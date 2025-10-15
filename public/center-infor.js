@@ -1,0 +1,31 @@
+const availableSubjects = [
+  "Arabe",
+  "Français",
+  "Amazigh",
+  "Mathématiques",
+  "Sciences de la Vie et de la Terre (SVT)",
+  "Physique-Chimie",
+  "Histoire-Géographie",
+  "Éducation Islamique",
+  "Philosophie",
+  "Langue Anglaise",
+  "Technologie",
+  "Informatique",
+  "Éducation Artistique",
+  "Éducation Physique et Sportive",
+];
+
+const availableGrades = [
+  "1ère année primaire (CP)",
+  "2ème année primaire",
+  "3ème année primaire",
+  "4ème année primaire",
+  "5ème année primaire",
+  "6ème année primaire",
+  "1ère année collège",
+  "2ème année collège",
+  "3ème année collège",
+  "Tronc commun",
+  "1ère année baccalauréat",
+  "2ème année baccalauréat",
+];

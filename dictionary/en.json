@@ -1,44 +1,135 @@
 {
-  "Index": {
-    "boilerplateName": "Next.js i18n Template",
-    "title": "Next 15 Template with i18n and Shadcn UI",
-    "description": "A powerful starting point for your next multilingual, accessible web application.",
-    "cloneRepository": "Clone Repository",
-    "leaveStar": "Leave a Star",
-    "howToUse": "How to Use",
-    "gettingStarted": "Getting Started",
-    "installation": "Installation",
-    "howToContribute": "How to Contribute",
-    "omitrtlUsage": "OmitRTL Usage",
-    "OmitRTLInstruction": "To use OmitRTL, simply wrap the component you want to omit RTL support for with the OmitRTL component.",
-    "contribute": "Contribute",
-    "installationSteps": {
-      "cloneRepository": "Clone the repository:",
-      "installDependencies": "Install dependencies:",
-      "startDevServer": "Start the development server:"
+  "login": {
+    "title": "Welcome back",
+    "email": {
+      "label": "Email",
+      "placeholder": "m@example.com"
     },
-    "contributeSteps": {
-      "fork": "Fork the repository",
-      "createBranch": "Create a new branch:",
-      "commit": "Commit your changes:",
-      "push": "Push to the branch:",
-      "pullRequest": "Create a new Pull Request"
+    "password": {
+      "label": "Password",
+      "placeholder": "Your password"
     },
+    "submit": "Login",
+    "submitting": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "terms": "By clicking continue, you agree to our",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy"
+  }, 
+    "managerLogin": {
+    "title": "Welcome back"
+  },
+  "register": {
+    "title": "Create an Account",
+    "username": {
+      "label": "User name",
+      "placeholder": "ahmed rachou"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "m@example.com"
+    },
+    "password": {
+      "label": "Password"
+    },
+    "confirmPassword": {
+      "label": "Confirm Password"
+    },
+    "submit": "Register",
+    "submitting": "Registering...",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login",
+    "terms": "By clicking continue, you agree to our",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy"
+  }, 
+  "Metadata": {
+    "title": "center management, تدبير مراجعتي",
+"description":"Expense tracker is a tool designed to help track financial transactions",
+    "keywords": "center management, تدبير مراجعتي"
+    
+  },    
+  "homePage": {
+    "title": "Welcome to Center Management",
+    "description": "Manage your school easily with our dashboard.",
+    "ownerDashboard": "Owner Dashboard",
+    "managerDashboard": "Manager Dashboard"
+  },
+  "adminStats": {
+    "totalManagers": "Total Managers",
+    "totalStudents": "Total Students",
+    "totalTeachers": "Total Teachers",
+    "totalRevenue": "Total Revenue",
+    "thisMonth": "this month"
+  },
+  "adminQuickActions": {
+    "title": "Quick Actions",
+    "description": "Admin shortcuts",
+    "myCenter": {
+      "title": "My Center",
+      "description": "Create new center"
+    },
+    "addManager": {
+      "title": "Add Manager",
+      "description": "Register manager"
+    },
+    "allUsers": {
+      "title": "All Users",
+      "description": "Manage users"
+    },
+    "schedule": {
+      "title": "Schedule",
+      "description": "View calendar"
+    }
+  },
+  "adminRevenueChart": {
+    "title": "Revenue Overview",
+    "description": "Income vs Expenses over time",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+    "income": "Income",
+    "expenses": "Expenses"
+  },
+  "centerOverview": {
+    "title": "Your Center",
+    "description": "Overview of your center",
+    "noCenters": "No centers created yet",
+    "createFirstCenter": "Create First Center",
+    "managers": "manager(s)",
+    "students": "Students",
+    "teachers": "Teachers",
+    "revenue": "Revenue",
+    "performance": "Performance",
+    "ofTotal": "of total",
+    "viewDetails": "View Details"
+  },
+  "managersList": {
+    "title": "Managers",
+    "description": "System administrators",
+    "add": "Add",
+    "noManagers": "No managers yet",
+    "centers": "centers",
+    "students": "students",
+    "teachers": "teachers"
+  },
+  "systemActivityLog": {
+    "title": "System Activity",
+    "description": "Recent platform events",
+    "noActivity": "No recent activity"
+  },
     "error": {
       "server": "Internal Server Error",
       "sorry": "Sorry, we encountered an unexpected issue on our server.",
       "tryAgain": " Try again later.",
       "returnHome": "Return home"
-    }
-  },
-
-  "Footer": {
-    "copyright": "© 2025 Next.js i18n Template. Open source under MIT license.",
-    "githubLink": "GitHub"
-  },
-  "Metadata": {
-    "title": "Next.js i18n Template - Multilingual Starter Template",
-    "description": "Next.js internationalization (i18n) starter kit with Arabic, Chinese, English, Spanish, and Japanese support. Includes shadcn UI, theme switching, and RTL support.",
-    "keywords": "Next.js, i18n, internationalization, Arabic, Chinese, Spanish, Japanese, multilingual, template, starter template, shadcn UI, RTL support"
+    },
+    "notFound": {
+    "title": "Oops! Something went wrong.",
+    "description": "We're sorry, but we couldn't find the page you were looking for. Please check the URL or go back to the homepage.",
+    "goHome": "Go Back Home"
   }
 }

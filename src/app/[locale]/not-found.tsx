@@ -1,6 +1,9 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations('notFound');
+
   return (
     <html>
       <body className="flex items-center justify-center h-screen bg-slate-500/20">
@@ -21,19 +24,18 @@ export default function NotFound() {
               />
             </svg>
             <h1 className="text-3xl font-bold text-gray-800">
-              Oops! Something went wrong.
+              {t('title')}
             </h1>
           </div>
           <p className="text-gray-600 text-lg mb-8 text-center">
-            We&apos;re sorry, but we couldn&apos;t find the page you were
-            looking for. Please check the URL or go back to the homepage.
+            {t('description')}
           </p>
           <div className="flex justify-center">
             <Link
               href="/"
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-200 ease-in-out hover:scale-105"
             >
-              Go Back Home
+              {t('goHome')}
             </Link>
           </div>
         </div>

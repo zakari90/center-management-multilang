@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN 
+  MANAGER
+}
+
+enum ReceiptType {
+  STUDENT_PAYMENT
+  TEACHER_PAYMENT
+}
+model Center {
+  id          String   @id @default(cuid()) // ✅ Changed to String
+  name        String
+  address     String?
+  phone       String?
+  classrooms  Json     // ["Room 1", "Room 2"]
+  workingDays Json     // ["Monday", "Tuesday"]
+  managers   Json?     // List of manager IDs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  admin   User   @relation("AdminCenters", fields: [adminId], references: [id], onDelete: Cascade)
+  adminId String @unique
+  schedules  Schedule[]
+  subjects Subject[]
+
+  @@index([adminId])
+}
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+
+  managedStudents     Student[] @relation("UserManagedStudents") // for what i need to add relation name
+  managedTeachers     Teacher[] @relation("UserManagedTeachers")
+  managedReceipts     Receipt[] @relation("UserManagedReceipts")
+  administeredCenters Center[]  @relation("AdminCenters")
+  schedules  Schedule[] @relation("ManagerSchedules")
+  @@index([email])
+  @@index([role])
+}
+
+
+model Teacher {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?  @unique
+  phone     String?
+  address   String?
+  weeklySchedule Json? 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  manager   User   @relation("UserManagedTeachers", fields: [managerId], references: [id], onDelete: Cascade)
+  managerId String
+schedules  Schedule[]
+  teacherSubjects TeacherSubject[]
+  studentSubjects StudentSubject[] @relation("StudentTeacher") // Add this line
+  receipts        Receipt[]
+
+  @@index([managerId])
+  @@index([email])
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?  @unique
+  phone       String?
+  parentName  String?
+  parentPhone String?
+  parentEmail String?
+  grade       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  manager   User   @relation("UserManagedStudents", fields: [managerId], references: [id], onDelete: Cascade)
+  managerId String
+
+  studentSubjects StudentSubject[]
+  receipts        Receipt[]
+
+  @@index([managerId])
+  @@index([email])
+  @@index([grade])
+}
+
+
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String   
+  grade     String  
+  price     Float
+  duration  Int?     // Duration in minutes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  center   Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  centerId String // ✅ Changed to String
+  schedules  Schedule[]
+  teacherSubjects TeacherSubject[]
+  studentSubjects StudentSubject[]
+
+  @@unique([name, grade, centerId])
+  @@index([centerId])
+  @@index([grade])
+}
+
+model TeacherSubject {
+  id         String   @id @default(cuid())
+  percentage Float?   // Teacher's percentage of subject price
+  hourlyRate Float?   // Alternative: flat hourly rate
+  
+  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId  String
+  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId  String
+  assignedAt DateTime @default(now())
+
+  @@unique([teacherId, subjectId])
+  @@index([teacherId])
+  @@index([subjectId])
+}
+
+model StudentSubject {
+  id         String   @id @default(cuid())
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId  String
+  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId  String
+  teacher    Teacher  @relation("StudentTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId  String
+  enrolledAt DateTime @default(now())
+
+  @@unique([studentId, subjectId, teacherId])
+  @@index([studentId])
+  @@index([subjectId])
+  @@index([teacherId])
+}
+
+model Receipt {
+  id          String      @id @default(cuid())
+  receiptNumber String    @unique @default(cuid())
+  amount      Float
+  type        ReceiptType // STUDENT_PAYMENT or TEACHER_PAYMENT
+  description String?
+  paymentMethod String?   // "CASH", "CARD", "TRANSFER"
+  date        DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  // For student payments
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String?
+
+  // For teacher payments
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId String?
+
+  // Manager who created receipt
+  manager   User   @relation("UserManagedReceipts", fields: [managerId], references: [id])
+  managerId String
+
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([managerId])
+  @@index([date])
+  @@index([receiptNumber])
+}
+
+
+model Schedule {
+  id         String   @id @default(cuid())
+  day        String   // Monday, Tuesday, etc.
+  startTime  String   // HH:MM format
+  endTime    String   // HH:MM format
+  roomId     String   // Room name/number
+  
+  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId  String
+  
+  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectId  String
+  
+  manager    User     @relation("ManagerSchedules", fields: [managerId], references: [id], onDelete: Cascade)
+  managerId  String
+  
+  center     Center?  @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  centerId   String?
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([teacherId])
+  @@index([subjectId])
+  @@index([managerId])
+  @@index([centerId])
+  @@index([day, startTime])
+}

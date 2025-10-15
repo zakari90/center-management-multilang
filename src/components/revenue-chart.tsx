@@ -1,0 +1,117 @@
+// components/dashboard/revenue-chart.tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import axios from 'axios'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from 'recharts'
+import { Loader2 } from 'lucide-react'
+
+interface RevenueData {
+  date: string
+  income: number
+  expense: number
+  net: number
+}
+
+export default function RevenueChart() {
+  const [data, setData] = useState<RevenueData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
+
+  useEffect(() => {
+    fetchRevenueData()
+  }, [period])
+
+  const fetchRevenueData = async () => {
+    setIsLoading(true)
+    try {
+      const { data } = await axios.get(`/api/dashboard/revenue?period=${period}`)
+      setData(data)
+    } catch (err) {
+      console.error('Failed to fetch revenue data:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Card className="col-span-4">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Revenue Overview</CardTitle>
+            <CardDescription>Income vs Expenses over time</CardDescription>
+          </div>
+          <Tabs value={period} onValueChange={(v) => setPeriod(v as any)}>
+            <TabsList>
+              <TabsTrigger value="week">Week</TabsTrigger>
+              <TabsTrigger value="month">Month</TabsTrigger>
+              <TabsTrigger value="year">Year</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-[350px]">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={350}>
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip 
+                formatter={(value: number) => `$${value.toFixed(2)}`}
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px' }}
+              />
+              <Legend />
+              <Area 
+                type="monotone" 
+                dataKey="income" 
+                stroke="#10b981" 
+                fillOpacity={1} 
+                fill="url(#colorIncome)" 
+                name="Income"
+              />
+              <Area 
+                type="monotone" 
+                dataKey="expense" 
+                stroke="#ef4444" 
+                fillOpacity={1} 
+                fill="url(#colorExpense)" 
+                name="Expenses"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  )
+}

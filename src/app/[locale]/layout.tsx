@@ -1,15 +1,15 @@
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { routing } from "@/i18n/routing";
+import { Metadata } from "next";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Geist, Geist_Mono } from "next/font/google";
+import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../globals.css";
+import { AuthProvider } from "@/context/authContext";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 // Extract domain to a constant to avoid repetition
-const DOMAIN = "https://next-app-i18n-starter.vercel.app";
+const DOMAIN = "";
 
 export default async function RootLayout({
   children,
@@ -74,16 +74,21 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider>
+            <AuthProvider>
+            
+            {children}
+            <Toaster />
+
+            </AuthProvider>
+            </NextIntlClientProvider>
         </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );
 }
 
-const locales = ["en", "ar", "zh", "es", "ja"] as const;
+const locales = ["en", "ar", "fr"] as const;
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -102,13 +107,13 @@ export async function generateMetadata({
     description: t("description"),
     keywords: t("keywords"),
     other: {
-      "google-site-verification": "sVYBYfSJfXdBca3QoqsZtD6lsWVH6sk02RCH4YAbcm8",
+      // "google-site-verification": "sVYBYfSJfXdBca3QoqsZtD6lsWVH6sk02RCH4YAbcm8",
     },
     openGraph: {
       title: t("title"),
       description: t("description"),
       url: DOMAIN,
-      siteName: "Next.js i18n Template",
+      siteName: "center management, تدبير مراجعتي",
       images: [
         {
           url: `${DOMAIN}/og-image.png`,
@@ -132,9 +137,7 @@ export async function generateMetadata({
       languages: {
         en: `${DOMAIN}/en`,
         ar: `${DOMAIN}/ar`,
-        zh: `${DOMAIN}/zh`,
-        es: `${DOMAIN}/es`,
-        ja: `${DOMAIN}/ja`,
+        fr: `${DOMAIN}/fr`,
       },
     },
     robots: {
@@ -148,5 +151,7 @@ export async function generateMetadata({
         "max-snippet": -1,
       },
     },
+  authors: [{ name: "zakaria zinedine" }],
+  icons: [{ rel: "icon", url: "/icon.png" }],
   };
 }
