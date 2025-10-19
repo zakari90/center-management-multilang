@@ -1,25 +1,23 @@
-// components/dashboard/revenue-chart.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import axios from 'axios'
+import { Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  Area,
+  AreaChart,
   CartesianGrid,
-  Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
-  AreaChart
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts'
-import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface RevenueData {
   date: string
@@ -28,10 +26,11 @@ interface RevenueData {
   net: number
 }
 
-export default function RevenueChart() {
+export default function ManagerRevenueChart() {
   const [data, setData] = useState<RevenueData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
+  const t = useTranslations('ManagerRevenueChart')
 
   useEffect(() => {
     fetchRevenueData()
@@ -54,14 +53,14 @@ export default function RevenueChart() {
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>Income vs Expenses over time</CardDescription>
+            <CardTitle>{t('title')}</CardTitle>
+            <CardDescription>{t('description')}</CardDescription>
           </div>
           <Tabs value={period} onValueChange={(v) => setPeriod(v as any)}>
             <TabsList>
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="month">Month</TabsTrigger>
-              <TabsTrigger value="year">Year</TabsTrigger>
+              <TabsTrigger value="week">{t('tabs.week')}</TabsTrigger>
+              <TabsTrigger value="month">{t('tabs.month')}</TabsTrigger>
+              <TabsTrigger value="year">{t('tabs.year')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -98,7 +97,7 @@ export default function RevenueChart() {
                 stroke="#10b981" 
                 fillOpacity={1} 
                 fill="url(#colorIncome)" 
-                name="Income"
+                name={t('chart.income')}
               />
               <Area 
                 type="monotone" 
@@ -106,7 +105,7 @@ export default function RevenueChart() {
                 stroke="#ef4444" 
                 fillOpacity={1} 
                 fill="url(#colorExpense)" 
-                name="Expenses"
+                name={t('chart.expense')}
               />
             </AreaChart>
           </ResponsiveContainer>

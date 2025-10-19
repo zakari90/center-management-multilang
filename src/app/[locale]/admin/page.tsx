@@ -2,16 +2,20 @@ import AdminQuickActions from "@/components/adminQuickActions";
 import AdminRevenueChart from "@/components/adminrevenue-chart";
 import AdminStatsCards from "@/components/adminStatsCards";
 import CentersOverview from "@/components/centersOverview";
+import EnrollmentChart from "@/components/enrollement-chart";
 import ManagersList from "@/components/managersList";
 import SystemActivityLog from "@/components/systemActivitylog";
+import TopSubjects from "@/components/top-subjects";
+import { useTranslations } from "next-intl";
 
 export default function AdminDashboard() {
-  
+  const t = useTranslations('Dashboard')
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">System-wide overview and management</p>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {/* Stats Overview */}
@@ -31,7 +35,10 @@ export default function AdminDashboard() {
       <div className="grid gap-4 grid-cols-4">
         <CentersOverview />
       </div>
-
+      <div className="grid gap-4 grid-cols-4">
+        <EnrollmentChart />
+        <TopSubjects />
+      </div>
       {/* Managers & Activity */}
       <div className="grid gap-4 grid-cols-4">
         <ManagersList />

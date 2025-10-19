@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from "@/lib/authentication";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -5,7 +6,7 @@ import { redirect } from "next/navigation";
 
 export default async function HomePage() {
   const t = await getTranslations('homePage');
-  const session = await getSession();
+  const session :any = await getSession();
 
   if (session?.user?.role === "ADMIN") {
     redirect("/admin");

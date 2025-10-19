@@ -1,22 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/schedule/[id]/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
     const { id } = await params
-    const session = await getSession()
+    const session: any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const schedule = await db.schedule.findUnique({
-      where: { id}
+      where: { id }
     })
 
     if (!schedule || schedule.managerId !== session.user.id) {
@@ -24,7 +29,7 @@ export async function DELETE(
     }
 
     await db.schedule.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

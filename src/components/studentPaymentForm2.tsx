@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -21,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface StudentSubject {
   id: string
@@ -44,6 +46,7 @@ interface Student {
 }
 
 export default function CreateStudentPaymentForm() {
+  const t = useTranslations('CreateStudentPaymentForm')
   const router = useRouter()
   const searchParams = useSearchParams()
   const preSelectedStudentId = searchParams.get('studentId')
@@ -153,7 +156,7 @@ export default function CreateStudentPaymentForm() {
     if (showQrScanner) startScanning()
     else stopScanning()
     return () => stopScanning()
-  }, [showQrScanner])
+  }, [])
 
   const startScanning = async () => {
     try {
@@ -220,8 +223,8 @@ export default function CreateStudentPaymentForm() {
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Create Student Payment Receipt</CardTitle>
-          <CardDescription>Select student via search or QR code</CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('subtitle')}</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
@@ -235,17 +238,17 @@ export default function CreateStudentPaymentForm() {
 
             {/* Student Finder */}
             <div className="space-y-2">
-              <Label>Find Student *</Label>
+              <Label>{t('findStudent')} {t('required')} *</Label>
               {loadingStudents ? (
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Loading students...
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t('loadingStudents')}
                 </div>
               ) : (
                 <>
                   {/* Search Input + QR button */}
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Search by name, email, or phone..."
+                      placeholder={t('searchPlaceholder')}
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
                       disabled={!!selectedStudent}
@@ -256,7 +259,7 @@ export default function CreateStudentPaymentForm() {
                       onClick={() => setShowQrScanner(!showQrScanner)}
                       disabled={!!selectedStudent}
                     >
-                      QR Scan
+                      {t('qrScan')}
                     </Button>
                   </div>
 
@@ -280,7 +283,7 @@ export default function CreateStudentPaymentForm() {
                     <div className="max-h-64 overflow-y-auto border rounded-lg">
                       {filteredStudents.length === 0 ? (
                         <p className="text-sm text-center text-muted-foreground p-4">
-                          No students found
+                          {t('noStudentsFound')}
                         </p>
                       ) : (
                         filteredStudents.map(student => (
@@ -314,7 +317,7 @@ export default function CreateStudentPaymentForm() {
                           size="sm"
                           onClick={() => setSelectedStudent(null)}
                         >
-                          Change
+                         {t('change')}
                         </Button>
                       </div>
                     </div>
@@ -329,14 +332,14 @@ export default function CreateStudentPaymentForm() {
                 <Separator />
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <Label>Select Subjects *</Label>
+                    <Label>{t('selectSubjects')} {t('required')}*</Label>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleSelectAllSubjects}
                     >
-                      Select All
+                     {t('selectAll')}
                     </Button>
                   </div>
 
@@ -344,7 +347,7 @@ export default function CreateStudentPaymentForm() {
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        This student has no subjects.
+                        {t('noSubjects')}
                       </AlertDescription>
                     </Alert>
                   ) : (
@@ -387,7 +390,7 @@ export default function CreateStudentPaymentForm() {
                 <Separator />
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Payment Method *</Label>
+                    <Label>{t('paymentMethod')} {t('required')}</Label>
                     <select
                       value={formData.paymentMethod}
                       onChange={e =>
@@ -398,15 +401,15 @@ export default function CreateStudentPaymentForm() {
                       }
                       className="w-full border rounded-md p-2"
                     >
-                      <option value="CASH">Cash</option>
-                      <option value="CARD">Card</option>
-                      <option value="BANK_TRANSFER">Bank Transfer</option>
-                      <option value="CHECK">Check</option>
-                      <option value="MOBILE_PAYMENT">Mobile Payment</option>
+                      <option value="CASH">{t('cash')}</option>
+                      <option value="CARD">{t('card')}</option>
+                      <option value="BANK_TRANSFER">{t('bank_transfer')}</option>
+                      <option value="CHECK">{t('check')}</option>
+                      <option value="MOBILE_PAYMENT">{t('mobile_payment')}</option>
                     </select>
                   </div>
                   <div>
-                    <Label>Date *</Label>
+                    <Label>{t('date')} {t('required')}</Label>
                     <Input
                       type="date"
                       value={formData.date}
@@ -418,7 +421,7 @@ export default function CreateStudentPaymentForm() {
                 </div>
 
                 <div>
-                  <Label>Description</Label>
+                  <Label>{t('description')}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={e =>
@@ -427,7 +430,7 @@ export default function CreateStudentPaymentForm() {
                         description: e.target.value
                       }))
                     }
-                    placeholder="Optional notes..."
+                    placeholder={t('descriptionPlaceholder')}
                   />
                 </div>
 
@@ -435,17 +438,17 @@ export default function CreateStudentPaymentForm() {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 text-primary" />
-                      Payment Summary
+                      {t('paymentSummary')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p>Student: {selectedStudent?.name}</p>
-                    <p>Subjects: {formData.selectedSubjects.length}</p>
-                    <p>Method: {formData.paymentMethod}</p>
-                    <p>Date: {new Date(formData.date).toLocaleDateString()}</p>
+                    <p>{t('student')}: {selectedStudent?.name}</p>
+                    <p>{t('subjects')}: {formData.selectedSubjects.length}</p>
+                    <p>{t('method')}: {formData.paymentMethod}</p>
+                    <p>{t('date')} {new Date(formData.date).toLocaleDateString()}</p>
                     <Separator className="my-2" />
                     <p className="text-xl font-bold text-primary">
-                      Total:{' '}
+                      {t('total')}:{' '}
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD'
@@ -459,7 +462,7 @@ export default function CreateStudentPaymentForm() {
 
           <CardFooter className="flex justify-end gap-4 mt-4">
             <Button type="button" variant="outline" onClick={() => router.back()}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               type="submit"
@@ -468,7 +471,7 @@ export default function CreateStudentPaymentForm() {
               }
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Receipt
+              {t('createReceipt')}
             </Button>
           </CardFooter>
         </form>

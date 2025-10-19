@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from "@/lib/authentication";
 import db from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
@@ -5,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET() {
   console.log("Fetching managers from API route...");
   try {
-    const session = await getSession();
+    const session :any = await getSession();
     console.log("API Session:", session);
     
     if (!session || session.user.role !== "ADMIN") {
@@ -35,9 +36,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  console.log("Updating manager from API route...");
   try {
-    const session = await getSession();
+    const session :any = await getSession();
 
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -67,9 +67,8 @@ export async function PUT(req: NextRequest) {
 
 
 export async function DELETE(req: NextRequest) {
-  console.log("Deleting manager from API route...");
   try {
-    const session = await getSession();
+    const session :any = await getSession();
 
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

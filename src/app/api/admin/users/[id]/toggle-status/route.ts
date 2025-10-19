@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/admin/users/[id]/toggle-status/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
@@ -10,7 +11,7 @@ export async function PATCH(
   try {
         const { id } = await params
 
-    const session = await getSession()
+    const session :any = await getSession()
     
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

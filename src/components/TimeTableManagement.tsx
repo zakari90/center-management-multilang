@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -29,6 +31,7 @@ import {
 import { cn } from '@/lib/utils'
 import axios from 'axios'
 import { Clock, Loader2, MapPin, Trash2, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 interface Teacher {
@@ -42,30 +45,24 @@ interface Subject {
   grade: string
 }
 
-interface Room {
-  id: string
-  name: string
-}
-
 interface ScheduleSlot {
-  id: string
+  id?: string
   day: string
   startTime: string
   endTime: string
   teacherId: string
   subjectId: string
   roomId: string
-  teacher: { id: string; name: string }
-  subject: { id: string; name: string; grade: string }
 }
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const TIME_SLOTS = [
-  '08:00', '09:00', '10:00', '11:00', '12:00', 
+  '08:00', '09:00', '10:00', '11:00', '12:00',
   '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
 ]
 
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
+  const t = useTranslations('TimetableManagement')
+  
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [rooms, setRooms] = useState<string[]>([])
@@ -74,7 +71,6 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   
-  // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedSlot, setSelectedSlot] = useState<{
     day: string
@@ -82,20 +78,28 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     endTime: string
   } | null>(null)
   
-  // Form state for new schedule entry
   const [newEntry, setNewEntry] = useState({
     teacherId: '',
     subjectId: '',
     roomId: '',
   })
 
-  // View filter
   const [viewMode, setViewMode] = useState<'all' | 'teacher' | 'room'>('all')
   const [selectedFilter, setSelectedFilter] = useState<string>('')
 
+  const daysOfWeek = [
+    { key: 'monday', label: t('monday') },
+    { key: 'tuesday', label: t('tuesday') },
+    { key: 'wednesday', label: t('wednesday') },
+    { key: 'thursday', label: t('thursday') },
+    { key: 'friday', label: t('friday') },
+    { key: 'saturday', label: t('saturday') },
+    { key: 'sunday', label: t('sunday') }
+  ]
+
   useEffect(() => {
     fetchData()
-  }, [centerId])
+  }, [])
 
   const fetchData = async () => {
     try {
@@ -105,17 +109,11 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
         centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
       ])
-      console.log("*******************************")
-      console.log(teachersRes.data)
-      console.log(subjectsRes.data)
-      console.log(scheduleRes.data)
-      console.log("*******************************")
       
       setTeachers(teachersRes.data)
       setSubjects(subjectsRes.data)
       setSchedule(scheduleRes.data)
       
-      // Get rooms from center or default
       if (centerRes?.data?.classrooms) {
         setRooms(centerRes.data.classrooms)
       } else {
@@ -123,7 +121,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       }
     } catch (err) {
       console.error('Failed to fetch data:', err)
-      setError('Failed to load schedule data')
+      setError(t('errorLoadData'))
     } finally {
       setIsLoading(false)
     }
@@ -138,49 +136,45 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     setIsDialogOpen(true)
   }
 
-const handleAddSchedule = async () => {
-  if (!selectedSlot || !newEntry.teacherId || !newEntry.subjectId || !newEntry.roomId) {
-    setError('Please fill all fields')
-    return
-  }
-
-  setIsSaving(true)
-  try {
-    const { data } = await axios.post('/api/admin/schedule', {
-      day: selectedSlot.day,
-      startTime: selectedSlot.startTime,
-      endTime: selectedSlot.endTime,
-      teacherId: newEntry.teacherId,
-      subjectId: newEntry.subjectId,
-      roomId: newEntry.roomId,
-      centerId, // ✅ Include centerId if available
-      // managerId will be added from session in the API route
-    })
-
-    setSchedule(prev => [...prev, data])
-    setIsDialogOpen(false)
-    setNewEntry({ teacherId: '', subjectId: '', roomId: '' })
-    setError('')
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      setError(err.response?.data?.error || 'Failed to add schedule')
+  const handleAddSchedule = async () => {
+    if (!selectedSlot || !newEntry.teacherId || !newEntry.subjectId || !newEntry.roomId) {
+      setError(t('errorFillAllFields'))
+      return
     }
-  } finally {
-    setIsSaving(false)
+
+    setIsSaving(true)
+    try {
+      const { data } = await axios.post('/api/admin/schedule', {
+        day: selectedSlot.day,
+        startTime: selectedSlot.startTime,
+        endTime: selectedSlot.endTime,
+        teacherId: newEntry.teacherId,
+        subjectId: newEntry.subjectId,
+        roomId: newEntry.roomId,
+        centerId, 
+      })
+
+      setSchedule(prev => [...prev, data])
+      setIsDialogOpen(false)
+      setNewEntry({ teacherId: '', subjectId: '', roomId: '' })
+      setError('')
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || t('errorAddSchedule'))
+      }
+    } finally {
+      setIsSaving(false)
+    }
   }
-}
 
   const handleDeleteSchedule = async (scheduleId: string) => {
     try {
       await axios.delete(`/api/admin/schedule/${scheduleId}`)
       setSchedule(prev => prev.filter(s => s.id !== scheduleId))
     } catch (err) {
-      setError('Failed to delete schedule')
+      console.log(err);
+      setError(t('errorDeleteSchedule'))
     }
-  }
-
-  const getScheduleForSlot = (day: string, startTime: string) => {
-    return schedule.filter(s => s.day === day && s.startTime === startTime)
   }
 
   const filteredSchedule = schedule.filter(slot => {
@@ -210,8 +204,8 @@ const handleAddSchedule = async () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Schedule Management</h2>
-          <p className="text-muted-foreground">Manage class schedules, teachers, and rooms</p>
+          <h2 className="text-3xl font-bold">{t('title')}</h2>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -224,12 +218,12 @@ const handleAddSchedule = async () => {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>View Options</CardTitle>
+          <CardTitle>{t('viewOptions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>View Mode</Label>
+              <Label>{t('viewMode')}</Label>
               <Select value={viewMode} onValueChange={(value: any) => {
                 setViewMode(value)
                 setSelectedFilter('')
@@ -238,19 +232,19 @@ const handleAddSchedule = async () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Schedules</SelectItem>
-                  <SelectItem value="teacher">By Teacher</SelectItem>
-                  <SelectItem value="room">By Room</SelectItem>
+                  <SelectItem value="all">{t('allSchedules')}</SelectItem>
+                  <SelectItem value="teacher">{t('byTeacher')}</SelectItem>
+                  <SelectItem value="room">{t('byRoom')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {viewMode === 'teacher' && (
               <div className="flex-1">
-                <Label>Select Teacher</Label>
+                <Label>{t('selectTeacher')}</Label>
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose teacher" />
+                    <SelectValue placeholder={t('chooseTeacher')} />
                   </SelectTrigger>
                   <SelectContent>
                     {teachers.map(teacher => (
@@ -265,10 +259,10 @@ const handleAddSchedule = async () => {
 
             {viewMode === 'room' && (
               <div className="flex-1">
-                <Label>Select Room</Label>
+                <Label>{t('selectRoom')}</Label>
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose room" />
+                    <SelectValue placeholder={t('chooseRoom')} />
                   </SelectTrigger>
                   <SelectContent>
                     {rooms.map(room => (
@@ -287,22 +281,22 @@ const handleAddSchedule = async () => {
       {/* Timetable Grid */}
       <Card>
         <CardHeader>
-          <CardTitle>Weekly Schedule</CardTitle>
+          <CardTitle>{t('weeklySchedule')}</CardTitle>
           <CardDescription>
-            Click on any time slot to add a class
+            {t('weeklyScheduleDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <div className="min-w-[1200px]">
               {/* Header Row */}
-              <div className="grid grid-cols-7 gap-2 mb-2">
+              <div className="grid grid-cols-8 gap-2 mb-2">
                 <div className="font-semibold text-sm text-muted-foreground p-2">
-                  Time
+                  {t('time')}
                 </div>
-                {DAYS.map(day => (
-                  <div key={day} className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md">
-                    {day}
+                {daysOfWeek.map(day => (
+                  <div key={day.key} className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md">
+                    {day.label}
                   </div>
                 ))}
               </div>
@@ -310,7 +304,7 @@ const handleAddSchedule = async () => {
               {/* Time Slots */}
               <div className="space-y-2">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
-                  <div key={time} className="grid grid-cols-7 gap-2">
+                  <div key={time} className="grid grid-cols-8 gap-2">
                     {/* Time Label */}
                     <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md">
                       <Clock className="h-3 w-3 mr-1" />
@@ -318,14 +312,14 @@ const handleAddSchedule = async () => {
                     </div>
 
                     {/* Day Columns */}
-                    {DAYS.map(day => {
-                      const slots = getSlotsByDayAndTime(day, time)
+                    {daysOfWeek.map(day => {
+                      const slots = getSlotsByDayAndTime(day.label, time)
                       const hasConflict = slots.length > 1
 
                       return (
                         <div
-                          key={`${day}-${time}`}
-                          onClick={() => handleSlotClick(day, time)}
+                          key={`${day.key}-${time}`}
+                          onClick={() => handleSlotClick(day.label, time)}
                           className={cn(
                             "min-h-[100px] p-2 border-2 rounded-md cursor-pointer transition-all",
                             "hover:border-primary hover:bg-primary/5",
@@ -389,7 +383,7 @@ const handleAddSchedule = async () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Class Schedule</DialogTitle>
+            <DialogTitle>{t('addClassSchedule')}</DialogTitle>
             <DialogDescription>
               {selectedSlot && (
                 <>
@@ -401,13 +395,13 @@ const handleAddSchedule = async () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Teacher *</Label>
+              <Label>{t('teacher')} {t('required')}</Label>
               <Select
                 value={newEntry.teacherId}
                 onValueChange={(value) => setNewEntry(prev => ({ ...prev, teacherId: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select teacher" />
+                  <SelectValue placeholder={t('selectTeacherPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {teachers.map(teacher => (
@@ -420,13 +414,13 @@ const handleAddSchedule = async () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Subject *</Label>
+              <Label>{t('subject')} {t('required')}</Label>
               <Select
                 value={newEntry.subjectId}
                 onValueChange={(value) => setNewEntry(prev => ({ ...prev, subjectId: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select subject" />
+                  <SelectValue placeholder={t('selectSubjectPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {subjects.map(subject => (
@@ -439,13 +433,13 @@ const handleAddSchedule = async () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Room *</Label>
+              <Label>{t('room')} {t('required')}</Label>
               <Select
                 value={newEntry.roomId}
                 onValueChange={(value) => setNewEntry(prev => ({ ...prev, roomId: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select room" />
+                  <SelectValue placeholder={t('selectRoomPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {rooms.map(room => (
@@ -460,11 +454,11 @@ const handleAddSchedule = async () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={handleAddSchedule} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add to Schedule
+              {t('addToSchedule')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { FileSpreadsheet, FileText } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -39,6 +41,8 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
+import * as XLSX from 'xlsx'
 
 // ==================== TYPES & INTERFACES ====================
 
@@ -53,7 +57,7 @@ interface Teacher {
   name: string
   email?: string
   phone?: string
-  weeklySchedule?: WeeklyScheduleSlot[] | string // Can be JSON string or parsed array
+  weeklySchedule?: WeeklyScheduleSlot[] | string
 }
 
 interface Schedule {
@@ -87,7 +91,6 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 
 // ==================== HELPER FUNCTIONS ====================
 
-// Parse weeklySchedule from JSON if needed
 const parseWeeklySchedule = (schedule: any): WeeklyScheduleSlot[] => {
   if (!schedule) return []
   if (Array.isArray(schedule)) return schedule
@@ -101,14 +104,12 @@ const parseWeeklySchedule = (schedule: any): WeeklyScheduleSlot[] => {
   return []
 }
 
-// Calculate hours difference between two times
 const calculateHoursDifference = (startTime: string, endTime: string): number => {
   const [startHour, startMin] = startTime.split(':').map(Number)
   const [endHour, endMin] = endTime.split(':').map(Number)
   return (endHour * 60 + endMin - startHour * 60 - startMin) / 60
 }
 
-// Check if a scheduled class fits within teacher's availability
 const isWithinAvailability = (schedule: Schedule, availability: WeeklyScheduleSlot[]): boolean => {
   const availableSlot = availability.find(slot => slot.day === schedule.day)
   if (!availableSlot) return false
@@ -117,56 +118,52 @@ const isWithinAvailability = (schedule: Schedule, availability: WeeklyScheduleSl
          schedule.endTime <= availableSlot.endTime
 }
 
-// Convert time to position percentage for timeline view (6 AM to 8 PM range)
 const timeToPosition = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number)
   const totalMinutes = hours * 60 + minutes
-  const dayStart = 360 // 6 AM
-  const dayEnd = 1200 // 8 PM
+  const dayStart = 360
+  const dayEnd = 1200
   const position = ((totalMinutes - dayStart) / (dayEnd - dayStart)) * 100
-  return Math.max(0, Math.min(100, position)) // Clamp between 0-100
+  return Math.max(0, Math.min(100, position))
 }
 
-// Export teacher schedule to text file
-const exportTeacherSchedule = (teacher: TeacherWithSchedule) => {
-  let text = `Schedule for ${teacher.name}\n`
+// Export functions with translations
+const exportTeacherSchedule = (teacher: TeacherWithSchedule, t: any) => {
+  let text = `${t('title')} - ${teacher.name}\n`
   text += `${'='.repeat(50)}\n\n`
   text += `Email: ${teacher.email || 'N/A'}\n`
-  text += `Phone: ${teacher.phone || 'N/A'}\n`
-  text += `Available Hours/Week: ${teacher.availableHours.toFixed(1)}h\n`
-  text += `Scheduled Hours/Week: ${teacher.totalHours.toFixed(1)}h\n`
-  text += `Utilization: ${teacher.utilizationRate}%\n\n`
+  text += `${t('phone')}: ${teacher.phone || 'N/A'}\n`
+  text += `${t('available')} ${t('hours')}/Week: ${teacher.availableHours.toFixed(1)}${t('hours')}\n`
+  text += `${t('scheduled')} ${t('hours')}/Week: ${teacher.totalHours.toFixed(1)}${t('hours')}\n`
+  text += `${t('utilization')}: ${teacher.utilizationRate}%\n\n`
 
-  // Availability section
-  text += `AVAILABILITY:\n`
+  text += `${t('availableHours').toUpperCase()}:\n`
   text += `${'-'.repeat(50)}\n`
   if (teacher.weeklySchedule.length > 0) {
     teacher.weeklySchedule.forEach(slot => {
       text += `  ${slot.day.padEnd(12)} ${slot.startTime} - ${slot.endTime}\n`
     })
   } else {
-    text += `  No availability set\n`
+    text += `  ${t('noAvailability')}\n`
   }
   text += '\n'
 
-  // Conflicts section
   if (teacher.conflicts.length > 0) {
-    text += `⚠️  SCHEDULING CONFLICTS (${teacher.conflicts.length}):\n`
+    text += `⚠️  ${t('conflictsAlert').toUpperCase()} (${teacher.conflicts.length}):\n`
     text += `${'-'.repeat(50)}\n`
     teacher.conflicts.forEach(conflict => {
       const availability = teacher.weeklySchedule.find(s => s.day === conflict.day)
       text += `  ⚠️  ${conflict.day} ${conflict.startTime}-${conflict.endTime}: ${conflict.subject.name} (${conflict.subject.grade})\n`
       if (availability) {
-        text += `      Available: ${availability.startTime}-${availability.endTime}\n`
+        text += `      ${t('available')}: ${availability.startTime}-${availability.endTime}\n`
       } else {
-        text += `      Not available on ${conflict.day}\n`
+        text += `      ${t('notAvailableOn')} ${conflict.day}\n`
       }
     })
     text += '\n'
   }
 
-  // Scheduled classes section
-  text += `SCHEDULED CLASSES:\n`
+  text += `${t('classes').toUpperCase()}:\n`
   text += `${'-'.repeat(50)}\n`
   const schedulesByDay = teacher.schedules.reduce((acc, schedule) => {
     if (!acc[schedule.day]) acc[schedule.day] = []
@@ -183,12 +180,11 @@ const exportTeacherSchedule = (teacher: TeacherWithSchedule) => {
         .forEach(schedule => {
           const withinAvailability = isWithinAvailability(schedule, teacher.weeklySchedule)
           const status = withinAvailability ? '✓' : '⚠'
-          text += `  ${status} ${schedule.startTime}-${schedule.endTime}: ${schedule.subject.name} (${schedule.subject.grade}) - Room: ${schedule.roomId}\n`
+          text += `  ${status} ${schedule.startTime}-${schedule.endTime}: ${schedule.subject.name} (${schedule.subject.grade}) - ${t('room')}: ${schedule.roomId}\n`
         })
     }
   })
 
-  // Create and download file
   const blob = new Blob([text], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -200,10 +196,167 @@ const exportTeacherSchedule = (teacher: TeacherWithSchedule) => {
   URL.revokeObjectURL(url)
 }
 
+const exportTeacherScheduleToExcel = (teacher: TeacherWithSchedule, t: any) => {
+  const workbook = XLSX.utils.book_new()
+
+  // Sheet 1: Teacher Info
+  const infoData = [
+    [`${t('title')}`],
+    [''],
+    [`${t('title')}:`, teacher.name],
+    ['Email:', teacher.email || 'N/A'],
+    [`${t('phone')}:`, teacher.phone || 'N/A'],
+    [''],
+    ['Statistics'],
+    [`${t('available')} ${t('hours')}/Week:`, `${teacher.availableHours.toFixed(1)}${t('hours')}`],
+    [`${t('scheduled')} ${t('hours')}/Week:`, `${teacher.totalHours.toFixed(1)}${t('hours')}`],
+    [`${t('utilization')}:`, `${teacher.utilizationRate}%`],
+    [`${t('classes')}:`, teacher.schedules.length],
+    [`${t('subjects')}:`, teacher.subjectsCount],
+    [`${t('conflict')}:`, teacher.conflicts.length],
+  ]
+
+  const infoSheet = XLSX.utils.aoa_to_sheet(infoData)
+  infoSheet['!cols'] = [{ wch: 25 }, { wch: 30 }]
+  XLSX.utils.book_append_sheet(workbook, infoSheet, 'Teacher Info')
+
+  // Sheet 2: Availability
+  const availabilityData = [
+    ['Day', 'Start Time', 'End Time', `Duration (${t('hours')})`]
+  ]
+
+  teacher.weeklySchedule.forEach(slot => {
+    const duration = calculateHoursDifference(slot.startTime, slot.endTime)
+    availabilityData.push([
+      slot.day,
+      slot.startTime,
+      slot.endTime,
+      duration.toFixed(1)
+    ])
+  })
+
+  availabilityData.push([])
+  availabilityData.push([`Total ${t('available')} ${t('hours')}:`, '', '', teacher.availableHours.toFixed(1)])
+
+  const availabilitySheet = XLSX.utils.aoa_to_sheet(availabilityData)
+  availabilitySheet['!cols'] = [{ wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 15 }]
+  XLSX.utils.book_append_sheet(workbook, availabilitySheet, t('availableHours'))
+
+  // Sheet 3: Scheduled Classes
+  const schedulesData = [
+    ['Day', 'Start Time', 'End Time', 'Subject', 'Grade', t('room'), `Duration (${t('hours')})`, 'Status']
+  ]
+
+  const sortedSchedules = [...teacher.schedules].sort((a, b) => {
+    const dayCompare = DAYS.indexOf(a.day) - DAYS.indexOf(b.day)
+    if (dayCompare !== 0) return dayCompare
+    return a.startTime.localeCompare(b.startTime)
+  })
+
+  sortedSchedules.forEach(schedule => {
+    const duration = calculateHoursDifference(schedule.startTime, schedule.endTime)
+    const withinAvailability = isWithinAvailability(schedule, teacher.weeklySchedule)
+    const status = withinAvailability ? '✓ OK' : `⚠ ${t('conflict')}`
+
+    schedulesData.push([
+      schedule.day,
+      schedule.startTime,
+      schedule.endTime,
+      schedule.subject.name,
+      schedule.subject.grade,
+      schedule.roomId,
+      duration.toFixed(1),
+      status
+    ])
+  })
+
+  schedulesData.push([])
+  schedulesData.push([`Total ${t('scheduled')} ${t('hours')}:`, '', '', '', '', '', teacher.totalHours.toFixed(1), ''])
+
+  const schedulesSheet = XLSX.utils.aoa_to_sheet(schedulesData)
+  schedulesSheet['!cols'] = [
+    { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 20 }, 
+    { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }
+  ]
+  XLSX.utils.book_append_sheet(workbook, schedulesSheet, t('classes'))
+
+  // Sheet 4: Conflicts
+  if (teacher.conflicts.length > 0) {
+    const conflictsData = [
+      ['Day', 'Scheduled Time', 'Subject', 'Grade', t('room'), `${t('available')} Time`, 'Issue']
+    ]
+
+    teacher.conflicts.forEach(conflict => {
+      const availability = teacher.weeklySchedule.find(s => s.day === conflict.day)
+      const issue = availability 
+        ? `${t('outsideAvailableHours')} (${availability.startTime}-${availability.endTime})`
+        : `${t('notAvailableOn')} ${conflict.day}`
+
+      conflictsData.push([
+        conflict.day,
+        `${conflict.startTime} - ${conflict.endTime}`,
+        conflict.subject.name,
+        conflict.subject.grade,
+        conflict.roomId,
+        availability ? `${availability.startTime} - ${availability.endTime}` : 'N/A',
+        issue
+      ])
+    })
+
+    const conflictsSheet = XLSX.utils.aoa_to_sheet(conflictsData)
+    conflictsSheet['!cols'] = [
+      { wch: 12 }, { wch: 18 }, { wch: 20 }, { wch: 10 }, 
+      { wch: 12 }, { wch: 18 }, { wch: 40 }
+    ]
+    XLSX.utils.book_append_sheet(workbook, conflictsSheet, t('conflict'))
+  }
+
+  // Sheet 5: Weekly Overview
+  const weeklyData = [['Time', ...DAYS]]
+
+  const timeSlots = [
+    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+    '18:00', '19:00', '20:00'
+  ]
+
+  timeSlots.forEach(time => {
+    const row = [time]
+    
+    DAYS.forEach(day => {
+      const schedule = teacher.schedules.find(
+        s => s.day === day && s.startTime <= time && s.endTime > time
+      )
+      
+      if (schedule) {
+        row.push(`${schedule.subject.name} (${schedule.roomId})`)
+      } else {
+        const isAvailable = teacher.weeklySchedule.some(
+          slot => slot.day === day && slot.startTime <= time && slot.endTime > time
+        )
+        row.push(isAvailable ? t('available') : '-')
+      }
+    })
+    
+    weeklyData.push(row)
+  })
+
+  const weeklySheet = XLSX.utils.aoa_to_sheet(weeklyData)
+  weeklySheet['!cols'] = [
+    { wch: 8 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, 
+    { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }
+  ]
+  XLSX.utils.book_append_sheet(workbook, weeklySheet, t('weeklyTimeline'))
+
+  const fileName = `${teacher.name.replace(/\s+/g, '_')}_schedule_${new Date().toISOString().split('T')[0]}.xlsx`
+  XLSX.writeFile(workbook, fileName)
+}
 
 // ==================== MAIN COMPONENT ====================
 
 export default function TeacherScheduleView({ centerId }: { centerId?: string }) {
+  const t = useTranslations('TeacherScheduleView')
+  
   const [teachers, setTeachers] = useState<TeacherWithSchedule[]>([])
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
@@ -212,7 +365,7 @@ export default function TeacherScheduleView({ centerId }: { centerId?: string })
 
   useEffect(() => {
     fetchTeacherSchedules()
-  }, [centerId])
+  }, [])
 
   const fetchTeacherSchedules = async () => {
     try {
@@ -220,42 +373,30 @@ export default function TeacherScheduleView({ centerId }: { centerId?: string })
         axios.get('/api/admin/teachers'),
         axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`)
       ])
-console.log("*****************************************1");
-console.log(teachersRes.data)
-console.log(schedulesRes)
-console.log("*****************************************2");
-
       const teachersData: Teacher[] = teachersRes.data
       const schedulesData: Schedule[] = schedulesRes.data
 
-      // Process teachers with schedules and stats
       const teachersWithSchedules: TeacherWithSchedule[] = teachersData.map((teacher) => {
         const teacherSchedules = schedulesData.filter(
           (s) => s.teacherId === teacher.id
         )
 
-        // Parse weeklySchedule
         const weeklySchedule = parseWeeklySchedule(teacher.weeklySchedule)
 
-        // Calculate total available hours
         const availableHours = weeklySchedule.reduce((acc, slot) => {
           return acc + calculateHoursDifference(slot.startTime, slot.endTime)
         }, 0)
 
-        // Calculate total scheduled hours
         const totalHours = teacherSchedules.reduce((acc, schedule) => {
           return acc + calculateHoursDifference(schedule.startTime, schedule.endTime)
         }, 0)
 
-        // Calculate utilization rate
         const utilizationRate = availableHours > 0 
           ? Math.round((totalHours / availableHours) * 100) 
           : 0
 
-        // Count unique subjects
         const uniqueSubjects = new Set(teacherSchedules.map((s) => s.subjectId))
 
-        // Find conflicts
         const conflicts = teacherSchedules.filter(
           schedule => !isWithinAvailability(schedule, weeklySchedule)
         )
@@ -274,19 +415,16 @@ console.log("*****************************************2");
 
       setTeachers(teachersWithSchedules)
       
-      // Auto-select first teacher
       if (teachersWithSchedules.length > 0) {
         setSelectedTeacherId(teachersWithSchedules[0].id)
       }
     } catch (err) {
       console.error('Failed to fetch teacher schedules:', err)
-      setError('Failed to load teacher schedules')
+      setError(t('errorLoadSchedules'))
     } finally {
       setIsLoading(false)
     }
   }
-
-  const selectedTeacher = teachers.find(t => t.id === selectedTeacherId)
 
   if (isLoading) {
     return (
@@ -298,11 +436,10 @@ console.log("*****************************************2");
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Teacher Schedules</h2>
-          <p className="text-muted-foreground">View availability and assigned classes</p>
+          <h2 className="text-3xl font-bold">{t('title')}</h2>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
@@ -310,9 +447,9 @@ console.log("*****************************************2");
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="grid">Grid View</SelectItem>
-              <SelectItem value="list">List View</SelectItem>
-              <SelectItem value="timeline">Timeline</SelectItem>
+              <SelectItem value="grid">{t('gridView')}</SelectItem>
+              <SelectItem value="list">{t('listView')}</SelectItem>
+              <SelectItem value="timeline">{t('timeline')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -328,13 +465,12 @@ console.log("*****************************************2");
         <Card>
           <CardContent className="py-12 text-center">
             <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Teachers Found</h3>
-            <p className="text-muted-foreground">Add teachers to start managing schedules</p>
+            <h3 className="text-lg font-semibold mb-2">{t('noTeachersFound')}</h3>
+            <p className="text-muted-foreground">{t('noTeachersDescription')}</p>
           </CardContent>
         </Card>
       ) : (
         <Tabs value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
-          {/* Teacher Selection Tabs */}
           <div className="border rounded-lg p-2 bg-muted/30 overflow-x-auto">
             <TabsList className="w-full justify-start flex-nowrap h-auto gap-2">
               {teachers.map(teacher => (
@@ -352,17 +488,16 @@ console.log("*****************************************2");
                     )}
                   </div>
                   <span className="text-xs opacity-80">
-                    {teacher.totalHours.toFixed(1)}h/{teacher.availableHours.toFixed(1)}h • {teacher.utilizationRate}%
+                    {teacher.totalHours.toFixed(1)}{t('hours')}/{teacher.availableHours.toFixed(1)}{t('hours')} • {teacher.utilizationRate}%
                   </span>
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
 
-          {/* Teacher Schedule Content */}
           {teachers.map(teacher => (
             <TabsContent key={teacher.id} value={teacher.id} className="space-y-4 mt-4">
-              <TeacherInfoCard teacher={teacher} onExport={() => exportTeacherSchedule(teacher)} />
+              <TeacherInfoCard teacher={teacher} />
               <AvailabilityCard teacher={teacher} />
               
               {viewMode === 'grid' && <GridScheduleView teacher={teacher} />}
@@ -378,16 +513,12 @@ console.log("*****************************************2");
 
 // ==================== TEACHER INFO CARD ====================
 
-function TeacherInfoCard({ 
-  teacher, 
-  onExport 
-}: { 
-  teacher: TeacherWithSchedule
-  onExport: () => void 
-}) {
+function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations('TeacherScheduleView')
+  
   return (
     <Card>
-    <CardHeader>
+      <CardHeader>
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="flex items-center gap-2">
@@ -409,23 +540,22 @@ function TeacherInfoCard({
               )}
             </CardDescription>
           </div>
-          {/* Replace this with the new ExportButton */}
-          <ExportButton teacher={teacher} onExport={onExport} />
+          <ExportButton teacher={teacher} />
         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">
-              {teacher.availableHours.toFixed(1)}h
+              {teacher.availableHours.toFixed(1)}{t('hours')}
             </div>
-            <div className="text-xs text-muted-foreground">Available</div>
+            <div className="text-xs text-muted-foreground">{t('available')}</div>
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">
-              {teacher.totalHours.toFixed(1)}h
+              {teacher.totalHours.toFixed(1)}{t('hours')}
             </div>
-            <div className="text-xs text-muted-foreground">Scheduled</div>
+            <div className="text-xs text-muted-foreground">{t('scheduled')}</div>
           </div>
           <div className={cn(
             "text-center p-4 rounded-lg",
@@ -438,30 +568,29 @@ function TeacherInfoCard({
               teacher.utilizationRate >= 60 ? "text-yellow-600" : "text-green-600"
             )}>
               {teacher.utilizationRate}%
-            </div>
-            <div className="text-xs text-muted-foreground">Utilization</div>
+              </div>
+            <div className="text-xs text-muted-foreground">{t('utilization')}</div>
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <div className="text-2xl font-bold text-purple-600">
               {teacher.schedules.length}
             </div>
-            <div className="text-xs text-muted-foreground">Classes</div>
+            <div className="text-xs text-muted-foreground">{t('classes')}</div>
           </div>
           <div className="text-center p-4 bg-orange-50 rounded-lg">
             <div className="text-2xl font-bold text-orange-600">
               {teacher.subjectsCount}
             </div>
-            <div className="text-xs text-muted-foreground">Subjects</div>
+            <div className="text-xs text-muted-foreground">{t('subjects')}</div>
           </div>
         </div>
 
-        {/* Conflicts Alert */}
         {teacher.conflicts.length > 0 && (
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               <div className="font-semibold mb-2">
-                {teacher.conflicts.length} class(es) scheduled outside available hours:
+                {teacher.conflicts.length} {t('conflictsAlert')}
               </div>
               <ul className="space-y-2 text-sm">
                 {teacher.conflicts.map(conflict => {
@@ -476,15 +605,15 @@ function TeacherInfoCard({
                           <span className="font-medium">{conflict.day}</span>
                           {' '}{conflict.startTime}-{conflict.endTime}
                           {' - '}{conflict.subject.name} ({conflict.subject.grade})
-                          {' - Room: '}{conflict.roomId}
+                          {' - '}{t('room')}: {conflict.roomId}
                         </div>
                         {availability ? (
                           <span className="text-xs block text-muted-foreground mt-0.5">
-                            ✓ Available: {availability.startTime}-{availability.endTime}
+                            ✓ {t('available')}: {availability.startTime}-{availability.endTime}
                           </span>
                         ) : (
                           <span className="text-xs block text-muted-foreground mt-0.5">
-                            ✗ Not available on {conflict.day}
+                            ✗ {t('notAvailableOn')} {conflict.day}
                           </span>
                         )}
                       </div>
@@ -503,15 +632,17 @@ function TeacherInfoCard({
 // ==================== AVAILABILITY CARD ====================
 
 function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations('TeacherScheduleView')
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <Clock className="h-5 w-5 text-blue-600" />
-          Available Hours
+          {t('availableHours')}
         </CardTitle>
         <CardDescription>
-          When this teacher is available to teach
+          {t('availableHoursDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -530,8 +661,8 @@ function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No availability set for this teacher</p>
-            <p className="text-xs mt-1">Add available hours to prevent scheduling conflicts</p>
+            <p className="text-sm">{t('noAvailability')}</p>
+            <p className="text-xs mt-1">{t('noAvailabilityDescription')}</p>
           </div>
         )}
       </CardContent>
@@ -542,6 +673,8 @@ function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
 // ==================== GRID SCHEDULE VIEW ====================
 
 function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations('TeacherScheduleView')
+  
   const schedulesByDay = teacher.schedules.reduce((acc, schedule) => {
     if (!acc[schedule.day]) acc[schedule.day] = []
     acc[schedule.day].push(schedule)
@@ -582,7 +715,6 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {/* Scheduled Classes */}
               {daySchedules.length > 0 ? (
                 <div className="space-y-2">
                   {daySchedules.map(schedule => {
@@ -627,7 +759,7 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               ) : dayAvailability.length > 0 ? (
                 <div className="text-center py-6 text-muted-foreground text-sm">
                   <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-500" />
-                  Available but no classes scheduled
+                  {t('availableButNoClasses')}
                 </div>
               ) : null}
             </CardContent>
@@ -641,6 +773,8 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 // ==================== LIST SCHEDULE VIEW ====================
 
 function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations('TeacherScheduleView')
+  
   const schedulesByDay = teacher.schedules.reduce((acc, schedule) => {
     if (!acc[schedule.day]) acc[schedule.day] = []
     acc[schedule.day].push(schedule)
@@ -669,11 +803,11 @@ function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                 <div className="flex items-center gap-2">
                   {dayAvailability && (
                     <Badge variant="outline" className="text-xs">
-                      Available: {dayAvailability.startTime}-{dayAvailability.endTime}
+                      {t('available')}: {dayAvailability.startTime}-{dayAvailability.endTime}
                     </Badge>
                   )}
                   <Badge variant="secondary">
-                    {daySchedules.length} {daySchedules.length === 1 ? 'class' : 'classes'}
+                    {daySchedules.length} {daySchedules.length === 1 ? t('class') : t('classesPlural')}
                   </Badge>
                 </div>
               </div>
@@ -733,8 +867,8 @@ function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
         <Card>
           <CardContent className="py-12 text-center">
             <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Classes Scheduled</h3>
-            <p className="text-muted-foreground">This teacher has no scheduled classes yet</p>
+            <h3 className="text-lg font-semibold mb-2">{t('noClassesScheduled')}</h3>
+            <p className="text-muted-foreground">{t('noClassesDescription')}</p>
           </CardContent>
         </Card>
       )}
@@ -745,6 +879,8 @@ function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 // ==================== TIMELINE SCHEDULE VIEW ====================
 
 function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations('TeacherScheduleView')
+  
   const schedulesByDay = teacher.schedules.reduce((acc, schedule) => {
     if (!acc[schedule.day]) acc[schedule.day] = []
     acc[schedule.day].push(schedule)
@@ -760,12 +896,12 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Weekly Timeline</CardTitle>
-        <CardDescription>Visual representation of availability and scheduled classes</CardDescription>
+        <CardTitle>{t('weeklyTimeline')}</CardTitle>
+        <CardDescription>{t('weeklyTimelineDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {DAYS.map(day => {
-const availability = availabilityByDay[day] || []
+          const availability = availabilityByDay[day] || []
           const schedules = schedulesByDay[day] || []
           
           const hasContent = availability.length > 0 || schedules.length > 0
@@ -780,14 +916,12 @@ const availability = availabilityByDay[day] || []
                 </div>
                 {schedules.length > 0 && (
                   <Badge variant="secondary" className="text-xs">
-                    {schedules.length} {schedules.length === 1 ? 'class' : 'classes'}
+                    {schedules.length} {schedules.length === 1 ? t('class') : t('classesPlural')}
                   </Badge>
                 )}
               </div>
               
-              {/* Timeline visualization */}
               <div className="relative h-16 bg-gray-100 rounded-lg overflow-hidden border">
-                {/* Availability background bars */}
                 {availability.map((slot, idx) => {
                   const start = timeToPosition(slot.startTime)
                   const width = timeToPosition(slot.endTime) - start
@@ -797,22 +931,20 @@ const availability = availabilityByDay[day] || []
                       key={`avail-${idx}`}
                       className="absolute h-full bg-green-200/50 border-l-2 border-r-2 border-green-400"
                       style={{ left: `${start}%`, width: `${width}%` }}
-                      title={`Available: ${slot.startTime} - ${slot.endTime}`}
+                      title={`${t('available')}: ${slot.startTime} - ${slot.endTime}`}
                     >
                       <div className="text-xs p-1 text-green-800 font-medium truncate">
-                        Available
+                        {t('available')}
                       </div>
                     </div>
                   )
                 })}
                 
-                {/* Scheduled classes overlay */}
                 {schedules.map((schedule, idx) => {
                   const start = timeToPosition(schedule.startTime)
                   const width = timeToPosition(schedule.endTime) - start
                   const isConflict = !isWithinAvailability(schedule, availability)
                   
-                  // Stagger multiple classes at different vertical positions
                   const topOffset = (idx % 2) * 6 + 2
                   
                   return (
@@ -829,7 +961,7 @@ const availability = availabilityByDay[day] || []
                         width: `${Math.max(width, 5)}%`,
                         top: `${topOffset}px`
                       }}
-                      title={`${schedule.subject.name} (${schedule.subject.grade})\n${schedule.startTime} - ${schedule.endTime}\nRoom: ${schedule.roomId}${isConflict ? '\n⚠️ Outside availability!' : ''}`}
+                      title={`${schedule.subject.name} (${schedule.subject.grade})\n${schedule.startTime} - ${schedule.endTime}\n${t('room')}: ${schedule.roomId}${isConflict ? `\n⚠️ ${t('outsideAvailableHours')}` : ''}`}
                     >
                       <div className="text-xs p-1 text-white font-medium truncate flex items-center gap-1">
                         {isConflict && <AlertCircle className="h-3 w-3 flex-shrink-0" />}
@@ -839,10 +971,8 @@ const availability = availabilityByDay[day] || []
                   )
                 })}
 
-                {/* Gray overlay for unavailable times */}
                 {availability.length > 0 && (
                   <>
-                    {/* Before first availability */}
                     {availability[0] && timeToPosition(availability[0].startTime) > 0 && (
                       <div
                         className="absolute h-full bg-gray-300/40 pointer-events-none"
@@ -852,7 +982,6 @@ const availability = availabilityByDay[day] || []
                         }}
                       />
                     )}
-                    {/* After last availability */}
                     {availability[availability.length - 1] && 
                      timeToPosition(availability[availability.length - 1].endTime) < 100 && (
                       <div
@@ -867,7 +996,6 @@ const availability = availabilityByDay[day] || []
                 )}
               </div>
               
-              {/* Time labels */}
               <div className="flex justify-between text-xs text-muted-foreground px-1">
                 <span>6 AM</span>
                 <span>9 AM</span>
@@ -877,7 +1005,6 @@ const availability = availabilityByDay[day] || []
                 <span>8 PM</span>
               </div>
 
-              {/* Detailed schedule list for this day */}
               {schedules.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {schedules
@@ -916,34 +1043,32 @@ const availability = availabilityByDay[day] || []
           )
         })}
 
-        {/* Legend */}
         <div className="border-t pt-4 mt-4">
-          <div className="text-sm font-medium mb-2">Legend:</div>
+          <div className="text-sm font-medium mb-2">{t('legend')}</div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-8 h-4 bg-green-200/50 border border-green-400 rounded"></div>
-              <span>Available Time</span>
+              <span>{t('availableTime')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-4 bg-blue-500 border-2 border-blue-700 rounded"></div>
-              <span>Scheduled Class</span>
+              <span>{t('scheduledClass')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-4 bg-red-500 border-2 border-red-700 rounded"></div>
-              <span>Conflict</span>
+              <span>{t('conflict')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-4 bg-gray-300/40 rounded"></div>
-              <span>Unavailable</span>
+              <span>{t('unavailable')}</span>
             </div>
           </div>
         </div>
 
-        {/* Empty state */}
         {teacher.schedules.length === 0 && teacher.weeklySchedule.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">No availability or schedules configured</p>
+            <p className="text-sm">{t('noAvailabilityOrSchedules')}</p>
           </div>
         )}
       </CardContent>
@@ -951,200 +1076,10 @@ const availability = availabilityByDay[day] || []
   )
 }
 
-
-import * as XLSX from 'xlsx'
-
-// ==================== EXCEL EXPORT FUNCTION ====================
-
-const exportTeacherScheduleToExcel = (teacher: TeacherWithSchedule) => {
-  // Create a new workbook
-  const workbook = XLSX.utils.book_new()
-
-  // ========== Sheet 1: Teacher Info ==========
-  const infoData = [
-    ['Teacher Schedule Report'],
-    [''],
-    ['Teacher Name:', teacher.name],
-    ['Email:', teacher.email || 'N/A'],
-    ['Phone:', teacher.phone || 'N/A'],
-    [''],
-    ['Statistics'],
-    ['Available Hours/Week:', `${teacher.availableHours.toFixed(1)}h`],
-    ['Scheduled Hours/Week:', `${teacher.totalHours.toFixed(1)}h`],
-    ['Utilization Rate:', `${teacher.utilizationRate}%`],
-    ['Total Classes:', teacher.schedules.length],
-    ['Subjects Teaching:', teacher.subjectsCount],
-    ['Scheduling Conflicts:', teacher.conflicts.length],
-  ]
-
-  const infoSheet = XLSX.utils.aoa_to_sheet(infoData)
-  
-  // Style the header
-  infoSheet['!cols'] = [{ wch: 25 }, { wch: 30 }]
-  
-  XLSX.utils.book_append_sheet(workbook, infoSheet, 'Teacher Info')
-
-  // ========== Sheet 2: Availability ==========
-  const availabilityData = [
-    ['Day', 'Start Time', 'End Time', 'Duration (hours)']
-  ]
-
-  teacher.weeklySchedule.forEach(slot => {
-    const duration = calculateHoursDifference(slot.startTime, slot.endTime)
-    availabilityData.push([
-      slot.day,
-      slot.startTime,
-      slot.endTime,
-      duration.toFixed(1)
-    ])
-  })
-
-  // Add total
-  availabilityData.push([])
-  availabilityData.push(['Total Available Hours:', '', '', teacher.availableHours.toFixed(1)])
-
-  const availabilitySheet = XLSX.utils.aoa_to_sheet(availabilityData)
-  availabilitySheet['!cols'] = [{ wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 15 }]
-  
-  XLSX.utils.book_append_sheet(workbook, availabilitySheet, 'Availability')
-
-  // ========== Sheet 3: Scheduled Classes ==========
-  const schedulesData = [
-    ['Day', 'Start Time', 'End Time', 'Subject', 'Grade', 'Room', 'Duration (h)', 'Status']
-  ]
-
-  // Sort schedules by day and time
-  const sortedSchedules = [...teacher.schedules].sort((a, b) => {
-    const dayCompare = DAYS.indexOf(a.day) - DAYS.indexOf(b.day)
-    if (dayCompare !== 0) return dayCompare
-    return a.startTime.localeCompare(b.startTime)
-  })
-
-  sortedSchedules.forEach(schedule => {
-    const duration = calculateHoursDifference(schedule.startTime, schedule.endTime)
-    const withinAvailability = isWithinAvailability(schedule, teacher.weeklySchedule)
-    const status = withinAvailability ? '✓ OK' : '⚠ CONFLICT'
-
-    schedulesData.push([
-      schedule.day,
-      schedule.startTime,
-      schedule.endTime,
-      schedule.subject.name,
-      schedule.subject.grade,
-      schedule.roomId,
-      duration.toFixed(1),
-      status
-    ])
-  })
-
-  // Add summary
-  schedulesData.push([])
-  schedulesData.push(['Total Scheduled Hours:', '', '', '', '', '', teacher.totalHours.toFixed(1), ''])
-
-  const schedulesSheet = XLSX.utils.aoa_to_sheet(schedulesData)
-  schedulesSheet['!cols'] = [
-    { wch: 12 }, 
-    { wch: 12 }, 
-    { wch: 12 }, 
-    { wch: 20 }, 
-    { wch: 10 }, 
-    { wch: 12 }, 
-    { wch: 12 }, 
-    { wch: 12 }
-  ]
-  
-  XLSX.utils.book_append_sheet(workbook, schedulesSheet, 'Scheduled Classes')
-
-  // ========== Sheet 4: Conflicts (if any) ==========
-  if (teacher.conflicts.length > 0) {
-    const conflictsData = [
-      ['Day', 'Scheduled Time', 'Subject', 'Grade', 'Room', 'Available Time', 'Issue']
-    ]
-
-    teacher.conflicts.forEach(conflict => {
-      const availability = teacher.weeklySchedule.find(s => s.day === conflict.day)
-      const issue = availability 
-        ? `Outside available hours (${availability.startTime}-${availability.endTime})`
-        : `Not available on ${conflict.day}`
-
-      conflictsData.push([
-        conflict.day,
-        `${conflict.startTime} - ${conflict.endTime}`,
-        conflict.subject.name,
-        conflict.subject.grade,
-        conflict.roomId,
-        availability ? `${availability.startTime} - ${availability.endTime}` : 'N/A',
-        issue
-      ])
-    })
-
-    const conflictsSheet = XLSX.utils.aoa_to_sheet(conflictsData)
-    conflictsSheet['!cols'] = [
-      { wch: 12 }, 
-      { wch: 18 }, 
-      { wch: 20 }, 
-      { wch: 10 }, 
-      { wch: 12 }, 
-      { wch: 18 }, 
-      { wch: 40 }
-    ]
-    
-    XLSX.utils.book_append_sheet(workbook, conflictsSheet, 'Conflicts')
-  }
-
-  // ========== Sheet 5: Weekly Overview ==========
-  const weeklyData = [['Time', ...DAYS]]
-
-  // Create time slots for the overview
-  const timeSlots = [
-    '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
-    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
-    '18:00', '19:00', '20:00'
-  ]
-
-  timeSlots.forEach(time => {
-    const row = [time]
-    
-    DAYS.forEach(day => {
-      const schedule = teacher.schedules.find(
-        s => s.day === day && s.startTime <= time && s.endTime > time
-      )
-      
-      if (schedule) {
-        row.push(`${schedule.subject.name} (${schedule.roomId})`)
-      } else {
-        const isAvailable = teacher.weeklySchedule.some(
-          slot => slot.day === day && slot.startTime <= time && slot.endTime > time
-        )
-        row.push(isAvailable ? 'Available' : '-')
-      }
-    })
-    
-    weeklyData.push(row)
-  })
-
-  const weeklySheet = XLSX.utils.aoa_to_sheet(weeklyData)
-  weeklySheet['!cols'] = [
-    { wch: 8 }, 
-    { wch: 18 }, 
-    { wch: 18 }, 
-    { wch: 18 }, 
-    { wch: 18 }, 
-    { wch: 18 }, 
-    { wch: 18 }, 
-    { wch: 18 }
-  ]
-  
-  XLSX.utils.book_append_sheet(workbook, weeklySheet, 'Weekly Overview')
-
-  // ========== Generate and download file ==========
-  const fileName = `${teacher.name.replace(/\s+/g, '_')}_schedule_${new Date().toISOString().split('T')[0]}.xlsx`
-  XLSX.writeFile(workbook, fileName)
-}
-
 // ==================== EXPORT OPTIONS COMPONENT ====================
 
-function ExportButton({ teacher, onExport }: { teacher: TeacherWithSchedule; onExport: () => void }) {
+function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations('TeacherScheduleView')
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -1155,7 +1090,7 @@ function ExportButton({ teacher, onExport }: { teacher: TeacherWithSchedule; onE
         onClick={() => setIsOpen(!isOpen)}
       >
         <Download className="h-4 w-4 mr-2" />
-        Export
+        {t('export')}
       </Button>
 
       {isOpen && (
@@ -1167,23 +1102,23 @@ function ExportButton({ teacher, onExport }: { teacher: TeacherWithSchedule; onE
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-20 overflow-hidden">
             <button
               onClick={() => {
-                exportTeacherScheduleToExcel(teacher)
+                exportTeacherScheduleToExcel(teacher, t)
                 setIsOpen(false)
               }}
               className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
             >
               <FileSpreadsheet className="h-4 w-4" />
-              Export to Excel
+              {t('exportToExcel')}
             </button>
             <button
               onClick={() => {
-                onExport()
+                exportTeacherSchedule(teacher, t)
                 setIsOpen(false)
               }}
               className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
             >
               <FileText className="h-4 w-4" />
-              Export to Text
+              {t('exportToText')}
             </button>
           </div>
         </>

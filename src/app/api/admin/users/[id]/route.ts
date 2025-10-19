@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/admin/users/[id]/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
@@ -8,7 +9,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session :any = await getSession()
         const { id } = await params
     
     if (!session?.user || session.user.role !== 'ADMIN') {
@@ -33,7 +34,7 @@ export async function PUT(req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session :any = await getSession()
         const { id } = await params
 
     if (!session || session.user.role !== "ADMIN") {

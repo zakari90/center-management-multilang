@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -26,6 +27,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertCircle, CheckCircle2, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface SubjectStats {
   subjectId: string
@@ -51,6 +53,7 @@ interface TeacherPaymentData {
 }
 
 export default function CreateTeacherPaymentForm() {
+  const t = useTranslations('TeacherPayment')
   const router = useRouter()
   const searchParams = useSearchParams()
   const preSelectedTeacherId = searchParams.get('teacherId')
@@ -86,7 +89,7 @@ export default function CreateTeacherPaymentForm() {
       setTeachers(data)
     } catch (err) {
       console.error('Failed to fetch teachers:', err)
-      setError('Failed to load teachers')
+      setError(t('errorloadTeachers'))
     } finally {
       setLoadingTeachers(false)
     }
@@ -105,7 +108,7 @@ export default function CreateTeacherPaymentForm() {
       }))
     } catch (err) {
       console.error('Failed to calculate payment:', err)
-      setError('Failed to calculate teacher payment')
+      setError(t('errorcalcPayment'))
     } finally {
       setLoadingCalculation(false)
     }
@@ -161,13 +164,14 @@ export default function CreateTeacherPaymentForm() {
         date: formData.date,
       })
 
-      router.push('/receipts')
+      router.push('/manager/receipts')
       router.refresh()
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || 'Failed to create receipt')
+        console.log(err.response?.data?.error);        
+        setError( t('errorcreateReceipt'))
       } else {
-        setError('Something went wrong')
+        setError(t('errorgeneric'))
       }
     } finally {
       setIsLoading(false)
@@ -178,10 +182,8 @@ export default function CreateTeacherPaymentForm() {
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Create Teacher Payment Receipt</CardTitle>
-          <CardDescription>
-            Payment calculated based on subject price × percentage × enrolled students
-          </CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
@@ -195,7 +197,7 @@ export default function CreateTeacherPaymentForm() {
 
             {/* Teacher Selection */}
             <div className="space-y-2">
-              <Label htmlFor="teacherId">Teacher *</Label>
+              <Label htmlFor="teacherId">{t('teacherlabel')}</Label>
               {loadingTeachers ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -214,7 +216,7 @@ export default function CreateTeacherPaymentForm() {
                   disabled={!!preSelectedTeacherId}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a teacher" />
+                    <SelectValue placeholder={t('teacherplaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {teachers.map(teacher => (
@@ -227,7 +229,7 @@ export default function CreateTeacherPaymentForm() {
               )}
               {paymentData && (
                 <p className="text-sm text-muted-foreground">
-                  Email: {paymentData.teacher.email || 'N/A'}
+                  {t('teacheremail')}: {paymentData.teacher.email || t('teachernoEmail')}
                 </p>
               )}
             </div>
@@ -238,29 +240,26 @@ export default function CreateTeacherPaymentForm() {
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             )}
-
-            {paymentData && !loadingCalculation && (
+           {paymentData && !loadingCalculation && (
               <>
                 <Separator />
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <Label>Select Subjects to Include in Payment *</Label>
+                    <Label>{t('subjectsselectLabel')}</Label>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleSelectAllSubjects}
                     >
-                      Select All
+                      {t('subjectsselectAll')}
                     </Button>
                   </div>
 
                   {paymentData.subjects.length === 0 ? (
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        This teacher is not assigned to any subjects yet.
-                      </AlertDescription>
+                      <AlertDescription>{t('subjectsnone')}</AlertDescription>
                     </Alert>
                   ) : (
                     <div className="space-y-3">
@@ -288,26 +287,31 @@ export default function CreateTeacherPaymentForm() {
                                   <p className="text-sm text-muted-foreground mb-2">
                                     {subject.grade}
                                   </p>
-                                  
+
                                   <div className="flex flex-wrap gap-2 text-xs">
                                     <Badge variant="outline">
-                                      Price: ${subject.price.toFixed(2)}
+                                      {t('subjectsprice', { price: subject.price.toFixed(2) })}
                                     </Badge>
                                     <Badge variant="outline">
-                                      {subject.percentage 
-                                        ? `${subject.percentage}% commission`
-                                        : `$${subject.hourlyRate}/hr`
-                                      }
+                                      {subject.percentage
+                                        ? t('subjectspercentage', { percentage: subject.percentage })
+                                        : t('subjectshourly', { hourlyRate: subject.hourlyRate || "" })}
                                     </Badge>
                                     <Badge variant="secondary" className="flex items-center gap-1">
                                       <Users className="h-3 w-3" />
-                                      {subject.enrolledStudents} students
+                                      {t('subjectsstudents', {
+                                        count: subject.enrolledStudents,
+                                      })}
                                     </Badge>
                                   </div>
 
                                   {subject.percentage && (
                                     <p className="text-xs text-muted-foreground mt-2">
-                                      Calculation: ${subject.price} × {subject.percentage}% × {subject.enrolledStudents} students
+                                      {t('subjectscalculation', {
+                                        price: subject.price,
+                                        percentage: subject.percentage,
+                                        students: subject.enrolledStudents,
+                                      })}
                                     </p>
                                   )}
                                 </div>
@@ -327,89 +331,85 @@ export default function CreateTeacherPaymentForm() {
               </>
             )}
 
-            {/* Payment Details */}
             {formData.selectedSubjects.length > 0 && paymentData && (
               <>
                 <Separator />
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="paymentMethod">Payment Method *</Label>
+                    <Label htmlFor="paymentMethod">{t('paymentmethod')}</Label>
                     <Select
                       value={formData.paymentMethod}
-                      onValueChange={(value) => 
-                        setFormData(prev => ({ ...prev, paymentMethod: value }))
-                      }
+                      onValueChange={value => setFormData(prev => ({ ...prev, paymentMethod: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
-                        <SelectItem value="CASH">Cash</SelectItem>
-                        <SelectItem value="CHECK">Check</SelectItem>
-                        <SelectItem value="MOBILE_PAYMENT">Mobile Payment</SelectItem>
+                        <SelectItem value="BANK_TRANSFER">{t('paymentmethodbank')}</SelectItem>
+                        <SelectItem value="CASH">{t('paymentmethodcash')}</SelectItem>
+                        <SelectItem value="CHECK">{t('paymentmethodcheck')}</SelectItem>
+                        <SelectItem value="MOBILE_PAYMENT">
+                          {t('paymentmethodmobile')}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="date">Payment Date *</Label>
+                    <Label htmlFor="date">{t('paymentdate')}</Label>
                     <Input
                       type="date"
                       id="date"
                       value={formData.date}
-                      onChange={(e) => 
-                        setFormData(prev => ({ ...prev, date: e.target.value }))
-                      }
+                      onChange={e => setFormData(prev => ({ ...prev, date: e.target.value }))}
                       required
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description/Notes</Label>
+                  <Label htmlFor="description">{t('paymentdescription')}</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => 
+                    onChange={e =>
                       setFormData(prev => ({ ...prev, description: e.target.value }))
                     }
-                    placeholder="Monthly salary, bonus, etc."
+                    placeholder={t('paymentdescriptionplaceholder')}
                     rows={3}
                   />
                 </div>
 
-                {/* Payment Summary */}
                 <Card className="bg-orange-50 border-orange-200">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 text-orange-600" />
-                      Payment Summary
+                      {t('summarytitle')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Teacher:</span>
+                      <span className="text-muted-foreground">{t('summaryteacher')}</span>
                       <span className="font-medium">{paymentData.teacher.name}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Subjects:</span>
+                      <span className="text-muted-foreground">{t('summarysubjects')}</span>
                       <span className="font-medium">{formData.selectedSubjects.length}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Method:</span>
+                      <span className="text-muted-foreground">{t('summarymethod')}</span>
                       <span className="font-medium">{formData.paymentMethod}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Date:</span>
+                      <span className="text-muted-foreground">{t('summarydate')}</span>
                       <span className="font-medium">
                         {new Date(formData.date).toLocaleDateString()}
                       </span>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold">Total Amount:</span>
+                      <span className="text-lg font-semibold">{t('summarytotal')}</span>
                       <span className="text-2xl font-bold text-orange-600">
                         ${totalAmount.toFixed(2)}
                       </span>
@@ -427,7 +427,7 @@ export default function CreateTeacherPaymentForm() {
               onClick={() => router.back()}
               disabled={isLoading}
             >
-              Cancel
+              {t('buttonscancel')}
             </Button>
             <Button
               type="submit"
@@ -435,7 +435,7 @@ export default function CreateTeacherPaymentForm() {
               className="bg-orange-600 hover:bg-orange-700"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Payment
+              {t('buttonscreate')}
             </Button>
           </CardFooter>
         </form>

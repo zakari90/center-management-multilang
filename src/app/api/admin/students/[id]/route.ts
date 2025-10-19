@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/students/[id]/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
@@ -11,7 +12,7 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    const session = await getSession()
+    const session :any = await getSession()
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

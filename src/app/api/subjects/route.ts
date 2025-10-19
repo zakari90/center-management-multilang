@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from "@/lib/authentication"
 import db from "@/lib/db"
 import { NextRequest, NextResponse } from "next/server"
@@ -69,6 +70,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(subject)
   } catch (error) {
+    console.log(error);
+    
     return NextResponse.json(
       { error: 'Failed to create subject' },
       { status: 500 }
@@ -101,6 +104,8 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(subject)
   } catch (error) {
+    console.log(error);
+    
     return NextResponse.json(
       { error: 'Failed to update subject' },
       { status: 500 }
@@ -110,7 +115,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-        const session = await getSession()
+        const session:any = await getSession()
     
     if (!(session?.user?.role === "ADMIN")) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -132,6 +137,8 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.log(error);
+    
     return NextResponse.json(
       { error: 'Failed to delete subject' },
       { status: 500 }

@@ -1,7 +1,18 @@
-'use client'
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client"
 
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import type React from "react"
+
+import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { X } from "lucide-react"
 
 interface Teacher {
   id: string
@@ -37,28 +48,29 @@ interface EnrolledSubject {
 }
 
 export default function CreateStudentForm() {
+  const t = useTranslations("CreateStudentForm")
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
-  
+
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    parentName: '',
-    parentPhone: '',
-    parentEmail: '',
-    grade: '',
+    name: "",
+    email: "",
+    phone: "",
+    parentName: "",
+    parentPhone: "",
+    parentEmail: "",
+    grade: "",
   })
 
   // Enrollment flow state
-  const [selectedGrade, setSelectedGrade] = useState<string>('')
+  const [selectedGrade, setSelectedGrade] = useState<string>("")
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
-  const [selectedTeacher, setSelectedTeacher] = useState<string>('')
-  
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("")
+
   // Enrolled subjects list
   const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>([])
 
@@ -66,13 +78,14 @@ export default function CreateStudentForm() {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await fetch('/api/subjects?includeTeachers=true')
+        const response = await fetch("/api/subjects?includeTeachers=true")
         if (response.ok) {
           const data = await response.json()
           setSubjects(data)
         }
       } catch (err) {
-        console.error('Failed to fetch subjects:', err)
+        console.error("Failed to fetch subjects:", err)
+        setError(t("errors.fetchSubjects"))
       } finally {
         setLoadingSubjects(false)
       }
@@ -82,40 +95,39 @@ export default function CreateStudentForm() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   // Get unique grades from subjects
-  const availableGrades = [...new Set(subjects.map(s => s.grade))].sort()
+  const availableGrades = [...new Set(subjects.map((s) => s.grade))].sort()
 
   // Filter subjects by selected grade
-  const subjectsForGrade = selectedGrade 
-    ? subjects.filter(s => s.grade === selectedGrade)
-    : []
+  const subjectsForGrade = selectedGrade ? subjects.filter((s) => s.grade === selectedGrade) : []
 
   // Get teachers for selected subject
-const teachersForSubject = selectedSubject?.teacherSubjects?.filter(ts => ts.teacher) || []
+  const teachersForSubject = selectedSubject?.teacherSubjects?.filter((ts) => ts.teacher) || []
+
   const handleAddEnrollment = () => {
     if (!selectedSubject || !selectedTeacher) {
-      setError('Please select both subject and teacher')
+      setError(t("errors.selectSubjectTeacher"))
       return
     }
 
     // Check if already enrolled in this subject with this teacher
     const alreadyEnrolled = enrolledSubjects.some(
-      es => es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher
+      (es) => es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
     )
 
     if (alreadyEnrolled) {
-      setError('Student is already enrolled in this subject with this teacher')
+      setError(t("errors.alreadyEnrolled"))
       return
     }
 
-    const teacher = teachersForSubject.find(ts => ts.teacherId === selectedTeacher)?.teacher
-    
+    const teacher = teachersForSubject.find((ts) => ts.teacherId === selectedTeacher)?.teacher
+
     if (!teacher) return
 
-    setEnrolledSubjects(prev => [
+    setEnrolledSubjects((prev) => [
       ...prev,
       {
         subjectId: selectedSubject.id,
@@ -123,59 +135,57 @@ const teachersForSubject = selectedSubject?.teacherSubjects?.filter(ts => ts.tea
         subjectName: selectedSubject.name,
         teacherName: teacher.name,
         grade: selectedSubject.grade,
-        price: selectedSubject.price
-      }
+        price: selectedSubject.price,
+      },
     ])
 
     // Reset enrollment flow
-    setSelectedGrade('')
+    setSelectedGrade("")
     setSelectedSubject(null)
-    setSelectedTeacher('')
-    setError('')
+    setSelectedTeacher("")
+    setError("")
   }
 
   const handleRemoveEnrollment = (subjectId: string, teacherId: string) => {
-    setEnrolledSubjects(prev => 
-      prev.filter(es => !(es.subjectId === subjectId && es.teacherId === teacherId))
-    )
+    setEnrolledSubjects((prev) => prev.filter((es) => !(es.subjectId === subjectId && es.teacherId === teacherId)))
   }
-  const [success , setSuccess] = useState(false)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError('')
+    setError("")
 
     try {
       if (!formData.name) {
-        throw new Error('Student name is required')
+        throw new Error("Student name is required")
       }
 
       if (enrolledSubjects.length === 0) {
-        throw new Error('Please enroll the student in at least one subject')
+        throw new Error("Please enroll the student in at least one subject")
       }
 
-      const response = await fetch('/api/students', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          enrollments: enrolledSubjects.map(es => ({
+          enrollments: enrolledSubjects.map((es) => ({
             subjectId: es.subjectId,
-            teacherId: es.teacherId
-          }))
+            teacherId: es.teacherId,
+          })),
         }),
       })
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to create student')
+        throw new Error(data.error || "Failed to create student")
       }
-      setSuccess(true)
-    await router.push('/manager/students')
-    router.refresh()  
-    // toast("student created successfully") 
+
+      await router.push("/manager/students")
+      router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      console.log(err instanceof Error ? err.message : "Something went wrong")
+      setError(t("errors.generic"))
     } finally {
       setIsLoading(false)
     }
@@ -186,364 +196,321 @@ const teachersForSubject = selectedSubject?.teacherSubjects?.filter(ts => ts.tea
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Add New Student</h1>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-800">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Student Information */}
-          <div className="border-b pb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Student Information</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div hidden>
-                <label htmlFor="grade" className="block text-sm font-medium text-gray-700 mb-2">
-                  Grade/Level
-                </label>
-                <input
-                  type="text"
-                  id="grade"
-                  name="grade"
-                  value={formData.grade || selectedGrade}
-                  readOnly
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Grade 10"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="student@example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="+1 (555) 000-0000"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Parent/Guardian Information */}
-          <div className="border-b pb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Parent/Guardian Information</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="parentName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Parent Name
-                </label>
-                <input
-                  type="text"
-                  id="parentName"
-                  name="parentName"
-                  value={formData.parentName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Jane Doe"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="parentPhone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Parent Phone
-                </label>
-                <input
-                  type="tel"
-                  id="parentPhone"
-                  name="parentPhone"
-                  value={formData.parentPhone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="+1 (555) 000-0000"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700 mb-2">
-                  Parent Email
-                </label>
-                <input
-                  type="email"
-                  id="parentEmail"
-                  name="parentEmail"
-                  value={formData.parentEmail}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="parent@example.com"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Subject Enrollment - Step by Step */}
-          <div className="border-b pb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Subject Enrollment</h2>
-            <p className="text-sm text-gray-600 mb-6">Select grade, subject, and teacher to enroll</p>
-
-            {loadingSubjects ? (
-              <p className="text-gray-500 text-center py-4">Loading subjects...</p>
-            ) : subjects.length === 0 ? (
-              <p className="text-gray-500 text-center py-4 bg-gray-50 rounded-md">
-                No subjects available. Create subjects first.
-              </p>
-            ) : (
-              <div className="space-y-6">
-                {/* Step 1: Select Grade */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Step 1: Select Grade
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {availableGrades.map(grade => (
-                      <button
-                        key={grade}
-                        type="button"
-                        onClick={() => {
-                          setSelectedGrade(grade)
-                          setSelectedSubject(null)
-                          setSelectedTeacher('')
-                        }}
-                        className={`
-                          px-4 py-3 rounded-lg font-medium transition-all
-                          ${selectedGrade === grade
-                            ? 'bg-blue-600 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }
-                        `}
-                      >
-                        {grade}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Step 2: Select Subject */}
-                {selectedGrade && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Step 2: Select Subject
-                    </label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {subjectsForGrade.length === 0 ? (
-                        <p className="text-gray-500 col-span-2">No subjects available for this grade</p>
-                      ) : (
-                        subjectsForGrade.map(subject => (
-                          <button
-                            key={subject.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedSubject(subject)
-                              setSelectedTeacher('')
-                            }}
-                            disabled={subject.teacherSubjects && subject.teacherSubjects.length === 0}
-                            className={`
-                              p-4 rounded-lg text-left transition-all border-2
-                              ${selectedSubject?.id === subject.id
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 bg-white hover:border-gray-300'
-                              }
-                              ${subject.teacherSubjects && subject.teacherSubjects.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}
-                            `}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-semibold text-gray-900">{subject.name}</h4>
-                                {subject.duration && (
-                                  <p className="text-sm text-gray-500 mt-1">
-                                    {subject.duration} minutes
-                                  </p>
-                                )}
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {subject.teacherSubjects && subject.teacherSubjects.length} teacher(s) available
-                                </p>
-                              </div>
-                              <p className="text-lg font-bold text-blue-600">
-                                ${subject.price.toFixed(2)}
-                              </p>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Select Teacher */}
-                {selectedSubject && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Step 3: Select Teacher for {selectedSubject.name}
-                    </label>
-                    {teachersForSubject && teachersForSubject.length === 0 ? (
-                      <p className="text-gray-500 bg-gray-50 p-4 rounded-md">
-                        No teachers available for this subject
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {teachersForSubject && teachersForSubject.map(ts => (
-                          <div
-                            key={ts.id}
-                            onClick={() => setSelectedTeacher(ts.teacherId)}
-                            className={`
-                              p-4 rounded-lg cursor-pointer transition-all border-2
-                              ${selectedTeacher === ts.teacherId
-                                ? 'border-green-500 bg-green-50'
-                                : 'border-gray-200 bg-white hover:border-gray-300'
-                              }
-                            `}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                  <span className="text-blue-600 font-semibold">
-                                    {ts.teacher.name.charAt(0).toUpperCase()}
-                                  </span>
-                                </div>
-                                <div>
-                                  <h4 className="font-semibold text-gray-900">{ts.teacher.name}</h4>
-                                  <p className="text-sm text-gray-600">
-                                    {ts.teacher.email || ts.teacher.phone || 'No contact info'}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-gray-600">Compensation</p>
-                                <p className="font-semibold text-gray-900">
-                                  {ts.percentage 
-                                    ? `${ts.percentage}% ($${((selectedSubject.price * ts.percentage) / 100).toFixed(2)})`
-                                    : `$${ts.hourlyRate}/hr`
-                                  }
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Add Button */}
-                    {selectedTeacher && (
-                      <button
-                        type="button"
-                        onClick={handleAddEnrollment}
-                        className="mt-4 w-full px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium transition-colors"
-                      >
-                        Add Enrollment
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Enrolled Subjects List */}
-          {enrolledSubjects.length > 0 && (
-            <div className="border-b pb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">Enrolled Subjects</h2>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">Total Price</p>
-                  <p className="text-2xl font-bold text-blue-600">${totalPrice.toFixed(2)}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {enrolledSubjects.map((es, index) => (
-                  <div key={index} className="p-4 bg-blue-50 border border-blue-200 rounded-md">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900">{es.subjectName}</h4>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Grade: {es.grade} • Teacher: {es.teacherName}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-lg font-bold text-blue-600">${es.price.toFixed(2)}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveEnrollment(es.subjectId, es.teacherId)}
-                        className="ml-4 p-2 text-red-600 hover:bg-red-100 rounded-md transition-colors"
-                        title="Remove enrollment"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">{t("title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-4 pt-6">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-              disabled={isLoading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading || enrolledSubjects.length === 0}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? 'Creating...' : 'Add Student'}
-            </button>
-          </div>
-        </form>
-      </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Student Information */}
+            <div className="border-b pb-6">
+              <h2 className="text-xl font-semibold mb-4">{t("studentInfo.title")}</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t("studentInfo.fullName")} *</Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="rachid Daman"
+                  />
+                </div>
+
+                <div hidden>
+                  <Label htmlFor="grade">{t("studentInfo.grade")}</Label>
+                  <Input
+                    type="text"
+                    id="grade"
+                    name="grade"
+                    value={formData.grade || selectedGrade}
+                    readOnly
+                    placeholder={t("studentInfo.grade")}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t("studentInfo.email")}</Label>
+                  <Input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder={t("studentInfo.emailPlaceholder")}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">{t("studentInfo.phone")}</Label>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder={t("studentInfo.phonePlaceholder")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Parent/Guardian Information */}
+            <div className="border-b pb-6">
+              <h2 className="text-xl font-semibold mb-4">{t("parentInfo.title")}</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="parentName">{t("parentInfo.name")}</Label>
+                  <Input
+                    type="text"
+                    id="parentName"
+                    name="parentName"
+                    value={formData.parentName}
+                    onChange={handleInputChange}
+                    placeholder={t("parentInfo.namePlaceholder")}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="parentPhone">{t("parentInfo.phone")}</Label>
+                  <Input
+                    type="tel"
+                    id="parentPhone"
+                    name="parentPhone"
+                    value={formData.parentPhone}
+                    onChange={handleInputChange}
+                    placeholder={t("parentInfo.phonePlaceholder")}
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="parentEmail">{t("parentInfo.email")}</Label>
+                  <Input
+                    type="email"
+                    id="parentEmail"
+                    name="parentEmail"
+                    value={formData.parentEmail}
+                    onChange={handleInputChange}
+                    placeholder={t("parentInfo.emailPlaceholder")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Subject Enrollment - Step by Step */}
+            <div className="border-b pb-6">
+              <h2 className="text-xl font-semibold mb-4">{t("subjectEnrollment.title")}</h2>
+              <p className="text-sm text-muted-foreground mb-6">{t("subjectEnrollment.description")}</p>
+
+              {loadingSubjects ? (
+                <p className="text-muted-foreground text-center py-4">{t("subjectEnrollment.loading")}</p>
+              ) : subjects.length === 0 ? (
+                <Card className="bg-muted">
+                  <CardContent className="pt-6 text-center text-muted-foreground">
+                    {t("subjectEnrollment.noSubjects")}
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-6">
+                  {/* Step 1: Select Grade */}
+                  <div>
+                    <Label className="text-base mb-3 block">{t("subjectEnrollment.step1")}</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {availableGrades.map((grade) => (
+                        <Button
+                          key={grade}
+                          type="button"
+                          onClick={() => {
+                            setSelectedGrade(grade)
+                            setSelectedSubject(null)
+                            setSelectedTeacher("")
+                          }}
+                          variant={selectedGrade === grade ? "default" : "outline"}
+                        >
+                          {grade}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Step 2: Select Subject */}
+                  {selectedGrade && (
+                    <div>
+                      <Label className="text-base mb-3 block">{t("subjectEnrollment.step2")}</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {subjectsForGrade.length === 0 ? (
+                          <p className="text-muted-foreground col-span-2">
+                            {t("subjectEnrollment.noSubjectsForGrade")}
+                          </p>
+                        ) : (
+                          subjectsForGrade.map((subject) => (
+                            <Button
+                              key={subject.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedSubject(subject)
+                                setSelectedTeacher("")
+                              }}
+                              disabled={subject.teacherSubjects && subject.teacherSubjects.length === 0}
+                              variant={selectedSubject?.id === subject.id ? "default" : "outline"}
+                              className="h-auto p-4 justify-start text-left"
+                            >
+                              <div className="w-full">
+                                <div className="flex justify-between items-start w-full">
+                                  <div>
+                                    <h4 className="font-semibold">{subject.name}</h4>
+                                    {subject.duration && (
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {subject.duration} {t("subjectEnrollment.minutes")}
+                                      </p>
+                                    )}
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {subject.teacherSubjects && subject.teacherSubjects.length}{" "}
+                                      {t("subjectEnrollment.teachersAvailable")}
+                                    </p>
+                                  </div>
+                                  <p className="text-lg font-bold text-primary">${subject.price.toFixed(2)}</p>
+                                </div>
+                              </div>
+                            </Button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 3: Select Teacher */}
+                  {selectedSubject && (
+                    <div>
+                      <Label className="text-base mb-3 block">
+                        {t("subjectEnrollment.step3", { subject: selectedSubject.name })}
+                      </Label>
+                      {teachersForSubject && teachersForSubject.length === 0 ? (
+                        <Card className="bg-muted">
+                          <CardContent className="pt-6 text-center text-muted-foreground">
+                            {t("subjectEnrollment.noTeachers")}
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        <div className="space-y-3">
+                          {teachersForSubject &&
+                            teachersForSubject.map((ts) => (
+                              <Button
+                                key={ts.id}
+                                type="button"
+                                onClick={() => setSelectedTeacher(ts.teacherId)}
+                                variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
+                                className="h-auto p-4 justify-start w-full"
+                              >
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex items-center gap-4">
+                                    <Avatar>
+                                      <AvatarFallback>{ts.teacher.name.charAt(0).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="text-left">
+                                      <h4 className="font-semibold">{ts.teacher.name}</h4>
+                                      <p className="text-sm text-muted-foreground">
+                                        {ts.teacher.email || ts.teacher.phone || t("subjectEnrollment.noContact")}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-sm text-muted-foreground">
+                                      {t("subjectEnrollment.compensation")}
+                                    </p>
+                                    <p className="font-semibold">
+                                      {ts.percentage
+                                        ? `${ts.percentage}% ($${((selectedSubject.price * ts.percentage) / 100).toFixed(2)})`
+                                        : `$${ts.hourlyRate}/hr`}
+                                    </p>
+                                  </div>
+                                </div>
+                              </Button>
+                            ))}
+                        </div>
+                      )}
+
+                      {/* Add Button */}
+                      {selectedTeacher && (
+                        <Button type="button" onClick={handleAddEnrollment} className="mt-4 w-full">
+                          {t("subjectEnrollment.addButton")}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Enrolled Subjects List */}
+            {enrolledSubjects.length > 0 && (
+              <div className="border-b pb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">{t("enrolledSubjects.title")}</h2>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">{t("enrolledSubjects.totalPrice")}</p>
+                    <p className="text-2xl font-bold text-primary">${totalPrice.toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {enrolledSubjects.map((es, index) => (
+                    <Card key={index}>
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-1">
+                                <h4 className="font-semibold">{es.subjectName}</h4>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {t("enrolledSubjects.subjectInfo", { grade: es.grade, teacher: es.teacherName })}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-primary">MAD{es.price.toFixed(2)}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={() => handleRemoveEnrollment(es.subjectId, es.teacherId)}
+                            variant="ghost"
+                            size="sm"
+                            className="ml-4 text-destructive hover:text-destructive"
+                            title={t("enrolledSubjects.removeEnrollment")}
+                          >
+                            <X className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 pt-6">
+              <Button type="button" onClick={() => router.back()} variant="outline" disabled={isLoading}>
+                {t("actions.cancel")}
+              </Button>
+              <Button type="submit" disabled={isLoading || enrolledSubjects.length === 0}>
+                {isLoading ? t("actions.creating") : t("actions.addStudent")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

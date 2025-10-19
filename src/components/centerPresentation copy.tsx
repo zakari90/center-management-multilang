@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState } from "react"
@@ -25,10 +26,11 @@ import { Textarea } from "./ui/textarea"
 import { Separator } from "./ui/separator"
 import { toast } from 'sonner'
 import { ItemInputList } from "./itemInputList"
-import { availableSubjects, availableGrades } from "@/types/types"
+import { useLocalizedConstants } from "./useLocalizedConstants"
 
 export default function CenterPresentation(center: any) {
   
+    const { availableSubjects, availableGrades } = useLocalizedConstants();
   const [formData, setFormData] = useState({
     name: center.name,
     address: center.address,
@@ -61,9 +63,11 @@ export default function CenterPresentation(center: any) {
         phone: data.phone
       }))
 
-      toast.success("Center updated successfully")
+      toast("Center updated successfully")
     } catch (error) {
-      toast.error("Failed to update center")
+      console.log(error);
+      
+      toast("Failed to update center")
     }
   }
 
@@ -77,9 +81,11 @@ export default function CenterPresentation(center: any) {
 
       setFormData(prev => ({ ...prev, classrooms: data.classrooms }))
 
-      toast.success("Classrooms updated successfully")
+      toast("Classrooms updated successfully")
     } catch (error) {
-      toast.error("Failed to update classrooms")
+      console.log(error);
+      
+      toast("Failed to update classrooms")
     }
   }
 
@@ -93,9 +99,11 @@ export default function CenterPresentation(center: any) {
 
       setFormData(prev => ({ ...prev, workingDays: data.workingDays }))
 
-      toast.success("Working days updated successfully")
+      toast("Working days updated successfully")
     } catch (error) {
-      toast.error("Failed to update working days")
+      console.log(error);
+
+      toast("Failed to update working days")
     }
   }
 
@@ -115,9 +123,10 @@ export default function CenterPresentation(center: any) {
         subjects: [...prev.subjects, data]
       }))
 
-      toast.success("Subject added successfully")
+      toast("Subject added successfully")
     } catch (error) {
-      toast.error("Failed to add subject")
+      console.log(error);
+      toast("Failed to add subject")
     }
   }
 
@@ -131,12 +140,14 @@ export default function CenterPresentation(center: any) {
 
       setFormData(prev => ({
         ...prev,
-        subjects: prev.subjects.map(s => s.id === subjectId ? data : s)
+        subjects: prev.subjects.map((s: { id: string }) => s.id === subjectId ? data : s)
       }))
 
-      toast.success("Subject updated successfully")
+      toast("Subject updated successfully")
     } catch (error) {
-      toast.error("Failed to update subject")
+            console.log(error);
+
+      toast("Failed to update subject")
     }
   }
 
@@ -149,12 +160,14 @@ export default function CenterPresentation(center: any) {
 
       setFormData(prev => ({
         ...prev,
-        subjects: prev.subjects.filter(s => s.id !== subjectId)
+        subjects: prev.subjects.filter((s: { id: string }) => s.id !== subjectId)
       }))
 
-      toast.success("Subject deleted successfully")
+      toast("Subject deleted successfully")
     } catch (error) {
-      toast.error("Failed to delete subject")
+            console.log(error);
+
+      toast("Failed to delete subject")
     }
   }
 
@@ -241,7 +254,7 @@ export default function CenterPresentation(center: any) {
 
             <div className="space-y-3">
               {formData.subjects.length > 0 ? (
-                formData.subjects.map((subject) => (
+                formData.subjects.map((subject: { name: string; centerId: string; grade: string; price: number; duration: number | null; id: string; createdAt: Date; updatedAt: Date }) => (
                   <SubjectCard
                     key={subject.id}
                     subject={subject}
@@ -369,7 +382,6 @@ export const SubjectForm = ({
               setSubjectData(prev => ({ ...prev, selectedSubject: single }))
             }}
             suggestions={availableSubjects}
-            maxItems={1}
           />
           {subjectData.selectedSubject && (
             <div className="text-xs text-muted-foreground">
@@ -390,7 +402,6 @@ export const SubjectForm = ({
               setSubjectData(prev => ({ ...prev, selectedGrade: single }))
             }}
             suggestions={availableGrades}
-            maxItems={1}
           />
           {subjectData.selectedGrade && (
             <div className="text-xs text-muted-foreground">
@@ -513,7 +524,6 @@ function SubjectCard({
                       setTempSubject(prev => ({ ...prev, selectedSubject: single }))
                     }}
                     suggestions={availableSubjects}
-                    maxItems={1}
                   />
                 </div>
 
@@ -529,7 +539,6 @@ function SubjectCard({
                       setTempSubject(prev => ({ ...prev, selectedGrade: single }))
                     }}
                     suggestions={availableGrades}
-                    maxItems={1}
                   />
                 </div>
 
@@ -572,7 +581,7 @@ function SubjectCard({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Subject?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete "{subject.name}" from the center.
+                  This will permanently delete &quot;{subject.name}&quot; from the center.
                   This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>

@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client"
 
+import { ItemInputList } from "@/components/itemInputList"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -7,16 +11,13 @@ import {
   CardTitle
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Pencil, BookOpen, Building2, CalendarDays, DollarSign, Clock, Plus } from "lucide-react"
+import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
 import { useState } from "react"
-import { ItemInputList } from "@/components/itemInputList"
+import { SubjectForm } from "./centerPresentation copy"
 import { EditDialog } from "./editDialog"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
-import { SubjectForm } from "./newCenterForm copy"
-import { availableGrades, availableSubjects, BASE_URL } from "@/types/types"
-import axios from "axios"
+import { useTranslations } from "next-intl"
+import { useLocalizedConstants } from "./useLocalizedConstants"
 
 type Subject = {
   id: string
@@ -43,6 +44,8 @@ export type Center = {
 }
 
 export default function CenterPresentation(center: Center) {
+  const t = useTranslations('CenterPresentation')
+  const {availableSubjects, availableGrades } = useLocalizedConstants();
   const [formData, setFormData] = useState({
     name: center.name,
     address: center.address,
@@ -52,67 +55,22 @@ export default function CenterPresentation(center: Center) {
     subjects: center.subjects
   })
 
-    const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
-    
+  const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
+    //@ts-expect-error
     setFormData(prev => ({
       ...prev,
       subjects: [...prev.subjects, { name: subjectName, grade, price, duration }]
     }))
   }
+  
   const [tempClassrooms, setTempClassrooms] = useState(formData.classrooms)
   const [tempWorkingDays, setTempWorkingDays] = useState(formData.workingDays)
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
-    const handleAddSubject = () => {
+  
+  const handleAddSubject = () => {
     setIsAddDialogOpen(true)
   }
 
-   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage("")
-
-    try {
-      const payload = {
-        centerId: formData.name,
-        name: formData.name,
-        address: formData.address || null,
-        phone: formData.phone || null,
-        classrooms: formData.classrooms,
-        workingDays: formData.workingDays,
-        subjects: formData.subjects
-      }
-      const response = await axios.put(BASE_URL+
-            '/center', 
-            payload
-        , { headers: { 
-            "Content-Type": "application/json", }, }
-        );       
-
-
-      if (!response) {
-        throw new Error('Failed to create center')
-      }
-
-      setMessage("Center created successfully!")
-      setFormData({
-        name: "",
-        address: "",
-        phone: "",
-        subjects: [],
-        classrooms: [],
-        workingDays: [],
-      })
-    } catch (error) {
-      console.log(error);
-      
-      setMessage("Error creating center. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
   return (
     <main className="max-w-3xl mx-auto p-6">
       <Card className="shadow-lg border border-border bg-background">
@@ -120,29 +78,28 @@ export default function CenterPresentation(center: Center) {
           <CardTitle className="text-3xl font-bold text-primary">
             {formData.name}
           </CardTitle>
-          <p className="text-muted-foreground text-sm">Center Overview</p>
+          <p className="text-muted-foreground text-sm">{t('centerOverview')}</p>
           {formData.address && (
             <p className="text-sm text-muted-foreground whitespace-pre-line">{formData.address}</p>
           )}
           {formData.phone && (
-            <p className="text-sm text-muted-foreground">📞 {formData.phone}</p>
+            <p className="text-sm text-muted-foreground">{t('phone')} {formData.phone}</p>
           )}
         </CardHeader>
 
         <Separator className="my-2" />
 
         <CardContent className="space-y-6">
-
           {/* Subjects */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
-                Subjects Offered
+                {t('subjectsOffered')}
               </div>
-        <Button onClick={handleAddSubject} className="hover:cursor-pointer w-full m-2 mb-0 sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-                Add Subject
+              <Button onClick={handleAddSubject} className="hover:cursor-pointer w-full m-2 mb-0 sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                {t('addSubject')}
               </Button>
             </div>
 
@@ -157,12 +114,12 @@ export default function CenterPresentation(center: Center) {
                           <Badge variant="outline">{subject.grade}</Badge>
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-3 w-3" />
-                            {subject.price} MAD
+                            {subject.price} {t('currency')}
                           </span>
                           {subject.duration && (
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {subject.duration} min
+                              {subject.duration} {t('duration')}
                             </span>
                           )}
                         </div>
@@ -174,76 +131,79 @@ export default function CenterPresentation(center: Center) {
                   </Card>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground italic">No subjects added</p>
+                <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
               )}
             </div>
           </div>
 
           {/* Classrooms */}
           <Section
-            title="Available Classrooms"
+            title={t('availableClassrooms')}
             icon={<Building2 className="h-4 w-4 text-muted-foreground" />}
             items={formData.classrooms}
             onEditButton={
               <EditDialog
-                title="Edit Classrooms"
+                title={t('editClassrooms')}
                 trigger={
                   <Button variant="ghost" size="sm">
-                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                    <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                   </Button>
                 }
                 onSave={() => setFormData(prev => ({ ...prev, classrooms: tempClassrooms }))}
               >
                 <ItemInputList
-                  label="Classrooms"
-                  placeholder="Type a classroom"
+                  label={t('classroomsLabel')}
+                  placeholder={t('classroomPlaceholder')}
                   items={tempClassrooms}
                   onChange={setTempClassrooms}
                   suggestions={formData.classrooms}
                 />
               </EditDialog>
             }
+            noDataText={t('noData')}
           />
 
           <Section
-            title="Working Days"
+            title={t('workingDays')}
             icon={<CalendarDays className="h-4 w-4 text-muted-foreground" />}
             items={formData.workingDays}
             onEditButton={
               <EditDialog
-                title="Edit Working Days"
+                title={t('editWorkingDays')}
                 trigger={
                   <Button variant="ghost" size="sm">
-                    <Pencil className="h-4 w-4 mr-1" /> Edit
+                    <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                   </Button>
                 }
                 onSave={() => setFormData(prev => ({ ...prev, workingDays: tempWorkingDays }))}
               >
                 <ItemInputList
-                  label="Working Days"
-                  placeholder="Type a day name"
+                  label={t('workingDaysLabel')}
+                  placeholder={t('dayPlaceholder')}
                   items={tempWorkingDays}
                   onChange={setTempWorkingDays}
                   suggestions={formData.workingDays}
                 />
               </EditDialog>
             }
+            noDataText={t('noData')}
           />
         </CardContent>
       </Card>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add New Subject</DialogTitle>
+            <DialogTitle>{t('addNewSubject')}</DialogTitle>
             <DialogDescription>
-              Fill out the form below to add a new manager to the system.
+              {t('addSubjectDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <SubjectForm
-                onAddSubject={addSubject} 
-                availableSubjects={availableSubjects}
-                availableGrades={availableGrades}
+              onAddSubject={addSubject} 
+              availableSubjects={availableSubjects}
+              availableGrades={availableGrades}
             />
           </div>
         </DialogContent>
@@ -257,9 +217,10 @@ type SectionProps = {
   icon: React.ReactNode
   items: string[]
   onEditButton?: React.ReactNode
+  noDataText?: string
 }
 
-function Section({ title, icon, items, onEditButton }: SectionProps) {
+function Section({ title, icon, items, onEditButton, noDataText = "No data" }: SectionProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -278,7 +239,7 @@ function Section({ title, icon, items, onEditButton }: SectionProps) {
             </Badge>
           ))
         ) : (
-          <p className="text-sm text-muted-foreground italic">No data</p>
+          <p className="text-sm text-muted-foreground italic">{noDataText}</p>
         )}
       </div>
     </div>

@@ -1,5 +1,4 @@
 import db from "@/lib/db";
-import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 

@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/dashboard/top-subjects/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const session = await getSession()
+    const session:any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -14,13 +15,7 @@ export async function GET(req: NextRequest) {
 
     const subjects = await db.subject.findMany({
       include: {
-        studentSubjects: {
-          where: {
-            student: {
-              managerId: session.user.id
-            }
-          }
-        }
+        studentSubjects: true
       }
     })
 

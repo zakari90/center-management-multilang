@@ -1,13 +1,13 @@
-// components/dashboard/top-subjects.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import Link from 'next/link'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { Loader2, TrendingUp } from 'lucide-react'
+import axios from 'axios'
+import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface TopSubject {
   id: string
@@ -21,6 +21,7 @@ interface TopSubject {
 export default function TopSubjects() {
   const [subjects, setSubjects] = useState<TopSubject[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const t = useTranslations('TopSubjects')
 
   useEffect(() => {
     fetchTopSubjects()
@@ -40,8 +41,8 @@ export default function TopSubjects() {
   return (
     <Card className="col-span-4 lg:col-span-2">
       <CardHeader>
-        <CardTitle>Top Performing Subjects</CardTitle>
-        <CardDescription>By enrollment and revenue</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -50,7 +51,7 @@ export default function TopSubjects() {
           </div>
         ) : subjects.length === 0 ? (
           <div className="flex justify-center items-center h-[300px] text-muted-foreground">
-            No subjects available
+            {t('noData')}
           </div>
         ) : (
           <div className="space-y-6">
@@ -85,7 +86,7 @@ export default function TopSubjects() {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {subject.students} students enrolled
+                  {t('studentsEnrolled', { count: subject.students })}
                 </p>
               </div>
             ))}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ import axios from 'axios'
 import { Eye, Loader2, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface TeacherSubject {
   id: string
@@ -46,11 +48,11 @@ interface Teacher {
 }
 
 export default function TeachersTable() {
+  const t = useTranslations('TeachersTable')
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  // const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
   useEffect(() => {
     fetchTeachers()
@@ -61,20 +63,9 @@ export default function TeachersTable() {
       const response = await axios.get('/api/teachers')
       setTeachers(response.data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : t('error'))
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const handleDelete = async (id: string) => {
-    try {
-      const response = await fetch(`/api/teachers/${id}`, { method: 'DELETE' })
-      if (!response.ok) throw new Error('Failed to delete teacher')
-      setTeachers(prev => prev.filter(t => t.id !== id))
-      // setDeleteConfirm(null)
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete teacher')
     }
   }
 
@@ -85,8 +76,8 @@ export default function TeachersTable() {
   )
 
   const getAvailableDays = (schedule: any) => {
-    if (!schedule || !Array.isArray(schedule)) return 'Not set'
-    return schedule.map((s: any) => s.day).join(', ') || 'Not set'
+    if (!schedule || !Array.isArray(schedule)) return t('notSet')
+    return schedule.map((s: any) => s.day).join(', ') || t('notSet')
   }
 
   if (isLoading) {
@@ -102,11 +93,11 @@ export default function TeachersTable() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Teachers</h1>
-          <p className="text-muted-foreground">Manage your teaching staff</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <Button asChild>
-          <Link href="/manager/teachers/create">+ Add Teacher</Link>
+          <Link href="/manager/teachers/create">{t('addTeacher')}</Link>
         </Button>
       </div>
 
@@ -123,13 +114,13 @@ export default function TeachersTable() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Total Teachers</p>
+            <p className="text-sm text-muted-foreground">{t('totalTeachers')}</p>
             <p className="text-3xl font-bold">{teachers.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Active Teachers</p>
+            <p className="text-sm text-muted-foreground">{t('activeTeachers')}</p>
             <p className="text-3xl font-bold text-green-600">
               {teachers.filter(t => t.teacherSubjects.length > 0).length}
             </p>
@@ -137,7 +128,7 @@ export default function TeachersTable() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Subjects Covered</p>
+            <p className="text-sm text-muted-foreground">{t('subjectsCovered')}</p>
             <p className="text-3xl font-bold text-blue-600">
               {new Set(teachers.flatMap(t => t.teacherSubjects.map(ts => ts.subject.id))).size}
             </p>
@@ -145,49 +136,47 @@ export default function TeachersTable() {
         </Card>
       </div>
 
-
       {/* Table Section */}
       <Card>
-        <CardHeader className="flex justify-between gap-4 mb-2 ">
-          <div className='w-1/3'>
-          <CardTitle >Teachers List</CardTitle>
-                   <CardDescription>
-            {filteredTeachers.length > 0
-              ? `Showing ${filteredTeachers.length} of ${teachers.length} teachers`
-              : 'No teachers found'}
-          </CardDescription>
+        <CardHeader className="flex justify-between gap-4 mb-2">
+          <div className="w-1/3">
+            <CardTitle>{t('teachersList')}</CardTitle>
+            <CardDescription>
+              {filteredTeachers.length > 0
+                ? t('showing', {
+                    count: filteredTeachers.length,
+                    total: teachers.length,
+                  })
+                : t('noTeachersFound')}
+            </CardDescription>
           </div>
 
-      {/* Search Input */}
-        <Input
-          placeholder="Search by name, email, or phone..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-
-
-          
-   
+          {/* Search Input */}
+          <Input
+            placeholder={t('searchPlaceholder')}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </CardHeader>
 
         <CardContent>
           {filteredTeachers.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              No teachers found.{' '}
+              {t('noTeachersFound')}{' '}
               <Link href="/manager/teachers/create" className="text-primary underline">
-                Add your first teacher
+                {t('addYourFirstTeacher')}
               </Link>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Teacher</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Subjects</TableHead>
-                  <TableHead>Schedule</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('teacher')}</TableHead>
+                  <TableHead>{t('contact')}</TableHead>
+                  <TableHead>{t('subjects')}</TableHead>
+                  <TableHead>{t('schedule')}</TableHead>
+                  <TableHead>{t('joined')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -213,7 +202,7 @@ export default function TeachersTable() {
                     <TableCell>
                       {teacher.teacherSubjects.length === 0 ? (
                         <span className="text-sm text-muted-foreground italic">
-                          No subjects assigned
+                          {t('noSubjectsAssigned')}
                         </span>
                       ) : (
                         <div className="space-y-1">
@@ -229,7 +218,9 @@ export default function TeachersTable() {
                           ))}
                           {teacher.teacherSubjects.length > 2 && (
                             <p className="text-xs text-muted-foreground">
-                              +{teacher.teacherSubjects.length - 2} more
+                              {t('moreSubjects', {
+                                count: teacher.teacherSubjects.length - 2,
+                              })}
                             </p>
                           )}
                         </div>
@@ -251,33 +242,6 @@ export default function TeachersTable() {
                             <Pencil className="w-4 h-4 text-green-600" />
                           </Button>
                         </Link>
-                        {/* {deleteConfirm === teacher.id ? (
-                          <div className="flex gap-1">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDelete(teacher.id)}
-                            >
-                              Confirm
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setDeleteConfirm(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setDeleteConfirm(teacher.id)}
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </Button>
-                        )} */}
                       </div>
                     </TableCell>
                   </TableRow>

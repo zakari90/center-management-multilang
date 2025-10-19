@@ -1,4 +1,2 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://next-app-i18n-starter.vercel.app/sitemap.xml

@@ -1,9 +1,9 @@
 // app/api/admin/centers/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getSession()
     

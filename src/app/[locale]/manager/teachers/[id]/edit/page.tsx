@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/teachers/[id]/edit/page.tsx
 'use client'
 
@@ -26,6 +28,7 @@ import axios from 'axios'
 import { AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'use-intl'
 interface Subject {
   id: string
   name: string
@@ -58,9 +61,13 @@ interface Teacher {
   teacherSubjects: TeacherSubject[]
 }
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export default function EditTeacherPage() {
+ const t = useTranslations('EditTeacherPage')
+  const DAYS = [
+    t('monday'), t('tuesday'), t('wednesday'), t('thursday'),
+    t('friday'), t('saturday'), t('sunday')
+  ]
    const params = useParams()
   // const id = params?.id as string 
   const router = useRouter()
@@ -149,7 +156,7 @@ export default function EditTeacherPage() {
       )
     } catch (err) {
       console.error('Failed to fetch data:', err)
-      setError('Failed to load teacher data')
+    setError(t('errorFetchData'))
     } finally {
       setIsFetching(false)
     }
@@ -222,12 +229,13 @@ export default function EditTeacherPage() {
       router.refresh()
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || 'Failed to update teacher')
+        console.log(err.response?.data?.error || 'Failed to update teacher')
+setError(t('errorSomethingWrong'))
       } else if (err instanceof Error) {
         setError(err.message)
       } else {
-        setError('Something went wrong')
-      }
+setError(t('errorSomethingWrong'))      
+}
     } finally {
       setIsLoading(false)
     }
@@ -246,7 +254,7 @@ export default function EditTeacherPage() {
       <div className="max-w-4xl mx-auto p-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Teacher not found</AlertDescription>
+          <AlertDescription>{t('teacherNotFound')}</AlertDescription>
         </Alert>
       </div>
     )
@@ -256,8 +264,8 @@ export default function EditTeacherPage() {
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Teacher</CardTitle>
-          <CardDescription>Update teacher information and assignments</CardDescription>
+          <CardTitle>{t('title')}</CardTitle>
+          <CardDescription>{t('subtitle')}</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
@@ -271,53 +279,53 @@ export default function EditTeacherPage() {
 
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Basic Information</h3>
+              <h3 className="text-lg font-semibold">{t('basicInformation')}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name">{t('fullName')} {t('required')}</Label>
                   <Input
                     id="name"
                     name="name"
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="John Doe"
+                    placeholder={t("namePlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('email')}</Label>
                   <Input
                     type="email"
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="teacher@example.com"
+                    placeholder={t("emailPlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">{t('phoneNumber')}</Label>
                   <Input
                     type="tel"
                     id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder={t("phonePlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="address">{t('address')}</Label>
                   <Input
                     id="address"
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    placeholder="123 Main St, City"
+                    placeholder={t("addressPlaceholder")}
                   />
                 </div>
               </div>
@@ -329,20 +337,18 @@ export default function EditTeacherPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-semibold">Subjects & Compensation</h3>
-                  <p className="text-sm text-muted-foreground">Assign subjects and set payment terms</p>
+                  <h3 className="text-lg font-semibold">{t("subjectsCompensation")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("assignSubjectsPayment")}</p>
                 </div>
                 <Button type="button" onClick={addSubject} size="sm">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Subject
+                  {t("addSubject")}
                 </Button>
               </div>
 
               {teacherSubjects.length === 0 ? (
                 <Alert>
-                  <AlertDescription>
-                    No subjects assigned yet. Click "Add Subject" to start.
-                  </AlertDescription>
+                  <AlertDescription>{t("noSubjectsAssigned")}</AlertDescription>
                 </Alert>
               ) : (
                 <div className="space-y-4">
@@ -354,13 +360,13 @@ export default function EditTeacherPage() {
                           <div className="flex items-start gap-4">
                             <div className="flex-1 space-y-4">
                               <div className="space-y-2">
-                                <Label>Subject *</Label>
+                                <Label>{t("subject")}</Label>
                                 <Select
                                   value={ts.subjectId}
                                   onValueChange={(value) => updateSubject(index, 'subjectId', value)}
                                 >
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select a subject" />
+                                    <SelectValue placeholder={t("selectSubject")} />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {subjects
@@ -376,7 +382,7 @@ export default function EditTeacherPage() {
 
                               <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-2">
-                                  <Label>Payment Type</Label>
+                                  <Label>{t("paymentType")}</Label>
                                   <Select
                                     value={ts.compensationType}
                                     onValueChange={(value) => updateSubject(index, 'compensationType', value)}
@@ -385,15 +391,15 @@ export default function EditTeacherPage() {
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="percentage">Percentage</SelectItem>
-                                      <SelectItem value="hourly">Hourly Rate</SelectItem>
+                                      <SelectItem value="percentage">{t("percentage")}</SelectItem>
+                                      <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
 
                                 {ts.compensationType === 'percentage' ? (
                                   <div className="space-y-2">
-                                    <Label>Percentage (%) *</Label>
+                                    <Label>{t("percentageLabel")} *</Label>
                                     <Input
                                       type="number"
                                       min="1"
@@ -407,7 +413,7 @@ export default function EditTeacherPage() {
                                   </div>
                                 ) : (
                                   <div className="space-y-2">
-                                    <Label>Hourly Rate ($) *</Label>
+                                    <Label>{t("hourlyRate")} *</Label>
                                     <Input
                                       type="number"
                                       min="0"
@@ -422,14 +428,14 @@ export default function EditTeacherPage() {
 
                                 {selectedSubject && (
                                   <div className="space-y-2">
-                                    <Label>Est. Earnings</Label>
+                                    <Label>{t("estEarnings")}</Label>
                                     <div className="h-10 px-3 py-2 bg-primary/10 border rounded-md flex items-center">
                                       <span className="font-semibold text-primary">
                                         {ts.compensationType === 'percentage' && ts.percentage
-                                          ? `$${((selectedSubject.price * ts.percentage) / 100).toFixed(2)}`
+                                          ? `MAD${((selectedSubject.price * ts.percentage) / 100).toFixed(2)}`
                                           : ts.hourlyRate
-                                          ? `$${ts.hourlyRate.toFixed(2)}/hr`
-                                          : '$0.00'}
+                                          ? `MAD${ts.hourlyRate.toFixed(2)}/hr`
+                                          : 'MAD 0.00'}
                                       </span>
                                     </div>
                                   </div>
@@ -460,8 +466,8 @@ export default function EditTeacherPage() {
             {/* Weekly Schedule */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold">Weekly Schedule</h3>
-                <p className="text-sm text-muted-foreground">Select available days and set working hours</p>
+                <h3 className="text-lg font-semibold">{t("weeklySchedule")}</h3>
+                <p className="text-sm text-muted-foreground">{t("selectDaysHours")}</p>
               </div>
 
               <div className="space-y-3">
@@ -495,7 +501,7 @@ export default function EditTeacherPage() {
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <Label className="text-sm text-muted-foreground">To:</Label>
+                          <Label className="text-sm text-muted-foreground">{t("to")}</Label>
                           <Input
                             type="time"
                             value={schedule.endTime}
@@ -518,11 +524,11 @@ export default function EditTeacherPage() {
               onClick={() => router.back()}
               disabled={isLoading}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              {t("saveChanges")}
             </Button>
           </CardFooter>
         </form>

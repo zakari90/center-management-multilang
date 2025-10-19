@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from "@/lib/authentication";
-import { Building, Building2, PenLine } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function AuthLayout({
@@ -7,7 +8,7 @@ export default async function AuthLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const session = await getSession();
+    const session : any = await getSession();
   
     if (session?.user?.role === "ADMIN") {
       redirect("/admin");

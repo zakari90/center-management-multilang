@@ -1,33 +1,26 @@
-// components/dashboard/stats-cards.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
-  Users, 
-  BookOpen, 
-  DollarSign, 
-  TrendingUp,
-  GraduationCap,
-  Receipt,
-  Loader2
-} from 'lucide-react'
+import { Loader2, Users, GraduationCap, DollarSign, TrendingUp, Receipt } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface DashboardStats {
   totalStudents: number
+  activeEnrollments: number
   totalTeachers: number
   totalSubjects: number
-  totalRevenue: number
   monthlyRevenue: number
-  totalReceipts: number
-  activeEnrollments: number
   revenueGrowth: number
+  totalRevenue: number
+  totalReceipts: number
 }
 
-export default function StatsCards() {
+export default function ManagerStatsCards() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const t = useTranslations('ManagerStatsCards')
 
   useEffect(() => {
     fetchStats()
@@ -64,33 +57,33 @@ export default function StatsCards() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('students.title')}</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalStudents}</div>
           <p className="text-xs text-muted-foreground">
-            {stats.activeEnrollments} active enrollments
+            {t('students.active', { count: stats.activeEnrollments })}
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Teachers</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('teachers.title')}</CardTitle>
           <GraduationCap className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalTeachers}</div>
           <p className="text-xs text-muted-foreground">
-            Teaching {stats.totalSubjects} subjects
+            {t('teachers.subtitle', { count: stats.totalSubjects })}
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('monthlyRevenue.title')}</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -99,14 +92,14 @@ export default function StatsCards() {
           </div>
           <div className="flex items-center text-xs text-muted-foreground">
             <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
-            +{stats.revenueGrowth.toFixed(1)}% from last month
+            {t('monthlyRevenue.growth', { percent: stats.revenueGrowth.toFixed(1) })}
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('totalRevenue.title')}</CardTitle>
           <Receipt className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -114,7 +107,7 @@ export default function StatsCards() {
             ${stats.totalRevenue.toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {stats.totalReceipts} receipts issued
+            {t('totalRevenue.subtitle', { count: stats.totalReceipts })}
           </p>
         </CardContent>
       </Card>

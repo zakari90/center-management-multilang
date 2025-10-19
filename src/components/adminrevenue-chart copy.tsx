@@ -1,25 +1,23 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // components/dashboard/revenue-chart.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import axios from 'axios'
+import { Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  Area,
+  AreaChart,
   CartesianGrid,
-  Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
-  AreaChart
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts'
-import { Loader2 } from 'lucide-react'
 
 interface RevenueData {
   date: string

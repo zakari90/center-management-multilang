@@ -1,28 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
-export async function GET(req: NextRequest) {
+import { NextResponse } from 'next/server'
+export async function GET() {
   try {
-    const session = await getSession()
+    const session :any = await getSession()
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Group enrollments by subjectId and count how many students per subject
     const enrollments = await db.studentSubject.groupBy({
       by: ['subjectId'],
-      where: {
-        student: {
-          managerId: session.user.id
-        }
-      },
       _count: {
         studentId: true // Avoid ambiguous 'id' field
       }
     })
 
-    // Get subject details for the enrolled subjectIds
     const subjectsData = await db.subject.findMany({
       where: {
         id: {

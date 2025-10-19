@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslations } from 'next-intl'
 
 interface ReceiptStats {
   totalReceipts: number
@@ -16,6 +17,7 @@ interface ReceiptStats {
 }
 
 export default function ReceiptsSummary() {
+  const t = useTranslations('ManagerReceiptsSummary')
   const [stats, setStats] = useState<ReceiptStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -31,7 +33,7 @@ export default function ReceiptsSummary() {
         setStats(data)
       }
     } catch (err) {
-      console.error('Failed to fetch stats:', err)
+      console.error(t('errorFetchStats'), err)
     } finally {
       setIsLoading(false)
     }
@@ -55,24 +57,26 @@ export default function ReceiptsSummary() {
   return (
     <Card className="shadow-sm border border-muted">
       <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-semibold text-foreground">Financial Overview</CardTitle>
+        <CardTitle className="text-xl font-semibold text-foreground">
+          {t('financialOverview')}
+        </CardTitle>
       </CardHeader>
 
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Stat label="Total Revenue" value={stats.totalRevenue} color="text-green-600" />
-          <Stat label="This Month" value={stats.thisMonthRevenue} color="text-blue-600" />
-          <Stat label="Income" value={stats.studentPayments} color="text-green-600" />
-          <Stat label="Expenses" value={stats.teacherPayments} color="text-orange-600" />
+          <Stat label={t('totalRevenue')} value={stats.totalRevenue} color="text-green-600" />
+          <Stat label={t('thisMonth')} value={stats.thisMonthRevenue} color="text-blue-600" />
+          <Stat label={t('income')} value={stats.studentPayments} color="text-green-600" />
+          <Stat label={t('expenses')} value={stats.teacherPayments} color="text-orange-600" />
         </div>
       </CardContent>
 
       <CardFooter className="flex gap-3 border-t pt-4">
         <Button asChild className="flex-1 bg-primary hover:bg-primary-foreground">
-          <Link href="/manager/receipts/create">+ Student Payment</Link>
+          <Link href="/manager/receipts/create">{t('studentPayment')}</Link>
         </Button>
         <Button asChild className="flex-1 bg-orange-600 hover:bg-orange-700">
-          <Link href="/manager/receipts/create-teacher-payment">+ Teacher Payment</Link>
+          <Link href="/manager/receipts/create-teacher-payment">{t('teacherPayment')}</Link>
         </Button>
       </CardFooter>
     </Card>

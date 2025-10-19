@@ -39,17 +39,16 @@ export function NavMain({
                   asChild
                   tooltip={item.title}
                   className={cn(
-                    "flex items-center px-3 py-2 rounded-md w-full",
-                    isActive ? "bg-gray-200 font-semibold" : "text-gray-600"
+                    "flex items-center px-3 py-2 rounded-md w-full font-semibold",
+                    isActive ? "bg-primary text-black " : ""
                   )}
                 >
                   <Link href={item.url} className="flex items-center gap-2">
-                    {item.icon && 
-                            <Avatar className="h-4 w-4 rounded-lg grayscale">
-                <AvatarImage src={item.icon} alt={item.title} />
-                <AvatarFallback className="rounded-lg">{item.title[0]}</AvatarFallback>
-              </Avatar>
-              } 
+                    {item.icon && <Avatar className="h-4 w-4 rounded-lg grayscale">
+                  <AvatarImage className={ isActive ? "bg-primary text-black " : ""} src={item.icon} alt={item.title} />
+                  <AvatarFallback className="rounded-lg">{item.title[0]}</AvatarFallback>
+                </Avatar>
+                } 
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>

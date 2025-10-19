@@ -1,15 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/students/[id]/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
+interface RouteParams {
+  params: Promise<{
+    id: string
+  }>
+}
+
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
-    const { id } = await params
-    const session = await getSession()
+    const id = (await params).id
+    const session: any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -24,7 +31,7 @@ export async function GET(
         studentSubjects: {
           include: {
             subject: true,
-            teacher:true,
+            teacher: true,
           }
         },
         receipts: {
@@ -51,18 +58,17 @@ export async function GET(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
-    const id = await params.id
-    const session = await getSession()
+    const id = (await params).id
+    const session: any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Verify student belongs to this manager
     const student = await db.student.findUnique({
       where: { 
         id,
@@ -74,7 +80,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Student not found' }, { status: 404 })
     }
 
-    // Delete student (cascade will handle related records)
     await db.student.delete({
       where: { id }
     })
@@ -91,13 +96,11 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
- 
-  
   try {
-    const id = await params.id
-    const session = await getSession()
+    const id = (await params).id
+    const session: any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -115,7 +118,6 @@ export async function PATCH(
       subjects 
     } = body
 
-    // Verify student belongs to this manager
     const existingStudent = await db.student.findUnique({
       where: { 
         id,
@@ -127,7 +129,6 @@ export async function PATCH(
       return NextResponse.json({ error: 'Student not found' }, { status: 404 })
     }
 
-    // Check if email is being changed and if it's already in use
     if (email && email !== existingStudent.email) {
       const emailInUse = await db.student.findUnique({
         where: { email }
@@ -138,10 +139,8 @@ export async function PATCH(
       }
     }
 
-    // Update student in transaction
     const student = await db.$transaction(async (tx) => {
-      // Update basic info
-      const updated = await tx.student.update({
+      await tx.student.update({
         where: { id },
         data: {
           name: name || existingStudent.name,
@@ -154,18 +153,15 @@ export async function PATCH(
         }
       })
 
-      // Update subjects if provided
       if (subjects) {
-        // Delete existing subjects
         await tx.studentSubject.deleteMany({
-          where: { studentId: id}
+          where: { studentId: id }
         })
 
-        // Create new subjects
         if (subjects.length > 0) {
           await tx.studentSubject.createMany({
             data: subjects.map((subjectId: string) => ({
-              studentId: params.id,
+              studentId: id,
               subjectId: subjectId,
             }))
           })
@@ -173,7 +169,7 @@ export async function PATCH(
       }
 
       return tx.student.findUnique({
-        where: { id},
+        where: { id },
         include: {
           studentSubjects: {
             include: {

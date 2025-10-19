@@ -1,45 +1,49 @@
-// components/dashboard/quick-actions.tsx
+'use client'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { BookOpen, Calendar, GraduationCap, Receipt, Settings, UserPlus } from 'lucide-react'
+import { Calendar, GraduationCap, Receipt, UserPlus } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export default function QuickActions() {
+  const t = useTranslations('QuickActions')
+
   const actions = [
     {
-      title: 'Add Student',
-      description: 'Enroll a new student',
+      title: t('actions.addStudent.title'),
+      description: t('actions.addStudent.description'),
       icon: UserPlus,
       href: '/manager/students/create',
       color: 'text-blue-600 bg-blue-100'
     },
     {
-      title: 'Add Teacher',
-      description: 'Register new teacher',
+      title: t('actions.addTeacher.title'),
+      description: t('actions.addTeacher.description'),
       icon: GraduationCap,
       href: '/manager/teachers/create',
       color: 'text-purple-600 bg-purple-100'
     },
     {
-      title: 'New Receipt',
-      description: 'Record payment',
+      title: t('actions.newReceipt.title'),
+      description: t('actions.newReceipt.description'),
       icon: Receipt,
       href: '/manager/receipts/create',
       color: 'text-orange-600 bg-orange-100'
     },
     {
-      title: 'Schedule',
-      description: 'View calendar',
+      title: t('actions.schedule.title'),
+      description: t('actions.schedule.description'),
       icon: Calendar,
       href: '/manager/schedule',
       color: 'text-pink-600 bg-pink-100'
-    },
+    }
   ]
 
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
-        <CardDescription>Common tasks and shortcuts</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

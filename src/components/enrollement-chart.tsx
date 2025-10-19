@@ -1,4 +1,3 @@
-// components/dashboard/enrollment-chart.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -16,6 +15,7 @@ import {
   Cell
 } from 'recharts'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface SubjectEnrollment {
   subject: string
@@ -28,6 +28,7 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 export default function EnrollmentChart() {
   const [data, setData] = useState<SubjectEnrollment[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const t = useTranslations('EnrollmentChart')
 
   useEffect(() => {
     fetchEnrollmentData()
@@ -47,8 +48,8 @@ export default function EnrollmentChart() {
   return (
     <Card className="col-span-4 lg:col-span-2">
       <CardHeader>
-        <CardTitle>Subject Enrollments</CardTitle>
-        <CardDescription>Students enrolled per subject</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -57,7 +58,7 @@ export default function EnrollmentChart() {
           </div>
         ) : data.length === 0 ? (
           <div className="flex justify-center items-center h-[300px] text-muted-foreground">
-            No enrollment data available
+            {t('noData')}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
@@ -73,7 +74,12 @@ export default function EnrollmentChart() {
                 contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px' }}
               />
               <Legend />
-              <Bar dataKey="students" fill="#3b82f6" name="Students" radius={[8, 8, 0, 0]}>
+              <Bar
+                dataKey="students"
+                fill="#3b82f6"
+                name={t('chart.students')}
+                radius={[8, 8, 0, 0]}
+              >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}

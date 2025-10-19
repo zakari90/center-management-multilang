@@ -1,28 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/dashboard/stats/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const session = await getSession()
+    const session:any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const [students, teachers, subjects, receipts, enrollments] = await Promise.all([
-      db.student.count({ where: { managerId: session.user.id } }),
-      db.teacher.count({ where: { managerId: session.user.id } }),
+      db.student.count(),
+      db.teacher.count(),
       db.subject.count(),
       db.receipt.findMany({
         where: { managerId: session.user.id },
         select: { amount: true, type: true, date: true }
       }),
-      db.studentSubject.count({
-        where: { student: { managerId: session.user.id } }
-      })
+      db.studentSubject.count()
     ])
 
     const now = new Date()

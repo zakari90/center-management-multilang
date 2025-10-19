@@ -51,6 +51,7 @@ import {
   Receipt as ReceiptIcon
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useTranslations } from 'next-intl'
 
 interface Receipt {
   id: string
@@ -75,6 +76,7 @@ interface Student {
 }
 
 export default function StudentReceiptTable() {
+  const t = useTranslations("StudentReceiptTable")
   const router = useRouter()
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [students, setStudents] = useState<Student[]>([])
@@ -102,7 +104,7 @@ export default function StudentReceiptTable() {
       setStudents(studentsRes.data)
     } catch (err) {
       console.error('Failed to fetch data:', err)
-      setError('Failed to load receipts')
+      setError(t("errorLoadReceipts"))
     } finally {
       setIsLoading(false)
     }
@@ -169,7 +171,7 @@ export default function StudentReceiptTable() {
 
   const handleExportCSV = () => {
     const csvContent = [
-      ['Receipt Number', 'Student', 'Grade', 'Amount', 'Method', 'Date', 'Description'],
+      [t("receiptNumber"), t('student'), t('grade'), t('amount'), t('method'), t('date'), t('description')],
       ...filteredReceipts.map(r => [
         r.receiptNumber,
         r.student.name,
@@ -185,7 +187,7 @@ export default function StudentReceiptTable() {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `student-receipts-${format(new Date(), 'yyyy-MM-dd')}.csv`
+    a.download = `${t("studentReceipts")}-${format(new Date(), 'yyyy-MM-dd')}.csv`
     a.click()
     window.URL.revokeObjectURL(url)
   }
@@ -203,18 +205,18 @@ export default function StudentReceiptTable() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Student Receipts</h1>
-          <p className="text-muted-foreground mt-1">Track student payments and tuition fees</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleExportCSV}>
             <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            {t("exportCSV")}
           </Button>
           <Button asChild>
             <Link href="/receipts/create">
               <Plus className="mr-2 h-4 w-4" />
-              New Payment
+              {t("newPayment")}
             </Link>
           </Button>
         </div>
@@ -230,20 +232,20 @@ export default function StudentReceiptTable() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Receipts</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalReceipts")}</CardTitle>
             <ReceiptIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{filteredReceipts.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {receipts.length} total
+              {receipts.length} {t("total")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("totalAmount")}</CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -251,14 +253,14 @@ export default function StudentReceiptTable() {
               ${totalAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              From filtered results
+              {t("fromFiltered")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("thisMonth")}</CardTitle>
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -266,14 +268,14 @@ export default function StudentReceiptTable() {
               ${thisMonthAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {thisMonthReceipts.length} receipts
+              {thisMonthReceipts.length} {t("receipts")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Payment</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("averagePayment")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
@@ -281,277 +283,287 @@ export default function StudentReceiptTable() {
               ${avgAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Per receipt
+              {t("perReceipt")}
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filters</CardTitle>
-          <CardDescription>Refine your search results</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search receipts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+<Card>
+  <CardHeader>
+    <CardTitle>{t("filters")}</CardTitle>
+    <CardDescription>{t("refineSearch")}</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder={t("searchReceipts")}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
 
-            {/* Student Filter */}
-            <Select value={studentFilter} onValueChange={setStudentFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Students" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Students</SelectItem>
-                {students.map(student => (
-                  <SelectItem key={student.id} value={student.id}>
-                    {student.name} {student.grade ? `(${student.grade})` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Student Filter */}
+      <Select value={studentFilter} onValueChange={setStudentFilter}>
+        <SelectTrigger>
+          <SelectValue placeholder={t("allStudents")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("allStudents")}</SelectItem>
+          {students.map((student) => (
+            <SelectItem key={student.id} value={student.id}>
+              {student.name} {student.grade ? `(${student.grade})` : ""}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-            {/* Payment Method Filter */}
-            <Select value={methodFilter} onValueChange={setMethodFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Methods" />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map(method => (
-                  <SelectItem key={method} value={method}>
-                    {method === 'all' ? 'All Methods' : method}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Payment Method Filter */}
+      <Select value={methodFilter} onValueChange={setMethodFilter}>
+        <SelectTrigger>
+          <SelectValue placeholder={t("allMethods")} />
+        </SelectTrigger>
+        <SelectContent>
+          {paymentMethods.map((method) => (
+            <SelectItem key={method} value={method}>
+              {method === "all" ? t("allMethods") : method}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-            {/* Date Filter */}
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="week">Last 7 Days</SelectItem>
-                <SelectItem value="month">Last 30 Days</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Date Filter */}
+      <Select value={dateFilter} onValueChange={setDateFilter}>
+        <SelectTrigger>
+          <SelectValue placeholder={t("allTime")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("allTime")}</SelectItem>
+          <SelectItem value="today">{t("today")}</SelectItem>
+          <SelectItem value="week">{t("last7Days")}</SelectItem>
+          <SelectItem value="month">{t("last30Days")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
 
-          {/* Active Filters Summary */}
-          {(searchTerm || studentFilter !== 'all' || methodFilter !== 'all' || dateFilter !== 'all') && (
-            <div className="flex gap-2 mt-4 flex-wrap">
-              <Badge variant="secondary" className="text-xs">
-                Showing {filteredReceipts.length} of {receipts.length} receipts
-              </Badge>
-              {searchTerm && (
-                <Badge variant="outline" className="text-xs">
-                  Search: {searchTerm}
-                </Badge>
-              )}
-              {studentFilter !== 'all' && (
-                <Badge variant="outline" className="text-xs">
-                  Student: {students.find(s => s.id === studentFilter)?.name}
-                </Badge>
-              )}
-              {methodFilter !== 'all' && (
-                <Badge variant="outline" className="text-xs">
-                  Method: {methodFilter}
-                </Badge>
-              )}
-              {dateFilter !== 'all' && (
-                <Badge variant="outline" className="text-xs">
-                  Period: {dateFilter}
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchTerm('')
-                  setStudentFilter('all')
-                  setMethodFilter('all')
-                  setDateFilter('all')
-                }}
-                className="h-6 text-xs"
-              >
-                Clear All
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+    {/* Active Filters Summary */}
+    {(searchTerm ||
+      studentFilter !== "all" ||
+      methodFilter !== "all" ||
+      dateFilter !== "all") && (
+      <div className="flex gap-2 mt-4 flex-wrap">
+        <Badge variant="secondary" className="text-xs">
+          {t("showing")} {filteredReceipts.length} {t("of")} {receipts.length}{" "}
+          {t("receipts")}
+        </Badge>
+
+        {searchTerm && (
+          <Badge variant="outline" className="text-xs">
+            {t("search")}: {searchTerm}
+          </Badge>
+        )}
+        {studentFilter !== "all" && (
+          <Badge variant="outline" className="text-xs">
+            {t("student")}: {students.find((s) => s.id === studentFilter)?.name}
+          </Badge>
+        )}
+        {methodFilter !== "all" && (
+          <Badge variant="outline" className="text-xs">
+            {t("method")}: {methodFilter}
+          </Badge>
+        )}
+        {dateFilter !== "all" && (
+          <Badge variant="outline" className="text-xs">
+            {t("period")}: {dateFilter}
+          </Badge>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSearchTerm("")
+            setStudentFilter("all")
+            setMethodFilter("all")
+            setDateFilter("all")
+          }}
+          className="h-6 text-xs"
+        >
+          {t("clearAll")}
+        </Button>
+      </div>
+    )}
+  </CardContent>
+</Card>
+
 
       {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment Records</CardTitle>
-          <CardDescription>
-            Complete list of student payment receipts
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredReceipts.length === 0 ? (
-            <div className="text-center py-12">
-              <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">
-                {searchTerm || studentFilter !== 'all' || methodFilter !== 'all' || dateFilter !== 'all'
-                  ? 'No receipts found matching your filters'
-                  : 'No student receipts yet'}
-              </p>
-              {!searchTerm && studentFilter === 'all' && methodFilter === 'all' && dateFilter === 'all' && (
-                <Button asChild className="mt-4">
-                  <Link href="/receipts/create">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create First Receipt
-                  </Link>
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Receipt #</TableHead>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredReceipts.map((receipt) => (
-                    <TableRow key={receipt.id} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div className="font-mono text-sm font-medium">
-                          {receipt.receiptNumber}
-                        </div>
+<Card>
+  <CardHeader>
+    <CardTitle>{t("paymentRecords")}</CardTitle>
+    <CardDescription>{t("completeList")}</CardDescription>
+  </CardHeader>
+  <CardContent>
+    {filteredReceipts.length === 0 ? (
+      <div className="text-center py-12">
+        <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+        <p className="mt-4 text-muted-foreground">
+          {searchTerm || studentFilter !== "all" || methodFilter !== "all" || dateFilter !== "all"
+            ? t("noReceiptsFilters")
+            : t("noReceiptsYet")}
+        </p>
+        {!searchTerm && studentFilter === "all" && methodFilter === "all" && dateFilter === "all" && (
+          <Button asChild className="mt-4">
+            <Link href="/receipts/create">
+              <Plus className="mr-2 h-4 w-4" />
+              {t("createFirstReceipt")}
+            </Link>
+          </Button>
+        )}
+      </div>
+    ) : (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("receiptNumber")}</TableHead>
+              <TableHead>{t("student")}</TableHead>
+              <TableHead>{t("grade")}</TableHead>
+              <TableHead>{t("amount")}</TableHead>
+              <TableHead>{t("method")}</TableHead>
+              <TableHead>{t("date")}</TableHead>
+              <TableHead>{t("description")}</TableHead>
+              <TableHead className="text-right">{t("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredReceipts.map((receipt) => (
+              <TableRow key={receipt.id} className="hover:bg-muted/50">
+                <TableCell>
+                  <div className="font-mono text-sm font-medium">
+                    {receipt.receiptNumber}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {format(new Date(receipt.createdAt), "MMM dd, yyyy HH:mm")}
+                  </div>
+                </TableCell>
+
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{receipt.student.name}</div>
+                      {receipt.student.email && (
                         <div className="text-xs text-muted-foreground">
-                          {format(new Date(receipt.createdAt), 'MMM dd, yyyy HH:mm')}
+                          {receipt.student.email}
                         </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{receipt.student.name}</div>
-                            {receipt.student.email && (
-                              <div className="text-xs text-muted-foreground">
-                                {receipt.student.email}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
+                      )}
+                    </div>
+                  </div>
+                </TableCell>
 
-                      <TableCell>
-                        {receipt.student.grade ? (
-                          <Badge variant="outline">{receipt.student.grade}</Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">-</span>
-                        )}
-                      </TableCell>
+                <TableCell>
+                  {receipt.student.grade ? (
+                    <Badge variant="outline">{receipt.student.grade}</Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
+                </TableCell>
 
-                      <TableCell>
-                        <div className="font-semibold text-green-600">
-                          ${receipt.amount.toFixed(2)}
-                        </div>
-                      </TableCell>
+                <TableCell>
+                  <div className="font-semibold text-green-600">
+                    ${receipt.amount.toFixed(2)}
+                  </div>
+                </TableCell>
 
-                      <TableCell>
-                        {receipt.paymentMethod ? (
-                          <Badge variant="secondary" className="text-xs">
-                            {receipt.paymentMethod}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">-</span>
-                        )}
-                      </TableCell>
+                <TableCell>
+                  {receipt.paymentMethod ? (
+                    <Badge variant="secondary" className="text-xs">
+                      {receipt.paymentMethod}
+                    </Badge>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">-</span>
+                  )}
+                </TableCell>
 
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
-                          {format(new Date(receipt.date), 'MMM dd, yyyy')}
-                        </div>
-                      </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-3 w-3 text-muted-foreground" />
+                    {format(new Date(receipt.date), "MMM dd, yyyy")}
+                  </div>
+                </TableCell>
 
-                      <TableCell>
-                        <div className="max-w-[200px] truncate text-sm text-muted-foreground">
-                          {receipt.description || '-'}
-                        </div>
-                      </TableCell>
+                <TableCell>
+                  <div className="max-w-[200px] truncate text-sm text-muted-foreground">
+                    {receipt.description || "-"}
+                  </div>
+                </TableCell>
 
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link href={`/receipts/${receipt.id}`}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handlePrint(receipt.id)}>
-                              <Printer className="mr-2 h-4 w-4" />
-                              Print Receipt
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link href={`/students/${receipt.student.id}`}>
-                                <User className="mr-2 h-4 w-4" />
-                                View Student
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/receipts/${receipt.id}`}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          {t("viewDetails")}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handlePrint(receipt.id)}>
+                        <Printer className="mr-2 h-4 w-4" />
+                        {t("printReceipt")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/students/${receipt.student.id}`}>
+                          <User className="mr-2 h-4 w-4" />
+                          {t("viewStudent")}
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    )}
+  </CardContent>
+</Card>
+
 
       {/* Summary Footer */}
       {filteredReceipts.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-muted-foreground">
-                Showing <span className="font-medium text-foreground">{filteredReceipts.length}</span> receipts
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-muted-foreground">Total Amount</div>
-                <div className="text-2xl font-bold text-green-600">
-                  ${totalAmount.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+<Card>
+  <CardContent className="pt-6">
+    <div className="flex justify-between items-center">
+      <div className="text-sm text-muted-foreground">
+        {t("showing")}{" "}
+        <span className="font-medium text-foreground">{filteredReceipts.length}</span>{" "}
+        {t("receipts")}
+      </div>
+      <div className="text-right">
+        <div className="text-sm text-muted-foreground">
+          {t("totalAmountLabel")}
+        </div>
+        <div className="text-2xl font-bold text-green-600">
+          {t("MAD")}{totalAmount.toFixed(2)}
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
       )}
     </div>
   )

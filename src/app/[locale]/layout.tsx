@@ -1,28 +1,16 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
 import { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
-import "../globals.css";
-import { AuthProvider } from "@/context/authContext";
 import { Toaster } from "sonner";
+import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// Extract domain to a constant to avoid repetition
-const DOMAIN = "";
+const DOMAIN = "https://your-domain.com";
 
 export default async function RootLayout({
   children,
@@ -31,17 +19,20 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  // Ensure that the incoming `locale` is valid
-  const { locale } = await params;
-  if (!hasLocale(routing.locales, locale)) {
+  if (!params) {
     notFound();
   }
 
-  // Enable static rendering
+  const { locale } = await params;
+  if (!locale || !hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
   setRequestLocale(locale);
 
   const isArabic = locale === "ar";
   const t = await getTranslations({ locale, namespace: "Metadata" });
+
   return (
     <html lang={locale} dir={isArabic ? "rtl" : "ltr"} suppressHydrationWarning>
       <head>
@@ -64,10 +55,7 @@ export default async function RootLayout({
           })}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning
-      >
+      <body suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -76,12 +64,10 @@ export default async function RootLayout({
         >
           <NextIntlClientProvider>
             <AuthProvider>
-            
-            {children}
-            <Toaster />
-
+              {children}
+              <Toaster />
             </AuthProvider>
-            </NextIntlClientProvider>
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>
@@ -106,9 +92,6 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     keywords: t("keywords"),
-    other: {
-      // "google-site-verification": "sVYBYfSJfXdBca3QoqsZtD6lsWVH6sk02RCH4YAbcm8",
-    },
     openGraph: {
       title: t("title"),
       description: t("description"),
@@ -151,7 +134,7 @@ export async function generateMetadata({
         "max-snippet": -1,
       },
     },
-  authors: [{ name: "zakaria zinedine" }],
-  icons: [{ rel: "icon", url: "/icon.png" }],
+    authors: [{ name: "zakaria zinedine" }],
+    icons: [{ rel: "icon", url: "/icon.png" }],
   };
 }

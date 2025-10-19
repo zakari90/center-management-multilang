@@ -15,7 +15,7 @@ interface PdfExporterProps {
 export default function PdfExporter({
   children,
   fileName = 'document.pdf',
-  buttonText = 'Download PDF',
+  buttonText = '',
 }: PdfExporterProps) {
   const contentRef = useRef<HTMLDivElement>(null)
 

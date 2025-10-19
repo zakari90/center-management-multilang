@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -20,6 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import axios from 'axios'
 import { Clock, Loader2, MapPin, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
 interface Teacher {
@@ -45,13 +48,19 @@ interface ScheduleSlot {
   subject?: { id: string; name: string; grade: string }
 }
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const TIME_SLOTS = [
   '08:00', '09:00', '10:00', '11:00', '12:00', 
   '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
 ]
 
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
+  const t = useTranslations('TimetableOverview')
+  
+  const DAYS = [
+    t('monday'), t('tuesday'), t('wednesday'), 
+    t('thursday'), t('friday'), t('saturday')
+  ]
+  
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [rooms, setRooms] = useState<string[]>([])
@@ -59,13 +68,12 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   
-  // View filter
   const [viewMode, setViewMode] = useState<'all' | 'teacher' | 'room'>('all')
   const [selectedFilter, setSelectedFilter] = useState<string>('')
 
   useEffect(() => {
     fetchData()
-  }, [centerId])
+  }, [])
 
   const fetchData = async () => {
     try {
@@ -86,7 +94,6 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       setSubjects(subjectsRes.data)
       setSchedule(scheduleRes.data)
       
-      // Get rooms from center or default
       if (centerRes?.data?.classrooms) {
         setRooms(centerRes.data.classrooms)
       } else if (centerRes?.data?.[0]?.classrooms) {
@@ -96,7 +103,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       }
     } catch (err) {
       console.error('Failed to fetch data:', err)
-      setError('Failed to load schedule data')
+      setError(t('errorLoadSchedule'))
     } finally {
       setIsLoading(false)
     }
@@ -126,11 +133,10 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Schedule Overview</h2>
-          <p className="text-muted-foreground">View class schedules, teachers, and rooms</p>
+          <h2 className="text-3xl font-bold">{t('title')}</h2>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -140,15 +146,14 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         </Alert>
       )}
 
-      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>View Options</CardTitle>
+          <CardTitle>{t('viewOptions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1">
-              <Label>View Mode</Label>
+              <Label>{t('viewMode')}</Label>
               <Select value={viewMode} onValueChange={(value: any) => {
                 setViewMode(value)
                 setSelectedFilter('')
@@ -157,19 +162,19 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Schedules</SelectItem>
-                  <SelectItem value="teacher">By Teacher</SelectItem>
-                  <SelectItem value="room">By Room</SelectItem>
+                  <SelectItem value="all">{t('allSchedules')}</SelectItem>
+                  <SelectItem value="teacher">{t('byTeacher')}</SelectItem>
+                  <SelectItem value="room">{t('byRoom')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {viewMode === 'teacher' && (
               <div className="flex-1">
-                <Label>Select Teacher</Label>
+                <Label>{t('selectTeacher')}</Label>
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose teacher" />
+                    <SelectValue placeholder={t('chooseTeacher')} />
                   </SelectTrigger>
                   <SelectContent>
                     {teachers.map(teacher => (
@@ -184,10 +189,10 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
 
             {viewMode === 'room' && (
               <div className="flex-1">
-                <Label>Select Room</Label>
+                <Label>{t('selectRoom')}</Label>
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose room" />
+                    <SelectValue placeholder={t('chooseRoom')} />
                   </SelectTrigger>
                   <SelectContent>
                     {rooms.map(room => (
@@ -203,21 +208,19 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         </CardContent>
       </Card>
 
-      {/* Read-only Timetable Grid */}
       <Card>
         <CardHeader>
-          <CardTitle>Weekly Schedule</CardTitle>
+          <CardTitle>{t('weeklySchedule')}</CardTitle>
           <CardDescription>
-            View the full weekly class timetable
+            {t('viewFullTimetable')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <div className="min-w-[1200px]">
-              {/* Header Row */}
               <div className="grid grid-cols-7 gap-2 mb-2">
                 <div className="font-semibold text-sm text-muted-foreground p-2">
-                  Time
+                  {t('time')}
                 </div>
                 {DAYS.map(day => (
                   <div key={day} className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md">
@@ -226,17 +229,14 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                 ))}
               </div>
 
-              {/* Time Slots */}
               <div className="space-y-2">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
                   <div key={time} className="grid grid-cols-7 gap-2">
-                    {/* Time Label */}
                     <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md">
                       <Clock className="h-3 w-3 mr-1" />
                       {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
-                    {/* Day Columns */}
                     {DAYS.map(day => {
                       const slots = getSlotsByDayAndTime(day, time)
                       const hasConflict = slots.length > 1
@@ -252,8 +252,6 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                         >
                           <div className="space-y-1">
                             {slots.map((slot, idx) => {
-                              // Try to get data from slot first (if included from API)
-                              // Otherwise fall back to finding in the arrays
                               const teacher = slot.teacher || teachers.find(t => t.id === slot.teacherId)
                               const subject = slot.subject || subjects.find(s => s.id === slot.subjectId)
                               
@@ -264,12 +262,12 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                                 >
                                   <div className="flex justify-between items-start">
                                     <Badge variant="outline" className="text-xs">
-                                      {subject?.name || 'Unknown Subject'}
+                                      {subject?.name || t('unknownSubject')}
                                     </Badge>
                                   </div>
                                   <div className="flex items-center gap-1 text-muted-foreground">
                                     <User className="h-3 w-3" />
-                                    <span>{teacher?.name || 'Unknown Teacher'}</span>
+                                    <span>{teacher?.name || t('unknownTeacher')}</span>
                                   </div>
                                   <div className="flex items-center gap-1 text-muted-foreground">
                                     <MapPin className="h-3 w-3" />
@@ -277,14 +275,8 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                                   </div>
                                   {subject?.grade && (
                                     <Badge variant="secondary" className="text-xs">
-                                      Grade: {subject.grade}
+                                      {t('grade')}: {subject.grade}
                                     </Badge>
-                                  )}
-                                  {/* Debug info - remove after fixing */}
-                                  {!subject?.grade && (
-                                    <div className="text-xs text-red-500">
-                                      SubjectId: {slot.subjectId}
-                                    </div>
                                   )}
                                 </div>
                               )

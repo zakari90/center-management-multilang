@@ -3,10 +3,9 @@
 import type { Center } from "@/components/centerPresentation";
 import CenterPresentation from "@/components/centerPresentation"; // Remove "copy" if not needed
 import { NewCenterForm } from "@/components/newCenterForm copy"; // Remove "copy" if not needed
-import { BASE_URL } from "@/types/types";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function Page() {
   const [centerData, setCenterData] = useState<Center | null>(null);

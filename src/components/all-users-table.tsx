@@ -71,7 +71,7 @@ import {
   User,
   Users
 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -136,10 +136,10 @@ interface UserFormData {
 }
 
 export default function AllUsersTable() {
-  const router = useRouter()
+  const t = useTranslations('AllUsersTable')
+  
   const [activeTab, setActiveTab] = useState('users')
   
-  // Users state
   const [users, setUsers] = useState<UserData[]>([])
   const [teachers, setTeachers] = useState<TeacherData[]>([])
   const [students, setStudents] = useState<StudentData[]>([])
@@ -147,16 +147,12 @@ export default function AllUsersTable() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   
-  // Filters
   const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState<string>('all')
   const [gradeFilter, setGradeFilter] = useState<string>('all')
 
-  // Delete state
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'user' | 'teacher' | 'student'; name: string } | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Add/Edit User state
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<UserData | null>(null)
@@ -167,7 +163,6 @@ export default function AllUsersTable() {
     role: 'MANAGER'
   })
 
-  // Password visibility state
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
@@ -188,13 +183,12 @@ export default function AllUsersTable() {
       setStudents(studentsRes.data)
     } catch (err) {
       console.error('Failed to fetch data:', err)
-      setError('Failed to load data')
+      setError(t('errorLoadData'))
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Toggle password visibility
   const togglePasswordVisibility = (id: string) => {
     setVisiblePasswords((prev) => ({
       ...prev,
@@ -223,44 +217,42 @@ export default function AllUsersTable() {
         setStudents(prev => prev.filter(s => s.id !== itemToDelete.id))
       }
       
-      toast.success(`${itemToDelete.type} deleted successfully`)
+      toast(`${t(itemToDelete.type)} ${t('deletedSuccess')}`)
       setItemToDelete(null)
     } catch (err) {
       console.error('Failed to delete:', err)
-      toast.error(`Failed to delete ${itemToDelete.type}`)
+      toast(`${t('deletedError')} ${t(itemToDelete.type)}`)
     } finally {
       setIsProcessing(false)
     }
   }
 
-  // Add Manager Handler
-const handleAddUser = async () => {
-  if (!userFormData.name.trim() || !userFormData.email.trim() || !userFormData.password.trim()) {
-    toast.error('Please fill in all fields')
-    return
+  const handleAddUser = async () => {
+    if (!userFormData.name.trim() || !userFormData.email.trim() || !userFormData.password.trim()) {
+      toast(t('fillAllFields'))
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      console.log("Sending userFormData:", userFormData)
+      const response = await axios.post('/api/admin/users', userFormData)
+      setUsers(prev => [...prev, response.data])
+      setIsAddDialogOpen(false)
+      setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
+      toast(t('userAddedSuccess'))
+    } catch (err) {
+      console.log(err);
+      
+      setIsAddDialogOpen(false)
+
+      console.error('Failed to add Manager:', err)
+      toast(t('userAddedError'))
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  setIsProcessing(true)
-  try {
-    console.log("Sending userFormData:", userFormData)
-    const response = await axios.post('/api/admin/users', userFormData)
-    setUsers(prev => [...prev, response.data])
-    setIsAddDialogOpen(false)
-    setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
-    toast('User added successfully')
-  } catch (err: any) {
-    setIsAddDialogOpen(false)
-
-    console.error('Failed to add Manager:', err)
-    const msg = err.response?.data?.error || 'Failed to add Manager'
-    toast(msg)
-  } finally {
-    setIsProcessing(false)
-  }
-}
-
-
-  // Edit User Handlers
   const handleEditUser = (user: UserData) => {
     setEditingUser({ ...user })
     setIsEditDialogOpen(true)
@@ -270,7 +262,7 @@ const handleAddUser = async () => {
     if (!editingUser) return
 
     if (!editingUser.name || !editingUser.email) {
-      toast.error('Name and email are required')
+      toast(t('nameEmailRequired'))
       return
     }
 
@@ -289,27 +281,22 @@ const handleAddUser = async () => {
       
       setIsEditDialogOpen(false)
       setEditingUser(null)
-      toast.success('User updated successfully')
-    } catch (err: any) {
+      toast(t('userUpdatedSuccess'))
+    } catch (err) {
       console.error('Failed to update user:', err)
-      toast("Failed to update user")
+      toast(t('userUpdatedError'))
     } finally {
       setIsProcessing(false)
     }
   }
 
-  // Filter users
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter
-
-    return matchesSearch && matchesRole
+    return matchesSearch
   })
 
-  // Filter teachers
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch = 
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -319,7 +306,6 @@ const handleAddUser = async () => {
     return matchesSearch
   })
 
-  // Filter students
   const filteredStudents = students.filter(student => {
     const matchesSearch = 
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -332,14 +318,12 @@ const handleAddUser = async () => {
     return matchesSearch && matchesGrade
   })
 
-  // Calculate stats
   const totalUsers = users.length
   const totalTeachers = teachers.length
   const totalStudents = students.length
   const admins = users.filter(u => u.role === 'ADMIN').length
   const managers = users.filter(u => u.role === 'MANAGER').length
 
-  // Get unique grades
   const uniqueGrades = Array.from(new Set(students.map(s => s.grade).filter(Boolean)))
 
   if (isLoading) {
@@ -357,70 +341,57 @@ const handleAddUser = async () => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
- <Button
-      variant="outline"
-      onClick={() =>
-        toast("Event has been created", {
-          description: "Sunday, December 03, 2023 at 9:00 AM",
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    >
-      Show Toast
-    </Button>
+      
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('systemUsers')}</CardTitle>
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              {admins} admins, {managers} managers
+              {admins} {t('admins')}, {managers} {t('managers')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Teachers</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('teachers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalTeachers}</div>
             <p className="text-xs text-muted-foreground">
-              Total teaching staff
+              {t('totalTeachingStaff')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Students</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('students')}</CardTitle>
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
             <p className="text-xs text-muted-foreground">
-              Enrolled students
+              {t('enrolledStudents')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total People</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalPeople')}</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers + totalTeachers + totalStudents}</div>
             <p className="text-xs text-muted-foreground">
-              In the system
+              {t('inTheSystem')}
             </p>
           </CardContent>
         </Card>
@@ -429,67 +400,63 @@ const handleAddUser = async () => {
       {/* Main Content with Tabs */}
       <Card>
         <CardHeader>
-          <CardTitle>System Overview</CardTitle>
-          <CardDescription>Manage all users, teachers, and students</CardDescription>
+          <CardTitle>{t('systemOverview')}</CardTitle>
+          <CardDescription>{t('systemOverviewDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="users">
                 <Shield className="mr-2 h-4 w-4" />
-                Users ({totalUsers})
+                {t('users')} ({totalUsers})
               </TabsTrigger>
               <TabsTrigger value="teachers">
                 <Users className="mr-2 h-4 w-4" />
-                Teachers ({totalTeachers})
+                {t('teachers')} ({totalTeachers})
               </TabsTrigger>
               <TabsTrigger value="students">
                 <GraduationCap className="mr-2 h-4 w-4" />
-                Students ({totalStudents})
+                {t('students')} ({totalStudents})
               </TabsTrigger>
             </TabsList>
 
             {/* USERS TAB */}
- {/* USERS TAB */}
             <TabsContent value="users" className="space-y-4">
               <div className="flex justify-between gap-3 items-center">
-
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search users..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t('searchUsers')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
 
                 <Button onClick={() => setIsAddDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Manager
+                  {t('addManager')}
                 </Button>
               </div>
 
-              {/* Users Table */}
               {filteredUsers.length === 0 ? (
                 <div className="text-center py-12">
                   <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="mt-4 text-muted-foreground">No users found</p>
+                  <p className="mt-4 text-muted-foreground">{t('noUsersFound')}</p>
                 </div>
               ) : (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="hidden md:table-cell">Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Password</TableHead>
-                        <TableHead className="hidden sm:table-cell">Students</TableHead>
-                        <TableHead className="hidden sm:table-cell">Teachers</TableHead>
-                        <TableHead className="hidden lg:table-cell">Joined</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('name')}</TableHead>
+                        <TableHead className="hidden md:table-cell">{t('email')}</TableHead>
+                        <TableHead>{t('role')}</TableHead>
+                        <TableHead>{t('password')}</TableHead>
+                        <TableHead className="hidden sm:table-cell">{t('students')}</TableHead>
+                        <TableHead className="hidden sm:table-cell">{t('teachers')}</TableHead>
+                        <TableHead className="hidden lg:table-cell">{t('joined')}</TableHead>
+                        <TableHead className="text-right">{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -532,7 +499,7 @@ const handleAddUser = async () => {
                                   <button
                                     type="button"
                                     onClick={() => togglePasswordVisibility(user.id)}
-                                    aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                                    aria-label={isPasswordVisible ? t('hidePassword') : t('showPassword')}
                                     aria-pressed={isPasswordVisible}
                                     className="mr-2 text-muted-foreground"
                                   >
@@ -552,11 +519,11 @@ const handleAddUser = async () => {
                             </TableCell>
 
                             <TableCell className="hidden sm:table-cell">
-                              <Badge variant="outline">{user?.stats?.students} students</Badge>
+                              <Badge variant="outline">{user?.stats?.students} {t('studentsCount')}</Badge>
                             </TableCell>
 
                             <TableCell className="hidden sm:table-cell">
-                              <Badge variant="outline">{user?.stats?.teachers} teachers</Badge>
+                              <Badge variant="outline">{user?.stats?.teachers} {t('teachersCount')}</Badge>
                             </TableCell>
 
                             <TableCell className="hidden lg:table-cell">
@@ -600,7 +567,7 @@ const handleAddUser = async () => {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search teachers..."
+                    placeholder={t('searchTeachers')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -611,21 +578,20 @@ const handleAddUser = async () => {
               {filteredTeachers.length === 0 ? (
                 <div className="text-center py-12">
                   <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="mt-4 text-muted-foreground">No teachers found</p>
+                  <p className="mt-4 text-muted-foreground">{t('noTeachersFound')}</p>
                 </div>
               ) : (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Teacher</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Manager</TableHead>
-                        <TableHead>Subjects</TableHead>
-                        <TableHead>Students</TableHead>
-                        <TableHead>Receipts</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('teacher')}</TableHead>
+                        <TableHead>{t('contact')}</TableHead><TableHead>{t('manager')}</TableHead>
+                        <TableHead>{t('subjects')}</TableHead>
+                        <TableHead>{t('students')}</TableHead>
+                        <TableHead>{t('receipts')}</TableHead>
+                        <TableHead>{t('joined')}</TableHead>
+                        <TableHead className="text-right">{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -698,7 +664,7 @@ const handleAddUser = async () => {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search students..."
+                    placeholder={t('searchStudents')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -707,10 +673,10 @@ const handleAddUser = async () => {
 
                 <Select value={gradeFilter} onValueChange={setGradeFilter}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="All Grades" />
+                    <SelectValue placeholder={t('allGrades')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Grades</SelectItem>
+                    <SelectItem value="all">{t('allGrades')}</SelectItem>
                     {uniqueGrades.map(grade => (
                       <SelectItem key={grade} value={grade!}>{grade}</SelectItem>
                     ))}
@@ -721,22 +687,22 @@ const handleAddUser = async () => {
               {filteredStudents.length === 0 ? (
                 <div className="text-center py-12">
                   <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="mt-4 text-muted-foreground">No students found</p>
+                  <p className="mt-4 text-muted-foreground">{t('noStudentsFound')}</p>
                 </div>
               ) : (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Parent</TableHead>
-                        <TableHead>Grade</TableHead>
-                        <TableHead>Manager</TableHead>
-                        <TableHead>Subjects</TableHead>
-                        <TableHead>Receipts</TableHead>
-                        <TableHead>Enrolled</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('student')}</TableHead>
+                        <TableHead>{t('contact')}</TableHead>
+                        <TableHead>{t('parent')}</TableHead>
+                        <TableHead>{t('grade')}</TableHead>
+                        <TableHead>{t('manager')}</TableHead>
+                        <TableHead>{t('subjects')}</TableHead>
+                        <TableHead>{t('receipts')}</TableHead>
+                        <TableHead>{t('enrolled')}</TableHead>
+                        <TableHead className="text-right">{t('actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -833,22 +799,22 @@ const handleAddUser = async () => {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add New Maager</DialogTitle>
+            <DialogTitle>{t('addNewManager')}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="add-name">Name</Label>
+              <Label htmlFor="add-name">{t('fullName')}</Label>
               <Input
                 id="add-name"
                 value={userFormData.name}
                 onChange={(e) =>
                   setUserFormData(prev => ({ ...prev, name: e.target.value }))
                 }
-                placeholder="Enter full name"
+                placeholder={t('enterFullName')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="add-email">Email</Label>
+              <Label htmlFor="add-email">{t('email')}</Label>
               <Input
                 id="add-email"
                 type="email"
@@ -856,11 +822,11 @@ const handleAddUser = async () => {
                 onChange={(e) =>
                   setUserFormData(prev => ({ ...prev, email: e.target.value }))
                 }
-                placeholder="Enter email address"
+                placeholder={t('enterEmail')}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="add-password">Password</Label>
+              <Label htmlFor="add-password">{t('password')}</Label>
               <Input
                 id="add-password"
                 type="text"
@@ -868,7 +834,7 @@ const handleAddUser = async () => {
                 onChange={(e) =>
                   setUserFormData(prev => ({ ...prev, password: e.target.value }))
                 }
-                placeholder="Enter password"
+                placeholder={t('enterPassword')}
               />
             </div>
           </div>
@@ -878,11 +844,11 @@ const handleAddUser = async () => {
               onClick={() => setIsAddDialogOpen(false)}
               disabled={isProcessing}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={handleAddUser} disabled={isProcessing}>
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Manager
+              {t('addManager')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -892,15 +858,15 @@ const handleAddUser = async () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>{t('editUser')}</DialogTitle>
             <DialogDescription>
-              Make changes to user details. Leave password blank to keep current password.
+              {t('editUserDescription')}
             </DialogDescription>
           </DialogHeader>
           {editingUser && (
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="edit-name">Name</Label>
+                <Label htmlFor="edit-name">{t('fullName')}</Label>
                 <Input
                   id="edit-name"
                   value={editingUser.name}
@@ -910,7 +876,7 @@ const handleAddUser = async () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-email">Email</Label>
+                <Label htmlFor="edit-email">{t('email')}</Label>
                 <Input
                   id="edit-email"
                   type="email"
@@ -921,7 +887,7 @@ const handleAddUser = async () => {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-password">Password (optional)</Label>
+                <Label htmlFor="edit-password">{t('passwordOptional')}</Label>
                 <Input
                   id="edit-password"
                   type="text"
@@ -929,10 +895,9 @@ const handleAddUser = async () => {
                   onChange={(e) =>
                     setEditingUser(prev => ({ ...prev!, password: e.target.value }))
                   }
-                  placeholder="Leave blank to keep current password"
+                  placeholder={t('keepCurrentPassword')}
                 />
               </div>
-
             </div>
           )}
           <DialogFooter>
@@ -944,11 +909,11 @@ const handleAddUser = async () => {
               }}
               disabled={isProcessing}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button onClick={handleSaveEdit} disabled={isProcessing}>
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
+              {t('saveChanges')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -958,22 +923,25 @@ const handleAddUser = async () => {
       <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {itemToDelete?.type}?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('deleteConfirmTitle')} {itemToDelete && t(itemToDelete.type)}?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{itemToDelete?.name}</strong>? 
-              This will permanently delete this {itemToDelete?.type} and all associated data. 
-              This action cannot be undone.
+              {t('deleteConfirmDescription')} <strong>{itemToDelete?.name}</strong>? 
+              {t('deleteConfirmWarning')} {itemToDelete && t(itemToDelete.type)} {t('deleteConfirmWarning2')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isProcessing}>
+              {t('cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isProcessing}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete {itemToDelete?.type}
+              {t('delete')} {itemToDelete && t(itemToDelete.type)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

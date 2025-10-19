@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from "@/lib/authentication"
 import db from "@/lib/db"
 import { NextRequest, NextResponse } from "next/server"
@@ -7,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session : any = await getSession()
         const { id } = await params
 
     if (!session?.user) {
@@ -53,7 +54,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session :any = await getSession()
     const { id } = await params
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -91,7 +92,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getSession()
+    const session : any = await getSession()
         const { id } = await params
 
     if (!session?.user) {
@@ -116,7 +117,7 @@ export async function PATCH(
     // Update teacher in transaction
     const teacher = await db.$transaction(async (tx) => {
       // Update basic info
-      const updated = await tx.teacher.update({
+       await tx.teacher.update({
         where: { id: id },
         data: {
           name: name || existingTeacher.name,

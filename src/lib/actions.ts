@@ -30,7 +30,6 @@ const registrationSchema = z.object({
     }
   });
 
-type RegistrationSchema = z.infer<typeof registrationSchema>
 
 const loginSchema = z.object({
   email: z.email({ message: "Invalid email address" })
@@ -40,8 +39,6 @@ const loginSchema = z.object({
     .min(1, { message: "Password must be at least 1 characters" })
     .nonempty({ message: "Password is required" }),
 })
-
-type LoginSchema = z.infer<typeof loginSchema>
 
 export async function register(state: unknown, formData: FormData) {
 
@@ -220,10 +217,6 @@ export async function loginManager(state: unknown, formData: FormData) {
 export async function createCenterAction(state: unknown, formData: FormData) {
   try {
     const name = formData.get('name') as string
-    const address = formData.get('address') as string
-    const phone = formData.get('phone') as string
-    const classrooms = formData.get('classrooms')?.toString().split(',').map(s => s.trim())
-    const workingDays = formData.get('workingDays')?.toString().split(',').map(s => s.trim())
     console.log(
         name
     );

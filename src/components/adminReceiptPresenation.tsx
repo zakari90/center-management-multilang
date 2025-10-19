@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -26,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { User } from '@prisma/client'
 import axios from 'axios'
 import {
   Coins,
@@ -35,10 +37,12 @@ import {
   TrendingDown,
   TrendingUp
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 interface Receipt {
+  manager: User
   id: string
   receiptNumber: string
   amount: number
@@ -59,6 +63,8 @@ interface Receipt {
 }
 
 export default function AdminReceiptsTable() {
+  const t = useTranslations('AdminReceiptsTable')
+  
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -75,7 +81,9 @@ export default function AdminReceiptsTable() {
       const { data } = await axios.get('/api/receipts')
       setReceipts(data)
     } catch (err) {
-      setError('Failed to fetch receipts')
+      console.log(err);
+      
+      setError(t('errorFetchReceipts'))
     } finally {
       setIsLoading(false)
     }
@@ -116,8 +124,8 @@ export default function AdminReceiptsTable() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Receipts</h1>
-          <p className="text-muted-foreground mt-1">Track all payments and transactions</p>
+          <h1 className="text-3xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -131,7 +139,7 @@ export default function AdminReceiptsTable() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Receipts</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalReceipts')}</CardTitle>
             <ReceiptIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -141,7 +149,7 @@ export default function AdminReceiptsTable() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Income</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalIncome')}</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -149,14 +157,14 @@ export default function AdminReceiptsTable() {
               ${totalIncome.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {studentPayments.length} receipts
+              {studentPayments.length} {t('receipts')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalExpenses')}</CardTitle>
             <TrendingDown className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -164,14 +172,14 @@ export default function AdminReceiptsTable() {
               ${totalExpense.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {teacherPayments.length} receipts
+              {teacherPayments.length} {t('receipts')}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Amount</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('netAmount')}</CardTitle>
             <Coins className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -179,7 +187,7 @@ export default function AdminReceiptsTable() {
               ${netAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {netAmount >= 0 ? 'Profit' : 'Loss'}
+              {netAmount >= 0 ? t('profit') : t('loss')}
             </p>
           </CardContent>
         </Card>
@@ -188,14 +196,14 @@ export default function AdminReceiptsTable() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t('filters')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by receipt number, person, or description..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -203,22 +211,22 @@ export default function AdminReceiptsTable() {
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Types" />
+                <SelectValue placeholder={t('allTypes')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="STUDENT_PAYMENT">Student Payments</SelectItem>
-                <SelectItem value="TEACHER_PAYMENT">Teacher Payments</SelectItem>
+                <SelectItem value="all">{t('allTypes')}</SelectItem>
+                <SelectItem value="STUDENT_PAYMENT">{t('studentPayments')}</SelectItem>
+                <SelectItem value="TEACHER_PAYMENT">{t('teacherPayments')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={methodFilter} onValueChange={setMethodFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Methods" />
+                <SelectValue placeholder={t('allMethods')} />
               </SelectTrigger>
               <SelectContent>
                 {paymentMethods.map(method => (
                   <SelectItem key={method} value={method}>
-                    {method === 'all' ? 'All Methods' : method}
+                    {method === 'all' ? t('allMethods') : method}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -230,9 +238,9 @@ export default function AdminReceiptsTable() {
       {/* Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Receipts</CardTitle>
+          <CardTitle>{t('allReceipts')}</CardTitle>
           <CardDescription>
-            Showing {filteredReceipts.length} of {receipts.length} receipts
+            {t('showing')} {filteredReceipts.length} {t('of')} {receipts.length} {t('receipts')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -241,13 +249,13 @@ export default function AdminReceiptsTable() {
               <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">
                 {searchTerm || typeFilter !== 'all' || methodFilter !== 'all' 
-                  ? 'No receipts found matching your criteria' 
-                  : 'No receipts yet'}
+                  ? t('noReceiptsFound')
+                  : t('noReceiptsYet')}
               </p>
               {!searchTerm && typeFilter === 'all' && methodFilter === 'all' && (
                 <Button asChild className="mt-4">
                   <Link href="/receipts/create">
-                    Create Your First Receipt
+                    {t('createFirstReceipt')}
                   </Link>
                 </Button>
               )}
@@ -256,19 +264,19 @@ export default function AdminReceiptsTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Manager</TableHead>
-                  <TableHead>Receipt #</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>For</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t('manager')}</TableHead>
+                  <TableHead>{t('receiptNumber')}</TableHead>
+                  <TableHead>{t('type')}</TableHead>
+                  <TableHead>{t('for')}</TableHead>
+                  <TableHead>{t('amount')}</TableHead>
+                  <TableHead>{t('method')}</TableHead>
+                  <TableHead>{t('date')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredReceipts.map((receipt) => (
                   <TableRow key={receipt.id}>
-                  <TableCell>
+                    <TableCell>
                       <div className="font-medium">{receipt.manager?.name || '-'}</div>
                       {receipt.description && (
                         <div className="text-xs text-muted-foreground truncate max-w-[200px]">
@@ -286,11 +294,10 @@ export default function AdminReceiptsTable() {
                     </TableCell>
                     <TableCell>
                       <Badge variant={receipt.type === 'STUDENT_PAYMENT' ? 'default' : 'secondary'}>
-                        {receipt.type === 'STUDENT_PAYMENT' ? 'Income' : 'Expense'}
+                        {receipt.type === 'STUDENT_PAYMENT' ? t('income') : t('expense')}
                       </Badge>
                     </TableCell>
-                    <TableCell
-                    >
+                    <TableCell>
                       <div className="font-medium">
                         {receipt.student?.name || receipt.teacher?.name || '-'}
                       </div>
@@ -315,7 +322,6 @@ export default function AdminReceiptsTable() {
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(receipt.date).toLocaleDateString()}
                     </TableCell>
-  
                   </TableRow>
                 ))}
               </TableBody>

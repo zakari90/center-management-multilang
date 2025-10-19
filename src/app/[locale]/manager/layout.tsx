@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/manager/layout.tsx
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
@@ -5,44 +6,25 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/authentication";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  params: Promise<{ locale: string }>;
 }
 
-const navItems = [
-  {
-    title: "Dashboard",
-    url: "/manager",
-    icon: "/dashboard.svg",
-  },
-  {
-    title: "Teachers",
-    url: "/manager/teachers",
-    icon: "/teacher.svg",
-  },
-  {
-    title: "Students",
-    url: "/manager/students",
-    icon: "/students.svg",
-  },
-  {
-    title: "Receipts",
-    url: "/manager/receipts",
-    icon: "/receipt.svg",
-  },
-];
+export default async function ManagerLayout({ children, params }: DashboardLayoutProps) {
+  const session: any = await getSession();
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ManagerLayout" });
+  const isArabic = locale === "ar";
 
-export default async function ManagerLayout({ children }: DashboardLayoutProps) {
-  const session = await getSession();
-
-  // Server-side protection
   if (!session?.user) {
     redirect("/login");
   }
 
   if (session.user.role !== "MANAGER") {
-    redirect("/admin"); // Redirect to their correct dashboard
+    redirect("/admin");
   }
 
   const user = {
@@ -50,6 +32,29 @@ export default async function ManagerLayout({ children }: DashboardLayoutProps) 
     email: session.user.email,
     avatar: "/school.svg",
   };
+
+  const navItems = [
+    {
+      title: t("dashboard"),
+      url: "/manager",
+      icon: "/dashboard.svg",
+    },
+    {
+      title: t("teachers"),
+      url: "/manager/teachers",
+      icon: "/teacher.svg",
+    },
+    {
+      title: t("students"),
+      url: "/manager/students",
+      icon: "/students.svg",
+    },
+    {
+      title: t("receipts"),
+      url: "/manager/receipts",
+      icon: "/receipt.svg",
+    },
+  ];
 
   return (
     <SidebarProvider
@@ -60,7 +65,7 @@ export default async function ManagerLayout({ children }: DashboardLayoutProps) 
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" items={navItems} user={user} />
+      <AppSidebar side={isArabic ? "right" : "left"} variant="inset" items={navItems} user={user} />
       <SidebarInset>
         <SiteHeader />
         <main>{children}</main>

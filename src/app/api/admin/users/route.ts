@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/admin/users/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/authentication'
@@ -5,7 +6,7 @@ import db from '@/lib/db'
 
 export async function GET() {
   try {
-    const session = await getSession()
+    const session : any = await getSession()
     
     // Check if user is authenticated and is an ADMIN
     if (!session?.user || session.user.role !== 'ADMIN') {
@@ -65,7 +66,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
+    const session : any = await getSession()
     
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -3,7 +3,7 @@ import ReceiptsTable from "@/components/receiptPresenationui"
 function Page() {
   return (
     <div>
-lll
+      <ReceiptsTable/>
       </div>
   )
 }

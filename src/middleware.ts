@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/authentication';
@@ -11,7 +12,7 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Get session
-  const session = await getSession();
+  const session:any = await getSession();
   
   // Check if route is public
   const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route));

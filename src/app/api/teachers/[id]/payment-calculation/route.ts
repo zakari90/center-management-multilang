@@ -1,22 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/teachers/[id]/payment-calculation/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
-    const session = await getSession()
-      const { id } = await params
+    const { id } = await params
+    const session: any = await getSession()
   
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get teacher with their subjects and enrolled students
     const teacher = await db.teacher.findUnique({
       where: { 
         id,
@@ -29,7 +32,7 @@ export async function GET(
               include: {
                 studentSubjects: {
                   where: {
-                    teacherId: id // Only count students assigned to this teacher
+                    teacherId: id
                   }
                 }
               }
@@ -43,16 +46,13 @@ export async function GET(
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
     }
 
-    // Calculate payment for each subject
     const subjects = teacher.teacherSubjects.map(ts => {
       const enrolledStudents = ts.subject.studentSubjects.length
       
       let calculatedAmount = 0
       if (ts.percentage) {
-        // Formula: subject price × percentage × number of enrolled students
         calculatedAmount = (ts.subject.price * ts.percentage / 100) * enrolledStudents
       } else if (ts.hourlyRate) {
-        // For hourly rate, we'd need hours worked - for now just multiply by students as placeholder
         calculatedAmount = ts.hourlyRate * enrolledStudents
       }
 

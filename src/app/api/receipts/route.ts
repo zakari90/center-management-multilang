@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/receipts/route.ts
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const session = await getSession()
+    const session:any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -77,14 +78,10 @@ if (session.user.role === 'MANAGER' ) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession()
+    const session:any  = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    if (session.user.role !== 'MANAGER' && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const body = await req.json()

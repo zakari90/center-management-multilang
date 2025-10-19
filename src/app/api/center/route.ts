@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import { getSession } from "@/lib/authentication";
@@ -5,7 +6,7 @@ import { Subject } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession();
+    const session : any= await getSession();
 
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const session = await getSession();
+    const session :any = await getSession();
 
     if (!session || session.user.role in [ "ADMIN" ,"MANAGER"]) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -90,7 +91,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const session = await getSession();
+    const session :any = await getSession();
 
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -117,6 +118,7 @@ export async function PATCH(request: Request) {
     })
 
     return NextResponse.json(center)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to update center' },

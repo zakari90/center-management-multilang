@@ -1,8 +1,8 @@
 // app/api/dashboard/revenue/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { startOfWeek, startOfMonth, startOfYear, format, subDays, subMonths, eachDayOfInterval, eachMonthOfInterval } from 'date-fns'
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
+import { eachDayOfInterval, eachMonthOfInterval, format, startOfYear, subDays } from 'date-fns'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   try {

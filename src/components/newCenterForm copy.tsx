@@ -8,17 +8,19 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { availableClassrooms, availableGrades, availableSubjects, BASE_URL } from "@/types/types"
 import { Separator } from "@radix-ui/react-separator"
 import axios from "axios"
-
+import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
 import { SubjectForm } from "./centerPresentation copy"
+import { useLocalizedConstants } from "./useLocalizedConstants"
 
 
 export const NewCenterForm = () => {
+  const t = useTranslations('NewCenterForm')
+  const { daysOfWeek, availableSubjects, availableGrades,availableClassrooms  } = useLocalizedConstants();
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: "",
@@ -84,7 +86,7 @@ export const NewCenterForm = () => {
         throw new Error('Failed to create center')
       }
 
-      setMessage("Center created successfully!")
+      setMessage(t('successMessage'))
       setFormData({
         name: "",
         address: "",
@@ -98,7 +100,7 @@ export const NewCenterForm = () => {
     } catch (error) {
       console.log(error);
       
-      setMessage("Error creating center. Please try again.")
+      setMessage(t('errorMessage'))
     } finally {
       setLoading(false)
     }
@@ -115,13 +117,13 @@ export const NewCenterForm = () => {
                 <div className="relative my-4 flex items-center justify-center overflow-hidden">
                   <Separator className="flex-1 h-px bg-border" />
                   <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                    <Label>Basic Information</Label>
+                    <Label>{t('basicInformation')}</Label>
                   </div>
                   <Separator className="flex-1 h-px bg-border" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">Center Name *</Label>
+                  <Label htmlFor="name">{t('centerNameRequired')}</Label>
                   <Input
                     id="name"
                     type="text"
@@ -129,30 +131,30 @@ export const NewCenterForm = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    placeholder="Enter center's full name"
+                    placeholder={t('centerNamePlaceholder')}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
+                  <Label htmlFor="address">{t('address')}</Label>
                   <Textarea
                     id="address"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    placeholder="Enter center's address"
+                    placeholder={t('addressPlaceholder')}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t('phone')}</Label>
                   <Input
                     id="phone"
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Enter phone number"
+                    placeholder={t('phonePlaceholder')}
                   />
                 </div>
               </div>
@@ -160,13 +162,13 @@ export const NewCenterForm = () => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <Label>Classrooms</Label>
+                  <Label>{t('classrooms')}</Label>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
               <ItemInputList
-                label="Classrooms"
-                placeholder="Type a classroom name"
+                label={t('classrooms')}
+                placeholder={t('classroomPlaceholder')}
                 items={formData.classrooms}
                 onChange={updateClassrooms}
                 suggestions={availableClassrooms}
@@ -175,28 +177,28 @@ export const NewCenterForm = () => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <Label>Working Days</Label>
+                  <Label>{t('workingDays')}</Label>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
               <div className="space-y-3">
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-                  <div key={day} className="border rounded-lg p-3">
+                {daysOfWeek.map((day) => (
+                  <div key={day.key} className="border rounded-lg p-3">
                     <div className="flex items-center space-x-2">
                       <Checkbox
-                        id={day}
-                        checked={formData.workingDays.includes(day)}
+                        id={day.key}
+                        checked={formData.workingDays.includes(day.label)}
                         onCheckedChange={(checked) => {
                           setFormData((prev) => ({
                             ...prev,
                             workingDays: checked
-                              ? [...prev.workingDays, day]
-                              : prev.workingDays.filter((d) => d !== day),
+                              ? [...prev.workingDays, day.label]
+                              : prev.workingDays.filter((d) => d !== day.label),
                           }))
                         }}
                       />
-                      <Label htmlFor={day} className="font-medium">
-                        {day}
+                      <Label htmlFor={day.key} className="font-medium">
+                        {day.label}
                       </Label>
                     </div>
                   </div>
@@ -204,13 +206,12 @@ export const NewCenterForm = () => {
               </div>
 
               <Button 
-              
                 type="button" 
                 onClick={() => setStep(2)} 
                 className="w-full hover:cursor-pointer"
                 disabled={!formData.name.trim()}
               >
-                Next: Add Subjects
+                {t('nextAddSubjects')}
               </Button>
             </>
           )}
@@ -221,7 +222,7 @@ export const NewCenterForm = () => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <Label>Subjects & Pricing</Label>
+                  <Label>{t('subjectsPricing')}</Label>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
@@ -234,7 +235,7 @@ export const NewCenterForm = () => {
 
               {formData.subjects.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Added Subjects ({formData.subjects.length}):</Label>
+                  <Label>{t('addedSubjects')} ({formData.subjects.length}):</Label>
                   <div className="max-h-60 overflow-y-auto space-y-2">
                     {formData.subjects.map((subject, index) => (
                       <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
@@ -246,8 +247,8 @@ export const NewCenterForm = () => {
                             </span>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            Price: ${subject.price}
-                            {subject.duration && ` • Duration: ${subject.duration} minutes`}
+                            {t('price')}: ${subject.price}
+                            {subject.duration && ` • ${t('duration')}: ${subject.duration} ${t('minutes')}`}
                           </div>
                         </div>
                         <Button
@@ -257,7 +258,7 @@ export const NewCenterForm = () => {
                           onClick={() => removeSubject(index)}
                           className="ml-2"
                         >
-                          Remove
+                          {t('remove')}
                         </Button>
                       </div>
                     ))}
@@ -267,17 +268,17 @@ export const NewCenterForm = () => {
 
               <div className="flex gap-2">
                 <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  Back
+                  {t('back')}
                 </Button>
                 <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? "Creating Center..." : "Create Center"}
+                  {loading ? t('creatingCenter') : t('createCenter')}
                 </Button>
               </div>
             </>
           )}
 
           {message && (
-            <Alert className={message.includes("Error") ? "border-destructive" : "border-green-500"}>
+            <Alert className={message.includes(t('errorMessage').split('.')[0]) ? "border-destructive" : "border-green-500"}>
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
@@ -296,6 +297,8 @@ export const SubjectFormMultipleChoices = ({
   availableSubjects: string[]
   availableGrades: string[]
 }) => {
+  const t = useTranslations('SubjectForm')
+  
   const [subjectData, setSubjectData] = useState({
     selectedSubjects: [] as string[],
     selectedGrades: [] as string[],
@@ -341,41 +344,41 @@ export const SubjectFormMultipleChoices = ({
   return (
     <div className="border rounded-lg p-4 space-y-4 bg-muted/10">
       <div className="text-sm text-muted-foreground mb-4">
-        You can select multiple subjects and grades. Each combination will create a separate course.
+        {t('selectMultipleInfo')}
       </div>
       
       {/* NO FORM WRAPPER - just div */}
       <div className="space-y-4">
         {/* Subject Selection */}
         <div className="space-y-2">
-          <Label>Select Subjects *</Label>
+          <Label>{t('selectSubjectsRequired')}</Label>
           <ItemInputList
-            label="Subjects"
-            placeholder="Type or select subjects"
+            label={t('selectSubjects')}
+            placeholder={t('subjectsPlaceholder')}
             items={subjectData.selectedSubjects}
             onChange={updateSubjects}
             suggestions={availableSubjects}
           />
           {subjectData.selectedSubjects.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              Selected: {subjectData.selectedSubjects.join(', ')}
+              {t('selected')}: {subjectData.selectedSubjects.join(', ')}
             </div>
           )}
         </div>
 
         {/* Grade Selection */}
         <div className="space-y-2">
-          <Label>Select Grades *</Label>
+          <Label>{t('selectGradesRequired')}</Label>
           <ItemInputList
-            label="Grades"
-            placeholder="Type or select grades"
+            label={t('selectGrades')}
+            placeholder={t('gradesPlaceholder')}
             items={subjectData.selectedGrades}
             onChange={updateGrades}
             suggestions={availableGrades}
           />
           {subjectData.selectedGrades.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              Selected: {subjectData.selectedGrades.join(', ')}
+              {t('selected')}: {subjectData.selectedGrades.join(', ')}
             </div>
           )}
         </div>
@@ -383,25 +386,25 @@ export const SubjectFormMultipleChoices = ({
         {/* Price and Duration */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="subjectPrice">Price ($) *</Label>
+            <Label htmlFor="subjectPrice">{t('priceRequired')}</Label>
             <Input
               id="subjectPrice"
               type="number"
               step="0.01"
               value={subjectData.price}
               onChange={(e) => setSubjectData(prev => ({ ...prev, price: e.target.value }))}
-              placeholder="0.00"
+              placeholder={t('pricePlaceholder')}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="subjectDuration">Duration (minutes)</Label>
+            <Label htmlFor="subjectDuration">{t('durationOptional')}</Label>
             <Input
               id="subjectDuration"
               type="number"
               value={subjectData.duration}
               onChange={(e) => setSubjectData(prev => ({ ...prev, duration: e.target.value }))}
-              placeholder="60"
+              placeholder={t('durationPlaceholder')}
             />
           </div>
         </div>
@@ -410,7 +413,7 @@ export const SubjectFormMultipleChoices = ({
         {subjectData.selectedSubjects.length > 0 && subjectData.selectedGrades.length > 0 && (
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="text-sm font-medium text-blue-900 mb-1">
-              Will create {subjectData.selectedSubjects.length * subjectData.selectedGrades.length} course(s):
+              {t('willCreate')} {subjectData.selectedSubjects.length * subjectData.selectedGrades.length} {t('courses')}:
             </div>
             <div className="text-xs text-blue-700 space-y-1">
               {subjectData.selectedSubjects.slice(0, 3).map(subject => (
@@ -420,7 +423,7 @@ export const SubjectFormMultipleChoices = ({
                 </div>
               ))}
               {subjectData.selectedSubjects.length > 3 && (
-                <div className="italic">+{subjectData.selectedSubjects.length - 3} more subjects...</div>
+                <div className="italic">+{subjectData.selectedSubjects.length - 3} {t('moreSubjects')}</div>
               )}
             </div>
           </div>
@@ -433,7 +436,7 @@ export const SubjectFormMultipleChoices = ({
           className="w-full"
           disabled={!subjectData.selectedSubjects.length || !subjectData.selectedGrades.length || !subjectData.price}
         >
-          Add Subject(s) to Center
+          {t('addSubjectsToCenter')}
         </Button>
       </div>
     </div>
