@@ -1,14 +1,14 @@
 {
   "StudentCard": {
-    "title": "بطاقة هوية الطالب",
-    "idLabel": "رقم الهوية",
+    "title": "بطاقة الطالب",
+    "idLabel": "رقم ",
     "studentInfo": {
       "gradeLabel": "الفئة",
       "emailLabel": "البريد الإلكتروني",
       "phoneLabel": "الهاتف"
     },
     "subjects": {
-      "title": "المواد المسجلة",
+      "title": "المواد ",
       "noSubjects": "لم يتم تسجيل أي مواد",
       "gradePrefix": "الفئة",
       "teacherLabel": "المعلم"

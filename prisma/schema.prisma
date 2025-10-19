@@ -1,10 +1,12 @@
-generator client {
-  provider = "prisma-client-js"
-}
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_POSTGRES_URL")
+  url      = env("DATABASE_URL")
+}
+
+// Define custom output path for generated Prisma Client
+generator client {
+  provider = "prisma-client-js"
 }
 
 enum Role {
