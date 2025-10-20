@@ -1,12 +1,10 @@
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// Define custom output path for generated Prisma Client
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -18,27 +16,26 @@ enum ReceiptType {
   STUDENT_PAYMENT
   TEACHER_PAYMENT
 }
+
 model Center {
-  id          String   @id @default(cuid()) // ✅ Changed to String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   address     String?
   phone       String?
-  classrooms  Json     // ["Room 1", "Room 2"]
-  workingDays Json     // ["Monday", "Tuesday"]
-  managers   Json?     // List of manager IDs
+  classrooms  Json
+  workingDays Json
+  managers    Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
-  admin   User   @relation("AdminCenters", fields: [adminId], references: [id], onDelete: Cascade)
-  adminId String @unique
+  admin      User       @relation("AdminCenters", fields: [adminId], references: [id])
+  adminId    String     @db.ObjectId
   schedules  Schedule[]
-  subjects Subject[]
-
-  @@index([adminId])
+  subjects   Subject[]
 }
+
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   password  String
   name      String
@@ -46,42 +43,33 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-
-  managedStudents     Student[] @relation("UserManagedStudents") // for what i need to add relation name
+  managedStudents     Student[] @relation("UserManagedStudents")
   managedTeachers     Teacher[] @relation("UserManagedTeachers")
   managedReceipts     Receipt[] @relation("UserManagedReceipts")
   administeredCenters Center[]  @relation("AdminCenters")
-  schedules  Schedule[] @relation("ManagerSchedules")
-  @@index([email])
-  @@index([role])
+  schedules           Schedule[] @relation("ManagerSchedules")
 }
 
-
 model Teacher {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?  @unique
-  phone     String?
-  address   String?
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String?  @unique
+  phone          String?
+  address        String?
   weeklySchedule Json? 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  // Relations
-  manager   User   @relation("UserManagedTeachers", fields: [managerId], references: [id], onDelete: Cascade)
-  managerId String
-schedules  Schedule[]
+  manager         User             @relation("UserManagedTeachers", fields: [managerId], references: [id])
+  managerId       String           @db.ObjectId
+  schedules       Schedule[]
   teacherSubjects TeacherSubject[]
-  studentSubjects StudentSubject[] @relation("StudentTeacher") // Add this line
+  studentSubjects StudentSubject[] @relation("StudentTeacher")
   receipts        Receipt[]
-
-  @@index([managerId])
-  @@index([email])
 }
 
 model Student {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   email       String?  @unique
   phone       String?
@@ -92,128 +80,90 @@ model Student {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
-  manager   User   @relation("UserManagedStudents", fields: [managerId], references: [id], onDelete: Cascade)
-  managerId String
-
+  manager         User             @relation("UserManagedStudents", fields: [managerId], references: [id])
+  managerId       String           @db.ObjectId
   studentSubjects StudentSubject[]
   receipts        Receipt[]
-
-  @@index([managerId])
-  @@index([email])
-  @@index([grade])
 }
 
-
-
 model Subject {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String   
   grade     String  
   price     Float
-  duration  Int?     // Duration in minutes
+  duration  Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  center   Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  centerId String // ✅ Changed to String
-  schedules  Schedule[]
+  center          Center           @relation(fields: [centerId], references: [id])
+  centerId        String           @db.ObjectId
+  schedules       Schedule[]
   teacherSubjects TeacherSubject[]
   studentSubjects StudentSubject[]
-
-  @@unique([name, grade, centerId])
-  @@index([centerId])
-  @@index([grade])
 }
 
 model TeacherSubject {
-  id         String   @id @default(cuid())
-  percentage Float?   // Teacher's percentage of subject price
-  hourlyRate Float?   // Alternative: flat hourly rate
-  
-  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  teacherId  String
-  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  subjectId  String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  percentage Float?
+  hourlyRate Float?
   assignedAt DateTime @default(now())
-
-  @@unique([teacherId, subjectId])
-  @@index([teacherId])
-  @@index([subjectId])
+  
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String  @db.ObjectId
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String  @db.ObjectId
 }
 
 model StudentSubject {
-  id         String   @id @default(cuid())
-  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId  String
-  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  subjectId  String
-  teacher    Teacher  @relation("StudentTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
-  teacherId  String
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
   enrolledAt DateTime @default(now())
 
-  @@unique([studentId, subjectId, teacherId])
-  @@index([studentId])
-  @@index([subjectId])
-  @@index([teacherId])
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String  @db.ObjectId
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String  @db.ObjectId
+  teacher   Teacher @relation("StudentTeacher", fields: [teacherId], references: [id])
+  teacherId String  @db.ObjectId
 }
 
 model Receipt {
-  id          String      @id @default(cuid())
-  receiptNumber String    @unique @default(cuid())
-  amount      Float
-  type        ReceiptType // STUDENT_PAYMENT or TEACHER_PAYMENT
-  description String?
-  paymentMethod String?   // "CASH", "CARD", "TRANSFER"
-  date        DateTime    @default(now())
-  createdAt   DateTime    @default(now())
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  receiptNumber String      @unique
+  amount        Float
+  type          ReceiptType
+  description   String?
+  paymentMethod String?
+  date          DateTime    @default(now())
+  createdAt     DateTime    @default(now())
 
-  // For student payments
-  student   Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id])
+  studentId String?  @db.ObjectId
 
-  // For teacher payments
-  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id])
+  teacherId String?  @db.ObjectId
 
-  // Manager who created receipt
   manager   User   @relation("UserManagedReceipts", fields: [managerId], references: [id])
-  managerId String
-
-  @@index([studentId])
-  @@index([teacherId])
-  @@index([managerId])
-  @@index([date])
-  @@index([receiptNumber])
+  managerId String @db.ObjectId
 }
 
-
 model Schedule {
-  id         String   @id @default(cuid())
-  day        String   // Monday, Tuesday, etc.
-  startTime  String   // HH:MM format
-  endTime    String   // HH:MM format
-  roomId     String   // Room name/number
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  day       String
+  startTime String
+  endTime   String
+  roomId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  teacherId  String
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String  @db.ObjectId
   
-  subject    Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  subjectId  String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String  @db.ObjectId
   
-  manager    User     @relation("ManagerSchedules", fields: [managerId], references: [id], onDelete: Cascade)
-  managerId  String
+  manager   User    @relation("ManagerSchedules", fields: [managerId], references: [id])
+  managerId String  @db.ObjectId
   
-  center     Center?  @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  centerId   String?
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([teacherId])
-  @@index([subjectId])
-  @@index([managerId])
-  @@index([centerId])
-  @@index([day, startTime])
+  center    Center? @relation(fields: [centerId], references: [id])
+  centerId  String? @db.ObjectId
 }
