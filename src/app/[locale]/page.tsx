@@ -19,9 +19,9 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen bg-gray-50 gap-6">
-      <h1 className="text-4xl font-bold">{t("title")}</h1>
-      <p >{t("description")}</p>
+    <main className="flex flex-col bg-amber-400 items-center justify-center h-screen gap-6">
+      <h1 className="text-4xl text-blue-800 font-bold">{t("title")}</h1>
+      <p className="text-blue-500" >{t("description")}</p>
       <div className="flex gap-4">
         <Link href="/login">
           <Button className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700">{t("ownerDashboard")}</Button>
