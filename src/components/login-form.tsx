@@ -1,4 +1,5 @@
 "use client"
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -20,19 +21,19 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [state, action, isPending] = useActionState(loginAdmin, undefined);
-  const { login } = useAuth();
-  const router = useRouter();
-  const t = useTranslations("login");
+  const [state, action, isPending] = useActionState(loginAdmin, undefined)
+  const { login } = useAuth()
+  const router = useRouter()
+  const t = useTranslations("login")
 
   useEffect(() => {
     if (state?.success && state?.data?.user) {
-      login(state.data.user);
+      login(state.data.user)
       setTimeout(() => {
-        router.push("/admin");
-      }, 10);
+        router.push("/admin")
+      }, 10)
     }
-  }, [state, login, router]);
+  }, [state, login, router])
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -43,7 +44,12 @@ export function LoginForm({
         <CardContent>
           <form action={action}>
             <div className="grid gap-6">
-              {/* Email Field */}
+              {state?.error?.message && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                  {state.error.message}
+                </div>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="email">{t("email.label")}</Label>
                 <Input
@@ -52,23 +58,22 @@ export function LoginForm({
                   type="email"
                   placeholder={t("email.placeholder")}
                   required
+                  autoComplete="email"
                 />
                 {state?.error?.email && (
                   <p className="text-red-500 text-sm">{state.error.email}</p>
                 )}
               </div>
 
-              {/* Password Field */}
               <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">{t("password.label")}</Label>
-                </div>
+                <Label htmlFor="password">{t("password.label")}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
                   placeholder={t("password.placeholder")}
                   required
+                  autoComplete="current-password"
                 />
                 {state?.error?.password && (
                   <p className="text-red-500 text-sm">{state.error.password}</p>
@@ -80,8 +85,7 @@ export function LoginForm({
               </Button>
             </div>
 
-            {/* Sign up link */}
-            <div className="text-center text-sm">
+            <div className="text-center text-sm mt-4">
               {t("noAccount")}{" "}
               <Link href="/register" className="underline underline-offset-4">
                 {t("signUp")}
@@ -90,11 +94,6 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
-
-      {/* Footer Terms */}
-      {/* <div className="text-muted-foreground text-center text-xs text-balance">
-        {t("terms")} <a href="#">{t("termsOfService")}</a> {t("and")} <a href="#">{t("privacyPolicy")}</a>.
-      </div> */}
     </div>
-  );
+  )
 }

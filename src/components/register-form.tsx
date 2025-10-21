@@ -18,17 +18,17 @@ export function RegisterForm({
 }: React.ComponentProps<"div">) {
   const t = useTranslations('register')
   const [state, action, isPending] = useActionState(register, undefined)
-  const { login: setUser } = useAuth();
-  const router = useRouter();
+  const { login: setUser } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     if (state?.success && state?.data?.user) {
-      setUser(state.data.user);
+      setUser(state.data.user)
       setTimeout(() => {
-        router.push("/admin");
-      }, 10);
+        router.push("/admin")
+      }, 10)
     }
-  }, [state, setUser, router]);
+  }, [state, setUser, router])
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -39,6 +39,13 @@ export function RegisterForm({
         <CardContent>
           <form action={action}>
             <div className="grid gap-6">
+              {/* General error message */}
+              {state?.error?.message && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                  {state.error.message}
+                </div>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="username">{t('username.label')}</Label>
                 <Input
@@ -48,6 +55,11 @@ export function RegisterForm({
                   placeholder={t('username.placeholder')}
                   required
                 />
+                {state?.error?.username && (
+                  <p className="text-red-500 text-sm">
+                    {state.error.username}
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-3">
@@ -55,11 +67,12 @@ export function RegisterForm({
                 <Input
                   id="email"
                   name="email"
+                  type="email"
                   placeholder={t('email.placeholder')}
                   required
                 />
                 {state?.error?.email && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-sm">
                     {state.error.email}
                   </p>
                 )}
@@ -73,6 +86,11 @@ export function RegisterForm({
                   type="password"
                   required
                 />
+                {state?.error?.password && (
+                  <p className="text-red-500 text-sm">
+                    {state.error.password}
+                  </p>
+                )}
               </div>
 
               <div className="grid gap-3">
@@ -83,6 +101,11 @@ export function RegisterForm({
                   type="password"
                   required
                 />
+                {state?.error?.confirmPassword && (
+                  <p className="text-red-500 text-sm">
+                    {state.error.confirmPassword}
+                  </p>
+                )}
               </div>
 
               <Button type="submit" className="w-full" disabled={isPending}>
@@ -99,11 +122,6 @@ export function RegisterForm({
           </form>
         </CardContent>
       </Card>
-
-      {/* <div className="text-muted-foreground text-center text-xs text-balance">
-        {t('terms')}{" "}
-        <a href="#" className="underline underline-offset-4">{t('termsOfService')}</a> {t('and')} <a href="#" className="underline underline-offset-4">{t('privacyPolicy')}</a>.
-      </div> */}
     </div>
   )
 }

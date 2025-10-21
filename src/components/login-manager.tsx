@@ -1,4 +1,5 @@
 "use client"
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
 import { loginManager } from "@/lib/actions"
 import { cn } from "@/lib/utils"
-import { SendToBackIcon } from "lucide-react"
+import { Home } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -24,18 +25,17 @@ export function LoginManager({
   const t = useTranslations('login')
   const tManager = useTranslations('managerLogin')
   const [state, action, isPending] = useActionState(loginManager, undefined)
-
-  const { login } = useAuth();
-  const router = useRouter();
+  const { login } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     if (state?.success && state?.data?.user) {
-      login(state.data.user);
+      login(state.data.user)
       setTimeout(() => {
-        router.push("/manager");
-      }, 10);
+        router.push("/manager")
+      }, 10)
     }
-  }, [state, login, router]);
+  }, [state, login, router])
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -46,6 +46,12 @@ export function LoginManager({
         <CardContent>
           <form action={action}>
             <div className="grid gap-6">
+              {state?.error?.message && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
+                  {state.error.message}
+                </div>
+              )}
+
               <div className="grid gap-3">
                 <Label htmlFor="email">{t('email.label')}</Label>
                 <Input
@@ -54,38 +60,37 @@ export function LoginManager({
                   type="email"
                   placeholder={t('email.placeholder')}
                   required
+                  autoComplete="email"
                 />
                 {state?.error?.email && (
                   <p className="text-red-500 text-sm">{state.error.email}</p>
                 )}
               </div>
 
-              {/* Password Field */}
               <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">{t('password.label')}</Label>
-                </div>
+                <Label htmlFor="password">{t('password.label')}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
                   placeholder={t('password.placeholder')}
                   required
+                  autoComplete="current-password"
                 />
                 {state?.error?.password && (
                   <p className="text-red-500 text-sm">{state.error.password}</p>
                 )}
               </div>
 
-              {/* Submit Button */}
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? t('submitting') : t('submit')}
               </Button>
             </div>
-            <div className="text-center text-sm mt-4">
-              <Link href="/" className="underline underline-offset-4">
-                  <SendToBackIcon/>
 
+            <div className="text-center text-sm mt-4">
+              <Link href="/" className="inline-flex items-center gap-2 underline underline-offset-4">
+                <Home className="h-4 w-4" />
+                {tManager('backToHome')}
               </Link>
             </div>
           </form>
