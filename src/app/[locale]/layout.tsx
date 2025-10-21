@@ -10,7 +10,7 @@ import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
 
-const DOMAIN = "https://center-management-multilang.vercel.app";
+const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || ""
 
 export default async function RootLayout({
   children,
