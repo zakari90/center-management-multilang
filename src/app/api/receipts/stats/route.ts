@@ -27,7 +27,7 @@ export async function GET() {
     const now = new Date()
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    const stats = receipts.reduce((acc, receipt) => {
+    const stats = receipts.reduce((acc:any, receipt:any) => {
       acc.totalReceipts++
       acc.totalRevenue += receipt.amount
 

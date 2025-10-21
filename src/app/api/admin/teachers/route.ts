@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
 import { NextResponse } from 'next/server'
@@ -38,7 +39,7 @@ export async function GET() {
       }
     })
 
-    const transformedTeachers = teachers.map(teacher => ({
+    const transformedTeachers = teachers.map((teacher:any) => ({
       id: teacher.id,
       name: teacher.name,
       email: teacher.email,

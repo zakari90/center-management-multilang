@@ -20,7 +20,7 @@ export async function GET() {
     const subjectsData = await db.subject.findMany({
       where: {
         id: {
-          in: enrollments.map(e => e.subjectId)
+          in: enrollments.map((e:any) => e.subjectId)
         }
       },
       select: {
@@ -31,15 +31,15 @@ export async function GET() {
     })
 
     // Merge the enrollments and subject data
-    const data = enrollments.map(enrollment => {
-      const subject = subjectsData.find(s => s.id === enrollment.subjectId)
+    const data = enrollments.map((enrollment:any) => {
+      const subject = subjectsData.find((s:any) => s.id === enrollment.subjectId)
       return {
         subject: subject?.name || 'Unknown',
         students: enrollment._count.studentId,
         revenue: (subject?.price || 0) * enrollment._count.studentId
       }
     })
-    .sort((a, b) => b.students - a.students) // Sort by most students
+    .sort((a:any, b:any) => b.students - a.students) // Sort by most students
     .slice(0, 6) // Take top 6 subjects
 
     return NextResponse.json(data)

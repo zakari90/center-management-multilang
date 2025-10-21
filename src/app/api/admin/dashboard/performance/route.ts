@@ -21,7 +21,7 @@ export async function GET() {
     })
 
     const performance = await Promise.all(
-      centers.map(async (center) => {
+      centers.map(async (center:any) => {
         // Get students, teachers, and revenue per center
         // Note: Adjust these queries based on your actual schema relationships
         const [students, teachers, receipts] = await Promise.all([
@@ -33,7 +33,7 @@ export async function GET() {
           })
         ])
 
-        const revenue = receipts.reduce((sum, r) => sum + r.amount, 0)
+        const revenue = receipts.reduce((sum :any, r :any) => sum + r.amount, 0)
 
         return {
           center: center.name.length > 15 ? center.name.substring(0, 15) + '...' : center.name,

@@ -29,7 +29,7 @@ export async function GET() {
       }
     })
 
-    const managersWithStats = managers.map(manager => ({
+    const managersWithStats = managers.map((manager:any) => ({
       id: manager.id,
       name: manager.name,
       email: manager.email,

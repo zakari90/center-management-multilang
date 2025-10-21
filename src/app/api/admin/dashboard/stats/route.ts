@@ -29,18 +29,18 @@ export async function GET() {
     const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
     const thisMonthRevenue = receipts
-      .filter(r => new Date(r.date) >= firstDayOfMonth)
-      .reduce((sum, r) => sum + r.amount, 0)
+      .filter((r:any) => new Date(r.date) >= firstDayOfMonth)
+      .reduce((sum :any, r:any) => sum + r.amount, 0)
 
     const lastMonthRevenue = receipts
-      .filter(r => new Date(r.date) >= firstDayOfLastMonth && new Date(r.date) <= lastDayOfLastMonth)
-      .reduce((sum, r) => sum + r.amount, 0)
+      .filter((r:any )=> new Date(r.date) >= firstDayOfLastMonth && new Date(r.date) <= lastDayOfLastMonth)
+      .reduce((sum :any, r:any) => sum + r.amount, 0)
 
     const revenueGrowth = lastMonthRevenue > 0 
       ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
       : 0
 
-    const totalRevenue = receipts.reduce((sum, r) => sum + r.amount, 0)
+    const totalRevenue = receipts.reduce((sum :any, r:any) => sum + r.amount, 0)
 
     return NextResponse.json({
       totalCenters: centers,

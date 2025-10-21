@@ -20,7 +20,7 @@ export async function GET() {
     })
 
     const topSubjects = subjects
-      .map(subject => ({
+      .map((subject:any) => ({
         id: subject.id,
         name: subject.name,
         grade: subject.grade,
@@ -28,8 +28,8 @@ export async function GET() {
         revenue: subject.price * subject.studentSubjects.length,
         maxCapacity: 30 // You can make this dynamic
       }))
-      .filter(s => s.students > 0)
-      .sort((a, b) => b.revenue - a.revenue)
+      .filter((s:any) => s.students > 0)
+      .sort((a:any, b:any) => b.revenue - a.revenue)
       .slice(0, 5)
 
     return NextResponse.json(topSubjects)

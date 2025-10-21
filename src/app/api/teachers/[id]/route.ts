@@ -115,7 +115,7 @@ export async function PATCH(
     }
 
     // Update teacher in transaction
-    const teacher = await db.$transaction(async (tx) => {
+    const teacher = await db.$transaction(async (tx:any) => {
       // Update basic info
        await tx.teacher.update({
         where: { id: id },

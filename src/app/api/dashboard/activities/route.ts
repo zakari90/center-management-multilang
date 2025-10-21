@@ -56,7 +56,7 @@ export async function GET() {
     })
 
     const activities = [
-      ...recentStudents.map(s => ({
+      ...recentStudents.map((s:any) => ({
         id: `student-${s.id}`,
         type: 'student' as const,
         title: 'New Student',
@@ -64,7 +64,7 @@ export async function GET() {
         date: s.createdAt.toISOString(),
         link: `/students/${s.id}`
       })),
-      ...recentTeachers.map(t => ({
+      ...recentTeachers.map((t:any) => ({
         id: `teacher-${t.id}`,
         type: 'teacher' as const,
         title: 'New Teacher',
@@ -72,7 +72,7 @@ export async function GET() {
         date: t.createdAt.toISOString(),
         link: `/teachers/${t.id}`
       })),
-      ...recentEnrollments.map(e => ({
+      ...recentEnrollments.map((e:any) => ({
         id: `enrollment-${e.id}`,
         type: 'enrollment' as const,
         title: 'New Enrollment',
@@ -80,7 +80,7 @@ export async function GET() {
         date: e.enrolledAt.toISOString(),
         link: `/students/${e.student.id}`
       })),
-      ...recentPayments.map(p => ({
+      ...recentPayments.map((p:any) => ({
         id: `payment-${p.id}`,
         type: 'payment' as const,
         title: 'Payment Received',
@@ -92,7 +92,7 @@ export async function GET() {
     ]
 
     // Sort by date and limit to 10
-    activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    activities.sort((a :any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime())
     
     return NextResponse.json(activities.slice(0, 10))
   } catch (error) {

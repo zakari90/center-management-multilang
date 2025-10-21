@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create teacher with subjects in a transaction
-    const teacher = await db.$transaction(async (tx) => {
+    const teacher = await db.$transaction(async (tx:any) => {
       // Create the teacher
       const newTeacher = await tx.teacher.create({
         data: {

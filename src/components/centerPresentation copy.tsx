@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "./ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { Subject } from "@prisma/client"
 import { Textarea } from "./ui/textarea"
 import { Separator } from "./ui/separator"
 import { toast } from 'sonner'
@@ -131,7 +130,7 @@ export default function CenterPresentation(center: any) {
   }
 
   // Update existing subject
-  const handleUpdateSubject = async (subjectId: string, updatedData: Partial<Subject>) => {
+  const handleUpdateSubject = async (subjectId: string, updatedData: Partial<any>) => {
     try {
       const { data } = await axios.patch(`/api/subjects`, {
         subjectId,
@@ -458,8 +457,8 @@ function SubjectCard({
   availableSubjects,
   availableGrades
 }: { 
-  subject: Subject
-  onUpdate: (id: string, data: Partial<Subject>) => void
+  subject: any
+  onUpdate: (id: string, data: Partial<any>) => void
   onDelete: (id: string) => void
   availableSubjects: string[]
   availableGrades: string[]

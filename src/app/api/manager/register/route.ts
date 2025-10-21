@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
 
    await db.center.update({
-      where: { adminId: session.user.id },
+      where: { id: session.user.id },
       data: {
         managers: { push: user.id }
       }

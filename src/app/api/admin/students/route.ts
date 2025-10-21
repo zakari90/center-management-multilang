@@ -42,7 +42,7 @@ export async function GET() {
       }
     })
 
-    const transformedStudents = students.map(student => ({
+    const transformedStudents = students.map((student:any) => ({
       id: student.id,
       name: student.name,
       email: student.email,

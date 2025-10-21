@@ -1,84 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// app/api/receipts/route.ts
-import { getSession } from '@/lib/authentication'
-import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
-
-
-export async function GET() {
-  try {
-    const session:any = await getSession()
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    let receipts
-if (session.user.role === 'MANAGER' ) {
-   receipts = await db.receipt.findMany({
-      where: {
-        managerId: session.user.id
-      },
-      include: {
-        student: {
-          select: {
-            id: true,
-            name: true,
-            grade: true
-          }
-        },
-        teacher: {
-          select: {
-            id: true,
-            name: true
-          }
-        }
-      },
-      orderBy: {
-        date: 'desc'
-      }
-    })
-}
-
-   receipts = await db.receipt.findMany({
-      include: {
-        student: {
-          select: {
-            id: true,
-            name: true,
-            grade: true
-          }
-        },
-        teacher: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        manager: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-      },
-      orderBy: {
-        date: 'desc'
-      }
-    })
-
-    return NextResponse.json(receipts)
-  } catch (error) {
-    console.error('Error fetching receipts:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
+import { getSession } from "@/lib/authentication"
+import db from "@/lib/db"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
   try {
-    const session:any  = await getSession()
+    const session: any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -109,7 +36,8 @@ export async function POST(req: NextRequest) {
 
     const receipt = await db.receipt.create({
       data: {
-        amount: parseFloat(amount),
+        receiptNumber: `RCP-${Date.now()}`,
+        amount: parseFloat(amount), // Add this - was incorrectly named 'id'
         type,
         paymentMethod: paymentMethod || null,
         description: description || null,

@@ -39,26 +39,26 @@ export async function GET() {
     ])
 
     const activities = [
-      ...recentCenters.map(c => ({
+      ...recentCenters.map((c:any)=> ({
         id: `center-${c.id}`,
         type: 'center_created' as const,
         description: `New center "${c.name}" created`,
         centerName: c.name,
         timestamp: c.createdAt.toISOString()
       })),
-      ...recentManagers.map(m => ({
+      ...recentManagers.map((m:any )=> ({
         id: `manager-${m.id}`,
         type: 'manager_added' as const,
         description: `Manager ${m.name} added to system`,
         timestamp: m.createdAt.toISOString()
       })),
-      ...recentStudents.map(s => ({
+      ...recentStudents.map((s:any) => ({
         id: `student-${s.id}`,
         type: 'student_enrolled' as const,
         description: `Student ${s.name} enrolled`,
         timestamp: s.createdAt.toISOString()
       })),
-      ...recentPayments.map(p => ({
+      ...recentPayments.map((p:any )=> ({
         id: `payment-${p.id}`,
         type: 'payment_received' as const,
         description: 'Payment received',

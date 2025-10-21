@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create student with subjects in a transaction
-    const student = await db.$transaction(async (tx) => {
+    const student = await db.$transaction(async (tx:any) => {
       // Create the student
       const newStudent = await tx.student.create({
         data: {

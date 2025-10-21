@@ -139,7 +139,7 @@ export async function PATCH(
       }
     }
 
-    const student = await db.$transaction(async (tx) => {
+    const student = await db.$transaction(async (tx:any) => {
       await tx.student.update({
         where: { id },
         data: {

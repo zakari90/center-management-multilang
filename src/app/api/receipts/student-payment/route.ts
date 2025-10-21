@@ -37,15 +37,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Calculate total amount
-    const totalAmount = studentSubjects.reduce((sum, ss) => sum + ss.subject.price, 0)
+    const totalAmount = studentSubjects.reduce((sum:any, ss:any) => sum + ss.subject.price, 0)
 
     // Create description if not provided
-    const subjectNames = studentSubjects.map(ss => ss.subject.name).join(', ')
+    const subjectNames = studentSubjects.map((ss:any) => ss.subject.name).join(', ')
     const finalDescription = description || `Payment for: ${subjectNames}`
 
     // Create receipt
     const receipt = await db.receipt.create({
       data: {
+        receiptNumber: `RCP-${Date.now()}`,
         amount: totalAmount,
         type: 'STUDENT_PAYMENT',
         paymentMethod: paymentMethod || null,

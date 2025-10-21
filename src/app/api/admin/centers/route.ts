@@ -1,79 +1,45 @@
-// app/api/admin/centers/route.ts
-import { getSession } from '@/lib/authentication'
-import db from '@/lib/db'
-import { NextResponse } from 'next/server'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { getSession } from "@/lib/authentication";
+import db from "@/lib/db";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await getSession()
-    
+    const session = await getSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const centers = await db.center.findMany({
       include: {
-        admin: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        },
-        _count: {
-          select: {
-            subjects: true
-          }
-        }
+        admin: { select: { id: true, name: true, email: true } },
+        _count: { select: { subjects: true } }
       }
-    })
+    });
 
-    // Get counts for each center
     const centersWithStats = await Promise.all(
-      centers.map(async (center) => {
-        // Parse JSON fields from the current center
-        const classrooms = center.classrooms as string[]
-        const workingDays = center.workingDays as string[]
-        const managerIds = (center.managers as string[]) || []
+      centers.map(async (center: any & { admin: any; _count: any }) => {
+        const classrooms = Array.isArray(center.classrooms) ? (center.classrooms as string[]) : [];
+        const workingDays = Array.isArray(center.workingDays) ? (center.workingDays as string[]) : [];
+        const managerIds = Array.isArray(center.managers) ? (center.managers as string[]) : [];
 
         const [students, teachers, receipts, managers] = await Promise.all([
-          // Count students managed by this center's managers
-          db.student.count({
-            where: {
-              managerId: { in: managerIds }
-            }
-          }),
-          // Count teachers managed by this center's managers
-          db.teacher.count({
-            where: {
-              managerId: { in: managerIds }
-            }
-          }),
-          // Get receipts from this center's managers
+          db.student.count({ where: { managerId: { in: managerIds } } }),
+          db.teacher.count({ where: { managerId: { in: managerIds } } }),
           db.receipt.findMany({
-            where: { 
-              type: 'STUDENT_PAYMENT',
-              managerId: { in: managerIds }
-            },
+            where: { type: 'STUDENT_PAYMENT', managerId: { in: managerIds } },
             select: { amount: true }
           }),
-          // Get manager details for this center
-          managerIds.length > 0 
+          managerIds.length
             ? db.user.findMany({
-                where: {
-                  id: { in: managerIds },
-                  role: 'MANAGER'
-                },
-                select: {
-                  id: true,
-                  name: true,
-                  email: true
-                }
+                where: { id: { in: managerIds }, role: 'MANAGER' },
+                select: { id: true, name: true, email: true }
               })
-            : []
-        ])
+            : Promise.resolve([])
+        ]);
 
-        const revenue = receipts.reduce((sum, r) => sum + r.amount, 0)
+        const revenue = receipts.reduce((sum :number, r:any) => sum + r.amount , 0);
 
         return {
           id: center.id,
@@ -91,13 +57,13 @@ export async function GET() {
           managersCount: managers.length,
           createdAt: center.createdAt,
           updatedAt: center.updatedAt
-        }
+        };
       })
-    )
+    );
 
-    return NextResponse.json(centersWithStats)
+    return NextResponse.json(centersWithStats);
   } catch (error) {
-    console.error('Error fetching centers:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error fetching centers:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

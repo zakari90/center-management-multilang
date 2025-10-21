@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
     // Create receipt
     const receipt = await db.receipt.create({
       data: {
+        receiptNumber: `RCP-${Date.now()}`,
         amount: totalAmount,
         type: 'TEACHER_PAYMENT',
         paymentMethod: paymentMethod || null,

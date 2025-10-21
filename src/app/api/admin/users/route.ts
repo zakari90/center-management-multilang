@@ -40,7 +40,7 @@ export async function GET() {
     })
 
     // Transform data to match component interface
-    const transformedUsers = users.map(user => ({
+    const transformedUsers = users.map((user:any) => ({
       id: user.id,
       name: user.name,
       email: user.email,

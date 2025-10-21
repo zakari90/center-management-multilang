@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import { getSession } from "@/lib/authentication";
-import { Subject } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,7 +41,7 @@ export async function POST(req: NextRequest) {
         workingDays,
         adminId: session.user.id, // ✅ Use session.user.id instead of adminId from body
         subjects: {
-          create: subjects?.map((subject: Subject) => ({
+          create: subjects?.map((subject: any) => ({
             name: subject.name,
             grade: subject.grade,
             price: subject.price,

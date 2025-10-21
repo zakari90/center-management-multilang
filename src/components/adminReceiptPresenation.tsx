@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
@@ -27,7 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { User } from '@prisma/client'
 import axios from 'axios'
 import {
   Coins,
@@ -42,7 +42,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 interface Receipt {
-  manager: User
+  manager: any
   id: string
   receiptNumber: string
   amount: number

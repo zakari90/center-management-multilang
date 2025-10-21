@@ -46,7 +46,7 @@ export async function GET(
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
     }
 
-    const subjects = teacher.teacherSubjects.map(ts => {
+    const subjects = teacher.teacherSubjects.map((ts:any) => {
       const enrolledStudents = ts.subject.studentSubjects.length
       
       let calculatedAmount = 0
@@ -68,7 +68,7 @@ export async function GET(
       }
     })
 
-    const totalAmount = subjects.reduce((sum, s) => sum + s.calculatedAmount, 0)
+    const totalAmount = subjects.reduce((sum:any, s:any) => sum + s.calculatedAmount, 0)
 
     return NextResponse.json({
       teacher: {

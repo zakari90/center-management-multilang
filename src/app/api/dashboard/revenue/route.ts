@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
       revenueMap.set(key, { income: 0, expense: 0 })
     })
 
-    receipts.forEach(receipt => {
+    receipts.forEach((receipt:any) => {
       const key = format(new Date(receipt.date), dateFormat)
       const existing = revenueMap.get(key) || { income: 0, expense: 0 }
 

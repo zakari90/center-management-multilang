@@ -133,7 +133,7 @@ model StudentSubject {
 
 model Receipt {
   id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  receiptNumber String      @unique
+  receiptNumber String      @unique 
   amount        Float
   type          ReceiptType
   description   String?
