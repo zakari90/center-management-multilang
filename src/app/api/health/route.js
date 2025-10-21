@@ -1,15 +1,14 @@
+import db from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import db from "@/lib/db";
 
 export async function GET() {
   try {
     console.log('🔄 Testing database connection...');
     
-    // Test the connection
-    const result = await db.$queryRaw`db.adminCommand({ ping: 1 })`;
+    // Simple test - just try to find a user (won't error if collection is empty)
+    await db.user.findFirst();
     
     console.log('✅ Database connection successful');
-    console.log(result);
     
     return NextResponse.json({
       success: true,
