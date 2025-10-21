@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { email, password, username } = body;
-
+  console.log('📝 Registration attempt:', { email, username, timestamp: new Date().toISOString() });
     if (!email || !password || !username) {
       return NextResponse.json(
         { error: { message: "All fields are required." } },
