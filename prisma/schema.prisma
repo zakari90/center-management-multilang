@@ -22,16 +22,16 @@ model Center {
   name        String
   address     String?
   phone       String?
-  classrooms  Json
-  workingDays Json
-  managers    Json?
+  classrooms  String[]
+  workingDays String[]
+  managers    String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  admin      User       @relation("AdminCenters", fields: [adminId], references: [id])
-  adminId    String     @db.ObjectId
-  schedules  Schedule[]
-  subjects   Subject[]
+  admin       User       @relation("AdminCenters", fields: [adminId], references: [id])
+  adminId     String     @db.ObjectId
+  schedules   Schedule[]
+  subjects    Subject[]
 }
 
 model User {
@@ -43,11 +43,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  managedStudents     Student[] @relation("UserManagedStudents")
-  managedTeachers     Teacher[] @relation("UserManagedTeachers")
-  managedReceipts     Receipt[] @relation("UserManagedReceipts")
-  administeredCenters Center[]  @relation("AdminCenters")
-  schedules           Schedule[] @relation("ManagerSchedules")
+  managedStudents     Student[]   @relation("UserManagedStudents")
+  managedTeachers     Teacher[]   @relation("UserManagedTeachers")
+  managedReceipts     Receipt[]   @relation("UserManagedReceipts")
+  administeredCenters Center[]    @relation("AdminCenters")
+  schedules           Schedule[]  @relation("ManagerSchedules")
 }
 
 model Teacher {
@@ -56,16 +56,16 @@ model Teacher {
   email          String?  @unique
   phone          String?
   address        String?
-  weeklySchedule Json? 
+  weeklySchedule String[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  manager         User             @relation("UserManagedTeachers", fields: [managerId], references: [id])
-  managerId       String           @db.ObjectId
-  schedules       Schedule[]
-  teacherSubjects TeacherSubject[]
-  studentSubjects StudentSubject[] @relation("StudentTeacher")
-  receipts        Receipt[]
+  manager           User                @relation("UserManagedTeachers", fields: [managerId], references: [id])
+  managerId         String              @db.ObjectId
+  schedules         Schedule[]
+  teacherSubjects   TeacherSubject[]
+  studentSubjects   StudentSubject[]    @relation("StudentTeacher")
+  receipts          Receipt[]
 }
 
 model Student {
@@ -80,8 +80,8 @@ model Student {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  manager         User             @relation("UserManagedStudents", fields: [managerId], references: [id])
-  managerId       String           @db.ObjectId
+  manager         User              @relation("UserManagedStudents", fields: [managerId], references: [id])
+  managerId       String            @db.ObjectId
   studentSubjects StudentSubject[]
   receipts        Receipt[]
 }
@@ -95,11 +95,11 @@ model Subject {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  center          Center           @relation(fields: [centerId], references: [id])
-  centerId        String           @db.ObjectId
-  schedules       Schedule[]
-  teacherSubjects TeacherSubject[]
-  studentSubjects StudentSubject[]
+  center              Center            @relation(fields: [centerId], references: [id])
+  centerId            String            @db.ObjectId
+  schedules           Schedule[]
+  teacherSubjects     TeacherSubject[]
+  studentSubjects     StudentSubject[]
 }
 
 model TeacherSubject {
@@ -108,22 +108,22 @@ model TeacherSubject {
   hourlyRate Float?
   assignedAt DateTime @default(now())
   
-  teacher   Teacher @relation(fields: [teacherId], references: [id])
-  teacherId String  @db.ObjectId
-  subject   Subject @relation(fields: [subjectId], references: [id])
-  subjectId String  @db.ObjectId
+  teacher    Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId  String   @db.ObjectId
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  subjectId  String   @db.ObjectId
 }
 
 model StudentSubject {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   enrolledAt DateTime @default(now())
 
-  student   Student @relation(fields: [studentId], references: [id])
-  studentId String  @db.ObjectId
-  subject   Subject @relation(fields: [subjectId], references: [id])
-  subjectId String  @db.ObjectId
-  teacher   Teacher @relation("StudentTeacher", fields: [teacherId], references: [id])
-  teacherId String  @db.ObjectId
+  student    Student  @relation(fields: [studentId], references: [id])
+  studentId  String   @db.ObjectId
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+  subjectId  String   @db.ObjectId
+  teacher    Teacher  @relation("StudentTeacher", fields: [teacherId], references: [id])
+  teacherId  String   @db.ObjectId
 }
 
 model Receipt {
@@ -155,15 +155,15 @@ model Schedule {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  teacher   Teacher @relation(fields: [teacherId], references: [id])
-  teacherId String  @db.ObjectId
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId String   @db.ObjectId
   
-  subject   Subject @relation(fields: [subjectId], references: [id])
-  subjectId String  @db.ObjectId
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  subjectId String   @db.ObjectId
   
-  manager   User    @relation("ManagerSchedules", fields: [managerId], references: [id])
-  managerId String  @db.ObjectId
+  manager   User     @relation("ManagerSchedules", fields: [managerId], references: [id])
+  managerId String   @db.ObjectId
   
-  center    Center? @relation(fields: [centerId], references: [id])
-  centerId  String? @db.ObjectId
+  center    Center?  @relation(fields: [centerId], references: [id])
+  centerId  String?  @db.ObjectId
 }
