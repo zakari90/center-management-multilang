@@ -42,11 +42,6 @@ export default function AdminDashboard() {
       {/* Managers & Activity */}
       <div className="grid gap-4 grid-cols-4">
         <ManagersList />
-        {/* <TopCenters /> */}
-      </div>
-
-      {/* System Activity */}
-      <div className="grid gap-4 grid-cols-4">
         <SystemActivityLog />
       </div>
     </div>

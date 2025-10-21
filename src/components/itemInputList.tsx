@@ -18,7 +18,7 @@ interface ItemInputListProps {
 
 export const ItemInputList: React.FC<ItemInputListProps> = ({
   label,
-  placeholder = "Enter item...",
+  placeholder = "...",
   items,
   onChange,
   suggestions = [],
@@ -35,9 +35,6 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
   }
 
   useEffect(() => {
-    console.log("********************************************");
-    console.log("Items:", items);
-    console.log("Input Value:", inputValue);
   }, [items, inputValue])
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -85,7 +82,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
             variant="secondary"
             onClick={() => setShowSuggestions((prev) => !prev)}
           >
-            {showSuggestions ? "Hide" : `${label} Suggestions`}
+            {showSuggestions ? "-" : `${label} +`}
           </Button>
         </div>
 
