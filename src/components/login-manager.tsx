@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
 import { loginManager } from "@/lib/actions"
 import { cn } from "@/lib/utils"
+import { SendToBackIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useActionState, useEffect } from "react"
 
@@ -79,6 +81,12 @@ export function LoginManager({
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? t('submitting') : t('submit')}
               </Button>
+            </div>
+            <div className="text-center text-sm mt-4">
+              <Link href="/" className="underline underline-offset-4">
+                  <SendToBackIcon/>
+
+              </Link>
             </div>
           </form>
         </CardContent>
