@@ -7,7 +7,7 @@ export async function GET() {
     console.log('🔄 Testing database connection...');
     
     // Simple test - just try to find a user (won't error if collection is empty)
-    await db.user.findFirst();
+    await db.user.findMany();
     
     console.log('✅ Database connection successful');
     
