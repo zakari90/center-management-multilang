@@ -336,22 +336,22 @@ export default function CreateTeacherForm() {
 
               <div className="space-y-3">
                 {weeklySchedule.map((schedule, index) => (
-                  <div key={schedule.day} className="flex items-center gap-4 p-4 bg-muted rounded-md">
-                    <div className="flex items-center min-w-[140px]">
+                  <div key={schedule.day} className="flex items-center  p-4 bg-muted rounded-md">
+                    <div className="flex items-center min-w-[100px]">
                       <Checkbox
                         id={`day-${schedule.day}`}
                         checked={schedule.isAvailable}
                         onCheckedChange={(checked) => handleScheduleChange(index, "isAvailable", checked as boolean)}
                       />
-                      <Label htmlFor={`day-${schedule.day}`} className="ml-3 cursor-pointer">
+                      <Label htmlFor={`day-${schedule.day}`} className="m-3 cursor-pointer">
                         {schedule.day}
                       </Label>
                     </div>
 
                     {schedule.isAvailable && (
-                      <div className="flex items-center gap-3 flex-1 flex-wrap">
-                        <div className="flex items-center gap-2">
-                          <Label className="text-sm">{t("from")}</Label>
+                      <div className="flex gap-3 flex-1 flex-wrap">
+                        <div className="flex ">
+                          <Label className="text-sm m-1">{t("from")}</Label>
                           <Input
                             type="time"
                             value={schedule.startTime}
@@ -359,8 +359,8 @@ export default function CreateTeacherForm() {
                             className="w-32"
                           />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Label className="text-sm">{t("to")}</Label>
+                        <div className="flex">
+                          <Label className="text-sm m-1">{t("to")}</Label>
                           <Input
                             type="time"
                             value={schedule.endTime}

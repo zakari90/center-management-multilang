@@ -139,8 +139,8 @@ export default function TeachersTable() {
 
       {/* Table Section */}
       <Card>
-        <CardHeader className=" flex sm:flex-col justify-between gap-4 mb-2">
-          <div className="w-1/3">
+        <CardHeader className="flex flex-col lg:flex-row justify-between gap-4 mb-2">
+          <div className=" lg:w-1/3 ">
             <CardTitle>{t('teachersList')}</CardTitle>
             <CardDescription>
               {filteredTeachers.length > 0
