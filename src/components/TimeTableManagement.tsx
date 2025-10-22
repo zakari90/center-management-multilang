@@ -62,6 +62,7 @@ const TIME_SLOTS = [
 ]
 
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
+  // Translate using the 'TimetableManagement' namespace
   const t = useTranslations('TimetableManagement')
   const { daysOfWeek, availableClassrooms } = useLocalizedConstants()
 
@@ -164,7 +165,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       await axios.delete(`/api/admin/schedule/${scheduleId}`)
       setSchedule(prev => prev.filter(s => s.id !== scheduleId))
     } catch (err) {
-      console.log(err);
+      console.log(err)
       setError(t('errorDeleteSchedule'))
     }
   }
@@ -213,13 +214,16 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           <CardTitle>{t('viewOptions')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
+          <div className="flex gap-4 flex-wrap">
+            <div className="flex-1 min-w-[150px]">
               <Label>{t('viewMode')}</Label>
-              <Select value={viewMode} onValueChange={(value: any) => {
-                setViewMode(value)
-                setSelectedFilter('')
-              }}>
+              <Select
+                value={viewMode}
+                onValueChange={(value: any) => {
+                  setViewMode(value)
+                  setSelectedFilter('')
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -232,7 +236,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
             </div>
 
             {viewMode === 'teacher' && (
-              <div className="flex-1">
+              <div className="flex-1 min-w-[150px]">
                 <Label>{t('selectTeacher')}</Label>
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
@@ -250,7 +254,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
             )}
 
             {viewMode === 'room' && (
-              <div className="flex-1">
+              <div className="flex-1 min-w-[150px]">
                 <Label>{t('selectRoom')}</Label>
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
                   <SelectTrigger>
@@ -274,9 +278,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       <Card>
         <CardHeader>
           <CardTitle>{t('weeklySchedule')}</CardTitle>
-          <CardDescription>
-            {t('weeklyScheduleDescription')}
-          </CardDescription>
+          <CardDescription>{t('weeklyScheduleDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -286,7 +288,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                 <div className="font-semibold text-sm text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                   {t('time')}
                 </div>
-                {daysOfWeek.map((day:any) => (
+                {daysOfWeek.map(day => (
                   <div
                     key={day.key}
                     className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md sticky top-0 z-20"
@@ -300,14 +302,14 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
               <div className="space-y-2">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
                   <div key={time} className="grid grid-cols-8 gap-2">
-                    {/* Time Label */}
+                    {/* Time Label - fixed on left */}
                     <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                       <Clock className="h-3 w-3 mr-1" />
                       {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
                     {/* Day Columns */}
-                    {daysOfWeek.map((day:any) => {
+                    {daysOfWeek.map(day => {
                       const slots = getSlotsByDayAndTime(day.label, time)
                       const hasConflict = slots.length > 1
 
