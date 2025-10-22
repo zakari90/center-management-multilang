@@ -40,9 +40,6 @@
     "and": "و",
     "privacyPolicy": "سياسة الخصوصية"
   },
-  "managerLogin": {
-    "title": "أهلا بك مجددا"
-  },
   "register": {
     "title": "إنشاء حساب",
     "username": {
@@ -77,10 +74,10 @@
     "title": "أهلا بك في إدارة المركز",
     "description": "إدارة مدرستك بسهولة من خلال لوحة التحكم الخاصة بنا",
     "ownerDashboard": "لوحة تحكم المالك",
-    "managerDashboard": "لوحة تحكم ال مشرف"
+    "managerDashboard": "لوحة تحكم المشرف"
   },
   "adminStats": {
-    "totalManagers": "إجمالي ال مشرفين",
+    "totalManagers": "إجمالي المشرفين",
     "totalStudents": "إجمالي الطلاب",
     "totalTeachers": "إجمالي المعلمين",
     "totalRevenue": "إجمالي الإيرادات",
@@ -129,7 +126,7 @@
     "viewDetails": "عرض التفاصيل"
   },
   "managersList": {
-    "title": "ال مشرفون",
+    "title": "المشرفون",
     "description": "مسؤولو النظام",
     "add": "إضافة",
     "noManagers": "لا توجد  مشرفون حتى الآن",
@@ -249,7 +246,7 @@
     "noReceiptsFound": "لم يتم العثور على إيصالات تطابق معاييرك",
     "noReceiptsYet": "لا توجد إيصالات حتى الآن",
     "createFirstReceipt": "أنشئ إيصالتك الأولى",
-    "manager": "ال مشرف",
+    "manager": "المشرف",
     "receiptNumber": "رقم الإيصال",
     "type": "النوع",
     "for": "ل",
@@ -359,7 +356,7 @@
     "user": "مستخدم",
     "fillAllFields": "يرجى ملء جميع الحقول",
     "userAddedSuccess": "تم إضافة المستخدم بنجاح",
-    "userAddedError": "فشل في إضافة ال مشرف",
+    "userAddedError": "فشل في إضافة المشرف",
     "userUpdatedSuccess": "تم تحديث المستخدم بنجاح",
     "userUpdatedError": "فشل في تحديث المستخدم",
     "nameEmailRequired": "الاسم والبريد الإلكتروني مطلوبان",
@@ -1093,17 +1090,18 @@
     "nameRequired": "اسم الطالب مطلوب",
     "atLeastOneSubject": "يرجى تسجيل الطالب في مادة واحدة على الأقل"
   },
-"subjectForm":{  "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
-  "selectSubject": "اختر المادة *",
-  "selected": "مختار: {{value}}",
-  "selectGrade": "اختر الدرجة *",
-  "price": "السعر (درهم) *",
-  "duration": "المدة (بالساعات)",
-  "addButton": "إضافة المادة إلى المركز",
-  "required": "مطلوب",
-  "selectTeacherPlaceholder": "اكتب أو اختر مادة",
-  "selectSubjectPlaceholder": "اكتب أو اختر مادة",
-  "selectGradePlaceholder": "اكتب أو اختر درجة",
-  "selectRoomPlaceholder": "اكتب أو اختر غرفة"
-}
+  "subjectForm": {  
+    "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
+    "selectSubject": "اختر المادة *",
+    "selected": "مختار: {{value}}",
+    "selectGrade": "اختر الدرجة *",
+    "price": "السعر (درهم) *",
+    "duration": "المدة (بالساعات)",
+    "addButton": "إضافة المادة إلى المركز",
+    "required": "مطلوب",
+    "selectTeacherPlaceholder": "اكتب أو اختر مادة",
+    "selectSubjectPlaceholder": "اكتب أو اختر مادة",
+    "selectGradePlaceholder": "اكتب أو اختر درجة",
+    "selectRoomPlaceholder": "اكتب أو اختر غرفة"
+  }
 }

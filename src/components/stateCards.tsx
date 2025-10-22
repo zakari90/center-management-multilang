@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import axios from 'axios'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Users, GraduationCap, DollarSign, TrendingUp, Receipt } from 'lucide-react'
+import axios from 'axios'
+import { DollarSign, GraduationCap, Loader2, Receipt, TrendingUp, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 interface DashboardStats {
   totalStudents: number
@@ -39,11 +39,11 @@ export default function ManagerStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex justify-center items-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
+          <Card key={i} className="min-h-[120px] md:min-h-[140px]">
+            <CardContent className="flex justify-center items-center h-full py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </CardContent>
           </Card>
         ))}
@@ -54,60 +54,96 @@ export default function ManagerStatsCards() {
   if (!stats) return null
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('studentstitle')}</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+      {/* Students Card */}
+      <Card className="min-h-[120px] md:min-h-[140px] transition-all duration-200 hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+          <CardTitle className="text-sm font-medium text-left flex-1 pr-2">
+            {t('studentstitle')}
+          </CardTitle>
+          <Users className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalStudents}</div>
-          <p className="text-xs text-muted-foreground">
-            {t('studentsactive', { count: stats.activeEnrollments })}
+        <CardContent className="px-4 pb-4">
+          <div className="text-2xl sm:text-3xl font-bold text-primary">{stats.totalStudents.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t('studentsactive', { count: stats.activeEnrollments.toLocaleString() })}
           </p>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('teacherstitle')}</CardTitle>
-          <GraduationCap className="h-4 w-4 text-muted-foreground" />
+      {/* Teachers Card */}
+      <Card className="min-h-[120px] md:min-h-[140px] transition-all duration-200 hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+          <CardTitle className="text-sm font-medium text-left flex-1 pr-2">
+            {t('teacherstitle')}
+          </CardTitle>
+          <GraduationCap className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalTeachers}</div>
-          <p className="text-xs text-muted-foreground">
-            {t('teacherssubtitle', { count: stats.totalSubjects })}
+        <CardContent className="px-4 pb-4">
+          <div className="text-2xl sm:text-3xl font-bold text-primary">{stats.totalTeachers.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t('teacherssubtitle', { count: stats.totalSubjects.toLocaleString() })}
           </p>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('monthlyRevenuetitle')}</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+      {/* Monthly Revenue Card */}
+      <Card className="min-h-[120px] md:min-h-[140px] transition-all duration-200 hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+          <CardTitle className="text-sm font-medium text-left flex-1 pr-2">
+            {t('monthlyRevenuetitle')}
+          </CardTitle>
+          <DollarSign className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600">
-            MAD{stats.monthlyRevenue.toFixed(2)}
+        <CardContent className="px-4 pb-4">
+          <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1">
+            {stats.monthlyRevenue.toLocaleString('ar-MA', { 
+              style: 'currency', 
+              currency: 'MAD',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0 
+            })}
           </div>
           <div className="flex items-center text-xs text-muted-foreground">
-            <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
-            {t('monthlyRevenuegrowth', { percent: stats.revenueGrowth.toFixed(1) })}
+            <TrendingUp 
+              className={`mr-1 h-3 w-3 flex-shrink-0 ${
+                stats.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'
+              }`} 
+            />
+            <span className={`${
+              stats.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {t('monthlyRevenuegrowth', { percent: Math.abs(stats.revenueGrowth).toFixed(1) })}
+              {stats.revenueGrowth < 0 && (
+                <span className="ml-1">↓</span>
+              )}
+              {stats.revenueGrowth >= 0 && (
+                <span className="ml-1">↑</span>
+              )}
+            </span>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('totalRevenuetitle')}</CardTitle>
-          <Receipt className="h-4 w-4 text-muted-foreground" />
+      {/* Total Revenue Card */}
+      <Card className="min-h-[120px] md:min-h-[140px] transition-all duration-200 hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 pt-4">
+          <CardTitle className="text-sm font-medium text-left flex-1 pr-2">
+            {t('totalRevenuetitle')}
+          </CardTitle>
+          <Receipt className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-blue-600">
-            ${stats.totalRevenue.toFixed(2)}
+        <CardContent className="px-4 pb-4">
+          <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1">
+            {stats.totalRevenue.toLocaleString('ar-MA', { 
+              style: 'currency', 
+              currency: 'MAD',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0 
+            })}
           </div>
           <p className="text-xs text-muted-foreground">
-            {t('totalRevenuesubtitle', { count: stats.totalReceipts })}
+            {t('totalRevenuesubtitle', { count: stats.totalReceipts.toLocaleString() })}
           </p>
         </CardContent>
       </Card>

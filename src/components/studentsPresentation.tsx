@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { Loader2, Eye, Pencil, Search } from "lucide-react"
@@ -10,6 +11,7 @@ import { Card } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import axios from "axios"
 
 interface StudentSubject {
   id: string
@@ -48,10 +50,8 @@ export default function StudentsTable() {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch("/api/students")
-      if (!response.ok) throw new Error("Failed to fetch students")
-      const data = await response.json()
-      setStudents(data)
+      const response = await axios.get("/api/students")
+      setStudents(response.data)
     } catch (err) {
       console.log(err instanceof Error ? err.message : "Something went wrong")
       setError(t("errorFetchStudents"))

@@ -38,7 +38,7 @@ interface EnrolledSubject {
   price: number
 }
 
-export default function CreateStudentForm() {
+export default function CreateStudentForm2() {
   const t = useTranslations("CreateStudentForm")
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)

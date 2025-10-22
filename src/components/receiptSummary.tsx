@@ -1,13 +1,12 @@
 // components/ReceiptsSummary.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslations } from 'next-intl'
-import { BASE_URL } from '@/types/types'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 interface ReceiptStats {
   totalReceipts: number
@@ -28,7 +27,7 @@ export default function ReceiptsSummary() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(BASE_URL+'/api/receipts/stats')
+      const response = await fetch('/api/receipts/stats')
       if (response.ok) {
         const data = await response.json()
         setStats(data)

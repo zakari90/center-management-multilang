@@ -203,12 +203,12 @@ export default function StudentReceiptTable() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className=" flex flex-col lg:flex-row justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-2">
           <Button variant="outline" onClick={handleExportCSV}>
             <Download className="mr-2 h-4 w-4" />
             {t("exportCSV")}

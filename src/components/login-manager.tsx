@@ -23,7 +23,6 @@ export function LoginManager({
   ...props
 }: React.ComponentProps<"div">) {
   const t = useTranslations('login')
-  const tManager = useTranslations('managerLogin')
   const [state, action, isPending] = useActionState(loginManager, undefined)
   const { login } = useAuth()
   const router = useRouter()
@@ -41,7 +40,7 @@ export function LoginManager({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">{tManager('title')}</CardTitle>
+          <CardTitle className="text-xl">{t('title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={action}>
@@ -89,8 +88,7 @@ export function LoginManager({
 
             <div className="text-center text-sm mt-4">
               <Link href="/" className="inline-flex items-center gap-2 underline underline-offset-4">
-                <Home className="h-4 w-4" />
-                {tManager('backToHome')}
+                <Home className="h-6 w-6" />
               </Link>
             </div>
           </form>

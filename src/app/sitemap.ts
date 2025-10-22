@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "";
-  const locales = ["en", "ar","fr"] as const;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ""
+
+  const locales = ["ar", "fr","en"] as const;
 
   return [
     {

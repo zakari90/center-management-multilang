@@ -85,7 +85,7 @@ export default function CreateStudentForm() {
         }
       } catch (err) {
         console.error("Failed to fetch subjects:", err)
-        setError(t("errors.fetchSubjects"))
+        setError(t("errorsfetchSubjects"))
       } finally {
         setLoadingSubjects(false)
       }
@@ -109,7 +109,7 @@ export default function CreateStudentForm() {
 
   const handleAddEnrollment = () => {
     if (!selectedSubject || !selectedTeacher) {
-      setError(t("errors.selectSubjectTeacher"))
+      setError(t("errorsselectSubjectTeacher"))
       return
     }
 
@@ -118,7 +118,7 @@ export default function CreateStudentForm() {
       (es) => es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
     )
     if (alreadyEnrolled) {
-      setError(t("errors.alreadyEnrolled"))
+      setError(t("errorsalreadyEnrolled"))
       return
     }
 
@@ -155,10 +155,10 @@ export default function CreateStudentForm() {
 
     try {
       if (!formData.name) {
-        throw new Error(t("errors.nameRequired"))
+        throw new Error(t("errorsrequiredName"))
       }
       if (enrolledSubjects.length === 0) {
-        throw new Error(t("errors.enrollAtLeastOne"))
+        throw new Error(t("errorsnoSubjects"))
       }
 
       const response = await fetch("/api/students", {
@@ -175,13 +175,13 @@ export default function CreateStudentForm() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || t("errors.generic"))
+        throw new Error(data.error || t("errorsgeneric"))
       }
 
       await router.push("/manager/students")
       router.refresh()
     } catch (err: any) {
-      setError(err.message || t("errors.generic"))
+      setError(err.message || t("errorsgeneric"))
     } finally {
       setIsLoading(false)
     }
@@ -206,10 +206,10 @@ export default function CreateStudentForm() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Student Info */}
             <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">{t("studentInfo.title")}</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("studentInfotitle")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">{t("studentInfo.fullName")} *</Label>
+                  <Label htmlFor="name">{t("studentInfofullName")}</Label>
                   <Input
                     type="text"
                     id="name"
@@ -217,43 +217,43 @@ export default function CreateStudentForm() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder={t("studentInfo.namePlaceholder")}
+                    placeholder={t("studentInfofullNamePlaceholder")}
                   />
                 </div>
 
-                <div hidden>
-                  <Label htmlFor="grade">{t("studentInfo.grade")}</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="grade">{t("studentInfograde")}</Label>
                   <Input
                     type="text"
                     id="grade"
                     name="grade"
                     value={formData.grade || selectedGrade}
                     readOnly
-                    placeholder={t("studentInfo.grade")}
+                    placeholder={t("studentInfograde")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">{t("studentInfo.email")}</Label>
+                  <Label htmlFor="email">{t("studentInfoemail")}</Label>
                   <Input
                     type="email"
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder={t("studentInfo.emailPlaceholder")}
+                    placeholder={t("studentInfoemailPlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">{t("studentInfo.phone")}</Label>
+                  <Label htmlFor="phone">{t("studentInfophone")}</Label>
                   <Input
                     type="tel"
                     id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder={t("studentInfo.phonePlaceholder")}
+                    placeholder={t("studentInfophonePlaceholder")}
                   />
                 </div>
               </div>
@@ -261,41 +261,41 @@ export default function CreateStudentForm() {
 
             {/* Parent/Guardian Info */}
             <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">{t("parentInfo.title")}</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("parentInfotitle")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="parentName">{t("parentInfo.name")}</Label>
+                  <Label htmlFor="parentName">{t("parentInfoname")}</Label>
                   <Input
                     type="text"
                     id="parentName"
                     name="parentName"
                     value={formData.parentName}
                     onChange={handleInputChange}
-                    placeholder={t("parentInfo.namePlaceholder")}
+                    placeholder={t("parentInfonamePlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="parentPhone">{t("parentInfo.phone")}</Label>
+                  <Label htmlFor="parentPhone">{t("parentInfophone")}</Label>
                   <Input
                     type="tel"
                     id="parentPhone"
                     name="parentPhone"
                     value={formData.parentPhone}
                     onChange={handleInputChange}
-                    placeholder={t("parentInfo.phonePlaceholder")}
+                    placeholder={t("parentInfophonePlaceholder")}
                   />
                 </div>
 
                 <div className="md:col-span-2 space-y-2">
-                  <Label htmlFor="parentEmail">{t("parentInfo.email")}</Label>
+                  <Label htmlFor="parentEmail">{t("parentInfoemail")}</Label>
                   <Input
                     type="email"
                     id="parentEmail"
                     name="parentEmail"
                     value={formData.parentEmail}
                     onChange={handleInputChange}
-                    placeholder={t("parentInfo.emailPlaceholder")}
+                    placeholder={t("parentInfoemailPlaceholder")}
                   />
                 </div>
               </div>
@@ -303,22 +303,22 @@ export default function CreateStudentForm() {
 
             {/* Enrollment Flow */}
             <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">{t("subjectEnrollment.title")}</h2>
-              <p className="text-sm text-muted-foreground mb-6">{t("subjectEnrollment.description")}</p>
+              <h2 className="text-xl font-semibold mb-4">{t("enrollmenttitle")}</h2>
+              <p className="text-sm text-muted-foreground mb-6">{t("enrollmentsubtitle")}</p>
 
               {loadingSubjects ? (
-                <p className="text-muted-foreground text-center py-4">{t("subjectEnrollment.loading")}</p>
+                <p className="text-muted-foreground text-center py-4">{t("enrollmentloading")}</p>
               ) : subjects.length === 0 ? (
                 <Card className="bg-muted">
                   <CardContent className="pt-6 text-center text-muted-foreground">
-                    {t("subjectEnrollment.noSubjects")}
+                    {t("enrollmentnoSubjects")}
                   </CardContent>
                 </Card>
               ) : (
                 <div className="space-y-6">
                   {/* Step 1: Select Grade */}
                   <div>
-                    <Label className="text-base mb-3 block">{t("subjectEnrollment.step1")}</Label>
+                    <Label className="text-base mb-3 block">{t("enrollmentstep1title")}</Label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {availableGrades.map((grade) => (
                         <Button
@@ -340,10 +340,10 @@ export default function CreateStudentForm() {
                   {/* Step 2: Select Subject */}
                   {selectedGrade && (
                     <div>
-                      <Label className="text-base mb-3 block">{t("subjectEnrollment.step2")}</Label>
+                      <Label className="text-base mb-3 block">{t("enrollmentstep2title")}</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {subjectsForGrade.length === 0 ? (
-                          <p className="text-muted-foreground col-span-2">{t("subjectEnrollment.noSubjectsForGrade")}</p>
+                          <p className="text-muted-foreground col-span-2">{t("enrollmentnoSubjectsForGrade")}</p>
                         ) : (
                           subjectsForGrade.map((subject) => (
                             <Button
@@ -362,14 +362,14 @@ export default function CreateStudentForm() {
                                   <h4 className="font-semibold">{subject.name}</h4>
                                   {subject.duration && (
                                     <p className="text-sm text-muted-foreground mt-1">
-                                      {subject.duration} {t("subjectEnrollment.minutes")}
+                                      {subject.duration} {t("minutes")}
                                     </p>
                                   )}
                                   <p className="text-xs text-muted-foreground mt-1">
-                                    {subject.teacherSubjects.length} {t("subjectEnrollment.teachersAvailable")}
+                                    {subject.teacherSubjects.length} {t("enrollmentteachersAvailable")}
                                   </p>
                                 </div>
-                                <p className="text-lg font-bold text-primary">${subject.price.toFixed(2)}</p>
+                                <p className="text-lg font-bold text-primary">{subject.price.toFixed(2)} درهم</p>
                               </div>
                             </Button>
                           ))
@@ -381,10 +381,14 @@ export default function CreateStudentForm() {
                   {/* Step 3: Select Teacher */}
                   {selectedSubject && (
                     <div>
-                      <Label className="text-base mb-3 block">{t("subjectEnrollment.step3", { subject: selectedSubject.name })}</Label>
+                      <Label className="text-base mb-3 block">
+                        {t("enrollmentstep3title", { subject: selectedSubject.name })}
+                      </Label>
                       {teachersForSubject.length === 0 ? (
                         <Card className="bg-muted">
-                          <CardContent className="pt-6 text-center text-muted-foreground">{t("subjectEnrollment.noTeachers")}</CardContent>
+                          <CardContent className="pt-6 text-center text-muted-foreground">
+                            {t("enrollmentnoTeachers")}
+                          </CardContent>
                         </Card>
                       ) : (
                         <div className="space-y-3">
@@ -404,16 +408,16 @@ export default function CreateStudentForm() {
                                   <div className="text-left">
                                     <h4 className="font-semibold">{ts.teacher.name}</h4>
                                     <p className="text-sm text-muted-foreground">
-                                      {ts.teacher.email || ts.teacher.phone || t("subjectEnrollment.noContact")}
+                                      {ts.teacher.email || ts.teacher.phone || t("enrollmentnoContactInfo")}
                                     </p>
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-sm text-muted-foreground">{t("subjectEnrollment.compensation")}</p>
+                                  <p className="text-sm text-muted-foreground">{t("enrollmentcompensation")}</p>
                                   <p className="font-semibold">
                                     {ts.percentage
-                                      ? `${ts.percentage}% ($${((selectedSubject.price * ts.percentage) / 100).toFixed(2)})`
-                                      : `$${ts.hourlyRate}/hr`}
+                                      ? `${ts.percentage}% (${((selectedSubject.price * ts.percentage) / 100).toFixed(2)} درهم)`
+                                      : `${ts.hourlyRate} درهم/ساعة`}
                                   </p>
                                 </div>
                               </div>
@@ -424,7 +428,7 @@ export default function CreateStudentForm() {
 
                       {selectedTeacher && (
                         <Button type="button" onClick={handleAddEnrollment} className="mt-4 w-full">
-                          {t("subjectEnrollment.addButton")}
+                          {t("enrollmentaddButton")}
                         </Button>
                       )}
                     </div>
@@ -437,10 +441,10 @@ export default function CreateStudentForm() {
             {enrolledSubjects.length > 0 && (
               <div className="border-b pb-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{t("enrolledSubjects.title")}</h2>
+                  <h2 className="text-xl font-semibold">{t("enrolledSubjectstitle")}</h2>
                   <div className="text-right">
-                    <p className="text-sm text-muted-foreground">{t("enrolledSubjects.totalPrice")}</p>
-                    <p className="text-2xl font-bold text-primary">${totalPrice.toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground">{t("enrolledSubjectstotalPrice")}</p>
+                    <p className="text-2xl font-bold text-primary">{totalPrice.toFixed(2)} درهم</p>
                   </div>
                 </div>
 
@@ -454,11 +458,11 @@ export default function CreateStudentForm() {
                               <div className="flex-1">
                                 <h4 className="font-semibold">{es.subjectName}</h4>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                  {t("enrolledSubjects.subjectInfo", { grade: es.grade, teacher: es.teacherName })}
+                                  {t("enrolledSubjectsgradeLabel")}: {es.grade} | {t("enrolledSubjectsteacherLabel")}: {es.teacherName}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="text-lg font-bold text-primary">MAD {es.price.toFixed(2)}</p>
+                                <p className="text-lg font-bold text-primary">{es.price.toFixed(2)} درهم</p>
                               </div>
                             </div>
                           </div>
@@ -468,7 +472,7 @@ export default function CreateStudentForm() {
                             variant="ghost"
                             size="sm"
                             className="ml-4 text-destructive hover:text-destructive"
-                            title={t("enrolledSubjects.removeEnrollment")}
+                            title={t("enrolledSubjectsremoveTooltip")}
                           >
                             <X className="w-5 h-5" />
                           </Button>
@@ -483,10 +487,10 @@ export default function CreateStudentForm() {
             {/* Action Buttons */}
             <div className="flex justify-end gap-4 pt-6 flex-wrap">
               <Button type="button" onClick={() => router.back()} variant="outline" disabled={isLoading}>
-                {t("actions.cancel")}
+                {t("actionscancel")}
               </Button>
               <Button type="submit" disabled={isLoading || enrolledSubjects.length === 0}>
-                {isLoading ? t("actions.creating") : t("actions.addStudent")}
+                {isLoading ? t("actionscreating") : t("actionssubmit")}
               </Button>
             </div>
           </form>
