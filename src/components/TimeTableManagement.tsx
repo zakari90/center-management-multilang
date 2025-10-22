@@ -281,10 +281,10 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           <CardDescription>{t('weeklyScheduleDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto relative">
             <div className="min-w-[1200px]">
               {/* Header Row */}
-              <div className="grid grid-cols-8 gap-2 mb-2">
+              <div className="grid grid-cols-8 gap-2 mb-2 ">
                 <div className="font-semibold text-sm text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                   {t('time')}
                 </div>
@@ -299,7 +299,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
               </div>
 
               {/* Time Slots */}
-              <div className="space-y-2">
+              <div className="space-y-2 sticky">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
                   <div key={time} className="grid grid-cols-8 gap-2">
                     {/* Time Label - fixed on left */}

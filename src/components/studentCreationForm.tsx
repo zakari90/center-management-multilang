@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import type React from "react"
-
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -113,18 +113,16 @@ export default function CreateStudentForm() {
       return
     }
 
-    // Check if already enrolled in this subject with this teacher
+    // Check if already enrolled
     const alreadyEnrolled = enrolledSubjects.some(
       (es) => es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
     )
-
     if (alreadyEnrolled) {
       setError(t("errors.alreadyEnrolled"))
       return
     }
 
     const teacher = teachersForSubject.find((ts) => ts.teacherId === selectedTeacher)?.teacher
-
     if (!teacher) return
 
     setEnrolledSubjects((prev) => [
@@ -139,7 +137,7 @@ export default function CreateStudentForm() {
       },
     ])
 
-    // Reset enrollment flow
+    // Reset enrollment selection
     setSelectedGrade("")
     setSelectedSubject(null)
     setSelectedTeacher("")
@@ -157,11 +155,10 @@ export default function CreateStudentForm() {
 
     try {
       if (!formData.name) {
-        throw new Error("Student name is required")
+        throw new Error(t("errors.nameRequired"))
       }
-
       if (enrolledSubjects.length === 0) {
-        throw new Error("Please enroll the student in at least one subject")
+        throw new Error(t("errors.enrollAtLeastOne"))
       }
 
       const response = await fetch("/api/students", {
@@ -178,14 +175,13 @@ export default function CreateStudentForm() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || "Failed to create student")
+        throw new Error(data.error || t("errors.generic"))
       }
 
       await router.push("/manager/students")
       router.refresh()
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : "Something went wrong")
-      setError(t("errors.generic"))
+    } catch (err: any) {
+      setError(err.message || t("errors.generic"))
     } finally {
       setIsLoading(false)
     }
@@ -208,10 +204,9 @@ export default function CreateStudentForm() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Student Information */}
+            {/* Student Info */}
             <div className="border-b pb-6">
               <h2 className="text-xl font-semibold mb-4">{t("studentInfo.title")}</h2>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">{t("studentInfo.fullName")} *</Label>
@@ -222,7 +217,7 @@ export default function CreateStudentForm() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="rachid Daman"
+                    placeholder={t("studentInfo.namePlaceholder")}
                   />
                 </div>
 
@@ -264,10 +259,9 @@ export default function CreateStudentForm() {
               </div>
             </div>
 
-            {/* Parent/Guardian Information */}
+            {/* Parent/Guardian Info */}
             <div className="border-b pb-6">
               <h2 className="text-xl font-semibold mb-4">{t("parentInfo.title")}</h2>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="parentName">{t("parentInfo.name")}</Label>
@@ -307,7 +301,7 @@ export default function CreateStudentForm() {
               </div>
             </div>
 
-            {/* Subject Enrollment - Step by Step */}
+            {/* Enrollment Flow */}
             <div className="border-b pb-6">
               <h2 className="text-xl font-semibold mb-4">{t("subjectEnrollment.title")}</h2>
               <p className="text-sm text-muted-foreground mb-6">{t("subjectEnrollment.description")}</p>
@@ -349,9 +343,7 @@ export default function CreateStudentForm() {
                       <Label className="text-base mb-3 block">{t("subjectEnrollment.step2")}</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {subjectsForGrade.length === 0 ? (
-                          <p className="text-muted-foreground col-span-2">
-                            {t("subjectEnrollment.noSubjectsForGrade")}
-                          </p>
+                          <p className="text-muted-foreground col-span-2">{t("subjectEnrollment.noSubjectsForGrade")}</p>
                         ) : (
                           subjectsForGrade.map((subject) => (
                             <Button
@@ -361,26 +353,23 @@ export default function CreateStudentForm() {
                                 setSelectedSubject(subject)
                                 setSelectedTeacher("")
                               }}
-                              disabled={subject.teacherSubjects && subject.teacherSubjects.length === 0}
+                              disabled={subject.teacherSubjects.length === 0}
                               variant={selectedSubject?.id === subject.id ? "default" : "outline"}
                               className="h-auto p-4 justify-start text-left"
                             >
-                              <div className="w-full">
-                                <div className="flex justify-between items-start w-full">
-                                  <div>
-                                    <h4 className="font-semibold">{subject.name}</h4>
-                                    {subject.duration && (
-                                      <p className="text-sm text-muted-foreground mt-1">
-                                        {subject.duration} {t("subjectEnrollment.minutes")}
-                                      </p>
-                                    )}
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      {subject.teacherSubjects && subject.teacherSubjects.length}{" "}
-                                      {t("subjectEnrollment.teachersAvailable")}
+                              <div className="w-full flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-semibold">{subject.name}</h4>
+                                  {subject.duration && (
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                      {subject.duration} {t("subjectEnrollment.minutes")}
                                     </p>
-                                  </div>
-                                  <p className="text-lg font-bold text-primary">${subject.price.toFixed(2)}</p>
+                                  )}
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {subject.teacherSubjects.length} {t("subjectEnrollment.teachersAvailable")}
+                                  </p>
                                 </div>
+                                <p className="text-lg font-bold text-primary">${subject.price.toFixed(2)}</p>
                               </div>
                             </Button>
                           ))
@@ -392,55 +381,47 @@ export default function CreateStudentForm() {
                   {/* Step 3: Select Teacher */}
                   {selectedSubject && (
                     <div>
-                      <Label className="text-base mb-3 block">
-                        {t("subjectEnrollment.step3", { subject: selectedSubject.name })}
-                      </Label>
-                      {teachersForSubject && teachersForSubject.length === 0 ? (
+                      <Label className="text-base mb-3 block">{t("subjectEnrollment.step3", { subject: selectedSubject.name })}</Label>
+                      {teachersForSubject.length === 0 ? (
                         <Card className="bg-muted">
-                          <CardContent className="pt-6 text-center text-muted-foreground">
-                            {t("subjectEnrollment.noTeachers")}
-                          </CardContent>
+                          <CardContent className="pt-6 text-center text-muted-foreground">{t("subjectEnrollment.noTeachers")}</CardContent>
                         </Card>
                       ) : (
                         <div className="space-y-3">
-                          {teachersForSubject &&
-                            teachersForSubject.map((ts) => (
-                              <Button
-                                key={ts.id}
-                                type="button"
-                                onClick={() => setSelectedTeacher(ts.teacherId)}
-                                variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
-                                className="h-auto p-4 justify-start w-full"
-                              >
-                                <div className="flex items-center justify-between w-full">
-                                  <div className="flex items-center gap-4">
-                                    <Avatar>
-                                      <AvatarFallback>{ts.teacher.name.charAt(0).toUpperCase()}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="text-left">
-                                      <h4 className="font-semibold">{ts.teacher.name}</h4>
-                                      <p className="text-sm text-muted-foreground">
-                                        {ts.teacher.email || ts.teacher.phone || t("subjectEnrollment.noContact")}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
+                          {teachersForSubject.map((ts) => (
+                            <Button
+                              key={ts.id}
+                              type="button"
+                              onClick={() => setSelectedTeacher(ts.teacherId)}
+                              variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
+                              className="h-auto p-4 justify-start w-full"
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-4">
+                                  <Avatar>
+                                    <AvatarFallback>{ts.teacher.name.charAt(0).toUpperCase()}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="text-left">
+                                    <h4 className="font-semibold">{ts.teacher.name}</h4>
                                     <p className="text-sm text-muted-foreground">
-                                      {t("subjectEnrollment.compensation")}
-                                    </p>
-                                    <p className="font-semibold">
-                                      {ts.percentage
-                                        ? `${ts.percentage}% ($${((selectedSubject.price * ts.percentage) / 100).toFixed(2)})`
-                                        : `$${ts.hourlyRate}/hr`}
+                                      {ts.teacher.email || ts.teacher.phone || t("subjectEnrollment.noContact")}
                                     </p>
                                   </div>
                                 </div>
-                              </Button>
-                            ))}
+                                <div className="text-right">
+                                  <p className="text-sm text-muted-foreground">{t("subjectEnrollment.compensation")}</p>
+                                  <p className="font-semibold">
+                                    {ts.percentage
+                                      ? `${ts.percentage}% ($${((selectedSubject.price * ts.percentage) / 100).toFixed(2)})`
+                                      : `$${ts.hourlyRate}/hr`}
+                                  </p>
+                                </div>
+                              </div>
+                            </Button>
+                          ))}
                         </div>
                       )}
 
-                      {/* Add Button */}
                       {selectedTeacher && (
                         <Button type="button" onClick={handleAddEnrollment} className="mt-4 w-full">
                           {t("subjectEnrollment.addButton")}
@@ -477,7 +458,7 @@ export default function CreateStudentForm() {
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="text-lg font-bold text-primary">MAD{es.price.toFixed(2)}</p>
+                                <p className="text-lg font-bold text-primary">MAD {es.price.toFixed(2)}</p>
                               </div>
                             </div>
                           </div>
@@ -500,7 +481,7 @@ export default function CreateStudentForm() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-end gap-4 pt-6">
+            <div className="flex justify-end gap-4 pt-6 flex-wrap">
               <Button type="button" onClick={() => router.back()} variant="outline" disabled={isLoading}>
                 {t("actions.cancel")}
               </Button>

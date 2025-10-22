@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
@@ -23,6 +24,7 @@ import { Eye, Loader2, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { BASE_URL } from '@/types/types'
 
 interface TeacherSubject {
   id: string
@@ -60,7 +62,7 @@ export default function TeachersTable() {
 
   const fetchTeachers = async () => {
     try {
-      const response = await axios.get('/api/teachers')
+      const response = await axios.get(BASE_URL+'/api/teachers')
       setTeachers(response.data)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('error'))
@@ -83,7 +85,7 @@ export default function TeachersTable() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <Loader2 className="h-12 w-12 animate-spin" />
       </div>
     )
   }
@@ -138,7 +140,7 @@ export default function TeachersTable() {
 
       {/* Table Section */}
       <Card>
-        <CardHeader className="flex justify-between gap-4 mb-2">
+        <CardHeader className=" flex sm:flex-col justify-between gap-4 mb-2">
           <div className="w-1/3">
             <CardTitle>{t('teachersList')}</CardTitle>
             <CardDescription>

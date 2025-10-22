@@ -2,7 +2,6 @@
 "use client"
 
 import type React from "react"
-
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
@@ -44,7 +43,6 @@ export default function CreateTeacherForm() {
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
-
   const DAYS = [t("monday"), t("tuesday"), t("wednesday"), t("thursday"), t("friday"), t("saturday"), t("sunday")]
 
   const [formData, setFormData] = useState({
@@ -120,10 +118,10 @@ export default function CreateTeacherForm() {
       const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
       for (const ts of validSubjects) {
         if (ts.compensationType === "percentage" && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
-          throw new Error("Percentage must be between 1 and 100")
+          throw new Error(t("percentageRangeError"))
         }
         if (ts.compensationType === "hourly" && (!ts.hourlyRate || ts.hourlyRate <= 0)) {
-          throw new Error("Hourly rate must be greater than 0")
+          throw new Error(t("hourlyRateError"))
         }
       }
 
@@ -145,9 +143,9 @@ export default function CreateTeacherForm() {
       await router.push("/manager/teachers")
       router.refresh()
     } catch (err) {
-      if (axios.isAxiosError(err)) setError(err.response?.data?.error || "Failed to create teacher")
+      if (axios.isAxiosError(err)) setError(err.response?.data?.error || t("genericError"))
       else if (err instanceof Error) setError(err.message)
-      else setError("Something went wrong")
+      else setError(t("genericError"))
     } finally {
       setIsLoading(false)
     }
@@ -167,7 +165,7 @@ export default function CreateTeacherForm() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Info */}
+            {/* Basic Information Section */}
             <div className="border-b pb-6">
               <h2 className="text-xl font-semibold mb-4">{t("basicInfo")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,7 +173,7 @@ export default function CreateTeacherForm() {
                   <div key={field} className="space-y-2">
                     <Label htmlFor={field}>
                       {t(field)}
-                      {field === "name" ? <span className="text-destructive">*</span> : ""}
+                      {field === "name" && <span className="text-destructive">*</span>}
                     </Label>
                     <Input
                       type={field === "email" ? "email" : "text"}
@@ -191,7 +189,7 @@ export default function CreateTeacherForm() {
               </div>
             </div>
 
-            {/* Subjects & Compensation */}
+            {/* Subjects & Compensation Section */}
             <div className="border-b pb-6">
               <div className="flex justify-between items-center mb-4">
                 <div>
@@ -212,7 +210,6 @@ export default function CreateTeacherForm() {
               ) : (
                 <div className="space-y-4">
                   {teacherSubjects.map((ts, index) => {
-                    const selectedSubject = subjects.find((s) => s.id === ts.subjectId)
                     return (
                       <Card key={index}>
                         <CardContent className="pt-6 space-y-4">
@@ -231,7 +228,10 @@ export default function CreateTeacherForm() {
                                 <SelectContent>
                                   {subjects
                                     .filter(
-                                      (s) => !teacherSubjects.some((ts2, i) => i !== index && ts2.subjectId === s.id),
+                                      (s) =>
+                                        !teacherSubjects.some(
+                                          (ts2, i) => i !== index && ts2.subjectId === s.id,
+                                        ),
                                     )
                                     .map((subject) => (
                                       <SelectItem key={subject.id} value={subject.id}>
@@ -248,13 +248,12 @@ export default function CreateTeacherForm() {
                               size="icon"
                               onClick={() => removeSubject(index)}
                               className="mt-7 text-destructive hover:text-destructive"
-                              title="Remove"
+                              title={t("remove")}
                             >
                               <X className="h-4 w-4" />
                             </Button>
                           </div>
 
-                          {/* Compensation */}
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
                               <Label htmlFor={`payment-type-${index}`}>{t("paymentType")}</Label>
@@ -280,12 +279,12 @@ export default function CreateTeacherForm() {
                                 <Input
                                   id={`percentage-${index}`}
                                   type="number"
-                                  min="1"
-                                  max="100"
-                                  step="0.1"
+                                  min={1}
+                                  max={100}
+                                  step={0.1}
                                   value={ts.percentage || ""}
                                   onChange={(e) =>
-                                    updateSubject(index, "percentage", Number.parseFloat(e.target.value))
+                                    updateSubject(index, "percentage", parseFloat(e.target.value))
                                   }
                                 />
                               </div>
@@ -297,32 +296,30 @@ export default function CreateTeacherForm() {
                                 <Input
                                   id={`hourly-rate-${index}`}
                                   type="number"
-                                  min="0"
-                                  step="0.01"
+                                  min={0}
+                                  step={0.01}
                                   value={ts.hourlyRate || ""}
                                   onChange={(e) =>
-                                    updateSubject(index, "hourlyRate", Number.parseFloat(e.target.value))
+                                    updateSubject(index, "hourlyRate", parseFloat(e.target.value))
                                   }
                                 />
                               </div>
                             )}
 
-                            {selectedSubject && (
-                              <div className="flex items-end">
-                                <Card className="w-full bg-primary/5">
-                                  <CardContent className="pt-4">
-                                    <p className="text-xs text-muted-foreground mb-1">{t("estimatedEarnings")}</p>
-                                    <p className="text-lg font-semibold">
-                                      {ts.compensationType === "percentage" && ts.percentage
-                                        ? `$${((selectedSubject.price * ts.percentage) / 100).toFixed(2)}`
-                                        : ts.hourlyRate
-                                          ? `$${ts.hourlyRate.toFixed(2)}/hr`
-                                          : "$0.00"}
-                                    </p>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            )}
+                            <div className="flex items-end">
+                              <Card className="w-full bg-primary/5">
+                                <CardContent className="pt-4">
+                                  <p className="text-xs text-muted-foreground mb-1">{t("estimatedEarnings")}</p>
+                                  <p className="text-lg font-semibold">
+                                    {ts.compensationType === "percentage" && ts.percentage
+                                      ? `$${((subjects.find((s) => s.id === ts.subjectId)?.price ?? 0 * ts.percentage) / 100).toFixed(2)}`
+                                      : ts.hourlyRate
+                                      ? `$${ts.hourlyRate.toFixed(2)}/hr`
+                                      : "$0.00"}
+                                  </p>
+                                </CardContent>
+                              </Card>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -332,7 +329,7 @@ export default function CreateTeacherForm() {
               )}
             </div>
 
-            {/* Weekly Schedule */}
+            {/* Weekly Schedule Section */}
             <div className="border-b pb-6">
               <h2 className="text-xl font-semibold mb-4">{t("weeklySchedule")}</h2>
               <p className="text-sm text-muted-foreground mb-4">{t("selectAvailable")}</p>
@@ -352,7 +349,7 @@ export default function CreateTeacherForm() {
                     </div>
 
                     {schedule.isAvailable && (
-                      <div className="flex items-center gap-3 flex-1">
+                      <div className="flex items-center gap-3 flex-1 flex-wrap">
                         <div className="flex items-center gap-2">
                           <Label className="text-sm">{t("from")}</Label>
                           <Input
@@ -378,8 +375,8 @@ export default function CreateTeacherForm() {
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-4 pt-6">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap justify-end gap-4 pt-6">
               <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
                 {t("cancel")}
               </Button>

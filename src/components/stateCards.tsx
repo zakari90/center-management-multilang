@@ -57,49 +57,49 @@ export default function ManagerStatsCards() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('students.title')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('studentstitle')}</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalStudents}</div>
           <p className="text-xs text-muted-foreground">
-            {t('students.active', { count: stats.activeEnrollments })}
+            {t('studentsactive', { count: stats.activeEnrollments })}
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('teachers.title')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('teacherstitle')}</CardTitle>
           <GraduationCap className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalTeachers}</div>
           <p className="text-xs text-muted-foreground">
-            {t('teachers.subtitle', { count: stats.totalSubjects })}
+            {t('teacherssubtitle', { count: stats.totalSubjects })}
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('monthlyRevenue.title')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('monthlyRevenuetitle')}</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
-            ${stats.monthlyRevenue.toFixed(2)}
+            MAD{stats.monthlyRevenue.toFixed(2)}
           </div>
           <div className="flex items-center text-xs text-muted-foreground">
             <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
-            {t('monthlyRevenue.growth', { percent: stats.revenueGrowth.toFixed(1) })}
+            {t('monthlyRevenuegrowth', { percent: stats.revenueGrowth.toFixed(1) })}
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('totalRevenue.title')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{t('totalRevenuetitle')}</CardTitle>
           <Receipt className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -107,7 +107,7 @@ export default function ManagerStatsCards() {
             ${stats.totalRevenue.toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground">
-            {t('totalRevenue.subtitle', { count: stats.totalReceipts })}
+            {t('totalRevenuesubtitle', { count: stats.totalReceipts })}
           </p>
         </CardContent>
       </Card>

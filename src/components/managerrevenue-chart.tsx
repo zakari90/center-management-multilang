@@ -51,7 +51,7 @@ export default function ManagerRevenueChart() {
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div>
             <CardTitle>{t('title')}</CardTitle>
             <CardDescription>{t('description')}</CardDescription>

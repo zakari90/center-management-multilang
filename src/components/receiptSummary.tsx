@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslations } from 'next-intl'
+import { BASE_URL } from '@/types/types'
 
 interface ReceiptStats {
   totalReceipts: number
@@ -27,7 +28,7 @@ export default function ReceiptsSummary() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/receipts/stats')
+      const response = await fetch(BASE_URL+'/api/receipts/stats')
       if (response.ok) {
         const data = await response.json()
         setStats(data)

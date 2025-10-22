@@ -1,14 +1,13 @@
 import EnrollmentChart from "@/components/enrollement-chart";
 import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
-import ManagerRevenueChart from "@/components/revenue-chart";
+import ManagerRevenueChart from "@/components/managerrevenue-chart";
 import ManagerStatsCards from "@/components/stateCards";
 import TopSubjects from "@/components/top-subjects";
 import { useTranslations } from "next-intl";
 
 
 function Page() {
-//how to auto refrech
   const t = useTranslations('Dashboard')
 
 return (
@@ -19,11 +18,11 @@ return (
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 <ReceiptsSummary/>
+        <QuickActions />
 
-      <ManagerStatsCards />
 
       <div className="grid gap-4 grid-cols-4">
-        <QuickActions />
+      <ManagerStatsCards />
 
         <ManagerRevenueChart />
       </div>

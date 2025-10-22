@@ -216,10 +216,10 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto relative">
             <div className="min-w-[1200px]">
               <div className="grid grid-cols-7 gap-2 mb-2">
-                <div className="font-semibold text-sm text-muted-foreground p-2">
+                <div className="font-semibold text-sm text-muted-foreground p-2 sticky">
                   {t('time')}
                 </div>
                 {DAYS.map(day => (
@@ -229,7 +229,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                 ))}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 sticky">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
                   <div key={time} className="grid grid-cols-7 gap-2">
                     <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md">
