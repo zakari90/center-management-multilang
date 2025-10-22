@@ -13,11 +13,11 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
 import { useState } from "react"
-import { SubjectForm } from "./centerPresentation copy"
 import { EditDialog } from "./editDialog"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useTranslations } from "next-intl"
 import { useLocalizedConstants } from "./useLocalizedConstants"
+import { SubjectForm } from "./subjectForm"
 
 type Subject = {
   id: string
@@ -45,7 +45,8 @@ export type Center = {
 
 export default function CenterPresentation(center: Center) {
   const t = useTranslations('CenterPresentation')
-  const {availableSubjects, availableGrades } = useLocalizedConstants();
+  const { availableSubjects, availableGrades } = useLocalizedConstants();
+  
   const [formData, setFormData] = useState({
     name: center.name,
     address: center.address,
@@ -56,7 +57,7 @@ export default function CenterPresentation(center: Center) {
   })
 
   const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
-    //@ts-expect-error
+    // @ts-expect-error id is missing but you might generate it in backend or UI
     setFormData(prev => ({
       ...prev,
       subjects: [...prev.subjects, { name: subjectName, grade, price, duration }]
@@ -72,71 +73,73 @@ export default function CenterPresentation(center: Center) {
   }
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
+    <main className="max-w-3xl mx-auto p-4 sm:p-6">
       <Card className="shadow-lg border border-border bg-background">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold text-primary">
+        <CardHeader className="text-center space-y-2 px-4 sm:px-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
             {formData.name}
           </CardTitle>
           <p className="text-muted-foreground text-sm">{t('centerOverview')}</p>
           {formData.address && (
-            <p className="text-sm text-muted-foreground whitespace-pre-line">{formData.address}</p>
+            <p className="text-sm text-muted-foreground whitespace-pre-line break-words px-2 sm:px-0">{formData.address}</p>
           )}
           {formData.phone && (
-            <p className="text-sm text-muted-foreground">{t('phone')} {formData.phone}</p>
+            <p className="text-sm text-muted-foreground px-2 sm:px-0">
+              {t('phone')} {formData.phone}
+            </p>
           )}
         </CardHeader>
 
         <Separator className="my-2" />
 
-        <CardContent className="space-y-6">
-          {/* Subjects */}
+        <CardContent className="space-y-6 px-4 sm:px-6">
+          {/* Subjects Section */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                {t('subjectsOffered')}
+            <div className="flex flex-wrap justify-between items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <BookOpen className="h-4 w-4" />
+                <span>{t('subjectsOffered')}</span>
               </div>
-              <Button onClick={handleAddSubject} className="hover:cursor-pointer w-full m-2 mb-0 sm:w-auto">
+              <Button onClick={handleAddSubject} className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addSubject')}
               </Button>
             </div>
 
-            <div className="space-y-3">
-              {formData.subjects.length > 0 ? (
-                formData.subjects.map((subject) => (
-                  <Card key={subject.id} className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <h4 className="font-semibold text-base">{subject.name}</h4>
+            {formData.subjects.length > 0 ? (
+              <div className="space-y-3">
+                {formData.subjects.map(subject => (
+                  <Card key={subject.id || subject.name} className="p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <h4 className="font-semibold text-base truncate">{subject.name}</h4>
                         <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                           <Badge variant="outline">{subject.grade}</Badge>
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 whitespace-nowrap">
                             <DollarSign className="h-3 w-3" />
                             {subject.price} {t('currency')}
                           </span>
-                          {subject.duration && (
-                            <span className="flex items-center gap-1">
+                          {subject.duration !== null && subject.duration !== undefined && (
+                            <span className="flex items-center gap-1 whitespace-nowrap">
                               <Clock className="h-3 w-3" />
                               {subject.duration} {t('duration')}
                             </span>
                           )}
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" aria-label={t('edit')}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </div>
                   </Card>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
+            )}
           </div>
 
-          {/* Classrooms */}
+          {/* Classrooms Section */}
           <Section
             title={t('availableClassrooms')}
             icon={<Building2 className="h-4 w-4 text-muted-foreground" />}
@@ -163,6 +166,7 @@ export default function CenterPresentation(center: Center) {
             noDataText={t('noData')}
           />
 
+          {/* Working Days Section */}
           <Section
             title={t('workingDays')}
             icon={<CalendarDays className="h-4 w-4 text-muted-foreground" />}
@@ -190,18 +194,16 @@ export default function CenterPresentation(center: Center) {
           />
         </CardContent>
       </Card>
-      
+
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>{t('addNewSubject')}</DialogTitle>
-            <DialogDescription>
-              {t('addSubjectDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('addSubjectDescription')}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <SubjectForm
-              onAddSubject={addSubject} 
+              onAddSubject={addSubject}
               availableSubjects={availableSubjects}
               availableGrades={availableGrades}
             />
@@ -223,23 +225,23 @@ type SectionProps = {
 function Section({ title, icon, items, onEditButton, noDataText = "No data" }: SectionProps) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap justify-between items-center">
         <div className="flex items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
           {icon}
-          {title}
+          <span className="truncate">{title}</span>
         </div>
         {onEditButton}
       </div>
 
       <div className="flex flex-wrap gap-2">
         {items.length > 0 ? (
-          items.map((item) => (
-            <Badge key={item} variant="secondary" className="text-sm">
+          items.map(item => (
+            <Badge key={item} variant="secondary" className="text-sm truncate max-w-xs">
               {item}
             </Badge>
           ))
         ) : (
-          <p className="text-sm text-muted-foreground italic">{noDataText}</p>
+          <p className="text-sm text-muted-foreground italic truncate">{noDataText}</p>
         )}
       </div>
     </div>
