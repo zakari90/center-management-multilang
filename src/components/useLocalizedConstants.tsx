@@ -75,8 +75,6 @@ export function useLocalizedConstants() {
     t('classrooms.lab1'),
     t('classrooms.labComputer'),
     t('classrooms.labScience'),
-    t('classrooms.artRoom'),
-    t('classrooms.musicRoom'),
     t('classrooms.library')
   ];
 

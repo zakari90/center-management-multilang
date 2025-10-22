@@ -13,7 +13,7 @@ export function ModeToggle() {
 
   //change theme from current to opposite
   const toggleTheme = () => {
-    setTheme(themes === "light" ? "dark" : "light");
+    setTheme(themes === "dark" ? "light" : "dark");
   };
 
   return (

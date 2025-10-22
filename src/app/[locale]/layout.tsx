@@ -8,6 +8,8 @@ import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../globals.css";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || ""
@@ -69,6 +71,9 @@ export default async function RootLayout({
             </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
+                <Analytics />
+        <SpeedInsights />
+
       </body>
     </html>
   );

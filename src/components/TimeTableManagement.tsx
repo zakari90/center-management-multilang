@@ -33,6 +33,7 @@ import axios from 'axios'
 import { Clock, Loader2, MapPin, Trash2, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import { useLocalizedConstants } from './useLocalizedConstants'
 
 interface Teacher {
   id: string
@@ -62,22 +63,23 @@ const TIME_SLOTS = [
 
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
   const t = useTranslations('TimetableManagement')
-  
+  const { daysOfWeek, availableClassrooms } = useLocalizedConstants()
+
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [rooms, setRooms] = useState<string[]>([])
+  const [rooms, setRooms] = useState<string[]>(availableClassrooms)
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
-  
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedSlot, setSelectedSlot] = useState<{
     day: string
     startTime: string
     endTime: string
   } | null>(null)
-  
+
   const [newEntry, setNewEntry] = useState({
     teacherId: '',
     subjectId: '',
@@ -86,16 +88,6 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
 
   const [viewMode, setViewMode] = useState<'all' | 'teacher' | 'room'>('all')
   const [selectedFilter, setSelectedFilter] = useState<string>('')
-
-  const daysOfWeek = [
-    { key: 'monday', label: t('monday') },
-    { key: 'tuesday', label: t('tuesday') },
-    { key: 'wednesday', label: t('wednesday') },
-    { key: 'thursday', label: t('thursday') },
-    { key: 'friday', label: t('friday') },
-    { key: 'saturday', label: t('saturday') },
-    { key: 'sunday', label: t('sunday') }
-  ]
 
   useEffect(() => {
     fetchData()
@@ -109,15 +101,15 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
         centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
       ])
-      
+
       setTeachers(teachersRes.data)
       setSubjects(subjectsRes.data)
       setSchedule(scheduleRes.data)
-      
-      if (centerRes?.data?.classrooms) {
+
+      if (centerRes?.data?.classrooms?.length) {
         setRooms(centerRes.data.classrooms)
       } else {
-        setRooms(['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'])
+        setRooms(availableClassrooms)
       }
     } catch (err) {
       console.error('Failed to fetch data:', err)
@@ -130,7 +122,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   const handleSlotClick = (day: string, startTime: string) => {
     const endTimeIndex = TIME_SLOTS.indexOf(startTime) + 1
     const endTime = TIME_SLOTS[endTimeIndex] || '18:00'
-    
+
     setSelectedSlot({ day, startTime, endTime })
     setNewEntry({ teacherId: '', subjectId: '', roomId: '' })
     setIsDialogOpen(true)
@@ -151,7 +143,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         teacherId: newEntry.teacherId,
         subjectId: newEntry.subjectId,
         roomId: newEntry.roomId,
-        centerId, 
+        centerId,
       })
 
       setSchedule(prev => [...prev, data])
@@ -291,11 +283,14 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
             <div className="min-w-[1200px]">
               {/* Header Row */}
               <div className="grid grid-cols-8 gap-2 mb-2">
-                <div className="font-semibold text-sm text-muted-foreground p-2">
+                <div className="font-semibold text-sm text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                   {t('time')}
                 </div>
-                {daysOfWeek.map(day => (
-                  <div key={day.key} className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md">
+                {daysOfWeek.map((day:any) => (
+                  <div
+                    key={day.key}
+                    className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md sticky top-0 z-20"
+                  >
                     {day.label}
                   </div>
                 ))}
@@ -306,13 +301,13 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
                   <div key={time} className="grid grid-cols-8 gap-2">
                     {/* Time Label */}
-                    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md">
+                    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                       <Clock className="h-3 w-3 mr-1" />
                       {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
                     {/* Day Columns */}
-                    {daysOfWeek.map(day => {
+                    {daysOfWeek.map((day:any) => {
                       const slots = getSlotsByDayAndTime(day.label, time)
                       const hasConflict = slots.length > 1
 
@@ -331,7 +326,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                             {slots.map((slot, idx) => {
                               const teacher = teachers.find(t => t.id === slot.teacherId)
                               const subject = subjects.find(s => s.id === slot.subjectId)
-                              
+
                               return (
                                 <div
                                   key={slot.id || idx}
