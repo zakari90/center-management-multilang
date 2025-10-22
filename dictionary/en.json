@@ -1113,7 +1113,20 @@
     "description":"Expense tracker is a tool designed to help track financial transactions",
     "keywords": "center management, تدبير مراجعتي"
     
-  }
+  },
+"subjectForm":{  "instructions": "Please select one subject and one grade. Duration is optional.",
+  "selectSubject": "Select Subject *",
+  "selected": "Selected: {{value}}",
+  "selectGrade": "Select Grade *",
+  "price": "Price (MAD) *",
+  "duration": "Duration (hours)",
+  "addButton": "Add Subject to Center",
+  "required": "required",
+  "selectTeacherPlaceholder": "Type or select a subject",
+  "selectSubjectPlaceholder": "Type or select a subject",
+  "selectGradePlaceholder": "Type or select a grade",
+  "selectRoomPlaceholder": "Type or select a room"
+}
 
 }
 

@@ -1090,5 +1090,19 @@
     "saving": "Enregistrement en cours...",
     "nameRequired": "Le nom de l'élève est obligatoire",
     "atLeastOneSubject": "Veuillez inscrire l'élève à au moins une matière"
-  }
+  },
+  "subjectForm" :
+  {  "instructions": "Veuillez sélectionner un sujet et un niveau. La durée est optionnelle.",
+  "selectSubject": "Sélectionnez le sujet *",
+  "selected": "Sélectionné : {{value}}",
+  "selectGrade": "Sélectionnez le niveau *",
+  "price": "Prix (MAD) *",
+  "duration": "Durée (heurs)",
+  "addButton": "Ajouter le sujet au centre",
+  "required": "requis",
+  "selectTeacherPlaceholder": "Tapez ou sélectionnez un sujet",
+  "selectSubjectPlaceholder": "Tapez ou sélectionnez un sujet",
+  "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
+  "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
+}
 }

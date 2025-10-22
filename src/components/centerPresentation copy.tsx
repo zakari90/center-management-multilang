@@ -26,6 +26,7 @@ import { Separator } from "./ui/separator"
 import { toast } from 'sonner'
 import { ItemInputList } from "./itemInputList"
 import { useLocalizedConstants } from "./useLocalizedConstants"
+import { SubjectForm } from "./subjectForm"
 
 export default function CenterPresentation(center: any) {
   
@@ -326,128 +327,7 @@ export default function CenterPresentation(center: any) {
   )
 }
 
-// Your SubjectForm Component
-export const SubjectForm = ({
-  onAddSubject,
-  availableSubjects,
-  availableGrades
-}: {
-  onAddSubject: (name: string, grade: string, price: number, duration?: number) => void
-  availableSubjects: string[]
-  availableGrades: string[]
-}) => {
-  const [subjectData, setSubjectData] = useState({
-    selectedSubject: "",
-    selectedGrade: "",
-    price: "",
-    duration: ""
-  })
 
-  const handleAddSubject = () => {
-    if (subjectData.selectedSubject && subjectData.selectedGrade && subjectData.price) {
-      onAddSubject(
-        subjectData.selectedSubject,
-        subjectData.selectedGrade,
-        parseFloat(subjectData.price),
-        subjectData.duration ? parseInt(subjectData.duration) : undefined
-      )
-
-      // Reset form
-      setSubjectData({
-        selectedSubject: "",
-        selectedGrade: "",
-        price: "",
-        duration: ""
-      })
-    }
-  }
-
-  return (
-    <div className="border rounded-lg p-4 space-y-4 bg-muted/10">
-      <div className="text-sm text-muted-foreground mb-4">
-        Please select one subject and one grade. Duration is optional.
-      </div>
-
-      <div className="space-y-4">
-        {/* Subject Selection */}
-        <div className="space-y-2">
-          <Label>Select Subject *</Label>
-          <ItemInputList
-            label="Subject"
-            placeholder="Type or select a subject"
-            items={subjectData.selectedSubject ? [subjectData.selectedSubject] : []}
-            onChange={(items) => {
-              const single = items[0] || ""
-              setSubjectData(prev => ({ ...prev, selectedSubject: single }))
-            }}
-            suggestions={availableSubjects}
-          />
-          {subjectData.selectedSubject && (
-            <div className="text-xs text-muted-foreground">
-              Selected: {subjectData.selectedSubject}
-            </div>
-          )}
-        </div>
-
-        {/* Grade Selection */}
-        <div className="space-y-2">
-          <Label>Select Grade *</Label>
-          <ItemInputList
-            label="Grade"
-            placeholder="Type or select a grade"
-            items={subjectData.selectedGrade ? [subjectData.selectedGrade] : []}
-            onChange={(items) => {
-              const single = items[0] || ""
-              setSubjectData(prev => ({ ...prev, selectedGrade: single }))
-            }}
-            suggestions={availableGrades}
-          />
-          {subjectData.selectedGrade && (
-            <div className="text-xs text-muted-foreground">
-              Selected: {subjectData.selectedGrade}
-            </div>
-          )}
-        </div>
-
-        {/* Price and Duration */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="subjectPrice">Price (MAD) *</Label>
-            <Input
-              id="subjectPrice"
-              type="number"
-              step="0.01"
-              value={subjectData.price}
-              onChange={(e) => setSubjectData(prev => ({ ...prev, price: e.target.value }))}
-              placeholder="0.00"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="subjectDuration">Duration (minutes)</Label>
-            <Input
-              id="subjectDuration"
-              type="number"
-              value={subjectData.duration}
-              onChange={(e) => setSubjectData(prev => ({ ...prev, duration: e.target.value }))}
-              placeholder="60"
-            />
-          </div>
-        </div>
-
-        <Button
-          type="button"
-          onClick={handleAddSubject}
-          size="sm"
-          className="w-full"
-          disabled={!subjectData.selectedSubject || !subjectData.selectedGrade || !subjectData.price}
-        >
-          Add Subject to Center
-        </Button>
-      </div>
-    </div>
-  )
-}
 
 // Subject Card Component for editing
 function SubjectCard({ 

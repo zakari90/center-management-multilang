@@ -1092,5 +1092,18 @@
     "saving": "جاري الحفظ...",
     "nameRequired": "اسم الطالب مطلوب",
     "atLeastOneSubject": "يرجى تسجيل الطالب في مادة واحدة على الأقل"
-  }
+  },
+"subjectForm":{  "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
+  "selectSubject": "اختر المادة *",
+  "selected": "مختار: {{value}}",
+  "selectGrade": "اختر الدرجة *",
+  "price": "السعر (درهم) *",
+  "duration": "المدة (بالساعات)",
+  "addButton": "إضافة المادة إلى المركز",
+  "required": "مطلوب",
+  "selectTeacherPlaceholder": "اكتب أو اختر مادة",
+  "selectSubjectPlaceholder": "اكتب أو اختر مادة",
+  "selectGradePlaceholder": "اكتب أو اختر درجة",
+  "selectRoomPlaceholder": "اكتب أو اختر غرفة"
+}
 }

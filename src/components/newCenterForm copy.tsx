@@ -14,8 +14,8 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
-import { SubjectForm } from "./centerPresentation copy"
 import { useLocalizedConstants } from "./useLocalizedConstants"
+import { SubjectForm } from "./subjectForm"
 
 
 export const NewCenterForm = () => {
@@ -87,16 +87,16 @@ export const NewCenterForm = () => {
       }
 
       setMessage(t('successMessage'))
-      setFormData({
-        name: "",
-        address: "",
-        phone: "",
-        subjects: [],
-        classrooms: [],
-        workingDays: [],
-      })
+      // setFormData({
+      //   name: "",
+      //   address: "",
+      //   phone: "",
+      //   subjects: [],
+      //   classrooms: [],
+      //   workingDays: [],
+      // })
       setStep(1)
-      router.refresh()
+      await router.push("/admin/center")
     } catch (error) {
       console.log(error);
       
