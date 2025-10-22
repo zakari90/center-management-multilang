@@ -21,10 +21,9 @@ import {
 } from '@/components/ui/table'
 import axios from 'axios'
 import { Eye, Loader2, Pencil } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { BASE_URL } from '@/types/types'
 
 interface TeacherSubject {
   id: string
@@ -62,7 +61,7 @@ export default function TeachersTable() {
 
   const fetchTeachers = async () => {
     try {
-      const response = await axios.get(BASE_URL+'/api/teachers')
+      const response = await axios.get('/api/teachers')
       setTeachers(response.data)
     } catch (err) {
       setError(err instanceof Error ? err.message : t('error'))

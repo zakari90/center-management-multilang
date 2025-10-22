@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import {
   Building2,
   Calendar,
-  UserPlus,
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -21,13 +20,6 @@ export default function AdminQuickActions() {
       icon: Building2,
       href: '/admin/center',
       color: 'text-blue-600 bg-blue-100'
-    },
-    {
-      title: t('addManager.title'),
-      description: t('addManager.description'),
-      icon: UserPlus,
-      href: '/admin/managers/create',
-      color: 'text-purple-600 bg-purple-100'
     },
     {
       title: t('allUsers.title'),
