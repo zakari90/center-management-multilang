@@ -346,7 +346,7 @@ export default function AllUsersTable() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('systemUsers')}</CardTitle>
+            <CardTitle className="text-sm  hidden font-medium">{t('systemUsers')}</CardTitle>
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -405,39 +405,43 @@ export default function AllUsersTable() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="users">
-                <Shield className="mr-2 h-4 w-4" />
-                {t('users')} ({totalUsers})
-              </TabsTrigger>
-              <TabsTrigger value="teachers">
-                <Users className="mr-2 h-4 w-4" />
-                {t('teachers')} ({totalTeachers})
-              </TabsTrigger>
-              <TabsTrigger value="students">
-                <GraduationCap className="mr-2 h-4 w-4" />
-                {t('students')} ({totalStudents})
-              </TabsTrigger>
-            </TabsList>
+ <TabsList className="grid w-full grid-cols-3">
+  <TabsTrigger value="users">
+    <Shield className="mr-2 h-4 w-4" />
+    <span className="hidden sm:inline">{t('users')} ({totalUsers})</span>
+    <span className="sm:hidden text-xs">({totalUsers})</span>
+  </TabsTrigger>
+  <TabsTrigger value="teachers">
+    <Users className="mr-2 h-4 w-4" />
+    <span className="hidden sm:inline">{t('teachers')} ({totalTeachers})</span>
+    <span className="sm:hidden text-xs">({totalTeachers})</span>
+  </TabsTrigger>
+  <TabsTrigger value="students">
+    <GraduationCap className="mr-2 h-4 w-4" />
+    <span className="hidden sm:inline">{t('students')} ({totalStudents})</span>
+    <span className="sm:hidden text-xs">({totalStudents})</span>
+  </TabsTrigger>
+</TabsList>
 
             {/* USERS TAB */}
             <TabsContent value="users" className="space-y-4">
-              <div className="flex justify-between gap-3 items-center">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t('searchUsers')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+<div className="flex flex-col sm:flex-row justify-between gap-3 items-center sm:items-center">
+  <div className="flex-1 w-full sm:w-auto relative">
+    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+    <Input
+      placeholder={t('searchUsers')}
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="pl-10 w-full"
+    />
+  </div>
 
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('addManager')}
-                </Button>
-              </div>
+  <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
+    <Plus className="mr-2 h-4 w-4" />
+    <span className="hidden sm:inline">{t('addManager')}</span>
+    <span className="sm:hidden">{t('add')}</span>
+  </Button>
+</div>
 
               {filteredUsers.length === 0 ? (
                 <div className="text-center py-12">

@@ -33,7 +33,6 @@ export default function AdminDashboard() {
 
       {/* Centers Overview */}
       <div className="grid gap-4 grid-cols-4">
-       ss
         <CentersOverview />
       </div>
       <div className="grid gap-4 grid-cols-4">
