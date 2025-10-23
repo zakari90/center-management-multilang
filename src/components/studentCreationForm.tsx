@@ -316,26 +316,30 @@ export default function CreateStudentForm() {
               ) : (
                 <div className="space-y-6">
                   {/* Step 1: Select Grade */}
-                  <div>
-                    <Label className="text-base mb-3 block">{t("enrollmentstep1title")}</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {availableGrades.map((grade) => (
-                        <Button
-                        className="w-auto"
-                          key={grade}
-                          type="button"
-                          onClick={() => {
-                            setSelectedGrade(grade)
-                            setSelectedSubject(null)
-                            setSelectedTeacher("")
-                          }}
-                          variant={selectedGrade === grade ? "default" : "outline"}
-                        >
-                          {grade}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+<div>
+  <Label className="text-base mb-3 block">
+    {t("enrollmentstep1title")}
+  </Label>
+
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-cols-max">
+    {availableGrades.map((grade) => (
+      <Button
+        key={grade}
+        type="button"
+        onClick={() => {
+          setSelectedGrade(grade)
+          setSelectedSubject(null)
+          setSelectedTeacher("");
+        }}
+        variant={selectedGrade === grade ? "default" : "outline"}
+        className="w-fit px-4"
+      >
+        {grade}
+      </Button>
+    ))}
+  </div>
+</div>
+
 
                   {/* Step 2: Select Subject */}
                   {selectedGrade && (

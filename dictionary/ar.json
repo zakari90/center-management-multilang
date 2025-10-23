@@ -449,7 +449,6 @@
     "na": "غير متاح"
   },
   "CreateStudentPaymentForm": {
-    "hours":"ساعة",
     "title": "إنشاء إيصال دفع الطالب",
     "subtitle": "اختر الطالب عن طريق البحث أو رمز الاستجابة السريعة",
     "findStudent": "ابحث عن الطالب",
@@ -932,6 +931,8 @@
     "na": "غير متاح"
   },
   "CreateStudentForm": {
+        "hours":"ساعة",
+
     "title": "إضافة طالب جديد",
     "errorsrequiredName": "اسم الطالب مطلوب",
     "errorsnoSubjects": "يرجى تسجيل الطالب في مادة واحدة على الأقل",

@@ -939,6 +939,8 @@
     "na": "S/O"
   },
   "CreateStudentForm": {
+        "hours":"heures",
+
     "title": "Ajouter un nouvel élève",
     "errorsrequiredName": "Le nom de l'élève est obligatoire",
     "errorsnoSubjects": "Veuillez inscrire l'élève à au moins une matière",

@@ -900,6 +900,7 @@
   },
   "CreateStudentForm": {
     "title": "Add New Student",
+    "hours":"hours",
 
     "errorsrequiredName": "Student name is required",
     "errorsnoSubjects": "Please enroll the student in at least one subject",
