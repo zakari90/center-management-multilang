@@ -87,14 +87,8 @@ export default function TeacherProfilePage() {
   }
 
   return (
-    <div className="relative max-w-3xl mx-auto p-6 space-y-8">
-      <Button
-        className="absolute top-25 right-25"
-        onClick={() => router.push(`/teachers/${id}/edit`)}
-      >
-        <Edit className="mr-2 h-4 w-4" />
-        {t('edit')}
-      </Button>
+    <div className=" max-w-3xl mx-auto p-6 space-y-8">
+
 
       <PdfExporter>
         <Card>
@@ -195,6 +189,13 @@ export default function TeacherProfilePage() {
           </CardContent>
         </Card>
       </PdfExporter>
+            <Button
+
+        onClick={() => router.push(`/teachers/${id}/edit`)}
+      >
+        <Edit className="mr-2 h-4 w-4" />
+        {t('edit')}
+      </Button>
     </div>
   )
 }

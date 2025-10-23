@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// app/teachers/[id]/edit/page.tsx
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -29,6 +28,7 @@ import { AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'use-intl'
+
 interface Subject {
   id: string
   name: string
@@ -61,15 +61,13 @@ interface Teacher {
   teacherSubjects: TeacherSubject[]
 }
 
-
 export default function EditTeacherPage() {
- const t = useTranslations('EditTeacherPage')
+  const t = useTranslations('EditTeacherPage')
   const DAYS = [
     t('monday'), t('tuesday'), t('wednesday'), t('thursday'),
     t('friday'), t('saturday'), t('sunday')
   ]
-   const params = useParams()
-  // const id = params?.id as string 
+  const params = useParams()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
@@ -115,7 +113,6 @@ export default function EditTeacherPage() {
       setTeacher(teacherData)
       setSubjects(subjectsRes.data)
 
-      // Set form data
       setFormData({
         name: teacherData.name,
         email: teacherData.email || '',
@@ -123,10 +120,12 @@ export default function EditTeacherPage() {
         address: teacherData.address || '',
       })
 
-      // Set weekly schedule
       if (teacherData.weeklySchedule && Array.isArray(teacherData.weeklySchedule)) {
         const scheduleMap = new Map(
-          teacherData.weeklySchedule.map((s: any) => [s.day, s])
+          teacherData.weeklySchedule.map((s: any) => {
+            const parsed = typeof s === 'string' ? JSON.parse(s) : s
+            return [parsed.day, parsed]
+          })
         )
         
         setWeeklySchedule(DAYS.map(day => {
@@ -145,7 +144,6 @@ export default function EditTeacherPage() {
         }))
       }
 
-      // Set teacher subjects
       setTeacherSubjects(
         teacherData.teacherSubjects.map(ts => ({
           subjectId: ts.subject.id,
@@ -156,7 +154,7 @@ export default function EditTeacherPage() {
       )
     } catch (err) {
       console.error('Failed to fetch data:', err)
-    setError(t('errorFetchData'))
+      setError(t('errorFetchData'))
     } finally {
       setIsFetching(false)
     }
@@ -204,20 +202,20 @@ export default function EditTeacherPage() {
       
       for (const ts of validSubjects) {
         if (ts.compensationType === 'percentage' && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
-          throw new Error('Percentage must be between 1 and 100')
+          throw new Error(t('errorPercentage'))
         }
         if (ts.compensationType === 'hourly' && (!ts.hourlyRate || ts.hourlyRate <= 0)) {
-          throw new Error('Hourly rate must be greater than 0')
+          throw new Error(t('errorHourlyRate'))
         }
       }
 
       const activeSchedule = weeklySchedule
         .filter(day => day.isAvailable)
-        .map(({ day, startTime, endTime }) => ({ day, startTime, endTime }))
+        .map(({ day, startTime, endTime }) => JSON.stringify({ day, startTime, endTime }))
 
       await axios.patch(`/api/teachers/${params.id}`, {
         ...formData,
-        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : null,
+        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
         subjects: validSubjects.map(ts => ({
           subjectId: ts.subjectId,
           percentage: ts.compensationType === 'percentage' ? ts.percentage : null,
@@ -225,17 +223,16 @@ export default function EditTeacherPage() {
         }))
       })
 
-      router.push(`/teachers/${params.id}`)
+      router.push(`/manager/teachers/${params.id}`)
       router.refresh()
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        console.log(err.response?.data?.error || 'Failed to update teacher')
-setError(t('errorSomethingWrong'))
+        setError(err.response?.data?.error || t('errorUpdateTeacher'))
       } else if (err instanceof Error) {
         setError(err.message)
       } else {
-setError(t('errorSomethingWrong'))      
-}
+        setError(t('errorSomethingWrong'))      
+      }
     } finally {
       setIsLoading(false)
     }
@@ -251,7 +248,7 @@ setError(t('errorSomethingWrong'))
 
   if (!teacher) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{t('teacherNotFound')}</AlertDescription>
@@ -261,29 +258,31 @@ setError(t('errorSomethingWrong'))
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       <Card>
-        <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-          <CardDescription>{t('subtitle')}</CardDescription>
+        <CardHeader className="px-4 sm:px-6">
+          <CardTitle className="text-xl sm:text-2xl">{t('title')}</CardTitle>
+          <CardDescription className="text-sm">{t('subtitle')}</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 px-4 sm:px-6">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription className="text-sm">{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">{t('basicInformation')}</h3>
+              <h3 className="text-base sm:text-lg font-semibold">{t('basicInformation')}</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">{t('fullName')} {t('required')}</Label>
+                  <Label htmlFor="name" className="text-sm">
+                    {t('fullName')} <span className="text-destructive">{t('required')}</span>
+                  </Label>
                   <Input
                     id="name"
                     name="name"
@@ -291,11 +290,12 @@ setError(t('errorSomethingWrong'))
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder={t("namePlaceholder")}
+                    className="w-full"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">{t('email')}</Label>
+                  <Label htmlFor="email" className="text-sm">{t('email')}</Label>
                   <Input
                     type="email"
                     id="email"
@@ -303,11 +303,12 @@ setError(t('errorSomethingWrong'))
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder={t("emailPlaceholder")}
+                    className="w-full"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">{t('phoneNumber')}</Label>
+                  <Label htmlFor="phone" className="text-sm">{t('phoneNumber')}</Label>
                   <Input
                     type="tel"
                     id="phone"
@@ -315,17 +316,19 @@ setError(t('errorSomethingWrong'))
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder={t("phonePlaceholder")}
+                    className="w-full"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">{t('address')}</Label>
+                  <Label htmlFor="address" className="text-sm">{t('address')}</Label>
                   <Input
                     id="address"
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder={t("addressPlaceholder")}
+                    className="w-full"
                   />
                 </div>
               </div>
@@ -335,12 +338,17 @@ setError(t('errorSomethingWrong'))
 
             {/* Subjects & Compensation */}
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold">{t("subjectsCompensation")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("assignSubjectsPayment")}</p>
+                  <h3 className="text-base sm:text-lg font-semibold">{t("subjectsCompensation")}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t("assignSubjectsPayment")}</p>
                 </div>
-                <Button type="button" onClick={addSubject} size="sm">
+                <Button 
+                  type="button" 
+                  onClick={addSubject} 
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   {t("addSubject")}
                 </Button>
@@ -348,7 +356,7 @@ setError(t('errorSomethingWrong'))
 
               {teacherSubjects.length === 0 ? (
                 <Alert>
-                  <AlertDescription>{t("noSubjectsAssigned")}</AlertDescription>
+                  <AlertDescription className="text-sm">{t("noSubjectsAssigned")}</AlertDescription>
                 </Alert>
               ) : (
                 <div className="space-y-4">
@@ -356,33 +364,47 @@ setError(t('errorSomethingWrong'))
                     const selectedSubject = subjects.find(s => s.id === ts.subjectId)
                     return (
                       <Card key={index}>
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1 space-y-4">
+                        <CardContent className="pt-4 sm:pt-6 space-y-4 px-4 sm:px-6">
+                          <div className="flex flex-col sm:flex-row items-start gap-4">
+                            <div className="flex-1 w-full space-y-4">
+                              {/* Subject Selection */}
                               <div className="space-y-2">
-                                <Label>{t("subject")}</Label>
+                                <Label className="text-sm">{t("subject")}</Label>
                                 <Select
                                   value={ts.subjectId}
                                   onValueChange={(value) => updateSubject(index, 'subjectId', value)}
                                 >
-                                  <SelectTrigger>
+                                  <SelectTrigger className="w-full">
                                     <SelectValue placeholder={t("selectSubject")} />
                                   </SelectTrigger>
-                                  <SelectContent>
+                                  <SelectContent 
+                                    position="popper"
+                                    className="max-h-[200px] sm:max-h-[300px]"
+                                  >
                                     {subjects
                                       .filter(s => !teacherSubjects.some((ts2, i) => i !== index && ts2.subjectId === s.id))
                                       .map(subject => (
-                                        <SelectItem key={subject.id} value={subject.id}>
-                                          {subject.name} - {subject.grade} (${subject.price})
+                                        <SelectItem 
+                                          key={subject.id} 
+                                          value={subject.id}
+                                          className="text-xs sm:text-sm"
+                                        >
+                                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 max-w-[250px] sm:max-w-none">
+                                            <span className="truncate font-medium">{subject.name}</span>
+                                            <span className="text-muted-foreground text-xs truncate">
+                                              {subject.grade} · MAD {subject.price}
+                                            </span>
+                                          </div>
                                         </SelectItem>
                                       ))}
                                   </SelectContent>
                                 </Select>
                               </div>
 
-                              <div className="grid grid-cols-3 gap-4">
+                              {/* Payment Type and Amount */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="space-y-2">
-                                  <Label>{t("paymentType")}</Label>
+                                  <Label className="text-sm">{t("paymentType")}</Label>
                                   <Select
                                     value={ts.compensationType}
                                     onValueChange={(value) => updateSubject(index, 'compensationType', value)}
@@ -390,7 +412,7 @@ setError(t('errorSomethingWrong'))
                                     <SelectTrigger>
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent position="popper">
                                       <SelectItem value="percentage">{t("percentage")}</SelectItem>
                                       <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
                                     </SelectContent>
@@ -399,7 +421,9 @@ setError(t('errorSomethingWrong'))
 
                                 {ts.compensationType === 'percentage' ? (
                                   <div className="space-y-2">
-                                    <Label>{t("percentageLabel")} *</Label>
+                                    <Label className="text-sm">
+                                      {t("percentageLabel")} <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                       type="number"
                                       min="1"
@@ -413,7 +437,9 @@ setError(t('errorSomethingWrong'))
                                   </div>
                                 ) : (
                                   <div className="space-y-2">
-                                    <Label>{t("hourlyRate")} *</Label>
+                                    <Label className="text-sm">
+                                      {t("hourlyRateLabel")} <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                       type="number"
                                       min="0"
@@ -428,13 +454,13 @@ setError(t('errorSomethingWrong'))
 
                                 {selectedSubject && (
                                   <div className="space-y-2">
-                                    <Label>{t("estEarnings")}</Label>
-                                    <div className="h-10 px-3 py-2 bg-primary/10 border rounded-md flex items-center">
-                                      <span className="font-semibold text-primary">
+                                    <Label className="text-xs sm:text-sm">{t("estEarnings")}</Label>
+                                    <div className="h-10 px-3 py-2 bg-primary/10 border rounded-md flex items-center justify-center">
+                                      <span className="font-semibold text-primary text-sm truncate">
                                         {ts.compensationType === 'percentage' && ts.percentage
-                                          ? `MAD${((selectedSubject.price * ts.percentage) / 100).toFixed(2)}`
+                                          ? `MAD ${((selectedSubject.price * ts.percentage) / 100).toFixed(2)}`
                                           : ts.hourlyRate
-                                          ? `MAD${ts.hourlyRate.toFixed(2)}/hr`
+                                          ? `MAD ${ts.hourlyRate.toFixed(2)}/hr`
                                           : 'MAD 0.00'}
                                       </span>
                                     </div>
@@ -448,7 +474,7 @@ setError(t('errorSomethingWrong'))
                               variant="ghost"
                               size="icon"
                               onClick={() => removeSubject(index)}
-                              className="text-destructive hover:text-destructive"
+                              className="text-destructive hover:text-destructive flex-shrink-0 mt-0 sm:mt-6"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -466,14 +492,17 @@ setError(t('errorSomethingWrong'))
             {/* Weekly Schedule */}
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold">{t("weeklySchedule")}</h3>
-                <p className="text-sm text-muted-foreground">{t("selectDaysHours")}</p>
+                <h3 className="text-base sm:text-lg font-semibold">{t("weeklySchedule")}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t("selectDaysHours")}</p>
               </div>
 
               <div className="space-y-3">
                 {weeklySchedule.map((schedule, index) => (
-                  <div key={schedule.day} className="flex items-center gap-4 p-4 border rounded-md">
-                    <div className="flex items-center space-x-2 min-w-[140px]">
+                  <div 
+                    key={schedule.day} 
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 sm:p-4 border rounded-md bg-muted/50"
+                  >
+                    <div className="flex items-center space-x-2 min-w-[120px]">
                       <Checkbox
                         id={`day-${schedule.day}`}
                         checked={schedule.isAvailable}
@@ -490,9 +519,11 @@ setError(t('errorSomethingWrong'))
                     </div>
 
                     {schedule.isAvailable && (
-                      <div className="flex items-center gap-3 flex-1">
+                      <div className="flex flex-wrap items-center gap-3 flex-1 w-full sm:w-auto">
                         <div className="flex items-center gap-2">
-                          <Label className="text-sm text-muted-foreground">From:</Label>
+                          <Label className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                            {t("from")}:
+                          </Label>
                           <Input
                             type="time"
                             value={schedule.startTime}
@@ -501,7 +532,9 @@ setError(t('errorSomethingWrong'))
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <Label className="text-sm text-muted-foreground">{t("to")}</Label>
+                          <Label className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                            {t("to")}:
+                          </Label>
                           <Input
                             type="time"
                             value={schedule.endTime}
@@ -517,16 +550,21 @@ setError(t('errorSomethingWrong'))
             </div>
           </CardContent>
 
-          <CardFooter className="flex justify-end gap-4">
+          <CardFooter className="flex flex-col sm:flex-row justify-end gap-3 px-4 sm:px-6 pb-4 sm:pb-6">
             <Button
               type="button"
               variant="outline"
               onClick={() => router.back()}
               disabled={isLoading}
+              className="w-full sm:w-auto"
             >
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t("saveChanges")}
             </Button>

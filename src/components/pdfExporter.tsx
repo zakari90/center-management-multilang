@@ -40,7 +40,7 @@ export default function PdfExporter({
 
   return (
     <div className="space-y-4">
-      <div ref={contentRef} className="bg-white rounded-md shadow p-4">
+      <div ref={contentRef} className=" rounded-md shadow p-1">
         {children}
       </div>
 
