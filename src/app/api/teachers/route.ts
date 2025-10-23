@@ -3,11 +3,10 @@ import { getSession } from "@/lib/authentication";
 import db from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-
-export async function POST(req: NextRequest) {  
+export async function POST(req: NextRequest) {
   try {
-    const session :any = await getSession()
-    
+    const session: any = await getSession()
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -28,14 +27,22 @@ export async function POST(req: NextRequest) {
       const existingTeacher = await db.teacher.findUnique({
         where: { email }
       })
-      
+
       if (existingTeacher) {
         return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
       }
     }
 
+    // Parse weeklySchedule if it's a string, or keep it as is
+    let parsedSchedule = null
+    if (weeklySchedule) {
+      parsedSchedule = typeof weeklySchedule === 'string' 
+        ? weeklySchedule 
+        : JSON.stringify(weeklySchedule)
+    }
+
     // Create teacher with subjects in a transaction
-    const teacher = await db.$transaction(async (tx:any) => {
+    const teacher = await db.$transaction(async (tx: any) => {
       // Create the teacher
       const newTeacher = await tx.teacher.create({
         data: {
@@ -43,7 +50,7 @@ export async function POST(req: NextRequest) {
           email: email || null,
           phone: phone || null,
           address: address || null,
-          weeklySchedule: weeklySchedule || null,
+          weeklySchedule: parsedSchedule,
           managerId: session.user.id,
         },
       })
@@ -82,11 +89,11 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
 export async function GET() {
   try {
-    
-    const session :any = await getSession()
-    
+    const session: any = await getSession()
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -122,4 +129,3 @@ export async function GET() {
     )
   }
 }
-

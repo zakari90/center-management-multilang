@@ -40,12 +40,12 @@ interface TeacherSubject {
 // ==================== SUB-COMPONENTS ====================
 
 // Basic Information Section
-const BasicInfoSection = ({ 
-  formData, 
-  onChange 
-}: { 
+const BasicInfoSection = ({
+  formData,
+  onChange
+}: {
   formData: { name: string; email: string; phone: string; address: string }
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void 
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) => {
   const t = useTranslations("CreateTeacherForm")
   const fields = [
@@ -108,16 +108,16 @@ const SubjectCompensationCard = ({
 
   const calculateEstimatedEarnings = () => {
     if (!selectedSubject) return "MAD 0.00"
-    
+
     if (teacherSubject.compensationType === "percentage" && teacherSubject.percentage) {
       const earnings = (selectedSubject.price * teacherSubject.percentage) / 100
       return `MAD ${earnings.toFixed(2)}`
     }
-    
+
     if (teacherSubject.compensationType === "hourly" && teacherSubject.hourlyRate) {
       return `MAD ${teacherSubject.hourlyRate.toFixed(2)}/hr`
     }
-    
+
     return "MAD 0.00"
   }
 
@@ -137,10 +137,23 @@ const SubjectCompensationCard = ({
               <SelectTrigger id={`subject-${index}`} className="w-full">
                 <SelectValue placeholder={t("subject")} />
               </SelectTrigger>
-              <SelectContent className="overflow-auto max-h-60">
+              <SelectContent 
+                className="max-h-[200px] sm:max-h-[300px] overflow-y-auto"
+                position="popper"
+                sideOffset={5}
+              >
                 {availableSubjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name} - {subject.grade} (MAD {subject.price})
+                  <SelectItem 
+                    key={subject.id} 
+                    value={subject.id}
+                    className="text-xs sm:text-sm"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 max-w-[250px] sm:max-w-none">
+                      <span className="truncate font-medium">{subject.name}</span>
+                      <span className="text-muted-foreground truncate">
+                        {subject.grade} <span className="hidden sm:inline">·</span> MAD {subject.price}
+                      </span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -170,7 +183,11 @@ const SubjectCompensationCard = ({
               <SelectTrigger id={`payment-type-${index}`}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="overflow-auto sm:max-h-60">
+              <SelectContent
+                position="popper"
+                sideOffset={5}
+                align="start"
+              >
                 <SelectItem value="percentage">{t("percentage")}</SelectItem>
                 <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
               </SelectContent>
@@ -227,12 +244,12 @@ const SubjectCompensationCard = ({
 }
 
 // Weekly Schedule Section
-const WeeklyScheduleSection = ({ 
-  weeklySchedule, 
-  onChange 
-}: { 
+const WeeklyScheduleSection = ({
+  weeklySchedule,
+  onChange
+}: {
   weeklySchedule: DaySchedule[]
-  onChange: (index: number, field: keyof DaySchedule, value: string | boolean) => void 
+  onChange: (index: number, field: keyof DaySchedule, value: string | boolean) => void
 }) => {
   const t = useTranslations("CreateTeacherForm")
 
@@ -243,8 +260,8 @@ const WeeklyScheduleSection = ({
 
       <div className="space-y-3">
         {weeklySchedule.map((schedule, index) => (
-          <div 
-            key={schedule.day} 
+          <div
+            key={schedule.day}
             className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted rounded-md"
           >
             {/* Day Checkbox */}
@@ -254,8 +271,8 @@ const WeeklyScheduleSection = ({
                 checked={schedule.isAvailable}
                 onCheckedChange={(checked) => onChange(index, "isAvailable", checked as boolean)}
               />
-              <Label 
-                htmlFor={`day-${schedule.day}`} 
+              <Label
+                htmlFor={`day-${schedule.day}`}
                 className="ml-3 cursor-pointer font-medium"
               >
                 {schedule.day}
@@ -300,14 +317,14 @@ export default function CreateTeacherForm() {
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
-  
+
   const DAYS = [
-    t("monday"), 
-    t("tuesday"), 
-    t("wednesday"), 
-    t("thursday"), 
-    t("friday"), 
-    t("saturday"), 
+    t("monday"),
+    t("tuesday"),
+    t("wednesday"),
+    t("thursday"),
+    t("friday"),
+    t("saturday"),
     t("sunday")
   ]
 
@@ -382,7 +399,7 @@ export default function CreateTeacherForm() {
 
     try {
       const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
-      
+
       for (const ts of validSubjects) {
         if (ts.compensationType === "percentage" && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
           throw new Error("Percentage must be between 1 and 100")
@@ -398,7 +415,8 @@ export default function CreateTeacherForm() {
 
       const payload = {
         ...formData,
-        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : null,
+        // Convert to JSON string for Prisma
+        weeklySchedule: activeSchedule.length > 0 ? JSON.stringify(activeSchedule) : null,
         subjects: validSubjects.map((ts) => ({
           subjectId: ts.subjectId,
           percentage: ts.compensationType === "percentage" ? ts.percentage : null,
@@ -442,9 +460,9 @@ export default function CreateTeacherForm() {
                   <h2 className="text-xl font-semibold">{t("subjectsCompensation")}</h2>
                   <p className="text-sm text-muted-foreground mt-1">{t("assignSubjects")}</p>
                 </div>
-                <Button 
-                  type="button" 
-                  onClick={addSubject} 
+                <Button
+                  type="button"
+                  onClick={addSubject}
                   disabled={loadingSubjects}
                   className="w-full sm:w-auto"
                 >
@@ -480,24 +498,24 @@ export default function CreateTeacherForm() {
             </div>
 
             {/* Weekly Schedule */}
-            <WeeklyScheduleSection 
-              weeklySchedule={weeklySchedule} 
-              onChange={handleScheduleChange} 
+            <WeeklyScheduleSection
+              weeklySchedule={weeklySchedule}
+              onChange={handleScheduleChange}
             />
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => router.back()} 
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
                 disabled={isLoading}
                 className="w-full sm:w-auto"
               >
                 {t("cancel")}
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
                 className="w-full sm:w-auto"
               >
