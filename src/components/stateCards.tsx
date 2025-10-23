@@ -2,7 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import axios from 'axios'
-import { DollarSign, GraduationCap, Loader2, Receipt, TrendingUp, Users } from 'lucide-react'
+import {
+  DollarSign,
+  GraduationCap,
+  Loader2,
+  Receipt,
+  TrendingUp,
+  Users
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 
@@ -37,14 +44,16 @@ export default function ManagerStatsCards() {
     }
   }
 
+  // 🌀 Loading state
   if (isLoading) {
     return (
-      <div className="flex flex-wrap ">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex justify-center items-center h-full">
-              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin " />
-            </CardContent>
+          <Card
+            key={i}
+            className="flex items-center justify-center h-24 sm:h-32 animate-pulse"
+          >
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
           </Card>
         ))}
       </div>
@@ -71,11 +80,15 @@ export default function ManagerStatsCards() {
     {
       title: t('monthlyRevenuetitle'),
       icon: DollarSign,
-      value: `MAD ${stats.monthlyRevenue.toFixed(2)}`,
+      value: stats.monthlyRevenue,
       subtitle: (
         <div className="flex items-center gap-1">
           <TrendingUp className="h-3 w-3 text-green-600 flex-shrink-0" />
-          <span className="truncate">{t('monthlyRevenuegrowth', { percent: stats.revenueGrowth.toFixed(1) })}</span>
+          <span className="truncate">
+            {t('monthlyRevenuegrowth', {
+              percent: stats.revenueGrowth.toFixed(1)
+            })}
+          </span>
         </div>
       ),
       colorClass: 'text-green-600',
@@ -84,7 +97,7 @@ export default function ManagerStatsCards() {
     {
       title: t('totalRevenuetitle'),
       icon: Receipt,
-      value: `MAD ${stats.totalRevenue.toFixed(2)}`,
+      value: stats.totalRevenue,
       subtitle: t('totalRevenuesubtitle', { count: stats.totalReceipts }),
       colorClass: 'text-orange-600',
       isRevenue: true
@@ -92,30 +105,43 @@ export default function ManagerStatsCards() {
   ]
 
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {statsData.map((stat, index) => {
         const IconComponent = stat.icon
         return (
-          <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow">
+          <Card
+            key={index}
+            className="overflow-hidden hover:shadow-lg hover:scale-[1.02] transition-transform transition-shadow duration-200 min-w-[140px] sm:min-w-[180px]"
+          >
+            {/* Header */}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-              <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2 pr-2">
+              <CardTitle className="text-sm sm:text-base font-medium line-clamp-2 pr-2">
                 {stat.title}
               </CardTitle>
               <IconComponent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
+
+            {/* Content */}
             <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
-              <div className={`text-xl sm:text-2xl font-bold ${stat.colorClass} break-words`}>
+              <div
+                className={`text-2xl sm:text-3xl font-bold ${stat.colorClass} break-words`}
+              >
                 {stat.isRevenue ? (
                   <span className="block">
-                    <span className="text-base sm:text-2xl">MAD</span>
-                    <span className="ml-1">{typeof stat.value === 'string' ? stat.value.replace('MAD ', '') : stat.value}</span>
+                    <span className="text-sm sm:text-lg">MAD</span>
+                    <span className="ml-1">
+                      {stat.value.toFixed(2)}
+                    </span>
                   </span>
                 ) : (
                   stat.value
                 )}
               </div>
-              <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                {typeof stat.subtitle === 'string' ? stat.subtitle : stat.subtitle}
+
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
+                {typeof stat.subtitle === 'string'
+                  ? stat.subtitle
+                  : stat.subtitle}
               </div>
             </CardContent>
           </Card>
