@@ -137,7 +137,7 @@ const SubjectCompensationCard = ({
               <SelectTrigger id={`subject-${index}`} className="w-full">
                 <SelectValue placeholder={t("subject")} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="overflow-auto max-h-60">
                 {availableSubjects.map((subject) => (
                   <SelectItem key={subject.id} value={subject.id}>
                     {subject.name} - {subject.grade} (MAD {subject.price})
@@ -170,7 +170,7 @@ const SubjectCompensationCard = ({
               <SelectTrigger id={`payment-type-${index}`}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="overflow-auto sm:max-h-60">
                 <SelectItem value="percentage">{t("percentage")}</SelectItem>
                 <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
               </SelectContent>
@@ -463,7 +463,7 @@ export default function CreateTeacherForm() {
                   {t("noSubjectsAssigned")}
                 </p>
               ) : (
-                <div className="space-y-4 max-w-32 h-auto overflow-auto">
+                <div className="space-y-4">
                   {teacherSubjects.map((ts, index) => (
                     <SubjectCompensationCard
                       key={index}
