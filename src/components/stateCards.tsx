@@ -39,11 +39,11 @@ export default function ManagerStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 w-full px-2 sm:px-0">
+      <div className="flex flex-wrap ">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="min-h-[120px] sm:min-h-[140px]">
+          <Card key={i}>
             <CardContent className="flex justify-center items-center h-full">
-              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin " />
             </CardContent>
           </Card>
         ))}
@@ -92,7 +92,7 @@ export default function ManagerStatsCards() {
   ]
 
   return (
-    <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 w-full px-2 sm:px-0">
+    <div className="flex flex-wrap gap-4">
       {statsData.map((stat, index) => {
         const IconComponent = stat.icon
         return (
