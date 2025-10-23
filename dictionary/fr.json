@@ -1,43 +1,43 @@
 {
   "StudentCard": {
-    "title": "بطاقة هوية الطالب",
-    "idLabel": "رقم الهوية",
+    "title": "Carte d'identité de l'élève",
+    "idLabel": "Numéro d'identification",
     "studentInfo": {
-      "gradeLabel": "الفئة",
-      "emailLabel": "البريد الإلكتروني",
-      "phoneLabel": "الهاتف"
+      "gradeLabel": "Niveau",
+      "emailLabel": "Email",
+      "phoneLabel": "Téléphone"
     },
     "subjects": {
-      "title": "المواد المسجلة",
-      "noSubjects": "لم يتم تسجيل أي مواد",
-      "gradePrefix": "الفئة",
-      "teacherLabel": "المعلم",
-       "editSubject": "Modifier la matière",
-    "deleteSubject": "Supprimer la matière ?",
-    "deleteConfirmation": "Cela supprimera définitivement {subjectName} du centre. Cette action est irréversible.",
-    "cancel": "Annuler",
-    "delete": "Supprimer",
-    "selectSubject": "Sélectionner la matière",
-    "selectGrade": "Sélectionner le niveau",
-    "price": "Prix (MAD)",
-    "duration": "Durée (minutes)",
-    "placeholders": {
-      "subject": "Saisir ou sélectionner une matière",
-      "grade": "Saisir ou sélectionner un niveau",
-      "price": "0.00",
-      "duration": "60"
-    },
-    "labels": {
-      "subject": "Matière",
-      "grade": "Niveau"
-    },
-    "requiredField": "*"
+      "title": "Matières inscrites",
+      "noSubjects": "Aucune matière inscrite",
+      "gradePrefix": "Niveau",
+      "teacherLabel": "Enseignant",
+      "editSubject": "Modifier la matière",
+      "deleteSubject": "Supprimer la matière ?",
+      "deleteConfirmation": "Cela supprimera définitivement {subjectName} du centre. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "selectSubject": "Sélectionner la matière",
+      "selectGrade": "Sélectionner le niveau",
+      "price": "Prix (MAD)",
+      "duration": "Durée (minutes)",
+      "placeholders": {
+        "subject": "Saisir ou sélectionner une matière",
+        "grade": "Saisir ou sélectionner un niveau",
+        "price": "0.00",
+        "duration": "60"
+      },
+      "labels": {
+        "subject": "Matière",
+        "grade": "Niveau"
+      },
+      "requiredField": "*"
     },
     "qrCode": {
-      "description": "رمز الاستجابة السريعة"
+      "description": "Code QR"
     },
     "actions": {
-      "downloadPdf": "تحميل PDF"
+      "downloadPdf": "Télécharger PDF"
     }
   },
   "login": {
@@ -85,9 +85,9 @@
     "privacyPolicy": "Politique de confidentialité"
   },
   "Metadata": {
-    "title": "Gestion du centre, تدبير مراجعتي",
+    "title": "Gestion du centre",
     "description": "Le suivi des dépenses est un outil conçu pour aider à suivre les transactions financières",
-    "keywords": "Gestion du centre, تدبير مراجعتي"
+    "keywords": "Gestion du centre"
   },
   "homePage": {
     "title": "Bienvenue à la gestion du centre",
@@ -240,7 +240,16 @@
     "willCreate": "Créera",
     "courses": "cours",
     "moreSubjects": "plus de matières...",
-    "addSubjectsToCenter": "Ajouter la(les) matière(s) au centre"
+    "addSubjectsToCenter": "Ajouter la(les) matière(s) au centre",
+    "instructions": "Veuillez sélectionner une matière et un niveau. La durée est optionnelle.",
+    "selectSubject": "Sélectionnez la matière *",
+    "selectGrade": "Sélectionnez le niveau *",
+    "addButton": "Ajouter la matière au centre",
+    "required": "requis",
+    "selectTeacherPlaceholder": "Tapez ou sélectionnez une matière",
+    "selectSubjectPlaceholder": "Tapez ou sélectionnez une matière",
+    "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
+    "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
   },
   "AdminReceiptsTable": {
     "title": "Reçus",
@@ -493,7 +502,7 @@
     "description": "Le paiement est calculé sur la base du prix de la matière × pourcentage × élèves inscrits",
     "errorloadTeachers": "Impossible de charger les enseignants",
     "errorcalcPayment": "Impossible de calculer le paiement de l'enseignant",
-"errorcreateReceipt": "Impossible de créer le reçu",
+    "errorcreateReceipt": "Impossible de créer le reçu",
     "errorgeneric": "Quelque chose s'est mal passé",
     "errornoTeacher": "Veuillez sélectionner un enseignant",
     "errornoSubjects": "Veuillez sélectionner au moins une matière à inclure dans le paiement",
@@ -988,7 +997,8 @@
     "loss": "Perte",
     "receipts": "reçus",
     "filters": "Filtres",
-    "searchPlaceholder": "Recherche par numéro de reçu, personne ou description...",
+
+    "searchPlaceholder": "Rechercher par numéro de reçu, personne ou description...",
     "allTypes": "Tous les types",
     "studentPayments": "Paiements des élèves",
     "teacherPayments": "Paiements des enseignants",
@@ -1006,84 +1016,71 @@
     "amount": "Montant",
     "method": "Méthode",
     "date": "Date",
-    "actions": "Actions",
     "income": "Revenu",
     "expense": "Dépense"
   },
-  "TimetableOverview": {
-    "title": "Aperçu de l'horaire",
-    "subtitle": "Voir les horaires des classes, les enseignants et les salles",
-    "errorLoadSchedule": "Impossible de charger les données d'horaire",
-    "viewOptions": "Options d'affichage",
-    "viewMode": "Mode d'affichage",
-    "allSchedules": "Tous les horaires",
-    "byTeacher": "Par enseignant",
-    "byRoom": "Par salle",
-    "selectTeacher": "Sélectionner l'enseignant",
-    "selectRoom": "Sélectionner la salle",
-    "chooseTeacher": "Choisir un enseignant",
-    "chooseRoom": "Choisir une salle",
-    "weeklySchedule": "Horaire hebdomadaire",
-    "viewFullTimetable": "Voir l'horaire hebdomadaire complet des classes",
-    "time": "Heure",
-    "monday": "Lundi",
-    "tuesday": "Mardi",
-    "wednesday": "Mercredi",
-    "thursday": "Jeudi",
-    "friday": "Vendredi",
-    "saturday": "Samedi",
-    "sunday": "Dimanche",
-    "unknownSubject": "Matière inconnue",
-    "unknownTeacher": "Enseignant inconnu",
-    "grade": "Niveau"
-  },
-  "StudentCardPage": {
-    "loadingCard": "Chargement de la carte d'élève...",
+  "StudentProfile": {
+    "backToStudents": "Retour aux élèves",
+    "studentProfile": "Profil de l'élève",
+    "edit": "Modifier",
+    "downloadCard": "Télécharger la carte",
+    "errorLoadStudent": "Impossible de charger les détails de l'élève",
     "studentNotFound": "Élève introuvable",
-    "title": "Carte d'identité de l'élève",
-    "subtitle": "Carte d'identification numérique",
-    "printCard": "Imprimer la carte",
-    "errorFetchStudent": "Impossible de récupérer l'élève"
-  },
-  "StudentDetailPage": {
-    "loading": "Chargement...",
-    "errorFetchStudent": "Impossible de récupérer l'élève",
-    "studentNotFound": "Élève introuvable",
-    "somethingWentWrong": "Quelque chose s'est mal passé",
-    "studentSince": "Élève depuis",
-    "editStudent": "Modifier l'élève",
-    "enrolledSubjects": "Matières inscrites",
-    "totalRevenue": "Revenu total",
-    "totalPaid": "Total payé",
-    "contactInformation": "Informations de contact",
+    "overview": "Aperçu",
+    "contactDetails": "Coordonnées",
     "email": "Email",
     "phone": "Téléphone",
-"gradeLevel": "Niveau/Classe",
+    "grade": "Niveau",
+    "enrolledDate": "Date d'inscription",
     "notProvided": "Non fourni",
     "parentGuardian": "Parent/Tuteur",
-    "name": "Nom",
-    "noSubjectsEnrolled": "Aucune matière inscrite pour l'instant",
-    "minutes": "minutes",
-    "enrolledOn": "Inscrit le",
-    "paymentHistory": "Historique des paiements",
-    "noPaymentsYet": "Aucun paiement pour l'instant",
-    "addPayment": "Ajouter un paiement"
-  },
-  "editStudent": {
-    "title": "Modifier l'élève",
-    "fetchStudent": "Impossible de récupérer l'élève",
-    "fetchSubjects": "Veuillez sélectionner la matière et l'enseignant",
-    "alreadyEnrolled": "L'élève est déjà inscrit à cette matière avec cet enseignant",
-    "somethingWentWrong": "Quelque chose s'est mal passé",
-    "studentInfo": "Informations de l'élève",
-    "fullName": "Nom complet *",
-    "grade": "Niveau/Classe",
-    "email": "Email",
-    "phone": "Numéro de téléphone",
-    "parentInfo": "Informations du parent/tuteur",
-    "parentName": "Nom du parent/tuteur",
+    "parentName": "Nom du parent",
     "parentPhone": "Téléphone du parent",
     "parentEmail": "Email du parent",
+    "noParentInfo": "Aucune information sur le parent",
+    "enrolledSubjects": "Matières inscrites",
+    "subjects": "matières",
+    "totalMonthlyFees": "Frais mensuels totaux",
+    "MAD": "MAD",
+    "teacher": "Enseignant",
+    "noSubjectsEnrolled": "Aucune matière inscrite pour l'instant",
+    "paymentHistory": "Historique des paiements",
+    "totalPaid": "Total payé",
+    "payments": "paiements",
+    "mostRecent": "Plus récent",
+    "viewAll": "Voir tout",
+    "viewReceipt": "Voir le reçu",
+    "noPayments": "Aucun paiement enregistré",
+    "receiptNumber": "Reçu n°"
+  },
+  "EditStudentPage": {
+    "title": "Modifier l'élève",
+    "subtitle": "Mettre à jour les informations et inscriptions de l'élève",
+    "loading": "Chargement...",
+    "studentNotFound": "Élève introuvable",
+    "errorLoadStudent": "Impossible de charger les données de l'élève",
+    "errorLoadSubjects": "Impossible de récupérer les matières",
+    "errorSelectBoth": "Veuillez sélectionner la matière et l'enseignant",
+    "errorAlreadyEnrolled": "L'élève est déjà inscrit à cette matière avec cet enseignant",
+    "errorUpdateStudent": "Impossible de mettre à jour l'élève",
+    "errorNameRequired": "Le nom de l'élève est obligatoire",
+    "errorAtLeastOne": "Veuillez inscrire l'élève à au moins une matière",
+    "errorGeneric": "Quelque chose s'est mal passé",
+    "studentInfo": "Informations de l'élève",
+    "fullName": "Nom complet",
+    "gradeClass": "Niveau/Classe",
+    "email": "Email",
+    "phoneNumber": "Numéro de téléphone",
+    "namePlaceholder": "John Doe",
+    "emailPlaceholder": "student@example.com",
+    "phonePlaceholder": "+212 (555) 000-0000",
+    "parentInfo": "Informations du parent/tuteur",
+    "parentName": "Nom du parent",
+    "parentPhone": "Téléphone du parent",
+    "parentEmail": "Email du parent",
+    "parentNamePlaceholder": "Jane Doe",
+    "parentPhonePlaceholder": "+212 (555) 000-0000",
+    "parentEmailPlaceholder": "parent@example.com",
     "currentEnrollments": "Inscriptions actuelles",
     "totalPrice": "Prix total",
     "teacher": "Enseignant",
@@ -1108,18 +1105,18 @@
     "nameRequired": "Le nom de l'élève est obligatoire",
     "atLeastOneSubject": "Veuillez inscrire l'élève à au moins une matière"
   },
-  "subjectForm" :
-  {  "instructions": "Veuillez sélectionner un sujet et un niveau. La durée est optionnelle.",
-  "selectSubject": "Sélectionnez le sujet *",
-  "selected": "Sélectionné : {{value}}",
-  "selectGrade": "Sélectionnez le niveau *",
-  "price": "Prix (MAD) *",
-  "duration": "Durée (heurs)",
-  "addButton": "Ajouter le sujet au centre",
-  "required": "requis",
-  "selectTeacherPlaceholder": "Tapez ou sélectionnez un sujet",
-  "selectSubjectPlaceholder": "Tapez ou sélectionnez un sujet",
-  "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
-  "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
-}
+  "subjectForm": {
+    "instructions": "Veuillez sélectionner une matière et un niveau. La durée est optionnelle.",
+    "selectSubject": "Sélectionnez la matière *",
+    "selected": "Sélectionné : {{value}}",
+    "selectGrade": "Sélectionnez le niveau *",
+    "price": "Prix (MAD) *",
+    "duration": "Durée (heures)",
+    "addButton": "Ajouter la matière au centre",
+    "required": "requis",
+    "selectTeacherPlaceholder": "Tapez ou sélectionnez une matière",
+    "selectSubjectPlaceholder": "Tapez ou sélectionnez une matière",
+    "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
+    "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
+  }
 }

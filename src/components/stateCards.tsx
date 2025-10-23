@@ -39,11 +39,11 @@ export default function ManagerStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 w-full px-2 sm:px-0">
         {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="flex justify-center items-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin" />
+          <Card key={i} className="min-h-[120px] sm:min-h-[140px]">
+            <CardContent className="flex justify-center items-center h-full">
+              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin text-muted-foreground" />
             </CardContent>
           </Card>
         ))}
@@ -53,64 +53,74 @@ export default function ManagerStatsCards() {
 
   if (!stats) return null
 
+  const statsData = [
+    {
+      title: t('studentstitle'),
+      icon: Users,
+      value: stats.totalStudents,
+      subtitle: t('studentsactive', { count: stats.activeEnrollments }),
+      colorClass: 'text-blue-600'
+    },
+    {
+      title: t('teacherstitle'),
+      icon: GraduationCap,
+      value: stats.totalTeachers,
+      subtitle: t('teacherssubtitle', { count: stats.totalSubjects }),
+      colorClass: 'text-purple-600'
+    },
+    {
+      title: t('monthlyRevenuetitle'),
+      icon: DollarSign,
+      value: `MAD ${stats.monthlyRevenue.toFixed(2)}`,
+      subtitle: (
+        <div className="flex items-center gap-1">
+          <TrendingUp className="h-3 w-3 text-green-600 flex-shrink-0" />
+          <span className="truncate">{t('monthlyRevenuegrowth', { percent: stats.revenueGrowth.toFixed(1) })}</span>
+        </div>
+      ),
+      colorClass: 'text-green-600',
+      isRevenue: true
+    },
+    {
+      title: t('totalRevenuetitle'),
+      icon: Receipt,
+      value: `MAD ${stats.totalRevenue.toFixed(2)}`,
+      subtitle: t('totalRevenuesubtitle', { count: stats.totalReceipts }),
+      colorClass: 'text-orange-600',
+      isRevenue: true
+    }
+  ]
+
   return (
-    <div className="grid gap-4 ml-auto mr-auto md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('studentstitle')}</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalStudents}</div>
-          <p className="text-xs text-muted-foreground">
-            {t('studentsactive', { count: stats.activeEnrollments })}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('teacherstitle')}</CardTitle>
-          <GraduationCap className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalTeachers}</div>
-          <p className="text-xs text-muted-foreground">
-            {t('teacherssubtitle', { count: stats.totalSubjects })}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('monthlyRevenuetitle')}</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600">
-            MAD{stats.monthlyRevenue.toFixed(2)}
-          </div>
-          <div className="flex items-center text-xs text-muted-foreground">
-            <TrendingUp className="mr-1 h-3 w-3 text-green-600" />
-            {t('monthlyRevenuegrowth', { percent: stats.revenueGrowth.toFixed(1) })}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('totalRevenuetitle')}</CardTitle>
-          <Receipt className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-blue-600">
-            MAD{stats.totalRevenue.toFixed(2)}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {t('totalRevenuesubtitle', { count: stats.totalReceipts })}
-          </p>
-        </CardContent>
-      </Card>
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 w-full px-2 sm:px-0">
+      {statsData.map((stat, index) => {
+        const IconComponent = stat.icon
+        return (
+          <Card key={index} className="overflow-hidden hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium line-clamp-2 pr-2">
+                {stat.title}
+              </CardTitle>
+              <IconComponent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <div className={`text-xl sm:text-2xl font-bold ${stat.colorClass} break-words`}>
+                {stat.isRevenue ? (
+                  <span className="block">
+                    <span className="text-base sm:text-2xl">MAD</span>
+                    <span className="ml-1">{typeof stat.value === 'string' ? stat.value.replace('MAD ', '') : stat.value}</span>
+                  </span>
+                ) : (
+                  stat.value
+                )}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                {typeof stat.subtitle === 'string' ? stat.subtitle : stat.subtitle}
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }
