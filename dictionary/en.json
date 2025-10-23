@@ -403,6 +403,7 @@
     "na": "N/A"
   },
   "CreateStudentPaymentForm": {
+        "hours":"hours",
     "title": "Create Student Payment Receipt",
     "subtitle": "Select student via search or QR code",
     "findStudent": "Find Student",

@@ -55,13 +55,13 @@ export default function StudentDetailPage() {
 
   useEffect(() => {
     fetchStudent()
-  }, [params.id])
+  }, [params])
 
   const fetchStudent = async () => {
     try {
-      const response = await axios.get(`/api/students/${params.id}`)
-      if (!response.data) throw new Error(t("errorFetchStudent"))
-      setStudent(response.data)
+      const {data} = await axios.get(`/api/students/${params.id}`)
+      if (!data) throw new Error(t("errorFetchStudent"))
+      setStudent(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : t("somethingWentWrong"))
     } finally {

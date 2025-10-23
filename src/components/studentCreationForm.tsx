@@ -2,17 +2,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
-import type React from "react"
-import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import type React from "react"
+import { useEffect, useState } from "react"
 
 interface Teacher {
   id: string
@@ -322,6 +321,7 @@ export default function CreateStudentForm() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {availableGrades.map((grade) => (
                         <Button
+                        className="w-auto"
                           key={grade}
                           type="button"
                           onClick={() => {
@@ -355,14 +355,14 @@ export default function CreateStudentForm() {
                               }}
                               disabled={subject.teacherSubjects.length === 0}
                               variant={selectedSubject?.id === subject.id ? "default" : "outline"}
-                              className="h-auto p-4 justify-start text-left"
+                              className="h-auto w-auto gap-2 p-4 justify-start text-left"
                             >
                               <div className="w-full flex justify-between items-start">
                                 <div>
                                   <h4 className="font-semibold">{subject.name}</h4>
                                   {subject.duration && (
                                     <p className="text-sm text-muted-foreground mt-1">
-                                      {subject.duration} {t("minutes")}
+                                      {subject.duration} {t("hours")}
                                     </p>
                                   )}
                                   <p className="text-xs text-muted-foreground mt-1">
@@ -401,26 +401,12 @@ export default function CreateStudentForm() {
                               className="h-auto p-4 justify-start w-full"
                             >
                               <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-4">
-                                  <Avatar>
-                                    <AvatarFallback>{ts.teacher.name.charAt(0).toUpperCase()}</AvatarFallback>
-                                  </Avatar>
-                                  <div className="text-left">
+  
                                     <h4 className="font-semibold">{ts.teacher.name}</h4>
                                     <p className="text-sm text-muted-foreground">
                                       {ts.teacher.email || ts.teacher.phone || t("enrollmentnoContactInfo")}
                                     </p>
-                                  </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-sm text-muted-foreground">{t("enrollmentcompensation")}</p>
-                                  <p className="font-semibold">
-                                    {ts.percentage
-                                      ? `${ts.percentage}% (${((selectedSubject.price * ts.percentage) / 100).toFixed(2)} درهم)`
-                                      : `${ts.hourlyRate} درهم/ساعة`}
-                                  </p>
-                                </div>
-                              </div>
                             </Button>
                           ))}
                         </div>

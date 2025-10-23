@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
-import { Loader2, Eye, Pencil, Search } from "lucide-react"
+import { Loader2, Eye, Pencil, Search, QrCode } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -284,6 +284,11 @@ export default function StudentsTable() {
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/manager/students/${student.id}/edit`} title="Edit">
                             <Pencil className="w-4 h-4" />
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/manager/students/${student.id}/card`} title="Edit">
+                            <QrCode className="w-4 h-4" />
                           </Link>
                         </Button>
                       </div>

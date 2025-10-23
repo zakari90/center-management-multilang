@@ -457,6 +457,7 @@
     "na": "S/O"
   },
   "CreateStudentPaymentForm": {
+    "hours":"heures",
     "title": "Créer un reçu de paiement d'élève",
     "subtitle": "Sélectionner un élève via la recherche ou le code QR",
     "findStudent": "Trouver un élève",
