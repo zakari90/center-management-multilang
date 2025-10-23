@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import axios from 'axios'
 import {
   Building2,
-  DollarSign,
+  Coins,
   Loader2,
   MapPin,
   Users
@@ -117,16 +117,16 @@ export default function CenterOverview() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                            <DollarSign className="h-3 w-3" />
+                            <Coins className="h-3 w-3" />
                             {t('revenue')}
                           </div>
                           <div className="text-2xl font-bold text-green-600">
-                            ${center.revenue.toFixed(0)}
+                            MAD{center.revenue.toFixed(0)}
                           </div>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
+                      <div className="space-y-1 w-full">
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>{t('performance')}</span>
                           <span>{((center.revenue / totalRevenue) * 100).toFixed(1)}% {t('ofTotal')}</span>
