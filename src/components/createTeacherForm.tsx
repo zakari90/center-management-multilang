@@ -208,124 +208,128 @@ export default function CreateTeacherForm() {
               ) : teacherSubjects.length === 0 ? (
                 <p className="text-muted-foreground text-center py-4 bg-muted rounded-md">{t("noSubjectsAssigned")}</p>
               ) : (
-                <div className="space-y-4">
-                  {teacherSubjects.map((ts, index) => {
-                    return (
-                      <Card key={index}>
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1 space-y-2">
-                              <Label htmlFor={`subject-${index}`}>
-                                {t("subject")} <span className="text-destructive">*</span>
-                              </Label>
-                              <Select
-                                value={ts.subjectId}
-                                onValueChange={(value) => updateSubject(index, "subjectId", value)}
-                              >
-                                <SelectTrigger id={`subject-${index}`}>
-                                  <SelectValue placeholder={t("subject")} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {subjects
-                                    .filter(
-                                      (s) =>
-                                        !teacherSubjects.some(
-                                          (ts2, i) => i !== index && ts2.subjectId === s.id,
-                                        ),
-                                    )
-                                    .map((subject) => (
-                                      <SelectItem key={subject.id} value={subject.id}>
-                                        {subject.name} - {subject.grade} (${subject.price})
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeSubject(index)}
-                              className="mt-7 text-destructive hover:text-destructive"
-                              title={t("remove")}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-sm">
-                            <div className="space-y-2">
-                              <Label htmlFor={`payment-type-${index}`}>{t("paymentType")}</Label>
-                              <Select
-                                value={ts.compensationType}
-                                onValueChange={(value) => updateSubject(index, "compensationType", value)}
-                              >
-                                <SelectTrigger id={`payment-type-${index}`}>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="percentage">{t("percentage")}</SelectItem>
-                                  <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            {ts.compensationType === "percentage" ? (
-                              <div className="space-y-2">
-                                <Label htmlFor={`percentage-${index}`}>
-                                  {t("percentage")} <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                  id={`percentage-${index}`}
-                                  type="number"
-                                  min={1}
-                                  max={100}
-                                  step={0.1}
-                                  value={ts.percentage || ""}
-                                  onChange={(e) =>
-                                    updateSubject(index, "percentage", parseFloat(e.target.value))
-                                  }
-                                />
-                              </div>
-                            ) : (
-                              <div className="space-y-2">
-                                <Label htmlFor={`hourly-rate-${index}`}>
-                                  {t("hourlyRate")} <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                  id={`hourly-rate-${index}`}
-                                  type="number"
-                                  min={0}
-                                  step={0.01}
-                                  value={ts.hourlyRate || ""}
-                                  onChange={(e) =>
-                                    updateSubject(index, "hourlyRate", parseFloat(e.target.value))
-                                  }
-                                />
-                              </div>
-                            )}
-
-                            <div className="flex items-end">
-                              <Card className="w-full bg-primary/5">
-                                <CardContent className="pt-4">
-                                  <p className="text-xs text-muted-foreground mb-1">{t("estimatedEarnings")}</p>
-                                  <p className="text-lg font-semibold">
-                                    {ts.compensationType === "percentage" && ts.percentage
-                                      ? `$${((subjects.find((s) => s.id === ts.subjectId)?.price ?? 0 * ts.percentage) / 100).toFixed(2)}`
-                                      : ts.hourlyRate
-                                      ? `$${ts.hourlyRate.toFixed(2)}/hr`
-                                      : "$0.00"}
-                                  </p>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+<div className="space-y-4">
+  {teacherSubjects.map((ts, index) => {
+    return (
+      <Card key={index}>
+        <CardContent className="pt-6 space-y-4">
+          {/* Subject Selection */}
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="flex-1 w-full">
+              <Label htmlFor={`subject-${index}`}>
+                {t("subject")} <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={ts.subjectId}
+                onValueChange={(value) => updateSubject(index, "subjectId", value)}
+              >
+                <SelectTrigger id={`subject-${index}`}>
+                  <SelectValue placeholder={t("subject")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {subjects
+                    .filter(
+                      (s) =>
+                        !teacherSubjects.some(
+                          (ts2, i) => i !== index && ts2.subjectId === s.id,
+                        ),
                     )
-                  })}
-                </div>
+                    .map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name} - {subject.grade} (${subject.price})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => removeSubject(index)}
+              className="mt-2 sm:mt-7 text-destructive hover:text-destructive w-full sm:w-auto"
+              title={t("remove")}
+            >
+              <X className="h-4 w-4 mr-2 sm:mr-0" />
+              <span className="sm:hidden">{t("remove")}</span>
+            </Button>
+          </div>
+
+          {/* Payment Type & Compensation */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor={`payment-type-${index}`}>{t("paymentType")}</Label>
+              <Select
+                value={ts.compensationType}
+                onValueChange={(value) => updateSubject(index, "compensationType", value)}
+              >
+                <SelectTrigger id={`payment-type-${index}`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">{t("percentage")}</SelectItem>
+                  <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {ts.compensationType === "percentage" ? (
+              <div className="space-y-2">
+                <Label htmlFor={`percentage-${index}`}>
+                  {t("percentage")} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id={`percentage-${index}`}
+                  type="number"
+                  min={1}
+                  max={100}
+                  step={0.1}
+                  value={ts.percentage || ""}
+                  onChange={(e) =>
+                    updateSubject(index, "percentage", parseFloat(e.target.value))
+                  }
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor={`hourly-rate-${index}`}>
+                  {t("hourlyRate")} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id={`hourly-rate-${index}`}
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={ts.hourlyRate || ""}
+                  onChange={(e) =>
+                    updateSubject(index, "hourlyRate", parseFloat(e.target.value))
+                  }
+                />
+              </div>
+            )}
+
+            {/* Estimated Earnings */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">{t("estimatedEarnings")}</Label>
+              <Card className="w-full bg-primary/5 h-full">
+                <CardContent className="pt-4 flex items-center justify-center h-full">
+                  <p className="text-lg font-semibold">
+                    {ts.compensationType === "percentage" && ts.percentage
+                      ? `$${((subjects.find((s) => s.id === ts.subjectId)?.price ?? 0 * ts.percentage) / 100).toFixed(2)}`
+                      : ts.hourlyRate
+                      ? `$${ts.hourlyRate.toFixed(2)}/hr`
+                      : "$0.00"}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  })}
+</div>
               )}
             </div>
 
