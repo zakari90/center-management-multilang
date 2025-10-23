@@ -254,7 +254,7 @@ export default function CreateTeacherForm() {
                             </Button>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-sm">
                             <div className="space-y-2">
                               <Label htmlFor={`payment-type-${index}`}>{t("paymentType")}</Label>
                               <Select
