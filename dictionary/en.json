@@ -1025,7 +1025,27 @@
       "title": "Enrolled Subjects",
       "noSubjects": "No subjects enrolled",
       "gradePrefix": "Grade",
-      "teacherLabel": "Teacher"
+      "teacherLabel": "Teacher",
+          "editSubject": "Edit Subject",
+    "deleteSubject": "Delete Subject?",
+    "deleteConfirmation": "This will permanently delete {subjectName} from the center. This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "selectSubject": "Select Subject",
+    "selectGrade": "Select Grade",
+    "price": "Price (MAD)",
+    "duration": "Duration (minutes)",
+    "placeholders": {
+      "subject": "Type or select a subject",
+      "grade": "Type or select a grade",
+      "price": "0.00",
+      "duration": "60"
+    },
+    "labels": {
+      "subject": "Subject",
+      "grade": "Grade"
+    },
+    "requiredField": "*"
     },
     "qrCode": {
       "description": "QR Code"

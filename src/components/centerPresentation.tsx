@@ -11,19 +11,16 @@ import {
   CardTitle
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
-import { EditDialog } from "./editDialog"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
-import { useTranslations } from "next-intl"
-import { useLocalizedConstants } from "./useLocalizedConstants"
-import { SubjectForm } from "./subjectForm"
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@radix-ui/react-alert-dialog"
-import { Label } from "recharts"
-import { AlertDialogHeader, AlertDialogFooter } from "./ui/alert-dialog"
-import { Input } from "./ui/input"
 import axios from "axios"
+import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
 import { toast } from "sonner"
+import { EditDialog } from "./editDialog"
+import { EditSubjectCard } from "./editSubjectCard"
+import { SubjectForm } from "./subjectForm"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
+import { useLocalizedConstants } from "./useLocalizedConstants"
 
 type Subject = {
   id: string
@@ -155,7 +152,7 @@ export default function CenterPresentation(center: Center) {
             <div className="space-y-3">
               {formData.subjects.length > 0 ? (
                 formData.subjects.map((subject) => (
-                  <SubjectCard
+                  <EditSubjectCard
                     key={subject.id}
                     subject={subject}
                     onUpdate={handleUpdateSubject}
@@ -313,153 +310,3 @@ function Section({ title, icon, items, onEditButton, noDataText = "No data" }: S
   )
 }
 
-
-function SubjectCard({ 
-  subject, 
-  onUpdate, 
-  onDelete,
-  availableSubjects,
-  availableGrades
-}: { 
-  subject: Subject
-  onUpdate: (id: string, data: Partial<Subject>) => void
-  onDelete: (id: string) => void
-  availableSubjects: string[]
-  availableGrades: string[]
-}) {
-  const [tempSubject, setTempSubject] = useState({
-    selectedSubject: subject.name,
-    selectedGrade: subject.grade,
-    price: subject.price.toString(),
-    duration: subject.duration?.toString() || ""
-  })
-
-  const handleUpdateSubject = () => {
-    onUpdate(subject.id, {
-      name: tempSubject.selectedSubject,
-      grade: tempSubject.selectedGrade,
-      price: parseFloat(tempSubject.price),
-      duration: tempSubject.duration ? parseInt(tempSubject.duration) : null
-    })
-  }
-
-  return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h4 className="font-semibold text-base">{subject.name}</h4>
-          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-            <Badge variant="outline">{subject.grade}</Badge>
-            <span className="flex items-center gap-1">
-              <DollarSign className="h-3 w-3" />
-              {subject.price} MAD
-            </span>
-            {subject.duration && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {subject.duration} min
-              </span>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex gap-1">
-          <EditDialog
-            title="Edit Subject"
-            trigger={
-              <Button variant="ghost" size="sm">
-                <Pencil className="h-4 w-4" />
-              </Button>
-            }
-            onSave={handleUpdateSubject}
-          >
-            <div className="border rounded-lg p-4 space-y-4 bg-muted/10">
-              <div className="space-y-4">
-                {/* Subject Selection */}
-                <div className="space-y-2">
-                  <Label>Select Subject *</Label>
-                  <ItemInputList
-                    label="Subject"
-                    placeholder="Type or select a subject"
-                    items={tempSubject.selectedSubject ? [tempSubject.selectedSubject] : []}
-                    onChange={(items) => {
-                      const single = items[0] || ""
-                      setTempSubject(prev => ({ ...prev, selectedSubject: single }))
-                    }}
-                    suggestions={availableSubjects}
-      
-                  />
-                </div>
-
-                {/* Grade Selection */}
-                <div className="space-y-2">
-                  <Label>Select Grade *</Label>
-                  <ItemInputList
-                    label="Grade"
-                    placeholder="Type or select a grade"
-                    items={tempSubject.selectedGrade ? [tempSubject.selectedGrade] : []}
-                    onChange={(items) => {
-                      const single = items[0] || ""
-                      setTempSubject(prev => ({ ...prev, selectedGrade: single }))
-                    }}
-                    suggestions={availableGrades}
-      
-                  />
-                </div>
-
-                {/* Price and Duration */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Price (MAD) *</Label>
-                    <Input
-                      id="editPrice"
-                      type="number"
-                      step="0.01"
-                      value={tempSubject.price}
-                      onChange={(e) => setTempSubject(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Duration (minutes)</Label>
-                    <Input
-                      id="editDuration"
-                      type="number"
-                      value={tempSubject.duration}
-                      onChange={(e) => setTempSubject(prev => ({ ...prev, duration: e.target.value }))}
-                      placeholder="60"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </EditDialog>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Subject?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete - {subject.name} - from the center.
-                  This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(subject.id)}>
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div>
-    </Card>
-  )
-}

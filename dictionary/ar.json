@@ -11,7 +11,27 @@
       "title": "المواد ",
       "noSubjects": "لم يتم تسجيل أي مواد",
       "gradePrefix": "الفئة",
-      "teacherLabel": "المعلم"
+      "teacherLabel": "المعلم",
+      "editSubject": "تعديل المادة",
+    "deleteSubject": "حذف المادة؟",
+    "deleteConfirmation": "سيؤدي هذا إلى حذف {subjectName} نهائياً من المركز. لا يمكن التراجع عن هذا الإجراء.",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "selectSubject": "اختر المادة",
+    "selectGrade": "اختر المستوى",
+    "price": "السعر (درهم)",
+    "duration": "المدة (دقائق)",
+    "placeholders": {
+      "subject": "اكتب أو اختر مادة",
+      "grade": "اكتب أو اختر مستوى",
+      "price": "0.00",
+      "duration": "60"
+    },
+    "labels": {
+      "subject": "المادة",
+      "grade": "المستوى"
+    },
+    "requiredField": "*"
     },
     "qrCode": {
       "description": "رمز الاستجابة السريعة"
