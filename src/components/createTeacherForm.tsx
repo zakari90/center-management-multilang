@@ -239,11 +239,7 @@ export default function CreateTeacherForm() {
                         {subject.name} - {subject.grade} (${subject.price})
                       </SelectItem>
                     ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
+                                <Button
               type="button"
               variant="ghost"
               size="icon"
@@ -252,8 +248,12 @@ export default function CreateTeacherForm() {
               title={t("remove")}
             >
               <X className="h-4 w-4 mr-2 sm:mr-0" />
-              <span className="sm:hidden">{t("remove")}</span>
             </Button>
+                </SelectContent>
+              </Select>
+            </div>
+
+
           </div>
 
           {/* Payment Type & Compensation */}
