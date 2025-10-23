@@ -198,7 +198,7 @@ const SubjectCompensationCard = ({
           {teacherSubject.compensationType === "percentage" ? (
             <div className="space-y-2">
               <Label htmlFor={`percentage-${index}`}>
-                {t("percentage")} (%) <span className="text-destructive">*</span>
+                {t("percentage")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`percentage-${index}`}
@@ -393,48 +393,52 @@ export default function CreateTeacherForm() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+  e.preventDefault()
+  setIsLoading(true)
+  setError("")
 
-    try {
-      const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
+  try {
+    const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
 
-      for (const ts of validSubjects) {
-        if (ts.compensationType === "percentage" && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
-          throw new Error("Percentage must be between 1 and 100")
-        }
-        if (ts.compensationType === "hourly" && (!ts.hourlyRate || ts.hourlyRate <= 0)) {
-          throw new Error("Hourly rate must be greater than 0")
-        }
+    for (const ts of validSubjects) {
+      if (ts.compensationType === "percentage" && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
+        throw new Error("Percentage must be between 1 and 100")
       }
-
-      const activeSchedule = weeklySchedule
-        .filter((day) => day.isAvailable)
-        .map(({ day, startTime, endTime }) => ({ day, startTime, endTime }))
-
-      const payload = {
-        ...formData,
-        // Convert to JSON string for Prisma
-        weeklySchedule: activeSchedule.length > 0 ? JSON.stringify(activeSchedule) : null,
-        subjects: validSubjects.map((ts) => ({
-          subjectId: ts.subjectId,
-          percentage: ts.compensationType === "percentage" ? ts.percentage : null,
-          hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
-        })),
+      if (ts.compensationType === "hourly" && (!ts.hourlyRate || ts.hourlyRate <= 0)) {
+        throw new Error("Hourly rate must be greater than 0")
       }
-
-      await axios.post("/api/teachers", payload)
-      await router.push("/manager/teachers")
-      router.refresh()
-    } catch (err) {
-      if (axios.isAxiosError(err)) setError(err.response?.data?.error || t("genericError"))
-      else if (err instanceof Error) setError(err.message)
-      else setError(t("genericError"))
-    } finally {
-      setIsLoading(false)
     }
+
+    const activeSchedule = weeklySchedule
+      .filter((day) => day.isAvailable)
+      .map(({ day, startTime, endTime }) => 
+        // Convert each schedule item to a JSON string
+        JSON.stringify({ day, startTime, endTime })
+      )
+
+    const payload = {
+      ...formData,
+      // Send as array of JSON strings (each item stringified)
+      weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
+      subjects: validSubjects.map((ts) => ({
+        subjectId: ts.subjectId,
+        percentage: ts.compensationType === "percentage" ? ts.percentage : null,
+        hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
+      })),
+    }
+
+    await axios.post("/api/teachers", payload)
+    await router.push("/manager/teachers")
+    router.refresh()
+  } catch (err) {
+    if (axios.isAxiosError(err)) setError(err.response?.data?.error || t("genericError"))
+    else if (err instanceof Error) setError(err.message)
+    else setError(t("genericError"))
+  } finally {
+    setIsLoading(false)
   }
+}
+
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">

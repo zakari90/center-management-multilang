@@ -5,7 +5,6 @@ import axios from 'axios'
 import {
   DollarSign,
   GraduationCap,
-  Loader2,
   Receipt,
   TrendingUp,
   Users
@@ -28,17 +27,22 @@ export default function ManagerStatsCards() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const t = useTranslations('ManagerStatsCards')
+  const [error, setError] = useState<string | null>(null)
+
 
   useEffect(() => {
     fetchStats()
   }, [])
 
   const fetchStats = async () => {
+        setError(null)
+    setIsLoading(true)
     try {
       const { data } = await axios.get('/api/dashboard/stats')
       setStats(data)
     } catch (err) {
       console.error('Failed to fetch stats:', err)
+      setError('Failed to load statistics')
     } finally {
       setIsLoading(false)
     }
@@ -46,13 +50,15 @@ export default function ManagerStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <Card
-            key={i}
-            className="flex items-center justify-center w-64 h-28"
-          >
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+            </CardContent>
           </Card>
         ))}
       </div>
@@ -99,15 +105,19 @@ export default function ManagerStatsCards() {
     }
   ]
 
+    if (error) {
+    return (
+      <div className="p-4 text-red-600 bg-red-50 rounded-md">
+        {error}
+      </div>
+    )
+  }
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statsData.map((stat, index) => {
         const Icon = stat.icon
         return (
-          <Card
-            key={index}
-            className="w-64 hover:shadow-md transition-shadow"
-          >
+          <Card key={index} >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">                
                 {stat.title}</CardTitle>
@@ -118,9 +128,9 @@ export default function ManagerStatsCards() {
               <div className={`text-2xl font-bold ${stat.colorClass}`}>
                 {stat.value}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
+              {/* <div className="text-xs text-muted-foreground mt-1">
                 {stat.subtitle}
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         )

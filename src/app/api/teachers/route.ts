@@ -33,13 +33,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Parse weeklySchedule if it's a string, or keep it as is
-    let parsedSchedule = null
-    if (weeklySchedule) {
-      parsedSchedule = typeof weeklySchedule === 'string' 
-        ? weeklySchedule 
-        : JSON.stringify(weeklySchedule)
-    }
+    // Ensure weeklySchedule is an array or empty array
+    const scheduleArray = Array.isArray(weeklySchedule) ? weeklySchedule : []
 
     // Create teacher with subjects in a transaction
     const teacher = await db.$transaction(async (tx: any) => {
@@ -50,7 +45,7 @@ export async function POST(req: NextRequest) {
           email: email || null,
           phone: phone || null,
           address: address || null,
-          weeklySchedule: parsedSchedule,
+          weeklySchedule: scheduleArray, // Pass array directly
           managerId: session.user.id,
         },
       })
