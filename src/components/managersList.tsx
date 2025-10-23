@@ -1,21 +1,19 @@
 // components/admin/managers-list.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { 
-  Loader2, 
-  UserPlus, 
-  Mail,
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import axios from 'axios'
+import {
   Building2,
+  Loader2,
+  Mail,
+  UserPlus,
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 interface Manager {
   id: string
@@ -50,16 +48,9 @@ export default function ManagersList() {
     <Card className="col-span-4 lg:col-span-2">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <div>
             <CardTitle>{t('title')}</CardTitle>
             <CardDescription>{t('description')}</CardDescription>
-          </div>
-          <Button size="sm" asChild>
-            <Link href="/admin/managers/create">
-              <UserPlus className="h-4 w-4 mr-1" />
-              {t('add')}
-            </Link>
-          </Button>
+          
         </div>
       </CardHeader>
       <CardContent>
@@ -83,12 +74,8 @@ export default function ManagersList() {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <Link 
-                      href={`/admin/managers/${manager.id}`}
-                      className="font-semibold hover:underline truncate"
-                    >
                       {manager.name}
-                    </Link>
+
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
                     <Mail className="h-3 w-3" />

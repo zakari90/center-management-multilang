@@ -75,74 +75,117 @@ export default function CenterOverview() {
         ) : (
           <div className="space-y-4">
             {centers.map((center) => (
-              <Card key={center.id} className="border-2 hover:border-primary/50 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Building2 className="h-5 w-5 text-primary" />
-                          <Link 
-                            href={`/admin/centers/${center.id}`}
-                            className="text-lg font-semibold hover:underline"
-                          >
-                            {center.name}
-                          </Link>
-                          <Badge variant="secondary">
-                            {center.managersCount} {t('managers')}
-                          </Badge>
-                        </div>
-                        {center.address && (
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            {center.address}
-                          </div>
-                        )}
-                      </div>
+<Card 
+  key={center.id} 
+  className="border-2 hover:border-primary/50 transition-all duration-200"
+>
+  <CardContent className="p-4 sm:p-6">
+    {/* Main Container - Stack on mobile, horizontal on larger screens */}
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      
+      {/* Left Section - Content */}
+      <div className="flex-1 space-y-3 sm:space-y-4">
+        
+        {/* Header - Name, Badge, Address */}
+        <div className="space-y-2">
+          {/* Name and Badge - Stack on very small screens */}
+          <div className="flex flex-col xs:flex-row xs:items-center xs:flex-wrap gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Building2 className="h-5 w-5 text-primary flex-shrink-0" />
+              <Link 
+                href={`/admin/centers/${center.id}`}
+                className="text-base sm:text-lg font-semibold hover:underline truncate"
+              >
+                {center.name}
+              </Link>
+            </div>
+            <Badge variant="secondary" className="w-fit text-xs">
+              {center.managersCount} {t('managers')}
+            </Badge>
+          </div>
+          
+          {/* Address */}
+          {center.address && (
+            <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+              <span className="line-clamp-2">{center.address}</span>
+            </div>
+          )}
+        </div>
 
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                            <Users className="h-3 w-3" />
-                            {t('students')}
-                          </div>
-                          <div className="text-2xl font-bold">{center.studentsCount}</div>
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                            <Users className="h-3 w-3" />
-                            {t('teachers')}
-                          </div>
-                          <div className="text-2xl font-bold">{center.teachersCount}</div>
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">
-                            <Coins className="h-3 w-3" />
-                            {t('revenue')}
-                          </div>
-                          <div className="text-2xl font-bold text-green-600">
-                            MAD{center.revenue.toFixed(0)}
-                          </div>
-                        </div>
-                      </div>
+        {/* Stats Grid - Responsive columns */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* Students */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Users className="h-3 w-3 flex-shrink-0" />
+              <span>{t('students')}</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-primary">
+              {center.studentsCount.toLocaleString()}
+            </div>
+          </div>
+          
+          {/* Teachers */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Users className="h-3 w-3 flex-shrink-0" />
+              <span>{t('teachers')}</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-primary">
+              {center.teachersCount.toLocaleString()}
+            </div>
+          </div>
+          
+          {/* Revenue - Full width on mobile if needed */}
+          <div className="space-y-1 xs:col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Coins className="h-3 w-3 flex-shrink-0" />
+              <span>{t('revenue')}</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">
+              {center.revenue.toLocaleString('ar-MA', { 
+                style: 'currency', 
+                currency: 'MAD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+              })}
+            </div>
+          </div>
+        </div>
 
-                      <div className="space-y-1 w-full">
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{t('performance')}</span>
-                          <span>{((center.revenue / totalRevenue) * 100).toFixed(1)}% {t('ofTotal')}</span>
-                        </div>
-                        <Progress value={(center.revenue / totalRevenue) * 100} />
-                      </div>
-                    </div>
+        {/* Performance Progress Bar */}
+        {totalRevenue > 0 && (
+          <div className="space-y-1.5 w-full">
+            <div className="flex flex-col xs:flex-row xs:justify-between gap-1 text-xs text-muted-foreground">
+              <span>{t('performance')}</span>
+              <span className="font-medium">
+                {((center.revenue / totalRevenue) * 100).toFixed(1)}% {t('ofTotal')}
+              </span>
+            </div>
+            <Progress 
+              value={(center.revenue / totalRevenue) * 100} 
+              className="h-2"
+            />
+          </div>
+        )}
+      </div>
 
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/center`}>
-                        {t('viewDetails')}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* Action Button - Full width on mobile, auto on larger */}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        asChild
+        className="w-full sm:w-auto sm:flex-shrink-0 order-first sm:order-last"
+      >
+        <Link href={`/admin/center`}>
+          {t('viewDetails')}
+        </Link>
+      </Button>
+    </div>
+  </CardContent>
+</Card>
+
             ))}
           </div>
         )}
