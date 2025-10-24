@@ -53,10 +53,9 @@ export function LoginManager({
 
   return (
     <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl w-full max-w-sm">
+      <Card className="border-0 shadow-xl w-full max-w-md">
         <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-center flex items-center justify-center gap-2">
-            <UserCog className="h-6 w-6 sm:h-7 sm:w-7" />
             {tManager('title')}
           </CardTitle>
           <CardDescription className="text-center text-xs sm:text-sm px-2">
@@ -119,18 +118,10 @@ export function LoginManager({
 
             {/* Password Field */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
                   {t('password.label')}
                 </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary hover:underline underline-offset-4 whitespace-nowrap"
-                  tabIndex={-1}
-                >
-                  {tManager('forgotPassword')}
-                </Link>
-              </div>
+
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input

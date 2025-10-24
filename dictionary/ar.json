@@ -10,8 +10,8 @@
     },
     "errors": {
       "registrationFailed": "فشل التسجيل",
-      "createManagerFailed": "فشل إنشاء المدير",
-      "updateManagerFailed": "فشل تحديث المدير",
+      "createManagerFailed": "فشل إنشاء المشرف",
+      "updateManagerFailed": "فشل تحديث المشرف",
       "loginFailed": "فشل تسجيل الدخول",
       "unexpectedError": "حدث خطأ غير متوقع",
       "userIdRequired": "معرف المستخدم مطلوب"
@@ -86,13 +86,13 @@
     "privacyPolicy": "سياسة الخصوصية"
   },
    "loginManager": {
-    "title": "تسجيل دخول المدير",
-    "subtitle": "الوصول إلى لوحة تحكم المدير",
+    "title": "تسجيل دخول المشرف",
+    "subtitle": "الوصول إلى لوحة تحكم المشرف",
     "successMessage": "تم تسجيل الدخول بنجاح! جارٍ التوجيه إلى لوحة التحكم...",
     "forgotPassword": "نسيت كلمة المرور؟",
     "or": "أو",
     "backToHome": "العودة إلى الصفحة الرئيسية",
-    "infoTitle": "وصول المدير فقط",
+    "infoTitle": "وصول المشرف فقط",
     "infoDescription": "هذا تسجيل الدخول مخصص لمديري المراكز. إذا كنت مسؤولاً، يرجى استخدام تسجيل دخول المسؤول."
   }
   ,

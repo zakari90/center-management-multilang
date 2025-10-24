@@ -62,8 +62,8 @@ export function RegisterForm({
   }
 
   return (
-    <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen flex items-center justify-center p-3 sm:p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl w-full max-w-sm">
+    <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
+      <Card className="border-0 shadow-xl w-full max-w-md">
         <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
             {t('title')}
