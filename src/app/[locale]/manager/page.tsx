@@ -2,7 +2,7 @@ import EnrollmentChart from "@/components/enrollement-chart";
 import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
-import ManagerStatsCards from "@/components/stateCards";
+import ManagerStatsCards from "@/components/managerStateCards";
 import TopSubjects from "@/components/top-subjects";
 import { useTranslations } from "next-intl";
 
@@ -17,6 +17,7 @@ return (
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
+      ------------
 <ReceiptsSummary/>
         <QuickActions />
 
