@@ -7,7 +7,6 @@ import {
   GraduationCap,
   Receipt,
   TrendingUp,
-  UserCheck,
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'

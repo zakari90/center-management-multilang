@@ -1,15 +1,13 @@
 generator client {
   provider = "prisma-client-js"
 }
-// const DATABASE_URL_LOCAL = "postgresql://postgres:123456789@localhost:5432/postgres?schema=public";
 
-// const LOCAL_MONGO_DB = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.8"
 
 
 //
 datasource db {
   provider = "mongodb"
-  url      = "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.8"
+  url      = env("DATABASE_URL")
 }
 
 

@@ -11,17 +11,20 @@ function Page() {
   const t = useTranslations('Dashboard')
 
 return (
-     <div className="container mx-auto p-6 space-y-6">
+   <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
+
+      <ManagerStatsCards />
+      <div className="grid gap-4 grid-cols-4">
+
       <ReceiptsSummary/>
       <QuickActions />
-
+      </div>
 
       <div className="grid gap-4 grid-cols-4">
-      <ManagerStatsCards />
 
         <ManagerRevenueChart />
       </div>

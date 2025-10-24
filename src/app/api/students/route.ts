@@ -46,7 +46,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const session :any = await getSession()
+    const session: any = await getSession()
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       parentPhone, 
       parentEmail, 
       grade,
-      subjects 
+      enrollments  // ← Changed from 'subjects'
     } = body
 
     if (!name) {
@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create student with subjects in a transaction
-    const student = await db.$transaction(async (tx:any) => {
+    // Create student with enrollments in a transaction
+    const student = await db.$transaction(async (tx: any) => {
       // Create the student
       const newStudent = await tx.student.create({
         data: {
@@ -95,12 +95,13 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // Create student-subject associations if subjects provided
-      if (subjects && subjects.length > 0) {
+      // Create student-subject-teacher associations if enrollments provided
+      if (enrollments && enrollments.length > 0) {
         await tx.studentSubject.createMany({
-          data: subjects.map((subjectId: string) => ({
+          data: enrollments.map((enrollment: { subjectId: string; teacherId: string }) => ({
             studentId: newStudent.id,
-            subjectId: subjectId,
+            subjectId: enrollment.subjectId,
+            teacherId: enrollment.teacherId,  // ← Added teacherId
           }))
         })
       }
@@ -111,7 +112,8 @@ export async function POST(req: NextRequest) {
         include: {
           studentSubjects: {
             include: {
-              subject: true
+              subject: true,
+              teacher: true  // ← Include teacher info too
             }
           }
         }
