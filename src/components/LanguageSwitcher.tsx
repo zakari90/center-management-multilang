@@ -35,7 +35,7 @@ const LanguageSwitcher = () => {
     document.cookie = `NEXT_LOCALE=${newLanguage}; path=/;`;
 
     const segments = pathname.split("/");
-    if (["en", "ar", "zh", "es", "ja"].includes(segments[1])) {
+    if (["en", "ar", "fr"].includes(segments[1])) {
       segments[1] = newLanguage;
     } else {
       segments.splice(1, 0, newLanguage);
