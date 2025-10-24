@@ -18,22 +18,15 @@ return (
       </div>
 
       <ManagerStatsCards />
-      <div className="grid gap-4 grid-cols-4">
 
       <ReceiptsSummary/>
       <QuickActions />
-      </div>
 
-      <div className="grid gap-4 grid-cols-4">
 
         <ManagerRevenueChart />
-      </div>
 
-      <div className="grid gap-4 grid-cols-4">
         <EnrollmentChart />
         <TopSubjects />
-      </div>
-
       {/* <div className="grid gap-4 grid-cols-4">
         <RecentActivities />
       </div> */}

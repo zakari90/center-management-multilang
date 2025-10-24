@@ -115,7 +115,7 @@ export async function PATCH(
       parentPhone, 
       parentEmail, 
       grade,
-      subjects 
+      enrollments  // ← Changed from 'subjects'
     } = body
 
     const existingStudent = await db.student.findUnique({
@@ -139,7 +139,7 @@ export async function PATCH(
       }
     }
 
-    const student = await db.$transaction(async (tx:any) => {
+    const student = await db.$transaction(async (tx: any) => {
       await tx.student.update({
         where: { id },
         data: {
@@ -153,16 +153,20 @@ export async function PATCH(
         }
       })
 
-      if (subjects) {
+      // Update enrollments if provided
+      if (enrollments) {
+        // Delete existing enrollments
         await tx.studentSubject.deleteMany({
           where: { studentId: id }
         })
 
-        if (subjects.length > 0) {
+        // Create new enrollments with teachers
+        if (enrollments.length > 0) {
           await tx.studentSubject.createMany({
-            data: subjects.map((subjectId: string) => ({
+            data: enrollments.map((enrollment: { subjectId: string; teacherId: string }) => ({
               studentId: id,
-              subjectId: subjectId,
+              subjectId: enrollment.subjectId,
+              teacherId: enrollment.teacherId,  // ← Added teacherId
             }))
           })
         }
@@ -173,7 +177,8 @@ export async function PATCH(
         include: {
           studentSubjects: {
             include: {
-              subject: true
+              subject: true,
+              teacher: true  // ← Include teacher info
             }
           }
         }
