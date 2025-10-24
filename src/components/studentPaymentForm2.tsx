@@ -212,46 +212,17 @@ export default function CreateStudentPaymentForm() {
     }
   }
 
-  const stopScanning = () => {
-    // Reset the QR reader
-    if (readerRef.current) {
-      try {
-        readerRef.current.reset()
-      } catch (err) {
-        console.error('Error resetting reader:', err)
-      }
-      readerRef.current = null
-    }
-    
-    // Stop camera stream
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => {
-        if (track.readyState === 'live') {
-          track.stop()
-        }
-      })
-      streamRef.current = null
-    }
-    
-    // Clear video source
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-    }
-    
-    setIsScanning(false)
-  }
-
 const scanQRCode = async () => {
   if (!videoRef.current || !isScanning) return
   
   try {
-    const { BrowserQRCodeReader } = await import('@zxing/library')
-    const reader = new BrowserQRCodeReader()
+    const { BrowserMultiFormatReader } = await import('@zxing/browser')
+    const reader = new BrowserMultiFormatReader()
     readerRef.current = reader
     
-    // Use decodeFromVideoDevice for continuous scanning
-    reader.decodeFromVideoDevice(
-      null, // deviceId (null = default camera) ✅ Changed from undefined
+    // Start continuous decoding with combined callback
+    await reader.decodeFromVideoDevice(
+      undefined, // deviceId (undefined = default camera) ✅ Changed to undefined
       videoRef.current,
       (result, error) => {
         if (result) {
@@ -260,8 +231,8 @@ const scanQRCode = async () => {
           handleQrScan(result.getText())
         }
         
-        // Only log errors that aren't "QR code not found"
         if (error && error.name !== 'NotFoundException') {
+          // Only log errors that aren't "QR code not found"
           console.error('QR Scan error:', error)
         }
       }
@@ -271,6 +242,38 @@ const scanQRCode = async () => {
     setQrError('Failed to initialize QR scanner')
   }
 }
+
+
+
+const stopScanning = () => {
+  // Reset the QR reader
+  if (readerRef.current) {
+    try {
+      readerRef.current.reset()
+    } catch (err) {
+      console.error('Error resetting reader:', err)
+    }
+    readerRef.current = null
+  }
+  
+  // Stop camera stream
+  if (streamRef.current) {
+    streamRef.current.getTracks().forEach(track => {
+      if (track.readyState === 'live') {
+        track.stop()
+      }
+    })
+    streamRef.current = null
+  }
+  
+  // Clear video source
+  if (videoRef.current) {
+    videoRef.current.srcObject = null
+  }
+  
+  setIsScanning(false)
+}
+
 
 
   const handleQrScan = (data: string) => {
