@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Receipt,
   TrendingUp,
+  UserCheck,
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -112,8 +113,62 @@ export default function ManagerStatsCards() {
       </div>
     )
   }
-  return (
+  return (<>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            {t('totalManagers')}
+          </CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold"></div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            {t('totalStudents')}
+          </CardTitle>
+          <UserCheck className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.totalStudents}</div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            {t('totalTeachers')}
+          </CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.totalTeachers}</div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">
+            {t('totalRevenue')}
+          </CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <TrendingUp className="h-3 w-3" />
+            +{stats.revenueGrowth.toFixed(1)}% {t('thisMonth')}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      ---------------------------------------------------
       {statsData.map((stat, index) => {
         const Icon = stat.icon
         return (
@@ -136,5 +191,7 @@ export default function ManagerStatsCards() {
         )
       })}
     </div>
+  </>
+
   )
 }
