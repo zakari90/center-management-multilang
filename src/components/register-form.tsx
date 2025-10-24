@@ -62,28 +62,22 @@ export function RegisterForm({
   }
 
   return (
-    <div className={cn("flex flex-col gap-6 w-full mx-auto p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl">
-        <CardHeader className="space-y-1 pb-4 px-4 sm:px-6">
-          <div className="flex items-center justify-center mb-2">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-xl sm:text-2xl font-bold text-center">
+    <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen flex items-center justify-center p-3 sm:p-4", className)} {...props}>
+      <Card className="border-0 shadow-xl w-full max-w-sm">
+        <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
             {t('title')}
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="px-4 sm:px-6">
-          <form action={action} className="space-y-4">
+        <CardContent className="px-4 sm:px-6 pb-6">
+          <form action={action} className="space-y-4 sm:space-y-5">
             {/* Success Message */}
             {state?.success && (
               <Alert className="border-green-200 bg-green-50">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-sm text-green-700">
+                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
                   {t('successMessage')}
-
                   Account created successfully! Redirecting...
                 </AlertDescription>
               </Alert>
@@ -92,25 +86,27 @@ export function RegisterForm({
             {/* General Error Message */}
             {state?.error?.message && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-sm">{state.error.message}</AlertDescription>
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <AlertDescription className="text-xs sm:text-sm ml-2">
+                  {state.error.message}
+                </AlertDescription>
               </Alert>
             )}
 
             {/* Username Field */}
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
+              <Label htmlFor="username" className="text-xs sm:text-sm font-medium">
                 {t('username.label')}
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   id="username"
                   name="username"
                   type="text"
                   placeholder={t('username.placeholder')}
                   className={cn(
-                    "pl-10 h-10 sm:h-11 w-full",
+                    "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
                     state?.error?.username && "border-red-500 focus-visible:ring-red-500"
                   )}
                   required
@@ -120,7 +116,7 @@ export function RegisterForm({
               </div>
               {state?.error?.username && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
                   {Array.isArray(state.error.username) ? state.error.username[0] : state.error.username}
                 </p>
               )}
@@ -128,18 +124,18 @@ export function RegisterForm({
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
+              <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
                 {t('email.label')}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   placeholder={t('email.placeholder')}
                   className={cn(
-                    "pl-10 h-10 sm:h-11 w-full",
+                    "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
                     state?.error?.email && "border-red-500 focus-visible:ring-red-500"
                   )}
                   required
@@ -149,7 +145,7 @@ export function RegisterForm({
               </div>
               {state?.error?.email && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
                   {Array.isArray(state.error.email) ? state.error.email[0] : state.error.email}
                 </p>
               )}
@@ -157,17 +153,17 @@ export function RegisterForm({
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
+              <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
                 {t('password.label')}
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   className={cn(
-                    "pl-10 pr-10 h-10 sm:h-11 w-full",
+                    "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
                     state?.error?.password && "border-red-500 focus-visible:ring-red-500"
                   )}
                   required
@@ -178,7 +174,7 @@ export function RegisterForm({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
                   disabled={isPending}
                   tabIndex={-1}
                 >
@@ -192,13 +188,13 @@ export function RegisterForm({
               
               {/* Password Strength Indicator */}
               {passwordStrength > 0 && (
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="flex gap-1">
                     {[1, 2, 3, 4].map((level) => (
                       <div
                         key={level}
                         className={cn(
-                          "h-1 flex-1 rounded-full transition-colors",
+                          "h-1.5 flex-1 rounded-full transition-colors",
                           level <= passwordStrength ? getStrengthColor(passwordStrength) : "bg-gray-200"
                         )}
                       />
@@ -218,7 +214,7 @@ export function RegisterForm({
 
               {state?.error?.password && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
                   {Array.isArray(state.error.password) ? state.error.password[0] : state.error.password}
                 </p>
               )}
@@ -226,17 +222,17 @@ export function RegisterForm({
 
             {/* Confirm Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium">
+              <Label htmlFor="confirmPassword" className="text-xs sm:text-sm font-medium">
                 {t('confirmPassword.label')}
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   className={cn(
-                    "pl-10 pr-10 h-10 sm:h-11 w-full",
+                    "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
                     state?.error?.confirmPassword && "border-red-500 focus-visible:ring-red-500"
                   )}
                   required
@@ -246,7 +242,7 @@ export function RegisterForm({
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
                   disabled={isPending}
                   tabIndex={-1}
                 >
@@ -259,7 +255,7 @@ export function RegisterForm({
               </div>
               {state?.error?.confirmPassword && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
                   {Array.isArray(state.error.confirmPassword) ? state.error.confirmPassword[0] : state.error.confirmPassword}
                 </p>
               )}
@@ -268,12 +264,12 @@ export function RegisterForm({
             {/* Submit Button */}
             <Button 
               type="submit" 
-              className="w-full h-10 sm:h-11 text-sm sm:text-base font-medium" 
+              className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium mt-6" 
               disabled={isPending}
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
                   {t('submitting')}
                 </>
               ) : (
@@ -282,24 +278,24 @@ export function RegisterForm({
             </Button>
 
             {/* Terms */}
-            <p className="text-xs text-center text-muted-foreground px-2">
+            <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
               {t('terms')}{" "}
-              <Link href="/terms" className="text-primary hover:underline underline-offset-4">
+              <Link href="/terms" className="text-primary hover:underline underline-offset-4 font-medium">
                 {t('termsOfService')}
               </Link>{" "}
               {t('and')}{" "}
-              <Link href="/privacy" className="text-primary hover:underline underline-offset-4">
+              <Link href="/privacy" className="text-primary hover:underline underline-offset-4 font-medium">
                 {t('privacyPolicy')}
               </Link>
             </p>
 
             {/* Divider */}
-            <div className="relative my-4">
+            <div className="relative my-4 sm:my-6">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background px-2 text-muted-foreground text-xs">
                   {t('alreadyHaveAccount')}
                 </span>
               </div>
@@ -309,10 +305,10 @@ export function RegisterForm({
             <div className="text-center">
               <Link 
                 href="/login" 
-                className="text-sm font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1"
+                className="text-sm sm:text-base font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1 transition-colors"
               >
                 {t('login')}
-                <span aria-hidden="true">→</span>
+                <span aria-hidden="true" className="text-lg">→</span>
               </Link>
             </div>
           </form>

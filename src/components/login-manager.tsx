@@ -52,29 +52,25 @@ export function LoginManager({
   }, [state, login, router])
 
   return (
-    <div className={cn("flex flex-col gap-6 w-full mx-auto p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl">
-        <CardHeader className="space-y-1 pb-4 px-4 sm:px-6">
-          <div className="flex items-center justify-center mb-2">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <UserCog className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-          <CardTitle className="text-xl sm:text-2xl font-bold text-center">
+    <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
+      <Card className="border-0 shadow-xl w-full max-w-sm">
+        <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center flex items-center justify-center gap-2">
+            <UserCog className="h-6 w-6 sm:h-7 sm:w-7" />
             {tManager('title')}
           </CardTitle>
-          <CardDescription className="text-center text-xs sm:text-sm">
+          <CardDescription className="text-center text-xs sm:text-sm px-2">
             {tManager('subtitle')}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="px-4 sm:px-6">
-          <form action={action} className="space-y-4">
+        <CardContent className="px-4 sm:px-6 pb-6">
+          <form action={action} className="space-y-4 sm:space-y-5">
             {/* Success Message */}
             {state?.success && (
               <Alert className="border-green-200 bg-green-50">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-sm text-green-700">
+                <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
                   {tManager('successMessage')}
                 </AlertDescription>
               </Alert>
@@ -83,8 +79,8 @@ export function LoginManager({
             {/* General Error Message */}
             {state?.error?.message && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-sm">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <AlertDescription className="text-xs sm:text-sm ml-2">
                   {state.error.message}
                 </AlertDescription>
               </Alert>
@@ -92,18 +88,18 @@ export function LoginManager({
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
+              <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
                 {t('email.label')}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   placeholder={t('email.placeholder')}
                   className={cn(
-                    "pl-10 h-10 sm:h-11 w-full",
+                    "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
                     state?.error?.email && "border-red-500 focus-visible:ring-red-500"
                   )}
                   required
@@ -113,35 +109,37 @@ export function LoginManager({
               </div>
               {state?.error?.email && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {Array.isArray(state.error.email) ? state.error.email[0] : state.error.email}
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                  <span>
+                    {Array.isArray(state.error.email) ? state.error.email[0] : state.error.email}
+                  </span>
                 </p>
               )}
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium">
+              <div className="flex items-center justify-between gap-2">
+                <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
                   {t('password.label')}
                 </Label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-primary hover:underline underline-offset-4"
+                  className="text-xs text-primary hover:underline underline-offset-4 whitespace-nowrap"
                   tabIndex={-1}
                 >
                   {tManager('forgotPassword')}
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder={t('password.placeholder')}
                   className={cn(
-                    "pl-10 pr-10 h-10 sm:h-11 w-full",
+                    "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
                     state?.error?.password && "border-red-500 focus-visible:ring-red-500"
                   )}
                   required
@@ -151,7 +149,7 @@ export function LoginManager({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
                   disabled={isPending}
                   tabIndex={-1}
                 >
@@ -164,8 +162,10 @@ export function LoginManager({
               </div>
               {state?.error?.password && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {Array.isArray(state.error.password) ? state.error.password[0] : state.error.password}
+                  <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                  <span>
+                    {Array.isArray(state.error.password) ? state.error.password[0] : state.error.password}
+                  </span>
                 </p>
               )}
             </div>
@@ -173,29 +173,29 @@ export function LoginManager({
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-10 sm:h-11 text-sm sm:text-base font-medium"
+              className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium mt-6"
               disabled={isPending}
             >
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
                   {t('submitting')}
                 </>
               ) : (
                 <>
-                  <UserCog className="mr-2 h-4 w-4" />
+                  <UserCog className="mr-2 h-4 w-4 flex-shrink-0" />
                   {t('submit')}
                 </>
               )}
             </Button>
 
             {/* Divider */}
-            <div className="relative my-4">
+            <div className="relative my-4 sm:my-6">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background px-2 text-muted-foreground text-xs">
                   {tManager('or')}
                 </span>
               </div>
@@ -205,9 +205,9 @@ export function LoginManager({
             <div className="text-center">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               >
-                <Home className="h-4 w-4" />
+                <Home className="h-4 w-4 flex-shrink-0" />
                 <span>{tManager('backToHome')}</span>
               </Link>
             </div>
@@ -216,15 +216,17 @@ export function LoginManager({
       </Card>
 
       {/* Info Card */}
-      <Card className="bg-muted/50 border-dashed">
-        <CardContent className="pt-6">
+      <Card className="bg-muted/50 border-dashed w-full max-w-sm">
+        <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
           <div className="flex items-start gap-3">
-            <div className="rounded-full bg-primary/10 p-2 flex-shrink-0">
+            <div className="rounded-full bg-primary/10 p-2 flex-shrink-0 mt-1">
               <AlertCircle className="h-4 w-4 text-primary" />
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">{tManager('infoTitle')}</p>
-              <p className="text-xs text-muted-foreground">
+            <div className="space-y-1 min-w-0">
+              <p className="text-xs sm:text-sm font-medium break-words">
+                {tManager('infoTitle')}
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {tManager('infoDescription')}
               </p>
             </div>

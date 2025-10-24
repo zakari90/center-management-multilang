@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Loader2, QrCode, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 interface StudentSubject {
@@ -82,6 +82,15 @@ export default function CreateStudentPaymentForm() {
       if (student) setSelectedStudent(student)
     }
   }, [preSelectedStudentId, students])
+
+  useEffect(() => {
+    if (showQrScanner) {
+      startScanning()
+    }
+    return () => {
+      stopScanning()
+    }
+  }, [showQrScanner])
 
   const fetchStudents = async () => {
     try {
@@ -152,33 +161,58 @@ export default function CreateStudentPaymentForm() {
   }
 
   // ========== QR SCANNING ==========
-  useEffect(() => {
-    if (showQrScanner) startScanning()
-    else stopScanning()
-    return () => stopScanning()
-  }, [])
-
   const startScanning = async () => {
     try {
       setQrError(null)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      })
+      
+      const constraints = {
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         streamRef.current = stream
         setIsScanning(true)
+        
+        // Add event listener when video is ready
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(err => {
+            console.error('Error playing video:', err)
+            setQrError('Unable to play video stream')
+          })
+        }
+        
         scanQRCode()
       }
-    } catch {
-      setQrError('Unable to access camera.')
+    } catch (err) {
+      console.error('Camera error:', err)
+      if (err instanceof DOMException) {
+        if (err.name === 'NotAllowedError') {
+          setQrError('Camera permission denied. Please allow camera access in your browser settings.')
+        } else if (err.name === 'NotFoundError') {
+          setQrError('No camera found on this device.')
+        } else {
+          setQrError('Unable to access camera: ' + err.message)
+        }
+      } else {
+        setQrError('Unable to access camera.')
+      }
+      setIsScanning(false)
     }
   }
 
   const stopScanning = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
-        if (track.readyState === 'live') track.stop()
+        if (track.readyState === 'live') {
+          track.stop()
+        }
       })
       streamRef.current = null
     }
@@ -187,13 +221,22 @@ export default function CreateStudentPaymentForm() {
 
   const scanQRCode = async () => {
     if (!videoRef.current || !isScanning) return
+    
     try {
       const { BrowserQRCodeReader } = await import('@zxing/library')
       const reader = new BrowserQRCodeReader()
+      
       const result = await reader.decodeOnceFromVideoDevice(undefined, videoRef.current)
-      if (result) handleQrScan(result.getText())
-    } catch {
-      if (isScanning) setTimeout(scanQRCode, 500)
+      if (result) {
+        handleQrScan(result.getText())
+      }
+    } catch (err) {
+      // Continue scanning if no QR code found
+      console.log("scanning error", err);
+      
+      if (isScanning) {
+        setTimeout(scanQRCode, 500)
+      }
     }
   }
 
@@ -206,7 +249,9 @@ export default function CreateStudentPaymentForm() {
       setShowQrScanner(false)
       stopScanning()
       setQrError(null)
-    } else setQrError('Student not found')
+    } else {
+      setQrError('Student not found')
+    }
   }
 
   const filteredStudents = students.filter(student => {
@@ -220,11 +265,11 @@ export default function CreateStudentPaymentForm() {
   })
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-3 sm:p-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
-          <CardDescription>{t('subtitle')}</CardDescription>
+          <CardTitle className="text-lg sm:text-2xl">{t('title')}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">{t('subtitle')}</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
@@ -252,28 +297,47 @@ export default function CreateStudentPaymentForm() {
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
                       disabled={!!selectedStudent}
+                      className="text-sm"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setShowQrScanner(!showQrScanner)}
                       disabled={!!selectedStudent}
+                      className="flex-shrink-0"
                     >
-                      {t('qrScan')}
+                      <QrCode className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className='hidden sm:inline ml-2'>{t('qrScan')}</span>
                     </Button>
                   </div>
 
                   {showQrScanner && (
-                    <div className="border rounded-lg p-4 bg-white">
+                    <div className="border rounded-lg p-3 sm:p-4 bg-white space-y-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-medium">{t('pointCamera')}</p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowQrScanner(false)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <video
                         ref={videoRef}
                         autoPlay
                         playsInline
                         muted
-                        className="w-full rounded-lg bg-black"
+                        className="w-full rounded-lg bg-black aspect-video object-cover"
                       />
                       {qrError && (
-                        <div className="mt-2 text-red-500 text-sm">{qrError}</div>
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription className="text-xs sm:text-sm">
+                            {qrError}
+                          </AlertDescription>
+                        </Alert>
                       )}
                     </div>
                   )}
@@ -289,7 +353,7 @@ export default function CreateStudentPaymentForm() {
                         filteredStudents.map(student => (
                           <div
                             key={student.id}
-                            className="p-3 border-b hover:bg-gray-50 cursor-pointer"
+                            className="p-3 border-b hover:bg-gray-50 cursor-pointer text-sm sm:text-base"
                             onClick={() => setSelectedStudent(student)}
                           >
                             <p className="font-medium">{student.name}</p>
@@ -303,11 +367,11 @@ export default function CreateStudentPaymentForm() {
                   )}
 
                   {selectedStudent && (
-                    <div className="p-4 bg-blue-50 border rounded-lg">
-                      <div className="flex justify-between">
+                    <div className="p-3 sm:p-4 bg-blue-50 border rounded-lg">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                         <div>
-                          <p className="font-semibold">{selectedStudent.name}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="font-semibold text-sm sm:text-base">{selectedStudent.name}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             {selectedStudent.email || selectedStudent.phone}
                           </p>
                         </div>
@@ -316,8 +380,9 @@ export default function CreateStudentPaymentForm() {
                           variant="outline"
                           size="sm"
                           onClick={() => setSelectedStudent(null)}
+                          className="w-full sm:w-auto"
                         >
-                         {t('change')}
+                          {t('change')}
                         </Button>
                       </div>
                     </div>
@@ -331,15 +396,16 @@ export default function CreateStudentPaymentForm() {
               <>
                 <Separator />
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                     <Label>{t('selectSubjects')} {t('required')}*</Label>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleSelectAllSubjects}
+                      className="w-full sm:w-auto"
                     >
-                     {t('selectAll')}
+                      {t('selectAll')}
                     </Button>
                   </div>
 
@@ -356,24 +422,21 @@ export default function CreateStudentPaymentForm() {
                         <Card
                           key={ss.id}
                           onClick={() => handleSubjectToggle(ss.subject.id)}
-                          className={`cursor-pointer ${
+                          className={`cursor-pointer transition-colors ${
                             formData.selectedSubjects.includes(ss.subject.id)
                               ? 'border-primary bg-primary/5'
                               : 'hover:border-gray-400'
                           }`}
                         >
-                          <CardContent className="p-4 flex justify-between items-center">
+                          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                             <div>
-                              <p className="font-semibold">{ss.subject.name}</p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="font-semibold text-sm sm:text-base">{ss.subject.name}</p>
+                              <p className="text-xs sm:text-sm text-muted-foreground">
                                 {ss.subject.grade}
                               </p>
                             </div>
-                            <p className="font-bold text-primary">
-                              {new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: 'USD'
-                              }).format(ss.subject.price)}
+                            <p className="font-bold text-primary text-sm sm:text-base">
+                              MAD {ss.subject.price.toFixed(2)}
                             </p>
                           </CardContent>
                         </Card>
@@ -388,9 +451,9 @@ export default function CreateStudentPaymentForm() {
             {formData.selectedSubjects.length > 0 && (
               <>
                 <Separator />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>{t('paymentMethod')} {t('required')}</Label>
+                    <Label className="text-sm">{t('paymentMethod')} {t('required')}</Label>
                     <select
                       value={formData.paymentMethod}
                       onChange={e =>
@@ -399,7 +462,7 @@ export default function CreateStudentPaymentForm() {
                           paymentMethod: e.target.value
                         }))
                       }
-                      className="w-full border rounded-md p-2"
+                      className="w-full border rounded-md p-2 text-sm"
                     >
                       <option value="CASH">{t('cash')}</option>
                       <option value="CARD">{t('card')}</option>
@@ -409,19 +472,20 @@ export default function CreateStudentPaymentForm() {
                     </select>
                   </div>
                   <div>
-                    <Label>{t('date')} {t('required')}</Label>
+                    <Label className="text-sm">{t('date')} {t('required')}</Label>
                     <Input
                       type="date"
                       value={formData.date}
                       onChange={e =>
                         setFormData(prev => ({ ...prev, date: e.target.value }))
                       }
+                      className="text-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>{t('description')}</Label>
+                  <Label className="text-sm">{t('description')}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={e =>
@@ -431,28 +495,25 @@ export default function CreateStudentPaymentForm() {
                       }))
                     }
                     placeholder={t('descriptionPlaceholder')}
+                    className="text-sm"
                   />
                 </div>
 
                 <Card className="bg-primary/5 border-primary">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       {t('paymentSummary')}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p>{t('student')}: {selectedStudent?.name}</p>
-                    <p>{t('subjects')}: {formData.selectedSubjects.length}</p>
-                    <p>{t('method')}: {formData.paymentMethod}</p>
-                    <p>{t('date')} {new Date(formData.date).toLocaleDateString()}</p>
+                  <CardContent className="space-y-1 text-sm">
+                    <p><strong>{t('student')}:</strong> {selectedStudent?.name}</p>
+                    <p><strong>{t('subjects')}:</strong> {formData.selectedSubjects.length}</p>
+                    <p><strong>{t('method')}:</strong> {formData.paymentMethod}</p>
+                    <p><strong>{t('date')}:</strong> {new Date(formData.date).toLocaleDateString()}</p>
                     <Separator className="my-2" />
-                    <p className="text-xl font-bold text-primary">
-                      {t('total')}:{' '}
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'USD'
-                      }).format(totalAmount)}
+                    <p className="text-base sm:text-lg font-bold text-primary">
+                      {t('total')}: MAD {totalAmount.toFixed(2)}
                     </p>
                   </CardContent>
                 </Card>
@@ -460,8 +521,13 @@ export default function CreateStudentPaymentForm() {
             )}
           </CardContent>
 
-          <CardFooter className="flex justify-end gap-4 mt-4">
-            <Button type="button" variant="outline" onClick={() => router.back()}>
+          <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 mt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => router.back()}
+              className="w-full sm:w-auto"
+            >
               {t('cancel')}
             </Button>
             <Button
@@ -469,6 +535,7 @@ export default function CreateStudentPaymentForm() {
               disabled={
                 isLoading || !selectedStudent || formData.selectedSubjects.length === 0
               }
+              className="w-full sm:w-auto"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('createReceipt')}
