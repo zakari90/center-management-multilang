@@ -1,25 +1,63 @@
 {
+  "auth": {
+    "validation": {
+      "usernameMin": "Username must be at least 3 characters",
+      "invalidEmail": "Invalid email address",
+      "passwordMin": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match",
+      "emailRequired": "Email is required",
+      "passwordRequired": "Password is required"
+    },
+    "errors": {
+      "registrationFailed": "Registration failed",
+      "createManagerFailed": "Failed to create manager",
+      "updateManagerFailed": "Failed to update manager",
+      "loginFailed": "Login failed",
+      "unexpectedError": "An unexpected error occurred",
+      "userIdRequired": "User ID is required"
+    }
+  },
+  "center": {
+    "errors": {
+      "nameRequired": "Center name is required",
+      "createFailed": "Failed to create center",
+      "unexpectedError": "An unexpected error occurred"
+    }
+  }
+,
  
-  "login": {
+"login": {
     "title": "Welcome back",
     "email": {
       "label": "Email",
-      "placeholder": "m@example.com"
+      "placeholder": "you@example.com"
     },
     "password": {
       "label": "Password",
-      "placeholder": "Your password"
+      "placeholder": "Enter your password"
     },
-    "submit": "Login",
-    "submitting": "Logging in...",
+    "submit": "Sign In",
+    "submitting": "Signing in...",
     "noAccount": "Don't have an account?",
-    "signUp": "Sign up",
+    "signUp": "Sign Up",
     "terms": "By clicking continue, you agree to our",
     "termsOfService": "Terms of Service",
     "and": "and",
     "privacyPolicy": "Privacy Policy"
-  }, 
+  },
+   "loginManager": {
+    "title": "Manager Login",
+    "subtitle": "Access your manager dashboard",
+    "successMessage": "Login successful! Redirecting to manager dashboard...",
+    "forgotPassword": "Forgot password?",
+    "or": "Or",
+    "backToHome": "Back to Home",
+    "infoTitle": "Manager Access Only",
+    "infoDescription": "This login is for center managers. If you're an administrator, please use the admin login."
+  }
+  , 
   "register": {
+    "successMessage":  "Account created successfully! Redirecting...",
     "title": "Create an Account",
     "username": {
       "label": "User name",

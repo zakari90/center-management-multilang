@@ -1,4 +1,30 @@
 {
+  "auth": {
+    "validation": {
+      "usernameMin": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+      "invalidEmail": "Adresse email invalide",
+      "passwordMin": "Le mot de passe doit contenir au moins 6 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "emailRequired": "L'email est requis",
+      "passwordRequired": "Le mot de passe est requis"
+    },
+    "errors": {
+      "registrationFailed": "L'inscription a échoué",
+      "createManagerFailed": "Impossible de créer le gestionnaire",
+      "updateManagerFailed": "Impossible de mettre à jour le gestionnaire",
+      "loginFailed": "La connexion a échoué",
+      "unexpectedError": "Une erreur inattendue s'est produite",
+      "userIdRequired": "L'identifiant utilisateur est requis"
+    }
+  },
+  "center": {
+    "errors": {
+      "nameRequired": "Le nom du centre est requis",
+      "createFailed": "Impossible de créer le centre",
+      "unexpectedError": "Une erreur inattendue s'est produite"
+    }
+  }
+,
   "StudentCard": {
     "title": "Carte d'identité de l'élève",
     "idLabel": "Numéro d'identification",
@@ -40,26 +66,38 @@
       "downloadPdf": "Télécharger PDF"
     }
   },
-  "login": {
-    "title": "Bienvenue de retour",
+"login": {
+    "title": "Bon retour",
     "email": {
       "label": "Email",
-      "placeholder": "m@example.com"
+      "placeholder": "vous@exemple.com"
     },
     "password": {
       "label": "Mot de passe",
-      "placeholder": "Votre mot de passe"
+      "placeholder": "Entrez votre mot de passe"
     },
-    "submit": "Connexion",
+    "submit": "Se connecter",
     "submitting": "Connexion en cours...",
-    "noAccount": "Vous n'avez pas de compte?",
+    "noAccount": "Vous n'avez pas de compte ?",
     "signUp": "S'inscrire",
     "terms": "En cliquant sur continuer, vous acceptez nos",
     "termsOfService": "Conditions de service",
     "and": "et",
     "privacyPolicy": "Politique de confidentialité"
   },
+   "loginManager": {
+    "title": "Connexion Gestionnaire",
+    "subtitle": "Accédez à votre tableau de bord gestionnaire",
+    "successMessage": "Connexion réussie ! Redirection vers le tableau de bord...",
+    "forgotPassword": "Mot de passe oublié ?",
+    "or": "Ou",
+    "backToHome": "Retour à l'accueil",
+    "infoTitle": "Accès Gestionnaire Uniquement",
+    "infoDescription": "Cette connexion est réservée aux gestionnaires de centres. Si vous êtes administrateur, veuillez utiliser la connexion administrateur."
+  }
+  ,
   "register": {
+    "successMessage": "Compte créé avec succès ! Redirection en cours...",
     "title": "Créer un compte",
     "username": {
       "label": "Nom d'utilisateur",

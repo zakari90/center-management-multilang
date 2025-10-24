@@ -1,4 +1,30 @@
 {
+  "auth": {
+    "validation": {
+      "usernameMin": "يجب أن يحتوي اسم المستخدم على 3 أحرف على الأقل",
+      "invalidEmail": "عنوان البريد الإلكتروني غير صالح",
+      "passwordMin": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "passwordRequired": "كلمة المرور مطلوبة"
+    },
+    "errors": {
+      "registrationFailed": "فشل التسجيل",
+      "createManagerFailed": "فشل إنشاء المدير",
+      "updateManagerFailed": "فشل تحديث المدير",
+      "loginFailed": "فشل تسجيل الدخول",
+      "unexpectedError": "حدث خطأ غير متوقع",
+      "userIdRequired": "معرف المستخدم مطلوب"
+    }
+  },
+  "center": {
+    "errors": {
+      "nameRequired": "اسم المركز مطلوب",
+      "createFailed": "فشل إنشاء المركز",
+      "unexpectedError": "حدث خطأ غير متوقع"
+    }
+  }
+,
   "StudentCard": {
     "title": "بطاقة الطالب",
     "idLabel": "رقم ",
@@ -40,16 +66,15 @@
       "downloadPdf": "تحميل PDF"
     }
   },
-  "login": {
-    "title": "أهلا بك مجددا",
+"login": {
+    "title": "مرحباً بعودتك",
     "email": {
       "label": "البريد الإلكتروني",
-      "placeholder": "m@example.com"
+      "placeholder": "you@example.com"
     },
-    
     "password": {
       "label": "كلمة المرور",
-      "placeholder": "كلمة المرور الخاصة بك"
+      "placeholder": "أدخل كلمة المرور"
     },
     "submit": "تسجيل الدخول",
     "submitting": "جاري تسجيل الدخول...",
@@ -60,7 +85,19 @@
     "and": "و",
     "privacyPolicy": "سياسة الخصوصية"
   },
+   "loginManager": {
+    "title": "تسجيل دخول المدير",
+    "subtitle": "الوصول إلى لوحة تحكم المدير",
+    "successMessage": "تم تسجيل الدخول بنجاح! جارٍ التوجيه إلى لوحة التحكم...",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "or": "أو",
+    "backToHome": "العودة إلى الصفحة الرئيسية",
+    "infoTitle": "وصول المدير فقط",
+    "infoDescription": "هذا تسجيل الدخول مخصص لمديري المراكز. إذا كنت مسؤولاً، يرجى استخدام تسجيل دخول المسؤول."
+  }
+  ,
   "register": {
+    "successMessage": "تم إنشاء الحساب بنجاح! جارٍ إعادة التوجيه...",
     "title": "إنشاء حساب",
     "username": {
       "label": "اسم المستخدم",
