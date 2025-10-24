@@ -25,8 +25,11 @@ return (
 
         <ManagerRevenueChart />
 
+      <div className="flex flex-col lg:flex-row gap-6">
         <EnrollmentChart />
         <TopSubjects />
+      </div>
+
       {/* <div className="grid gap-4 grid-cols-4">
         <RecentActivities />
       </div> */}

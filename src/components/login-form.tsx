@@ -41,7 +41,7 @@ export function LoginForm({
   }, [state, login, router])
 
   return (
-    <div className={cn("flex flex-col gap-6 w-full max-w-md mx-auto p-4", className)} {...props}>
+    <div className={cn("flex flex-col gap-6 w-full mx-auto p-4", className)} {...props}>
       <Card className="border-0 shadow-xl">
         <CardHeader className="space-y-1 pb-4 px-4 sm:px-6">
           <div className="flex items-center justify-center mb-2">
