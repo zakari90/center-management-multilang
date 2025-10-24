@@ -117,7 +117,7 @@ export default function ManagerStatsCards() {
       {statsData.map((stat, index) => {
         const Icon = stat.icon
         return (
-          <Card key={index} >
+          <Card key={index} className='w-full'>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">                
                 {stat.title}</CardTitle>

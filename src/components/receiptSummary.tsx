@@ -71,7 +71,7 @@ export default function ReceiptsSummary() {
         </div>
       </CardContent>
 
-      <CardFooter className="flex gap-3 border-t pt-4">
+      <CardFooter className="flex sm:flex-col md:flex-row gap-3 border-t pt-4">
         <Button asChild className="flex-1 bg-primary hover:bg-primary-foreground">
           <Link href="/manager/receipts/create">{t('studentPayment')}</Link>
         </Button>
