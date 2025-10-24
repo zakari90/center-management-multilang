@@ -64,7 +64,13 @@ export default function EnrollmentChart() {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="subject" angle={0} textAnchor="end" height={150} />
+              <XAxis 
+                dataKey="subject" 
+                angle={0}           // ← Changed to -45 for angled labels
+                textAnchor="end"      // ← Keep this for angled text
+                height={80}           // ← Reduced height
+                interval={0}          // ← Show all labels
+              />
               <YAxis />
               <Tooltip 
                 formatter={(value: number, name: string) => {

@@ -49,7 +49,7 @@ export default function ManagerRevenueChart() {
   }
 
   return (
-    <Card className="col-span-4">
+    <Card>
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div>

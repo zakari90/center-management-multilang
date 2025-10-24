@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
@@ -64,6 +65,7 @@ export default function CreateStudentPaymentForm() {
   const [isScanning, setIsScanning] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const readerRef = useRef<any>(null) // Store QR reader reference
 
   const [formData, setFormData] = useState({
     paymentMethod: 'CASH',
@@ -182,13 +184,16 @@ export default function CreateStudentPaymentForm() {
         
         // Add event listener when video is ready
         videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(err => {
-            console.error('Error playing video:', err)
-            setQrError('Unable to play video stream')
-          })
+          videoRef.current?.play()
+            .then(() => {
+              // Start QR scanning once video is playing
+              scanQRCode()
+            })
+            .catch(err => {
+              console.error('Error playing video:', err)
+              setQrError('Unable to play video stream')
+            })
         }
-        
-        scanQRCode()
       }
     } catch (err) {
       console.error('Camera error:', err)
@@ -208,6 +213,17 @@ export default function CreateStudentPaymentForm() {
   }
 
   const stopScanning = () => {
+    // Reset the QR reader
+    if (readerRef.current) {
+      try {
+        readerRef.current.reset()
+      } catch (err) {
+        console.error('Error resetting reader:', err)
+      }
+      readerRef.current = null
+    }
+    
+    // Stop camera stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         if (track.readyState === 'live') {
@@ -216,41 +232,63 @@ export default function CreateStudentPaymentForm() {
       })
       streamRef.current = null
     }
+    
+    // Clear video source
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+    
     setIsScanning(false)
   }
 
-  const scanQRCode = async () => {
-    if (!videoRef.current || !isScanning) return
+const scanQRCode = async () => {
+  if (!videoRef.current || !isScanning) return
+  
+  try {
+    const { BrowserQRCodeReader } = await import('@zxing/library')
+    const reader = new BrowserQRCodeReader()
+    readerRef.current = reader
     
-    try {
-      const { BrowserQRCodeReader } = await import('@zxing/library')
-      const reader = new BrowserQRCodeReader()
-      
-      const result = await reader.decodeOnceFromVideoDevice(undefined, videoRef.current)
-      if (result) {
-        handleQrScan(result.getText())
+    // Use decodeFromVideoDevice for continuous scanning
+    reader.decodeFromVideoDevice(
+      null, // deviceId (null = default camera) ✅ Changed from undefined
+      videoRef.current,
+      (result, error) => {
+        if (result) {
+          // QR code found!
+          console.log('QR Code detected:', result.getText())
+          handleQrScan(result.getText())
+        }
+        
+        // Only log errors that aren't "QR code not found"
+        if (error && error.name !== 'NotFoundException') {
+          console.error('QR Scan error:', error)
+        }
       }
-    } catch (err) {
-      // Continue scanning if no QR code found
-      console.log("scanning error", err);
-      
-      if (isScanning) {
-        setTimeout(scanQRCode, 500)
-      }
-    }
+    )
+  } catch (err) {
+    console.error('Scanner initialization error:', err)
+    setQrError('Failed to initialize QR scanner')
   }
+}
+
 
   const handleQrScan = (data: string) => {
+    console.log('Processing scanned data:', data)
+    
     const student = students.find(
       s => s.id === data || s.email === data || s.phone === data
     )
+    
     if (student) {
       setSelectedStudent(student)
       setShowQrScanner(false)
       stopScanning()
       setQrError(null)
+      setSearchTerm('')
     } else {
-      setQrError('Student not found')
+      setQrError(`Student not found for: ${data}`)
+      // Don't stop scanning - let them try again
     }
   }
 
@@ -319,7 +357,10 @@ export default function CreateStudentPaymentForm() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => setShowQrScanner(false)}
+                          onClick={() => {
+                            setShowQrScanner(false)
+                            stopScanning()
+                          }}
                         >
                           <X className="h-4 w-4" />
                         </Button>
