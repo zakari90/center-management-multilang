@@ -20,30 +20,16 @@ export default function AdminDashboard() {
 
       {/* Stats Overview */}
       <AdminStatsCards />
-
-      {/* Quick Actions */}
-      <div className="grid gap-4 grid-cols-4">
         <AdminQuickActions />
-      </div>
 
-      {/* Revenue Chart */}
-      <div className="grid gap-4 grid-cols-4">
         <AdminRevenueChart/>
-      </div>
 
-      {/* Centers Overview */}
-      <div className="grid gap-4 grid-cols-4">
         <CentersOverview />
-      </div>
-      <div className="grid gap-4 grid-cols-4">
         <EnrollmentChart />
         <TopSubjects />
-      </div>
-      {/* Managers & Activity */}
-      <div className="grid gap-4 grid-cols-4">
         <ManagersList />
         <SystemActivityLog />
-      </div>
+
     </div>
   )
 }
