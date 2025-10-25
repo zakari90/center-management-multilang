@@ -182,7 +182,7 @@ function QRScanner({
           className="w-full rounded-lg bg-black aspect-video object-cover"
           aria-label="Camera feed"
         />
-        nvas ref={canvasRef} className="hiddenden" />
+        <canvas ref={canvasRef} className="hiddenden" />
         {!isScanning && !cameraError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
