@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -9,12 +10,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/button'
-import { useTranslations } from 'next-intl'
-import { useRef, useEffect, useState } from 'react'
 import { Edit } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import QRCode from 'qrcode'
+import { useEffect, useRef, useState } from 'react'
 
 interface Subject {
   id: string
@@ -58,7 +58,6 @@ export default function StudentCard({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [qrGenerated, setQrGenerated] = useState(false)
 
-  const studentUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/student/${student.id}`
   const grades = [...new Set(student.studentSubjects.map(ss => ss.subject.grade))].join(', ')
   const displayGrade = student.grade || grades || 'N/A'
 
@@ -66,7 +65,7 @@ export default function StudentCard({
     if (showQR && canvasRef.current && !qrGenerated) {
       QRCode.toCanvas(
         canvasRef.current,
-        studentUrl,
+        student.id,
         {
           width: 120,
           margin: 2,
@@ -85,8 +84,7 @@ export default function StudentCard({
         }
       )
     }
-  }, [showQR, studentUrl, qrGenerated])
-
+  }, [showQR, student.id, qrGenerated])
   return (
     <div className="space-y-4">
       <Card ref={cardRef} className="max-w-md mx-auto bg-white">
@@ -157,7 +155,7 @@ export default function StudentCard({
           {/* QR Code */}
 {showQR && (
   <div className="flex justify-center pt-4">
-    <div className="p-2 border-2 border-gray-200 rounded-lg bg-white">
+    <div className="p-2 border-2  rounded-lg">
       <canvas 
         ref={canvasRef}
         className="max-w-full h-auto"
@@ -165,7 +163,6 @@ export default function StudentCard({
     </div>
   </div>
 )}
-
         </CardContent>
 
         <CardFooter className="flex gap-2 justify-end pt-4">

@@ -182,7 +182,7 @@ function QRScanner({
           className="w-full rounded-lg bg-black aspect-video object-cover"
           aria-label="Camera feed"
         />
-        <canvas ref={canvasRef} className="hidden" />
+        nvas ref={canvasRef} className="hiddenden" />
         {!isScanning && !cameraError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -435,7 +435,8 @@ export default function CreateStudentPaymentForm() {
     (data: string) => {
       console.log("Processing scanned data:", data)
 
-      const student = students.find((s) => s.id === data || s.email === data || s.phone === data)
+      // Find student by ID (the QR code contains the student ID)
+      const student = students.find((s) => s.id === data)
 
       if (student) {
         setSelectedStudent(student)
@@ -446,7 +447,7 @@ export default function CreateStudentPaymentForm() {
           subjectsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
         }, 100)
       } else {
-        setQrError(`Student not found for: ${data}`)
+        setQrError(`Student not found for ID: ${data.slice(0, 8)}...`)
       }
     },
     [students],
