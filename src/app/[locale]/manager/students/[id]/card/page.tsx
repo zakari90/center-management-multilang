@@ -49,12 +49,10 @@ export default function StudentCardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-              <PdfExporter fileName={student.name} >
-
+    <div className="min-h-screen py-12 px-4">
+      <PdfExporter fileName={student.name} >
         <StudentCard student={student} showQR={true} />
-        </PdfExporter>
-
+      </PdfExporter>
     </div>
   )
 }

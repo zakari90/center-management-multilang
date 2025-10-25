@@ -121,7 +121,7 @@ export default function ReceiptsTable() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
@@ -133,7 +133,7 @@ export default function ReceiptsTable() {
               {t('teacherPayment')}
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild variant="secondary">
             <Link href="/manager/receipts/create">
               <Plus className="mr-2 h-4 w-4" />
               {t('studentPayment')}

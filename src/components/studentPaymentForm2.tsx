@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, CheckCircle2, Loader2, QrCode, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import jsQR from 'jsqr'
 
 interface StudentSubject {
   id: string
@@ -64,8 +65,9 @@ export default function CreateStudentPaymentForm() {
   const [qrError, setQrError] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const readerRef = useRef<any>(null) // Store QR reader reference
+  const scanningRef = useRef<boolean>(false)
 
   const [formData, setFormData] = useState({
     paymentMethod: 'CASH',
@@ -88,6 +90,8 @@ export default function CreateStudentPaymentForm() {
   useEffect(() => {
     if (showQrScanner) {
       startScanning()
+    } else {
+      stopScanning()
     }
     return () => {
       stopScanning()
@@ -162,7 +166,7 @@ export default function CreateStudentPaymentForm() {
     }
   }
 
-  // ========== QR SCANNING ==========
+  // ========== QR SCANNING WITH JSQR ==========
   const startScanning = async () => {
     try {
       setQrError(null)
@@ -181,12 +185,11 @@ export default function CreateStudentPaymentForm() {
         videoRef.current.srcObject = stream
         streamRef.current = stream
         setIsScanning(true)
+        scanningRef.current = true
         
-        // Add event listener when video is ready
         videoRef.current.onloadedmetadata = () => {
           videoRef.current?.play()
             .then(() => {
-              // Start QR scanning once video is playing
               scanQRCode()
             })
             .catch(err => {
@@ -209,72 +212,71 @@ export default function CreateStudentPaymentForm() {
         setQrError('Unable to access camera.')
       }
       setIsScanning(false)
+      scanningRef.current = false
     }
   }
 
-const scanQRCode = async () => {
-  if (!videoRef.current || !isScanning) return
-  
-  try {
-    const { BrowserMultiFormatReader } = await import('@zxing/browser')
-    const reader = new BrowserMultiFormatReader()
-    readerRef.current = reader
+  const stopScanning = () => {
+    scanningRef.current = false
     
-    // Start continuous decoding with combined callback
-    await reader.decodeFromVideoDevice(
-      undefined, // deviceId (undefined = default camera) ✅ Changed to undefined
-      videoRef.current,
-      (result, error) => {
-        if (result) {
-          // QR code found!
-          console.log('QR Code detected:', result.getText())
-          handleQrScan(result.getText())
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        if (track.readyState === 'live') {
+          track.stop()
         }
-        
-        if (error && error.name !== 'NotFoundException') {
-          // Only log errors that aren't "QR code not found"
-          console.error('QR Scan error:', error)
-        }
-      }
-    )
-  } catch (err) {
-    console.error('Scanner initialization error:', err)
-    setQrError('Failed to initialize QR scanner')
-  }
-}
-
-
-
-const stopScanning = () => {
-  // Reset the QR reader
-  if (readerRef.current) {
-    try {
-      readerRef.current.reset()
-    } catch (err) {
-      console.error('Error resetting reader:', err)
+      })
+      streamRef.current = null
     }
-    readerRef.current = null
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+    
+    setIsScanning(false)
   }
-  
-  // Stop camera stream
-  if (streamRef.current) {
-    streamRef.current.getTracks().forEach(track => {
-      if (track.readyState === 'live') {
-        track.stop()
+
+  const scanQRCode = () => {
+    if (!scanningRef.current || !videoRef.current || !canvasRef.current) {
+      return
+    }
+
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+
+    if (!ctx) {
+      console.error('Could not get canvas context')
+      return
+    }
+
+    // Set canvas size to match video
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+
+      // Draw current video frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+      // Get image data from canvas
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+      // Scan for QR code
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert',
+      })
+
+      if (code) {
+        console.log('QR Code detected:', code.data)
+        handleQrScan(code.data)
+        return // Stop scanning after successful read
       }
-    })
-    streamRef.current = null
-  }
-  
-  // Clear video source
-  if (videoRef.current) {
-    videoRef.current.srcObject = null
-  }
-  
-  setIsScanning(false)
-}
+    }
 
-
+    // Continue scanning
+    if (scanningRef.current) {
+      requestAnimationFrame(scanQRCode)
+    }
+  }
 
   const handleQrScan = (data: string) => {
     console.log('Processing scanned data:', data)
@@ -291,7 +293,7 @@ const stopScanning = () => {
       setSearchTerm('')
     } else {
       setQrError(`Student not found for: ${data}`)
-      // Don't stop scanning - let them try again
+      // Continue scanning - don't stop
     }
   }
 
@@ -351,43 +353,59 @@ const stopScanning = () => {
                       <span className='hidden sm:inline ml-2'>{t('qrScan')}</span>
                     </Button>
                   </div>
+{showQrScanner && (
+  <div className="border rounded-lg p-3 sm:p-4 bg-white space-y-2">
+    <div className="flex justify-between items-center mb-2">
+      <div className="flex items-center gap-2">
+        <p className="text-sm font-medium">{t('pointCamera')}</p>
+        {isScanning && (
+          <span className="flex items-center gap-1 text-xs text-green-600">
+            <span className="inline-block w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+            ...
+          </span>
+        )}
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setShowQrScanner(false)}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+    <div className="relative">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-full rounded-lg bg-black aspect-video object-cover"
+      />
+      <canvas
+        ref={canvasRef}
+        className="hidden"
+      />
+      {!isScanning && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+      )}
+    </div>
+    {qrError && (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="text-xs sm:text-sm">
+          {qrError}
+        </AlertDescription>
+      </Alert>
+    )}
+  </div>
+)}
 
-                  {showQrScanner && (
-                    <div className="border rounded-lg p-3 sm:p-4 bg-white space-y-2">
-                      <div className="flex justify-between items-center mb-2">
-                        <p className="text-sm font-medium">{t('pointCamera')}</p>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setShowQrScanner(false)
-                            stopScanning()
-                          }}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="w-full rounded-lg bg-black aspect-video object-cover"
-                      />
-                      {qrError && (
-                        <Alert variant="destructive">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription className="text-xs sm:text-sm">
-                            {qrError}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-                  )}
 
                   {/* Student List */}
-                  {!selectedStudent && (
+                  {!selectedStudent && !showQrScanner && (
                     <div className="max-h-64 overflow-y-auto border rounded-lg">
                       {filteredStudents.length === 0 ? (
                         <p className="text-sm text-center text-muted-foreground p-4">

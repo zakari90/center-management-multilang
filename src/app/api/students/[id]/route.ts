@@ -4,6 +4,7 @@ import { getSession } from '@/lib/authentication'
 import db from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
+
 interface RouteParams {
   params: Promise<{
     id: string
@@ -16,38 +17,50 @@ export async function GET(
 ) {
   try {
     const id = (await params).id
-    const session: any = await getSession()
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
+    // Public endpoint - no auth required
+    // But you can add optional auth if needed
     const student = await db.student.findUnique({
-      where: { 
-        id,
-        managerId: session.user.id 
-      },
+      where: { id },
       include: {
         studentSubjects: {
           include: {
-            subject: true,
-            teacher: true,
+            subject: {
+              select: {
+                id: true,
+                name: true,
+                grade: true,
+                price: true
+              }
+            },
+            teacher: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
           }
-        },
-        receipts: {
-          orderBy: {
-            date: 'desc'
-          },
-          take: 10
         }
       }
     })
 
     if (!student) {
-      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+      return NextResponse.json(
+        { error: 'Student not found' },
+        { status: 404 }
+      )
     }
 
-    return NextResponse.json(student)
+    // Optionally hide sensitive data for public view
+    return NextResponse.json({
+      id: student.id,
+      name: student.name,
+      grade: student.grade,
+      email: student.email,
+      phone: student.phone,
+      studentSubjects: student.studentSubjects,
+      createdAt: student.createdAt
+    })
   } catch (error) {
     console.error('Error fetching student:', error)
     return NextResponse.json(
