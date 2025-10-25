@@ -165,7 +165,7 @@ function QRScanner({
           {isScanning && (
             <span className="flex items-center gap-1 text-xs text-green-600" aria-live="polite">
               <span className="inline-block w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-              Scanning...
+              ...
             </span>
           )}
         </div>
@@ -179,7 +179,7 @@ function QRScanner({
           autoPlay
           playsInline
           muted
-          className="w-full rounded-lg bg-black aspect-video object-cover"
+          className="w-full rounded-lg aspect-video object-cover"
           aria-label="Camera feed"
         />
         <canvas ref={canvasRef} className="hiddenden" />
@@ -288,7 +288,7 @@ function StudentSelector({
           )}
 
           {selectedStudent && (
-            <div className="p-3 sm:p-4 bg-blue-50 border rounded-lg">
+            <div className="p-3 sm:p-4 border rounded-lg">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <div>
                   <p className="font-semibold text-sm sm:text-base">{selectedStudent.name}</p>
@@ -296,7 +296,7 @@ function StudentSelector({
                     {selectedStudent.email || selectedStudent.phone}
                   </p>
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={onStudentChange} className="w-full sm:w-auto">
+                <Button type="button" variant="secondary" size="sm" onClick={onStudentChange} className="w-full sm:w-auto">
                   {t("change")}
                 </Button>
               </div>
@@ -324,7 +324,7 @@ function PaymentSummary({
   t: (key: string) => string
 }) {
   return (
-    <Card className="bg-primary/5 border-primary">
+    <Card className=" border-primary">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
@@ -471,7 +471,7 @@ export default function CreateStudentPaymentForm() {
           date: formData.date,
         })
 
-        await router.push(preSelectedStudentId ? `/students/${preSelectedStudentId}` : "/receipts")
+        await router.push(preSelectedStudentId ? `/manager/students/${preSelectedStudentId}` : "/manager/receipts")
         router.refresh()
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -524,7 +524,9 @@ export default function CreateStudentPaymentForm() {
               qrError={qrError}
               onSearchChange={setSearchTerm}
               onStudentSelect={handleStudentSelect}
-              onStudentChange={() => setSelectedStudent(null)}
+              onStudentChange={() =>{
+                setSelectedStudent(null)
+                router.refresh()}}
               onQrToggle={() => setShowQrScanner(!showQrScanner)}
               onQrScan={handleQrScan}
               t={t}
@@ -562,7 +564,7 @@ export default function CreateStudentPaymentForm() {
                           onClick={() => handleSubjectToggle(ss.subject.id)}
                           className={`cursor-pointer transition-colors ${
                             formData.selectedSubjects.includes(ss.subject.id)
-                              ? "border-primary bg-primary/5"
+                              ? "border-primary"
                               : "hover:border-gray-400"
                           }`}
                           role="button"
@@ -616,9 +618,9 @@ export default function CreateStudentPaymentForm() {
                       <SelectContent>
                         <SelectItem value="CASH">{t("cash")}</SelectItem>
                         <SelectItem value="CARD">{t("card")}</SelectItem>
-                        <SelectItem value="BANK_TRANSFER">{t("bank_transfer")}</SelectItem>
+                        <SelectItem value="BANK_TRANSFER">{t("bankTransfer")}</SelectItem>
                         <SelectItem value="CHECK">{t("check")}</SelectItem>
-                        <SelectItem value="MOBILE_PAYMENT">{t("mobile_payment")}</SelectItem>
+                        <SelectItem value="MOBILE_PAYMENT">{t("mobilePayment")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

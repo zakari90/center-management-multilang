@@ -8,8 +8,8 @@ export default async function NotFound() {
   const t = await getTranslations("notFound")
 
   return (
-    <html>
-      <body className="flex items-center justify-center h-screen bg-muted/20">
+
+      <div className="flex items-center justify-center h-screen bg-muted/20">
         <Card className="p-8 max-w-md">
           <div className="flex flex-col items-center justify-center mb-6">
             <AlertTriangle className="w-16 h-16 text-yellow-500 mb-2" />
@@ -22,7 +22,7 @@ export default async function NotFound() {
             </Button>
           </div>
         </Card>
-      </body>
-    </html>
+      </div>
+
   )
 }

@@ -87,7 +87,7 @@ export default function StudentCard({
   }, [showQR, student.id, qrGenerated])
   return (
     <div className="space-y-4">
-      <Card ref={cardRef} className="max-w-md mx-auto bg-white">
+      <Card ref={cardRef} className="max-w-md mx-auto">
         <CardHeader className="pb-3">
           <CardTitle className="text-xl sm:text-2xl">{t('title')}</CardTitle>
           <p className="text-xs sm:text-sm text-muted-foreground">
