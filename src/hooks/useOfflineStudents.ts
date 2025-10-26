@@ -24,30 +24,50 @@ export interface Student extends CachedStudent {
   studentSubjects: StudentSubject[]
 }
 
+
 export function useOfflineStudents() {
   const [isOnline, setIsOnline] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
+  const [isClient, setIsClient] = useState(false)
 
-  // Live query - automatically updates when IndexedDB changes
+  // Check if we're on client side
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Conditional live query - only on client
   const students = useLiveQuery(
-    () => db.students
-      .where('deletedAt')
-      .equals(undefined as any)
-      .or('deletedAt')
-      .equals(null as any)
-      .toArray(),
-    []
+    () => {
+      if (!isClient || !db) return []
+      
+      return db.students
+        .where('deletedAt')
+        .equals(undefined as any)
+        .or('deletedAt')
+        .equals(null as any)
+        .toArray()
+        .catch((error) => {
+          console.error('Failed to query students:', error)
+          return []
+        })
+    },
+    [isClient],
+    [] // Default value
   )
 
   useEffect(() => {
+    if (!isClient || typeof window === 'undefined') return
+
     // Check initial online status
     setIsOnline(navigator.onLine)
 
     // Network status listeners
     const handleOnline = () => {
       setIsOnline(true)
-      syncService.syncData()
+      if (db && syncService) {
+        syncService.syncData().catch(console.error)
+      }
     }
 
     const handleOffline = () => {
@@ -57,23 +77,30 @@ export function useOfflineStudents() {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
 
-    // Initial sync if online
-    if (navigator.onLine) {
-      syncService.syncData()
+    // Initial sync if online and db available
+    if (navigator.onLine && db && syncService) {
+      syncService.syncData().catch(console.error)
     }
 
-    // Start auto-sync
-    syncService.startAutoSync()
+    // Start auto-sync if available
+    if (syncService) {
+      syncService.startAutoSync()
+    }
 
     // Subscribe to sync completion
-    const unsubscribe = syncService.onSyncComplete(() => {
+    const unsubscribe = syncService?.onSyncComplete(() => {
       updatePendingCount()
     })
 
     // Update pending count periodically
     const updatePendingCount = async () => {
-      const count = await syncService.getPendingCount()
-      setPendingCount(count)
+      if (!syncService) return
+      try {
+        const count = await syncService.getPendingCount()
+        setPendingCount(count)
+      } catch (error) {
+        console.error('Failed to get pending count:', error)
+      }
     }
 
     updatePendingCount()
@@ -82,13 +109,19 @@ export function useOfflineStudents() {
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
-      syncService.stopAutoSync()
+      if (syncService) {
+        syncService.stopAutoSync()
+      }
       clearInterval(interval)
-      unsubscribe()
+      if (unsubscribe) unsubscribe()
     }
-  }, [])
+  }, [isClient])
 
   const createStudent = useCallback(async (studentData: Partial<Student>) => {
+    if (!db) {
+      throw new Error('Database not available')
+    }
+
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     const newStudent: CachedStudent = {
@@ -104,17 +137,15 @@ export function useOfflineStudents() {
       synced: false,
     }
     
-    // Save to IndexedDB immediately
     await db.students.add(newStudent)
-
-    // Queue for sync
     await syncService.queueOperation('CREATE', 'students', newStudent)
 
     return tempId
   }, [])
 
   const updateStudent = useCallback(async (id: string, studentData: Partial<Student>) => {
-    // Get existing student
+    if (!db) throw new Error('Database not available')
+
     const existing = await db.students.get(id)
     if (!existing) throw new Error('Student not found')
 
@@ -125,25 +156,23 @@ export function useOfflineStudents() {
       synced: false,
     }
 
-    // Update IndexedDB
     await db.students.put(updated)
-
-    // Queue for sync
     await syncService.queueOperation('UPDATE', 'students', updated, id)
   }, [])
 
   const deleteStudent = useCallback(async (id: string) => {
-    // Soft delete - mark as deleted
+    if (!db) throw new Error('Database not available')
+
     await db.students.update(id, {
       deletedAt: Date.now(),
       synced: false,
     })
 
-    // Queue for sync
     await syncService.queueOperation('DELETE', 'students', {}, id)
   }, [])
 
   const getStudentById = useCallback(async (id: string): Promise<Student | undefined> => {
+    if (!db) return undefined
     return await db.students.get(id) as Student | undefined
   }, [])
 
@@ -174,3 +203,4 @@ export function useOfflineStudents() {
     forceSync,
   }
 }
+

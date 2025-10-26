@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
-import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
+import { BookOpen, Building2, CalendarDays, Pencil, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -162,10 +162,10 @@ export default function CenterPresentation(center: Center) {
                   />
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground italic">No subjects added</p>
+                <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
               )}
             </div>
-            {formData.subjects.length > 0 ? (
+            {/* {formData.subjects.length > 0 ? (
               <div className="space-y-3">
                 {formData.subjects.map(subject => (
                   <Card key={subject.id || subject.name} className="p-4">
@@ -195,7 +195,7 @@ export default function CenterPresentation(center: Center) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
-            )}
+            )} */}
           </div>
 
           {/* Classrooms Section */}

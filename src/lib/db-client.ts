@@ -85,7 +85,38 @@ export class EducationCenterDB extends Dexie {
       subjects: 'id, name, grade, centerId, synced, lastModified, deletedAt',
       syncQueue: '++id, collection, synced, timestamp'
     })
+
+    // Error handling
+    this.on('versionchange', () => {
+      console.warn('Database version changed, reloading...')
+      if (typeof window !== 'undefined') {
+        window.location.reload()
+      }
+    })
   }
 }
 
-export const db = new EducationCenterDB()
+// ✅ CRITICAL FIX: Only initialize on client side
+let dbInstance: EducationCenterDB | null = null
+
+export const getDB = (): EducationCenterDB | null => {
+  // Return null on server
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  // Initialize on first call (client-side only)
+  if (!dbInstance) {
+    try {
+      dbInstance = new EducationCenterDB()
+    } catch (error) {
+      console.error('Failed to initialize IndexedDB:', error)
+      return null
+    }
+  }
+
+  return dbInstance
+}
+
+// For backward compatibility - but this will be null on server
+export const db = getDB()

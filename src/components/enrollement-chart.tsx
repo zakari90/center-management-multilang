@@ -46,7 +46,7 @@ export default function EnrollmentChart() {
   }
 
   return (
-    <Card className="col-span-4 lg:col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle>{t('title')}</CardTitle>
         <CardDescription>{t('description')}</CardDescription>

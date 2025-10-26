@@ -99,8 +99,8 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
         axios.get('/api/admin/teachers'),
         axios.get('/api/subjects'),
-        axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
-        centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
+        axios.get(`/api/admin/schedule`),
+        axios.get(`/api/admin/centers`)
       ])
 
       setTeachers(teachersRes.data)

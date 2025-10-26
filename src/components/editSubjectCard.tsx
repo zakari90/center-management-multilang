@@ -1,12 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +11,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { DollarSign, Clock, Pencil, Trash2 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Clock, Coins, Pencil, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useState } from 'react'
 import { EditDialog } from './editDialog'
 import { ItemInputList } from './itemInputList'
 
@@ -64,40 +64,46 @@ export function EditSubjectCard({
   }
 
   return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h4 className="font-semibold text-base">{subject.name}</h4>
-          <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-            <Badge variant="outline">{subject.grade}</Badge>
-            <span className="flex items-center gap-1">
-              <DollarSign className="h-3 w-3" />
+    <Card className="p-3 sm:p-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        {/* Subject Info */}
+        <div className="space-y-2 min-w-0 flex-1">
+          <h4 className="font-semibold text-sm sm:text-base truncate">
+            {subject.name}
+          </h4>
+          <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-muted-foreground">
+            <Badge variant="outline" className="text-xs">
+              {subject.grade}
+            </Badge>
+            <span className="flex items-center gap-1 whitespace-nowrap">
+              <Coins className="h-3 w-3 flex-shrink-0" />
               {subject.price} MAD
             </span>
             {subject.duration && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {subject.duration} min
+              <span className="flex items-center gap-1 whitespace-nowrap">
+                <Clock className="h-3 w-3 flex-shrink-0" />
+                {subject.duration} h
               </span>
             )}
           </div>
         </div>
         
-        <div className="flex gap-1">
+        {/* Action Buttons */}
+        <div className="flex gap-1 flex-shrink-0">
           <EditDialog
             title={t('editSubject')}
             trigger={
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
                 <Pencil className="h-4 w-4" />
               </Button>
             }
             onSave={handleUpdateSubject}
           >
-            <div className="border rounded-lg p-4 space-y-4 bg-muted/10">
+            <div className="border rounded-lg p-3 sm:p-4 space-y-4 bg-muted/10 max-h-[80vh] overflow-y-auto">
               <div className="space-y-4">
                 {/* Subject Selection */}
                 <div className="space-y-2">
-                  <Label>
+                  <Label className="text-xs sm:text-sm">
                     {t('selectSubject')} {t('requiredField')}
                   </Label>
                   <ItemInputList
@@ -114,7 +120,7 @@ export function EditSubjectCard({
 
                 {/* Grade Selection */}
                 <div className="space-y-2">
-                  <Label>
+                  <Label className="text-xs sm:text-sm">
                     {t('selectGrade')} {t('requiredField')}
                   </Label>
                   <ItemInputList
@@ -130,9 +136,12 @@ export function EditSubjectCard({
                 </div>
 
                 {/* Price and Duration */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="editPrice">
+                    <Label 
+                      htmlFor="editPrice"
+                      className="text-xs sm:text-sm"
+                    >
                       {t('price')} {t('requiredField')}
                     </Label>
                     <Input
@@ -142,11 +151,15 @@ export function EditSubjectCard({
                       value={tempSubject.price}
                       onChange={(e) => setTempSubject(prev => ({ ...prev, price: e.target.value }))}
                       placeholder={t('placeholders.price')}
+                      className="text-sm h-10 sm:h-11"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="editDuration">
+                    <Label 
+                      htmlFor="editDuration"
+                      className="text-xs sm:text-sm"
+                    >
                       {t('duration')}
                     </Label>
                     <Input
@@ -155,6 +168,7 @@ export function EditSubjectCard({
                       value={tempSubject.duration}
                       onChange={(e) => setTempSubject(prev => ({ ...prev, duration: e.target.value }))}
                       placeholder={t('placeholders.duration')}
+                      className="text-sm h-10 sm:h-11"
                     />
                   </div>
                 </div>
@@ -164,20 +178,31 @@ export function EditSubjectCard({
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-9 w-9 p-0"
+              >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="w-[90vw] max-w-sm">
               <AlertDialogHeader>
-                <AlertDialogTitle>{t('deleteSubject')}</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-lg sm:text-xl">
+                  {t('deleteSubject')}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-xs sm:text-sm">
                   {t('deleteConfirmation', { subjectName: subject.name })}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(subject.id)}>
+              <AlertDialogFooter className="flex gap-2 flex-col-reverse sm:flex-row">
+                <AlertDialogCancel className="w-full sm:w-auto">
+                  {t('cancel')}
+                </AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={() => onDelete(subject.id)}
+                  className="w-full sm:w-auto"
+                >
                   {t('delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>

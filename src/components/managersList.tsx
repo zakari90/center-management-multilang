@@ -45,7 +45,7 @@ export default function ManagersList() {
   }
 
   return (
-    <Card className="col-span-4 lg:col-span-2">
+    <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
             <CardTitle>{t('title')}</CardTitle>

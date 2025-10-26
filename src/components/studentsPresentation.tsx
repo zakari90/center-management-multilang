@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
-import { Loader2, Eye, Pencil, Search, WifiOff, RefreshCw, Users, GraduationCap, DollarSign } from "lucide-react"
+import { Loader2, Eye, Pencil, Search, Users, GraduationCap, DollarSign } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,21 +12,61 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { useOfflineStudents, Student } from "@/hooks/useOfflineStudents"
+import axios from "axios"
+
+export interface StudentSubject {
+  id: string
+  subject: {
+    id: string
+    name: string
+    grade: string
+    price: number
+  }
+  teacher: {
+    id: string
+    name: string
+  }
+}
+
+export interface Student {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  parentName: string | null
+  parentPhone: string | null
+  parentEmail: string | null
+  grade: string | null
+  createdAt: string
+  studentSubjects: StudentSubject[]
+}
 
 export default function StudentsTable() {
   const t = useTranslations("StudentsTable")
   
-  const { 
-    students, 
-    isOnline, 
-    isSyncing, 
-    pendingCount, 
-    forceSync 
-  } = useOfflineStudents()
-  
+  const [students, setStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
+
+  useEffect(() => {
+    fetchStudents()
+  }, [])
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true)
+      const { data } = await axios.get("/api/students")
+      setStudents(data)
+      setError("")
+    } catch (err) {
+      console.error("Error fetching students:", err)
+      setError("Failed to load students")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -53,24 +93,20 @@ export default function StudentsTable() {
     ? students.reduce((sum, s) => sum + (s.studentSubjects?.length || 0), 0) / totalStudents 
     : 0
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6">
-      {/* Offline Warning */}
-      {!isOnline && (
-        <Alert className="mb-4 border-orange-500 bg-orange-50">
-          <WifiOff className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
-            أنت غير متصل بالإنترنت. التغييرات ستُزامن تلقائياً عند عودة الاتصال.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Pending Changes */}
-      {pendingCount > 0 && (
-        <Alert className="mb-4 border-blue-500 bg-blue-50">
-          <AlertDescription className="text-blue-800">
-            {pendingCount} {t("pendingChanges") || "تغيير في انتظار المزامنة"}
-          </AlertDescription>
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
@@ -81,29 +117,9 @@ export default function StudentsTable() {
             <h1 className="text-3xl font-bold">{t("student")}</h1>
             <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={forceSync}
-              disabled={!isOnline || isSyncing}
-              variant="outline"
-              size="sm"
-            >
-              {isSyncing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t("syncing") || "جارٍ المزامنة..."}
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  {t("sync") || "مزامنة"}
-                </>
-              )}
-            </Button>
-            <Button asChild>
-              <Link href="/manager/students/create">{t("addStudent")}</Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link href="/manager/students/create">{t("addStudent")}</Link>
+          </Button>
         </div>
 
         {/* Search and Filter */}
@@ -143,7 +159,7 @@ export default function StudentsTable() {
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {filteredStudents.length} {t("filtered")}
+              {filteredStudents.length} {t("filtered") || "مُرشَّح"}
             </p>
           </CardContent>
         </Card>
@@ -155,18 +171,18 @@ export default function StudentsTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">MAD {totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t("monthlyRevenue")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("monthlyRevenue") || "الإيرادات الشهرية"}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("avgSubjects")}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("avgSubjects") || "متوسط المواد"}</CardTitle>
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{averageSubjects.toFixed(1)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("perStudent") || "لكل طالب"}</p>
           </CardContent>
         </Card>
       </div>
@@ -215,14 +231,7 @@ export default function StudentsTable() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <div className="text-sm font-medium">{student.name}</div>
-                            {!student.synced && (
-                              <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300">
-                                غير مُزامن
-                              </Badge>
-                            )}
-                          </div>
+                          <div className="text-sm font-medium">{student.name}</div>
                           {student.grade && (
                             <div className="text-sm text-muted-foreground">{student.grade}</div>
                           )}

@@ -39,7 +39,7 @@ export default function TopSubjects() {
   }
 
   return (
-    <Card className="col-span-4 lg:col-span-2">
+    <Card>
       <CardHeader className="pb-3 sm:pb-6">
         <CardTitle className="text-lg sm:text-xl">{t('title')}</CardTitle>
         <CardDescription className="text-xs sm:text-sm">{t('description')}</CardDescription>

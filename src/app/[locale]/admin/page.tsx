@@ -25,12 +25,12 @@ export default function AdminDashboard() {
         <AdminRevenueChart/>
 
         <CentersOverview />
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
 
         <EnrollmentChart />
         <TopSubjects />
 </div>
-<div className="grid gap-6 lg:grid-cols-2">
+<div className="grid gap-6 md:grid-cols-2">
         <ManagersList />
         <SystemActivityLog />
         </div>

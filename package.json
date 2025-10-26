@@ -37,6 +37,7 @@
     "date-fns": "^4.1.0",
     "dexie": "^4.2.1",
     "dexie-react-hooks": "^4.2.0",
+    "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
     "jose": "^6.1.0",
     "jspdf": "^3.0.3",
@@ -60,7 +61,6 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "xlsx": "^0.18.5",
     "zod": "^4.1.12"
   },
   "devDependencies": {
