@@ -87,6 +87,10 @@ export default async function RootLayout({
           <NextIntlClientProvider>
             <AuthProvider>
               {children}
+              
+              <p>
+pwa test
+              </p>
               <InstallPWA />
               <Toaster />
             </AuthProvider>
