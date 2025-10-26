@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getDB, SyncQueue } from './db-client'
 import axios from 'axios'
 
