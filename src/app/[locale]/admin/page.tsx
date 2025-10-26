@@ -26,9 +26,11 @@ export default function AdminDashboard() {
 
         <CentersOverview />
         <EnrollmentChart />
+        <div className="flex  flex-col sm:flex-row sm:flex-wrap" >
         <TopSubjects />
         <ManagersList />
         <SystemActivityLog />
+        </div>
 
     </div>
   )
