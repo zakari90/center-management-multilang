@@ -1,4 +1,10 @@
-{
+{  "InstallPWA": {
+    "installMessage": "Install app for a better experience",
+    "iosInstructions": "To install: tap Share button then 'Add to Home Screen'",
+    "install": "Install",
+    "instructions": "Instructions",
+    "close": "Close"
+  },
   "auth": {
     "validation": {
       "usernameMin": "Username must be at least 3 characters",

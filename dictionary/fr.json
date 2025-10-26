@@ -1,4 +1,10 @@
-{
+{  "InstallPWA": {
+    "installMessage": "Installer l'application pour une meilleure expérience",
+    "iosInstructions": "Pour installer: appuyez sur Partager puis 'Ajouter à l'écran d'accueil'",
+    "install": "Installer",
+    "instructions": "Instructions",
+    "close": "Fermer"
+  },
   "auth": {
     "validation": {
       "usernameMin": "Le nom d'utilisateur doit contenir au moins 3 caractères",

@@ -1,14 +1,14 @@
 {
-  "name": "Center Management",
-  "short_name": "Center Mgmt",
-  "description": "Education center management system for students, teachers, and schedules",
+  "name": "نظام إدارة المركز التعليمي",
+  "short_name": "إدارة المركز",
+  "description": "إدارة الطلاب والمعلمين والجداول الزمنية",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "theme_color": "#8936FF",
   "background_color": "#2EC6FE",
-  "dir": "auto",
+  "dir": "rtl",
   "lang": "ar",
   "icons": [
     {
@@ -20,12 +20,6 @@
     {
       "src": "/icon512_rounded.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     }
