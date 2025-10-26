@@ -1,3 +1,4 @@
+// /manager/students/create/page.tsx
 import CreateStudentForm from "@/components/studentCreationForm"
 
 function Page() {

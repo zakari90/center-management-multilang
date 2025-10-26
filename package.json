@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/client": "^6.17.1",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -34,6 +35,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dexie": "^4.2.1",
+    "dexie-react-hooks": "^4.2.0",
     "html2canvas": "^1.4.1",
     "jose": "^6.1.0",
     "jspdf": "^3.0.3",
@@ -70,7 +73,8 @@
     "eslint": "^9.35.0",
     "eslint-config-next": "15.2.3",
     "tailwindcss": "^4.1.14",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "webpack": "^5.102.1"
   },
   "overrides": {
     "@types/react": "19.0.12",

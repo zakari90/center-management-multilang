@@ -1,64 +1,32 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
-import { Loader2, Eye, Pencil, Search, QrCode } from "lucide-react"
+import { Loader2, Eye, Pencil, Search, WifiOff, RefreshCw, Users, GraduationCap, DollarSign } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import axios from "axios"
-
-interface StudentSubject {
-  id: string
-  subject: {
-    id: string
-    name: string
-    grade: string
-    price: number
-  }
-}
-
-export interface Student {
-  id: string
-  name: string
-  email: string | null
-  phone: string | null
-  parentName: string | null
-  parentPhone: string | null
-  parentEmail: string | null
-  grade: string | null
-  createdAt: string
-  studentSubjects: StudentSubject[]
-}
+import { Badge } from "@/components/ui/badge"
+import { useOfflineStudents, Student } from "@/hooks/useOfflineStudents"
 
 export default function StudentsTable() {
   const t = useTranslations("StudentsTable")
-  const [students, setStudents] = useState<Student[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+  
+  const { 
+    students, 
+    isOnline, 
+    isSyncing, 
+    pendingCount, 
+    forceSync 
+  } = useOfflineStudents()
+  
   const [searchTerm, setSearchTerm] = useState("")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
-
-  useEffect(() => {
-    fetchStudents()
-  }, [])
-
-  const fetchStudents = async () => {
-    try {
-      const response = await axios.get("/api/students")
-      setStudents(response.data)
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : "Something went wrong")
-      setError(t("errorFetchStudents"))
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -72,28 +40,40 @@ export default function StudentsTable() {
     return matchesSearch && matchesGrade
   })
 
-  // Get unique grades for filter
   const grades = ["all", ...new Set(students.map((s) => s.grade).filter(Boolean))]
 
   const getTotalRevenue = (student: Student) => {
-    if (!student?.studentSubjects) {
-      return 0
-    }
-    return student.studentSubjects.reduce((total, ss) => {
-      return total + (ss?.subject?.price ?? 0)
-    }, 0)
+    if (!student?.studentSubjects) return 0
+    return student.studentSubjects.reduce((total, ss) => total + (ss?.subject?.price ?? 0), 0)
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin rounded-full h-12 w-12" />
-      </div>
-    )
-  }
+  const totalStudents = students.length
+  const totalRevenue = students.reduce((sum, student) => sum + getTotalRevenue(student), 0)
+  const averageSubjects = totalStudents > 0 
+    ? students.reduce((sum, s) => sum + (s.studentSubjects?.length || 0), 0) / totalStudents 
+    : 0
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {/* Offline Warning */}
+      {!isOnline && (
+        <Alert className="mb-4 border-orange-500 bg-orange-50">
+          <WifiOff className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            أنت غير متصل بالإنترنت. التغييرات ستُزامن تلقائياً عند عودة الاتصال.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Pending Changes */}
+      {pendingCount > 0 && (
+        <Alert className="mb-4 border-blue-500 bg-blue-50">
+          <AlertDescription className="text-blue-800">
+            {pendingCount} {t("pendingChanges") || "تغيير في انتظار المزامنة"}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
@@ -101,11 +81,32 @@ export default function StudentsTable() {
             <h1 className="text-3xl font-bold">{t("student")}</h1>
             <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
           </div>
-          <Button asChild>
-            <Link href="/manager/students/create">{t("addStudent")}</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={forceSync}
+              disabled={!isOnline || isSyncing}
+              variant="outline"
+              size="sm"
+            >
+              {isSyncing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t("syncing") || "جارٍ المزامنة..."}
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {t("sync") || "مزامنة"}
+                </>
+              )}
+            </Button>
+            <Button asChild>
+              <Link href="/manager/students/create">{t("addStudent")}</Link>
+            </Button>
+          </div>
         </div>
 
+        {/* Search and Filter */}
         <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
@@ -132,95 +133,79 @@ export default function StudentsTable() {
         </div>
       </div>
 
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("totalStudents")}</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalStudents}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {filteredStudents.length} {t("filtered")}
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-1">{t("totalStudents")}</p>
-          <p className="text-3xl font-bold">{students?.length ?? 0}</p>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("totalRevenue")}</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">MAD {totalRevenue.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground mt-1">{t("monthlyRevenue")}</p>
+          </CardContent>
         </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-1">{t("activeEnrollments")}</p>
-          <p className="text-3xl font-bold text-green-600">
-            {students?.filter((s) => s.studentSubjects?.length > 0).length ?? 0}
-          </p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-1">{t("totalRevenue")}</p>
-          <p className="text-3xl font-bold text-blue-600">
-            MAD{students?.reduce((total, s) => total + getTotalRevenue(s), 0).toFixed(2) ?? "0.00"}
-          </p>
-        </Card>
-        <Card className="p-6">
-          <p className="text-sm text-muted-foreground mb-1">{t("avgSubjectsPerStudent")}</p>
-          <p className="text-3xl font-bold text-purple-600">
-            {students && students.length > 0
-              ? (students.reduce((total, s) => total + (s.studentSubjects?.length ?? 0), 0) / students.length).toFixed(
-                  1,
-                )
-              : "0"}
-          </p>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("avgSubjects")}</CardTitle>
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{averageSubjects.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}</p>
+          </CardContent>
         </Card>
       </div>
 
-      {/* Table */}
+      {/* Students Table */}
       <Card>
-        {filteredStudents.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="mx-auto h-12 w-12 text-muted-foreground mb-4">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                />
-              </svg>
-            </div>
-            <p className="text-muted-foreground">
-              {searchTerm || gradeFilter !== "all" ? "No students found matching your criteria" : "No students yet"}
-            </p>
-            {!searchTerm && gradeFilter === "all" && (
-              <Button asChild className="mt-4">
-                <Link href="/manager/students/create">{t("addFirstStudent")}</Link>
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted border-b">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  {t("name")}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  {t("contact")}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  {t("parent")}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  {t("subjects")}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                  {t("monthlyFee")}
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
+                  {t("actions")}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredStudents.length === 0 ? (
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("student")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("contact")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("parentGuardian")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("subjects")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("revenue")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("enrolled")}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {t("actions")}
-                  </th>
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                    {t("noStudents")}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filteredStudents.map((student) => (
+              ) : (
+                filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-4">
@@ -230,83 +215,59 @@ export default function StudentsTable() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="text-sm font-medium">{student.name}</div>
-                          {student.grade && <div className="text-sm text-muted-foreground">{student.grade}</div>}
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-medium">{student.name}</div>
+                            {!student.synced && (
+                              <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-300">
+                                غير مُزامن
+                              </Badge>
+                            )}
+                          </div>
+                          {student.grade && (
+                            <div className="text-sm text-muted-foreground">{student.grade}</div>
+                          )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="text-sm">{student.email || "-"}</div>
                       <div className="text-sm text-muted-foreground">{student.phone || "-"}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="text-sm">{student.parentName || "-"}</div>
                       <div className="text-sm text-muted-foreground">
-                        {student.parentPhone || student.parentEmail || "-"}
+                        {student.parentPhone || "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm">
-                        {student.studentSubjects && student.studentSubjects.length === 0 ? (
-                          <span className="text-muted-foreground italic">{t("noSubjects")}</span>
-                        ) : (
-                          <div className="space-y-1">
-                            {student.studentSubjects &&
-                              student.studentSubjects.slice(0, 2).map((ss) => (
-                                <div key={ss.id}>
-                                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
-                                    {ss.subject.name}
-                                  </span>
-                                </div>
-                              ))}
-                            {student.studentSubjects && student.studentSubjects.length > 2 && (
-                              <span className="text-xs text-muted-foreground">
-                                +{student.studentSubjects.length - 2} more
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                      <Badge variant="secondary">
+                        {student.studentSubjects?.length || 0} {t("subjects")}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold">${getTotalRevenue(student).toFixed(2)}</div>
+                      <div className="text-sm font-medium">MAD {getTotalRevenue(student).toFixed(2)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                      {new Date(student.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2">
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex gap-2 justify-end">
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/manager/students/${student.id}`} title="View details">
-                            <Eye className="w-4 h-4" />
+                          <Link href={`/manager/students/${student.id}`}>
+                            <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/manager/students/${student.id}/edit`} title="Edit">
-                            <Pencil className="w-4 h-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/manager/students/${student.id}/card`} title="Edit">
-                            <QrCode className="w-4 h-4" />
+                          <Link href={`/manager/students/${student.id}/edit`}>
+                            <Pencil className="h-4 w-4" />
                           </Link>
                         </Button>
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
-
-      {/* Pagination Info */}
-      {filteredStudents.length > 0 && (
-        <div className="mt-4 text-sm text-muted-foreground text-center">
-          {t("showing")} {filteredStudents.length} {t("of")} {students.length} {t("students")}
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </Card>
     </div>
   )
 }

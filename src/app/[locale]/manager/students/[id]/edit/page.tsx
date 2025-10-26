@@ -1,3 +1,4 @@
+// manager/students/[id]/edit/page.tsx
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 

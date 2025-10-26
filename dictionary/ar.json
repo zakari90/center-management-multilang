@@ -916,7 +916,13 @@
     "students": "طلاب",
     "errorFetchStudents": "فشل جلب الطلاب",
     "errorDeleteStudent": "فشل حذف الطالب",
-    "errorSomethingWrong": "حدث خطأ ما"
+    "errorSomethingWrong": "حدث خطأ ما",
+ "pendingChanges": "تغيير في انتظار المزامنة",
+    "syncing": "جارٍ المزامنة...",
+    "sync": "مزامنة",
+    "filtered": "مُرشَّح",
+    "monthlyRevenue": "الإيرادات الشهرية",
+    "perStudent": "لكل طالب"
   },
   "StudentReceiptTable": {
     "MAD": "درهم",

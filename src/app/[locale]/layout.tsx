@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -11,8 +11,17 @@ import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../globals.css";
+import InstallPWA from "@/components/installPWA";
 
-const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || ""
+const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
+
+// ✅ PWA Viewport Configuration
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default async function RootLayout({
   children,
@@ -38,14 +47,25 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={isArabic ? "rtl" : "ltr"} suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        {/* ✅ PWA Meta Tags */}
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="theme-color" content="#000000" />
+        
+        {/* ✅ PWA Apple Specific */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="ECMS" />
+        
+        {/* Original Meta Tags */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        
         <script
           {...jsonLdScriptProps<WebSite>({
             "@context": "https://schema.org",
@@ -67,19 +87,19 @@ export default async function RootLayout({
           <NextIntlClientProvider>
             <AuthProvider>
               {children}
+              <InstallPWA />
               <Toaster />
             </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
-                <Analytics />
+        <Analytics />
         <SpeedInsights />
-
       </body>
     </html>
   );
 }
 
-const locales = ["ar"] as const;
+const locales = ["ar", "en", "fr"] as const;
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -97,11 +117,27 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     keywords: t("keywords"),
+    
+    // ✅ PWA Manifest
+    manifest: '/manifest.json',
+    
+    // ✅ PWA Apple Web App
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: 'ECMS',
+    },
+    
+    // ✅ Format Detection
+    formatDetection: {
+      telephone: false,
+    },
+    
     openGraph: {
       title: t("title"),
       description: t("description"),
       url: DOMAIN,
-      siteName: "center management, تدبير مراجعتي",
+      siteName: "إدارة المركز، تدبير مراجعتي",
       images: [
         {
           url: `${DOMAIN}/og-image.png`,
@@ -140,6 +176,9 @@ export async function generateMetadata({
       },
     },
     authors: [{ name: "zakaria zinedine" }],
-    icons: [{ rel: "icon", url: "/icon.png" }],
+    icons: [
+      { rel: "icon", url: "/icon-192x192.png" },
+      { rel: "apple-touch-icon", url: "/icon-192x192.png" }
+    ],
   };
 }
