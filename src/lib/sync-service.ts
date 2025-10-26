@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { db, SyncQueue } from './db-client'
+import { getDB, SyncQueue } from './db-client'
 import axios from 'axios'
 
 class SyncService {
@@ -28,7 +27,9 @@ class SyncService {
     }, 30000) // 30 seconds
 
     // Also sync when coming back online
-    window.addEventListener('online', () => this.syncData())
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', () => this.syncData())
+    }
   }
 
   stopAutoSync() {
@@ -45,24 +46,37 @@ class SyncService {
     data: any,
     serverId?: string
   ) {
-    await db.syncQueue.add({
-      operation,
-      collection,
-      data,
-      timestamp: Date.now(),
-      synced: false,
-      serverId
-    })
+    const db = getDB()
+    if (!db) {
+      console.warn('Database not available, cannot queue operation')
+      return
+    }
 
-    // Try immediate sync if online
-    if (navigator.onLine) {
-      setTimeout(() => this.syncData(), 100)
+    try {
+      await db.syncQueue.add({
+        operation,
+        collection,
+        data,
+        timestamp: Date.now(),
+        synced: false,
+        serverId
+      })
+
+      // Try immediate sync if online
+      if (typeof window !== 'undefined' && navigator.onLine) {
+        setTimeout(() => this.syncData(), 100)
+      }
+    } catch (error) {
+      console.error('Failed to queue operation:', error)
     }
   }
 
   // Main sync function
   async syncData(): Promise<void> {
-    if (this.isSyncing || !navigator.onLine) return
+    const db = getDB()
+    if (!db || this.isSyncing || (typeof window !== 'undefined' && !navigator.onLine)) {
+      return
+    }
     
     this.isSyncing = true
     console.log('🔄 Starting sync...')
@@ -88,6 +102,9 @@ class SyncService {
 
   // Pull latest data from server
   private async pullFromServer() {
+    const db = getDB()
+    if (!db) return
+
     try {
       // Fetch students
       const { data: students } = await axios.get('/api/students')
@@ -113,52 +130,72 @@ class SyncService {
   }
 
   private async updateLocalCollection(collection: string, serverData: any[]) {
+    const db = getDB()
+    if (!db) return
+
     const table = db[collection as keyof typeof db] as any
 
-    for (const item of serverData) {
-      const existing = await table.get(item.id)
-      const serverTimestamp = new Date(item.updatedAt || item.createdAt).getTime()
+    if (!table) return
 
-      // Only update if server version is newer or doesn't exist locally
-      if (!existing || serverTimestamp > existing.lastModified) {
-        await table.put({
-          ...item,
-          lastModified: serverTimestamp,
-          synced: true
-        })
+    for (const item of serverData) {
+      try {
+        const existing = await table.get(item.id)
+        const serverTimestamp = new Date(item.updatedAt || item.createdAt).getTime()
+
+        // Only update if server version is newer or doesn't exist locally
+        if (!existing || serverTimestamp > existing.lastModified) {
+          await table.put({
+            ...item,
+            lastModified: serverTimestamp,
+            synced: true
+          })
+        }
+      } catch (error) {
+        console.error(`Failed to update ${collection} item:`, error)
       }
     }
   }
 
   // Push pending changes to server
   private async pushToServer() {
-    const pendingItems = await db.syncQueue
-      .where('synced')
-      .equals(0)
-      .sortBy('timestamp')
+    const db = getDB()
+    if (!db) return
 
-    console.log(`📤 Pushing ${pendingItems.length} pending changes...`)
+    try {
+      const pendingItems = await db.syncQueue
+        .where('synced')
+        .equals(0)
+        .sortBy('timestamp')
 
-    for (const item of pendingItems) {
-      try {
-        await this.executeSyncItem(item)
-        
-        // Mark as synced
-        await db.syncQueue.update(item.id!, { synced: true })
-        
-        // Update local record as synced
-        const table = db[item.collection as keyof typeof db] as any
-        if (item.serverId) {
-          await table.update(item.serverId, { synced: true })
+      console.log(`📤 Pushing ${pendingItems.length} pending changes...`)
+
+      for (const item of pendingItems) {
+        try {
+          await this.executeSyncItem(item)
+          
+          // Mark as synced
+          if (item.id) {
+            await db.syncQueue.update(item.id, { synced: true })
+          }
+          
+          // Update local record as synced
+          const table = db[item.collection as keyof typeof db] as any
+          if (table && item.serverId) {
+            await table.update(item.serverId, { synced: true })
+          }
+        } catch (error: any) {
+          console.error(`Failed to sync item ${item.id}:`, error)
+          
+          // Store error for debugging
+          if (item.id) {
+            await db.syncQueue.update(item.id, { 
+              error: error.message || 'Unknown error'
+            })
+          }
         }
-      } catch (error: any) {
-        console.error(`Failed to sync item ${item.id}:`, error)
-        
-        // Store error for debugging
-        await db.syncQueue.update(item.id!, { 
-          error: error.message || 'Unknown error'
-        })
       }
+    } catch (error) {
+      console.error('Failed to push to server:', error)
     }
   }
 
@@ -171,10 +208,13 @@ class SyncService {
         const { data: created } = await axios.post(endpoint, item.data)
         
         // Update local record with server ID
+        const db = getDB()
+        if (!db) return
+
         const createTable = db[item.collection as keyof typeof db] as any
         const tempId = item.data.id
         
-        if (tempId.startsWith('temp_')) {
+        if (createTable && tempId && tempId.startsWith('temp_')) {
           await createTable.delete(tempId)
           await createTable.put({
             ...item.data,
@@ -202,33 +242,56 @@ class SyncService {
 
   // Clean up old synced items (keep last 100)
   private async cleanupSyncQueue() {
-    const syncedItems = await db.syncQueue
-      .where('synced')
-      .equals(1)
-      .toArray()
+    const db = getDB()
+    if (!db) return
 
-    if (syncedItems.length > 100) {
-      const toDelete = syncedItems
-        .sort((a, b) => a.timestamp - b.timestamp)
-        .slice(0, syncedItems.length - 100)
-        .map(item => item.id!)
+    try {
+      const syncedItems = await db.syncQueue
+        .where('synced')
+        .equals(1)
+        .toArray()
 
-      await db.syncQueue.bulkDelete(toDelete)
+      if (syncedItems.length > 100) {
+        const toDelete = syncedItems
+          .sort((a, b) => a.timestamp - b.timestamp)
+          .slice(0, syncedItems.length - 100)
+          .map(item => item.id!)
+          .filter(id => id !== undefined)
+
+        await db.syncQueue.bulkDelete(toDelete)
+      }
+    } catch (error) {
+      console.error('Failed to cleanup sync queue:', error)
     }
   }
 
   // Get pending sync count
   async getPendingCount(): Promise<number> {
-    return await db.syncQueue.where('synced').equals(0).count()
+    const db = getDB()
+    if (!db) return 0
+
+    try {
+      return await db.syncQueue.where('synced').equals(0).count()
+    } catch (error) {
+      console.error('Failed to get pending count:', error)
+      return 0
+    }
   }
 
   // Clear all local data (useful for logout)
   async clearAllData() {
-    await db.students.clear()
-    await db.teachers.clear()
-    await db.receipts.clear()
-    await db.subjects.clear()
-    await db.syncQueue.clear()
+    const db = getDB()
+    if (!db) return
+
+    try {
+      await db.students.clear()
+      await db.teachers.clear()
+      await db.receipts.clear()
+      await db.subjects.clear()
+      await db.syncQueue.clear()
+    } catch (error) {
+      console.error('Failed to clear data:', error)
+    }
   }
 }
 
