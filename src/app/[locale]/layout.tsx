@@ -1,6 +1,9 @@
+import InstallPWA from "@/components/installPWA";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Metadata, Viewport } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -8,10 +11,7 @@ import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../globals.css";
-import InstallPWA from "@/components/installPWA";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -87,10 +87,7 @@ export default async function RootLayout({
           <NextIntlClientProvider>
             <AuthProvider>
               {children}
-              
-              <p>
-pwa test
-              </p>
+                    {/* <PWADebug /> */}
               <InstallPWA />
               <Toaster />
             </AuthProvider>

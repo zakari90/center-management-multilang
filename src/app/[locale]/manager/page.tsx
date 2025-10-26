@@ -25,7 +25,8 @@ return (
 
         <ManagerRevenueChart />
 
-      <div className="flex flex-col lg:flex-row gap-6">
+
+<div className="grid gap-6 lg:grid-cols-2">
         <EnrollmentChart />
         <TopSubjects />
       </div>
