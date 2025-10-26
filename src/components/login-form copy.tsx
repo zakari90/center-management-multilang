@@ -224,7 +224,7 @@ export function LoginManager({
             <div className="space-y-1">
               <p className="text-sm font-medium">Manager Access Only</p>
               <p className="text-xs text-muted-foreground">
-                This login is for center managers. If you're an administrator, please use the admin login.
+                This login is for center managers. If you are an administrator, please use the admin login.
               </p>
             </div>
           </div>
