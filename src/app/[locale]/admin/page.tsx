@@ -25,9 +25,13 @@ export default function AdminDashboard() {
         <AdminRevenueChart/>
 
         <CentersOverview />
+      <div className="flex flex-col lg:flex-row gap-6">
+
         <EnrollmentChart />
-        <div className="flex  flex-col sm:flex-row sm:flex-wrap" >
         <TopSubjects />
+</div>
+      <div className="flex flex-col lg:flex-row gap-6">
+
         <ManagersList />
         <SystemActivityLog />
         </div>
