@@ -409,17 +409,13 @@ export default function CreateTeacherForm() {
       }
     }
 
-    const activeSchedule = weeklySchedule
-      .filter((day) => day.isAvailable)
-      .map(({ day, startTime, endTime }) => 
-        // Convert each schedule item to a JSON string
-        JSON.stringify({ day, startTime, endTime })
-      )
+  const activeSchedule = weeklySchedule
+  .filter(day => day.isAvailable)
+  .map(({ day, startTime, endTime }) => ({ day, startTime, endTime }));
 
     const payload = {
       ...formData,
-      // Send as array of JSON strings (each item stringified)
-      weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
+            weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
       subjects: validSubjects.map((ts) => ({
         subjectId: ts.subjectId,
         percentage: ts.compensationType === "percentage" ? ts.percentage : null,
