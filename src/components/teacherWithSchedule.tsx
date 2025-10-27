@@ -451,6 +451,9 @@ console.log("--------------------------------------------");
 console.log(teachersRes, schedulesRes);
 
       const teachersWithSchedules: TeacherWithSchedule[] = teachersData.map((teacher) => {
+      console.log("-----------------------2-");
+      console.log(teacher)
+      
         const teacherSchedules = schedulesData.filter(
           (s) => s.teacherId === teacher.id
         )

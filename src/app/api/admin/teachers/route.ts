@@ -38,6 +38,7 @@ export async function GET() {
         createdAt: 'desc'
       }
     })
+    
     console.log(teachers);
     
 
@@ -56,6 +57,7 @@ export async function GET() {
         receipts: teacher._count.receipts,
       }
     }))
+console.log(transformedTeachers);
 
     return NextResponse.json(transformedTeachers)
   } catch (error) {

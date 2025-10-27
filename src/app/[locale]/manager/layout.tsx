@@ -54,6 +54,11 @@ export default async function ManagerLayout({ children, params }: DashboardLayou
       url: "/manager/receipts",
       icon: "/receipt.svg",
     },
+    {
+      title: t("schedule"),
+      url: "/manager/schedule",
+      icon: "/calendar.svg",
+    }
   ];
 
   return (
