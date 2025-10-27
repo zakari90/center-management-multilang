@@ -1,39 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/api/admin/delete-all/route.ts
-
-import { NextResponse } from "next/server";
-import db from "@/lib/db";
-import { getSession } from "@/lib/authentication";
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+import { getSession } from '@/lib/authentication';
 
 export async function POST() {
   const session:any = await getSession();
-  if (!session?.user || session.user.role !== 'ADMIN') {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!session?.user || session.user.role !== 'ADMIN')
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   try {
-    // 1. Delete JOIN/DEPENDENCY tables first (relations with required foreign keys)
-    await db.studentSubject.deleteMany({});    // Student ↔ Subject relation
-    await db.teacherSubject.deleteMany({});    // Teacher ↔ Subject relation
+    // Delete join tables first
+    await db.studentSubject.deleteMany({});
+    await db.teacherSubject.deleteMany({});
 
-    // 2. Delete Schedules (if schedules reference teacher/student in required way)
-    await db.schedule.deleteMany({});          
+    // Delete schedules first (depends on teacher, subject, manager, center)
+    await db.schedule.deleteMany({});
 
-    // 3. Delete Receipts (if referencing teacher or student)
-    await db.receipt.deleteMany({});          
+    // Delete receipts (depends on teacher, student, manager)
+    await db.receipt.deleteMany({});
 
-    // 4. Delete dependent main tables last
+    // Delete main tables
     await db.student.deleteMany({});
     await db.teacher.deleteMany({});
     await db.subject.deleteMany({});
-    
-    // 5. Any other tables (logs, notifications, etc.)
-    // await db.notification.deleteMany({});
-    // await db.auditLog.deleteMany({});
 
-    return NextResponse.json({ success: true, message: "All data deleted successfully." });
+    // Delete centers (depends on admin)
+    await db.center.deleteMany({});
+
+    // Optionally delete users except current admin
+    await db.user.deleteMany({
+      where: {
+        id: { not: session.user.id }
+      }
+    });
+
+    return NextResponse.json({ success: true, message: 'All data deleted.' });
   } catch (error) {
-    console.error("Admin Delete All Error:", error);
-    return NextResponse.json({ error: "Failed to delete all data." }, { status: 500 });
+    console.error('Failed to delete all data:', error);
+    return NextResponse.json({ error: 'Failed to delete all data.' }, { status: 500 });
   }
 }
