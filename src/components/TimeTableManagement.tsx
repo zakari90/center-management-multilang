@@ -106,6 +106,8 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       setTeachers(teachersRes.data)
       setSubjects(subjectsRes.data)
       setSchedule(scheduleRes.data)
+console.log("**************************************************" );
+console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
 
       if (centerRes?.data?.classrooms?.length) {
         setRooms(centerRes.data.classrooms)

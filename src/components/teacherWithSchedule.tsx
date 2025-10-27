@@ -447,6 +447,8 @@ export default function TeacherScheduleView() {
       ])
       const teachersData: Teacher[] = teachersRes.data
       const schedulesData: Schedule[] = schedulesRes.data
+console.log("--------------------------------------------");
+console.log(teachersRes, schedulesRes);
 
       const teachersWithSchedules: TeacherWithSchedule[] = teachersData.map((teacher) => {
         const teacherSchedules = schedulesData.filter(
