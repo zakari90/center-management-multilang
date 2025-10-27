@@ -193,7 +193,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
