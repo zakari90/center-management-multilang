@@ -1,4 +1,14 @@
-{  "InstallPWA": {
+{ "deleteALL": {
+  "allDataDeletedSuccessfully": "تم الحذف",
+  "failedToDeleteData": "فشل الحذف",
+  "areYouSureDeleteAllData": "هل تريد حقًا",
+  "deleteAllData": "حذف كل البيانات",
+  "cannotBeUndone": "هذا لا يمكن التراجع عنه",
+  "yesDeleteEverything": "نعم، احذف",
+  "cancel": "إلغاء"
+}
+  
+,"InstallPWA": {
     "installMessage": "تثبيت التطبيق للحصول على تجربة أفضل",
     "iosInstructions": "لتثبيت التطبيق: اضغط على زر المشاركة ثم 'إضافة إلى الشاشة الرئيسية'",
     "install": "تثبيت",

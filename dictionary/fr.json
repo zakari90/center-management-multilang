@@ -1,4 +1,15 @@
-{  "InstallPWA": {
+{ 
+"deleteALL": {
+  "allDataDeletedSuccessfully": "Supprimé",
+  "failedToDeleteData": "Échec de la suppression",
+  "areYouSureDeleteAllData": "Voulez-vous vraiment",
+  "deleteAllData": "Supprimer toutes les données",
+  "cannotBeUndone": "Ceci est irréversible",
+  "yesDeleteEverything": "Oui, supprimer",
+  "cancel": "Annuler"
+}
+,  
+"InstallPWA": {
     "installMessage": "Installer l'application pour une meilleure expérience",
     "iosInstructions": "Pour installer: appuyez sur Partager puis 'Ajouter à l'écran d'accueil'",
     "install": "Installer",

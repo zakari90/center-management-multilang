@@ -195,7 +195,7 @@ console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
   }
 
   return (
-    <div className="space-y-6 md:w-3xl lg:w-4xl xl:w-5xl">
+    <div className="space-y-6 ">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

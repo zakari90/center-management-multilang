@@ -1,4 +1,15 @@
-{  "InstallPWA": {
+{ "deleteALL": {
+  "allDataDeletedSuccessfully": "All data deleted successfully!",
+  "failedToDeleteData": "Failed to delete data!",
+  "areYouSureDeleteAllData": "Are you sure you want to",
+  "deleteAllData": "delete ALL data",
+  "cannotBeUndone": "This cannot be undone.",
+  "yesDeleteEverything": "Yes, delete everything",
+  "cancel": "Cancel"
+}
+
+, 
+  "InstallPWA": {
     "installMessage": "Install app for a better experience",
     "iosInstructions": "To install: tap Share button then 'Add to Home Screen'",
     "install": "Install",

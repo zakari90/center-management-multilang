@@ -1,6 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash } from "lucide-react";
@@ -8,15 +11,18 @@ import { Trash } from "lucide-react";
 export function DeleteAllDataButton() {
   const [confirm, setConfirm] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const t = useTranslations("deleteALL");
+  const router = useRouter();
 
   const handleDelete = async () => {
     setStatus(null);
     try {
       await axios.post("/api/admin/delete-all");
-      setStatus("All data deleted successfully!");
+      setStatus(t("allDataDeletedSuccessfully"));
+      setConfirm(false);
+      router.refresh();
     } catch {
-      setStatus("Failed to delete data!");
-    } finally {
+      setStatus(t("failedToDeleteData"));
       setConfirm(false);
     }
   };
@@ -30,19 +36,21 @@ export function DeleteAllDataButton() {
       )}
       {confirm ? (
         <div>
-          <p className="mb-2">Are you sure you want to <strong>delete ALL data</strong>? This cannot be undone.</p>
+          <p className="mb-2">
+            {t("areYouSureDeleteAllData")} <strong>{t("deleteAllData")}</strong>? {t("cannotBeUndone")}
+          </p>
           <Button onClick={handleDelete} variant="destructive" className="mr-2">
             <Trash className="inline w-4 h-4 mr-1" />
-            Yes, delete everything
+            {t("yesDeleteEverything")}
           </Button>
           <Button onClick={() => setConfirm(false)} variant="outline">
-            Cancel
+            {t("cancel")}
           </Button>
         </div>
       ) : (
         <Button onClick={() => setConfirm(true)} variant="destructive">
           <Trash className="inline w-4 h-4 mr-1" />
-          Delete All Data
+          {t("deleteAllData")}
         </Button>
       )}
     </div>
