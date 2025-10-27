@@ -61,7 +61,7 @@ model Teacher {
   email          String?  @unique
   phone          String?
   address        String?
-  weeklySchedule String[]
+  weeklySchedule Json?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
