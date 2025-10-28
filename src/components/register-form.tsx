@@ -118,8 +118,8 @@ const user: LocalUser = {
   syncStatus: "pending"
 };
 await localDb.users.add(user);
-      // Optionally add to syncQueue for later sync!
-      setState({
+
+setState({
         success: true,
         data: { user, message: t("offlineSuccessMessage") }
       })
