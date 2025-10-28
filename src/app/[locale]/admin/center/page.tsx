@@ -2,7 +2,7 @@
 
 import type { Center } from "@/components/centerPresentation";
 import CenterPresentation from "@/components/centerPresentation"; // Remove "copy" if not needed
-import { NewCenterForm } from "@/components/newCenterForm copy"; // Remove "copy" if not needed
+import { NewCenterForm } from "@/components/newCenterForm";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";

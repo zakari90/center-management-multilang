@@ -13,29 +13,29 @@ export default function AdminDashboard() {
   const t = useTranslations('Dashboard')
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-3 sm:p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {/* Stats Overview */}
       <AdminStatsCards />
-        <AdminQuickActions />
-
-        <AdminRevenueChart/>
-
-        <CentersOverview />
-        <div className="grid gap-6 md:grid-cols-2">
-
+      <AdminQuickActions />
+      <AdminRevenueChart/>
+      <CentersOverview />
+      
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <EnrollmentChart />
         <TopSubjects />
-</div>
-<div className="grid gap-6 md:grid-cols-2">
+      </div>
+      
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <ManagersList />
         <SystemActivityLog />
-        </div>
-<DeleteAllDataButton/>
+      </div>
+      
+      <DeleteAllDataButton/>
     </div>
   )
 }

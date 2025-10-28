@@ -72,7 +72,7 @@ import {
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 interface UserData {
@@ -165,11 +165,7 @@ export default function AllUsersTable() {
 
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    fetchAllData()
-  }, [])
-
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     setIsLoading(true)
     try {
       const [usersRes, teachersRes, studentsRes] = await Promise.all([
@@ -187,7 +183,11 @@ export default function AllUsersTable() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    fetchAllData()
+  }, [fetchAllData])
 
   const togglePasswordVisibility = (id: string) => {
     setVisiblePasswords((prev) => ({
@@ -343,7 +343,7 @@ export default function AllUsersTable() {
       )}
       
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm  hidden font-medium">{t('systemUsers')}</CardTitle>
@@ -449,7 +449,7 @@ export default function AllUsersTable() {
                   <p className="mt-4 text-muted-foreground">{t('noUsersFound')}</p>
                 </div>
               ) : (
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -585,7 +585,7 @@ export default function AllUsersTable() {
                   <p className="mt-4 text-muted-foreground">{t('noTeachersFound')}</p>
                 </div>
               ) : (
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -694,7 +694,7 @@ export default function AllUsersTable() {
                   <p className="mt-4 text-muted-foreground">{t('noStudentsFound')}</p>
                 </div>
               ) : (
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>

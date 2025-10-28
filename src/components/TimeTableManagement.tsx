@@ -216,7 +216,7 @@ console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
           <CardTitle>{t('viewOptions')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 min-w-[150px]">
               <Label>{t('viewMode')}</Label>
               <Select
