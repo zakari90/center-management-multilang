@@ -1,34 +1,46 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
+  Card, CardContent, CardHeader, CardTitle
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
-import { loginAdmin } from "@/lib/actions"
+import { loginAdmin } from "@/lib/actions"; // Online/server action
+import { localDb } from "@/lib/dexie"; // Dexie instance
 import { cn } from "@/lib/utils"
+import bcrypt from "bcryptjs"; // NEW: For hashing
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Home, Loader2, Lock, Mail } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useActionState, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [state, action, isPending] = useActionState(loginAdmin, undefined)
+  const [state, setState] = useState<any>({})
+  const [isPending, setIsPending] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
   const { login } = useAuth()
   const router = useRouter()
   const t = useTranslations("login")
-  
-  const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false)
+    const handleOffline = () => setIsOffline(true)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
 
   useEffect(() => {
     if (state?.success && state?.data?.user) {
@@ -39,6 +51,51 @@ export function LoginForm({
     }
   }, [state, login, router])
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setState({})
+    setIsPending(true)
+    const formData = new FormData(e.currentTarget)
+    const values = Object.fromEntries(formData.entries())
+
+    if (!isOffline) {
+      try {
+        const result = await loginAdmin(undefined, formData)
+        if (result?.success && result?.data?.user) {
+          setState({ success: true, data: result.data })
+        } else {
+          setState({ error: result?.error || { message: t("errors.loginFailed") } })
+        }
+      } catch (err) {
+              console.log("Offline login error:", err)
+
+        setState({ error: { message: t("errors.unexpectedError") } })
+      }
+      setIsPending(false)
+      return
+    }
+
+    // OFFLINE login (search Dexie, compare hash)
+    try {
+      const user = await localDb.users
+        .where("email").equals(values.email as string)
+        .first()
+      // Check password hash
+      if (user && bcrypt.compareSync(values.password as string, user.password)) {
+        setState({
+          success: true,
+          data: { user, message: t("offlineSuccessMessage") }
+        })
+      } else {
+        setState({ error: { message: t("errors.offlineLoginIncorrect") } })
+      }
+    } catch (err) {
+      console.log("Offline login error:", err)
+      setState({ error: { message: t("errors.offlineLoginError") } })
+    }
+    setIsPending(false)
+  }
+
   return (
     <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
       <Card className="border-0 shadow-xl w-full max-w-md">
@@ -47,20 +104,16 @@ export function LoginForm({
             {t("title")}
           </CardTitle>
         </CardHeader>
-
         <CardContent className="px-4 sm:px-6 pb-6">
-          <form action={action} className="space-y-4 sm:space-y-5">
-            {/* Success Message */}
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {state?.success && (
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
-                  Login successful! Redirecting...
+                  {isOffline ? t("offlineSuccessMessage") : t("successMessage")}
                 </AlertDescription>
               </Alert>
             )}
-
-            {/* General Error Message */}
             {state?.error?.message && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -69,8 +122,6 @@ export function LoginForm({
                 </AlertDescription>
               </Alert>
             )}
-
-            {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
                 {t("email.label")}
@@ -100,8 +151,6 @@ export function LoginForm({
                 </p>
               )}
             </div>
-
-            {/* Password Field */}
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
@@ -112,7 +161,7 @@ export function LoginForm({
                   className="text-xs text-primary hover:underline underline-offset-4 whitespace-nowrap"
                   tabIndex={-1}
                 >
-                  Forgot password?
+                  {t("forgotPassword")}
                 </Link>
               </div>
               <div className="relative">
@@ -137,11 +186,7 @@ export function LoginForm({
                   disabled={isPending}
                   tabIndex={-1}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {state?.error?.password && (
@@ -153,8 +198,6 @@ export function LoginForm({
                 </p>
               )}
             </div>
-
-            {/* Submit Button */}
             <Button
               type="submit"
               className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium mt-6"
@@ -163,14 +206,17 @@ export function LoginForm({
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
-                  {t("submitting")}
+                  {isOffline ? t("submittingOffline") : t("submitting")}
                 </>
               ) : (
                 t("submit")
               )}
             </Button>
-
-            {/* Terms */}
+            {isOffline && (
+              <p className="text-xs text-yellow-600 text-center mt-3">
+                {t("offlineLoginInfo")} {/* e.g. "You're offline. Logging in using local data." */}
+              </p>
+            )}
             <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
               {t("terms")}{" "}
               <Link href="/terms" className="text-primary hover:underline underline-offset-4 font-medium">
@@ -181,8 +227,6 @@ export function LoginForm({
                 {t("privacyPolicy")}
               </Link>
             </p>
-
-            {/* Divider */}
             <div className="relative my-4 sm:my-6">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-300" />
@@ -193,8 +237,6 @@ export function LoginForm({
                 </span>
               </div>
             </div>
-
-            {/* Sign Up & Home Links */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Link
                 href="/register"
@@ -209,7 +251,7 @@ export function LoginForm({
                 className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 <Home className="h-4 w-4" />
-                <span className="hidden sm:inline">Home</span>
+                <span className="hidden sm:inline">{t("home")}</span>
               </Link>
             </div>
           </form>

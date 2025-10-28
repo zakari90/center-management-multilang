@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -7,34 +8,45 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
 import { register } from "@/lib/actions"
+import { localDb, LocalUser } from "@/lib/dexie"
 import { cn } from "@/lib/utils"
+import bcrypt from "bcryptjs"; // Secure hashing
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useActionState, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
-export function RegisterForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const t = useTranslations('register')
-  const [state, action, isPending] = useActionState(register, undefined)
+export type Role = "ADMIN" | "MANAGER"
+
+export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
+  const t = useTranslations("register")
   const { login: setUser } = useAuth()
   const router = useRouter()
-  
+  const [state, setState] = useState<any>({})
+  const [isPending, setIsPending] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState(0)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
   useEffect(() => {
-    if (state?.success && state?.data?.user) {
-      setUser(state.data.user)
-      setTimeout(() => {
-        router.push("/admin")
-      }, 10)
+    const handleOnline = () => setIsOffline(false)
+    const handleOffline = () => setIsOffline(true)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
     }
-  }, [state, setUser, router])
+  }, [])
+
+  useEffect(() => {
+    if (state?.success && state?.data?.user && !isOffline) {
+      setUser(state.data.user)
+      setTimeout(() => { router.push("/admin") }, 10)
+    }
+  }, [state, setUser, router, isOffline])
 
   const calculatePasswordStrength = (password: string) => {
     let strength = 0
@@ -55,10 +67,67 @@ export function RegisterForm({
 
   const getStrengthText = (strength: number) => {
     if (strength === 0) return ""
-    if (strength === 1) return "Weak"
-    if (strength === 2) return "Fair"
-    if (strength === 3) return "Good"
-    return "Strong"
+    if (strength === 1) return t("passwordStrength.weak")
+    if (strength === 2) return t("passwordStrength.fair")
+    if (strength === 3) return t("passwordStrength.good")
+    return t("passwordStrength.strong")
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setState({})
+    setIsPending(true)
+    const formData = new FormData(e.currentTarget)
+    const values = Object.fromEntries(formData.entries())
+
+    // Online registration
+    if (!isOffline) {
+      try {
+        const result = await register(undefined, formData)
+        if (result?.success && result?.data?.user) {
+          setState({ success: true, data: result.data })
+          setUser(result.data.user)
+          setTimeout(() => router.push("/admin"), 10)
+        } else {
+          setState({ error: result?.error || { message: t("errors.registrationFailed") } })
+        }
+      } catch (err) {
+              console.log("Offline registration error:", err)
+
+        setState({ error: { message: t("errors.unexpectedError") } })
+      }
+      setIsPending(false)
+      return
+    }
+
+    // OFFLINE registration – hash password and save in Dexie
+    try {
+      if (values.password !== values.confirmPassword) {
+        setState({ error: { message: t("errors.passwordMismatch") } })
+        setIsPending(false)
+        return
+      }
+      const hash = bcrypt.hashSync(values.password as string, 10)
+const user: LocalUser = {
+  email: values.email as string,
+  name: values.username as string,
+  password: hash,
+  role: (values.role as Role) || "ADMIN",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  syncStatus: "pending"
+};
+await localDb.users.add(user);
+      // Optionally add to syncQueue for later sync!
+      setState({
+        success: true,
+        data: { user, message: t("offlineSuccessMessage") }
+      })
+    } catch (err) {
+      console.log("Offline registration error:", err)
+      setState({ error: { message: t("errors.offlineRegistrationFailed") } })
+    }
+    setIsPending(false)
   }
 
   return (
@@ -66,24 +135,19 @@ export function RegisterForm({
       <Card className="border-0 shadow-xl w-full max-w-md">
         <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
-            {t('title')}
+            {t("title")}
           </CardTitle>
         </CardHeader>
-
         <CardContent className="px-4 sm:px-6 pb-6">
-          <form action={action} className="space-y-4 sm:space-y-5">
-            {/* Success Message */}
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5" autoComplete="off">
             {state?.success && (
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
-                  {t('successMessage')}
-                  Account created successfully! Redirecting...
+                  {isOffline ? t("offlineSuccessMessage") : t("successMessage")}
                 </AlertDescription>
               </Alert>
             )}
-
-            {/* General Error Message */}
             {state?.error?.message && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -92,11 +156,10 @@ export function RegisterForm({
                 </AlertDescription>
               </Alert>
             )}
-
             {/* Username Field */}
             <div className="space-y-2">
               <Label htmlFor="username" className="text-xs sm:text-sm font-medium">
-                {t('username.label')}
+                {t("username.label")}
               </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -104,11 +167,8 @@ export function RegisterForm({
                   id="username"
                   name="username"
                   type="text"
-                  placeholder={t('username.placeholder')}
-                  className={cn(
-                    "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
-                    state?.error?.username && "border-red-500 focus-visible:ring-red-500"
-                  )}
+                  placeholder={t("username.placeholder")}
+                  className={cn("pl-10 pr-3 h-11 sm:h-12 w-full text-sm", state?.error?.username && "border-red-500 focus-visible:ring-red-500")}
                   required
                   disabled={isPending}
                   autoComplete="username"
@@ -121,11 +181,10 @@ export function RegisterForm({
                 </p>
               )}
             </div>
-
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs sm:text-sm font-medium">
-                {t('email.label')}
+                {t("email.label")}
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -133,11 +192,8 @@ export function RegisterForm({
                   id="email"
                   name="email"
                   type="email"
-                  placeholder={t('email.placeholder')}
-                  className={cn(
-                    "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
-                    state?.error?.email && "border-red-500 focus-visible:ring-red-500"
-                  )}
+                  placeholder={t("email.placeholder")}
+                  className={cn("pl-10 pr-3 h-11 sm:h-12 w-full text-sm", state?.error?.email && "border-red-500 focus-visible:ring-red-500")}
                   required
                   disabled={isPending}
                   autoComplete="email"
@@ -150,11 +206,10 @@ export function RegisterForm({
                 </p>
               )}
             </div>
-
             {/* Password Field */}
             <div className="space-y-2">
               <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
-                {t('password.label')}
+                {t("password.label")}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -162,10 +217,7 @@ export function RegisterForm({
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  className={cn(
-                    "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
-                    state?.error?.password && "border-red-500 focus-visible:ring-red-500"
-                  )}
+                  className={cn("pl-10 pr-10 h-11 sm:h-12 w-full text-sm", state?.error?.password && "border-red-500 focus-visible:ring-red-500")}
                   required
                   disabled={isPending}
                   autoComplete="new-password"
@@ -178,15 +230,9 @@ export function RegisterForm({
                   disabled={isPending}
                   tabIndex={-1}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              
-              {/* Password Strength Indicator */}
               {passwordStrength > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex gap-1">
@@ -207,11 +253,10 @@ export function RegisterForm({
                     passwordStrength === 3 && "text-yellow-600",
                     passwordStrength === 4 && "text-green-600"
                   )}>
-                    {getStrengthText(passwordStrength)} password
+                    {getStrengthText(passwordStrength)} {t("passwordStrength.label")}
                   </p>
                 </div>
               )}
-
               {state?.error?.password && (
                 <p className="text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3 flex-shrink-0" />
@@ -219,11 +264,10 @@ export function RegisterForm({
                 </p>
               )}
             </div>
-
             {/* Confirm Password Field */}
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-xs sm:text-sm font-medium">
-                {t('confirmPassword.label')}
+                {t("confirmPassword.label")}
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -231,10 +275,7 @@ export function RegisterForm({
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  className={cn(
-                    "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
-                    state?.error?.confirmPassword && "border-red-500 focus-visible:ring-red-500"
-                  )}
+                  className={cn("pl-10 pr-10 h-11 sm:h-12 w-full text-sm", state?.error?.confirmPassword && "border-red-500 focus-visible:ring-red-500")}
                   required
                   disabled={isPending}
                   autoComplete="new-password"
@@ -246,11 +287,7 @@ export function RegisterForm({
                   disabled={isPending}
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {state?.error?.confirmPassword && (
@@ -260,54 +297,49 @@ export function RegisterForm({
                 </p>
               )}
             </div>
-
-            {/* Submit Button */}
-            <Button 
-              type="submit" 
-              className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium mt-6" 
+            <Button
+              type="submit"
+              className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium mt-6"
               disabled={isPending}
             >
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
-                  {t('submitting')}
+                  {isOffline ? t("submittingOffline") : t("submitting")}
                 </>
-              ) : (
-                t('submit')
-              )}
+              ) : t("submit")}
             </Button>
-
-            {/* Terms */}
+            {isOffline && (
+              <p className="text-xs text-yellow-600 text-center mt-3">
+                {t("offlineRegistrationInfo")}
+              </p>
+            )}
             <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
-              {t('terms')}{" "}
+              {t("terms")}{" "}
               <Link href="/terms" className="text-primary hover:underline underline-offset-4 font-medium">
-                {t('termsOfService')}
+                {t("termsOfService")}
               </Link>{" "}
-              {t('and')}{" "}
+              {t("and")}{" "}
               <Link href="/privacy" className="text-primary hover:underline underline-offset-4 font-medium">
-                {t('privacyPolicy')}
+                {t("privacyPolicy")}
               </Link>
             </p>
-
-            {/* Divider */}
             <div className="relative my-4 sm:my-6">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground text-xs">
-                  {t('alreadyHaveAccount')}
+                  {t("alreadyHaveAccount")}
                 </span>
               </div>
             </div>
-
-            {/* Sign In Link */}
             <div className="text-center">
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="text-sm sm:text-base font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1 transition-colors"
               >
-                {t('login')}
+                {t("login")}
                 <span aria-hidden="true" className="text-lg">→</span>
               </Link>
             </div>

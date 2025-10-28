@@ -12,6 +12,7 @@ import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
+import { SyncProvider } from "@/components/sync-provider";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -30,6 +31,7 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
+  
   if (!params) {
     notFound();
   }
@@ -86,7 +88,9 @@ export default async function RootLayout({
         >
           <NextIntlClientProvider>
             <AuthProvider>
+              <SyncProvider>
               {children}
+              </SyncProvider>
                     {/* <PWADebug /> */}
               <InstallPWA />
               <Toaster />

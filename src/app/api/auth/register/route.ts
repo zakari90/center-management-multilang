@@ -1,3 +1,4 @@
+// src/app/api/auth/register/route.ts
 import db from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";

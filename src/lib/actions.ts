@@ -2,10 +2,10 @@
 
 import { BASE_URL } from "@/types/types"
 import axios from "axios"
+import { getTranslations } from "next-intl/server"; // Import for server-side translations
 import { cookies } from "next/headers"
 import { z } from "zod"
 import { encrypt } from "./authentication"
-import { getTranslations } from "next-intl/server" // Import for server-side translations
 
 // Zod schemas with dynamic translations
 const createRegistrationSchema = (t: Awaited<ReturnType<typeof getTranslations>>) =>
@@ -90,6 +90,8 @@ export async function register(state: unknown, formData: FormData) {
     }
   }
 }
+
+
 
 // Create Manager Action
 export async function createManager(state: unknown, formData: FormData) {

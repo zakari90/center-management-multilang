@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { db, CachedStudent } from '@/lib/db-client'
+import { db, CachedStudent } from '@/lib/dexie'
 import { syncService } from '@/lib/sync-service'
 import { useLiveQuery } from 'dexie-react-hooks'
 
