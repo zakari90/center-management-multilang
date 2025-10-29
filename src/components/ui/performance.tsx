@@ -2,7 +2,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import React, { ReactNode, Suspense, lazy, ComponentType, useEffect, useState, useMemo, useRef } from 'react'
+import React, { ReactNode, Suspense, lazy, ComponentType, useEffect, useState, useMemo, useRef, ErrorInfo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
 import { Button } from './button'
 import { Badge } from './badge'
@@ -14,9 +14,17 @@ import { ErrorBoundary } from './error-handling'
 interface LazyWrapperProps {
   children: ReactNode
   fallback?: ReactNode
-  errorFallback?: ReactNode
+  errorFallback?: ComponentType<ErrorFallbackProps>
   delay?: number
   className?: string
+}
+
+interface ErrorFallbackProps {
+  error: Error
+  errorInfo: ErrorInfo
+  errorId: string
+  resetError: () => void
+  retry: () => void
 }
 
 export function LazyWrapper({
