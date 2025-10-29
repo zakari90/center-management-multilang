@@ -1,4 +1,22 @@
-{ "deleteALL": {
+{ 
+  "offline": {
+    "status-disconnected": "أنت غير متصل بالإنترنت",
+    "status-reconnected": "تم استعادة الاتصال! جارٍ إعادة التحميل...",
+    "status-checking": "جارٍ التحقق من الاتصال...",
+    "offlineInfoSafe": "بياناتك آمنة ومحفوظة محلياً.",
+    "offlineInfoSync": "سيتم مزامنة التغييرات تلقائياً عند عودة الاتصال بالإنترنت.",
+    "offlineInfoContinue": "يمكنك الاستمرار في العمل دون اتصال بالإنترنت.",
+    "offlineActionRetry": "إعادة المحاولة",
+    "offlineTitle": "أنت غير متصل بالإنترنت",
+    "offlineMessageShort": "يبدو أنك فقدت الاتصال بالإنترنت.",
+    "offlineMessageLong": "يرجى التحقق من اتصالك وحاول مرة أخرى.",
+    "offlineSuccessMessage": "تم تسجيل الدخول باستخدام البيانات المخزنة محلياً.",
+    "offlineLoginInfo": "أنت غير متصل. يتم تسجيل الدخول باستخدام المعلومات المخزنة محلياً.",
+    "offlineLoginIncorrect": "البريد الإلكتروني أو كلمة المرور غير صحيحة لتسجيل الدخول بدون اتصال.",
+    "offlineLoginError": "حدث خطأ أثناء تسجيل الدخول بدون اتصال."
+  }
+,
+  "deleteALL": {
   "allDataDeletedSuccessfully": "تم الحذف",
   "failedToDeleteData": "فشل الحذف",
   "areYouSureDeleteAllData": "هل تريد حقًا",
@@ -14,6 +32,21 @@
     "install": "تثبيت",
     "instructions": "تعليمات",
     "close": "إغلاق"
+  },
+  "PWAUpdate": {
+    "installTitle": "تثبيت التطبيق",
+    "installDescription": "قم بتثبيت هذا التطبيق للحصول على تجربة أفضل والوصول دون اتصال",
+    "install": "تثبيت",
+    "installing": "جاري التثبيت...",
+    "installStarted": "تم بدء التثبيت",
+    "installError": "فشل التثبيت",
+    "appInstalled": "تم تثبيت التطبيق بنجاح!",
+    "updateTitle": "تحديث متاح",
+    "updateDescription": "إصدار جديد من التطبيق متاح مع تحسينات وإصلاحات للأخطاء",
+    "update": "تحديث",
+    "updating": "جاري التحديث...",
+    "updateAvailable": "تحديث متاح",
+    "updateError": "فشل التحديث"
   },
   "auth": {
     "validation": {

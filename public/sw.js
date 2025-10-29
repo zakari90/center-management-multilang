@@ -1,1 +1,367 @@
-if(!self.define){let e,c={};const s=(s,a)=>(s=new URL(s+".js",a).href,c[s]||new Promise(c=>{if("document"in self){const e=document.createElement("script");e.src=s,e.onload=c,document.head.appendChild(e)}else e=s,importScripts(s),c()}).then(()=>{let e=c[s];if(!e)throw new Error(`Module ${s} didn’t register its module`);return e}));self.define=(a,t)=>{const i=e||("document"in self?document.currentScript.src:"")||location.href;if(c[i])return;let n={};const r=e=>s(e,i),u={module:{uri:i},exports:n,require:r};c[i]=Promise.all(a.map(e=>u[e]||r(e))).then(e=>(t(...e),n))}}define(["./workbox-f1770938"],function(e){"use strict";importScripts(),self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"/_next/static/chunks/1071-fbab4ca67eb54e9a.js",revision:"fbab4ca67eb54e9a"},{url:"/_next/static/chunks/1242-e6fc6563348f81a2.js",revision:"e6fc6563348f81a2"},{url:"/_next/static/chunks/1486-d0a6f759140ccd2d.js",revision:"d0a6f759140ccd2d"},{url:"/_next/static/chunks/1605-ba1abc71a4165595.js",revision:"ba1abc71a4165595"},{url:"/_next/static/chunks/164f4fb6-a2b3533553851703.js",revision:"a2b3533553851703"},{url:"/_next/static/chunks/2121.664a5c4828372211.js",revision:"664a5c4828372211"},{url:"/_next/static/chunks/2609-bf6832b88f44144a.js",revision:"bf6832b88f44144a"},{url:"/_next/static/chunks/2779-845ca078a6b7073a.js",revision:"845ca078a6b7073a"},{url:"/_next/static/chunks/2797-68b9d7d63e8a1254.js",revision:"68b9d7d63e8a1254"},{url:"/_next/static/chunks/2f0b94e8-5f4d2efd9161c0b9.js",revision:"5f4d2efd9161c0b9"},{url:"/_next/static/chunks/3252-6249168dc8a8778b.js",revision:"6249168dc8a8778b"},{url:"/_next/static/chunks/3455-3045c6c19bc43180.js",revision:"3045c6c19bc43180"},{url:"/_next/static/chunks/3464-7842d2aeb78bbb3c.js",revision:"7842d2aeb78bbb3c"},{url:"/_next/static/chunks/3942-0789ed180b673d91.js",revision:"0789ed180b673d91"},{url:"/_next/static/chunks/424-75f7a0b0a20de544.js",revision:"75f7a0b0a20de544"},{url:"/_next/static/chunks/4578-537e57ac7c6bace7.js",revision:"537e57ac7c6bace7"},{url:"/_next/static/chunks/472.2c08b965bd9148e2.js",revision:"2c08b965bd9148e2"},{url:"/_next/static/chunks/4bd1b696-cc729d47eba2cee4.js",revision:"cc729d47eba2cee4"},{url:"/_next/static/chunks/5152-4628f338c231c3d6.js",revision:"4628f338c231c3d6"},{url:"/_next/static/chunks/55-646f469553d73caa.js",revision:"646f469553d73caa"},{url:"/_next/static/chunks/5516-096cfe734730a50c.js",revision:"096cfe734730a50c"},{url:"/_next/static/chunks/5881-8e910b81191b284d.js",revision:"8e910b81191b284d"},{url:"/_next/static/chunks/6364-dc089345ff013fa6.js",revision:"dc089345ff013fa6"},{url:"/_next/static/chunks/6838-6ec8f32f5bc661a8.js",revision:"6ec8f32f5bc661a8"},{url:"/_next/static/chunks/6874-414075bb21e16c80.js",revision:"414075bb21e16c80"},{url:"/_next/static/chunks/6894-8e1c1ae69f301782.js",revision:"8e1c1ae69f301782"},{url:"/_next/static/chunks/6edf0643-1c8d9bdf47f66931.js",revision:"1c8d9bdf47f66931"},{url:"/_next/static/chunks/7494-d5cb80343cfffd9a.js",revision:"d5cb80343cfffd9a"},{url:"/_next/static/chunks/7757-35a5a754c91e22c0.js",revision:"35a5a754c91e22c0"},{url:"/_next/static/chunks/8062-7fababa02d6bdbed.js",revision:"7fababa02d6bdbed"},{url:"/_next/static/chunks/8197-6f5158136ca40bd7.js",revision:"6f5158136ca40bd7"},{url:"/_next/static/chunks/822.206ac46776cabab8.js",revision:"206ac46776cabab8"},{url:"/_next/static/chunks/8833-f4b1c047f2f6730a.js",revision:"f4b1c047f2f6730a"},{url:"/_next/static/chunks/8960-07361fc1415b6822.js",revision:"07361fc1415b6822"},{url:"/_next/static/chunks/9341.8181fde8cccea77c.js",revision:"8181fde8cccea77c"},{url:"/_next/static/chunks/ad2866b8-d24ec0a5e084098f.js",revision:"d24ec0a5e084098f"},{url:"/_next/static/chunks/app/%5Blocale%5D/%5B...rest%5D/page-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/%5Blocale%5D/(auth)/layout-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/%5Blocale%5D/(auth)/login/page-8d4f58a46f809e8b.js",revision:"8d4f58a46f809e8b"},{url:"/_next/static/chunks/app/%5Blocale%5D/(auth)/loginmanager/page-64831724a9cb7ff5.js",revision:"64831724a9cb7ff5"},{url:"/_next/static/chunks/app/%5Blocale%5D/(auth)/register/page-6bc15d8fbf4e21b8.js",revision:"6bc15d8fbf4e21b8"},{url:"/_next/static/chunks/app/%5Blocale%5D/admin/center/page-919c376c8c4b85a1.js",revision:"919c376c8c4b85a1"},{url:"/_next/static/chunks/app/%5Blocale%5D/admin/layout-421f69aaa028c33c.js",revision:"421f69aaa028c33c"},{url:"/_next/static/chunks/app/%5Blocale%5D/admin/page-6a4715eb4da0e42e.js",revision:"6a4715eb4da0e42e"},{url:"/_next/static/chunks/app/%5Blocale%5D/admin/receipts/page-5a1594d618a83028.js",revision:"5a1594d618a83028"},{url:"/_next/static/chunks/app/%5Blocale%5D/admin/schedule/page-d34c11b9e2098cc1.js",revision:"d34c11b9e2098cc1"},{url:"/_next/static/chunks/app/%5Blocale%5D/admin/users/page-1ba963663b4b199c.js",revision:"1ba963663b4b199c"},{url:"/_next/static/chunks/app/%5Blocale%5D/layout-2beb37c0596ca57c.js",revision:"2beb37c0596ca57c"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/layout-9c3bd03be76fa23e.js",revision:"9c3bd03be76fa23e"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/page-f07ddca78cbce39a.js",revision:"f07ddca78cbce39a"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/receipts/%5Bid%5D/page-0e188cd0e632417a.js",revision:"0e188cd0e632417a"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/receipts/create-teacher-payment/page-e7a91d45fe39a493.js",revision:"e7a91d45fe39a493"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/receipts/create/page-1d5d129a9ce71407.js",revision:"1d5d129a9ce71407"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/receipts/page-6b5e89ea07a90112.js",revision:"6b5e89ea07a90112"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/schedule/page-fd448e81a8def7c1.js",revision:"fd448e81a8def7c1"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/students/%5Bid%5D/card/page-ba9cb070c0c95309.js",revision:"ba9cb070c0c95309"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/students/%5Bid%5D/edit/page-f249999938c0395b.js",revision:"f249999938c0395b"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/students/%5Bid%5D/page-29ac72a024f07551.js",revision:"29ac72a024f07551"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/students/create/page-f518091f047c8689.js",revision:"f518091f047c8689"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/students/page-e50ebead405a1d57.js",revision:"e50ebead405a1d57"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/teachers/%5Bid%5D/edit/page-109d814f36a2e141.js",revision:"109d814f36a2e141"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/teachers/%5Bid%5D/page-0e9f2c944224103b.js",revision:"0e9f2c944224103b"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/teachers/create/page-fe3212ef3afd7bc8.js",revision:"fe3212ef3afd7bc8"},{url:"/_next/static/chunks/app/%5Blocale%5D/manager/teachers/page-cdc57ebce8c92d71.js",revision:"cdc57ebce8c92d71"},{url:"/_next/static/chunks/app/%5Blocale%5D/not-found-c54a66fb19dfc976.js",revision:"c54a66fb19dfc976"},{url:"/_next/static/chunks/app/%5Blocale%5D/page-20dacb8403b4b08b.js",revision:"20dacb8403b4b08b"},{url:"/_next/static/chunks/app/_not-found/page-2eaccb3cfd6d786d.js",revision:"2eaccb3cfd6d786d"},{url:"/_next/static/chunks/app/api/admin/centers/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/dashboard/activities/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/dashboard/performance/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/dashboard/revenue/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/dashboard/stats/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/delete-all/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/managers/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/schedule/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/schedule/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/students/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/students/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/teachers/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/teachers/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/users/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/users/%5Bid%5D/toggle-status/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/admin/users/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/auth/login/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/auth/logout/route-ad4cdff9cb304f93.js",revision:"ad4cdff9cb304f93"},{url:"/_next/static/chunks/app/api/auth/me/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/auth/register/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/center/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/dashboard/activities/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/dashboard/enrollments/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/dashboard/revenue/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/dashboard/stats/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/dashboard/top-subjects/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/dns-test/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/health/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/manager/login/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/manager/register/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/manager/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/%5Bid%5D/payment-calculation/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/stats/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/student-payment/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/student-receipts/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/receipts/teacher-payment/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/student-subjects/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/students/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/students/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/subjects/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/teachers/%5Bid%5D/payment-calculation/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/teachers/%5Bid%5D/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/api/teachers/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/app/error-33c18cb2e298d0f4.js",revision:"33c18cb2e298d0f4"},{url:"/_next/static/chunks/app/sitemap.xml/route-682e3b0ec222c745.js",revision:"682e3b0ec222c745"},{url:"/_next/static/chunks/bc98253f.ce50eee70995d8cd.js",revision:"ce50eee70995d8cd"},{url:"/_next/static/chunks/d0f5a89a-f5c19caf5aebacaa.js",revision:"f5c19caf5aebacaa"},{url:"/_next/static/chunks/framework-9eb88047b88e9f9c.js",revision:"9eb88047b88e9f9c"},{url:"/_next/static/chunks/main-028c690131c52ccb.js",revision:"028c690131c52ccb"},{url:"/_next/static/chunks/main-app-3679572db0acb5c8.js",revision:"3679572db0acb5c8"},{url:"/_next/static/chunks/pages/_app-711a943019cc4c3f.js",revision:"711a943019cc4c3f"},{url:"/_next/static/chunks/pages/_error-74a3ff45f87fd51c.js",revision:"74a3ff45f87fd51c"},{url:"/_next/static/chunks/polyfills-42372ed130431b0a.js",revision:"846118c33b2c0e922d7b3a7676f81f6f"},{url:"/_next/static/chunks/webpack-5fa1f4f03845a798.js",revision:"5fa1f4f03845a798"},{url:"/_next/static/css/d181bc6f0e7f9564.css",revision:"d181bc6f0e7f9564"},{url:"/_next/static/gFwFGOKrAsH89p0NtBu5N/_buildManifest.js",revision:"2d9ae4727b445705a02b1d38c36f79ad"},{url:"/_next/static/gFwFGOKrAsH89p0NtBu5N/_ssgManifest.js",revision:"b6652df95db52feb4daf4eca35380933"},{url:"/calendar.svg",revision:"d29f85de3d278b82401fe4ef3d95664f"},{url:"/center-infor.js",revision:"1a48f5cc2a17b45131b0f00eb768c307"},{url:"/dashboard.svg",revision:"ff4cbf05f16212fb0385b2b00ee38849"},{url:"/file.svg",revision:"d09f95206c3fa0bb9bd9fefabfd0ea71"},{url:"/globe.svg",revision:"2aaafa6a49b6563925fe440891e32717"},{url:"/icon-192x192.png",revision:"ac638223246a329428fd5f1af416e385"},{url:"/icon512_maskable.png",revision:"1856d2386ee11a40dc30b052e06b6e26"},{url:"/icon512_rounded.png",revision:"8d8a577ff6b98a12ff011584f7396281"},{url:"/logo.png",revision:"d41d8cd98f00b204e9800998ecf8427e"},{url:"/manager.svg",revision:"165b972a8ab7b78c7f54b28bfeaf126e"},{url:"/manifest.json",revision:"eba244118b0509c95eb8d873f7e16b96"},{url:"/next.svg",revision:"8e061864f388b47f33a1c3780831193e"},{url:"/offline.html",revision:"d671589857e99e540474c7151d5c068f"},{url:"/receipt.svg",revision:"e078260fd45382c9193c22abf7e613c5"},{url:"/school.svg",revision:"f86bf5d05756289151fcf911ab6294b6"},{url:"/screenshot-desktop.png",revision:"1883111a5662e902cbc2be49d52069de"},{url:"/students.svg",revision:"b015cc9ead36a9b1dfce258c22daa028"},{url:"/swe-worker-5c72df51bb1f6ee0.js",revision:"76fdd3369f623a3edcf74ce2200bfdd0"},{url:"/teacher.svg",revision:"443c464e90a466ad5ed0a83ed774d38c"},{url:"/vercel.svg",revision:"61c6b19abff40ea7acd577be818f3976"},{url:"/window.svg",revision:"a2760511c65806022ad20adf74370ff3"}],{ignoreURLParametersMatching:[/^utm_/,/^fbclid$/]}),e.cleanupOutdatedCaches(),e.registerRoute("/",new e.NetworkFirst({cacheName:"start-url",plugins:[{cacheWillUpdate:function(e){var c=e.response;return _async_to_generator(function(){return _ts_generator(this,function(e){return[2,c&&"opaqueredirect"===c.type?new Response(c.body,{status:200,statusText:"OK",headers:c.headers}):c]})})()}}]}),"GET"),e.registerRoute(/^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,new e.CacheFirst({cacheName:"google-fonts-webfonts",plugins:[new e.ExpirationPlugin({maxEntries:4,maxAgeSeconds:31536e3})]}),"GET"),e.registerRoute(/^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,new e.StaleWhileRevalidate({cacheName:"google-fonts-stylesheets",plugins:[new e.ExpirationPlugin({maxEntries:4,maxAgeSeconds:604800})]}),"GET"),e.registerRoute(/\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,new e.StaleWhileRevalidate({cacheName:"static-font-assets",plugins:[new e.ExpirationPlugin({maxEntries:4,maxAgeSeconds:604800})]}),"GET"),e.registerRoute(/\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,new e.StaleWhileRevalidate({cacheName:"static-image-assets",plugins:[new e.ExpirationPlugin({maxEntries:64,maxAgeSeconds:2592e3})]}),"GET"),e.registerRoute(/\/_next\/static.+\.js$/i,new e.CacheFirst({cacheName:"next-static-js-assets",plugins:[new e.ExpirationPlugin({maxEntries:64,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\/_next\/image\?url=.+$/i,new e.StaleWhileRevalidate({cacheName:"next-image",plugins:[new e.ExpirationPlugin({maxEntries:64,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:mp3|wav|ogg)$/i,new e.CacheFirst({cacheName:"static-audio-assets",plugins:[new e.RangeRequestsPlugin,new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:mp4|webm)$/i,new e.CacheFirst({cacheName:"static-video-assets",plugins:[new e.RangeRequestsPlugin,new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:js)$/i,new e.StaleWhileRevalidate({cacheName:"static-js-assets",plugins:[new e.ExpirationPlugin({maxEntries:48,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:css|less)$/i,new e.StaleWhileRevalidate({cacheName:"static-style-assets",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\/_next\/data\/.+\/.+\.json$/i,new e.StaleWhileRevalidate({cacheName:"next-data",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:json|xml|csv)$/i,new e.NetworkFirst({cacheName:"static-data-assets",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(function(e){var c=e.sameOrigin,s=e.url.pathname;return!(!c||s.startsWith("/api/auth/callback")||!s.startsWith("/api/"))},new e.NetworkFirst({cacheName:"apis",networkTimeoutSeconds:10,plugins:[new e.ExpirationPlugin({maxEntries:16,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(function(e){var c=e.request,s=e.url.pathname,a=e.sameOrigin;return"1"===c.headers.get("RSC")&&"1"===c.headers.get("Next-Router-Prefetch")&&a&&!s.startsWith("/api/")},new e.NetworkFirst({cacheName:"pages-rsc-prefetch",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(function(e){var c=e.request,s=e.url.pathname,a=e.sameOrigin;return"1"===c.headers.get("RSC")&&a&&!s.startsWith("/api/")},new e.NetworkFirst({cacheName:"pages-rsc",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(function(e){var c=e.url.pathname;return e.sameOrigin&&!c.startsWith("/api/")},new e.NetworkFirst({cacheName:"pages",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(function(e){return!e.sameOrigin},new e.NetworkFirst({cacheName:"cross-origin",networkTimeoutSeconds:10,plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:3600})]}),"GET"),self.__WB_DISABLE_DEV_LOGS=!0});
+// Enhanced Service Worker for PWA
+const CACHE_NAME = 'center-management-v1'
+const STATIC_CACHE = 'static-v1'
+const DYNAMIC_CACHE = 'dynamic-v1'
+const API_CACHE = 'api-v1'
+
+// Files to cache immediately
+const STATIC_FILES = [
+  '/',
+  '/offline.html',
+  '/manifest.json',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
+  '/icon512_maskable.png',
+  '/icon512_rounded.png'
+]
+
+// Install event - cache static files
+self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installing...')
+  
+  event.waitUntil(
+    caches.open(STATIC_CACHE)
+      .then((cache) => {
+        console.log('Service Worker: Caching static files')
+        return cache.addAll(STATIC_FILES)
+      })
+      .then(() => {
+        console.log('Service Worker: Static files cached')
+        return self.skipWaiting()
+      })
+      .catch((error) => {
+        console.error('Service Worker: Error caching static files', error)
+      })
+  )
+})
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activating...')
+  
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && 
+                cacheName !== DYNAMIC_CACHE && 
+                cacheName !== API_CACHE) {
+              console.log('Service Worker: Deleting old cache', cacheName)
+              return caches.delete(cacheName)
+            }
+          })
+        )
+      })
+      .then(() => {
+        console.log('Service Worker: Activated')
+        return self.clients.claim()
+      })
+  )
+})
+
+// Fetch event - serve from cache with network fallback
+self.addEventListener('fetch', (event) => {
+  const { request } = event
+  const url = new URL(request.url)
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return
+  }
+
+  // Handle different types of requests
+  if (url.pathname.startsWith('/api/')) {
+    // API requests - Network First strategy
+    event.respondWith(handleApiRequest(request))
+  } else if (url.pathname.startsWith('/_next/static/') || 
+             url.pathname.startsWith('/static/')) {
+    // Static assets - Cache First strategy
+    event.respondWith(handleStaticRequest(request))
+  } else if (url.pathname.startsWith('/') && 
+             !url.pathname.includes('.')) {
+    // Page requests - Network First with offline fallback
+    event.respondWith(handlePageRequest(request))
+  } else {
+    // Other requests - Network First
+    event.respondWith(handleOtherRequest(request))
+  }
+})
+
+// Handle API requests with Network First strategy
+async function handleApiRequest(request) {
+  const cache = await caches.open(API_CACHE)
+  
+  try {
+    // Try network first
+    const networkResponse = await fetch(request)
+    
+    if (networkResponse.ok) {
+      // Cache successful responses
+      cache.put(request, networkResponse.clone())
+      return networkResponse
+    }
+    
+    throw new Error('Network response not ok')
+  } catch (error) {
+    console.log('Service Worker: Network failed, trying cache for API request')
+    
+    // Fall back to cache
+    const cachedResponse = await cache.match(request)
+    if (cachedResponse) {
+      return cachedResponse
+    }
+    
+    // Return offline response for API requests
+    return new Response(
+      JSON.stringify({ 
+        error: 'Offline', 
+        message: 'This request requires an internet connection' 
+      }),
+      { 
+        status: 503, 
+        statusText: 'Service Unavailable',
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
+  }
+}
+
+// Handle static assets with Cache First strategy
+async function handleStaticRequest(request) {
+  const cache = await caches.open(STATIC_CACHE)
+  
+  // Try cache first
+  const cachedResponse = await cache.match(request)
+  if (cachedResponse) {
+    return cachedResponse
+  }
+  
+  try {
+    // Fall back to network
+    const networkResponse = await fetch(request)
+    if (networkResponse.ok) {
+      cache.put(request, networkResponse.clone())
+    }
+    return networkResponse
+  } catch (error) {
+    console.error('Service Worker: Error fetching static asset', error)
+    throw error
+  }
+}
+
+// Handle page requests with Network First strategy
+async function handlePageRequest(request) {
+  const cache = await caches.open(DYNAMIC_CACHE)
+  
+  try {
+    // Try network first
+    const networkResponse = await fetch(request)
+    
+    if (networkResponse.ok) {
+      // Cache successful responses
+      cache.put(request, networkResponse.clone())
+      return networkResponse
+    }
+    
+    throw new Error('Network response not ok')
+  } catch (error) {
+    console.log('Service Worker: Network failed, trying cache for page request')
+    
+    // Fall back to cache
+    const cachedResponse = await cache.match(request)
+    if (cachedResponse) {
+      return cachedResponse
+    }
+    
+    // Fall back to offline page
+    const offlineResponse = await cache.match('/offline.html')
+    if (offlineResponse) {
+      return offlineResponse
+    }
+    
+    // Last resort - return basic offline response
+    return new Response(
+      `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Offline - Center Management</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body>
+          <h1>You are offline</h1>
+          <p>Please check your internet connection and try again.</p>
+        </body>
+      </html>
+      `,
+      { 
+        status: 200, 
+        statusText: 'OK',
+        headers: { 'Content-Type': 'text/html' }
+      }
+    )
+  }
+}
+
+// Handle other requests with Network First strategy
+async function handleOtherRequest(request) {
+  try {
+    // Try network first
+    const networkResponse = await fetch(request)
+    return networkResponse
+  } catch (error) {
+    console.log('Service Worker: Network failed for other request')
+    throw error
+  }
+}
+
+// Background sync for offline data
+self.addEventListener('sync', (event) => {
+  console.log('Service Worker: Background sync triggered', event.tag)
+  
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync())
+  }
+})
+
+async function doBackgroundSync() {
+  try {
+    // Get pending operations from IndexedDB
+    const pendingOps = await getPendingOperations()
+    
+    for (const operation of pendingOps) {
+      try {
+        await syncOperation(operation)
+        await markOperationAsSynced(operation.id)
+      } catch (error) {
+        console.error('Service Worker: Error syncing operation', error)
+      }
+    }
+  } catch (error) {
+    console.error('Service Worker: Background sync failed', error)
+  }
+}
+
+// Push notification handling
+self.addEventListener('push', (event) => {
+  console.log('Service Worker: Push notification received')
+  
+  if (event.data) {
+    const data = event.data.json()
+    const options = {
+      body: data.body,
+      icon: '/icon-192x192.png',
+      badge: '/icon-192x192.png',
+      tag: data.tag || 'default',
+      data: data.data || {},
+      requireInteraction: data.requireInteraction || false,
+      actions: data.actions || []
+    }
+    
+    event.waitUntil(
+      self.registration.showNotification(data.title, options)
+    )
+  }
+})
+
+// Notification click handling
+self.addEventListener('notificationclick', (event) => {
+  console.log('Service Worker: Notification clicked', event.notification.tag)
+  
+  event.notification.close()
+  
+  const action = event.action
+  const notificationData = event.notification.data
+  
+  // Handle different notification actions
+  if (action === 'view' || !action) {
+    // Default action - open app
+    event.waitUntil(
+      clients.openWindow('/')
+    )
+  } else if (action === 'update') {
+    // Update action - reload the app
+    event.waitUntil(
+      clients.openWindow('/').then(() => {
+        // Send message to update the app
+        return clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({ type: 'app-update' })
+          })
+        })
+      })
+    )
+  }
+  
+  // Send message to main thread about notification click
+  event.waitUntil(
+    clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'notification-click',
+          action,
+          notificationData
+        })
+      })
+    })
+  )
+})
+
+// Message handling from main thread
+self.addEventListener('message', (event) => {
+  console.log('Service Worker: Message received', event.data)
+  
+  const { type, data } = event.data
+  
+  switch (type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting()
+      break
+    case 'CACHE_URLS':
+      cacheUrls(data.urls)
+      break
+    case 'CLEAR_CACHE':
+      clearCache(data.cacheName)
+      break
+    default:
+      console.log('Service Worker: Unknown message type', type)
+  }
+})
+
+// Helper functions
+async function getPendingOperations() {
+  // This would typically read from IndexedDB
+  // For now, return empty array
+  return []
+}
+
+async function syncOperation(operation) {
+  // This would sync the operation with the server
+  console.log('Service Worker: Syncing operation', operation)
+}
+
+async function markOperationAsSynced(operationId) {
+  // This would mark the operation as synced in IndexedDB
+  console.log('Service Worker: Marking operation as synced', operationId)
+}
+
+async function cacheUrls(urls) {
+  const cache = await caches.open(DYNAMIC_CACHE)
+  return cache.addAll(urls)
+}
+
+async function clearCache(cacheName) {
+  return caches.delete(cacheName)
+}
+
+// Periodic background sync (if supported)
+if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+  self.addEventListener('periodicsync', (event) => {
+    console.log('Service Worker: Periodic sync triggered', event.tag)
+    
+    if (event.tag === 'content-sync') {
+      event.waitUntil(doBackgroundSync())
+    }
+  })
+}

@@ -1,16 +1,115 @@
 {
-  "name": "نظام إدارة المركز التعليمي",
+  "name": "نظام إدارة المركز التعليمي - Center Management System",
   "short_name": "إدارة المركز",
-  "description": "إدارة الطلاب والمعلمين والجداول الزمنية",
+  "description": "نظام شامل لإدارة الطلاب والمعلمين والجداول الزمنية - Comprehensive center management system for students, teachers, and schedules",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "theme_color": "#8936FF",
-  "background_color": "#2EC6FE",
-  "dir": "rtl",
+  "theme_color": "#1e40af",
+  "background_color": "#ffffff",
+  "dir": "auto",
   "lang": "ar",
+  "categories": ["education", "productivity", "business"],
+  "shortcuts": [
+    {
+      "name": "لوحة التحكم",
+      "short_name": "Dashboard",
+      "description": "عرض الإحصائيات العامة",
+      "url": "/admin",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "الطلاب",
+      "short_name": "Students",
+      "description": "إدارة الطلاب",
+      "url": "/manager/students",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "المعلمين",
+      "short_name": "Teachers",
+      "description": "إدارة المعلمين",
+      "url": "/manager/teachers",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "الإيصالات",
+      "short_name": "Receipts",
+      "description": "إدارة المدفوعات",
+      "url": "/manager/receipts",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
   "icons": [
+    {
+      "src": "/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon512_maskable.png",
       "sizes": "512x512",
@@ -20,12 +119,6 @@
     {
       "src": "/icon512_rounded.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     }
@@ -45,5 +138,13 @@
       "form_factor": "wide",
       "label": "لوحة التحكم"
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }

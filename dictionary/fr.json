@@ -1,4 +1,21 @@
 { 
+  "offline": {
+    "status-disconnected": "Vous êtes hors ligne",
+    "status-reconnected": "Connexion rétablie ! Rechargement en cours...",
+    "status-checking": "Vérification de la connexion...",
+    "offlineInfoSafe": "Vos données sont en sécurité et stockées localement.",
+    "offlineInfoSync": "Les modifications seront synchronisées automatiquement dès que vous serez à nouveau en ligne.",
+    "offlineInfoContinue": "Vous pouvez continuer à travailler sans connexion Internet.",
+    "offlineActionRetry": "Réessayer",
+    "offlineTitle": "Vous êtes hors ligne",
+    "offlineMessageShort": "Il semble que vous ayez perdu votre connexion Internet.",
+    "offlineMessageLong": "Veuillez vérifier votre connexion et réessayer.",
+    "offlineSuccessMessage": "Connecté en utilisant les données hors ligne.",
+    "offlineLoginInfo": "Vous êtes hors ligne. Connexion en utilisant les informations stockées localement.",
+    "offlineLoginIncorrect": "L’e-mail ou le mot de passe est incorrect pour une connexion hors ligne.",
+    "offlineLoginError": "Une erreur est survenue lors de la connexion hors ligne."
+  }
+,
 "deleteALL": {
   "allDataDeletedSuccessfully": "Supprimé",
   "failedToDeleteData": "Échec de la suppression",
@@ -9,12 +26,27 @@
   "cancel": "Annuler"
 }
 ,  
-"InstallPWA": {
+  "InstallPWA": {
     "installMessage": "Installer l'application pour une meilleure expérience",
     "iosInstructions": "Pour installer: appuyez sur Partager puis 'Ajouter à l'écran d'accueil'",
     "install": "Installer",
     "instructions": "Instructions",
     "close": "Fermer"
+  },
+  "PWAUpdate": {
+    "installTitle": "Installer l'application",
+    "installDescription": "Installez cette application pour une meilleure expérience et un accès hors ligne",
+    "install": "Installer",
+    "installing": "Installation en cours...",
+    "installStarted": "Installation démarrée",
+    "installError": "Échec de l'installation",
+    "appInstalled": "Application installée avec succès!",
+    "updateTitle": "Mise à jour disponible",
+    "updateDescription": "Une nouvelle version de l'application est disponible avec des améliorations et des corrections de bugs",
+    "update": "Mettre à jour",
+    "updating": "Mise à jour en cours...",
+    "updateAvailable": "Mise à jour disponible",
+    "updateError": "Échec de la mise à jour"
   },
   "auth": {
     "validation": {

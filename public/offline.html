@@ -5,117 +5,203 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>غير متصل - نظام إدارة المركز</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --radius: 0.625rem;
+      --background: #ffffff;
+      --foreground: #000000;
+      --card: #ffffff;
+      --card-foreground: #000000;
+      --primary: #1e40af;
+      --primary-foreground: #ffffff;
+      --secondary: #059669;
+      --secondary-foreground: #ffffff;
+      --accent: #ea580c;
+      --accent-foreground: #ffffff;
+      --muted: #f3f4f6;
+      --muted-foreground: #6b7280;
+      --destructive: #dc2626;
+      --border: #e5e7eb;
+      --input: #f2f2f2;
+      --ring: #1e40af;
+      --chart-1: #1e40af;
+      --chart-2: #059669;
+      --chart-3: #ea580c;
+      --chart-4: #7c3aed;
+      --chart-5: #06b6d4;
+      --sidebar: #ffffff;
+      --sidebar-foreground: #000000;
+    }
+    html.dark,
+    body.dark {
+      --background: #1f2937;
+      --foreground: #f3f4f6;
+      --card: #111827;
+      --card-foreground: #f3f4f6;
+      --primary: #60a5fa;
+      --primary-foreground: #111827;
+      --secondary: #34d399;
+      --secondary-foreground: #111827;
+      --accent: #fb923c;
+      --accent-foreground: #111827;
+      --muted: #374151;
+      --muted-foreground: #9ca3af;
+      --destructive: #f87171;
+      --border: #374151;
+      --input: #1f2937;
+      --ring: #60a5fa;
+      --chart-1: #60a5fa;
+      --chart-2: #34d399;
+      --chart-3: #fb923c;
+      --chart-4: #a78bfa;
+      --chart-5: #22d3ee;
+      --sidebar: #111827;
+      --sidebar-foreground: #f3f4f6;
     }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--primary), var(--chart-4));
+      color: var(--foreground);
+      margin: 0;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      direction: rtl;
     }
-    .container {
+    .offline-card {
+      background: var(--card);
+      color: var(--card-foreground);
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 40px rgba(30, 64, 175, 0.12), 0 2px 6px rgba(30,64,175,0.10);
+      padding: 2.5rem 2rem 2rem 2rem;
       text-align: center;
-      padding: 2rem;
-      max-width: 500px;
+      min-width: 325px;
+      max-width: 370px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      transition: background 0.3s, color 0.3s;
     }
-    .icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      animation: pulse 2s infinite;
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--chart-1) 70%, var(--chart-4) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(30, 64, 175, 0.15);
+      animation: pulse 2.2s infinite;
+    }
+    .offline-icon svg {
+      width: 48px;
+      height: 48px;
+      fill: var(--primary-foreground);
     }
     @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      0%, 100% { transform: scale(1);}
+      50% { transform: scale(1.08);}
     }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      font-weight: 700;
+    .offline-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.7rem;
+      letter-spacing: -0.5px;
+      color: var(--chart-1);
     }
-    p {
-      font-size: 1.1rem;
-      opacity: 0.9;
+    .offline-desc {
+      font-size: 1.08rem;
+      margin-bottom: 1.2rem;
+      color: var(--muted-foreground);
       line-height: 1.8;
-      margin-bottom: 0.5rem;
     }
-    .info-box {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin: 2rem 0;
-      backdrop-filter: blur(10px);
+    .offline-info {
+      background: linear-gradient(120deg, var(--chart-5)60%, var(--secondary)100%);
+      color: var(--primary-foreground);
+      border-radius: 0.8rem;
+      margin: 1.2rem 0;
+      padding: 1.2rem 1rem 1rem 1rem;
+      font-size: 0.97rem;
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.13);
+      opacity: .90;
+      backdrop-filter: blur(7px);
     }
-    .info-box p {
-      margin: 0.5rem 0;
-      font-size: 0.95rem;
+    .offline-info p {
+      margin: 0.5em 0;
+      font-size: 0.99rem;
+      color: var(--primary-foreground);
+      font-weight: 500;
     }
     .retry-btn {
       margin-top: 2rem;
-      padding: 1rem 2.5rem;
-      background: white;
-      color: #667eea;
+      padding: 1rem 2.8rem;
+      font-size: 1.08rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, var(--primary) 70%, var(--chart-4));
+      color: var(--primary-foreground);
       border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      border-radius: var(--radius);
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 3px 15px rgba(30,64,175,0.13);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+      letter-spacing: 0.5px;
     }
     .retry-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    }
-    .retry-btn:active {
-      transform: translateY(0);
+      background: linear-gradient(90deg, var(--accent), var(--secondary));
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 8px 30px rgba(234, 88, 12, 0.13);
     }
     .status {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      font-size: 0.9rem;
+      display: block;
+      margin-top: 1.5rem;
+      font-size: 1.02rem;
+      padding: 0.8rem 0.7rem;
+      background: var(--muted);
+      color: var(--muted-foreground);
+      border-radius: 18px;
+      font-weight: 600;
+      box-shadow: 0 1px 6px rgba(30,64,175,0.06);
+      letter-spacing: 0.1px;
+    }
+    @media (max-width: 480px) {
+      .offline-card {
+        padding: 1.7rem .7rem;
+        min-width: unset;
+        max-width: 95vw;
+      }
+      .offline-title { font-size: 1.2rem;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="icon">📡</div>
-    <h1>أنت غير متصل بالإنترنت</h1>
-    <p>يبدو أنك فقدت الاتصال بالإنترنت.</p>
-    
-    <div class="info-box">
-      <p>✓ بياناتك آمنة ومحفوظة محلياً</p>
-      <p>✓ ستتم المزامنة تلقائياً عند عودة الاتصال</p>
-      <p>✓ يمكنك الاستمرار في العمل دون اتصال</p>
+  <div class="offline-card">
+    <div class="offline-icon">
+      <!-- Custom SVG Icon -->
+      <svg viewBox="0 0 48 48"><path d="M24 39a1.5 1.5 0 0 1-1.49-1.35l-.47-3.49a14.13 14.13 0 0 0 3.94 0l-.47 3.49A1.5 1.5 0 0 1 24 39zM24 6c7.73 0 14 6.27 14 14 0 6.32-4.06 11.74-9.8 13.54a1.5 1.5 0 0 0-.96 2.25l2.97 5.16a1.5 1.5 0 0 1-2.61 1.5l-2.97-5.16c-.48-.84-1.59-1.06-2.25-.49l-2.97 5.16a1.5 1.5 0 1 1-2.61-1.5l2.97-5.16a1.5 1.5 0 0 0-.96-2.25C10.06 31.74 6 26.32 6 20c0-7.73 6.27-14 14-14z"/><circle cx="24" cy="24" r="5" fill="var(--accent)" /></svg>
     </div>
-    
-    <p>يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى</p>
-    
+    <div class="offline-title">أنت غير متصل بالإنترنت</div>
+    <div class="offline-desc">يبدو أنك فقدت الاتصال.<br>بياناتك آمنة ومحفوظة وستتم المزامنة تلقائيًا عند العودة.</div>
+
+    <div class="offline-info">
+      <p>✓ بياناتك محفوظة محليًا بأمان</p>
+      <p>✓ مزامنة تلقائية عند استعادة الإنترنت</p>
+      <p>✓ يمكنك متابعة العمل دون مشكلة</p>
+    </div>
+
     <button class="retry-btn" onclick="window.location.reload()">
       إعادة المحاولة
     </button>
-    
-    <div class="status" id="status">
-      جارٍ التحقق من الاتصال...
-    </div>
-  </div>
 
+    <span class="status" id="status">
+      جارٍ التحقق من الاتصال...
+    </span>
+  </div>
   <script>
     // Auto-reload when back online
     window.addEventListener('online', function() {
       document.getElementById('status').textContent = 'تم استعادة الاتصال! جارٍ إعادة التحميل...';
       setTimeout(function() {
         window.location.reload();
-      }, 1000);
+      }, 1200);
     });
 
     window.addEventListener('offline', function() {
@@ -127,9 +213,15 @@
       document.getElementById('status').textContent = 'متصل - جارٍ إعادة التحميل...';
       setTimeout(function() {
         window.location.reload();
-      }, 1000);
+      }, 1200);
     } else {
       document.getElementById('status').textContent = 'لا يوجد اتصال بالإنترنت';
+    }
+
+    // Optional: auto-detect dark mode
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
     }
   </script>
 </body>

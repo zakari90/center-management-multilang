@@ -1,4 +1,7 @@
 import InstallPWA from "@/components/installPWA";
+import PWAUpdateHandler from "@/components/pwa-update-handler";
+import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
+import PWATestingSuite from "@/components/pwa-testing-suite";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
@@ -18,10 +21,12 @@ const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
 // ✅ PWA Viewport Configuration
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: '#1e40af',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default async function RootLayout({
@@ -53,12 +58,37 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#1e40af" />
+        <meta name="msapplication-TileColor" content="#1e40af" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
         
         {/* ✅ PWA Apple Specific */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="ECMS" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="إدارة المركز" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/icon-192x192.png" />
+        
+        {/* ✅ PWA Microsoft Specific */}
+        <meta name="msapplication-TileImage" content="/icon-192x192.png" />
+        <meta name="msapplication-square70x70logo" content="/icon-72x72.png" />
+        <meta name="msapplication-square150x150logo" content="/icon-192x192.png" />
+        <meta name="msapplication-wide310x150logo" content="/icon-192x192.png" />
+        <meta name="msapplication-square310x310logo" content="/icon-512x512.png" />
+        
+        {/* ✅ PWA Additional Meta Tags */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="إدارة المركز" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="format-detection" content="address=no" />
+        <meta name="format-detection" content="email=no" />
         
         {/* Original Meta Tags */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -93,6 +123,9 @@ export default async function RootLayout({
               </SyncProvider>
                     {/* <PWADebug /> */}
               <InstallPWA />
+              <PWAUpdateHandler />
+              <PWAPerformanceMonitor />
+              <PWATestingSuite />
               <Toaster />
             </AuthProvider>
           </NextIntlClientProvider>

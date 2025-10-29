@@ -36,12 +36,25 @@ export function LoginManager({
 }: React.ComponentProps<"div">) {
   const t = useTranslations('login')
   const tManager = useTranslations('loginManager')
+  const tOffline = useTranslations('offline')
   const [state, action, isPending] = useActionState(loginManager, undefined)
   const { login } = useAuth()
   const router = useRouter()
   
   const [showPassword, setShowPassword] = useState(false)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
 
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false)
+    const handleOffline = () => setIsOffline(true)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
+  
   useEffect(() => {
     if (state?.success && state?.data?.user) {
       login(state.data.user)
@@ -53,7 +66,7 @@ export function LoginManager({
 
   return (
     <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl w-full max-w-md">
+      <Card className={cn("border-0 shadow-xl w-full ml-2 mr-2", isOffline && "border-2 border-yellow-400")}>
         <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-center flex items-center justify-center gap-2">
             {tManager('title')}
@@ -62,7 +75,6 @@ export function LoginManager({
             {tManager('subtitle')}
           </CardDescription>
         </CardHeader>
-
         <CardContent className="px-4 sm:px-6 pb-6">
           <form action={action} className="space-y-4 sm:space-y-5">
             {/* Success Message */}
@@ -70,7 +82,9 @@ export function LoginManager({
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
-                  {tManager('successMessage')}
+                  {isOffline
+                    ? tOffline('offlineSuccessMessage')
+                    : tManager('successMessage')}
                 </AlertDescription>
               </Alert>
             )}
@@ -80,7 +94,9 @@ export function LoginManager({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm ml-2">
-                  {state.error.message}
+                  {isOffline
+                    ? tOffline('offlineLoginError')
+                    : state.error.message}
                 </AlertDescription>
               </Alert>
             )}
@@ -118,10 +134,9 @@ export function LoginManager({
 
             {/* Password Field */}
             <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
-                  {t('password.label')}
-                </Label>
-
+              <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
+                {t('password.label')}
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
@@ -144,11 +159,7 @@ export function LoginManager({
                   disabled={isPending}
                   tabIndex={-1}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {state?.error?.password && (
@@ -170,7 +181,9 @@ export function LoginManager({
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
-                  {t('submitting')}
+                  {isOffline
+                    ? tOffline('offlineActionRetry')
+                    : t('submitting')}
                 </>
               ) : (
                 <>
@@ -179,6 +192,15 @@ export function LoginManager({
                 </>
               )}
             </Button>
+
+            {/* Show offline info banner when offline */}
+            {isOffline && (
+              <div className="mt-3 mb-2 text-xs text-yellow-700 text-center bg-yellow-50 rounded py-2 px-3">
+                {tOffline('offlineLoginInfo')}<br />
+                {tOffline('offlineInfoSafe')}<br />
+                {tOffline('offlineInfoSync')}
+              </div>
+            )}
 
             {/* Divider */}
             <div className="relative my-4 sm:my-6">
@@ -214,11 +236,16 @@ export function LoginManager({
               <AlertCircle className="h-4 w-4 text-primary" />
             </div>
             <div className="space-y-1 min-w-0">
+              {/* If offline, show offline info too */}
               <p className="text-xs sm:text-sm font-medium break-words">
-                {tManager('infoTitle')}
+                {isOffline
+                  ? tOffline('offlineTitle')
+                  : tManager('infoTitle')}
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                {tManager('infoDescription')}
+                {isOffline
+                  ? tOffline('offlineInfoContinue')
+                  : tManager('infoDescription')}
               </p>
             </div>
           </div>

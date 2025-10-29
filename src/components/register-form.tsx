@@ -10,7 +10,7 @@ import { useAuth } from "@/context/authContext"
 import { register } from "@/lib/actions"
 import { localDb, LocalUser } from "@/lib/dexie"
 import { cn } from "@/lib/utils"
-import bcrypt from "bcryptjs"; // Secure hashing
+import bcrypt from "bcryptjs"
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
@@ -21,6 +21,7 @@ export type Role = "ADMIN" | "MANAGER"
 
 export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const t = useTranslations("register")
+  const tOffline = useTranslations("offline")
   const { login: setUser } = useAuth()
   const router = useRouter()
   const [state, setState] = useState<any>({})
@@ -92,8 +93,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
           setState({ error: result?.error || { message: t("errors.registrationFailed") } })
         }
       } catch (err) {
-              console.log("Offline registration error:", err)
-
+        console.log("Registration error:", err);
+        
         setState({ error: { message: t("errors.unexpectedError") } })
       }
       setIsPending(false)
@@ -108,31 +109,32 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
         return
       }
       const hash = bcrypt.hashSync(values.password as string, 10)
-const user: LocalUser = {
-  email: values.email as string,
-  name: values.username as string,
-  password: hash,
-  role: (values.role as Role) || "ADMIN",
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  syncStatus: "pending"
-};
-await localDb.users.add(user);
+      const user: LocalUser = {
+        email: values.email as string,
+        name: values.username as string,
+        password: hash,
+        role: (values.role as Role) || "ADMIN",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        syncStatus: "pending"
+      }
+      await localDb.users.add(user)
 
-setState({
+      setState({
         success: true,
-        data: { user, message: t("offlineSuccessMessage") }
+        data: { user, message: tOffline("offlineSuccessMessage") }
       })
     } catch (err) {
-      console.log("Offline registration error:", err)
-      setState({ error: { message: t("errors.offlineRegistrationFailed") } })
+        console.log("Registration error:", err);
+
+      setState({ error: { message: tOffline("offlineLoginError") } })
     }
     setIsPending(false)
   }
 
   return (
     <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl w-full max-w-md">
+      <Card className={cn("border-0 shadow-xl w-full ml-2 mr-2", isOffline && "border-2 border-yellow-400")}>
         <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
             {t("title")}
@@ -144,7 +146,7 @@ setState({
               <Alert className="border-green-200 bg-green-50">
                 <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
-                  {isOffline ? t("offlineSuccessMessage") : t("successMessage")}
+                  {isOffline ? tOffline("offlineSuccessMessage") : t("successMessage")}
                 </AlertDescription>
               </Alert>
             )}
@@ -152,7 +154,7 @@ setState({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm ml-2">
-                  {state.error.message}
+                  {isOffline ? tOffline("offlineLoginError") : state.error.message}
                 </AlertDescription>
               </Alert>
             )}
@@ -305,40 +307,32 @@ setState({
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
-                  {isOffline ? t("submittingOffline") : t("submitting")}
+                  {isOffline ? tOffline("offlineActionRetry") : t("submitting")}
                 </>
               ) : t("submit")}
             </Button>
+            {/* Offline status & info */}
             {isOffline && (
-              <p className="text-xs text-yellow-600 text-center mt-3">
-                {t("offlineRegistrationInfo")}
-              </p>
+              <div className="mt-3 mb-2 text-xs text-yellow-700 text-center bg-yellow-50 rounded py-2 px-3">
+                {tOffline("offlineLoginInfo")}<br/>
+                {tOffline("offlineInfoSafe")}<br/>
+                {tOffline("offlineInfoSync")}
+              </div>
             )}
             <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
               {t("terms")}{" "}
-              <Link href="/terms" className="text-primary hover:underline underline-offset-4 font-medium">
-                {t("termsOfService")}
-              </Link>{" "}
+              <Link href="/terms" className="text-primary hover:underline underline-offset-4 font-medium">{t("termsOfService")}</Link>{" "}
               {t("and")}{" "}
-              <Link href="/privacy" className="text-primary hover:underline underline-offset-4 font-medium">
-                {t("privacyPolicy")}
-              </Link>
+              <Link href="/privacy" className="text-primary hover:underline underline-offset-4 font-medium">{t("privacyPolicy")}</Link>
             </p>
             <div className="relative my-4 sm:my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300" />
-              </div>
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-300" /></div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground text-xs">
-                  {t("alreadyHaveAccount")}
-                </span>
+                <span className="bg-background px-2 text-muted-foreground text-xs">{t("alreadyHaveAccount")}</span>
               </div>
             </div>
             <div className="text-center">
-              <Link
-                href="/login"
-                className="text-sm sm:text-base font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1 transition-colors"
-              >
+              <Link href="/login" className="text-sm sm:text-base font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1 transition-colors">
                 {t("login")}
                 <span aria-hidden="true" className="text-lg">→</span>
               </Link>

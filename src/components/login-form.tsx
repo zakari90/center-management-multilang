@@ -12,7 +12,7 @@ import { useAuth } from "@/context/authContext"
 import { loginAdmin } from "@/lib/actions"; // Online/server action
 import { localDb } from "@/lib/dexie"; // Dexie instance
 import { cn } from "@/lib/utils"
-import bcrypt from "bcryptjs"; // NEW: For hashing
+import bcrypt from "bcryptjs";
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Home, Loader2, Lock, Mail } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
@@ -30,6 +30,7 @@ export function LoginForm({
   const { login } = useAuth()
   const router = useRouter()
   const t = useTranslations("login")
+  const tOffline = useTranslations("offline")
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false)
@@ -67,8 +68,8 @@ export function LoginForm({
           setState({ error: result?.error || { message: t("errors.loginFailed") } })
         }
       } catch (err) {
-              console.log("Offline login error:", err)
-
+        console.log("login failed:", err); // Debug
+        
         setState({ error: { message: t("errors.unexpectedError") } })
       }
       setIsPending(false)
@@ -84,22 +85,28 @@ export function LoginForm({
       if (user && bcrypt.compareSync(values.password as string, user.password)) {
         setState({
           success: true,
-          data: { user, message: t("offlineSuccessMessage") }
+          data: { user, message: tOffline("offlineSuccessMessage") }
         })
       } else {
-        setState({ error: { message: t("errors.offlineLoginIncorrect") } })
+        setState({ error: { message: tOffline("offlineLoginIncorrect") } })
       }
     } catch (err) {
-      console.log("Offline login error:", err)
-      setState({ error: { message: t("errors.offlineLoginError") } })
+        
+      console.log("Offline login error:", err);
+      setState({ error: { message: tOffline("offlineLoginError") } })
     }
     setIsPending(false)
   }
 
   return (
     <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
-      <Card className="border-0 shadow-xl w-full max-w-md">
-        <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6">
+      <Card className={cn("border-0 shadow-xl w-full ml-2 mr-2", isOffline && "border-2 border-yellow-400")}>
+        <CardHeader className="space-y-1 pb-4 sm:pb-6 px-4 sm:px-6 relative">
+          {isOffline && (
+            <span className="absolute right-4 top-4 z-10 flex items-center gap-1 bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-md text-xs font-bold">
+              <AlertCircle className="h-3 w-3" /> {tOffline("status-disconnected")}
+            </span>
+          )}
           <CardTitle className="text-2xl sm:text-3xl font-bold text-center">
             {t("title")}
           </CardTitle>
@@ -107,15 +114,17 @@ export function LoginForm({
         <CardContent className="px-4 sm:px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {state?.success && (
-              <Alert className="border-green-200 bg-green-50">
+              <Alert className="border-green-200 bg-green-50" aria-live="polite">
                 <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
-                  {isOffline ? t("offlineSuccessMessage") : t("successMessage")}
+                  {isOffline
+                    ? tOffline("offlineSuccessMessage")
+                    : t("successMessage")}
                 </AlertDescription>
               </Alert>
             )}
             {state?.error?.message && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" aria-live="assertive">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <AlertDescription className="text-xs sm:text-sm ml-2">
                   {state.error.message}
@@ -140,6 +149,7 @@ export function LoginForm({
                   required
                   disabled={isPending}
                   autoComplete="email"
+                  autoFocus
                 />
               </div>
               {state?.error?.email && (
@@ -152,18 +162,6 @@ export function LoginForm({
               )}
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <Label htmlFor="password" className="text-xs sm:text-sm font-medium">
-                  {t("password.label")}
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary hover:underline underline-offset-4 whitespace-nowrap"
-                  tabIndex={-1}
-                >
-                  {t("forgotPassword")}
-                </Link>
-              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <Input
@@ -206,7 +204,9 @@ export function LoginForm({
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
-                  {isOffline ? t("submittingOffline") : t("submitting")}
+                  {isOffline
+                    ? tOffline("offlineActionRetry")
+                    : t("submitting")}
                 </>
               ) : (
                 t("submit")
@@ -214,7 +214,7 @@ export function LoginForm({
             </Button>
             {isOffline && (
               <p className="text-xs text-yellow-600 text-center mt-3">
-                {t("offlineLoginInfo")} {/* e.g. "You're offline. Logging in using local data." */}
+                {tOffline("offlineLoginInfo")}
               </p>
             )}
             <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
@@ -255,6 +255,18 @@ export function LoginForm({
               </Link>
             </div>
           </form>
+          {/* Connection status bar for extra feedback */}
+          <div
+            className={cn(
+              "mt-6 flex items-center justify-center text-xs",
+              isOffline ? "text-yellow-500" : "text-green-600"
+            )}
+            aria-live="polite"
+          >
+            {isOffline
+              ? tOffline("status-disconnected")
+              : tOffline("status-reconnected")}
+          </div>
         </CardContent>
       </Card>
     </div>
