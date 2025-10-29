@@ -1,18 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/// <reference no-default-lib="true"/>
+/// <reference lib="esnext" />
+/// <reference lib="webworker" />
+
 // Custom service worker with SKIP_WAITING handler
 import { clientsClaim } from 'workbox-core';
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { CacheFirst, NetworkFirst } from 'workbox-strategies';
-import { ExpirationPlugin } from 'workbox-expiration';
 
-// Extend ServiceWorkerGlobalScope to include Workbox properties
-declare global {
-  interface ServiceWorkerGlobalScope {
-    __WB_DISABLE_DEV_LOGS: boolean;
-    __WB_MANIFEST: any;
-  }
-}
-
+// Properly type self as ServiceWorkerGlobalScope
 declare const self: ServiceWorkerGlobalScope;
 
 // Disable dev logs
@@ -97,7 +95,10 @@ self.addEventListener('install', () => {
   console.log('[SW] Service worker installed');
 });
 
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Service worker activated');
+self.addEventListener('activate', (event :any) => {
+  console.log('[SW] Service worker activated' , event);
 });
+
+// Export to make this a module
+export { };
 
