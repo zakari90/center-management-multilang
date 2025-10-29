@@ -4,222 +4,594 @@
 @layer utilities {
   /* Container responsive padding - using Tailwind's responsive prefixes */
   .container-responsive {
-    @apply px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .container-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .container-responsive {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
   }
 
   /* Responsive spacing - using Tailwind's responsive prefixes */
-  .space-responsive {
-    @apply space-y-4 sm:space-y-6 md:space-y-8;
+  .space-responsive > * + * {
+    margin-top: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .space-responsive > * + * {
+      margin-top: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .space-responsive > * + * {
+      margin-top: 2rem;
+    }
   }
 
   .gap-responsive {
-    @apply gap-4 sm:gap-6 md:gap-8;
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .gap-responsive {
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .gap-responsive {
+      gap: 2rem;
+    }
   }
 
   /* Mobile-first button sizing - using Tailwind's responsive prefixes */
   .btn-mobile {
-    @apply min-h-[44px] min-w-[44px] px-4 py-2 text-sm;
+    min-height: 44px;
+    min-width: 44px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .btn-mobile-lg {
-    @apply min-h-[48px] min-w-[48px] px-6 py-3 text-base;
+    min-height: 48px;
+    min-width: 48px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
   }
 
   /* Touch-friendly interactive elements */
   .touch-target {
-    @apply min-h-[44px] min-w-[44px];
+    min-height: 44px;
+    min-width: 44px;
   }
 
   /* Responsive cards - using Tailwind's responsive prefixes */
   .card-responsive {
-    @apply rounded-lg border bg-card p-4 sm:p-6 shadow-sm;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    padding: 1rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  
+  @media (min-width: 640px) {
+    .card-responsive {
+      padding: 1.5rem;
+    }
   }
 
   .card-responsive-sm {
-    @apply rounded-md border bg-card p-3 sm:p-4 shadow-sm;
+    border-radius: 0.375rem;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    padding: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  
+  @media (min-width: 640px) {
+    .card-responsive-sm {
+      padding: 1rem;
+    }
   }
 
   .card-responsive-lg {
-    @apply rounded-xl border bg-card p-6 sm:p-8 shadow-md;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  
+  @media (min-width: 640px) {
+    .card-responsive-lg {
+      padding: 2rem;
+    }
   }
 
   /* Responsive tables - using Tailwind's responsive prefixes */
   .table-responsive {
-    @apply w-full overflow-x-auto;
+    width: 100%;
+    overflow-x: auto;
   }
 
   .table-responsive table {
-    @apply min-w-full divide-y divide-border;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  .table-responsive table tbody tr {
+    border-bottom: 1px solid var(--border);
   }
 
   /* Responsive modals and dialogs - using Tailwind's responsive prefixes */
   .modal-responsive {
-    @apply w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl;
+    width: 100%;
+    max-width: 24rem;
+  }
+  
+  @media (min-width: 640px) {
+    .modal-responsive {
+      max-width: 28rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .modal-responsive {
+      max-width: 32rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .modal-responsive {
+      max-width: 36rem;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .modal-responsive {
+      max-width: 42rem;
+    }
   }
 
   .modal-responsive-sm {
-    @apply w-full max-w-xs sm:max-w-sm;
+    width: 100%;
+    max-width: 20rem;
+  }
+  
+  @media (min-width: 640px) {
+    .modal-responsive-sm {
+      max-width: 24rem;
+    }
   }
 
   .modal-responsive-lg {
-    @apply w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl;
+    width: 100%;
+    max-width: 28rem;
+  }
+  
+  @media (min-width: 640px) {
+    .modal-responsive-lg {
+      max-width: 32rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .modal-responsive-lg {
+      max-width: 36rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .modal-responsive-lg {
+      max-width: 42rem;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .modal-responsive-lg {
+      max-width: 48rem;
+    }
   }
 
   /* Responsive navigation - using Tailwind's responsive prefixes */
   .nav-responsive {
-    @apply flex flex-col sm:flex-row;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  @media (min-width: 640px) {
+    .nav-responsive {
+      flex-direction: row;
+    }
   }
 
   .nav-item-responsive {
-    @apply block px-3 py-2 text-sm font-medium rounded-md;
+    display: block;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
   }
 
   /* Responsive sidebar - using Tailwind's responsive prefixes */
   .sidebar-responsive {
-    @apply fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: 16rem;
+    transform: translateX(0);
+    transition: transform 300ms ease-in-out;
   }
 
   .sidebar-responsive.closed {
-    @apply -translate-x-full;
+    transform: translateX(-100%);
   }
 
   @media (min-width: 768px) {
     .sidebar-responsive {
-      @apply relative translate-x-0;
+      position: relative;
+      transform: translateX(0);
     }
   }
 
   /* Responsive forms - using Tailwind's responsive prefixes */
-  .form-responsive {
-    @apply space-y-4 sm:space-y-6;
+  .form-responsive > * + * {
+    margin-top: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .form-responsive > * + * {
+      margin-top: 1.5rem;
+    }
   }
 
-  .form-group-responsive {
-    @apply space-y-2 sm:space-y-3;
+  .form-group-responsive > * + * {
+    margin-top: 0.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .form-group-responsive > * + * {
+      margin-top: 0.75rem;
+    }
   }
 
   .form-label-responsive {
-    @apply block text-sm font-medium text-foreground;
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--foreground);
   }
 
   .form-input-responsive {
-    @apply w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+    width: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border: 1px solid var(--input);
+    border-radius: 0.375rem;
+  }
+  
+  .form-input-responsive:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: var(--ring);
+    border-color: transparent;
   }
 
   /* Responsive charts - using Tailwind's responsive prefixes */
   .chart-responsive {
-    @apply w-full h-64 sm:h-80 md:h-96;
+    width: 100%;
+    height: 16rem;
+  }
+  
+  @media (min-width: 640px) {
+    .chart-responsive {
+      height: 20rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .chart-responsive {
+      height: 24rem;
+    }
   }
 
   .chart-responsive-sm {
-    @apply w-full h-48 sm:h-64;
+    width: 100%;
+    height: 12rem;
+  }
+  
+  @media (min-width: 640px) {
+    .chart-responsive-sm {
+      height: 16rem;
+    }
   }
 
   .chart-responsive-lg {
-    @apply w-full h-80 sm:h-96 md:h-[28rem];
+    width: 100%;
+    height: 20rem;
+  }
+  
+  @media (min-width: 640px) {
+    .chart-responsive-lg {
+      height: 24rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .chart-responsive-lg {
+      height: 28rem;
+    }
   }
 
   /* Responsive images - using Tailwind's responsive prefixes */
   .img-responsive {
-    @apply w-full h-auto object-cover;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
   }
 
   .img-responsive-square {
-    @apply w-full aspect-square object-cover;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
   }
 
   .img-responsive-16-9 {
-    @apply w-full aspect-video object-cover;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
   }
 
   /* Responsive shadows - using Tailwind's responsive prefixes */
   .shadow-responsive {
-    @apply shadow-sm sm:shadow-md;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  
+  @media (min-width: 640px) {
+    .shadow-responsive {
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
   }
 
   .shadow-responsive-lg {
-    @apply shadow-md sm:shadow-lg;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  
+  @media (min-width: 640px) {
+    .shadow-responsive-lg {
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
   }
 
   /* Responsive borders - using Tailwind's responsive prefixes */
   .border-responsive {
-    @apply border border-border;
+    border: 1px solid var(--border);
   }
 
   .border-responsive-t {
-    @apply border-t border-border;
+    border-top: 1px solid var(--border);
   }
 
   .border-responsive-b {
-    @apply border-b border-border;
+    border-bottom: 1px solid var(--border);
   }
 
   .border-responsive-l {
-    @apply border-l border-border;
+    border-left: 1px solid var(--border);
   }
 
   .border-responsive-r {
-    @apply border-r border-border;
+    border-right: 1px solid var(--border);
   }
 
   /* Responsive overflow - using Tailwind's responsive prefixes */
   .overflow-responsive {
-    @apply overflow-hidden sm:overflow-visible;
+    overflow: hidden;
+  }
+  
+  @media (min-width: 640px) {
+    .overflow-responsive {
+      overflow: visible;
+    }
   }
 
   .overflow-x-responsive {
-    @apply overflow-x-auto sm:overflow-x-visible;
+    overflow-x: auto;
+  }
+  
+  @media (min-width: 640px) {
+    .overflow-x-responsive {
+      overflow-x: visible;
+    }
   }
 
   .overflow-y-responsive {
-    @apply overflow-y-auto sm:overflow-y-visible;
+    overflow-y: auto;
+  }
+  
+  @media (min-width: 640px) {
+    .overflow-y-responsive {
+      overflow-y: visible;
+    }
   }
 
   /* Responsive positioning - using Tailwind's responsive prefixes */
   .fixed-responsive {
-    @apply fixed bottom-4 right-4 sm:bottom-6 sm:right-6;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .fixed-responsive {
+      bottom: 1.5rem;
+      right: 1.5rem;
+    }
   }
 
   .absolute-responsive {
-    @apply absolute inset-0 sm:inset-auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+  
+  @media (min-width: 640px) {
+    .absolute-responsive {
+      position: absolute;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+    }
   }
 
   /* Responsive z-index - using Tailwind's responsive prefixes */
   .z-responsive {
-    @apply z-10 sm:z-20;
+    z-index: 10;
+  }
+  
+  @media (min-width: 640px) {
+    .z-responsive {
+      z-index: 20;
+    }
   }
 
   .z-responsive-lg {
-    @apply z-20 sm:z-30;
+    z-index: 20;
+  }
+  
+  @media (min-width: 640px) {
+    .z-responsive-lg {
+      z-index: 30;
+    }
   }
 
   .z-responsive-xl {
-    @apply z-30 sm:z-40;
+    z-index: 30;
+  }
+  
+  @media (min-width: 640px) {
+    .z-responsive-xl {
+      z-index: 40;
+    }
   }
 
   /* Responsive visibility - using Tailwind's responsive prefixes */
   .visible-mobile {
-    @apply block sm:hidden;
+    display: block;
+  }
+  
+  @media (min-width: 640px) {
+    .visible-mobile {
+      display: none;
+    }
   }
 
   .visible-tablet {
-    @apply hidden sm:block lg:hidden;
+    display: none;
+  }
+  
+  @media (min-width: 640px) {
+    .visible-tablet {
+      display: block;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .visible-tablet {
+      display: none;
+    }
   }
 
   .visible-desktop {
-    @apply hidden lg:block;
+    display: none;
+  }
+  
+  @media (min-width: 1024px) {
+    .visible-desktop {
+      display: block;
+    }
   }
 
   .hidden-mobile {
-    @apply hidden sm:block;
+    display: none;
+  }
+  
+  @media (min-width: 640px) {
+    .hidden-mobile {
+      display: block;
+    }
   }
 
   .hidden-tablet {
-    @apply block sm:hidden lg:block;
+    display: block;
+  }
+  
+  @media (min-width: 640px) {
+    .hidden-tablet {
+      display: none;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .hidden-tablet {
+      display: block;
+    }
   }
 
   .hidden-desktop {
-    @apply block lg:hidden;
+    display: block;
+  }
+  
+  @media (min-width: 1024px) {
+    .hidden-desktop {
+      display: none;
+    }
   }
 }
 
@@ -227,71 +599,351 @@
 @layer components {
   /* Hero section */
   .hero-responsive {
-    @apply py-12 sm:py-16 md:py-20 lg:py-24;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  
+  @media (min-width: 640px) {
+    .hero-responsive {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .hero-responsive {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .hero-responsive {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
   }
 
   .hero-content-responsive {
-    @apply container-responsive mx-auto text-center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+  
+  @media (min-width: 640px) {
+    .hero-content-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .hero-content-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .hero-content-responsive {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .hero-content-responsive {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
   }
 
   .hero-title-responsive {
-    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  
+  @media (min-width: 640px) {
+    .hero-title-responsive {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .hero-title-responsive {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .hero-title-responsive {
+      font-size: 3rem;
+      line-height: 1;
+    }
   }
 
   .hero-description-responsive {
-    @apply text-base sm:text-lg text-muted-foreground mt-4 sm:mt-6 max-w-2xl mx-auto;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: var(--muted-foreground);
+    margin-top: 1rem;
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (min-width: 640px) {
+    .hero-description-responsive {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+      margin-top: 1.5rem;
+    }
   }
 
   /* Section spacing */
   .section-responsive {
-    @apply py-8 sm:py-12 md:py-16 lg:py-20;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  @media (min-width: 640px) {
+    .section-responsive {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .section-responsive {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .section-responsive {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
   }
 
   .section-content-responsive {
-    @apply container-responsive mx-auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  @media (min-width: 640px) {
+    .section-content-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .section-content-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .section-content-responsive {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .section-content-responsive {
+      padding-left: 4rem;
+      padding-right: 4rem;
+    }
   }
 
   /* Card grid - using Tailwind's responsive prefixes */
   .card-grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .card-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .card-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   .card-grid-responsive-2 {
-    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .card-grid-responsive-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
   }
 
   .card-grid-responsive-4 {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .card-grid-responsive-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .card-grid-responsive-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* Feature grid - using Tailwind's responsive prefixes */
   .feature-grid-responsive {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .feature-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .feature-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   /* Stats grid - using Tailwind's responsive prefixes */
   .stats-grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .stats-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .stats-grid-responsive {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* Testimonial grid - using Tailwind's responsive prefixes */
   .testimonial-grid-responsive {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .testimonial-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .testimonial-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   /* Pricing grid - using Tailwind's responsive prefixes */
   .pricing-grid-responsive {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .pricing-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .pricing-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   /* Team grid - using Tailwind's responsive prefixes */
   .team-grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .team-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .team-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .team-grid-responsive {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* Blog grid - using Tailwind's responsive prefixes */
   .blog-grid-responsive {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .blog-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .blog-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 }
 
@@ -299,60 +951,136 @@
 @layer utilities {
   /* Mobile menu */
   .mobile-menu {
-    @apply fixed inset-0 z-50 bg-background/80 backdrop-blur-sm;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    background-color: color-mix(in srgb, var(--background) 80%, transparent);
+    backdrop-filter: blur(4px);
   }
 
   .mobile-menu-content {
-    @apply fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-background shadow-xl;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 50;
+    width: 100%;
+    max-width: 24rem;
+    background-color: var(--background);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   }
 
   /* Mobile drawer */
   .mobile-drawer {
-    @apply fixed inset-0 z-50;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
   }
 
   .mobile-drawer-content {
-    @apply fixed inset-y-0 left-0 z-50 w-full max-w-sm bg-background shadow-xl;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: 100%;
+    max-width: 24rem;
+    background-color: var(--background);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   }
 
   /* Mobile bottom sheet */
   .mobile-bottom-sheet {
-    @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t border-border shadow-xl;
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    background-color: var(--background);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
   }
 
   /* Mobile floating action button */
   .mobile-fab {
-    @apply fixed bottom-4 right-4 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 40;
+    height: 3.5rem;
+    width: 3.5rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   }
 
   /* Mobile search bar */
   .mobile-search {
-    @apply fixed top-0 left-0 right-0 z-50 bg-background border-b border-border p-4;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background-color: var(--background);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem;
   }
 
   /* Mobile notification */
   .mobile-notification {
-    @apply fixed top-4 left-4 right-4 z-50 mx-auto max-w-sm;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 50;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 24rem;
   }
 
   /* Mobile modal */
   .mobile-modal {
-    @apply fixed inset-0 z-50 bg-background/80 backdrop-blur-sm;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    background-color: color-mix(in srgb, var(--background) 80%, transparent);
+    backdrop-filter: blur(4px);
   }
 
   .mobile-modal-content {
-    @apply fixed inset-x-0 bottom-0 z-50 bg-background border-t border-border shadow-xl rounded-t-xl;
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    background-color: var(--background);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
   }
 }
 
 /* Print styles */
 @media print {
   .print-hidden {
-    @apply hidden;
+    display: none;
   }
 
   .print-visible {
-    @apply block;
+    display: block;
   }
 
   .print-break-before {
@@ -371,45 +1099,49 @@
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .high-contrast {
-    @apply border-2 border-foreground;
+    border: 2px solid var(--foreground);
   }
 
   .high-contrast-text {
-    @apply font-bold;
+    font-weight: 700;
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .motion-reduce {
-    @apply transition-none;
+    transition: none;
   }
 
   .motion-reduce * {
-    @apply animate-none;
+    animation: none;
   }
 }
 
 /* Focus visible support */
-.focus-visible {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+.focus-visible:focus-visible {
+  outline: none;
+  ring: 2px;
+  ring-color: var(--ring);
+  ring-offset: 2px;
 }
 
 /* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .touch-device {
-    @apply touch-manipulation;
+    touch-action: manipulation;
   }
 
   .touch-device button {
-    @apply min-h-[44px] min-w-[44px];
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .touch-device input {
-    @apply min-h-[44px];
+    min-height: 44px;
   }
 
   .touch-device select {
-    @apply min-h-[44px];
+    min-height: 44px;
   }
 }

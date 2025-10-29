@@ -282,3 +282,5 @@ The custom responsive classes I created were unnecessary complexity. Tailwind's 
 - [Tailwind Container Queries](https://tailwindcss.com/docs/responsive-design#container-queries)
 
 
+
+
