@@ -143,15 +143,33 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
   }
+  
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
   }
   
   /* Mobile-first responsive improvements */
   .container {
-    @apply px-4 sm:px-6 lg:px-8;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
   }
   
   /* Better mobile scrolling */
@@ -161,13 +179,21 @@
   
   /* Mobile-friendly form spacing */
   .space-y-6 > * + * {
-    @apply mt-4 sm:mt-6;
+    margin-top: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .space-y-6 > * + * {
+      margin-top: 1.5rem;
+    }
   }
   
   /* Better mobile button sizing */
   @media (max-width: 640px) {
     .btn-mobile {
-      @apply min-h-[44px] px-4;
+      min-height: 44px;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
   }
 }
