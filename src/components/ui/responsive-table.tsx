@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { cn } from '@/lib/utils'
@@ -80,7 +81,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
     if (searchTerm) {
       result = result.filter(row =>
         columns.some(column => {
-          const value = getNestedValue(row, column.key)
+          const value = getNestedValue(row, column.key as string)
           return String(value).toLowerCase().includes(searchTerm.toLowerCase())
         })
       )
@@ -150,7 +151,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
   }
 
   const renderCell = (column: ResponsiveTableColumn<T>, row: T, index: number) => {
-    const value = getNestedValue(row, column.key)
+    const value = getNestedValue(row, column.key as string)
     
     if (column.render) {
       return column.render(value, row, index)
@@ -245,7 +246,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">All</SelectItem>
-                        {Array.from(new Set(data.map(row => getNestedValue(row, column.key))))
+                        {Array.from(new Set(data.map(row => getNestedValue(row, column.key as string))))
                           .map((value) => (
                             <SelectItem key={String(value)} value={String(value)}>
                               {String(value)}
