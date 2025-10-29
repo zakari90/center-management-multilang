@@ -67,7 +67,11 @@ export default function ReceiptDetailPage() {
     }
   }
 
-  const handlePrint = () => window.print()
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print()
+    }
+  }
 
   if (isLoading) {
     return (
