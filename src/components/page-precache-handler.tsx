@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useTranslations } from 'next-intl'
-import { Progress } from '@/components/ui/progress'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Download, CheckCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { CheckCircle, Download, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 // Pages to precache for offline-first experience
 const PAGES_TO_PRECACHE = [
@@ -36,7 +35,6 @@ const PAGES_TO_PRECACHE = [
 const LOCALES = ['en', 'ar', 'fr']
 
 export default function PagePrecacheHandler() {
-  const t = useTranslations('PWAUpdate')
   const [isPrecaching, setIsPrecaching] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
