@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { ReactNode, useEffect, useState, useRef } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 
 interface AnimationProps {
   children: ReactNode
@@ -212,7 +212,7 @@ export function ScaleIn({
 }
 
 interface StaggerProps {
-  children: ReactNode[]
+  children?: ReactNode[]
   className?: string
   staggerDelay?: number
   delay?: number
@@ -232,7 +232,7 @@ export function Stagger({
 }: StaggerProps) {
   return (
     <div className={cn('space-y-4', className)}>
-      {children.map((child, index) => (
+      {children?.map((child, index) => (
         <Animate
           key={index}
           direction="fade"
@@ -268,12 +268,7 @@ export function Parallax({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (elementRef.current) {
-        const rect = elementRef.current.getBoundingClientRect()
-        const elementTop = rect.top + window.scrollY
-        const elementHeight = rect.height
-        const windowHeight = window.innerHeight
-        
+      if (elementRef.current) {        
         const scrolled = window.scrollY
         const rate = scrolled * speed
         const yPos = direction === 'up' ? -(rate + offset) : (rate + offset)
@@ -548,7 +543,6 @@ export function MorphingText({
   texts,
   className,
   duration = 2000,
-  delay = 0
 }: MorphingTextProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
 

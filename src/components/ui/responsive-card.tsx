@@ -59,7 +59,7 @@ export const ResponsiveCard = forwardRef<HTMLDivElement, ResponsiveCardProps>(
 ResponsiveCard.displayName = 'ResponsiveCard'
 
 interface ResponsiveCardHeaderProps {
-  children: ReactNode
+  children?: ReactNode
   className?: string
   title?: string
   description?: string

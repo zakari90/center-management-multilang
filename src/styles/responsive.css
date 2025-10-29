@@ -1,38 +1,13 @@
-/* Responsive Design System - Mobile First Approach */
+/* Responsive Design System - Using Tailwind's Native Responsive Utilities */
 
-/* Base responsive utilities */
+/* Base responsive utilities - using Tailwind's built-in responsive system */
 @layer utilities {
-  /* Container responsive padding */
+  /* Container responsive padding - using Tailwind's responsive prefixes */
   .container-responsive {
     @apply px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16;
   }
 
-  /* Responsive text sizing */
-  .text-responsive-xs {
-    @apply text-xs sm:text-sm;
-  }
-
-  .text-responsive-sm {
-    @apply text-sm sm:text-base;
-  }
-
-  .text-responsive-base {
-    @apply text-base sm:text-lg;
-  }
-
-  .text-responsive-lg {
-    @apply text-lg sm:text-xl md:text-2xl;
-  }
-
-  .text-responsive-xl {
-    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
-  }
-
-  .text-responsive-2xl {
-    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
-  }
-
-  /* Responsive spacing */
+  /* Responsive spacing - using Tailwind's responsive prefixes */
   .space-responsive {
     @apply space-y-4 sm:space-y-6 md:space-y-8;
   }
@@ -41,37 +16,7 @@
     @apply gap-4 sm:gap-6 md:gap-8;
   }
 
-  /* Responsive grid */
-  .grid-responsive {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
-  }
-
-  .grid-responsive-2 {
-    @apply grid grid-cols-1 sm:grid-cols-2;
-  }
-
-  .grid-responsive-3 {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
-  }
-
-  .grid-responsive-4 {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
-  }
-
-  /* Responsive flex */
-  .flex-responsive {
-    @apply flex flex-col sm:flex-row;
-  }
-
-  .flex-responsive-col {
-    @apply flex flex-col;
-  }
-
-  .flex-responsive-row {
-    @apply flex flex-row;
-  }
-
-  /* Mobile-first button sizing */
+  /* Mobile-first button sizing - using Tailwind's responsive prefixes */
   .btn-mobile {
     @apply min-h-[44px] min-w-[44px] px-4 py-2 text-sm;
   }
@@ -85,7 +30,7 @@
     @apply min-h-[44px] min-w-[44px];
   }
 
-  /* Responsive cards */
+  /* Responsive cards - using Tailwind's responsive prefixes */
   .card-responsive {
     @apply rounded-lg border bg-card p-4 sm:p-6 shadow-sm;
   }
@@ -98,7 +43,7 @@
     @apply rounded-xl border bg-card p-6 sm:p-8 shadow-md;
   }
 
-  /* Responsive tables */
+  /* Responsive tables - using Tailwind's responsive prefixes */
   .table-responsive {
     @apply w-full overflow-x-auto;
   }
@@ -107,7 +52,7 @@
     @apply min-w-full divide-y divide-border;
   }
 
-  /* Responsive modals and dialogs */
+  /* Responsive modals and dialogs - using Tailwind's responsive prefixes */
   .modal-responsive {
     @apply w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl;
   }
@@ -120,7 +65,7 @@
     @apply w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl;
   }
 
-  /* Responsive navigation */
+  /* Responsive navigation - using Tailwind's responsive prefixes */
   .nav-responsive {
     @apply flex flex-col sm:flex-row;
   }
@@ -129,7 +74,7 @@
     @apply block px-3 py-2 text-sm font-medium rounded-md;
   }
 
-  /* Responsive sidebar */
+  /* Responsive sidebar - using Tailwind's responsive prefixes */
   .sidebar-responsive {
     @apply fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out;
   }
@@ -144,7 +89,7 @@
     }
   }
 
-  /* Responsive forms */
+  /* Responsive forms - using Tailwind's responsive prefixes */
   .form-responsive {
     @apply space-y-4 sm:space-y-6;
   }
@@ -161,7 +106,7 @@
     @apply w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
   }
 
-  /* Responsive charts */
+  /* Responsive charts - using Tailwind's responsive prefixes */
   .chart-responsive {
     @apply w-full h-64 sm:h-80 md:h-96;
   }
@@ -174,7 +119,7 @@
     @apply w-full h-80 sm:h-96 md:h-[28rem];
   }
 
-  /* Responsive images */
+  /* Responsive images - using Tailwind's responsive prefixes */
   .img-responsive {
     @apply w-full h-auto object-cover;
   }
@@ -187,20 +132,7 @@
     @apply w-full aspect-video object-cover;
   }
 
-  /* Responsive animations */
-  .animate-fade-in {
-    @apply animate-in fade-in duration-300;
-  }
-
-  .animate-slide-in {
-    @apply animate-in slide-in-from-bottom-4 duration-300;
-  }
-
-  .animate-scale-in {
-    @apply animate-in zoom-in-95 duration-200;
-  }
-
-  /* Responsive shadows */
+  /* Responsive shadows - using Tailwind's responsive prefixes */
   .shadow-responsive {
     @apply shadow-sm sm:shadow-md;
   }
@@ -209,7 +141,7 @@
     @apply shadow-md sm:shadow-lg;
   }
 
-  /* Responsive borders */
+  /* Responsive borders - using Tailwind's responsive prefixes */
   .border-responsive {
     @apply border border-border;
   }
@@ -230,7 +162,7 @@
     @apply border-r border-border;
   }
 
-  /* Responsive overflow */
+  /* Responsive overflow - using Tailwind's responsive prefixes */
   .overflow-responsive {
     @apply overflow-hidden sm:overflow-visible;
   }
@@ -243,7 +175,7 @@
     @apply overflow-y-auto sm:overflow-y-visible;
   }
 
-  /* Responsive positioning */
+  /* Responsive positioning - using Tailwind's responsive prefixes */
   .fixed-responsive {
     @apply fixed bottom-4 right-4 sm:bottom-6 sm:right-6;
   }
@@ -252,7 +184,7 @@
     @apply absolute inset-0 sm:inset-auto;
   }
 
-  /* Responsive z-index */
+  /* Responsive z-index - using Tailwind's responsive prefixes */
   .z-responsive {
     @apply z-10 sm:z-20;
   }
@@ -265,7 +197,7 @@
     @apply z-30 sm:z-40;
   }
 
-  /* Responsive visibility */
+  /* Responsive visibility - using Tailwind's responsive prefixes */
   .visible-mobile {
     @apply block sm:hidden;
   }
@@ -291,50 +223,7 @@
   }
 }
 
-/* Responsive typography scale */
-@layer base {
-  h1 {
-    @apply text-responsive-2xl font-bold tracking-tight;
-  }
-
-  h2 {
-    @apply text-responsive-xl font-semibold tracking-tight;
-  }
-
-  h3 {
-    @apply text-responsive-lg font-semibold;
-  }
-
-  h4 {
-    @apply text-responsive-base font-semibold;
-  }
-
-  h5 {
-    @apply text-responsive-sm font-medium;
-  }
-
-  h6 {
-    @apply text-responsive-xs font-medium;
-  }
-
-  p {
-    @apply text-responsive-sm leading-relaxed;
-  }
-
-  .text-muted {
-    @apply text-muted-foreground;
-  }
-
-  .text-small {
-    @apply text-responsive-xs;
-  }
-
-  .text-large {
-    @apply text-responsive-base;
-  }
-}
-
-/* Responsive layout patterns */
+/* Responsive layout patterns - using Tailwind's responsive prefixes */
 @layer components {
   /* Hero section */
   .hero-responsive {
@@ -346,11 +235,11 @@
   }
 
   .hero-title-responsive {
-    @apply text-responsive-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl;
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight;
   }
 
   .hero-description-responsive {
-    @apply text-responsive-base text-muted-foreground mt-4 sm:mt-6 max-w-2xl mx-auto;
+    @apply text-base sm:text-lg text-muted-foreground mt-4 sm:mt-6 max-w-2xl mx-auto;
   }
 
   /* Section spacing */
@@ -362,7 +251,7 @@
     @apply container-responsive mx-auto;
   }
 
-  /* Card grid */
+  /* Card grid - using Tailwind's responsive prefixes */
   .card-grid-responsive {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
   }
@@ -375,38 +264,38 @@
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
   }
 
-  /* Feature grid */
+  /* Feature grid - using Tailwind's responsive prefixes */
   .feature-grid-responsive {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
   }
 
-  /* Stats grid */
+  /* Stats grid - using Tailwind's responsive prefixes */
   .stats-grid-responsive {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6;
   }
 
-  /* Testimonial grid */
+  /* Testimonial grid - using Tailwind's responsive prefixes */
   .testimonial-grid-responsive {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
   }
 
-  /* Pricing grid */
+  /* Pricing grid - using Tailwind's responsive prefixes */
   .pricing-grid-responsive {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
   }
 
-  /* Team grid */
+  /* Team grid - using Tailwind's responsive prefixes */
   .team-grid-responsive {
     @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8;
   }
 
-  /* Blog grid */
+  /* Blog grid - using Tailwind's responsive prefixes */
   .blog-grid-responsive {
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8;
   }
 }
 
-/* Responsive utilities for specific use cases */
+/* Responsive utilities for specific use cases - using Tailwind's responsive prefixes */
 @layer utilities {
   /* Mobile menu */
   .mobile-menu {
