@@ -1,13 +1,5 @@
 /* Responsive Design System - Mobile First Approach */
 
-/* Breakpoints */
-/* xs: 0px - 475px (mobile) */
-/* sm: 476px - 639px (large mobile) */
-/* md: 640px - 767px (tablet portrait) */
-/* lg: 768px - 1023px (tablet landscape) */
-/* xl: 1024px - 1279px (desktop) */
-/* 2xl: 1280px+ (large desktop) */
-
 /* Base responsive utilities */
 @layer utilities {
   /* Container responsive padding */
