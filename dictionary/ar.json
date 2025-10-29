@@ -48,6 +48,18 @@
     "updateAvailable": "تحديث متاح",
     "updateError": "فشل التحديث"
   },
+  "ErrorHandling": {
+    "title": "عذراً! حدث خطأ ما",
+    "description": "واجهنا خطأ غير متوقع. لا تقلق، بياناتك آمنة.",
+    "errorTitle": "تفاصيل الخطأ",
+    "technicalDetails": "التفاصيل التقنية",
+    "errorStack": "تتبع الخطأ",
+    "componentStack": "تتبع المكونات",
+    "retry": "حاول مرة أخرى",
+    "dismiss": "إغلاق",
+    "goHome": "الذهاب للرئيسية",
+    "errorOccurred": "حدث خطأ"
+  },
   "auth": {
     "validation": {
       "usernameMin": "يجب أن يحتوي اسم المستخدم على 3 أحرف على الأقل",

@@ -19,6 +19,7 @@ export default function PWAUpdateHandler() {
   const [showUpdate, setShowUpdate] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null)
 
   useEffect(() => {
     // Check if app is already installed
@@ -39,23 +40,52 @@ export default function PWAUpdateHandler() {
       toast.success(t('appInstalled'))
     }
 
-    // Listen for service worker updates
-    const handleServiceWorkerUpdate = () => {
-      setShowUpdate(true)
-      toast.info(t('updateAvailable'))
-    }
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
     // Check for service worker updates
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', handleServiceWorkerUpdate)
-      
-      // Check for updates on load
+      let hasShownNotification = false
+
       navigator.serviceWorker.getRegistration().then(registration => {
         if (registration) {
-          registration.addEventListener('updatefound', handleServiceWorkerUpdate)
+          // Check if there's already a waiting worker
+          if (registration.waiting) {
+            setWaitingWorker(registration.waiting)
+            setShowUpdate(true)
+            if (!hasShownNotification) {
+              toast.info(t('updateAvailable'))
+              hasShownNotification = true
+            }
+          }
+
+          // Listen for new service worker installing
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // New service worker available
+                  setWaitingWorker(newWorker)
+                  setShowUpdate(true)
+                  // Only show toast if we haven't shown it yet
+                  if (!hasShownNotification) {
+                    toast.info(t('updateAvailable'))
+                    hasShownNotification = true
+                  }
+                }
+              })
+            }
+          })
+        }
+      })
+
+      // Listen for controller change (when new SW takes over)
+      let refreshing = false
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true
+          window.location.reload()
         }
       })
     }
@@ -63,9 +93,6 @@ export default function PWAUpdateHandler() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.removeEventListener('controllerchange', handleServiceWorkerUpdate)
-      }
     }
   }, [t])
 
@@ -89,18 +116,21 @@ export default function PWAUpdateHandler() {
   }
 
   const handleUpdate = async () => {
+    if (!waitingWorker) {
+      toast.error(t('updateError'))
+      return
+    }
+
     setIsUpdating(true)
     try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration()
-        if (registration?.waiting) {
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' })
-          window.location.reload()
-        }
-      }
-    } catch {
+      // Send skip waiting message to the waiting service worker
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' })
+      setShowUpdate(false)
+      toast.success(t('updating'))
+      // The page will reload automatically when controllerchange fires
+    } catch (error) {
+      console.error('Update error:', error)
       toast.error(t('updateError'))
-    } finally {
       setIsUpdating(false)
     }
   }

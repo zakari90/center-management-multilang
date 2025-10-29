@@ -15,12 +15,14 @@ function generatePrecacheEntries() {
     'register',
     
     // Admin routes
+    'admin',
     'admin/center',
     'admin/receipts',
     'admin/schedule',
     'admin/users',
     
     // Manager routes
+    'manager',
     'manager/receipts',
     'manager/receipts/create',
     'manager/receipts/create-teacher-payment',
@@ -52,8 +54,15 @@ const withPWA = withPWAInit({
   reloadOnOnline: true,
   swcMinify: true,
   disable: false,
+  register: true,
+  skipWaiting: false, // We control this manually via message handler
+  scope: "/",
+  sw: "sw.js",
+  customWorkerDir: "worker",
   workboxOptions: {
     disableDevLogs: true,
+    skipWaiting: false, // We'll handle this manually via message
+    clientsClaim: true,
     additionalManifestEntries: generatePrecacheEntries(),
     runtimeCaching: [
       {

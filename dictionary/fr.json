@@ -48,6 +48,18 @@
     "updateAvailable": "Mise à jour disponible",
     "updateError": "Échec de la mise à jour"
   },
+  "ErrorHandling": {
+    "title": "Oups! Une erreur s'est produite",
+    "description": "Nous avons rencontré une erreur inattendue. Ne vous inquiétez pas, vos données sont en sécurité.",
+    "errorTitle": "Détails de l'erreur",
+    "technicalDetails": "Détails techniques",
+    "errorStack": "Stack d'erreur",
+    "componentStack": "Stack des composants",
+    "retry": "Réessayer",
+    "dismiss": "Fermer",
+    "goHome": "Aller à l'accueil",
+    "errorOccurred": "Une erreur s'est produite"
+  },
   "auth": {
     "validation": {
       "usernameMin": "Le nom d'utilisateur doit contenir au moins 3 caractères",
@@ -712,7 +724,7 @@
     "studentsactive": "{count} inscriptions actives",
     "teacherstitle": "Enseignants totaux",
     "teacherssubtitle": "Enseigne {count} matières",
-    "monthlyRevenue.title": "Revenu mensuel",
+    "monthlyRevenuetitle": "Revenu mensuel",
     "monthlyRevenuegrowth": "+{percent}% par rapport au mois dernier",
     "totalRevenuetitle": "Revenu total",
     "totalRevenuesubtitle": "{count} reçus émis"

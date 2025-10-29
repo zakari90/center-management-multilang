@@ -128,6 +128,18 @@
     "warning": "Warning",
     "pending": "Pending"
   },
+  "ErrorHandling": {
+    "title": "Oops! Something went wrong",
+    "description": "We encountered an unexpected error. Don't worry, your data is safe.",
+    "errorTitle": "Error Details",
+    "technicalDetails": "Technical Details",
+    "errorStack": "Error Stack",
+    "componentStack": "Component Stack",
+    "retry": "Try Again",
+    "dismiss": "Dismiss",
+    "goHome": "Go Home",
+    "errorOccurred": "An error occurred"
+  },
   "auth": {
     "validation": {
       "usernameMin": "Username must be at least 3 characters",
