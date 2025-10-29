@@ -1,11 +1,12 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Button, ButtonProps } from './button'
+import { Button } from './button'
+import { ComponentProps } from 'react'
 import { forwardRef } from 'react'
 import { Loader2 } from 'lucide-react'
 
-interface ResponsiveButtonProps extends Omit<ButtonProps, 'size'> {
+interface ResponsiveButtonProps extends Omit<ComponentProps<'button'>, 'size'> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'icon'
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'gradient'
   loading?: boolean
@@ -72,10 +73,10 @@ export const ResponsiveButton = forwardRef<HTMLButtonElement, ResponsiveButtonPr
           'relative inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
           
           // Size classes
-          responsive ? responsiveSizeClasses[size] : sizeClasses[size],
+          responsive ? responsiveSizeClasses[size as keyof typeof responsiveSizeClasses] : sizeClasses[size as keyof typeof sizeClasses],
           
           // Variant classes
-          variantClasses[variant],
+          variantClasses[variant as keyof typeof variantClasses],
           
           // Touch classes
           touch && touchClasses.true,
@@ -106,7 +107,6 @@ interface ResponsiveButtonGroupProps {
   children: React.ReactNode
   className?: string
   orientation?: 'horizontal' | 'vertical'
-  size?: 'sm' | 'md' | 'lg'
   variant?: 'default' | 'outline'
   spacing?: 'none' | 'sm' | 'md' | 'lg'
   responsive?: boolean
@@ -117,11 +117,6 @@ const groupOrientationClasses = {
   vertical: 'flex-col'
 }
 
-const groupSizeClasses = {
-  sm: 'text-xs',
-  md: 'text-sm',
-  lg: 'text-base'
-}
 
 const groupSpacingClasses = {
   none: 'gap-0',
@@ -139,7 +134,6 @@ export function ResponsiveButtonGroup({
   children,
   className,
   orientation = 'horizontal',
-  size = 'md',
   variant = 'default',
   spacing = 'md',
   responsive = true
@@ -172,7 +166,6 @@ export function ResponsiveIconButton({
   label,
   'aria-label': ariaLabel,
   className,
-  size = 'md',
   ...props
 }: ResponsiveIconButtonProps) {
   return (
@@ -192,6 +185,7 @@ interface ResponsiveFloatingActionButtonProps extends Omit<ResponsiveButtonProps
   label: string
   position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
   fixed?: boolean
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 const fabPositionClasses = {
@@ -231,6 +225,7 @@ export function ResponsiveFloatingActionButton({
 interface ResponsiveToggleButtonProps extends Omit<ResponsiveButtonProps, 'variant'> {
   pressed?: boolean
   onPressedChange?: (pressed: boolean) => void
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'gradient'
 }
 
 export function ResponsiveToggleButton({
@@ -280,7 +275,7 @@ export function ResponsiveSplitButton({
   disabled = false
 }: ResponsiveSplitButtonProps) {
   return (
-    <ResponsiveButtonGroup className={className} size={size} variant={variant}>
+    <ResponsiveButtonGroup className={className} variant={variant}>
       <ResponsiveButton
         size={size}
         variant={variant}

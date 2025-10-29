@@ -1,11 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Activity, Wifi, WifiOff, Database, Clock, Zap } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Activity, Clock, Database, Wifi, WifiOff, Zap } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 interface PerformanceMetrics {
   isOnline: boolean
@@ -37,38 +38,7 @@ export default function PWAPerformanceMonitor() {
   })
   const [isVisible, setIsVisible] = useState(false)
 
-  useEffect(() => {
-    // Check if we're in development mode
-    const isDev = process.env.NODE_ENV === 'development'
-    if (!isDev) return
-
-    // Initial metrics collection
-    collectMetrics()
-
-    // Set up periodic updates
-    const interval = setInterval(collectMetrics, 5000)
-
-    // Listen for online/offline events
-    const handleOnline = () => {
-      setMetrics(prev => ({ ...prev, isOnline: true }))
-      collectMetrics()
-    }
-
-    const handleOffline = () => {
-      setMetrics(prev => ({ ...prev, isOnline: false }))
-    }
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [collectMetrics])
-
-  const collectMetrics = async () => {
+    const collectMetrics = async () => {
     try {
       // Network information
       const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
@@ -102,6 +72,38 @@ export default function PWAPerformanceMonitor() {
       console.error('Error collecting performance metrics:', error)
     }
   }
+  useEffect(() => {
+    // Check if we're in development mode
+    const isDev = process.env.NODE_ENV === 'development'
+    if (!isDev) return
+
+    // Initial metrics collection
+    collectMetrics()
+
+    // Set up periodic updates
+    const interval = setInterval(collectMetrics, 5000)
+
+    // Listen for online/offline events
+    const handleOnline = () => {
+      setMetrics(prev => ({ ...prev, isOnline: true }))
+      collectMetrics()
+    }
+
+    const handleOffline = () => {
+      setMetrics(prev => ({ ...prev, isOnline: false }))
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [collectMetrics])
+
+
 
   const getStorageInfo = async (): Promise<{ quota: number; usage: number }> => {
     try {
