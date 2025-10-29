@@ -514,9 +514,9 @@ export function createLazyComponent<T extends ComponentType<any>>(
 // Memoized component wrapper
 export function withMemo<T extends ComponentType<any>>(
   Component: T,
-  areEqual?: (prevProps: React.ComponentProps<T>, nextProps: React.ComponentProps<T>) => boolean
+  areEqual?: (prevProps: Readonly<React.ComponentProps<T>>, nextProps: Readonly<React.ComponentProps<T>>) => boolean
 ) {
-  return React.memo(Component as React.ComponentType<React.ComponentProps<T>>, areEqual)
+  return React.memo(Component, areEqual)
 }
 
 // Debounced hook
