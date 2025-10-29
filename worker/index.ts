@@ -5,6 +5,14 @@ import { registerRoute } from 'workbox-routing';
 import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
+// Extend ServiceWorkerGlobalScope to include Workbox properties
+declare global {
+  interface ServiceWorkerGlobalScope {
+    __WB_DISABLE_DEV_LOGS: boolean;
+    __WB_MANIFEST: any;
+  }
+}
+
 declare const self: ServiceWorkerGlobalScope;
 
 // Disable dev logs
