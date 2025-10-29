@@ -56,7 +56,6 @@ const withPWA = withPWAInit({
   disable: false,
   register: true,
   skipWaiting: false, // We control this manually via message handler
-  scope: "/",
   sw: "sw.js",
   customWorkerDir: "worker",
   workboxOptions: {
