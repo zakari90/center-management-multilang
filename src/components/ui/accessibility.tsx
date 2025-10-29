@@ -1,11 +1,10 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { Contrast, Eye, EyeOff, Keyboard, MousePointer, Type } from 'lucide-react'
 import { ReactNode, useEffect, useState } from 'react'
 import { Button } from './button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
-import { Badge } from './badge'
-import { Eye, EyeOff, Volume2, VolumeX, Type, Contrast, MousePointer, Keyboard } from 'lucide-react'
 
 interface AccessibilityProviderProps {
   children: ReactNode
