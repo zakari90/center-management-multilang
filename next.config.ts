@@ -2,10 +2,8 @@ import withPWAInit from "@ducanh2912/next-pwa";
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
 
-// Initialize plugins
 const withNextIntl = createNextIntlPlugin();
 
-// Initialize PWA plugin
 const withPWA = withPWAInit({
   dest: "public",
   cacheOnFrontEndNav: true,
@@ -14,14 +12,13 @@ const withPWA = withPWAInit({
   swcMinify: true,
   disable: false,
   workboxOptions: {
-    disableDevLogs: true,
-  },
+    disableDevLogs: true
+  }
+  // ❌ DO NOT include runtimeCaching -- this will error!
 });
 
-// Base Next.js configuration
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 };
 
-// Merge order: wrap one plugin inside the other
 export default withPWA(withNextIntl(nextConfig));
