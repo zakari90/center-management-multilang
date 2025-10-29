@@ -143,3 +143,13 @@ export function startSyncEngine(intervalMs: number = 30000) {
     clearInterval(syncInterval);
   };
 }
+
+// Export this function so it can be used by components
+export async function getPendingSyncCount(): Promise<number> {
+  try {
+    return await localDb.syncQueue.where('status').equals('pending').count();
+  } catch (error) {
+    console.error('Error getting pending sync count:', error);
+    return 0;
+  }
+}

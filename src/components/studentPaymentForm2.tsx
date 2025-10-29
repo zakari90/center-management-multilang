@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import axios from "axios"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertCircle, CheckCircle2, Loader2, QrCode, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import jsQR from "jsqr"
+import { getStudents, isAppOnline, apiPost } from "@/lib/apiClient"
+import { toast } from "sonner"
 
 interface StudentSubject {
   id: string
@@ -379,7 +380,8 @@ export default function CreateStudentPaymentForm() {
 
   const fetchStudents = useCallback(async () => {
     try {
-      const { data } = await axios.get("/api/students")
+      // Try to get students from cache/offline first if available
+      const data = await getStudents('')
       setStudents(data)
     } catch (err) {
       setError("Failed to load students")
@@ -463,24 +465,49 @@ export default function CreateStudentPaymentForm() {
         if (!selectedStudent) throw new Error("Please select a student")
         if (formData.selectedSubjects.length === 0) throw new Error("Please select at least one subject")
 
-        await axios.post("/api/receipts/student-payment", {
+        await apiPost("/api/receipts/student-payment", {
           studentId: selectedStudent.id,
           subjectIds: formData.selectedSubjects,
           paymentMethod: formData.paymentMethod,
           description: formData.description,
           date: formData.date,
+        }, {
+          offlineEntity: 'receipts',
+          offlineFallback: async () => {
+            // Handle offline receipt creation
+            const { addReceiptOffline } = await import('@/lib/offlineApi')
+            const userId = localStorage.getItem('auth') 
+              ? JSON.parse(localStorage.getItem('auth') || '{}').user?.id 
+              : ''
+            
+            const receiptData = {
+              studentId: selectedStudent.id,
+              subjectIds: formData.selectedSubjects,
+              paymentMethod: formData.paymentMethod,
+              description: formData.description,
+              date: formData.date,
+              amount: formData.selectedSubjects.reduce((total, subjectId) => {
+                const subject = selectedStudent.studentSubjects.find(ss => ss.subject.id === subjectId)
+                return total + (subject?.subject.price || 0)
+              }, 0)
+            }
+            
+            return await addReceiptOffline(receiptData, userId)
+          }
         })
+
+        if (isAppOnline()) {
+          toast.success("Receipt created successfully")
+        } else {
+          toast.success("Receipt saved offline - will sync when online")
+        }
 
         await router.push(preSelectedStudentId ? `/manager/students/${preSelectedStudentId}` : "/manager/receipts")
         router.refresh()
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.error || "Failed to create receipt")
-        } else if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError("Something went wrong")
-        }
+        const message = err instanceof Error ? err.message : "Failed to create receipt"
+        setError(message)
+        toast.error(message)
       } finally {
         setIsLoading(false)
       }
