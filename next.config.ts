@@ -52,15 +52,12 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  swcMinify: true,
   disable: false,
   register: true,
-  skipWaiting: false, // We control this manually via message handler
-  sw: "sw.js",
   customWorkerDir: "worker",
   workboxOptions: {
     disableDevLogs: true,
-    skipWaiting: false, // We'll handle this manually via message
+    skipWaiting: false,
     clientsClaim: true,
     additionalManifestEntries: generatePrecacheEntries(),
     runtimeCaching: [
@@ -88,7 +85,6 @@ const withPWA = withPWAInit({
         },
       },
       {
-        // Cache dynamic routes (e.g., /manager/students/[id])
         urlPattern: /^\/(en|ar|fr)\/(manager|admin)\/.*/,
         handler: 'NetworkFirst',
         options: {
@@ -101,8 +97,8 @@ const withPWA = withPWAInit({
         },
       },
     ],
-  } as any,
-});
+  },
+} as any); // Type assertion to bypass TypeScript error
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
