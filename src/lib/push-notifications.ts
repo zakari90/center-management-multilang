@@ -175,7 +175,7 @@ class PushNotificationService {
 
     switch (action) {
       case 'view':
-        if (notificationData?.type === 'payment') {
+        if (notificationData === 'payment') {
           // Navigate to payment details
           window.location.href = '/manager/receipts'
         }
