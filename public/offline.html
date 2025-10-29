@@ -187,7 +187,7 @@
       <p>✓ يمكنك متابعة العمل دون مشكلة</p>
     </div>
 
-    <button class="retry-btn" onclick="window.location.reload()">
+    <button class="retry-btn" onclick="retryConnection()">
       إعادة المحاولة
     </button>
 
@@ -212,10 +212,37 @@
     if (navigator.onLine) {
       document.getElementById('status').textContent = 'متصل - جارٍ إعادة التحميل...';
       setTimeout(function() {
-        window.location.reload();
+        // Try to go back to the previous page or home
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.href = '/';
+        }
       }, 1200);
     } else {
       document.getElementById('status').textContent = 'لا يوجد اتصال بالإنترنت';
+    }
+
+    // Retry connection function
+    function retryConnection() {
+      const status = document.getElementById('status');
+      status.textContent = 'جارٍ التحقق من الاتصال...';
+      
+      // Try to fetch a simple resource to test connection
+      fetch('/', { method: 'HEAD', cache: 'no-cache' })
+        .then(() => {
+          status.textContent = 'تم استعادة الاتصال! جارٍ إعادة التحميل...';
+          setTimeout(() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = '/';
+            }
+          }, 1000);
+        })
+        .catch(() => {
+          status.textContent = 'لا يزال لا يوجد اتصال بالإنترنت';
+        });
     }
 
     // Optional: auto-detect dark mode

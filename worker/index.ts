@@ -90,9 +90,108 @@ registerRoute(
   'GET'
 );
 
+// Add offline fallback for navigation requests
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  new NetworkFirst({
+    cacheName: 'pages',
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 24 * 60 * 60, // 24 hours
+      }),
+    ],
+  }),
+  'GET'
+);
+
+// Add offline fallback for all other requests
+registerRoute(
+  ({ request }) => request.destination === 'document',
+  new NetworkFirst({
+    cacheName: 'pages',
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 24 * 60 * 60, // 24 hours
+      }),
+    ],
+  }),
+  'GET'
+);
+
+// Add comprehensive offline fallback handler
+self.addEventListener('fetch', (event: any) => {
+  const { request } = event;
+  
+  // Handle navigation requests (page loads)
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          // If we get a response, cache it and return it
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open('pages').then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // If network fails, try to serve from cache first
+          return caches.match(request)
+            .then(cachedResponse => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              // If no cached version, serve offline page
+              return caches.match('/offline.html');
+            });
+        })
+    );
+  }
+  
+  // Handle document requests (HTML pages)
+  if (request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          // Cache successful responses
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open('pages').then(cache => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Try cache first, then offline page
+          return caches.match(request)
+            .then(cachedResponse => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              return caches.match('/offline.html');
+            });
+        })
+    );
+  }
+});
+
 // Log service worker lifecycle events
-self.addEventListener('install', () => {
+self.addEventListener('install', (event: any) => {
   console.log('[SW] Service worker installed');
+  
+  // Precache the offline page
+  event.waitUntil(
+    caches.open('offline-pages').then(cache => {
+      return cache.add('/offline.html');
+    })
+  );
 });
 
 self.addEventListener('activate', (event :any) => {

@@ -96,7 +96,21 @@ const withPWA = withPWAInit({
           },
         },
       },
+      {
+        urlPattern: /^\/(en|ar|fr)\/.*/,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'pages',
+          networkTimeoutSeconds: 3,
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 24 * 60 * 60,
+          },
+        },
+      },
     ],
+    navigateFallback: '/offline.html',
+    navigateFallbackDenylist: [/^\/_next\//, /^\/api\//],
   },
 } as any); // Type assertion to bypass TypeScript error
 
