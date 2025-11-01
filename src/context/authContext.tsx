@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
           }
         }
-      } catch (onlineError) {
+      } catch {
         console.log('Online auth check failed, trying offline...');
       }
       
