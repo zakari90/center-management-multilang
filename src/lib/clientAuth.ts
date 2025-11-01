@@ -2,7 +2,7 @@
 // src/lib/clientAuth.ts
 // Client-side authentication helper for offline operations
 
-import { localDb } from './dexie';
+import { localDb, Role } from './dexie';
 
 /**
  * Get current user from Dexie (for offline operations)
@@ -118,7 +118,7 @@ export async function setClientUser(user: { id: string; email: string; name: str
         id: user.id || existing.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: user.role as Role, // Cast to Role type
         updatedAt: new Date(),
         syncStatus: 'synced', // Mark as synced since it came from server
       });
@@ -129,7 +129,7 @@ export async function setClientUser(user: { id: string; email: string; name: str
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: user.role as Role, // Cast to Role type
         password: '', // Will be set when synced from server
         createdAt: new Date(),
         updatedAt: new Date(),
