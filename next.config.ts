@@ -5,38 +5,48 @@ import type { NextConfig } from "next";
 
 const withNextIntl = createNextIntlPlugin();
 
-// Generate precache entries for all routes
+// Generate precache entries for essential pages (precached on install for fast access)
 function generatePrecacheEntries() {
   const locales = ['en', 'ar', 'fr'];
-  const routes = [
-    // Auth routes
+  
+  // Essential pages that should be available immediately after install
+  const essentialRoutes = [
+    '', // Home page
     'login',
     'loginmanager',
     'register',
-    
-    // Admin routes
     'admin',
-    'admin/center',
-    'admin/receipts',
-    'admin/schedule',
-    'admin/users',
-    
-    // Manager routes
     'manager',
-    'manager/receipts',
-    'manager/receipts/create',
-    'manager/receipts/create-teacher-payment',
-    'manager/schedule',
+  ];
+  
+  // Important pages that should be cached but not critical for first install
+  const importantRoutes = [
+    'admin/center',
+    'admin/users',
     'manager/students',
-    'manager/students/create',
     'manager/teachers',
-    'manager/teachers/create',
+    'manager/receipts',
   ];
 
   const entries: Array<{ url: string; revision: null }> = [];
 
+  // Add offline page first (critical)
+  entries.push({
+    url: '/offline.html',
+    revision: null,
+  });
+
+  // Add essential routes for all locales
   locales.forEach(locale => {
-    routes.forEach(route => {
+    essentialRoutes.forEach(route => {
+      entries.push({
+        url: route ? `/${locale}/${route}` : `/${locale}`,
+        revision: null,
+      });
+    });
+    
+    // Add important routes
+    importantRoutes.forEach(route => {
       entries.push({
         url: `/${locale}/${route}`,
         revision: null,
@@ -57,9 +67,11 @@ const withPWA = withPWAInit({
   customWorkerDir: "worker",
   workboxOptions: {
     disableDevLogs: true,
-    skipWaiting: false,
+    skipWaiting: true, // Changed to true for faster activation
     clientsClaim: true,
     additionalManifestEntries: generatePrecacheEntries(),
+    // Note: Runtime caching is now handled in custom worker (worker/index.ts)
+    // for better control over caching strategies
     runtimeCaching: [
       {
         urlPattern: /^\/(_next\/static|static)\/.*/i,

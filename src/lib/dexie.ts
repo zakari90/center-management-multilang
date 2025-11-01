@@ -22,10 +22,9 @@ export interface LocalCenter {
 }
 
 export interface LocalUser {
-  id?: string
-  userId?: string // for relation with remote DB
+  id?: string // MongoDB ObjectId as string (matches Prisma User.id)
   email: string
-  password: string // hash or plaintext, must match Prisma (do NOT omit!)
+  password: string // hash, must match Prisma (do NOT omit!)
   name: string
   role: Role
   createdAt: Date

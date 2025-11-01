@@ -109,7 +109,9 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
         return
       }
       const hash = bcrypt.hashSync(values.password as string, 10)
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const user: LocalUser = {
+        id: tempId,
         email: values.email as string,
         name: values.username as string,
         password: hash,
@@ -119,6 +121,22 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
         syncStatus: "pending"
       }
       await localDb.users.add(user)
+      
+      // Add to sync queue
+      await localDb.syncQueue.add({
+        operation: 'CREATE',
+        entity: 'users',
+        entityId: tempId,
+        data: {
+          email: user.email,
+          name: user.name,
+          password: user.password,
+          role: user.role
+        },
+        timestamp: new Date(),
+        attempts: 0,
+        status: 'pending'
+      })
 
       setState({
         success: true,

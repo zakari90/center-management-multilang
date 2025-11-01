@@ -225,15 +225,14 @@ export function isAppOnline(): boolean {
 }
 
 /**
- * Get user ID from local storage (for offline operations)
+ * Get user ID from Dexie (for offline operations)
+ * This is client-side only and works offline
  */
-function getUserId(): string | null {
+async function getUserId(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
   try {
-    const authData = localStorage.getItem('auth');
-    if (!authData) return null;
-    const parsed = JSON.parse(authData);
-    return parsed.user?.id || null;
+    const { getClientUserId } = await import('./clientAuth');
+    return await getClientUserId();
   } catch {
     return null;
   }
@@ -247,7 +246,7 @@ function getUserId(): string | null {
  * Create a student with offline support
  */
 export async function createStudent(data: any): Promise<any> {
-  const userId = getUserId();
+  const userId = await getUserId();
   if (!userId) throw new Error('Not authenticated');
 
   return apiPost('/api/students', data, {
@@ -303,7 +302,7 @@ export async function deleteStudent(id: string): Promise<any> {
  * Create a teacher with offline support
  */
 export async function createTeacher(data: any): Promise<any> {
-  const userId = getUserId();
+  const userId = await getUserId();
   if (!userId) throw new Error('Not authenticated');
 
   return apiPost('/api/teachers', data, {
@@ -344,7 +343,7 @@ export async function updateTeacher(id: string, data: any): Promise<any> {
  * Create a receipt with offline support
  */
 export async function createReceipt(data: any): Promise<any> {
-  const userId = getUserId();
+  const userId = await getUserId();
   if (!userId) throw new Error('Not authenticated');
 
   return apiPost('/api/receipts', data, {
@@ -372,7 +371,7 @@ export async function getReceipts(managerId: string): Promise<any[]> {
  * Create a center with offline support
  */
 export async function createCenter(data: any): Promise<any> {
-  const userId = getUserId();
+  const userId = await getUserId();
   if (!userId) throw new Error('Not authenticated');
 
   return apiPost('/api/centers', data, {
@@ -443,7 +442,7 @@ export async function getSubjectsWithParams(params: any = {}): Promise<any[]> {
  * Create a schedule with offline support
  */
 export async function createSchedule(data: any): Promise<any> {
-  const userId = getUserId();
+  const userId = await getUserId();
   if (!userId) throw new Error('Not authenticated');
 
   return apiPost('/api/schedules', data, {

@@ -32,7 +32,19 @@ export async function syncWithServer() {
       try {
         await localDb.syncQueue.update(operation.id!, { status: 'syncing' });
 
-        const endpoint = `/api/${operation.entity}`;
+        // Map entity names to correct API endpoints
+        const entityEndpointMap: Record<string, string> = {
+          'users': 'admin/users',      // /api/admin/users
+          'center': 'center',          // /api/center (singular)
+          'schedules': 'admin/schedule', // /api/admin/schedule
+          'students': 'students',      // /api/students
+          'teachers': 'teachers',       // /api/teachers
+          'receipts': 'receipts',      // /api/receipts
+          'subjects': 'subjects',       // /api/subjects
+        };
+        
+        const endpointPath = entityEndpointMap[operation.entity] || operation.entity;
+        const endpoint = `/api/${endpointPath}`;
         let response;
 
         switch (operation.operation) {
@@ -69,15 +81,24 @@ export async function syncWithServer() {
           await localDb.syncQueue.delete(operation.id!);
           
           // Update local record with server ID if CREATE
+          // Note: operation.entity is the Dexie table name (users, students, teachers, etc.)
           if (operation.operation === 'CREATE' && result.id) {
-            const table = localDb.table(operation.entity);
-            await table.update(operation.entityId!, { 
-              id: result.id,
-              syncStatus: 'synced'
-            });
+            try {
+              const table = localDb.table(operation.entity);
+              await table.update(operation.entityId!, { 
+                id: result.id,
+                syncStatus: 'synced'
+              });
+            } catch (error) {
+              console.warn(`Could not update table ${operation.entity}:`, error);
+            }
           } else if (operation.entityId) {
-            const table = localDb.table(operation.entity);
-            await table.update(operation.entityId, { syncStatus: 'synced' });
+            try {
+              const table = localDb.table(operation.entity);
+              await table.update(operation.entityId, { syncStatus: 'synced' });
+            } catch (error) {
+              console.warn(`Could not update table ${operation.entity}:`, error);
+            }
           }
           
           successCount++;

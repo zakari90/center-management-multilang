@@ -83,6 +83,15 @@ export function LoginForm({
         .first()
       // Check password hash
       if (user && bcrypt.compareSync(values.password as string, user.password)) {
+        // Store logged in user in Dexie for offline access
+        const { setClientUser } = await import('@/lib/clientAuth');
+        await setClientUser({
+          id: user.id || '',
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        });
+        
         setState({
           success: true,
           data: { user, message: tOffline("offlineSuccessMessage") }

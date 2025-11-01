@@ -476,9 +476,8 @@ export default function CreateStudentPaymentForm() {
           offlineFallback: async () => {
             // Handle offline receipt creation
             const { addReceiptOffline } = await import('@/lib/offlineApi')
-            const userId = localStorage.getItem('auth') 
-              ? JSON.parse(localStorage.getItem('auth') || '{}').user?.id 
-              : ''
+            const { getClientUserId } = await import('@/lib/clientAuth')
+            const userId = await getClientUserId() || ''
             
             const receiptData = {
               studentId: selectedStudent.id,
@@ -486,6 +485,7 @@ export default function CreateStudentPaymentForm() {
               paymentMethod: formData.paymentMethod,
               description: formData.description,
               date: formData.date,
+              type: 'STUDENT_PAYMENT',
               amount: formData.selectedSubjects.reduce((total, subjectId) => {
                 const subject = selectedStudent.studentSubjects.find(ss => ss.subject.id === subjectId)
                 return total + (subject?.subject.price || 0)

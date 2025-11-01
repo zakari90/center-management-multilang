@@ -30,9 +30,12 @@ export async function addStudentOffline(studentData: any, managerId: string) {
   const tempId = generateTempId();
   const now = new Date();
   
+  // Extract enrollments if present
+  const { enrollments, ...studentInfo } = studentData;
+  
   const newStudent = {
     id: tempId,
-    ...studentData,
+    ...studentInfo,
     managerId,
     createdAt: now,
     updatedAt: now,
@@ -40,6 +43,24 @@ export async function addStudentOffline(studentData: any, managerId: string) {
   };
 
   await localDb.students.add(newStudent);
+  
+  // Save enrollments (studentSubjects) offline if provided
+  if (enrollments && Array.isArray(enrollments) && enrollments.length > 0) {
+    for (const enrollment of enrollments) {
+      const studentSubjectData = {
+        id: generateTempId(),
+        studentId: tempId,
+        subjectId: enrollment.subjectId,
+        teacherId: enrollment.teacherId,
+        enrolledAt: now,
+        syncStatus: 'pending' as const
+      };
+      
+      await localDb.studentSubjects.add(studentSubjectData);
+    }
+  }
+  
+  // Add student to sync queue (with enrollments included in data - API creates both together)
   await addToSyncQueue('CREATE', 'students', studentData, tempId);
   
   return newStudent;
@@ -103,17 +124,43 @@ export async function addReceiptOffline(receiptData: any, managerId: string) {
   const tempId = generateTempId();
   const now = new Date();
   
+  // Generate receipt number if not provided
+  const receiptNumber = receiptData.receiptNumber || `REC-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+  
+  // Determine receipt type based on data
+  const receiptType = receiptData.type || (receiptData.studentId ? 'STUDENT_PAYMENT' : 'TEACHER_PAYMENT');
+  
   const newReceipt = {
     id: tempId,
-    ...receiptData,
+    receiptNumber,
+    amount: receiptData.amount || 0,
+    type: receiptType,
+    description: receiptData.description || null,
+    paymentMethod: receiptData.paymentMethod || null,
+    date: receiptData.date ? new Date(receiptData.date) : now,
+    studentId: receiptData.studentId || null,
+    teacherId: receiptData.teacherId || null,
     managerId,
     createdAt: now,
-    date: receiptData.date || now,
     syncStatus: 'pending' as const
   };
 
   await localDb.receipts.add(newReceipt);
-  await addToSyncQueue('CREATE', 'receipts', receiptData, tempId);
+  
+  // Prepare data for sync (exclude internal fields)
+  const syncData = {
+    receiptNumber: newReceipt.receiptNumber,
+    amount: newReceipt.amount,
+    type: newReceipt.type,
+    description: newReceipt.description,
+    paymentMethod: newReceipt.paymentMethod,
+    date: newReceipt.date,
+    studentId: newReceipt.studentId,
+    teacherId: newReceipt.teacherId,
+    ...(receiptData.subjectIds && { subjectIds: receiptData.subjectIds })
+  };
+  
+  await addToSyncQueue('CREATE', 'receipts', syncData, tempId);
   
   return newReceipt;
 }
@@ -137,7 +184,7 @@ export async function addCenterOffline(centerData: any, adminId: string) {
   };
 
   await localDb.centers.add(newCenter);
-  await addToSyncQueue('CREATE', 'centers', centerData, tempId);
+  await addToSyncQueue('CREATE', 'center', centerData, tempId); // endpoint is /api/center (singular)
   
   return newCenter;
 }

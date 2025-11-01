@@ -74,6 +74,9 @@ import {
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { localDb } from '@/lib/dexie'
+import { isAppOnline } from '@/lib/apiClient'
+import bcrypt from 'bcryptjs'
 
 interface UserData {
   id: string
@@ -235,19 +238,78 @@ export default function AllUsersTable() {
 
     setIsProcessing(true)
     try {
-      console.log("Sending userFormData:", userFormData)
-      const response = await axios.post('/api/admin/users', userFormData)
-      setUsers(prev => [...prev, response.data])
+      const isOnline = isAppOnline()
+      
+      if (isOnline) {
+        // Online: Try API first
+        try {
+          console.log("Sending userFormData:", userFormData)
+          const response = await axios.post('/api/admin/users', userFormData)
+          setUsers(prev => [...prev, response.data])
+          setIsAddDialogOpen(false)
+          setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
+          toast(t('userAddedSuccess'))
+          setIsProcessing(false)
+          return
+        } catch (err) {
+          console.error('Online API failed, falling back to offline:', err)
+          // Fall through to offline handling
+        }
+      }
+      
+      // OFFLINE: Save to Dexie and sync queue
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const hash = bcrypt.hashSync(userFormData.password, 10)
+      
+      const offlineUser = {
+        id: tempId,
+        email: userFormData.email,
+        name: userFormData.name,
+        password: hash,
+        role: userFormData.role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        syncStatus: 'pending' as const
+      }
+      
+      await localDb.users.add(offlineUser)
+      
+      // Add to sync queue
+      await localDb.syncQueue.add({
+        operation: 'CREATE',
+        entity: 'users',
+        entityId: tempId,
+        data: {
+          email: offlineUser.email,
+          username: offlineUser.name,
+          password: userFormData.password, // Store plain password for sync
+          role: offlineUser.role
+        },
+        timestamp: new Date(),
+        attempts: 0,
+        status: 'pending'
+      })
+      
+      // Update UI with offline user
+      const displayUser = {
+        id: tempId,
+        name: offlineUser.name,
+        email: offlineUser.email,
+        role: offlineUser.role,
+        password: userFormData.password, // Display plain password
+        createdAt: new Date().toISOString(),
+        isActive: true,
+        stats: { centers: 0, students: 0, teachers: 0 }
+      }
+      
+      setUsers(prev => [...prev, displayUser])
       setIsAddDialogOpen(false)
       setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
-      toast(t('userAddedSuccess'))
-    } catch (err) {
-      console.log(err);
+      toast.success(isOnline ? t('userAddedSuccess') : 'Manager saved offline - will sync when online')
       
-      setIsAddDialogOpen(false)
-
+    } catch (err) {
       console.error('Failed to add Manager:', err)
-      toast(t('userAddedError'))
+      toast.error(t('userAddedError'))
     } finally {
       setIsProcessing(false)
     }

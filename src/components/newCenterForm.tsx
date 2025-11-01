@@ -7,14 +7,31 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import axios from "axios"
 import { Loader2 } from "lucide-react"
+import { createCenter, createSubject } from "@/lib/apiClient"
+import { addCenterOffline, addSubjectOffline } from "@/lib/offlineApi"
+import { localDb } from "@/lib/dexie"
+import { useAuth } from "@/context/authContext"
 
 export function NewCenterForm() {
   const t = useTranslations('NewCenterForm')
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
+  
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false)
+    const handleOffline = () => setIsOffline(true)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -55,10 +72,67 @@ export function NewCenterForm() {
       return
     }
 
+    if (!user?.id) {
+      toast.error('Not authenticated')
+      return
+    }
+
     setIsLoading(true)
     try {
-      await axios.post('/api/center', formData)
-      toast.success(t('successMessage'))
+      // Prepare center data
+      const centerData = {
+        name: formData.name,
+        address: formData.address,
+        phone: formData.phone,
+        classrooms: formData.classrooms,
+        workingDays: formData.workingDays
+      }
+
+      // Create center with offline support - use direct API call since endpoint is /api/center
+      let centerId: string | undefined
+      
+      if (!isOffline) {
+        try {
+          const response = await axios.post('/api/center', centerData)
+          centerId = response.data?.id
+        } catch (apiError) {
+          console.error('API call failed, using offline:', apiError)
+          // Fall through to offline
+        }
+      }
+      
+      // If online failed or offline, use offline storage
+      if (!centerId) {
+        const tempCenterId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        await addCenterOffline(centerData, user.id)
+        centerId = tempCenterId
+      }
+      
+      // Create subjects if any
+      if (formData.subjects.length > 0 && centerId) {
+        for (const subject of formData.subjects) {
+          try {
+            await createSubject({
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+              duration: subject.duration ? parseInt(subject.duration) : null,
+              centerId: centerId
+            })
+          } catch (subjectError) {
+            // If subject creation fails, save offline
+            await addSubjectOffline({
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+              duration: subject.duration ? parseInt(subject.duration) : null
+            }, centerId)
+          }
+        }
+      }
+      
+      toast.success(isOffline || !centerId ? 'Center saved offline - will sync when online' : t('successMessage'))
+      
       // Reset form
       setFormData({
         name: '',
@@ -70,7 +144,51 @@ export function NewCenterForm() {
       })
     } catch (error) {
       console.error('Error creating center:', error)
-      toast.error(t('errorMessage'))
+      
+      // Fallback to offline if online failed
+      if (!isOffline) {
+        try {
+          const tempCenterId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          const centerData = {
+            name: formData.name,
+            address: formData.address,
+            phone: formData.phone,
+            classrooms: formData.classrooms,
+            workingDays: formData.workingDays
+          }
+          
+          await addCenterOffline(centerData, user.id)
+          
+          // Save subjects offline
+          if (formData.subjects.length > 0) {
+            for (const subject of formData.subjects) {
+              await addSubjectOffline({
+                name: subject.name,
+                grade: subject.grade,
+                price: subject.price,
+                duration: subject.duration ? parseInt(subject.duration) : null
+              }, tempCenterId)
+            }
+          }
+          
+          toast.success('Center saved offline - will sync when online')
+          
+          // Reset form
+          setFormData({
+            name: '',
+            address: '',
+            phone: '',
+            classrooms: [],
+            workingDays: [],
+            subjects: []
+          })
+        } catch (offlineError) {
+          console.error('Offline save failed:', offlineError)
+          toast.error(t('errorMessage'))
+        }
+      } else {
+        toast.error(t('errorMessage'))
+      }
     } finally {
       setIsLoading(false)
     }

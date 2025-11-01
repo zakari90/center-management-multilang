@@ -58,6 +58,10 @@ export function LoginManager({
   useEffect(() => {
     if (state?.success && state?.data?.user) {
       login(state.data.user)
+      // Store user in Dexie for offline access
+      import('@/lib/clientAuth').then(({ setClientUser }) => {
+        setClientUser(state.data.user)
+      })
       setTimeout(() => {
         router.push("/manager")
       }, 10)

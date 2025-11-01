@@ -6,6 +6,8 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
+import { createTeacher } from "@/lib/apiClient"
+import { useAuth } from "@/context/authContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -313,10 +315,23 @@ const WeeklyScheduleSection = ({
 export default function CreateTeacherForm() {
   const router = useRouter()
   const t = useTranslations("CreateTeacherForm")
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
+  const [isOffline, setIsOffline] = useState(!navigator.onLine)
+  
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false)
+    const handleOffline = () => setIsOffline(true)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+    return () => {
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
 
   const DAYS = [
     t("monday"),
@@ -423,7 +438,14 @@ export default function CreateTeacherForm() {
       })),
     }
 
-    await axios.post("/api/teachers", payload)
+    // Use offline-capable API client
+    await createTeacher(payload)
+    
+    // Show success message
+    if (isOffline) {
+      // toast will be shown by apiClient
+    }
+    
     await router.push("/manager/teachers")
     router.refresh()
   } catch (err) {

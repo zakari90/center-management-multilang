@@ -288,3 +288,4 @@ The custom responsive classes I created were unnecessary complexity. Tailwind's 
 
 
 
+
