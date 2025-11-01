@@ -315,7 +315,6 @@ const WeeklyScheduleSection = ({
 export default function CreateTeacherForm() {
   const router = useRouter()
   const t = useTranslations("CreateTeacherForm")
-  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])

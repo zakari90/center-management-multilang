@@ -11,9 +11,8 @@ import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import axios from "axios"
 import { Loader2 } from "lucide-react"
-import { createCenter, createSubject } from "@/lib/apiClient"
+import { createSubject } from "@/lib/apiClient"
 import { addCenterOffline, addSubjectOffline } from "@/lib/offlineApi"
-import { localDb } from "@/lib/dexie"
 import { useAuth } from "@/context/authContext"
 
 export function NewCenterForm() {
@@ -119,7 +118,7 @@ export function NewCenterForm() {
               duration: subject.duration ? parseInt(subject.duration) : null,
               centerId: centerId
             })
-          } catch (subjectError) {
+          } catch {
             // If subject creation fails, save offline
             await addSubjectOffline({
               name: subject.name,
