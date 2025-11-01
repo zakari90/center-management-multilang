@@ -101,7 +101,7 @@ const withPWA = withPWAInit({
         handler: 'NetworkFirst',
         options: {
           cacheName: 'dynamic-pages',
-          networkTimeoutSeconds: 10,
+          networkTimeoutSeconds: 1, // Faster offline response
           expiration: {
             maxEntries: 100,
             maxAgeSeconds: 24 * 60 * 60,
@@ -113,7 +113,7 @@ const withPWA = withPWAInit({
         handler: 'NetworkFirst',
         options: {
           cacheName: 'pages',
-          networkTimeoutSeconds: 3,
+          networkTimeoutSeconds: 1, // Faster offline response
           expiration: {
             maxEntries: 50,
             maxAgeSeconds: 24 * 60 * 60,

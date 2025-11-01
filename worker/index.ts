@@ -148,11 +148,12 @@ registerRoute(
 // 3. AUTO-CACHE ALL NAVIGATION REQUESTS (Pages user visits)
 // ============================================
 // This automatically caches EVERY page the user visits
+// Using NetworkFirst with 1s timeout for faster offline response
 registerRoute(
   ({ request }) => request.mode === 'navigate',
   new NetworkFirst({
     cacheName: 'visited-pages-v2',
-    networkTimeoutSeconds: 3,
+    networkTimeoutSeconds: 1, // Reduced timeout for faster offline response
     plugins: [
       new CacheableResponsePlugin({
         statuses: [0, 200],
@@ -172,7 +173,7 @@ registerRoute(
   ({ request }) => request.destination === 'document',
   new NetworkFirst({
     cacheName: 'visited-pages-v2',
-    networkTimeoutSeconds: 3,
+    networkTimeoutSeconds: 1, // Reduced timeout for faster offline response
     plugins: [
       new CacheableResponsePlugin({
         statuses: [0, 200],
@@ -192,7 +193,7 @@ registerRoute(
   /^\/(en|ar|fr)\/(manager|admin)\/.*/,
   new NetworkFirst({
     cacheName: 'dashboard-pages-v2',
-    networkTimeoutSeconds: 5,
+    networkTimeoutSeconds: 1, // Reduced timeout for faster offline response
     plugins: [
       new CacheableResponsePlugin({
         statuses: [0, 200],
