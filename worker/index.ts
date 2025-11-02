@@ -4,75 +4,85 @@
 /// <reference lib="webworker" />
 
 // Serwist service worker - Simple cache-as-you-browse strategy
-import { Serwist } from "serwist";
+import { Serwist, CacheFirst, NetworkFirst, ExpirationPlugin } from "serwist";
 
 declare const self: ServiceWorkerGlobalScope;
 
+// Serwist/Next.js injects the manifest
 declare global {
   interface WorkerGlobalScope {
-    __SW_MANIFEST: any;
+    __SW_MANIFEST?: Array<{ url: string; revision: string | null }>;
+    __WB_MANIFEST?: Array<{ url: string; revision: string | null }>;
   }
 }
 
+// Get manifest from either __SW_MANIFEST or __WB_MANIFEST
+const manifest = (self.__SW_MANIFEST || self.__WB_MANIFEST || []) as Array<{ url: string; revision: string | null }>;
+
+console.log("[SW] Manifest entries:", manifest.length);
+
 // Create Serwist instance
 const serwist = new Serwist({
-  precacheEntries: self.__SW_MANIFEST || [],
+  precacheEntries: manifest,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
     {
-      urlPattern: ({ request }: { request: Request }) =>
+      matcher: ({ request }: { request: Request }) =>
         request.destination === "script" ||
         request.destination === "style" ||
         request.destination === "font" ||
         request.destination === "image",
-      handler: "CacheFirst",
-      options: {
+      handler: new CacheFirst({
         cacheName: "static-assets-v1",
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 200,
+            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith("/_next/static/"),
-      handler: "CacheFirst",
-      options: {
+      matcher: ({ url }: { url: URL }) => url.pathname.startsWith("/_next/static/"),
+      handler: new CacheFirst({
         cacheName: "next-static-v1",
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 365 * 24 * 60 * 60,
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 365 * 24 * 60 * 60,
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith("/api/"),
-      handler: "NetworkFirst",
-      options: {
+      matcher: ({ url }: { url: URL }) => url.pathname.startsWith("/api/"),
+      handler: new NetworkFirst({
         cacheName: "api-cache-v1",
         networkTimeoutSeconds: 2,
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 5 * 60, // 5 minutes
-        },
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 100,
+            maxAgeSeconds: 5 * 60, // 5 minutes
+          }),
+        ],
+      }),
     },
     {
-      urlPattern: ({ request }: { request: Request }) =>
+      matcher: ({ request }: { request: Request }) =>
         request.mode === "navigate" || request.destination === "document",
-      handler: "NetworkFirst",
-      options: {
+      handler: new NetworkFirst({
         cacheName: "pages-v1",
         networkTimeoutSeconds: 1,
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-          purgeOnQuotaError: true,
-        },
-        fallbackOnError: true,
-      },
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 200,
+            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+            purgeOnQuotaError: true,
+          }),
+        ],
+      }),
     },
   ],
 });
@@ -85,6 +95,18 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
+});
+
+// Install event
+self.addEventListener("install", (event: any) => {
+  console.log("[SW] Installing service worker...");
+  event.waitUntil(self.skipWaiting());
+});
+
+// Activate event
+self.addEventListener("activate", (event: any) => {
+  console.log("[SW] Activating service worker...");
+  event.waitUntil(self.clients.claim());
 });
 
 console.log("[SW] Serwist service worker loaded - caching pages as you visit them");

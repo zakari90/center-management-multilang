@@ -3,6 +3,7 @@ import PWAUpdateHandler from "@/components/pwa-update-handler";
 import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
 import PWATestingSuite from "@/components/pwa-testing-suite";
 import PagePrecacheHandler from "@/components/page-precache-handler";
+import ServiceWorkerRegister from "@/components/service-worker-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
@@ -123,6 +124,7 @@ export default async function RootLayout({
               {children}
               </SyncProvider>
                     {/* <PWADebug /> */}
+              <ServiceWorkerRegister />
               <InstallPWA />
               <PWAUpdateHandler />
               <PagePrecacheHandler />
