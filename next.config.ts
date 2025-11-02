@@ -8,10 +8,9 @@ const withNextIntl = createNextIntlPlugin();
 const withSerwist = withSerwistInit({
   swSrc: "worker/index.ts",
   swDest: "public/sw.js",
-  cacheOnFrontEndNav: true,
+  cacheOnNavigation: true,
   reloadOnOnline: true,
   disable: false,
-  disableDevLogs: true,
 });
 
 const nextConfig: NextConfig = {
