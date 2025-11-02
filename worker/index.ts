@@ -135,106 +135,36 @@ self.addEventListener("activate", (event: any) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Additional fetch handler to ensure ALL pages are cached
-// This works alongside Serwist's runtime caching
-self.addEventListener("fetch", (event: any) => {
+// Set catch handler for navigation requests when Serwist can't handle them
+serwist.setCatchHandler(async (event: any) => {
   const { request } = event;
-  const url = new URL(request.url);
   
-  // Skip API, Next.js internals, service worker, and non-HTML
-  if (
-    url.pathname.startsWith("/api/") ||
-    url.pathname.startsWith("/_next/") ||
-    url.pathname.startsWith("/sw.js") ||
-    url.pathname.includes("/worker/") ||
-    request.destination === "script" ||
-    request.destination === "style" ||
-    request.destination === "image" ||
-    request.destination === "font"
-  ) {
-    return; // Let Serwist handle these
-  }
-  
-  // Handle navigation and document requests (pages)
-  if (request.mode === "navigate" || request.destination === "document") {
-    event.respondWith(
-      (async () => {
-        const cache = await caches.open("pages-v1");
-        
-        try {
-          // Try network first (with timeout)
-          const networkPromise = fetch(request);
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Network timeout")), 1000)
-          );
-          
-          const networkResponse = await Promise.race([networkPromise, timeoutPromise]) as Response;
-          
-          // If successful, cache it for offline
-          if (networkResponse && networkResponse.ok) {
-            cache.put(request, networkResponse.clone()).catch((err) => {
-              console.warn("[SW] Failed to cache page:", err);
-            });
-            return networkResponse;
-          }
-          
-          throw new Error("Network response not ok");
-        } catch {
-          console.log("[SW] Network failed for:", url.pathname, "- checking cache...");
-          
-          // Try exact match first
-          let cachedResponse = await cache.match(request.url, {
-            ignoreSearch: true,
-            ignoreMethod: true,
-            ignoreVary: true,
-          });
-          
-          if (cachedResponse) {
-            console.log("[SW] ✓ Serving from cache:", url.pathname);
-            return cachedResponse;
-          }
-          
-          // Try matching by pathname (ignore query params)
-          cachedResponse = await cache.match(url.pathname, {
-            ignoreSearch: true,
-            ignoreMethod: true,
-            ignoreVary: true,
-          });
-          
-          if (cachedResponse) {
-            console.log("[SW] ✓ Serving cached page (by path):", url.pathname);
-            return cachedResponse;
-          }
-          
-          // Try matching any page in same locale
-          const pathParts = url.pathname.split("/");
-          if (pathParts.length >= 2) {
-            const locale = pathParts[1]; // e.g., "en", "ar", "fr"
-            const allCached = await cache.keys();
-            const localeMatch = allCached.find((req) => {
-              const reqUrl = new URL(req.url);
-              return reqUrl.pathname.startsWith(`/${locale}/`);
-            });
-            
-            if (localeMatch) {
-              const localeCached = await cache.match(localeMatch);
-              if (localeCached) {
-                console.log("[SW] ✓ Serving cached locale page");
-                return localeCached;
-              }
-            }
-          }
-          
-          // Last resort: offline page
-          const offlinePage = await cache.match("/offline.html");
-          if (offlinePage) {
-            console.log("[SW] → Serving offline page");
-            return offlinePage;
-          }
-          
-          // Final fallback
-          return new Response(
-            `<!DOCTYPE html>
+  // Only handle navigation requests
+  if (request.mode === "navigate") {
+    const cache = await caches.open("pages-v1");
+    
+    // Try to find any cached page
+    const cached = await cache.match(request, {
+      ignoreSearch: true,
+      ignoreMethod: true,
+      ignoreVary: true,
+    });
+    
+    if (cached) {
+      console.log("[SW] ✓ Serving from cache:", new URL(request.url).pathname);
+      return cached;
+    }
+    
+    // Try offline page
+    const offlinePage = await cache.match("/offline.html");
+    if (offlinePage) {
+      console.log("[SW] → Serving offline page");
+      return offlinePage;
+    }
+    
+    // Fallback HTML
+    return new Response(
+      `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -274,14 +204,13 @@ self.addEventListener("fetch", (event: any) => {
   </div>
 </body>
 </html>`,
-            {
-              headers: { "Content-Type": "text/html" },
-            }
-          );
-        }
-      })()
+      {
+        headers: { "Content-Type": "text/html" },
+      }
     );
   }
+  
+  return Response.error();
 });
 
 console.log("[SW] Serwist service worker loaded - caching all pages as you visit them");

@@ -64,7 +64,8 @@ export default function PagePrecacheHandler() {
     setShowPrompt(false)
     
     try {
-      const cache = await caches.open('offline-pages-v2')
+      // Use the same cache as the service worker
+      const cache = await caches.open('pages-v1')
       const totalPages = PAGES_TO_PRECACHE.length * LOCALES.length
       let cachedCount = 0
       let successCount = 0
