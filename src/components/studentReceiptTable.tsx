@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ModalLink } from '@/components/modal-link'
 import axios from 'axios'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -515,20 +516,20 @@ export default function StudentReceiptTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/receipts/${receipt.id}`}>
+                        <ModalLink href={`/manager/receipts/${receipt.id}`}>
                           <Eye className="mr-2 h-4 w-4" />
                           {t("viewDetails")}
-                        </Link>
+                        </ModalLink>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handlePrint(receipt.id)}>
                         <Printer className="mr-2 h-4 w-4" />
                         {t("printReceipt")}
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href={`/students/${receipt.student.id}`}>
+                        <ModalLink href={`/manager/students/${receipt.student.id}`}>
                           <User className="mr-2 h-4 w-4" />
                           {t("viewStudent")}
-                        </Link>
+                        </ModalLink>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

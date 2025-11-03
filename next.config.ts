@@ -8,13 +8,12 @@ const withNextIntl = createNextIntlPlugin();
 const withSerwist = withSerwistInit({
   swSrc: "worker/index.ts",
   swDest: "public/sw.js",
-  cacheOnNavigation: true,
-  reloadOnOnline: true,
-  disable: false,
 });
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+    turbopack: {}, // Add this line
+
 };
 
 export default withSerwist(withNextIntl(nextConfig));

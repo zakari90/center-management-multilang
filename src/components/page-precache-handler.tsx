@@ -88,7 +88,7 @@ export default function PagePrecacheHandler() {
       const totalPages = PAGES_TO_PRECACHE.length * LOCALES.length
       let cachedCount = 0
       let successCount = 0
-      let failedPages: string[] = []
+      const failedPages: string[] = []
 
       // Get current locale from URL
       const currentPath = window.location.pathname
@@ -215,15 +215,15 @@ export default function PagePrecacheHandler() {
   }
 
   // Check if user wants to manually trigger precaching
-  const canTriggerManually = () => {
-    const dismissed = localStorage.getItem('precache-dismissed')
-    if (dismissed) {
-      const dismissedTime = new Date(dismissed).getTime()
-      const hoursSinceDismiss = (new Date().getTime() - dismissedTime) / (1000 * 60 * 60)
-      return hoursSinceDismiss > 24 // Allow after 24 hours
-    }
-    return true
-  }
+  // const canTriggerManually = () => {
+  //   const dismissed = localStorage.getItem('precache-dismissed')
+  //   if (dismissed) {
+  //     const dismissedTime = new Date(dismissed).getTime()
+  //     const hoursSinceDismiss = (new Date().getTime() - dismissedTime) / (1000 * 60 * 60)
+  //     return hoursSinceDismiss > 24 // Allow after 24 hours
+  //   }
+  //   return true
+  // }
 
   if (!showPrompt && !isPrecaching) return null
 

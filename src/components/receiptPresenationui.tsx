@@ -41,6 +41,7 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 
 interface Receipt {
@@ -336,9 +337,9 @@ export default function ReceiptsTable() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/receipts/${receipt.id}`}>
+                          <ModalLink href={`/manager/receipts/${receipt.id}`}>
                             <Eye className="h-4 w-4" />
-                          </Link>
+                          </ModalLink>
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => window.print()}>
                           <Printer className="h-4 w-4" />

@@ -1,59 +1,23 @@
 // manager/students/[id]/card/page.tsx
-/* eslint-disable @typescript-eslint/no-explicit-any */
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import StudentCard from '@/components/studentCard'
-import PdfExporter from '@/components/pdfExporter'
-import { Loader2 } from 'lucide-react'
+import { useParams, useSearchParams } from "next/navigation"
+import { StudentCardContent } from "@/components/student-card-content"
+import { ModalContentWrapper } from "@/components/modal-content-wrapper"
 
 export default function StudentCardPage() {
-  const t = useTranslations('StudentCardPage')
   const params = useParams()
-  const [student, setStudent] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
+  const isModal = searchParams.get("modal") === "true"
+  const studentId = params.id as string
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const response = await fetch(`/api/students/${params.id}`)
-        if (response.ok) {
-          const data = await response.json()
-          setStudent(data)
-        }
-      } catch (error) {
-        console.error(t('errorFetchStudent'), error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const content = <StudentCardContent studentId={studentId} isModal={isModal} />
 
-    fetchStudent()
-  }, [params.id, t])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="animate-spin rounded-full h-12 w-12 "/>
-      </div>
-    )
+  // If modal query param is present, wrap in modal
+  // Otherwise, render as full page (supports deep linking)
+  if (isModal) {
+    return <ModalContentWrapper className="max-w-3xl">{content}</ModalContentWrapper>
   }
 
-  if (!student) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">{t('studentNotFound')}</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen py-12 px-4">
-      <PdfExporter fileName={student.name} >
-        <StudentCard student={student} showQR={true} />
-      </PdfExporter>
-    </div>
-  )
+  return <div className="min-h-screen">{content}</div>
 }

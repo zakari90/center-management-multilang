@@ -23,6 +23,7 @@ import axios from 'axios'
 import { Eye, Loader2, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 
 interface TeacherSubject {
@@ -233,11 +234,11 @@ export default function TeachersTable() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/manager/teachers/${teacher.id}`}>
+                        <ModalLink href={`/manager/teachers/${teacher.id}`}>
                           <Button variant="ghost" size="icon" title="View">
                             <Eye className="w-4 h-4" />
                           </Button>
-                        </Link>
+                        </ModalLink>
                         <Link href={`/manager/teachers/${teacher.id}/edit`}>
                           <Button variant="ghost" size="icon" title="Edit">
                             <Pencil className="w-4 h-4 text-green-600" />
