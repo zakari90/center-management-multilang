@@ -9,7 +9,7 @@ export default function ServiceWorkerRegister() {
       .then((registration) => {
         if (!registration) {
           navigator.serviceWorker
-            .register("/sw.js") // <-- Changed from /worker/index.ts to /sw.js
+            .register("/index.js") // <-- Changed from /worker/index.ts to /sw.js
             .then((reg) => {
               console.log("[SW] Service worker registered:", reg.scope);
             })
