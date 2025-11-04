@@ -21,9 +21,8 @@ export default function PWAInstallationGuide() {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null)
 
   const detectDevice = (): DeviceInfo => {
-    const userAgent = navigator.userAgent.toLowerCase()
-    
-    // Detect device type
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent.toLowerCase() : ''
+
     let type: 'mobile' | 'desktop' | 'tablet' = 'desktop'
     if (/mobile|android|iphone|ipod/.test(userAgent)) {
       type = 'mobile'
@@ -31,8 +30,7 @@ export default function PWAInstallationGuide() {
       type = 'tablet'
     }
 
-    // Detect OS
-    let os: 'ios' | 'android' | 'windows' | 'macos' | 'linux' | 'unknown' = 'unknown'
+    let os: DeviceInfo['os'] = 'unknown'
     if (/iphone|ipad|ipod/.test(userAgent)) {
       os = 'ios'
     } else if (/android/.test(userAgent)) {
@@ -45,8 +43,7 @@ export default function PWAInstallationGuide() {
       os = 'linux'
     }
 
-    // Detect browser
-    let browser: 'chrome' | 'firefox' | 'safari' | 'edge' | 'unknown' = 'unknown'
+    let browser: DeviceInfo['browser'] = 'unknown'
     if (/chrome/.test(userAgent) && !/edge/.test(userAgent)) {
       browser = 'chrome'
     } else if (/firefox/.test(userAgent)) {
@@ -173,7 +170,6 @@ export default function PWAInstallationGuide() {
         ]
       }
     }
-
     // Fallback for unsupported combinations
     return [
       {
@@ -193,26 +189,19 @@ export default function PWAInstallationGuide() {
 
   const getDeviceIcon = () => {
     if (!deviceInfo) return <Globe className="h-6 w-6" />
-    
     switch (deviceInfo.type) {
-      case 'mobile':
-        return <Smartphone className="h-6 w-6" />
-      case 'tablet':
-        return <Tablet className="h-6 w-6" />
-      case 'desktop':
-        return <Monitor className="h-6 w-6" />
-      default:
-        return <Globe className="h-6 w-6" />
+      case 'mobile': return <Smartphone className="h-6 w-6" />
+      case 'tablet': return <Tablet className="h-6 w-6" />
+      case 'desktop': return <Monitor className="h-6 w-6" />
+      default: return <Globe className="h-6 w-6" />
     }
   }
 
   const getDeviceName = () => {
     if (!deviceInfo) return t('unknownDevice')
-    
     const { type, os, browser } = deviceInfo
     const osName = os.charAt(0).toUpperCase() + os.slice(1)
     const browserName = browser.charAt(0).toUpperCase() + browser.slice(1)
-    
     return `${osName} ${browserName} (${type})`
   }
 
@@ -282,7 +271,6 @@ export default function PWAInstallationGuide() {
                   </p>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">{t('fasterLoading')}</CardTitle>
@@ -293,7 +281,6 @@ export default function PWAInstallationGuide() {
                   </p>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">{t('nativeExperience')}</CardTitle>
@@ -304,7 +291,6 @@ export default function PWAInstallationGuide() {
                   </p>
                 </CardContent>
               </Card>
-
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">{t('notifications')}</CardTitle>

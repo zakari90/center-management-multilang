@@ -1,9 +1,9 @@
 import InstallPWA from "@/components/installPWA";
-import PWAUpdateHandler from "@/components/pwa-update-handler";
 import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
 import PWATestingSuite from "@/components/pwa-testing-suite";
-import PagePrecacheHandler from "@/components/page-precache-handler";
-import ServiceWorkerRegister from "@/components/service-worker-register";
+import PWAUpdateHandler from "@/components/pwa-update-handler";
+// import PagePrecacheHandler from "@/components/page-precache-handler";
+import { SyncProvider } from "@/components/sync-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
@@ -17,7 +17,6 @@ import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
-import { SyncProvider } from "@/components/sync-provider";
 import LoadWS from "./loadws";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -81,10 +80,10 @@ export default async function RootLayout({
         
         {/* ✅ PWA Microsoft Specific */}
         <meta name="msapplication-TileImage" content="/icon-192x192.png" />
-        <meta name="msapplication-square70x70logo" content="/icon-72x72.png" />
+        {/* <meta name="msapplication-square70x70logo" content="/icon-72x72.png" /> */}
         <meta name="msapplication-square150x150logo" content="/icon-192x192.png" />
         <meta name="msapplication-wide310x150logo" content="/icon-192x192.png" />
-        <meta name="msapplication-square310x310logo" content="/icon-512x512.png" />
+        <meta name="msapplication-square310x310logo" content="/icon512_maskable.png" />
         
         {/* ✅ PWA Additional Meta Tags */}
         <meta name="mobile-web-app-capable" content="yes" />
@@ -127,10 +126,10 @@ export default async function RootLayout({
               {children}
               </SyncProvider>
                     {/* <PWADebug /> */}
-              <ServiceWorkerRegister />
+              {/* <ServiceWorkerRegister /> */}
               <InstallPWA />
               <PWAUpdateHandler />
-              <PagePrecacheHandler />
+              {/* <PagePrecacheHandler /> */}
               <PWAPerformanceMonitor />
               <PWATestingSuite />
               <Toaster />
