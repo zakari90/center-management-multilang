@@ -57,9 +57,9 @@ export class SyncManager {
           if (item.id?.startsWith('temp_')) {
             // Replace temp ID with server ID
             await DexieActions.updateItemId(item.id, response.data.id || item.id);
-          } else {
+          } else if (item.id) {
             // Update status to synced
-            await DexieActions.updateItemStatus(item.id!, '1');
+            await DexieActions.updateItemStatus(item.id, '1');
             if (response.data.id && response.data.id !== item.id) {
               // Server returned different ID, update it
               await DexieActions.updateItemId(item.id, response.data.id);
