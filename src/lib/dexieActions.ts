@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * DexieActions - Manages local IndexedDB operations with status tracking
  * Handles all CRUD operations on syncable items with status management
@@ -7,7 +6,7 @@ import Dexie, { Table } from 'dexie';
 import { SyncableItem } from './syncable-item';
 
 // Generic syncable items table
-interface SyncableItemTable extends Table<SyncableItem, string> {}
+type SyncableItemTable = Table<SyncableItem, string>;
 
 class SyncableItemsDB extends Dexie {
   items!: SyncableItemTable;
