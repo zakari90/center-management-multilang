@@ -1,18 +1,19 @@
-// center-management-multilang-pwa/src/lib/db.ts
-import { PrismaClient } from "@prisma/client"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/lib/db.ts
+import { PrismaClient } from "@prisma/client";
 
-const prismaClientSingleton = () => {
-  return new PrismaClient()
-}
 
-type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>
 
+// Correct global declaration (must match everywhere it appears in your codebase)
 declare global {
-  var prisma: undefined | PrismaClientSingleton
+  var prisma: any;
 }
 
-const db = globalThis.prisma ?? prismaClientSingleton()
+// Singleton: reuse global prisma in dev, create new in prod
+const db = global.prisma || new PrismaClient();
 
-export default db
+if (process.env.NODE_ENV !== "production") {
+  global.prisma = db;
+}
 
-if (process.env.NODE_ENV !== "production") globalThis.prisma = db
+export default db;
