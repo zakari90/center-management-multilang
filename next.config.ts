@@ -6,7 +6,7 @@ import withSerwistInit from "@serwist/next";
 const withNextIntl = createNextIntlPlugin();
 
 const withSerwist = withSerwistInit({
-  swSrc: "public/index.ts",
+  swSrc: "public/index.js",
   swDest: "public/sw.js",
 });
 
