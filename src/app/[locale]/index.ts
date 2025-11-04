@@ -18,8 +18,9 @@ const locales = ["en", "fr", "ar"] as const;
 
 // All STATIC page route fragments (NO dynamic segments like [id])
 const STATIC_PAGES = [
+  "/*",
   // Shell
-  "",
+  "/",
   // Auth
   "/login",
   "/loginmanager", //this a url or 

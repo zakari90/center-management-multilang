@@ -6,7 +6,7 @@ export default function LoadWS(){
 
     useEffect(() => {
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('worker/index.ts')
+          navigator.serviceWorker.register('/index.ts')
             .then(() => console.log('Service Worker registered'))
             .catch(console.error);
         }
