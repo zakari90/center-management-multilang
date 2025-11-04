@@ -1,0 +1,99 @@
+/* Homogenized styling for detail pages (modal and full page) */
+
+/* Consistent spacing */
+.detail-page-container {
+  @apply max-w-6xl mx-auto p-6;
+}
+
+.detail-page-container-modal {
+  @apply p-2;
+}
+
+/* Consistent header styling */
+.detail-header {
+  @apply mb-6 flex justify-between items-start;
+}
+
+.detail-header-modal {
+  @apply mb-4 flex justify-between items-start;
+}
+
+.detail-title {
+  @apply text-3xl font-bold text-foreground;
+}
+
+.detail-title-modal {
+  @apply text-2xl font-bold text-foreground;
+}
+
+.detail-subtitle {
+  @apply text-muted-foreground mt-1;
+}
+
+/* Stats cards grid */
+.detail-stats-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-6 mb-6;
+}
+
+.detail-stats-grid-modal {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4 mb-4;
+}
+
+.detail-stat-card {
+  @apply pt-6;
+}
+
+.detail-stat-label {
+  @apply text-sm text-muted-foreground mb-1;
+}
+
+.detail-stat-value {
+  @apply text-3xl font-bold;
+}
+
+/* Content sections */
+.detail-content-section {
+  @apply space-y-6;
+}
+
+.detail-content-section-modal {
+  @apply space-y-4;
+}
+
+.detail-info-card {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.detail-info-label {
+  @apply text-sm text-muted-foreground;
+}
+
+.detail-info-value {
+  @apply text-foreground;
+}
+
+/* Empty states */
+.detail-empty-state {
+  @apply text-muted-foreground text-center py-4;
+}
+
+/* Action buttons */
+.detail-action-button {
+  @apply mt-4 w-full;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .detail-page-container {
+    @apply p-4;
+  }
+  
+  .detail-title {
+    @apply text-2xl;
+  }
+  
+  .detail-stats-grid {
+    @apply gap-4;
+  }
+}
+

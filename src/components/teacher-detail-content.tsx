@@ -94,14 +94,14 @@ export function TeacherDetailContent({ teacherId, isModal = false }: TeacherDeta
     <>
       <PdfExporter>
         <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
-            <div>
+          <CardHeader className="flex flex-row justify-between items-center gap-4">
+            <div className="flex-1">
               <CardTitle className={isModal ? "text-xl font-semibold" : "text-2xl font-semibold"}>{teacher.name}</CardTitle>
-              <CardDescription>{t("overview")}</CardDescription>
+              <CardDescription className="mt-1">{t("overview")}</CardDescription>
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className={`${isModal ? "space-y-3" : "space-y-4"}`}>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">{t("email")}</p>
@@ -130,7 +130,7 @@ export function TeacherDetailContent({ teacherId, isModal = false }: TeacherDeta
             <CardDescription>{t("subjectsDesc")}</CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className={isModal ? "space-y-3" : "space-y-4"}>
             {teacher.teacherSubjects?.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("noSubjects")}</p>
             ) : (
@@ -166,7 +166,7 @@ export function TeacherDetailContent({ teacherId, isModal = false }: TeacherDeta
             <CardTitle>{t("scheduleTitle")}</CardTitle>
             <CardDescription>{t("scheduleDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className={isModal ? "space-y-2" : ""}>
             {teacher.weeklySchedule?.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("noSchedule")}</p>
             ) : (
@@ -189,18 +189,20 @@ export function TeacherDetailContent({ teacherId, isModal = false }: TeacherDeta
         </Card>
       </PdfExporter>
       {!isModal && (
-        <Button onClick={() => router.push(`/manager/teachers/${teacher.id}/edit`)}>
-          <Edit className="mr-2 h-4 w-4" />
-          {t("edit")}
-        </Button>
+        <div className="mt-6">
+          <Button onClick={() => router.push(`/manager/teachers/${teacher.id}/edit`)}>
+            <Edit className="mr-2 h-4 w-4" />
+            {t("edit")}
+          </Button>
+        </div>
       )}
     </>
   )
 
   if (isModal) {
-    return <div className="p-2 space-y-6">{content}</div>
+    return <div className={`p-2 ${isModal ? "space-y-4" : "space-y-6"}`}>{content}</div>
   }
 
-  return <div className="max-w-3xl mx-auto p-6 space-y-8">{content}</div>
+  return <div className="max-w-3xl mx-auto p-6 space-y-6">{content}</div>
 }
 

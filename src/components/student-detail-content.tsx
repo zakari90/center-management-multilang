@@ -96,16 +96,16 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
   const content = (
     <>
       <div className={isModal ? "mb-4" : "mb-6"}>
-        <div className="flex justify-between items-start">
-          <div>
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
             <h1 className={isModal ? "text-2xl font-bold text-foreground" : "text-3xl font-bold text-foreground"}>
               {student.name}
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-sm">
               {t("studentSince")} {new Date(student.createdAt).toLocaleDateString()}
             </p>
           </div>
-          <Button asChild size={isModal ? "sm" : "default"}>
+          <Button asChild size={isModal ? "sm" : "default"} className="shrink-0">
             <Link href={`/manager/students/${student.id}/edit`}>{t("editStudent")}</Link>
           </Button>
         </div>
@@ -133,9 +133,9 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 ${isModal ? "gap-4" : "gap-6"}`}>
         {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className={`lg:col-span-2 ${isModal ? "space-y-4" : "space-y-6"}`}>
           {/* Contact Information */}
           <Card>
             <CardHeader>
@@ -216,7 +216,7 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
         </div>
 
         {/* Right Column - Payment History */}
-        <div className="space-y-6">
+        <div className={isModal ? "space-y-4" : "space-y-6"}>
           <Card>
             <CardHeader>
               <CardTitle>{t("paymentHistory")}</CardTitle>

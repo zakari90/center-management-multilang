@@ -114,9 +114,11 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
 
       <div className={isModal ? "p-2" : "max-w-4xl mx-auto p-6"}>
         {/* Header */}
-        <div className="no-print mb-6 flex justify-between items-center">
-          <h1 className={isModal ? "text-2xl font-bold" : "text-3xl font-bold"}>{t("receiptDetails")}</h1>
-          <Button onClick={handlePrint} className="gap-2" size={isModal ? "sm" : "default"}>
+        <div className={`no-print ${isModal ? "mb-4" : "mb-6"} flex justify-between items-center gap-4`}>
+          <h1 className={isModal ? "text-2xl font-bold text-foreground" : "text-3xl font-bold text-foreground"}>
+            {t("receiptDetails")}
+          </h1>
+          <Button onClick={handlePrint} className="gap-2 shrink-0" size={isModal ? "sm" : "default"}>
             <Printer className="w-5 h-5" />
             {t("printReceipt")}
           </Button>
@@ -148,7 +150,7 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
 
           <CardContent className="pt-6">
             {/* Payer and Payment Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${isModal ? "gap-4 mb-4" : "gap-6 mb-6"}`}>
               {/* Payer */}
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">{t("paymentFrom")}</h3>
@@ -200,7 +202,7 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
 
             {/* Description */}
             {receipt.description && (
-              <div className="mb-6">
+              <div className={isModal ? "mb-4" : "mb-6"}>
                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">{t("description")}</h3>
                 <Card className="bg-muted">
                   <CardContent className="pt-6">
