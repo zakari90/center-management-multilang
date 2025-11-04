@@ -226,7 +226,7 @@ export async function deleteItem(
         await ServerAction.deleteItem(apiEndpoint, itemId);
         // If successful, delete locally
         await DexieActions.deleteItem(itemId);
-      } catch (error) {
+      } catch {
         // If it fails, it will be synced later
         // Item is already marked as "0", so it's fine
       }
