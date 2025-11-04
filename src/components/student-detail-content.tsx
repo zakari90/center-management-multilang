@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -55,7 +56,6 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
   const [student, setStudent] = useState<Student | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
-
   useEffect(() => {
     fetchStudent()
   }, [studentId])
