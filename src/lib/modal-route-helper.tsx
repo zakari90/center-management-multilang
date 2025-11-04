@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from "react"
+import { ModalContentWrapper } from "@/components/modal-content-wrapper"
 
 /**
  * Generic wrapper component for any detail page
@@ -25,8 +26,6 @@ export function createModalPageWrapper<T = string>(ContentComponent: (props: { i
     const content = ContentComponent({ itemId, isModal })
 
     if (isModal) {
-      // Dynamic import to avoid circular dependencies
-      const { ModalContentWrapper } = require("@/components/modal-content-wrapper")
       return <ModalContentWrapper>{content}</ModalContentWrapper>
     }
 
