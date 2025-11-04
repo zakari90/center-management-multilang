@@ -1,7 +1,6 @@
 import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
 import PWATestingSuite from "@/components/pwa-testing-suite";
 import PWAUpdateHandler from "@/components/pwa-update-handler";
-import ServiceWorkerRegister from "@/components/service-worker-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
@@ -15,6 +14,7 @@ import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
+import LoadWS from "./loadws";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -118,8 +118,8 @@ export default async function RootLayout({
           <NextIntlClientProvider>
             <AuthProvider>
               {/* <SyncProvider> */}
-                  {/* <LoadWS/> */}
-              <ServiceWorkerRegister />
+                  <LoadWS/>
+              {/* <ServiceWorkerRegister /> */}
 
               {children}
               {/* </SyncProvider> */}
