@@ -2,16 +2,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
-
-//
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-
-//
 enum Role {
   ADMIN 
   MANAGER
@@ -23,152 +18,163 @@ enum ReceiptType {
 }
 
 model Center {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  address     String?
-  phone       String?
-  classrooms  String[]
-  workingDays String[]
-  managers    String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  address       String?
+  phone         String?
+  classrooms    String[]
+  workingDays   String[]
+  managers      String[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  admin       User       @relation("AdminCenters", fields: [adminId], references: [id])
-  adminId     String     @db.ObjectId
-  schedules   Schedule[]
-  subjects    Subject[]
+  admin         User       @relation("AdminCenters", fields: [adminId], references: [id])
+  adminId       String     @db.ObjectId
+  schedules     Schedule[]
+  subjects      Subject[]
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  password  String
-  name      String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  email               String             @unique
+  password            String
+  name                String
+  role                Role
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
-  managedStudents     Student[]   @relation("UserManagedStudents")
-  managedTeachers     Teacher[]   @relation("UserManagedTeachers")
-  managedReceipts     Receipt[]   @relation("UserManagedReceipts")
-  administeredCenters Center[]    @relation("AdminCenters")
-  schedules           Schedule[]  @relation("ManagerSchedules")
+  managedStudents     Student[]          @relation("UserManagedStudents")
+  managedTeachers     Teacher[]          @relation("UserManagedTeachers")
+  managedReceipts     Receipt[]          @relation("UserManagedReceipts")
+  administeredCenters Center[]           @relation("AdminCenters")
+  schedules           Schedule[]         @relation("ManagerSchedules")
+  pushSubscriptions   PushSubscription[]
 }
 
 model Teacher {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  email          String?  @unique
-  phone          String?
-  address        String?
-  weeklySchedule Json?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  email            String?            @unique
+  phone            String?
+  address          String?
+  weeklySchedule   Json?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  manager           User                @relation("UserManagedTeachers", fields: [managerId], references: [id])
-  managerId         String              @db.ObjectId
-  schedules         Schedule[]
-  teacherSubjects   TeacherSubject[]
-  studentSubjects   StudentSubject[]    @relation("StudentTeacher")
-  receipts          Receipt[]
+  manager          User               @relation("UserManagedTeachers", fields: [managerId], references: [id])
+  managerId        String             @db.ObjectId
+  schedules        Schedule[]
+  teacherSubjects  TeacherSubject[]
+  studentSubjects  StudentSubject[]   @relation("StudentTeacher")
+  receipts         Receipt[]
 }
 
 model Student {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  email       String?  @unique
-  phone       String?
-  parentName  String?
-  parentPhone String?
-  parentEmail String?
-  grade       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  email            String?            @unique
+  phone            String?
+  parentName       String?
+  parentPhone      String?
+  parentEmail      String?
+  grade            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  manager         User              @relation("UserManagedStudents", fields: [managerId], references: [id])
-  managerId       String            @db.ObjectId
-  studentSubjects StudentSubject[]
-  receipts        Receipt[]
+  manager          User               @relation("UserManagedStudents", fields: [managerId], references: [id])
+  managerId        String             @db.ObjectId
+  studentSubjects  StudentSubject[]
+  receipts         Receipt[]
 }
 
 model Subject {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String   
-  grade     String  
-  price     Float
-  duration  Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  grade            String
+  price            Float
+  duration         Int?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
-  center              Center            @relation(fields: [centerId], references: [id])
-  centerId            String            @db.ObjectId
-  schedules           Schedule[]
-  teacherSubjects     TeacherSubject[]
-  studentSubjects     StudentSubject[]
+  center           Center             @relation(fields: [centerId], references: [id])
+  centerId         String             @db.ObjectId
+  schedules        Schedule[]
+  teacherSubjects  TeacherSubject[]
+  studentSubjects  StudentSubject[]
 }
 
 model TeacherSubject {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  percentage Float?
-  hourlyRate Float?
-  assignedAt DateTime @default(now())
-  
-  teacher    Teacher  @relation(fields: [teacherId], references: [id])
-  teacherId  String   @db.ObjectId
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-  subjectId  String   @db.ObjectId
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  percentage       Float?
+  hourlyRate       Float?
+  assignedAt       DateTime           @default(now())
+
+  teacher          Teacher            @relation(fields: [teacherId], references: [id])
+  teacherId        String             @db.ObjectId
+  subject          Subject            @relation(fields: [subjectId], references: [id])
+  subjectId        String             @db.ObjectId
 }
 
 model StudentSubject {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  enrolledAt DateTime @default(now())
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  enrolledAt       DateTime           @default(now())
 
-  student    Student  @relation(fields: [studentId], references: [id])
-  studentId  String   @db.ObjectId
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-  subjectId  String   @db.ObjectId
-  teacher    Teacher  @relation("StudentTeacher", fields: [teacherId], references: [id])
-  teacherId  String   @db.ObjectId
+  student          Student            @relation(fields: [studentId], references: [id])
+  studentId        String             @db.ObjectId
+  subject          Subject            @relation(fields: [subjectId], references: [id])
+  subjectId        String             @db.ObjectId
+  teacher          Teacher            @relation("StudentTeacher", fields: [teacherId], references: [id])
+  teacherId        String             @db.ObjectId
 }
 
 model Receipt {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  receiptNumber String      @unique 
-  amount        Float
-  type          ReceiptType
-  description   String?
-  paymentMethod String?
-  date          DateTime    @default(now())
-  createdAt     DateTime    @default(now())
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  receiptNumber    String             @unique
+  amount           Float
+  type             ReceiptType
+  description      String?
+  paymentMethod    String?
+  date             DateTime           @default(now())
+  createdAt        DateTime           @default(now())
 
-  student   Student? @relation(fields: [studentId], references: [id])
-  studentId String?  @db.ObjectId
+  student          Student?           @relation(fields: [studentId], references: [id])
+  studentId        String?            @db.ObjectId
 
-  teacher   Teacher? @relation(fields: [teacherId], references: [id])
-  teacherId String?  @db.ObjectId
+  teacher          Teacher?           @relation(fields: [teacherId], references: [id])
+  teacherId        String?            @db.ObjectId
 
-  manager   User   @relation("UserManagedReceipts", fields: [managerId], references: [id])
-  managerId String @db.ObjectId
+  manager          User               @relation("UserManagedReceipts", fields: [managerId], references: [id])
+  managerId        String             @db.ObjectId
 }
 
 model Schedule {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  day       String
-  startTime String
-  endTime   String
-  roomId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  teacher   Teacher  @relation(fields: [teacherId], references: [id])
-  teacherId String   @db.ObjectId
-  
-  subject   Subject  @relation(fields: [subjectId], references: [id])
-  subjectId String   @db.ObjectId
-  
-  manager   User     @relation("ManagerSchedules", fields: [managerId], references: [id])
-  managerId String   @db.ObjectId
-  
-  center    Center?  @relation(fields: [centerId], references: [id])
-  centerId  String?  @db.ObjectId
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  day              String
+  startTime        String
+  endTime          String
+  roomId           String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  teacher          Teacher            @relation(fields: [teacherId], references: [id])
+  teacherId        String             @db.ObjectId
+
+  subject          Subject            @relation(fields: [subjectId], references: [id])
+  subjectId        String             @db.ObjectId
+
+  manager          User               @relation("ManagerSchedules", fields: [managerId], references: [id])
+  managerId        String             @db.ObjectId
+
+  center           Center?            @relation(fields: [centerId], references: [id])
+  centerId         String?            @db.ObjectId
+}
+
+model PushSubscription {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  endpoint   String   @unique
+  keys       Json
+  user       User?    @relation(fields: [userId], references: [id])
+  userId     String?  @db.ObjectId
+  createdAt  DateTime @default(now())
+  role       Role?
 }

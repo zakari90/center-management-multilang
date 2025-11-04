@@ -5,7 +5,6 @@ interface Props {
   role?: string;
 }
 
-// Use process.env for env vars, fallback to empty string
 const subscribe_url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/subscribe`;
 const publicKey = process.env.NEXT_PUBLIC_PUBLIC_KEY || "";
 
