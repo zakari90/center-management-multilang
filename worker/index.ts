@@ -21,8 +21,11 @@ const STATIC_PAGES = [
   // Shell
   "",
   // Auth
+  "/login",
+  "/loginmanager", //this a url or 
+  "/register",
   "/(auth)/login",
-  "/(auth)/loginmanager",
+  "/(auth)/loginmanager", //this a url or 
   "/(auth)/register",
   // Admin
   "/admin",
