@@ -3,6 +3,7 @@
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { SyncButton } from "@/components/sync-button"
+import { DebugSyncButton } from "@/components/debug-sync-button"
 
 export function SiteHeader() {
   return (
@@ -17,6 +18,7 @@ export function SiteHeader() {
           {/* <h1 className="text-base font-medium">Documents</h1> */}
         </div>
         <div className="flex items-center gap-2">
+          <DebugSyncButton />
           <SyncButton 
             variant="ghost"
             size="sm"
