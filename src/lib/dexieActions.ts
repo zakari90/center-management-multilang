@@ -3,7 +3,7 @@
  * Handles all CRUD operations on syncable items with status management
  */
 import Dexie, { Table } from 'dexie';
-import { SyncableItem } from './syncable-item';
+import { SyncableItem, SyncStatus } from './syncable-item';
 
 // Generic syncable items table
 type SyncableItemTable = Table<SyncableItem, string>;
@@ -14,7 +14,7 @@ class SyncableItemsDB extends Dexie {
   constructor() {
     super('SyncableItemsDB');
     this.version(1).stores({
-      items: 'id, status, createdAt, updatedAt'
+      items: 'id, syncStatus, createdAt, updatedAt'
     });
   }
 }
@@ -34,21 +34,21 @@ function generateTempId(): string {
 export class DexieActions {
   /**
    * Get all items (both synced and waiting)
-   * Excludes pending delete items (status "0")
+   * Excludes pending delete items (syncStatus 'pending_delete')
    */
   static async getAllItems(): Promise<SyncableItem[]> {
     return await db.items
-      .where('status')
-      .anyOf(['1', 'w'])
+      .where('syncStatus')
+      .anyOf(['synced', 'pending'])
       .toArray();
   }
 
   /**
-   * Get items by status
+   * Get items by syncStatus
    */
-  static async getItemsByStatus(status: '1' | 'w' | '0'): Promise<SyncableItem[]> {
+  static async getItemsByStatus(status: SyncStatus): Promise<SyncableItem[]> {
     return await db.items
-      .where('status')
+      .where('syncStatus')
       .equals(status)
       .toArray();
   }
@@ -61,15 +61,15 @@ export class DexieActions {
   }
 
   /**
-   * Create a new item with status "w" (waiting to sync)
+   * Create a new item with syncStatus 'pending' (waiting to sync)
    * This is called when server save fails
    */
-  static async createItemWaiting(data: Omit<SyncableItem, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<SyncableItem> {
+  static async createItemWaiting(data: Omit<SyncableItem, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt'>): Promise<SyncableItem> {
     const now = new Date();
     const item: SyncableItem = {
       ...data,
       id: generateTempId(),
-      status: 'w',
+      syncStatus: 'pending',
       createdAt: now,
       updatedAt: now
     };
@@ -79,15 +79,15 @@ export class DexieActions {
   }
 
   /**
-   * Create a new item with status "1" (synced)
+   * Create a new item with syncStatus 'synced'
    * This is called when server save succeeds
    */
-  static async createItemSynced(data: Omit<SyncableItem, 'status' | 'createdAt' | 'updatedAt'>, serverId?: string): Promise<SyncableItem> {
+  static async createItemSynced(data: Omit<SyncableItem, 'syncStatus' | 'createdAt' | 'updatedAt'>, serverId?: string): Promise<SyncableItem> {
     const now = new Date();
     const item: SyncableItem = {
       ...data,
       id: serverId || data.id || generateTempId(),
-      status: '1',
+      syncStatus: 'synced',
       createdAt: now,
       updatedAt: now
     };
@@ -108,54 +108,54 @@ export class DexieActions {
   }
 
   /**
-   * Update item status
+   * Update item syncStatus
    */
-  static async updateItemStatus(id: string, status: '1' | 'w' | '0'): Promise<void> {
+  static async updateItemStatus(id: string, status: SyncStatus): Promise<void> {
     await db.items.update(id, {
-      status,
+      syncStatus: status,
       updatedAt: new Date()
     });
   }
 
   /**
    * Delete an item immediately
-   * Used for items with status "w" (never synced)
+   * Used for items with syncStatus 'pending' (never synced)
    */
   static async deleteItem(id: string): Promise<void> {
     await db.items.delete(id);
   }
 
   /**
-   * Mark item as pending delete (status "0")
-   * Used for items with status "1" (already synced)
+   * Mark item as pending delete (syncStatus 'pending_delete')
+   * Used for items with syncStatus 'synced' (already synced)
    */
   static async markForDeletion(id: string): Promise<void> {
     await db.items.update(id, {
-      status: '0',
+      syncStatus: 'pending_delete',
       updatedAt: new Date()
     });
   }
 
   /**
-   * Get all items waiting to sync (status "w")
+   * Get all items waiting to sync (syncStatus 'pending')
    */
   static async getWaitingItems(): Promise<SyncableItem[]> {
-    return await this.getItemsByStatus('w');
+    return await this.getItemsByStatus('pending');
   }
 
   /**
-   * Get all items pending delete (status "0")
+   * Get all items pending delete (syncStatus 'pending_delete')
    */
   static async getPendingDeleteItems(): Promise<SyncableItem[]> {
-    return await this.getItemsByStatus('0');
+    return await this.getItemsByStatus('pending_delete');
   }
 
   /**
-   * Remove all pending delete items (status "0")
+   * Remove all pending delete items (syncStatus 'pending_delete')
    * Called after successful sync
    */
   static async removePendingDeletes(): Promise<void> {
-    await db.items.where('status').equals('0').delete();
+    await db.items.where('syncStatus').equals('pending_delete').delete();
   }
 
   /**
@@ -168,20 +168,20 @@ export class DexieActions {
       await db.items.add({
         ...item,
         id: serverId,
-        status: '1',
+        syncStatus: 'synced',
         updatedAt: new Date()
       });
     }
   }
 
   /**
-   * Get count of items by status
+   * Get count of items by syncStatus
    */
   static async getStatusCounts(): Promise<{ synced: number; waiting: number; pendingDelete: number }> {
     const [synced, waiting, pendingDelete] = await Promise.all([
-      db.items.where('status').equals('1').count(),
-      db.items.where('status').equals('w').count(),
-      db.items.where('status').equals('0').count()
+      db.items.where('syncStatus').equals('synced').count(),
+      db.items.where('syncStatus').equals('pending').count(),
+      db.items.where('syncStatus').equals('pending_delete').count()
     ]);
 
     return { synced, waiting, pendingDelete };

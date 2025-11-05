@@ -80,7 +80,7 @@ export class ServerAction {
    */
   static async createItem(
     apiEndpoint: string,
-    data: Omit<SyncableItem, 'id' | 'status' | 'createdAt' | 'updatedAt'>
+    data: Omit<SyncableItem, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt'>
   ): Promise<ServerResponse<SyncableItem>> {
     if (!this.isOnline()) {
       throw this.createNetworkError('Offline - cannot create item on server', 0);
@@ -127,7 +127,7 @@ export class ServerAction {
   static async updateItem(
     apiEndpoint: string,
     itemId: string,
-    data: Partial<Omit<SyncableItem, 'id' | 'status' | 'createdAt' | 'updatedAt'>>
+    data: Partial<Omit<SyncableItem, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt'>>
   ): Promise<ServerResponse<SyncableItem>> {
     if (!this.isOnline()) {
       throw this.createNetworkError('Offline - cannot update item on server', 0);

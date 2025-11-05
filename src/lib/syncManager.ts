@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * SyncManager - Unified sync system that handles both waiting (w) and pending delete (0) items
+ * SyncManager - Unified sync system that handles both waiting (pending) and pending delete items
  * Coordinates between DexieActions (local) and ServerAction (network)
  */
 import { DexieActions } from './dexieActions';
@@ -20,7 +20,7 @@ export interface SyncResult {
  */
 export class SyncManager {
   /**
-   * Sync all pending items (waiting "w" and pending delete "0")
+   * Sync all pending items (waiting "pending" and pending delete "pending_delete")
    * This is the main sync function that should be called manually or automatically
    */
   static async syncAll(apiEndpoint: string): Promise<SyncResult> {
@@ -38,16 +38,16 @@ export class SyncManager {
       return result;
     }
 
-    // Sync waiting items (status "w") - POST to server
+    // Sync waiting items (syncStatus "pending") - POST to server
     const waitingItems = await DexieActions.getWaitingItems();
     for (const item of waitingItems) {
       try {
         const response = await ServerAction.createItem(
           apiEndpoint,
-          // Remove status and timestamps from data sent to server
+          // Remove syncStatus and timestamps from data sent to server
           Object.fromEntries(
             Object.entries(item).filter(
-              ([key]) => !['id', 'status', 'createdAt', 'updatedAt'].includes(key)
+              ([key]) => !['id', 'syncStatus', 'createdAt', 'updatedAt'].includes(key)
             )
           ) as any
         );
@@ -58,8 +58,8 @@ export class SyncManager {
             // Replace temp ID with server ID
             await DexieActions.updateItemId(item.id, response.data.id || item.id);
           } else if (item.id) {
-            // Update status to synced
-            await DexieActions.updateItemStatus(item.id, '1');
+            // Update syncStatus to synced
+            await DexieActions.updateItemStatus(item.id, 'synced');
             if (response.data.id && response.data.id !== item.id) {
               // Server returned different ID, update it
               await DexieActions.updateItemId(item.id, response.data.id);
@@ -78,7 +78,7 @@ export class SyncManager {
       }
     }
 
-    // Sync pending delete items (status "0") - DELETE from server
+    // Sync pending delete items (syncStatus "pending_delete") - DELETE from server
     const pendingDeleteItems = await DexieActions.getPendingDeleteItems();
     for (const item of pendingDeleteItems) {
       if (!item.id) {
@@ -137,12 +137,12 @@ export class SyncManager {
  * High-level function to add/edit an item with automatic sync handling
  * This implements the online-optimistic flow:
  * 1. Try server first
- * 2. On success: create with status "1"
- * 3. On failure: create with status "w"
+ * 2. On success: create with syncStatus "synced"
+ * 3. On failure: create with syncStatus "pending"
  */
 export async function addOrEditItem(
   apiEndpoint: string,
-  data: Omit<SyncableItem, 'id' | 'status' | 'createdAt' | 'updatedAt'>,
+  data: Omit<SyncableItem, 'id' | 'syncStatus' | 'createdAt' | 'updatedAt'>,
   itemId?: string
 ): Promise<SyncableItem> {
   // Try server first
@@ -157,7 +157,7 @@ export async function addOrEditItem(
     }
 
     if (response.success && response.data) {
-      // Server save succeeded - update or create with status "1" (synced)
+      // Server save succeeded - update or create with syncStatus "synced"
       if (itemId) {
         // Update existing item
         const existing = await DexieActions.getItem(itemId);
@@ -165,12 +165,12 @@ export async function addOrEditItem(
           // Update existing item with server data and mark as synced
           await DexieActions.updateItem(itemId, {
             ...response.data,
-            status: '1'
+            syncStatus: 'synced'
           });
           return (await DexieActions.getItem(itemId))!;
         }
       }
-      // Create new item with status "1" (synced)
+      // Create new item with syncStatus "synced"
       const item = await DexieActions.createItemSynced(
         response.data,
         response.data.id
@@ -181,17 +181,17 @@ export async function addOrEditItem(
       throw new Error(response.error || 'Server error');
     }
   } catch (error) {
-    // Network error or offline - save locally with status "w"
+    // Network error or offline - save locally with syncStatus "pending"
     if (ServerAction.isNetworkError(error) || !ServerAction.isOnline()) {
       if (itemId) {
         // Update existing item
         const existing = await DexieActions.getItem(itemId);
         if (existing) {
-          await DexieActions.updateItem(itemId, { ...data, status: 'w' });
+          await DexieActions.updateItem(itemId, { ...data, syncStatus: 'pending' });
           return (await DexieActions.getItem(itemId))!;
         }
       }
-      // Create new item with status "w"
+      // Create new item with syncStatus "pending"
       return await DexieActions.createItemWaiting(data);
     }
     // Re-throw non-network errors
@@ -201,8 +201,8 @@ export async function addOrEditItem(
 
 /**
  * High-level function to delete an item with automatic sync handling
- * - If status "w": delete locally immediately
- * - If status "1": mark as "0" (pending delete)
+ * - If syncStatus "pending": delete locally immediately
+ * - If syncStatus "synced": mark as "pending_delete" (pending delete)
  */
 export async function deleteItem(
   apiEndpoint: string,
@@ -213,10 +213,10 @@ export async function deleteItem(
     throw new Error('Item not found');
   }
 
-  if (item.status === 'w') {
+  if (item.syncStatus === 'pending') {
     // Never synced - delete immediately
     await DexieActions.deleteItem(itemId);
-  } else if (item.status === '1') {
+  } else if (item.syncStatus === 'synced') {
     // Already synced - mark for deletion
     await DexieActions.markForDeletion(itemId);
     
@@ -228,10 +228,10 @@ export async function deleteItem(
         await DexieActions.deleteItem(itemId);
       } catch {
         // If it fails, it will be synced later
-        // Item is already marked as "0", so it's fine
+        // Item is already marked as "pending_delete", so it's fine
       }
     }
-  } else if (item.status === '0') {
+  } else if (item.syncStatus === 'pending_delete') {
     // Already marked for deletion - do nothing or delete immediately
     await DexieActions.deleteItem(itemId);
   }
