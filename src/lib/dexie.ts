@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/dexie.ts
 import Dexie, { Table } from 'dexie'
+import { SyncStatus } from './syncable-item'
 
 // ENUMS to match Prisma schema
 export type Role = "ADMIN" | "MANAGER"
@@ -18,7 +19,7 @@ export interface LocalCenter {
   adminId: string    // relation
   createdAt: Date
   updatedAt: Date
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalUser {
@@ -29,7 +30,7 @@ export interface LocalUser {
   role: Role
   createdAt: Date
   updatedAt: Date
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalTeacher {
@@ -42,7 +43,7 @@ export interface LocalTeacher {
   createdAt: Date
   updatedAt: Date
   managerId: string     // relation
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalStudent {
@@ -57,7 +58,7 @@ export interface LocalStudent {
   createdAt: Date
   updatedAt: Date
   managerId: string     // relation
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalSubject {
@@ -69,7 +70,7 @@ export interface LocalSubject {
   createdAt: Date
   updatedAt: Date
   centerId: string         // relation
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalTeacherSubject {
@@ -79,7 +80,7 @@ export interface LocalTeacherSubject {
   assignedAt: Date
   teacherId: string
   subjectId: string
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalStudentSubject {
@@ -88,7 +89,7 @@ export interface LocalStudentSubject {
   studentId: string
   subjectId: string
   teacherId: string
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalReceipt {
@@ -103,7 +104,7 @@ export interface LocalReceipt {
   studentId?: string   // nullable relation
   teacherId?: string
   managerId: string
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 export interface LocalSchedule {
@@ -118,7 +119,7 @@ export interface LocalSchedule {
   subjectId: string
   managerId: string
   centerId?: string // optional for nullable
-  syncStatus?: 'pending' | 'synced' | 'failed'
+  syncStatus?: SyncStatus
 }
 
 // Sync queue remains unchanged

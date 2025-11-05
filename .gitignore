@@ -2,6 +2,7 @@
 
 # dependencies
 # Serwist
+/test
 public/sw*
 public/swe-worker*
 /node_modules

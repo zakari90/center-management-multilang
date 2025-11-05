@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -13,11 +14,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/context/authContext"
-import { loginManager } from "@/lib/actions"
+import { loginManager as loginManagerAction } from "@/lib/actions"
+import { getAllUsers, saveUserLocal } from "@/lib/dexieUserActions"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import bcrypt from "bcryptjs"
 import { 
   CheckCircle2, 
   Eye, 
@@ -37,7 +40,8 @@ export function LoginManager({
   const t = useTranslations('login')
   const tManager = useTranslations('loginManager')
   const tOffline = useTranslations('offline')
-  const [state, action, isPending] = useActionState(loginManager, undefined)
+  const [state, setState] = useState<any>({})
+  const [isPending, setIsPending] = useState(false)
   const { login } = useAuth()
   const router = useRouter()
   
@@ -58,15 +62,65 @@ export function LoginManager({
   useEffect(() => {
     if (state?.success && state?.data?.user) {
       login(state.data.user)
-      // Store user in Dexie for offline access
-      import('@/lib/clientAuth').then(({ setClientUser }) => {
-        setClientUser(state.data.user)
-      })
       setTimeout(() => {
         router.push("/manager")
       }, 10)
     }
   }, [state, login, router])
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setState({})
+    setIsPending(true)
+    const formData = new FormData(e.currentTarget)
+    const values = Object.fromEntries(formData.entries())
+
+    // ONLINE
+    if (!isOffline) {
+      try {
+        const result = await loginManagerAction(undefined, formData)
+        if (result?.success && result?.data?.user) {
+          // Save user locally for offline access
+          await saveUserLocal({ ...result.data.user, status: "1" })
+          setState({ success: true, data: result.data })
+        } else {
+          setState({ error: result?.error || { message: t("errors.loginFailed") } })
+        }
+      } catch (err) {
+        console.log(err)
+        setState({ error: { message: t("errors.unexpectedError") } })
+      }
+      setIsPending(false)
+      return
+    }
+
+    // OFFLINE
+    try {
+      const users = await getAllUsers()
+      const user = users.find(
+        (u) => u.email === values.email && u.role === 'MANAGER'
+      )
+      if (user && bcrypt.compareSync(values.password as string, user.password)) {
+        const { setClientUser } = await import('@/lib/clientAuth')
+        await setClientUser({
+          id: user.id || '',
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        })
+        setState({
+          success: true,
+          data: { user, message: tOffline("offlineSuccessMessage") }
+        })
+      } else {
+        setState({ error: { message: tOffline("offlineLoginIncorrect") } })
+      }
+    } catch (err) {
+      console.log(err)
+      setState({ error: { message: tOffline("offlineLoginError") } })
+    }
+    setIsPending(false)
+  }
 
   return (
     <div className={cn("flex flex-col gap-4 sm:gap-6 w-full min-h-screen items-center justify-center p-3 sm:p-4", className)} {...props}>
@@ -80,7 +134,7 @@ export function LoginManager({
           </CardDescription>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-6">
-          <form action={action} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {/* Success Message */}
             {state?.success && (
               <Alert className="border-green-200 bg-green-50">

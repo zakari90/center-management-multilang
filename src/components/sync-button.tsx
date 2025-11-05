@@ -2,60 +2,79 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { RefreshCw, Download, CheckCircle2, AlertCircle } from 'lucide-react'
+import { RefreshCw, CheckCircle2, AlertCircle, Info } from 'lucide-react'
 import { toast } from 'sonner'
-import { SyncManager } from '@/lib/syncManager'
-import { ServerAction } from '@/lib/serverAction'
-import { DexieActions } from '@/lib/dexieActions'
+import { syncWithServer, getPendingSyncCount } from '@/lib/syncEngine'
+import { localDb } from '@/lib/dexie'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 
 interface SyncButtonProps {
-  apiEndpoint: string
   className?: string
   variant?: 'default' | 'outline' | 'ghost' | 'secondary'
   size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
 export function SyncButton({ 
-  apiEndpoint, 
   className,
   variant = 'outline',
   size = 'default'
 }: SyncButtonProps) {
   const [isSyncing, setIsSyncing] = useState(false)
-  const [isImporting, setIsImporting] = useState(false)
+  const [isChecking, setIsChecking] = useState(false)
 
   const handleSync = async () => {
-    if (!ServerAction.isOnline()) {
-      toast.error('Cannot sync while offline')
+    if (!navigator.onLine) {
+      toast.error('Cannot sync while offline', {
+        icon: <AlertCircle className="h-4 w-4" />
+      })
       return
     }
 
     setIsSyncing(true)
     try {
-      const result = await SyncManager.syncAll(apiEndpoint)
+      // Check pending count before sync
+      const pendingBefore = await getPendingSyncCount()
+      
+      if (pendingBefore === 0) {
+        toast.info('No pending changes to sync', {
+          icon: <Info className="h-4 w-4" />
+        })
+        setIsSyncing(false)
+        return
+      }
+
+      toast.info(`Syncing ${pendingBefore} pending changes...`, {
+        icon: <RefreshCw className="h-4 w-4 animate-spin" />
+      })
+
+      const result = await syncWithServer()
       
       if (result.success) {
-        const message = result.synced > 0 || result.deleted > 0
-          ? `Synced ${result.synced} items, deleted ${result.deleted} items`
-          : 'All items are already synced'
-        toast.success(message, {
-          icon: <CheckCircle2 className="h-4 w-4" />
-        })
+        const pendingAfter = await getPendingSyncCount()
+        const synced = pendingBefore - pendingAfter
+        
+        if (synced > 0) {
+          toast.success(`Successfully synced ${synced} items!`, {
+            icon: <CheckCircle2 className="h-4 w-4" />
+          })
+        } else {
+          toast.success('All items are synced', {
+            icon: <CheckCircle2 className="h-4 w-4" />
+          })
+        }
       } else {
-        const errorMessage = result.errors.length > 0
-          ? result.errors.join(', ')
-          : 'Sync failed'
-        toast.error(errorMessage, {
+        toast.error(`Sync failed: ${result.reason || 'Unknown error'}`, {
           icon: <AlertCircle className="h-4 w-4" />
         })
       }
     } catch (error) {
+      console.error('Sync error:', error)
       toast.error(
         `Sync error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         {
@@ -67,92 +86,63 @@ export function SyncButton({
     }
   }
 
-  const handleImport = async () => {
-    if (!ServerAction.isOnline()) {
-      toast.error('Cannot import while offline')
-      return
-    }
-
-    setIsImporting(true)
+  const checkSyncQueue = async () => {
+    setIsChecking(true)
     try {
-      const response = await ServerAction.fetchItems(apiEndpoint)
-      
-      if (response.success && response.data) {
-        let imported = 0
-        let updated = 0
-        
-        for (const item of response.data) {
-          // Check if item already exists locally
-          const existing = await DexieActions.getItem(item.id || '')
-          
-          if (existing) {
-            // Update existing item
-            await DexieActions.updateItem(item.id!, {
-              ...item,
-              syncStatus: 'synced' as const, // Mark as synced
-              updatedAt: new Date()
-            })
-            updated++
-          } else {
-            // Create new item as synced
-            await DexieActions.createItemSynced(item, item.id)
-            imported++
-          }
-        }
-        
-        const message = imported > 0 || updated > 0
-          ? `Imported ${imported} new items, updated ${updated} items`
-          : 'No new items to import'
-        toast.success(message, {
+      const pendingCount = await getPendingSyncCount()
+      const failedOps = await localDb.syncQueue
+        .where('status')
+        .equals('failed')
+        .count()
+
+      const syncingOps = await localDb.syncQueue
+        .where('status')
+        .equals('syncing')
+        .count()
+
+      if (pendingCount === 0 && failedOps === 0) {
+        toast.success('All synced! No pending changes', {
           icon: <CheckCircle2 className="h-4 w-4" />
         })
       } else {
-        toast.error(
-          response.error || 'Failed to import data',
-          {
-            icon: <AlertCircle className="h-4 w-4" />
-          }
-        )
+        let message = `${pendingCount} pending`
+        if (failedOps > 0) message += `, ${failedOps} failed`
+        if (syncingOps > 0) message += `, ${syncingOps} syncing`
+        
+        toast.info(message, {
+          icon: <Info className="h-4 w-4" />
+        })
       }
     } catch (error) {
-      toast.error(
-        `Import error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        {
-          icon: <AlertCircle className="h-4 w-4" />
-        }
-      )
+      toast.error('Failed to check sync queue')
+      console.error('Check sync queue error:', error)
     } finally {
-      setIsImporting(false)
+      setIsChecking(false)
     }
   }
 
-  const getSyncStatus = async () => {
+  const viewSyncQueue = async () => {
     try {
-      const status = await SyncManager.getSyncStatus()
-      const hasPending = status.waiting > 0 || status.pendingDelete > 0
+      const allOps = await localDb.syncQueue.toArray()
+      console.log('📋 Sync Queue:', allOps)
       
-      if (hasPending) {
-        toast.info(
-          `Sync status: ${status.waiting} waiting, ${status.pendingDelete} pending delete`,
-          {
-            icon: <RefreshCw className="h-4 w-4" />
-          }
-        )
+      if (allOps.length === 0) {
+        toast.info('Sync queue is empty', {
+          icon: <Info className="h-4 w-4" />
+        })
       } else {
-        toast.success(
-          `All synced: ${status.synced} items`,
-          {
-            icon: <CheckCircle2 className="h-4 w-4" />
-          }
-        )
+        toast.info(`Found ${allOps.length} operations in sync queue. Check console for details.`, {
+          icon: <Info className="h-4 w-4" />
+        })
       }
-    } catch {
-      toast.error('Failed to get sync status')
+    } catch (error) {
+      toast.error('Failed to view sync queue')
+      console.error('View sync queue error:', error)
     }
   }
 
-  const isLoading = isSyncing || isImporting
-  const isOnline = ServerAction.isOnline()
+  const isLoading = isSyncing || isChecking
+  const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true
 
   return (
     <DropdownMenu>
@@ -177,21 +167,22 @@ export function SyncButton({
           disabled={!isOnline || isLoading}
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-          <span>Sync to Server</span>
+          <span>Sync Now</span>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={handleImport}
-          disabled={!isOnline || isLoading}
+          onClick={checkSyncQueue}
+          disabled={isLoading}
         >
-          <Download className={`mr-2 h-4 w-4 ${isImporting ? 'animate-spin' : ''}`} />
-          <span>Import from Server</span>
+          <Info className={`mr-2 h-4 w-4 ${isChecking ? 'animate-spin' : ''}`} />
+          <span>Check Status</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={getSyncStatus}
+          onClick={viewSyncQueue}
           disabled={isLoading}
         >
           <CheckCircle2 className="mr-2 h-4 w-4" />
-          <span>Check Sync Status</span>
+          <span>View Sync Queue (Console)</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

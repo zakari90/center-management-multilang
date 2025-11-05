@@ -1,89 +1,92 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import {
-  Card, CardContent, CardHeader, CardTitle
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "@/context/authContext"
-import { loginAdmin } from "@/lib/actions"; // Online/server action
-import { localDb } from "@/lib/dexie"; // Dexie instance
-import { cn } from "@/lib/utils"
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/authContext";
+import { loginAdmin } from "@/lib/serverUserActions";
+import { getAllUsers, saveUserLocal } from "@/lib/dexieUserActions";
+import { cn } from "@/lib/utils";
 import bcrypt from "bcryptjs";
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Home, Loader2, Lock, Mail } from "lucide-react"
-import { useTranslations } from "next-intl"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Home, Loader2, Lock, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [state, setState] = useState<any>({})
-  const [isPending, setIsPending] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [isOffline, setIsOffline] = useState(!navigator.onLine)
-  const { login } = useAuth()
-  const router = useRouter()
-  const t = useTranslations("login")
-  const tOffline = useTranslations("offline")
+  const [state, setState] = useState<any>({});
+  const [isPending, setIsPending] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const { login } = useAuth();
+  const router = useRouter();
+  const t = useTranslations("login");
+  const tOffline = useTranslations("offline");
 
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false)
-    const handleOffline = () => setIsOffline(true)
-    window.addEventListener("online", handleOnline)
-    window.addEventListener("offline", handleOffline)
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener("online", handleOnline)
-      window.removeEventListener("offline", handleOffline)
-    }
-  }, [])
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (state?.success && state?.data?.user) {
-      login(state.data.user)
+      login(state.data.user);
       setTimeout(() => {
-        router.push("/admin")
-      }, 10)
+        router.push("/admin");
+      }, 10);
     }
-  }, [state, login, router])
+  }, [state, login, router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setState({})
-    setIsPending(true)
-    const formData = new FormData(e.currentTarget)
-    const values = Object.fromEntries(formData.entries())
+    e.preventDefault();
+    setState({});
+    setIsPending(true);
+    const formData = new FormData(e.currentTarget);
+    const values = Object.fromEntries(formData.entries());
 
+    // ONLINE
     if (!isOffline) {
       try {
-        const result = await loginAdmin(undefined, formData)
+        const result = await loginAdmin(
+          values.email as string, 
+          values.password as string
+        );
         if (result?.success && result?.data?.user) {
-          setState({ success: true, data: result.data })
+          // Save user locally for offline access
+          await saveUserLocal({ ...result.data.user, status: "1" });
+          setState({ success: true, data: result.data });
         } else {
-          setState({ error: result?.error || { message: t("errors.loginFailed") } })
+          setState({ error: result?.error || { message: t("errors.loginFailed") } });
         }
       } catch (err) {
-        console.log("login failed:", err); // Debug
+        console.log(err);
         
-        setState({ error: { message: t("errors.unexpectedError") } })
+        setState({ error: { message: t("errors.unexpectedError") } });
       }
-      setIsPending(false)
-      return
+      setIsPending(false);
+      return;
     }
 
-    // OFFLINE login (search Dexie, compare hash)
+    // OFFLINE
     try {
-      const user = await localDb.users
-        .where("email").equals(values.email as string)
-        .first()
-      // Check password hash
+      const users = await getAllUsers();
+      const user = users.find(
+        (u) => u.email === values.email
+      );
       if (user && bcrypt.compareSync(values.password as string, user.password)) {
-        // Store logged in user in Dexie for offline access
         const { setClientUser } = await import('@/lib/clientAuth');
         await setClientUser({
           id: user.id || '',
@@ -91,20 +94,19 @@ export function LoginForm({
           name: user.name,
           role: user.role,
         });
-        
         setState({
           success: true,
           data: { user, message: tOffline("offlineSuccessMessage") }
-        })
+        });
       } else {
-        setState({ error: { message: tOffline("offlineLoginIncorrect") } })
+        setState({ error: { message: tOffline("offlineLoginIncorrect") } });
       }
     } catch (err) {
-        
-      console.log("Offline login error:", err);
-      setState({ error: { message: tOffline("offlineLoginError") } })
+      console.log(err);
+      
+      setState({ error: { message: tOffline("offlineLoginError") } });
     }
-    setIsPending(false)
+    setIsPending(false);
   }
 
   return (
@@ -264,7 +266,6 @@ export function LoginForm({
               </Link>
             </div>
           </form>
-          {/* Connection status bar for extra feedback */}
           <div
             className={cn(
               "mt-6 flex items-center justify-center text-xs",
@@ -279,5 +280,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

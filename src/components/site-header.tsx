@@ -18,7 +18,6 @@ export function SiteHeader() {
         </div>
         <div className="flex items-center gap-2">
           <SyncButton 
-            apiEndpoint="/api/data" 
             variant="ghost"
             size="sm"
           />
