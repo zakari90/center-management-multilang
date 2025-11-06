@@ -1,223 +1,56 @@
 "use client"
 
+import { ItemInputList } from "@/components/itemInputList"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useTranslations } from "next-intl"
-import { useState, useEffect } from "react"
-import { toast } from "sonner"
+import { Separator } from "@radix-ui/react-separator"
 import axios from "axios"
-import { Loader2 } from "lucide-react"
-import { createSubject } from "@/lib/apiClient"
-import { addCenterOffline, addSubjectOffline } from "@/lib/offlineApi"
-import { useAuth } from "@/context/authContext"
+import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
+import type React from "react"
+import { useState } from "react"
+import { useLocalizedConstants } from "./useLocalizedConstants"
+import { SubjectForm } from "./subjectForm"
 
-export function NewCenterForm() {
+
+export const NewCenterForm = () => {
   const t = useTranslations('NewCenterForm')
-  const { user } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isOffline, setIsOffline] = useState(!navigator.onLine)
-  
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false)
-    const handleOffline = () => setIsOffline(true)
-    window.addEventListener("online", handleOnline)
-    window.addEventListener("offline", handleOffline)
-    return () => {
-      window.removeEventListener("online", handleOnline)
-      window.removeEventListener("offline", handleOffline)
-    }
-  }, [])
+  const { daysOfWeek, availableSubjects, availableGrades,availableClassrooms  } = useLocalizedConstants();
+  const router = useRouter()
   const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    phone: '',
-    classrooms: [] as string[],
+    name: "",
+    address: "",
+    phone: "",
     workingDays: [] as string[],
-    subjects: [] as Array<{
-      name: string
-      grade: string
-      price: number
-      duration: string
-    }>
+    classrooms: [] as string[],
+    subjects: [] as Array<{name: string, grade: string, price: number, duration?: number}>,
   })
 
-  const [newClassroom, setNewClassroom] = useState('')
-  const [newSubject, setNewSubject] = useState({
-    name: '',
-    grade: '',
-    price: '',
-    duration: ''
-  })
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [step, setStep] = useState(1)
 
-  const daysOfWeek = [
-    { key: 'monday', label: t('monday') },
-    { key: 'tuesday', label: t('tuesday') },
-    { key: 'wednesday', label: t('wednesday') },
-    { key: 'thursday', label: t('thursday') },
-    { key: 'friday', label: t('friday') },
-    { key: 'saturday', label: t('saturday') },
-    { key: 'sunday', label: t('sunday') }
-  ]
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!formData.name.trim()) {
-      toast.error(t('centerNameRequired'))
-      return
-    }
-
-    if (!user?.id) {
-      toast.error('Not authenticated')
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      // Prepare center data
-      const centerData = {
-        name: formData.name,
-        address: formData.address,
-        phone: formData.phone,
-        classrooms: formData.classrooms,
-        workingDays: formData.workingDays
-      }
-
-      // Create center with offline support - use direct API call since endpoint is /api/center
-      let centerId: string | undefined
-      
-      if (!isOffline) {
-        try {
-          const response = await axios.post('/api/center', centerData)
-          centerId = response.data?.id
-        } catch (apiError) {
-          console.error('API call failed, using offline:', apiError)
-          // Fall through to offline
-        }
-      }
-      
-      // If online failed or offline, use offline storage
-      if (!centerId) {
-        const tempCenterId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        await addCenterOffline(centerData, user.id)
-        centerId = tempCenterId
-      }
-      
-      // Create subjects if any
-      if (formData.subjects.length > 0 && centerId) {
-        for (const subject of formData.subjects) {
-          try {
-            await createSubject({
-              name: subject.name,
-              grade: subject.grade,
-              price: subject.price,
-              duration: subject.duration ? parseInt(subject.duration) : null,
-              centerId: centerId
-            })
-          } catch {
-            // If subject creation fails, save offline
-            await addSubjectOffline({
-              name: subject.name,
-              grade: subject.grade,
-              price: subject.price,
-              duration: subject.duration ? parseInt(subject.duration) : null
-            }, centerId)
-          }
-        }
-      }
-      
-      toast.success(isOffline || !centerId ? 'Center saved offline - will sync when online' : t('successMessage'))
-      
-      // Reset form
-      setFormData({
-        name: '',
-        address: '',
-        phone: '',
-        classrooms: [],
-        workingDays: [],
-        subjects: []
-      })
-    } catch (error) {
-      console.error('Error creating center:', error)
-      
-      // Fallback to offline if online failed
-      if (!isOffline) {
-        try {
-          const tempCenterId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-          const centerData = {
-            name: formData.name,
-            address: formData.address,
-            phone: formData.phone,
-            classrooms: formData.classrooms,
-            workingDays: formData.workingDays
-          }
-          
-          await addCenterOffline(centerData, user.id)
-          
-          // Save subjects offline
-          if (formData.subjects.length > 0) {
-            for (const subject of formData.subjects) {
-              await addSubjectOffline({
-                name: subject.name,
-                grade: subject.grade,
-                price: subject.price,
-                duration: subject.duration ? parseInt(subject.duration) : null
-              }, tempCenterId)
-            }
-          }
-          
-          toast.success('Center saved offline - will sync when online')
-          
-          // Reset form
-          setFormData({
-            name: '',
-            address: '',
-            phone: '',
-            classrooms: [],
-            workingDays: [],
-            subjects: []
-          })
-        } catch (offlineError) {
-          console.error('Offline save failed:', offlineError)
-          toast.error(t('errorMessage'))
-        }
-      } else {
-        toast.error(t('errorMessage'))
-      }
-    } finally {
-      setIsLoading(false)
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
   }
 
-  const addClassroom = () => {
-    if (newClassroom.trim() && !formData.classrooms.includes(newClassroom.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        classrooms: [...prev.classrooms, newClassroom.trim()]
-      }))
-      setNewClassroom('')
-    }
+  const updateClassrooms = (newClassrooms: string[]) => {
+    setFormData(prev => ({ ...prev, classrooms: newClassrooms }))
   }
 
-  const removeClassroom = (classroom: string) => {
+  const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
     setFormData(prev => ({
       ...prev,
-      classrooms: prev.classrooms.filter(c => c !== classroom)
+      subjects: [...prev.subjects, { name: subjectName, grade, price, duration }]
     }))
-  }
-
-  const addSubject = () => {
-    if (newSubject.name.trim() && newSubject.grade.trim() && newSubject.price.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        subjects: [...prev.subjects, { ...newSubject, price: parseFloat(newSubject.price) }]
-      }))
-      setNewSubject({ name: '', grade: '', price: '', duration: '' })
-    }
   }
 
   const removeSubject = (index: number) => {
@@ -227,176 +60,385 @@ export function NewCenterForm() {
     }))
   }
 
-  const toggleWorkingDay = (day: string) => {
-    setFormData(prev => ({
-      ...prev,
-      workingDays: prev.workingDays.includes(day)
-        ? prev.workingDays.filter(d => d !== day)
-        : [...prev.workingDays, day]
-    }))
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage("")
+
+    try {
+      const payload = {
+        name: formData.name,
+        address: formData.address || null,
+        phone: formData.phone || null,
+        classrooms: formData.classrooms,
+        workingDays: formData.workingDays,
+        subjects: formData.subjects
+      }
+      const response = await axios.post(
+            '/api/center', 
+            payload
+        , { headers: { 
+            "Content-Type": "application/json", }, }
+        );       
+
+
+      if (!response) {
+        throw new Error('Failed to create center')
+      }
+
+      setMessage(t('successMessage'))
+      setFormData({
+        name: "",
+        address: "",
+        phone: "",
+        subjects: [],
+        classrooms: [],
+        workingDays: [],
+      })
+      setStep(1)
+      router.refresh()
+    } catch (error) {
+      console.log(error);
+      
+      setMessage(t('errorMessage'))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('basicInformation')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">{t('centerNameRequired')}</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder={t('centerNamePlaceholder')}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">{t('phone')}</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder={t('phonePlaceholder')}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">{t('address')}</Label>
-              <Textarea
-                id="address"
-                value={formData.address}
-                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                placeholder={t('addressPlaceholder')}
-                rows={3}
-              />
-            </div>
-
-            {/* Classrooms */}
-            <div className="space-y-4">
-              <Label>{t('classrooms')}</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={newClassroom}
-                  onChange={(e) => setNewClassroom(e.target.value)}
-                  placeholder={t('classroomPlaceholder')}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addClassroom())}
-                />
-                <Button type="button" onClick={addClassroom} variant="outline">
-                  Add
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.classrooms.map((classroom, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-muted px-3 py-1 rounded-md">
-                    <span>{classroom}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeClassroom(classroom)}
-                    >
-                      ×
-                    </Button>
+    <Card className="max-w-2xl mx-auto mt-4">
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Step 1: Basic Info */}
+          {step === 1 && (
+            <>
+              <div className="space-y-4">
+                <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                  <Separator className="flex-1 h-px bg-border" />
+                  <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                    <Label>{t('basicInformation')}</Label>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <Separator className="flex-1 h-px bg-border" />
+                </div>
 
-            {/* Working Days */}
-            <div className="space-y-4">
-              <Label>{t('workingDays')}</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {daysOfWeek.map((day) => (
-                  <div key={day.key} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={day.key}
-                      checked={formData.workingDays.includes(day.key)}
-                      onCheckedChange={() => toggleWorkingDay(day.key)}
-                    />
-                    <Label htmlFor={day.key} className="text-sm">
-                      {day.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Subjects */}
-            <div className="space-y-4">
-              <Label>{t('subjectsPricing')}</Label>
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                <Input
-                  value={newSubject.name}
-                  onChange={(e) => setNewSubject(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Subject name"
-                />
-                <Input
-                  value={newSubject.grade}
-                  onChange={(e) => setNewSubject(prev => ({ ...prev, grade: e.target.value }))}
-                  placeholder="Grade"
-                />
-                <Input
-                  type="number"
-                  value={newSubject.price}
-                  onChange={(e) => setNewSubject(prev => ({ ...prev, price: e.target.value }))}
-                  placeholder={t('price')}
-                />
-                <div className="flex gap-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t('centerNameRequired')}</Label>
                   <Input
-                    type="number"
-                    value={newSubject.duration}
-                    onChange={(e) => setNewSubject(prev => ({ ...prev, duration: e.target.value }))}
-                    placeholder={t('duration')}
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    placeholder={t('centerNamePlaceholder')}
                   />
-                  <Button type="button" onClick={addSubject} variant="outline">
-                    Add
-                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="address">{t('address')}</Label>
+                  <Textarea
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder={t('addressPlaceholder')}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">{t('phone')}</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder={t('phonePlaceholder')}
+                  />
                 </div>
               </div>
-              
+
+              <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                <Separator className="flex-1 h-px bg-border" />
+                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                  <Label>{t('classrooms')}</Label>
+                </div>
+                <Separator className="flex-1 h-px bg-border" />
+              </div>
+              <ItemInputList
+                label={t('classrooms')}
+                placeholder={t('classroomPlaceholder')}
+                items={formData.classrooms}
+                onChange={updateClassrooms}
+                suggestions={availableClassrooms}
+              />
+
+              <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                <Separator className="flex-1 h-px bg-border" />
+                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                  <Label>{t('workingDays')}</Label>
+                </div>
+                <Separator className="flex-1 h-px bg-border" />
+              </div>
+              <div className="space-y-3">
+                {daysOfWeek.map((day) => (
+                  <div key={day.key} className="border rounded-lg p-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={day.key}
+                        checked={formData.workingDays.includes(day.label)}
+                        onCheckedChange={(checked) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            workingDays: checked
+                              ? [...prev.workingDays, day.label]
+                              : prev.workingDays.filter((d) => d !== day.label),
+                          }))
+                        }}
+                      />
+                      <Label htmlFor={day.key} className="font-medium">
+                        {day.label}
+                      </Label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button 
+                type="button" 
+                onClick={() => setStep(2)} 
+                className="w-full hover:cursor-pointer"
+                disabled={!formData.name.trim()}
+              >
+                {t('nextAddSubjects')}
+              </Button>
+            </>
+          )}
+
+          {/* Step 2: Subjects */}
+          {step === 2 && (
+            <>
+              <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                <Separator className="flex-1 h-px bg-border" />
+                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                  <Label>{t('subjectsPricing')}</Label>
+                </div>
+                <Separator className="flex-1 h-px bg-border" />
+              </div>
+
+              <SubjectForm
+                onAddSubject={addSubject} 
+                availableSubjects={availableSubjects}
+                availableGrades={availableGrades}
+              />
+
               {formData.subjects.length > 0 && (
                 <div className="space-y-2">
-                  <Label>{t('addedSubjects')}</Label>
-                  {formData.subjects.map((subject, index) => (
-                    <div key={index} className="flex items-center justify-between bg-muted p-3 rounded-md">
-                      <span>{subject.name} - {subject.grade} - {subject.price} MAD</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeSubject(index)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
+                  <Label>{t('addedSubjects')} ({formData.subjects.length}):</Label>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {formData.subjects.map((subject, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{subject.name}</span>
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                              {subject.grade}
+                            </span>
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {t('price')}: ${subject.price}
+                            {subject.duration && ` • ${t('duration')}: ${subject.duration} ${t('minutes')}`}
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeSubject(index)}
+                          className="ml-2"
+                        >
+                          {t('remove')}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
 
-            <div className="flex justify-end gap-4">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('creatingCenter')}
-                  </>
-                ) : (
-                  t('createCenter')
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
+                  {t('back')}
+                </Button>
+                <Button type="submit" disabled={loading} className="flex-1">
+                  {loading ? t('creatingCenter') : t('createCenter')}
+                </Button>
+              </div>
+            </>
+          )}
+
+          {message && (
+            <Alert className={message.includes(t('errorMessage').split('.')[0]) ? "border-destructive" : "border-green-500"}>
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
+          )}
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
+
+export const SubjectFormMultipleChoices = ({ 
+  onAddSubject, 
+  availableSubjects, 
+  availableGrades 
+}: { 
+  onAddSubject: (name: string, grade: string, price: number, duration?: number) => void
+  availableSubjects: string[]
+  availableGrades: string[]
+}) => {
+  const t = useTranslations('SubjectForm')
+  
+  const [subjectData, setSubjectData] = useState({
+    selectedSubjects: [] as string[],
+    selectedGrades: [] as string[],
+    price: "",
+    duration: ""
+  })
+
+  const updateSubjects = (newSubjects: string[]) => {
+    setSubjectData(prev => ({ ...prev, selectedSubjects: newSubjects }))
+  }
+
+  const updateGrades = (newGrades: string[]) => {
+    setSubjectData(prev => ({ ...prev, selectedGrades: newGrades }))
+  }
+
+  const handleAddSubjects = () => {
+    if (subjectData.selectedSubjects.length > 0 && 
+        subjectData.selectedGrades.length > 0 && 
+        subjectData.price) {
+      
+      // Create combinations of subjects and grades
+      subjectData.selectedSubjects.forEach(subject => {
+        subjectData.selectedGrades.forEach(grade => {
+          onAddSubject(
+            subject,
+            grade,
+            parseFloat(subjectData.price),
+            subjectData.duration ? parseInt(subjectData.duration) : undefined
+          )
+        })
+      })
+      
+      // Reset form
+      setSubjectData({ 
+        selectedSubjects: [], 
+        selectedGrades: [], 
+        price: "", 
+        duration: "" 
+      })
+    }
+  }
+
+  return (
+    <div className="border rounded-lg p-4 space-y-4 bg-muted/10">
+      <div className="text-sm text-muted-foreground mb-4">
+        {t('selectMultipleInfo')}
+      </div>
+      
+      {/* NO FORM WRAPPER - just div */}
+      <div className="space-y-4">
+        {/* Subject Selection */}
+        <div className="space-y-2">
+          <Label>{t('selectSubjectsRequired')}</Label>
+          <ItemInputList
+            label={t('selectSubjects')}
+            placeholder={t('subjectsPlaceholder')}
+            items={subjectData.selectedSubjects}
+            onChange={updateSubjects}
+            suggestions={availableSubjects}
+          />
+          {subjectData.selectedSubjects.length > 0 && (
+            <div className="text-xs text-muted-foreground">
+              {t('selected')}: {subjectData.selectedSubjects.join(', ')}
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+
+        {/* Grade Selection */}
+        <div className="space-y-2">
+          <Label>{t('selectGradesRequired')}</Label>
+          <ItemInputList
+            label={t('selectGrades')}
+            placeholder={t('gradesPlaceholder')}
+            items={subjectData.selectedGrades}
+            onChange={updateGrades}
+            suggestions={availableGrades}
+          />
+          {subjectData.selectedGrades.length > 0 && (
+            <div className="text-xs text-muted-foreground">
+              {t('selected')}: {subjectData.selectedGrades.join(', ')}
+            </div>
+          )}
+        </div>
+
+        {/* Price and Duration */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="subjectPrice">{t('priceRequired')}</Label>
+            <Input
+              id="subjectPrice"
+              type="number"
+              step="0.01"
+              value={subjectData.price}
+              onChange={(e) => setSubjectData(prev => ({ ...prev, price: e.target.value }))}
+              placeholder={t('pricePlaceholder')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="subjectDuration">{t('durationOptional')}</Label>
+            <Input
+              id="subjectDuration"
+              type="number"
+              value={subjectData.duration}
+              onChange={(e) => setSubjectData(prev => ({ ...prev, duration: e.target.value }))}
+              placeholder={t('durationPlaceholder')}
+            />
+          </div>
+        </div>
+
+        {/* Preview */}
+        {subjectData.selectedSubjects.length > 0 && subjectData.selectedGrades.length > 0 && (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="text-sm font-medium text-blue-900 mb-1">
+              {t('willCreate')} {subjectData.selectedSubjects.length * subjectData.selectedGrades.length} {t('courses')}:
+            </div>
+            <div className="text-xs text-blue-700 space-y-1">
+              {subjectData.selectedSubjects.slice(0, 3).map(subject => (
+                <div key={subject}>
+                  {subject}: {subjectData.selectedGrades.slice(0, 3).join(', ')}
+                  {subjectData.selectedGrades.length > 3 && ` +${subjectData.selectedGrades.length - 3} more`}
+                </div>
+              ))}
+              {subjectData.selectedSubjects.length > 3 && (
+                <div className="italic">+{subjectData.selectedSubjects.length - 3} {t('moreSubjects')}</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <Button 
+          type="button" // ✅ Important: type="button" to prevent form submission
+          onClick={handleAddSubjects}
+          size="sm" 
+          className="w-full"
+          disabled={!subjectData.selectedSubjects.length || !subjectData.selectedGrades.length || !subjectData.price}
+        >
+          {t('addSubjectsToCenter')}
+        </Button>
+      </div>
     </div>
   )
 }
