@@ -59,28 +59,30 @@ export function LoginForm({
     const formData = new FormData(e.currentTarget)
     const values = Object.fromEntries(formData.entries())
 
-    if (!isOffline) {
-      try {
-        const result = await loginAdmin(undefined, formData)
-        if (result?.success && result?.data?.user) {
-          setState({ success: true, data: result.data })
-        } else {
-          setState({ error: result?.error || { message: t("errors.loginFailed") } })
-        }
-      } catch (err) {
-        console.log("login failed:", err); // Debug
-        
-        setState({ error: { message: t("errors.unexpectedError") } })
+    // Strategy: Always try server first (even if navigator.onLine says offline)
+    // This handles cases where navigator.onLine is inaccurate
+    try {
+      const result = await loginAdmin(undefined, formData)
+      if (result?.success && result?.data?.user) {
+        // 1.2 Server login succeeded
+        setState({ success: true, data: result.data })
+        setIsPending(false)
+        return
+      } else {
+        // Server returned error, fall through to offline login
+        console.log("Server login failed, trying offline...", result?.error)
       }
-      setIsPending(false)
-      return
+    } catch (err) {
+      // Network error or server unavailable, fall through to offline login
+      console.log("Server login error (will try offline):", err)
     }
 
-    // OFFLINE login (search Dexie, compare hash)
+    // 1.3 Fallback: OFFLINE login (search Dexie, compare hash)
     try {
       const user = await localDb.users
         .where("email").equals(values.email as string)
         .first()
+      
       // Check password hash
       if (user && bcrypt.compareSync(values.password as string, user.password)) {
         // Store logged in user in Dexie for offline access
@@ -100,8 +102,7 @@ export function LoginForm({
         setState({ error: { message: tOffline("offlineLoginIncorrect") } })
       }
     } catch (err) {
-        
-      console.log("Offline login error:", err);
+      console.error("Offline login error:", err);
       setState({ error: { message: tOffline("offlineLoginError") } })
     }
     setIsPending(false)
