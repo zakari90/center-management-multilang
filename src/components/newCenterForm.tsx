@@ -19,9 +19,11 @@ import { SubjectForm } from "./subjectForm"
 
 
 export const NewCenterForm = () => {
+
   const t = useTranslations('NewCenterForm')
   const { daysOfWeek, availableSubjects, availableGrades,availableClassrooms  } = useLocalizedConstants();
   const router = useRouter()
+  
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -108,6 +110,7 @@ export const NewCenterForm = () => {
 
   return (
     <Card className="max-w-2xl mx-auto mt-4">
+      <>test---------------------------------------------------</>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step 1: Basic Info */}
