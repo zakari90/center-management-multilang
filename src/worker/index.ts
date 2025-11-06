@@ -47,7 +47,7 @@ const STATIC_PAGES = [
 // Generate all static localized routes with revision info
 // Using PrecacheEntry format to avoid "no revision info" warnings
 // For dynamic Next.js pages, we use a version string as revision
-const BUILD_VERSION = "1.0.0"; // Update this on each deployment to bust cache
+const BUILD_VERSION = "1.0.1"; // Update this on each deployment to bust cache
 const STATIC_ROUTES: PrecacheEntry[] = locales.flatMap(locale =>
   STATIC_PAGES.map(page => {
     const url = `/${locale}${page || ""}`;
