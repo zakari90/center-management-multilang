@@ -261,7 +261,7 @@ export function LoginForm({
                 className="inline-flex items-center gap-2 text-sm sm:text-base font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 <Home className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("home")}</span>
+                <span className="hidden sm:inline">{t("backToHome")}</span>
               </Link>
             </div>
           </form>
