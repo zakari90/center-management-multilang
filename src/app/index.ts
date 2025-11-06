@@ -24,25 +24,6 @@ const serwist = new Serwist({
         cleanupOutdatedCaches: true,
         ignoreURLParametersMatching: [/.*/],
     },
-    fallbacks: {
-      entries: [
-        {
-          url: "/offlinedoc",
-          matcher({ request }) {
-            const url = new URL(request.url);
-            return request.destination === "document" && url.pathname.startsWith("/doc");
-          },
-        },
- 
-        {
-          url: "/offline",
-          matcher({ request }) {
-           
-            return request.destination === "document";
-          },
-        },
-      ],
-    },
     
     runtimeCaching: defaultCache,
 })
