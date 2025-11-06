@@ -17,17 +17,15 @@ declare const self: ServiceWorkerGlobalScope;
 const locales = ["en", "fr", "ar"] as const;
 
 // All STATIC page route fragments (NO dynamic segments like [id])
+// Note: Route groups like (auth) are NOT part of the URL - they're just for organization
+// Only include actual URL paths that exist
 const STATIC_PAGES = [
-  "/*",
   // Shell
   "/",
-  // Auth
+  // Auth (these are the actual URLs, not the route group paths)
   "/login",
-  "/loginmanager", //this a url or 
+  "/loginmanager",
   "/register",
-  "/(auth)/login",
-  "/(auth)/loginmanager", //this a url or 
-  "/(auth)/register",
   // Admin
   "/admin",
   "/admin/center",
@@ -46,9 +44,18 @@ const STATIC_PAGES = [
   "/manager/teachers/create",
 ];
 
-// Generate all static localized routes (no dynamic ones)
-const STATIC_ROUTES = locales.flatMap(locale =>
-  STATIC_PAGES.map(page => `/${locale}${page || ""}`)
+// Generate all static localized routes with revision info
+// Using PrecacheEntry format to avoid "no revision info" warnings
+// For dynamic Next.js pages, we use a version string as revision
+const BUILD_VERSION = "1.0.0"; // Update this on each deployment to bust cache
+const STATIC_ROUTES: PrecacheEntry[] = locales.flatMap(locale =>
+  STATIC_PAGES.map(page => {
+    const url = `/${locale}${page || ""}`;
+    return {
+      url,
+      revision: BUILD_VERSION, // Version string for cache invalidation
+    };
+  })
 );
 
 // ---- SERWIST CONFIG ----
@@ -73,7 +80,7 @@ self.addEventListener("install", event => {
     Promise.all(
       STATIC_ROUTES.map(route =>
         serwist.handleRequest({
-          request: new Request(route),
+          request: new Request(route.url),
           event,
         })
       )
