@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/dexie.ts
 import Dexie, { Table } from 'dexie'
-import { SyncStatus } from './syncable-item'
 
 // ENUMS to match Prisma schema
 export type Role = "ADMIN" | "MANAGER"
 export type ReceiptType = "STUDENT_PAYMENT" | "TEACHER_PAYMENT"
+export type SyncStatus = 'pending' | 'synced' | 'failed' | 'pending_delete';
 
 // Core interfaces matching Prisma, all _ids as type string
 export interface LocalCenter {
