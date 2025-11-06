@@ -2,6 +2,7 @@
   "status-disconnected": "You are offline",
   "status-reconnected": "Connection restored! Reloading...",
   "status-checking": "Checking connection...",
+  "status-synced": "All synced",
   "offlineInfoSafe": "Your data is safe and stored locally.",
   "offlineInfoSync": "Changes will sync automatically when you're back online.",
   "offlineInfoContinue": "You can continue working without an internet connection.",

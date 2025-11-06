@@ -3,6 +3,7 @@
     "status-disconnected": "Vous êtes hors ligne",
     "status-reconnected": "Connexion rétablie ! Rechargement en cours...",
     "status-checking": "Vérification de la connexion...",
+    "status-synced": "Tout synchronisé",
     "offlineInfoSafe": "Vos données sont en sécurité et stockées localement.",
     "offlineInfoSync": "Les modifications seront synchronisées automatiquement dès que vous serez à nouveau en ligne.",
     "offlineInfoContinue": "Vous pouvez continuer à travailler sans connexion Internet.",
