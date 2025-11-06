@@ -23,7 +23,13 @@ export async function syncWithServer() {
       .equals('pending')
       .toArray();
 
-    console.log(`📋 Found ${pendingOperations.length} pending operations`);
+    // Handle "nothing to sync" state
+    if (pendingOperations.length === 0) {
+      console.log('✅ Nothing to sync - all data is up to date');
+      return { success: true, successCount: 0, failCount: 0, reason: 'nothing_to_sync' };
+    }
+
+    console.log(`📋 Found ${pendingOperations.length} pending operation${pendingOperations.length !== 1 ? 's' : ''}`);
 
     let successCount = 0;
     let failCount = 0;
@@ -107,7 +113,17 @@ export async function syncWithServer() {
           throw new Error(`HTTP ${response?.status}: ${await response?.text()}`);
         }
       } catch (error) {
-        console.error(`❌ Sync error for ${operation.entity}:`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorDetails = error instanceof Error ? error.stack : undefined;
+        
+        console.error(`❌ Sync error for ${operation.entity} (${operation.operation}):`, {
+          error: errorMessage,
+          details: errorDetails,
+          operation: operation.entity,
+          entityId: operation.entityId,
+          attempts: operation.attempts + 1
+        });
+        
         failCount++;
         
         const attempts = operation.attempts + 1;
@@ -117,22 +133,35 @@ export async function syncWithServer() {
           await localDb.syncQueue.update(operation.id!, {
             status: 'failed',
             attempts,
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: errorMessage
           });
+          console.error(`🚫 Max retries reached for ${operation.entity} ${operation.operation}. Marked as failed.`);
         } else {
           await localDb.syncQueue.update(operation.id!, {
             status: 'pending',
-            attempts
+            attempts,
+            error: errorMessage // Store error for debugging
           });
+          console.warn(`⚠️ Retry ${attempts}/${maxRetries} for ${operation.entity} ${operation.operation}`);
         }
       }
     }
 
-    console.log(`✨ Sync complete: ${successCount} succeeded, ${failCount} failed`);
+    if (successCount > 0 || failCount > 0) {
+      console.log(`✨ Sync complete: ${successCount} succeeded, ${failCount} failed`);
+    }
     return { success: true, successCount, failCount };
   } catch (error) {
-    console.error('💥 Sync engine error:', error);
-    return { success: false, reason: 'error', error };
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    console.error('💥 Sync engine error:', {
+      error: errorMessage,
+      stack: errorStack,
+      timestamp: new Date().toISOString()
+    });
+    
+    return { success: false, reason: 'error', error: errorMessage };
   } finally {
     isSyncing = false;
   }

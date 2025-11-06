@@ -149,9 +149,25 @@ class CenterManagementDB extends Dexie {
 
   constructor() {
     super('CenterManagementDB')
+    
+    // Version 1: Initial schema
     this.version(1).stores({
       centers: 'id, name, adminId, syncStatus',
       users: 'id, email, role, syncStatus',
+      teachers: 'id, name, email, managerId, syncStatus',
+      students: 'id, name, email, managerId, grade, syncStatus',
+      subjects: 'id, name, grade, centerId, syncStatus',
+      schedules: 'id, teacherId, subjectId, managerId, centerId, syncStatus',
+      receipts: 'id, receiptNumber, type, studentId, teacherId, managerId, date, syncStatus',
+      teacherSubjects: 'id, subjectId, teacherId, syncStatus',
+      studentSubjects: 'id, studentId, subjectId, teacherId, syncStatus',
+      syncQueue: '++id, entity, status, timestamp, attempts'
+    })
+    
+    // Version 2: Added updatedAt index to users for sorting
+    this.version(2).stores({
+      centers: 'id, name, adminId, syncStatus',
+      users: 'id, email, role, syncStatus, updatedAt', // Added updatedAt index
       teachers: 'id, name, email, managerId, syncStatus',
       students: 'id, name, email, managerId, grade, syncStatus',
       subjects: 'id, name, grade, centerId, syncStatus',
