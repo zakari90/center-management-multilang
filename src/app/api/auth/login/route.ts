@@ -24,15 +24,47 @@ export async function POST(req: NextRequest) {
     if (!user && email === adminEmail && password === adminPassword) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
       
-      user = await db.user.create({
-        data: {
-          id: id,
-          email: adminEmail,
-          password: hashedPassword,
-          name: adminUsername,
-          role: "ADMIN",
-        },
-      });
+      try {
+        // For MongoDB without replica set, Prisma might try to use transactions
+        // This will fail if MongoDB is not configured as a replica set
+        // We catch the error and provide a helpful message
+        user = await db.user.create({
+          data: {
+            id: id || undefined, // Let MongoDB generate ID if not provided
+            email: adminEmail,
+            password: hashedPassword,
+            name: adminUsername,
+            role: "ADMIN",
+          },
+        });
+      } catch (createError: any) {
+        // Handle MongoDB replica set error
+        if (createError.code === 'P2031') {
+          console.error('MongoDB replica set error. To fix: Configure MongoDB as a replica set or use MongoDB Atlas.');
+          // Try to find the user in case it was created by another request
+          user = await db.user.findUnique({ where: { email: adminEmail } });
+          if (!user) {
+            // If user doesn't exist, return a helpful error
+            return NextResponse.json(
+              { 
+                error: { 
+                  message: "Database configuration error: MongoDB must be configured as a replica set for transactions. Please configure MongoDB as a replica set or use MongoDB Atlas." 
+                } 
+              },
+              { status: 500 }
+            );
+          }
+        } 
+        // Handle duplicate key error (race condition)
+        else if (createError.code === 'P2002' || createError.message?.includes('duplicate')) {
+          user = await db.user.findUnique({ where: { email: adminEmail } });
+          if (!user) {
+            throw createError; // Re-throw if it's a different error
+          }
+        } else {
+          throw createError;
+        }
+      }
 
       const response = NextResponse.json(
         {

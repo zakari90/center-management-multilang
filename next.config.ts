@@ -9,13 +9,12 @@ const withSerwist = withSerwistInit({
   swSrc: 'src/worker/index.ts',
   swDest: "public/sw.js",
   cacheOnNavigation: true,
-
+  // Disable Serwist in development to avoid Turbopack issues
+  disable: process.env.NODE_ENV !== "production",
 });
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-    turbopack: {}, // Add this line
-
 };
 
 export default withSerwist(withNextIntl(nextConfig));

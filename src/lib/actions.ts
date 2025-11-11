@@ -1,6 +1,5 @@
 "use server"
 
-import { BASE_URL } from "@/types/types"
 import axios from "axios"
 import { getTranslations } from "next-intl/server"; // Import for server-side translations
 import { cookies } from "next/headers"
@@ -62,8 +61,10 @@ export async function register(state: unknown, formData: FormData) {
       }
     }
 
+    // Use relative URL for server actions (runs on same server)
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`
     const response = await axios.post(
-      `${BASE_URL}/auth/register`,
+      `${apiUrl}/auth/register`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -118,7 +119,7 @@ export async function createManager(state: unknown, formData: FormData) {
     // The client-side code that calls this should save to localDb after success
     // or we handle it on the client side after receiving the response
     const response = await axios.post(
-      `${BASE_URL}/manager/register`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/manager/register`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -161,7 +162,7 @@ export async function updateManager(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/manager/${data.userId}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/manager/${data.userId}`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -206,8 +207,10 @@ export async function loginAdmin(
       }
     }
 
+    // Use relative URL for server actions (runs on same server)
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`
     const response = await axios.post(
-      `${BASE_URL}/auth/login`,
+      `${apiUrl}/auth/login`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -277,7 +280,7 @@ export async function loginManager(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/manager/login`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/manager/login`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -323,7 +326,7 @@ export async function createCenterAction(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/centers`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/centers`,
       { name, address, phone, classrooms, workingDays },
       { headers: { "Content-Type": "application/json" } }
     )
