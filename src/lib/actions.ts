@@ -63,7 +63,7 @@ export async function register(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/api/auth/register`,
+      `${BASE_URL}/auth/register`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -114,8 +114,11 @@ export async function createManager(state: unknown, formData: FormData) {
       }
     }
 
+    // Note: This is a server action, so we can't directly access Dexie
+    // The client-side code that calls this should save to localDb after success
+    // or we handle it on the client side after receiving the response
     const response = await axios.post(
-      `${BASE_URL}/api/manager/register`,
+      `${BASE_URL}/manager/register`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -158,7 +161,7 @@ export async function updateManager(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/api/manager/${data.userId}`,
+      `${BASE_URL}/manager/${data.userId}`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -182,19 +185,21 @@ export async function updateManager(state: unknown, formData: FormData) {
   }
 }
 
-// Login Admin Action
-export async function loginAdmin(state: unknown, formData: FormData) {
+export async function loginAdmin(
+  state: unknown,
+  formData: FormData
+){
   try {
-    const t = await getTranslations('auth')
-    
+    const t = await getTranslations('auth');
+
     const data = {
       email: formData.get("email"),
       password: formData.get("password"),
-    }
+    };
     
     const loginSchema = createLoginSchema(t)
     const result = loginSchema.safeParse(data)
-
+    
     if (!result.success) {
       return {
         error: result.error.flatten().fieldErrors,
@@ -202,7 +207,7 @@ export async function loginAdmin(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/api/auth/login`,
+      `${BASE_URL}/auth/login`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -216,7 +221,7 @@ export async function loginAdmin(state: unknown, formData: FormData) {
       data: response.data,
     }
   } catch (error) {
-    console.error("Login error:", error)
+    console.error("Admin login error:", error)
     const t = await getTranslations('auth')
     
     if (axios.isAxiosError(error)) {
@@ -227,6 +232,28 @@ export async function loginAdmin(state: unknown, formData: FormData) {
     return {
       error: { message: t('errors.unexpectedError') },
     }
+  }
+}
+
+
+
+
+
+// Export sync function for manual triggering
+export async function triggerSync(): Promise<{ success: boolean; message: string }> {
+  try {
+    const { syncPendingEntities } = await import('@/lib/dexie/syncWorker');
+    await syncPendingEntities();
+    return {
+      success: true,
+      message: 'Sync completed successfully',
+    };
+  } catch (error) {
+    console.error('Sync failed:', error);
+    return {
+      success: false,
+      message: 'Sync failed',
+    };
   }
 }
 
@@ -250,7 +277,7 @@ export async function loginManager(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/api/manager/login`,
+      `${BASE_URL}/manager/login`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -296,7 +323,7 @@ export async function createCenterAction(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${BASE_URL}/api/centers`,
+      `${BASE_URL}/centers`,
       { name, address, phone, classrooms, workingDays },
       { headers: { "Content-Type": "application/json" } }
     )
@@ -317,6 +344,19 @@ export async function createCenterAction(state: unknown, formData: FormData) {
     return {
       error: { message: t('errors.unexpectedError') },
     }
+  }
+}
+
+// Combined login action that routes based on role and returns role info
+export async function loginWithRole(state: unknown, formData: FormData) {
+  const submittedRole = (formData.get("role") as string) === "manager" ? "manager" : "admin"
+  const result = submittedRole === "manager"
+    ? await loginManager(state, formData)
+    : await loginAdmin(state, formData)
+
+  return {
+    ...result,
+    role: submittedRole,
   }
 }
 

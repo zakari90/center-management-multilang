@@ -2,9 +2,66 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { startSyncEngine, getPendingSyncCount } from '@/lib/syncEngine';
+import { fullSync } from '@/lib/dexie/syncWorker';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { 
+  userActions, 
+  centerActions, 
+  teacherActions, 
+  studentActions, 
+  subjectActions, 
+  receiptActions, 
+  scheduleActions 
+} from '@/lib/dexie/dexieActions';
+
+/**
+ * Get total count of pending changes across all entities
+ */
+async function getPendingSyncCount(): Promise<number> {
+  try {
+    const [
+      users,
+      centers,
+      teachers,
+      students,
+      subjects,
+      receipts,
+      schedules,
+    ] = await Promise.all([
+      userActions.getSyncTargets(),
+      centerActions.getSyncTargets(),
+      teacherActions.getSyncTargets(),
+      studentActions.getSyncTargets(),
+      subjectActions.getSyncTargets(),
+      receiptActions.getSyncTargets(),
+      scheduleActions.getSyncTargets(),
+    ]);
+
+    const waitingCount = 
+      users.waiting.length +
+      centers.waiting.length +
+      teachers.waiting.length +
+      students.waiting.length +
+      subjects.waiting.length +
+      receipts.waiting.length +
+      schedules.waiting.length;
+
+    const pendingCount = 
+      users.pending.length +
+      centers.pending.length +
+      teachers.pending.length +
+      students.pending.length +
+      subjects.pending.length +
+      receipts.pending.length +
+      schedules.pending.length;
+
+    return waitingCount + pendingCount;
+  } catch (error) {
+    console.error('Error getting pending sync count:', error);
+    return 0;
+  }
+}
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
   const [isOnline, setIsOnline] = useState(true);
@@ -16,9 +73,6 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     // Check initial online status
     setIsOnline(navigator.onLine);
 
-    // Start sync engine on mount
-    const cleanup = startSyncEngine(30000); // Sync every 30 seconds
-    
     // Check for pending changes
     const checkPending = async () => {
       try {
@@ -32,16 +86,23 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     const pendingCheckInterval = setInterval(checkPending, 10000); // Check every 10s
     
     // Listen for online/offline events
-    const handleOnline = () => {
+    const handleOnline = async () => {
       setIsOnline(true);
       setSyncStatus('syncing');
       toast.success(t('status-reconnected'));
-      checkPending(); // Recheck pending changes
       
-      // Trigger immediate sync when back online
-      setTimeout(() => {
-        setSyncStatus('idle');
-      }, 2000);
+      // Trigger sync when back online
+      try {
+        await fullSync();
+        await checkPending();
+      } catch (error) {
+        console.error('Sync failed:', error);
+        setSyncStatus('error');
+      } finally {
+        setTimeout(() => {
+          setSyncStatus('idle');
+        }, 2000);
+      }
     };
 
     const handleOffline = () => {
@@ -53,7 +114,6 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('offline', handleOffline);
 
     return () => {
-      cleanup();
       clearInterval(pendingCheckInterval);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);

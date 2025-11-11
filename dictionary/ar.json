@@ -12,8 +12,12 @@
     "offlineMessageShort": "يبدو أنك فقدت الاتصال بالإنترنت.",
     "offlineMessageLong": "يرجى التحقق من اتصالك وحاول مرة أخرى.",
     "offlineSuccessMessage": "تم تسجيل الدخول باستخدام البيانات المخزنة محلياً.",
+    "offlineMode": "وضع عدم الاتصال - استخدام بيانات الاعتماد المخزنة",
+    "offlineLoggingIn": "جارٍ تسجيل الدخول بدون اتصال...",
+    "offlineInfoTitle": "تسجيل الدخول بدون اتصال",
     "offlineLoginInfo": "أنت غير متصل. يتم تسجيل الدخول باستخدام المعلومات المخزنة محلياً.",
     "offlineLoginIncorrect": "البريد الإلكتروني أو كلمة المرور غير صحيحة لتسجيل الدخول بدون اتصال.",
+    "offlineInvalidCredentials": "لم نتمكن من التحقق من بيانات الاعتماد هذه بدون اتصال. يرجى المحاولة مرة أخرى عند الاتصال بالإنترنت.",
     "offlineLoginError": "حدث خطأ أثناء تسجيل الدخول بدون اتصال."
   }
 ,
@@ -129,28 +133,37 @@
     }
   },
 "login": {
-  "backToHome": "العودة إلى الصفحة الرئيسية",
-
-    "title": "مرحباً بعودتك",
-    "email": {
-      "label": "البريد الإلكتروني",
-      "placeholder": "you@example.com"
-    },
-    "password": {
-      "label": "كلمة المرور",
-      "placeholder": "أدخل كلمة المرور"
-    },
-    "submit": "تسجيل الدخول",
-    "submitting": "جاري تسجيل الدخول...",
-    "noAccount": "ليس لديك حساب؟",
-    "signUp": "إنشاء حساب",
-    "terms": "بالنقر على متابعة، فإنك توافق على",
-    "termsOfService": "شروط الخدمة",
-    "and": "و",
-    "privacyPolicy": "سياسة الخصوصية"
+  "title": "مرحباً بعودتك",
+  "adminOption": "مسؤول",
+  "welcomeBadge": "منصة إدارة المراكز",
+  "adminOptionDescription": "تتبع المراكز والمالية والفرق في مكان واحد.",
+  "email": {
+    "label": "البريد الإلكتروني",
+    "placeholder": "you@example.com"
   },
+  "password": {
+    "label": "كلمة المرور",
+    "placeholder": "أدخل كلمة المرور"
+  },
+  "submit": "تسجيل الدخول",
+  "submitting": "جاري تسجيل الدخول...",
+  "noAccount": "ليس لديك حساب؟",
+  "signUp": "إنشاء حساب",
+  "terms": "بالنقر على متابعة، فإنك توافق على",
+  "termsOfService": "شروط الخدمة",
+  "and": "و",
+  "privacyPolicy": "سياسة الخصوصية",
+  "privacyDialogTitle": "سياسة الخصوصية",
+    "privacyDialogContent": "أنت تملك جميع البيانات المخزنة في هذا النظام.",
+    "termsDialogTitle": "شروط الاستخدام",
+    "termsDialogOwnership": "هذا البرنامج مرخَّص للاستخدام في مركزك فقط، وتبقى ملكية بياناتك لك.",
+    "termsDialogRestrictions": "لا يجوز لك إعادة بيع التطبيق أو منحه ترخيصًا فرعيًا أو استخدامه لمراكز أخرى دون تصريح مسبق.",
+    "termsDialogConsent": "يعد استمرارك في استخدام المنصة قبولاً بهذه الشروط.",
+  "backToHome": "العودة إلى الصفحة الرئيسية"
+},
    "loginManager": {
     "title": "تسجيل دخول المشرف",
+    "managerOption": "مشرف",
     "subtitle": "الوصول إلى لوحة تحكم المشرف",
     "successMessage": "تم تسجيل الدخول بنجاح! جارٍ التوجيه إلى لوحة التحكم...",
     "forgotPassword": "نسيت كلمة المرور؟",
@@ -434,6 +447,7 @@
     "searchUsers": "ابحث عن المستخدمين...",
     "searchTeachers": "ابحث عن المعلمين...",
     "searchStudents": "ابحث عن الطلاب...",
+    "add": "إضافة",
     "addManager": "إضافة  مشرف",
     "noUsersFound": "لم يتم العثور على مستخدمين",
     "noTeachersFound": "لم يتم العثور على معلمين",

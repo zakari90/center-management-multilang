@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
 import { register } from "@/lib/actions"
-import { localDb, LocalUser } from "@/lib/dexie"
+import { saveManagerToLocalDb } from "@/lib/utils/saveManagerToLocalDb"
+import { syncPendingEntities } from "@/lib/dexie/syncWorker"
 import { cn } from "@/lib/utils"
-import bcrypt from "bcryptjs"
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
@@ -101,50 +101,39 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
       return
     }
 
-    // OFFLINE registration – hash password and save in Dexie
+    // OFFLINE registration – save to localDb
     try {
       if (values.password !== values.confirmPassword) {
         setState({ error: { message: t("errors.passwordMismatch") } })
         setIsPending(false)
         return
       }
-      const hash = bcrypt.hashSync(values.password as string, 10)
-      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      const user: LocalUser = {
-        id: tempId,
+      
+      const savedUser = await saveManagerToLocalDb({
         email: values.email as string,
         name: values.username as string,
-        password: hash,
-        role: (values.role as Role) || "ADMIN",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        syncStatus: "pending"
+        role: ((values.role as Role) || "ADMIN") as 'ADMIN' | 'MANAGER',
+      }, values.password as string)
+
+      // Trigger sync if online
+      if (navigator.onLine) {
+        syncPendingEntities().catch(err => console.error('Sync failed:', err))
       }
-      await localDb.users.add(user)
-      
-      // Add to sync queue
-      await localDb.syncQueue.add({
-        operation: 'CREATE',
-        entity: 'users',
-        entityId: tempId,
-        data: {
-          email: user.email,
-          name: user.name,
-          password: user.password,
-          role: user.role
-        },
-        timestamp: new Date(),
-        attempts: 0,
-        status: 'pending'
-      })
 
       setState({
         success: true,
-        data: { user, message: tOffline("offlineSuccessMessage") }
+        data: { 
+          user: {
+            id: savedUser.id,
+            email: savedUser.email,
+            name: savedUser.name,
+            role: savedUser.role,
+          }, 
+          message: tOffline("offlineSuccessMessage") 
+        }
       })
     } catch (err) {
-        console.log("Registration error:", err);
-
+      console.log("Registration error:", err);
       setState({ error: { message: tOffline("offlineLoginError") } })
     }
     setIsPending(false)

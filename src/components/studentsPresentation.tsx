@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { Loader2, Eye, Pencil, Search, Users, GraduationCap, DollarSign } from "lucide-react"

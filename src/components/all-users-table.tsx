@@ -74,9 +74,9 @@ import {
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { localDb } from '@/lib/dexie'
 import { isAppOnline } from '@/lib/apiClient'
-import bcrypt from 'bcryptjs'
+import { saveManagerToLocalDb } from '@/lib/utils/saveManagerToLocalDb'
+import { generateObjectId } from '@/lib/utils/generateObjectId'
 
 interface UserData {
   id: string
@@ -204,27 +204,84 @@ export default function AllUsersTable() {
     
     setIsProcessing(true)
     try {
-      const endpoint = itemToDelete.type === 'user' 
-        ? `/api/admin/users/${itemToDelete.id}`
-        : itemToDelete.type === 'teacher'
-        ? `/api/admin/teachers/${itemToDelete.id}`
-        : `/api/admin/students/${itemToDelete.id}`
+      const { 
+        deleteUserFromLocalDb, 
+        deleteTeacherFromLocalDb, 
+        deleteStudentFromLocalDb 
+      } = await import('@/lib/utils/deleteFromLocalDb');
+      const { fullSync } = await import('@/lib/dexie/syncWorker');
       
-      await axios.delete(endpoint)
+      let result;
       
+      // Delete based on type using the new deletion logic
       if (itemToDelete.type === 'user') {
-        setUsers(prev => prev.filter(u => u.id !== itemToDelete.id))
+        result = await deleteUserFromLocalDb(itemToDelete.id);
       } else if (itemToDelete.type === 'teacher') {
-        setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id))
+        result = await deleteTeacherFromLocalDb(itemToDelete.id);
       } else {
-        setStudents(prev => prev.filter(s => s.id !== itemToDelete.id))
+        result = await deleteStudentFromLocalDb(itemToDelete.id);
       }
       
-      toast(`${t(itemToDelete.type)} ${t('deletedSuccess')}`)
+      // If item was marked for deletion (status '1' -> '0'), try to delete from server if online
+      if (result.markedForDeletion && isAppOnline()) {
+        try {
+          const endpoint = itemToDelete.type === 'user' 
+            ? `/api/admin/users/${itemToDelete.id}`
+            : itemToDelete.type === 'teacher'
+            ? `/api/admin/teachers/${itemToDelete.id}`
+            : `/api/admin/students/${itemToDelete.id}`
+          
+          await axios.delete(endpoint, { withCredentials: true });
+          
+          // If server deletion succeeds, remove from localDb and update UI
+          if (itemToDelete.type === 'user') {
+            const { userActions } = await import('@/lib/dexie/dexieActions');
+            await userActions.deleteLocal(itemToDelete.id);
+            setUsers(prev => prev.filter(u => u.id !== itemToDelete.id));
+          } else if (itemToDelete.type === 'teacher') {
+            const { teacherActions } = await import('@/lib/dexie/dexieActions');
+            await teacherActions.deleteLocal(itemToDelete.id);
+            setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id));
+          } else {
+            const { studentActions } = await import('@/lib/dexie/dexieActions');
+            await studentActions.deleteLocal(itemToDelete.id);
+            setStudents(prev => prev.filter(s => s.id !== itemToDelete.id));
+          }
+          
+          toast.success(`${t(itemToDelete.type)} ${t('deletedSuccess')}`);
+        } catch (error) {
+          console.warn('Server deletion failed, item marked for deletion. Will sync later:', error);
+          // Item is already marked for deletion (status '0'), sync worker will handle it
+          // Update UI to reflect deletion state
+          if (itemToDelete.type === 'user') {
+            setUsers(prev => prev.filter(u => u.id !== itemToDelete.id));
+          } else if (itemToDelete.type === 'teacher') {
+            setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id));
+          } else {
+            setStudents(prev => prev.filter(s => s.id !== itemToDelete.id));
+          }
+          toast.info(`${t(itemToDelete.type)} marked for deletion - will sync when online`);
+          // Trigger sync for other pending items
+          fullSync().catch(err => console.error('Sync failed:', err));
+        }
+      } else if (result.deleted) {
+        // Item was directly deleted (status 'w'), update UI immediately
+        if (itemToDelete.type === 'user') {
+          setUsers(prev => prev.filter(u => u.id !== itemToDelete.id));
+        } else if (itemToDelete.type === 'teacher') {
+          setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id));
+        } else {
+          setStudents(prev => prev.filter(s => s.id !== itemToDelete.id));
+        }
+        toast.success(`${t(itemToDelete.type)} ${t('deletedSuccess')}`);
+        // Trigger sync for other pending items
+        fullSync().catch(err => console.error('Sync failed:', err));
+      }
+      
       setItemToDelete(null)
     } catch (err) {
       console.error('Failed to delete:', err)
-      toast(`${t('deletedError')} ${t(itemToDelete.type)}`)
+      toast.error(`${t('deletedError')} ${t(itemToDelete.type)}`)
     } finally {
       setIsProcessing(false)
     }
@@ -238,66 +295,28 @@ export default function AllUsersTable() {
 
     setIsProcessing(true)
     try {
-      const isOnline = isAppOnline()
+      // Generate ID on client side so it's the same in localDb and server
+      const userId = generateObjectId()
       
-      if (isOnline) {
-        // Online: Try API first
-        try {
-          console.log("Sending userFormData:", userFormData)
-          const response = await axios.post('/api/admin/users', userFormData)
-          setUsers(prev => [...prev, response.data])
-          setIsAddDialogOpen(false)
-          setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
-          toast(t('userAddedSuccess'))
-          setIsProcessing(false)
-          return
-        } catch (err) {
-          console.error('Online API failed, falling back to offline:', err)
-          // Fall through to offline handling
-        }
-      }
-      
-      // OFFLINE: Save to Dexie and sync queue
-      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      const hash = bcrypt.hashSync(userFormData.password, 10)
-      
-      const offlineUser = {
-        id: tempId,
-        email: userFormData.email,
-        name: userFormData.name,
-        password: hash,
-        role: userFormData.role,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        syncStatus: 'pending' as const
-      }
-      
-      await localDb.users.add(offlineUser)
-      
-      // Add to sync queue
-      await localDb.syncQueue.add({
-        operation: 'CREATE',
-        entity: 'users',
-        entityId: tempId,
-        data: {
-          email: offlineUser.email,
-          username: offlineUser.name,
-          password: userFormData.password, // Store plain password for sync
-          role: offlineUser.role
+      // Always save to localDb first with status 'w' (waiting for sync)
+      const savedUser = await saveManagerToLocalDb(
+        {
+          id: userId, // Use the generated ID
+          email: userFormData.email,
+          name: userFormData.name,
+          role: userFormData.role,
         },
-        timestamp: new Date(),
-        attempts: 0,
-        status: 'pending'
-      })
+        userFormData.password
+      )
       
-      // Update UI with offline user
-      const displayUser = {
-        id: tempId,
-        name: offlineUser.name,
-        email: offlineUser.email,
-        role: offlineUser.role,
+      // Update UI immediately
+      const displayUser: UserData = {
+        id: savedUser.id,
+        name: savedUser.name,
+        email: savedUser.email,
+        role: savedUser.role as 'ADMIN' | 'MANAGER',
         password: userFormData.password, // Display plain password
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(savedUser.createdAt).toISOString(),
         isActive: true,
         stats: { centers: 0, students: 0, teachers: 0 }
       }
@@ -305,7 +324,18 @@ export default function AllUsersTable() {
       setUsers(prev => [...prev, displayUser])
       setIsAddDialogOpen(false)
       setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
-      toast.success(isOnline ? t('userAddedSuccess') : 'Manager saved offline - will sync when online')
+      
+      // If online, trigger sync immediately
+      const online = isAppOnline()
+      if (online) {
+        if (typeof window !== 'undefined') {
+          const { syncPendingEntities } = await import('@/lib/dexie/syncWorker')
+          syncPendingEntities().catch(err => console.error('Sync failed:', err))
+        }
+        toast.success(t('userAddedSuccess') + ' - Syncing to server...')
+      } else {
+        toast.success('Manager saved locally - will sync when online')
+      }
       
     } catch (err) {
       console.error('Failed to add Manager:', err)

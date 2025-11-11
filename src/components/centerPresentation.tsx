@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client"
 
 import { ItemInputList } from "@/components/itemInputList"
@@ -99,20 +98,25 @@ export default function CenterPresentation(center: Center) {
   // Delete subject
   const handleDeleteSubject = async (subjectId: string) => {
     try {
-      await axios.delete(`/api/subjects`, {
-        data: { subjectId }
-      })
-
+      const { deleteSubject } = await import('@/lib/apiClient');
+      const { fullSync } = await import('@/lib/dexie/syncWorker');
+      
+      // Delete using the new deletion logic (handles status 'w' vs '1')
+      await deleteSubject(subjectId);
+      
+      // Update UI immediately
       setFormData(prev => ({
         ...prev,
         subjects: prev.subjects.filter(s => s.id !== subjectId)
       }))
 
-      toast("Subject deleted successfully")
-    } catch (error) {
-      console.log(error );
+      toast.success("Subject deleted successfully")
       
-      toast("Failed to delete subject")
+      // Trigger sync for other pending items
+      fullSync().catch(err => console.error('Sync failed:', err));
+    } catch (error) {
+      console.error('Failed to delete subject:', error);
+      toast.error("Failed to delete subject")
     }
   }
 

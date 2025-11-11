@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { name, email, password, role } = body
+    const { name, email, password, role, id } = body
 
     if (!name || !email || !password || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -88,8 +88,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
     }
 
+    // Check if ID is provided and if it already exists
+    if (id) {
+      const existingById = await db.user.findUnique({
+        where: { id }
+      })
+      
+      if (existingById) {
+        return NextResponse.json({ error: 'User with this ID already exists' }, { status: 400 })
+      }
+    }
+
     const user = await db.user.create({
       data: {
+        ...(id && { id }), // Use client-provided ID if available
         name,
         email,
         password,

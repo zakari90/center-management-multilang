@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export interface User {
+interface User {
   id: string;
   name: string;
   email: string;
@@ -33,30 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      // Try online first
-      try {
-        const response = await fetch('/api/auth/me');
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.user) {
-            setUser(data.user);
-            // Store in Dexie for offline access
-            const { setClientUser } = await import('@/lib/clientAuth');
-            await setClientUser(data.user);
-            setIsLoading(false);
-            return;
-          }
-        }
-      } catch {
-        console.log('Online auth check failed, trying offline...');
-      }
+      const response = await fetch('/api/auth/me');
       
-      // Fallback to offline: check Dexie
-      const { getClientUser } = await import('@/lib/clientAuth');
-      const offlineUser = await getClientUser();
-      if (offlineUser) {
-        setUser(offlineUser);
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
       } else {
         setUser(null);
       }
@@ -68,15 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (userData: User) => {
+  const login = (userData: User) => {
     setUser(userData);
-    // Store in Dexie for offline access
-    try {
-      const { setClientUser } = await import('@/lib/clientAuth');
-      await setClientUser(userData);
-    } catch (error) {
-      console.error('Failed to store user in Dexie:', error);
-    }
   };
 
   const logout = async () => {

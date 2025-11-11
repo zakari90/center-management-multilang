@@ -110,7 +110,6 @@ export const NewCenterForm = () => {
 
   return (
     <Card className="max-w-2xl mx-auto mt-4">
-      <>test---------------------------------------------------</>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step 1: Basic Info */}
@@ -364,7 +363,7 @@ export const SubjectFormMultipleChoices = ({
           />
           {subjectData.selectedSubjects.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              {t('selected')}: {subjectData.selectedSubjects.join(', ')}
+              {t('selected', { value: subjectData.selectedSubjects.join(', ') })}
             </div>
           )}
         </div>
@@ -381,7 +380,7 @@ export const SubjectFormMultipleChoices = ({
           />
           {subjectData.selectedGrades.length > 0 && (
             <div className="text-xs text-muted-foreground">
-              {t('selected')}: {subjectData.selectedGrades.join(', ')}
+              {t('selected', { value: subjectData.selectedGrades.join(', ') })}
             </div>
           )}
         </div>

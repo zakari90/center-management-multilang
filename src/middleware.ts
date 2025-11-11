@@ -6,7 +6,7 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
-const publicRoutes = ["/", "/login", "/register", "/loginmanager"];
+const publicRoutes = ["/login"];
 
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,19 +17,8 @@ export default async function middleware(request: NextRequest) {
   // Check if route is public
   const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(route));
   
-  // Redirect authenticated users from home page based on role
-  if (pathname === '/' && session?.user) {
-    if (session.user.role === 'ADMIN') {
-      return NextResponse.redirect(new URL('/admin', request.url));
-    }
-    
-    if (session.user.role === 'MANAGER') {
-      return NextResponse.redirect(new URL('/manager', request.url));
-    }
-  }
-  
-  // Redirect authenticated users away from auth pages
-  if (session?.user && (pathname === '/login' || pathname === '/register' || pathname === '/loginmanager')) {
+  // Redirect authenticated users away from login page
+  if (session?.user && pathname === '/login') {
     if (session.user.role === 'ADMIN') {
       return NextResponse.redirect(new URL('/admin', request.url));
     }

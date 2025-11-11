@@ -12,8 +12,12 @@
     "offlineMessageShort": "Il semble que vous ayez perdu votre connexion Internet.",
     "offlineMessageLong": "Veuillez vérifier votre connexion et réessayer.",
     "offlineSuccessMessage": "Connecté en utilisant les données hors ligne.",
+    "offlineMode": "Mode Hors Ligne - Utilisation des identifiants en cache",
+    "offlineLoggingIn": "Connexion hors ligne...",
+    "offlineInfoTitle": "Connexion Hors Ligne",
     "offlineLoginInfo": "Vous êtes hors ligne. Connexion en utilisant les informations stockées localement.",
-    "offlineLoginIncorrect": "L’e-mail ou le mot de passe est incorrect pour une connexion hors ligne.",
+    "offlineLoginIncorrect": "L'e-mail ou le mot de passe est incorrect pour une connexion hors ligne.",
+    "offlineInvalidCredentials": "Nous n'avons pas pu vérifier ces identifiants hors ligne. Veuillez réessayer lorsque vous serez en ligne.",
     "offlineLoginError": "Une erreur est survenue lors de la connexion hors ligne."
   }
 ,
@@ -130,6 +134,9 @@
   },
 "login": {
     "title": "Bon retour",
+    "adminOption": "Administrateur",
+    "welcomeBadge": "Plateforme de gestion des centres",
+    "adminOptionDescription": "Suivez centres, finances et équipes en un seul endroit.",
     "email": {
       "label": "Email",
       "placeholder": "vous@exemple.com"
@@ -145,10 +152,17 @@
     "terms": "En cliquant sur continuer, vous acceptez nos",
     "termsOfService": "Conditions de service",
     "and": "et",
-    "privacyPolicy": "Politique de confidentialité"
+    "privacyPolicy": "Politique de confidentialité",
+    "privacyDialogTitle": "Politique de confidentialité",
+    "privacyDialogContent": "Vous êtes propriétaire de toutes les données stockées sur cette plateforme.",
+    "termsDialogTitle": "Conditions d'utilisation",
+    "termsDialogOwnership": "Ce logiciel est concédé sous licence pour votre centre uniquement; la propriété de vos données vous appartient.",
+    "termsDialogRestrictions": "Vous ne pouvez pas le revendre, le sous-licencier ou l'utiliser pour d'autres centres sans autorisation préalable.",
+    "termsDialogConsent": "L'utilisation continue de la plateforme vaut acceptation de ces conditions."
   },
-   "loginManager": {
+  "loginManager": {
     "title": "Connexion Gestionnaire",
+    "managerOption": "Gestionnaire",
     "subtitle": "Accédez à votre tableau de bord gestionnaire",
     "successMessage": "Connexion réussie ! Redirection vers le tableau de bord...",
     "forgotPassword": "Mot de passe oublié ?",
@@ -441,6 +455,7 @@
     "searchUsers": "Rechercher les utilisateurs...",
     "searchTeachers": "Rechercher les enseignants...",
     "searchStudents": "Rechercher les élèves...",
+    "add": "Ajouter",
     "addManager": "Ajouter un gestionnaire",
     "noUsersFound": "Aucun utilisateur trouvé",
     "noTeachersFound": "Aucun enseignant trouvé",

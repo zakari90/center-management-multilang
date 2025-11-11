@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
   
     const body = await req.json();
-    const { email, password, username } = body;
+    const { email, password, username, id } = body;
 
     if (!email || !password || !username ) {
       return NextResponse.json(
@@ -30,8 +30,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if ID is provided and if it already exists
+    if (id) {
+      const existingById = await db.user.findUnique({
+        where: { id }
+      });
+      
+      if (existingById) {
+        return NextResponse.json(
+          { error: { message: "User with this ID already exists." } },
+          { status: 409 }
+        );
+      }
+    }
+
     const user = await db.user.create({
       data: {
+        ...(id && { id }), // Use client-provided ID if available
         email,
         password,
         name: username,

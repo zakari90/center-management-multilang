@@ -11,8 +11,12 @@
   "offlineMessageShort": "It looks like you've lost your internet connection.",
   "offlineMessageLong": "Please check your connection and try again.",
   "offlineSuccessMessage": "Logged in using offline data.",
+  "offlineMode": "Offline Mode - Using cached credentials",
+  "offlineLoggingIn": "Logging in offline...",
+  "offlineInfoTitle": "Offline Login",
   "offlineLoginInfo": "You're offline. Logging in using locally stored information.",
   "offlineLoginIncorrect": "Email or password is incorrect for offline login.",
+  "offlineInvalidCredentials": "We couldn't verify those credentials offline. Please try again when you're online.",
   "offlineLoginError": "There was an error with offline login."
 }
   , "deleteALL": {
@@ -170,6 +174,9 @@
  
 "login": {
     "title": "Welcome back",
+    "adminOption": "Administrator",
+    "welcomeBadge": "Center Management Platform",
+    "adminOptionDescription": "Track centers, finances, and teams in one place.",
     "email": {
       "label": "Email",
       "placeholder": "you@example.com"
@@ -185,10 +192,18 @@
     "terms": "By clicking continue, you agree to our",
     "termsOfService": "Terms of Service",
     "and": "and",
-    "privacyPolicy": "Privacy Policy"
+    "privacyPolicy": "Privacy Policy",
+    "privacyDialogTitle": "Privacy Policy",
+    "privacyDialogContent": "You own all data stored in this platform.",
+    "termsDialogTitle": "Terms of Service",
+    "termsDialogOwnership": "This software is licensed for use by your center only; you retain ownership of your data.",
+    "termsDialogRestrictions": "You may not resell, sub-license, or deploy this application for other centers without prior authorization.",
+    "termsDialogConsent": "Continued use of the platform confirms your acceptance of these terms.",
+    "backToHome": "Back to Home"
   },
    "loginManager": {
     "title": "Manager Login",
+    "managerOption": "Manager",
     "subtitle": "Access your manager dashboard",
     "successMessage": "Login successful! Redirecting to manager dashboard...",
     "forgotPassword": "Forgot password?",
@@ -467,6 +482,7 @@
     "searchUsers": "Search users...",
     "searchTeachers": "Search teachers...",
     "searchStudents": "Search students...",
+    "add": "Add",
     "addManager": "Add Manager",
     "noUsersFound": "No users found",
     "noTeachersFound": "No teachers found",

@@ -164,11 +164,20 @@ console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
 
   const handleDeleteSchedule = async (scheduleId: string) => {
     try {
-      await axios.delete(`/api/admin/schedule/${scheduleId}`)
-      setSchedule(prev => prev.filter(s => s.id !== scheduleId))
+      const { deleteSchedule } = await import('@/lib/apiClient');
+      const { fullSync } = await import('@/lib/dexie/syncWorker');
+      
+      // Delete using the new deletion logic (handles status 'w' vs '1')
+      await deleteSchedule(scheduleId);
+      
+      // Update UI immediately
+      setSchedule(prev => prev.filter(s => s.id !== scheduleId));
+      
+      // Trigger sync for other pending items
+      fullSync().catch(err => console.error('Sync failed:', err));
     } catch (err) {
-      console.log(err)
-      setError(t('errorDeleteSchedule'))
+      console.error('Failed to delete schedule:', err);
+      setError(t('errorDeleteSchedule'));
     }
   }
 

@@ -18,7 +18,7 @@ enum ReceiptType {
 }
 
 model Center {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  id            String     @id @map("_id") @db.ObjectId
   name          String
   address       String?
   phone         String?
@@ -35,7 +35,7 @@ model Center {
 }
 
 model User {
-  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String             @id @map("_id") @db.ObjectId
   email               String             @unique
   password            String
   name                String
@@ -52,7 +52,7 @@ model User {
 }
 
 model Teacher {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   name             String
   email            String?            @unique
   phone            String?
@@ -70,7 +70,7 @@ model Teacher {
 }
 
 model Student {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   name             String
   email            String?            @unique
   phone            String?
@@ -88,7 +88,7 @@ model Student {
 }
 
 model Subject {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   name             String
   grade            String
   price            Float
@@ -104,7 +104,7 @@ model Subject {
 }
 
 model TeacherSubject {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   percentage       Float?
   hourlyRate       Float?
   assignedAt       DateTime           @default(now())
@@ -116,7 +116,7 @@ model TeacherSubject {
 }
 
 model StudentSubject {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   enrolledAt       DateTime           @default(now())
 
   student          Student            @relation(fields: [studentId], references: [id])
@@ -128,7 +128,7 @@ model StudentSubject {
 }
 
 model Receipt {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   receiptNumber    String             @unique
   amount           Float
   type             ReceiptType
@@ -148,7 +148,7 @@ model Receipt {
 }
 
 model Schedule {
-  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  id               String             @id @map("_id") @db.ObjectId
   day              String
   startTime        String
   endTime          String
@@ -170,7 +170,7 @@ model Schedule {
 }
 
 model PushSubscription {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @map("_id") @db.ObjectId
   endpoint   String   @unique
   keys       Json
   user       User?    @relation(fields: [userId], references: [id])

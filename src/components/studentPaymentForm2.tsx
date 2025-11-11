@@ -474,25 +474,32 @@ export default function CreateStudentPaymentForm() {
         }, {
           offlineEntity: 'receipts',
           offlineFallback: async () => {
-            // Handle offline receipt creation
-            const { addReceiptOffline } = await import('@/lib/offlineApi')
+            // Handle offline receipt creation using Dexie
+            const { saveReceiptToLocalDb } = await import('@/lib/utils/saveToLocalDb')
+            const { ReceiptType } = await import('@/lib/dexie/dbSchema')
             const { getClientUserId } = await import('@/lib/clientAuth')
             const userId = await getClientUserId() || ''
             
-            const receiptData = {
-              studentId: selectedStudent.id,
-              subjectIds: formData.selectedSubjects,
-              paymentMethod: formData.paymentMethod,
-              description: formData.description,
-              date: formData.date,
-              type: 'STUDENT_PAYMENT',
-              amount: formData.selectedSubjects.reduce((total, subjectId) => {
-                const subject = selectedStudent.studentSubjects.find(ss => ss.subject.id === subjectId)
-                return total + (subject?.subject.price || 0)
-              }, 0)
-            }
+            const amount = formData.selectedSubjects.reduce((total, subjectId) => {
+              const subject = selectedStudent.studentSubjects.find(ss => ss.subject.id === subjectId)
+              return total + (subject?.subject.price || 0)
+            }, 0)
             
-            return await addReceiptOffline(receiptData, userId)
+            // Generate receipt number
+            const receiptNumber = `REC-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+            
+            const savedReceipt = await saveReceiptToLocalDb({
+              receiptNumber,
+              studentId: selectedStudent.id,
+              amount,
+              type: ReceiptType.STUDENT_PAYMENT,
+              description: formData.description,
+              paymentMethod: formData.paymentMethod,
+              date: formData.date,
+              managerId: userId,
+            })
+            
+            return savedReceipt
           }
         })
 
