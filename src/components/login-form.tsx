@@ -27,7 +27,10 @@ import {
   Lock,
   Mail,
   UserCog,
-  WifiOff
+  WifiOff,
+  Bug,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 import bcrypt from "bcryptjs"
 import { useTranslations } from "next-intl"
@@ -89,6 +92,7 @@ export function LoginForm({
   const [offlineError, setOfflineError] = useState<string | null>(null)
   const [offlineSuccess, setOfflineSuccess] = useState(false)
   const [isOfflineLoading, setIsOfflineLoading] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
 
   useEffect(() => {
     setRole(initialRole)
@@ -170,6 +174,8 @@ export function LoginForm({
     try {
       const email = (formData.get("email") as string)?.toLowerCase().trim()
       const password = (formData.get("password") as string) || ""
+      
+      console.log('📴 [OFFLINE LOGIN] Attempting offline login...', { email, role, isOffline })
 
       if (!email || !password) {
         setOfflineError(tOffline("offlineLoginError"))
@@ -288,10 +294,17 @@ export function LoginForm({
       }
 
       // If we reach here, login failed
+      console.log('❌ [OFFLINE LOGIN] Login failed - no matching user found')
       setOfflineError(tOffline("offlineLoginError"))
       setIsOfflineLoading(false)
     } catch (error) {
-      console.error("Offline login failed:", error)
+      console.error("❌ [OFFLINE LOGIN] Offline login failed:", error)
+      const errorDetails = error instanceof Error ? {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      } : error
+      console.error("❌ [OFFLINE LOGIN] Error details:", errorDetails)
       setOfflineError(tOffline("offlineLoginError"))
       setIsOfflineLoading(false)
     }
@@ -302,11 +315,28 @@ export function LoginForm({
     const formData = new FormData(event.currentTarget)
     formData.set("role", role)
 
+    // Debug logging
+    const email = (formData.get("email") as string)?.toLowerCase().trim()
+    const password = formData.get("password") as string
+    console.log('🔍 [LOGIN DEBUG]', {
+      role,
+      email,
+      passwordLength: password?.length || 0,
+      isOffline,
+      navigatorOnline: typeof navigator !== 'undefined' ? navigator.onLine : 'N/A',
+      apiUrl: process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' 
+        ? `${window.location.origin}/api` 
+        : `http://localhost:${process.env.PORT || 6524}/api`),
+      timestamp: new Date().toISOString()
+    })
+
     // Handle offline login
-    if (isOffline) {
-      await handleOfflineLogin(formData)
-      return
-    }
+    await handleOfflineLogin(formData)
+
+    // if (isOffline) {
+    //   await handleOfflineLogin(formData)
+    //   return
+    // }
 
     // Handle online login
     startTransition(async () => {
@@ -314,7 +344,9 @@ export function LoginForm({
         const email = (formData.get("email") as string)?.toLowerCase().trim()
         const password = (formData.get("password") as string) || ""
         
+        console.log('🌐 [ONLINE LOGIN] Attempting login...', { email, role })
         const result = await loginWithRole(state, formData)
+        console.log('✅ [ONLINE LOGIN] Result:', { success: result.success, error: result.error, hasUser: !!result.data?.user })
         
         // If login is successful, save user to localDb with status 'w' (will sync after)
         if (result.success && result.data?.user && email && password) {
@@ -346,7 +378,13 @@ export function LoginForm({
         
         setState(result)
       } catch (error) {
-        console.error("Login failed:", error)
+        console.error("❌ [ONLINE LOGIN] Login failed:", error)
+        const errorDetails = error instanceof Error ? {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        } : error
+        console.error("❌ [ONLINE LOGIN] Error details:", errorDetails)
         setState({
           error: { message: "An unexpected error occurred" },
           role: role
@@ -602,6 +640,114 @@ export function LoginForm({
               </CardContent>
             </Card>
           )}
+
+          {/* Debug Panel */}
+          <Card className="w-full max-w-md border-2 border-dashed border-blue-300 bg-blue-50/50">
+            <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
+              <button
+                type="button"
+                onClick={() => setShowDebug(!showDebug)}
+                className="w-full flex items-center justify-between text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <Bug className="h-4 w-4 text-blue-600" />
+                  <p className="text-xs sm:text-sm font-medium text-blue-900">
+                    Debug Info
+                  </p>
+                </div>
+                {showDebug ? (
+                  <ChevronUp className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-blue-600" />
+                )}
+              </button>
+              
+              {showDebug && (
+                <div className="mt-4 space-y-2 text-xs font-mono bg-white/50 p-3 rounded border border-blue-200">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-blue-700 font-semibold">Role:</span>
+                      <span className="ml-2 text-blue-900">{role}</span>
+                    </div>
+                    <div>
+                      <span className="text-blue-700 font-semibold">Online:</span>
+                      <span className={`ml-2 ${isOffline ? 'text-red-600' : 'text-green-600'}`}>
+                        {isOffline ? 'No' : 'Yes'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-blue-700 font-semibold">Navigator:</span>
+                      <span className={`ml-2 ${typeof navigator !== 'undefined' && navigator.onLine ? 'text-green-600' : 'text-red-600'}`}>
+                        {typeof navigator !== 'undefined' ? (navigator.onLine ? 'Online' : 'Offline') : 'N/A'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-blue-700 font-semibold">Loading:</span>
+                      <span className={`ml-2 ${isPending || isOfflineLoading ? 'text-yellow-600' : 'text-gray-600'}`}>
+                        {isPending || isOfflineLoading ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <div className="text-blue-700 font-semibold mb-1">API URL:</div>
+                    <div className="text-blue-900 break-all text-[10px]">
+                      {process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' 
+                        ? `${window.location.origin}/api` 
+                        : `http://localhost:${process.env.PORT || 6524}/api`)}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <div className="text-blue-700 font-semibold mb-1">Login State:</div>
+                    <div className="text-blue-900 space-y-1">
+                      <div>Success: {state?.success ? '✅' : '❌'}</div>
+                      <div>Error: {state?.error?.message || offlineError || 'None'}</div>
+                      <div>Offline Success: {offlineSuccess ? '✅' : '❌'}</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <div className="text-blue-700 font-semibold mb-1">Actions:</div>
+                    <div className="space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          console.log('🔍 [DEBUG] Current State:', {
+                            role,
+                            isOffline,
+                            isPending,
+                            isOfflineLoading,
+                            state,
+                            offlineError,
+                            offlineSuccess,
+                            navigatorOnline: typeof navigator !== 'undefined' ? navigator.onLine : 'N/A',
+                            apiUrl: process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' 
+                              ? `${window.location.origin}/api` 
+                              : `http://localhost:${process.env.PORT || 6524}/api`)
+                          });
+                        }}
+                        className="text-blue-600 hover:text-blue-800 underline text-[10px]"
+                      >
+                        Log State to Console
+                      </button>
+                      <br />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const users = await userActions.getAll();
+                          console.log('👥 [DEBUG] All Users in LocalDb:', users);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 underline text-[10px]"
+                      >
+                        Log LocalDb Users
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
