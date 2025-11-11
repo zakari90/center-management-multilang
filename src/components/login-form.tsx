@@ -34,7 +34,7 @@ import {
 } from "lucide-react"
 import bcrypt from "bcryptjs"
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useEffect, useState, useTransition } from "react"
 import {
   Dialog,
@@ -128,6 +128,12 @@ export function LoginForm({
   // Handle online login success
   useEffect(() => {
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
+      console.log('✅ [REDIRECT] Online login successful, preparing redirect...', {
+        userRole: state.data.user.role,
+        currentRole: role,
+        stateSuccess: state.success
+      })
+      
       login(state.data.user)
       const userRole = state.data.user.role
       const destination = userRole === "MANAGER"
@@ -138,8 +144,11 @@ export function LoginForm({
             ? "/manager"
             : "/admin"
 
+      console.log('🚀 [REDIRECT] Redirecting to:', destination)
+      
       const timeout = setTimeout(() => {
         router.push(destination)
+        console.log('✅ [REDIRECT] Navigation triggered to:', destination)
       }, 10)
 
       return () => clearTimeout(timeout)
@@ -149,9 +158,17 @@ export function LoginForm({
   // Handle offline login success
   useEffect(() => {
     if (offlineSuccess) {
+      console.log('✅ [REDIRECT] Offline login successful, preparing redirect...', {
+        role,
+        offlineSuccess
+      })
+      
+      const destination = role === "manager" ? "/manager" : "/admin"
+      console.log('🚀 [REDIRECT] Redirecting to:', destination)
+      
       const timeout = setTimeout(() => {
-        const destination = role === "manager" ? "/manager" : "/admin"
         router.push(destination)
+        console.log('✅ [REDIRECT] Navigation triggered to:', destination)
       }, 10)
 
       return () => clearTimeout(timeout)
