@@ -37,9 +37,12 @@ export async function POST(req: NextRequest) {
             role: "ADMIN",
           },
         });
-      } catch (createError: any) {
+      } catch (createError: unknown) {
+        // Type guard for Prisma errors
+        const prismaError = createError as { code?: string; message?: string };
+        
         // Handle MongoDB replica set error
-        if (createError.code === 'P2031') {
+        if (prismaError.code === 'P2031') {
           console.error('MongoDB replica set error. To fix: Configure MongoDB as a replica set or use MongoDB Atlas.');
           // Try to find the user in case it was created by another request
           user = await db.user.findUnique({ where: { email: adminEmail } });
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest) {
           }
         } 
         // Handle duplicate key error (race condition)
-        else if (createError.code === 'P2002' || createError.message?.includes('duplicate')) {
+        else if (prismaError.code === 'P2002' || prismaError.message?.includes('duplicate')) {
           user = await db.user.findUnique({ where: { email: adminEmail } });
           if (!user) {
             throw createError; // Re-throw if it's a different error
