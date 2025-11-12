@@ -1,18 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
+import { jwtVerify, SignJWT } from "jose";
 import { loginAdmin, loginManager } from "./actions"
-import { encrypt } from "./authentication";
 import { userActions } from "./dexie/dexieActions";
 import { generateObjectId } from "./utils/generateObjectId";
 import { isOnline } from "./utils/network";
 import Cookies from 'js-cookie'
 
 
+const secretKey = "secret";
+const key = new TextEncoder().encode(secretKey);
+
+export async function encrypt(payload: any) {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .sign(key);
+}
+export async function decrypt(input: string) {
+  const { payload } = await jwtVerify(input, key, {
+    algorithms: ["HS256"],
+  });
+  return payload;
+}
 // Combined login action that routes based on role and returns role info
 export async function loginWithRole(state: unknown, formData: FormData) {
   const submittedRole = (formData.get("role") as string) === "manager" ? "manager" : "admin"
-  console.log("***********************************************");
-  console.log(submittedRole);
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const id = generateObjectId();
