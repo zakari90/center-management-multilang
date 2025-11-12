@@ -15,8 +15,10 @@ const LanguageSwitcher = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [currentLanguage, setCurrentLanguage] = useState("ar");
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const savedLanguage =
       document.cookie
         .split("; ")
@@ -51,6 +53,15 @@ const LanguageSwitcher = () => {
     fr: "Français",
 
   };
+
+  // Prevent hydration mismatch by only rendering after mount
+  if (!isMounted) {
+    return (
+      <Button variant="outline" size="sm" disabled>
+        {languageLabels["ar"]}
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu dir={currentLanguage === "ar" ? "rtl" : "ltr"}>

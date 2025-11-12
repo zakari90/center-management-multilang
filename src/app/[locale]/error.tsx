@@ -1,20 +1,18 @@
 "use client";
 
 import { ServerCrash } from "lucide-react";
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
 
 export default function Error({
-  params,
   error,
   reset,
 }: {
-  params: Promise<{ locale: string }>;
+
   error: Error & { digest?: string };
   reset: () => void;
 }) {
@@ -22,8 +20,6 @@ export default function Error({
     // Log the error to an error reporting service
     console.error(error);
   }, [error]);
-  const { locale } = use(params);
-  setRequestLocale(locale);
   const t = useTranslations("error");
 
   return (

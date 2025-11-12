@@ -99,15 +99,13 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
         axios.get('/api/admin/teachers'),
         axios.get('/api/subjects'),
-        axios.get(`/api/admin/schedule`),
-        axios.get(`/api/admin/centers`)
+        axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
+        centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
       ])
 
       setTeachers(teachersRes.data)
       setSubjects(subjectsRes.data)
       setSchedule(scheduleRes.data)
-console.log("**************************************************" );
-console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
 
       if (centerRes?.data?.classrooms?.length) {
         setRooms(centerRes.data.classrooms)
@@ -164,20 +162,11 @@ console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
 
   const handleDeleteSchedule = async (scheduleId: string) => {
     try {
-      const { deleteSchedule } = await import('@/lib/apiClient');
-      const { fullSync } = await import('@/lib/dexie/syncWorker');
-      
-      // Delete using the new deletion logic (handles status 'w' vs '1')
-      await deleteSchedule(scheduleId);
-      
-      // Update UI immediately
-      setSchedule(prev => prev.filter(s => s.id !== scheduleId));
-      
-      // Trigger sync for other pending items
-      fullSync().catch(err => console.error('Sync failed:', err));
+      await axios.delete(`/api/admin/schedule/${scheduleId}`)
+      setSchedule(prev => prev.filter(s => s.id !== scheduleId))
     } catch (err) {
-      console.error('Failed to delete schedule:', err);
-      setError(t('errorDeleteSchedule'));
+      console.log(err)
+      setError(t('errorDeleteSchedule'))
     }
   }
 
@@ -204,7 +193,7 @@ console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
   }
 
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -225,7 +214,7 @@ console.log(teachersRes, subjectsRes, scheduleRes, centerRes);
           <CardTitle>{t('viewOptions')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex gap-4 flex-wrap">
             <div className="flex-1 min-w-[150px]">
               <Label>{t('viewMode')}</Label>
               <Select

@@ -6,7 +6,6 @@ import axios from "axios"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
-import { createTeacher } from "@/lib/apiClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -318,18 +317,6 @@ export default function CreateTeacherForm() {
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
-  const [isOffline, setIsOffline] = useState(!navigator.onLine)
-  
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false)
-    const handleOffline = () => setIsOffline(true)
-    window.addEventListener("online", handleOnline)
-    window.addEventListener("offline", handleOffline)
-    return () => {
-      window.removeEventListener("online", handleOnline)
-      window.removeEventListener("offline", handleOffline)
-    }
-  }, [])
 
   const DAYS = [
     t("monday"),
@@ -422,13 +409,17 @@ export default function CreateTeacherForm() {
       }
     }
 
-  const activeSchedule = weeklySchedule
-  .filter(day => day.isAvailable)
-  .map(({ day, startTime, endTime }) => ({ day, startTime, endTime }));
+    const activeSchedule = weeklySchedule
+      .filter((day) => day.isAvailable)
+      .map(({ day, startTime, endTime }) => 
+        // Convert each schedule item to a JSON string
+        JSON.stringify({ day, startTime, endTime })
+      )
 
     const payload = {
       ...formData,
-            weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
+      // Send as array of JSON strings (each item stringified)
+      weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
       subjects: validSubjects.map((ts) => ({
         subjectId: ts.subjectId,
         percentage: ts.compensationType === "percentage" ? ts.percentage : null,
@@ -436,14 +427,7 @@ export default function CreateTeacherForm() {
       })),
     }
 
-    // Use offline-capable API client
-    await createTeacher(payload)
-    
-    // Show success message
-    if (isOffline) {
-      // toast will be shown by apiClient
-    }
-    
+    await axios.post("/api/teachers", payload)
     await router.push("/manager/teachers")
     router.refresh()
   } catch (err) {

@@ -12,8 +12,6 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { createStudent, getSubjectsWithParams, isAppOnline } from "@/lib/apiClient"
-import { toast } from "sonner"
 
 interface Teacher {
   id: string
@@ -79,8 +77,11 @@ export default function CreateStudentForm() {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const data = await getSubjectsWithParams({ includeTeachers: true })
-        setSubjects(data)
+        const response = await fetch("/api/subjects?includeTeachers=true")
+        if (response.ok) {
+          const data = await response.json()
+          setSubjects(data)
+        }
       } catch (err) {
         console.error("Failed to fetch subjects:", err)
         setError(t("errorsfetchSubjects"))
@@ -159,25 +160,27 @@ export default function CreateStudentForm() {
         throw new Error(t("errorsnoSubjects"))
       }
 
-      await createStudent({
-        ...formData,
-        enrollments: enrolledSubjects.map((es) => ({
-          subjectId: es.subjectId,
-          teacherId: es.teacherId,
-        })),
+      const response = await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          enrollments: enrolledSubjects.map((es) => ({
+            subjectId: es.subjectId,
+            teacherId: es.teacherId,
+          })),
+        }),
       })
 
-      if (isAppOnline()) {
-        toast.success(t("successCreate") || "Student created successfully")
-      } else {
-        toast.success("Student saved offline - will sync when online")
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || t("errorsgeneric"))
       }
 
       await router.push("/manager/students")
       router.refresh()
     } catch (err: any) {
       setError(err.message || t("errorsgeneric"))
-      toast.error(err.message || t("errorsgeneric"))
     } finally {
       setIsLoading(false)
     }

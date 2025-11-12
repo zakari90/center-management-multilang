@@ -1,11 +1,14 @@
 "use server"
 
-import axios from "axios"
+import axios from "axios";
 import { getTranslations } from "next-intl/server"; // Import for server-side translations
-import { cookies } from "next/headers"
-import { z } from "zod"
-import { encrypt } from "./authentication"
+import { cookies } from "next/headers";
+import { z } from "zod";
+import { encrypt } from "./authentication";
+import { generateObjectId } from "./utils/generateObjectId";
 
+
+const apiUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000") + "/api"
 // Zod schemas with dynamic translations
 const createRegistrationSchema = (t: Awaited<ReturnType<typeof getTranslations>>) =>
   z.object({
@@ -62,9 +65,9 @@ export async function register(state: unknown, formData: FormData) {
     }
 
     // Use relative URL for server actions (runs on same server)
-    const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`
+    // src/app/api/admin/users/route.ts
     const response = await axios.post(
-      `${apiUrl}/auth/register`,
+      `${apiUrl}/admin/users`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -194,6 +197,7 @@ export async function loginAdmin(
     const t = await getTranslations('auth');
 
     const data = {
+      id: formData.get("id") || generateObjectId() || "1",
       email: formData.get("email"),
       password: formData.get("password"),
     };
@@ -208,9 +212,8 @@ export async function loginAdmin(
     }
 
     // Use relative URL for server actions (runs on same server)
-    const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`
     const response = await axios.post(
-      `${apiUrl}/auth/login`,
+      `${apiUrl}/admin/users`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
@@ -240,26 +243,6 @@ export async function loginAdmin(
 
 
 
-
-
-// Export sync function for manual triggering
-export async function triggerSync(): Promise<{ success: boolean; message: string }> {
-  try {
-    const { syncPendingEntities } = await import('@/lib/dexie/syncWorker');
-    await syncPendingEntities();
-    return {
-      success: true,
-      message: 'Sync completed successfully',
-    };
-  } catch (error) {
-    console.error('Sync failed:', error);
-    return {
-      success: false,
-      message: 'Sync failed',
-    };
-  }
-}
-
 // Login Manager Action
 export async function loginManager(state: unknown, formData: FormData) {
   try {
@@ -280,7 +263,7 @@ export async function loginManager(state: unknown, formData: FormData) {
     }
 
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/manager/login`,
+      `${apiUrl}/manager/login`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )

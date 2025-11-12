@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client"
 
 import { ItemInputList } from "@/components/itemInputList"
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
-import { BookOpen, Building2, CalendarDays, Pencil, Plus } from "lucide-react"
+import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
@@ -98,25 +99,20 @@ export default function CenterPresentation(center: Center) {
   // Delete subject
   const handleDeleteSubject = async (subjectId: string) => {
     try {
-      const { deleteSubject } = await import('@/lib/apiClient');
-      const { fullSync } = await import('@/lib/dexie/syncWorker');
-      
-      // Delete using the new deletion logic (handles status 'w' vs '1')
-      await deleteSubject(subjectId);
-      
-      // Update UI immediately
+      await axios.delete(`/api/subjects`, {
+        data: { subjectId }
+      })
+
       setFormData(prev => ({
         ...prev,
         subjects: prev.subjects.filter(s => s.id !== subjectId)
       }))
 
-      toast.success("Subject deleted successfully")
-      
-      // Trigger sync for other pending items
-      fullSync().catch(err => console.error('Sync failed:', err));
+      toast("Subject deleted successfully")
     } catch (error) {
-      console.error('Failed to delete subject:', error);
-      toast.error("Failed to delete subject")
+      console.log(error );
+      
+      toast("Failed to delete subject")
     }
   }
 
@@ -166,10 +162,10 @@ export default function CenterPresentation(center: Center) {
                   />
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
+                <p className="text-sm text-muted-foreground italic">No subjects added</p>
               )}
             </div>
-            {/* {formData.subjects.length > 0 ? (
+            {formData.subjects.length > 0 ? (
               <div className="space-y-3">
                 {formData.subjects.map(subject => (
                   <Card key={subject.id || subject.name} className="p-4">
@@ -199,7 +195,7 @@ export default function CenterPresentation(center: Center) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
-            )} */}
+            )}
           </div>
 
           {/* Classrooms Section */}

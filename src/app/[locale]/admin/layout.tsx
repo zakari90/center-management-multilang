@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/admin/layout.tsx
 import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/authentication";
 import { redirect } from "next/navigation";
@@ -78,7 +77,6 @@ export default async function AdminLayout({ children, params }: DashboardLayoutP
         user={user}
       />
       <SidebarInset>
-        <SiteHeader />
         <main>{children}</main>
       </SidebarInset>
     </SidebarProvider>

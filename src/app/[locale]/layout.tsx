@@ -15,7 +15,6 @@ import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
 import LoadWS from "./loadws";
-import { SyncProvider } from "@/components/sync-provider";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -118,12 +117,10 @@ export default async function RootLayout({
         >
           <NextIntlClientProvider>
             <AuthProvider>
-              <SyncProvider>
                   <LoadWS/>
               {/* <ServiceWorkerRegister /> */}
 
               {children}
-              </SyncProvider>
                     {/* <PWADebug /> */}
               {/* <InstallPWA /> */}
               <PWAUpdateHandler />

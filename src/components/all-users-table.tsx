@@ -72,11 +72,8 @@ import {
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { isAppOnline } from '@/lib/apiClient'
-import { saveManagerToLocalDb } from '@/lib/utils/saveManagerToLocalDb'
-import { generateObjectId } from '@/lib/utils/generateObjectId'
 
 interface UserData {
   id: string
@@ -168,7 +165,11 @@ export default function AllUsersTable() {
 
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
 
-  const fetchAllData = useCallback(async () => {
+  useEffect(() => {
+    fetchAllData()
+  }, [])
+
+  const fetchAllData = async () => {
     setIsLoading(true)
     try {
       const [usersRes, teachersRes, studentsRes] = await Promise.all([
@@ -186,11 +187,7 @@ export default function AllUsersTable() {
     } finally {
       setIsLoading(false)
     }
-  }, [t])
-
-  useEffect(() => {
-    fetchAllData()
-  }, [fetchAllData])
+  }
 
   const togglePasswordVisibility = (id: string) => {
     setVisiblePasswords((prev) => ({
@@ -204,84 +201,27 @@ export default function AllUsersTable() {
     
     setIsProcessing(true)
     try {
-      const { 
-        deleteUserFromLocalDb, 
-        deleteTeacherFromLocalDb, 
-        deleteStudentFromLocalDb 
-      } = await import('@/lib/utils/deleteFromLocalDb');
-      const { fullSync } = await import('@/lib/dexie/syncWorker');
+      const endpoint = itemToDelete.type === 'user' 
+        ? `/api/admin/users/${itemToDelete.id}`
+        : itemToDelete.type === 'teacher'
+        ? `/api/admin/teachers/${itemToDelete.id}`
+        : `/api/admin/students/${itemToDelete.id}`
       
-      let result;
+      await axios.delete(endpoint)
       
-      // Delete based on type using the new deletion logic
       if (itemToDelete.type === 'user') {
-        result = await deleteUserFromLocalDb(itemToDelete.id);
+        setUsers(prev => prev.filter(u => u.id !== itemToDelete.id))
       } else if (itemToDelete.type === 'teacher') {
-        result = await deleteTeacherFromLocalDb(itemToDelete.id);
+        setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id))
       } else {
-        result = await deleteStudentFromLocalDb(itemToDelete.id);
+        setStudents(prev => prev.filter(s => s.id !== itemToDelete.id))
       }
       
-      // If item was marked for deletion (status '1' -> '0'), try to delete from server if online
-      if (result.markedForDeletion && isAppOnline()) {
-        try {
-          const endpoint = itemToDelete.type === 'user' 
-            ? `/api/admin/users/${itemToDelete.id}`
-            : itemToDelete.type === 'teacher'
-            ? `/api/admin/teachers/${itemToDelete.id}`
-            : `/api/admin/students/${itemToDelete.id}`
-          
-          await axios.delete(endpoint, { withCredentials: true });
-          
-          // If server deletion succeeds, remove from localDb and update UI
-          if (itemToDelete.type === 'user') {
-            const { userActions } = await import('@/lib/dexie/dexieActions');
-            await userActions.deleteLocal(itemToDelete.id);
-            setUsers(prev => prev.filter(u => u.id !== itemToDelete.id));
-          } else if (itemToDelete.type === 'teacher') {
-            const { teacherActions } = await import('@/lib/dexie/dexieActions');
-            await teacherActions.deleteLocal(itemToDelete.id);
-            setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id));
-          } else {
-            const { studentActions } = await import('@/lib/dexie/dexieActions');
-            await studentActions.deleteLocal(itemToDelete.id);
-            setStudents(prev => prev.filter(s => s.id !== itemToDelete.id));
-          }
-          
-          toast.success(`${t(itemToDelete.type)} ${t('deletedSuccess')}`);
-        } catch (error) {
-          console.warn('Server deletion failed, item marked for deletion. Will sync later:', error);
-          // Item is already marked for deletion (status '0'), sync worker will handle it
-          // Update UI to reflect deletion state
-          if (itemToDelete.type === 'user') {
-            setUsers(prev => prev.filter(u => u.id !== itemToDelete.id));
-          } else if (itemToDelete.type === 'teacher') {
-            setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id));
-          } else {
-            setStudents(prev => prev.filter(s => s.id !== itemToDelete.id));
-          }
-          toast.info(`${t(itemToDelete.type)} marked for deletion - will sync when online`);
-          // Trigger sync for other pending items
-          fullSync().catch(err => console.error('Sync failed:', err));
-        }
-      } else if (result.deleted) {
-        // Item was directly deleted (status 'w'), update UI immediately
-        if (itemToDelete.type === 'user') {
-          setUsers(prev => prev.filter(u => u.id !== itemToDelete.id));
-        } else if (itemToDelete.type === 'teacher') {
-          setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id));
-        } else {
-          setStudents(prev => prev.filter(s => s.id !== itemToDelete.id));
-        }
-        toast.success(`${t(itemToDelete.type)} ${t('deletedSuccess')}`);
-        // Trigger sync for other pending items
-        fullSync().catch(err => console.error('Sync failed:', err));
-      }
-      
+      toast(`${t(itemToDelete.type)} ${t('deletedSuccess')}`)
       setItemToDelete(null)
     } catch (err) {
       console.error('Failed to delete:', err)
-      toast.error(`${t('deletedError')} ${t(itemToDelete.type)}`)
+      toast(`${t('deletedError')} ${t(itemToDelete.type)}`)
     } finally {
       setIsProcessing(false)
     }
@@ -295,51 +235,19 @@ export default function AllUsersTable() {
 
     setIsProcessing(true)
     try {
-      // Generate ID on client side so it's the same in localDb and server
-      const userId = generateObjectId()
-      
-      // Always save to localDb first with status 'w' (waiting for sync)
-      const savedUser = await saveManagerToLocalDb(
-        {
-          id: userId, // Use the generated ID
-          email: userFormData.email,
-          name: userFormData.name,
-          role: userFormData.role,
-        },
-        userFormData.password
-      )
-      
-      // Update UI immediately
-      const displayUser: UserData = {
-        id: savedUser.id,
-        name: savedUser.name,
-        email: savedUser.email,
-        role: savedUser.role as 'ADMIN' | 'MANAGER',
-        password: userFormData.password, // Display plain password
-        createdAt: new Date(savedUser.createdAt).toISOString(),
-        isActive: true,
-        stats: { centers: 0, students: 0, teachers: 0 }
-      }
-      
-      setUsers(prev => [...prev, displayUser])
+      console.log("Sending userFormData:", userFormData)
+      const response = await axios.post('/api/admin/users', userFormData)
+      setUsers(prev => [...prev, response.data])
       setIsAddDialogOpen(false)
       setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
-      
-      // If online, trigger sync immediately
-      const online = isAppOnline()
-      if (online) {
-        if (typeof window !== 'undefined') {
-          const { syncPendingEntities } = await import('@/lib/dexie/syncWorker')
-          syncPendingEntities().catch(err => console.error('Sync failed:', err))
-        }
-        toast.success(t('userAddedSuccess') + ' - Syncing to server...')
-      } else {
-        toast.success('Manager saved locally - will sync when online')
-      }
-      
+      toast(t('userAddedSuccess'))
     } catch (err) {
+      console.log(err);
+      
+      setIsAddDialogOpen(false)
+
       console.error('Failed to add Manager:', err)
-      toast.error(t('userAddedError'))
+      toast(t('userAddedError'))
     } finally {
       setIsProcessing(false)
     }
@@ -435,7 +343,7 @@ export default function AllUsersTable() {
       )}
       
       {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm  hidden font-medium">{t('systemUsers')}</CardTitle>
@@ -541,7 +449,7 @@ export default function AllUsersTable() {
                   <p className="mt-4 text-muted-foreground">{t('noUsersFound')}</p>
                 </div>
               ) : (
-                <div className="rounded-md border overflow-x-auto">
+                <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -677,7 +585,7 @@ export default function AllUsersTable() {
                   <p className="mt-4 text-muted-foreground">{t('noTeachersFound')}</p>
                 </div>
               ) : (
-                <div className="rounded-md border overflow-x-auto">
+                <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -786,7 +694,7 @@ export default function AllUsersTable() {
                   <p className="mt-4 text-muted-foreground">{t('noStudentsFound')}</p>
                 </div>
               ) : (
-                <div className="rounded-md border overflow-x-auto">
+                <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>

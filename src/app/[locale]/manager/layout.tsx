@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/manager/layout.tsx
 import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { getSession } from "@/lib/authentication";
 import { redirect } from "next/navigation";
@@ -72,7 +71,6 @@ export default async function ManagerLayout({ children, params }: DashboardLayou
     >
       <AppSidebar side={isArabic ? "right" : "left"} variant="inset" items={navItems} user={user} />
       <SidebarInset>
-        <SiteHeader />
         <main>{children}</main>
       </SidebarInset>
     </SidebarProvider>

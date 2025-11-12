@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 6524",
-    "build": "next build",
+    "dev": "next dev",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
@@ -40,6 +41,7 @@
     "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
     "jose": "^6.1.0",
+    "js-cookie": "^3.0.5",
     "jspdf": "^3.0.3",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.479.0",
@@ -66,6 +68,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.13",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.19.13",
     "@types/qrcode": "^1.5.6",
     "@types/react": "19.0.12",
@@ -75,6 +78,7 @@
     "eslint-config-next": "15.2.3",
     "serwist": "^9.2.1",
     "tailwindcss": "^4.1.14",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2",
     "vitest": "^2.1.4",
     "webpack": "^5.102.1"

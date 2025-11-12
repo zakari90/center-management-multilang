@@ -27,7 +27,7 @@ export interface Center extends SyncEntity {
 export interface User extends SyncEntity {
   email: string;
   password: string;
-  name?: string;
+  name: string;
   role: string;
 }
 

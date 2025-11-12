@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/admin/users/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from '@/lib/authentication'
-import db from '@/lib/db'
+import { getSession } from '@/lib/authentication';
+import db from '@/lib/db';
+import bcrypt from "bcryptjs";
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -64,61 +65,98 @@ export async function GET() {
   }
 }
 
+const adminUsername = "admin";
+const adminPassword = "admin";
+const adminEmail = "admin@admin.com";
+
+// This function assumes req is a POST request with JSON containing email and password
 export async function POST(req: NextRequest) {
+  console.log("POST request received ---------------------------------------------");
+  
   try {
-    const session : any = await getSession()
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const body = await req.json();
+    const { email, password, id } = body;
+console.log("Body received ---------------------------------------------", body);
+console.log("Email received ---------------------------------------------", email);
+console.log("Password received ---------------------------------------------", password);
+console.log("Id received ---------------------------------------------", id);
+
+    // Validate required fields
+    if (!email || !password || !id) {
+      return NextResponse.json(
+        { error: { message: "Email, password, and id are required." } },
+        { status: 400 }
+      );
     }
 
-    const body = await req.json()
-    const { name, email, password, role, id } = body
+    // Check for user by email
+    let user = await db.user.findUnique({ where: { email } });
 
-    if (!name || !email || !password || !role) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-    }
-
-    // Check if email already exists
-    const existingUser = await db.user.findUnique({
-      where: { email }
-    })
-
-    if (existingUser) {
-      return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
-    }
-
-    // Check if ID is provided and if it already exists
-    if (id) {
-      const existingById = await db.user.findUnique({
-        where: { id }
-      })
+    if (user) {
+      // User exists, verify password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
       
-      if (existingById) {
-        return NextResponse.json({ error: 'User with this ID already exists' }, { status: 400 })
+      if (!isPasswordValid) {
+        return NextResponse.json({
+          error: { message: "Invalid password." }
+        }, { status: 401 });
       }
+
+      // Password is valid, return user!
+      return NextResponse.json({
+        message: "User exists.",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }
+      }, { status: 200 });
     }
 
-    const user = await db.user.create({
-      data: {
-        ...(id && { id }), // Use client-provided ID if available
-        name,
-        email,
-        password,
-        role
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true
-      }
-    })
+    // If not, check for admin credentials
+   try {
+    if (email === adminEmail && password === adminPassword) {
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      user = await db.user.create({
+        data: {
+          id,
+          email: adminEmail,
+          password: hashedPassword,
+          name: adminUsername,
+          role: "ADMIN",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+      });
 
-    return NextResponse.json(user, { status: 201 })
+      return NextResponse.json({
+        message: "Admin user created.",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }
+      }, { status: 201 });
+    }
+   } catch (error) {
+    console.log("Error creating admin user::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", error);
+    return NextResponse.json({
+      error: { message: "Internal server error" }
+    }, { status: 500 });
+   }
+
+
+    // No user found, and not admin creation case
+    return NextResponse.json({
+      error: { message: "User not found." }
+    }, { status: 404 });
   } catch (error) {
-    console.error('Error creating user:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error("Error checking user:", error);
+    return NextResponse.json(
+      { error: { message: "Internal server error" } },
+      { status: 500 }
+    );
   }
 }
