@@ -4,7 +4,6 @@ import axios from "axios";
 import { getTranslations } from "next-intl/server"; // Import for server-side translations
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { encrypt } from "./authentication";
 import { generateObjectId } from "./utils/generateObjectId";
 
 
@@ -72,9 +71,9 @@ export async function register(state: unknown, formData: FormData) {
       { headers: { "Content-Type": "application/json" } }
     )
     
-    const user = response.data.user
-    const session = await encrypt({ user })
-    ;(await cookies()).set("session", session, { httpOnly: true })
+    // const user = response.data.user
+    // const session = await encrypt({ user })
+    // ;(await cookies()).set("session", session, { httpOnly: true })
     
     return {
       success: true,
@@ -94,8 +93,6 @@ export async function register(state: unknown, formData: FormData) {
     }
   }
 }
-
-
 
 // Create Manager Action
 export async function createManager(state: unknown, formData: FormData) {
@@ -218,9 +215,9 @@ export async function loginAdmin(
       { headers: { "Content-Type": "application/json" } }
     )
     
-    const user = response.data.user
-    const session = await encrypt({ user })
-    ;(await cookies()).set("session", session, { httpOnly: true })
+    // const user = response.data.user
+    // const session = await encrypt({ user })
+    // ;(await cookies()).set("session", session, { httpOnly: true })
     
     return {
       success: true,
@@ -240,8 +237,6 @@ export async function loginAdmin(
     }
   }
 }
-
-
 
 // Login Manager Action
 export async function loginManager(state: unknown, formData: FormData) {
@@ -268,9 +263,9 @@ export async function loginManager(state: unknown, formData: FormData) {
       { headers: { "Content-Type": "application/json" } }
     )
     
-    const user = response.data.user
-    const session = await encrypt({ user })
-    ;(await cookies()).set("session", session, { httpOnly: true })
+    // const user = response.data.user
+    // const session = await encrypt({ user })
+    // ;(await cookies()).set("session", session, { httpOnly: true })
     
     return {
       success: true,
