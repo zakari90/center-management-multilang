@@ -26,7 +26,7 @@ import {
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { useActionState, useEffect, useState, useRef } from "react"
+import { useActionState, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -57,7 +57,6 @@ export function LoginForm({
   const [state, action, isPending] = useActionState(loginWithRole, undefined)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const [isTermsOpen, setIsTermsOpen] = useState(false)
-  const hasNavigatedRef = useRef(false) // ✅ Prevent multiple navigations
 
   useEffect(() => {
     setRole(initialRole)
@@ -66,9 +65,7 @@ export function LoginForm({
   const activeStateMatchesRole = state?.role ? state.role === role : true
 
   useEffect(() => {
-    // ✅ Prevent infinite loop: only navigate once and if not already navigating
-    if (state?.success && activeStateMatchesRole && state?.data?.user && !hasNavigatedRef.current) {
-      hasNavigatedRef.current = true // Mark as navigated
+    if (state?.success && activeStateMatchesRole && state?.data?.user) {
       login(state.data.user)
       const userRole = state.data.user.role
       const destination = userRole === "MANAGER"
@@ -79,13 +76,11 @@ export function LoginForm({
             ? "/manager"
             : "/admin"
 
-      // ✅ Use replace instead of push to avoid history issues
-      router.replace(destination)
-    }
-    
-    // ✅ Reset navigation flag if login fails
-    if (state?.error) {
-      hasNavigatedRef.current = false
+      const timeout = setTimeout(() => {
+        router.push(destination)
+      }, 10)
+
+      return () => clearTimeout(timeout)
     }
   }, [state, activeStateMatchesRole, login, router, role])
 
@@ -94,7 +89,6 @@ export function LoginForm({
   const handleRoleChange = (nextRole: Role) => {
     if (nextRole !== role) {
       setRole(nextRole)
-      hasNavigatedRef.current = false // ✅ Reset navigation flag when role changes
     }
   }
 
