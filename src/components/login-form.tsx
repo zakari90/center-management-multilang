@@ -57,9 +57,8 @@ export function LoginForm({
   const [state, action, isPending] = useActionState(loginWithRole, undefined)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const [isTermsOpen, setIsTermsOpen] = useState(false)
-console.log("/////////////////////////////////////////////");
-console.log(state?.data);
-console.log("/////////////////////////////////////////////");
+// Type error: Property 'email' does not exist on type '{ message: string; }'.
+
 
   useEffect(() => {
     setRole(initialRole)
@@ -205,7 +204,7 @@ console.log("/////////////////////////////////////////////");
                         placeholder={t("email.placeholder")}
                         className={cn(
                           "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
-                          state?.error?.email && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
+                          state?.error && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
                         )}
                         required
                         disabled={isPending}
@@ -213,11 +212,11 @@ console.log("/////////////////////////////////////////////");
                         autoFocus
                       />
                     </div>
-                    {state?.error?.email && activeStateMatchesRole && (
+                    {state?.error && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         <span>
-                          {Array.isArray(state.error.email) ? state.error.email[0] : state.error.email}
+                          {Array.isArray(state.error) ? state.error[0] : state.error}
                         </span>
                       </p>
                     )}
@@ -236,7 +235,7 @@ console.log("/////////////////////////////////////////////");
                         placeholder={t("password.placeholder")}
                         className={cn(
                           "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
-                          state?.error?.password && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
+                          state?.error && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
                         )}
                         required
                         disabled={isPending}
@@ -252,11 +251,11 @@ console.log("/////////////////////////////////////////////");
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    {state?.error?.password && activeStateMatchesRole && (
+                    {state?.error && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         <span>
-                          {Array.isArray(state.error.password) ? state.error.password[0] : state.error.password}
+                          {Array.isArray(state.error) ? state.error[0] : state.error}
                         </span>
                       </p>
                     )}
