@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ServerActionUsers.ts
 
-import { userActions } from "./dexieActions";
+import { userActions } from "./_dexieActions";
 
 const api_url = process.env.NEXT_PUBLIC_BASE_URL + "/api/admin/users";
 

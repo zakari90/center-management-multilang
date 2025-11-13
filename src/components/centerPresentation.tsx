@@ -41,8 +41,8 @@ export type Center = {
   classrooms: string[]
   workingDays: string[]
   subjects: Subject[]
-  createdAt: string
-  updatedAt: string
+  createdAt: string | number
+  updatedAt: string | number
   adminId: string
 }
 

@@ -1,19 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Dexie, { Table } from 'dexie';
 
+// Enums
+export enum Role {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+}
+
 export enum ReceiptType {
   STUDENT_PAYMENT = 'STUDENT_PAYMENT',
   TEACHER_PAYMENT = 'TEACHER_PAYMENT',
 }
 
+export type SyncStatus = '1' | 'w' | '0'; 
+// '1' = synced with server
+// 'w' = waiting/pending sync
+// '0' = marked for deletion (soft delete, pending server sync)
+
 // Base interface for all synced entities
 export interface SyncEntity {
   id: string;
-  status: '1' | 'w' | '0'; // '1' = synced, 'w' = waiting, '0' = marked for deletion
+  status: SyncStatus;
   createdAt: number;
   updatedAt: number;
 }
 
+// Entity Interfaces
 export interface Center extends SyncEntity {
   name: string;
   address?: string;
@@ -27,8 +39,8 @@ export interface Center extends SyncEntity {
 export interface User extends SyncEntity {
   email: string;
   password: string;
-  name?: string;
-  role: string;
+  name: string;
+  role: Role;
 }
 
 export interface Teacher extends SyncEntity {
@@ -101,9 +113,10 @@ export interface PushSubscription extends SyncEntity {
   endpoint: string;
   keys: Record<string, any>;
   userId?: string;
-  role?: string;
+  role?: Role;
 }
 
+// Main Database Class
 export class AppDatabase extends Dexie {
   centers!: Table<Center>;
   users!: Table<User>;
@@ -120,19 +133,48 @@ export class AppDatabase extends Dexie {
     super('EducationAppDatabase');
 
     this.version(1).stores({
-      centers: 'id, status, adminId, updatedAt',
-      users: 'id, status, email, role, updatedAt',
-      teachers: 'id, status, managerId, email, updatedAt',
-      students: 'id, status, managerId, email, updatedAt',
-      subjects: 'id, status, centerId, updatedAt',
-      teacherSubjects: 'id, status, teacherId, subjectId, updatedAt',
-      studentSubjects: 'id, status, studentId, subjectId, teacherId, updatedAt',
-      receipts: 'id, status, receiptNumber, managerId, studentId, teacherId, date, updatedAt',
-      schedules: 'id, status, teacherId, subjectId, managerId, centerId, day, updatedAt',
-      pushSubscriptions: 'id, status, endpoint, userId, updatedAt',
+      // Centers: query by admin, sync status
+      centers: 
+        'id, status, adminId, [status+updatedAt], updatedAt',
+
+      // Users: query by email (login), role, sync status
+      users: 
+        'id, &email, status, role, [status+updatedAt], updatedAt',
+
+      // Teachers: query by manager, email (lookup), sync status
+      teachers: 
+        'id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt',
+
+      // Students: query by manager, grade (filtering), email (lookup), sync status
+      students: 
+        'id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt',
+
+      // Subjects: query by center, grade (filtering), center+grade combo
+      subjects: 
+        'id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt',
+
+      // TeacherSubjects: query by teacher or subject, teacher+subject combo for relations
+      teacherSubjects: 
+        'id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt',
+
+      // StudentSubjects: query by student, subject, teacher, combinations for enrollment lookups
+      studentSubjects: 
+        'id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt',
+
+      // Receipts: query by receipt number (unique), manager, student, teacher, type, date ranges
+      receipts: 
+        'id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt',
+
+      // Schedules: query by teacher, subject, center, day, center+day combo for calendar views
+      schedules: 
+        'id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt',
+
+      // PushSubscriptions: query by endpoint (unique), user, role
+      pushSubscriptions: 
+        'id, &endpoint, status, userId, role, [status+updatedAt], updatedAt',
     });
   }
 }
 
+// Export singleton instance
 export const localDb = new AppDatabase();
-
