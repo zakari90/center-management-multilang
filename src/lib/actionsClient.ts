@@ -66,7 +66,12 @@ try {
   const localResult = await userActions.getLocalByEmail?.(email);  
   const session = await encrypt({ user: localResult })
 
-  Cookies.set('session', session, {  })
+  // ✅ Set cookie with proper attributes so server can read it
+  Cookies.set('session', session, { 
+    expires: 7, // 7 days
+    sameSite: 'lax', // Allow server to read it
+    path: '/' // Available site-wide
+  })
 return {
   data: localResult,
   success: true,

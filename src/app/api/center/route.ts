@@ -7,8 +7,21 @@ export async function POST(req: NextRequest) {
   try {
     const session: any = await getSession();
 
-    if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session || !session.user) {
+      return NextResponse.json({ 
+        error: "Unauthorized: No session found. Please log in again." 
+      }, { status: 401 });
+    }
+
+    // ✅ Normalize role to uppercase for comparison
+    const userRole = typeof session.user.role === 'string' 
+      ? session.user.role.toUpperCase() 
+      : session.user.role;
+
+    if (userRole !== "ADMIN") {
+      return NextResponse.json({ 
+        error: `Unauthorized: Admin access required. Current role: ${userRole}` 
+      }, { status: 401 });
     }
 
     const body = await req.json();

@@ -21,7 +21,8 @@ import { centerActions, subjectActions } from "@/lib/dexie/_dexieActions"
 import { getSession } from "@/lib/actionsClient"
 import { isOnline } from "@/lib/utils/network"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
-
+// ./src/components/login-form.tsx:208:41
+// Type error: Property 'email' does not exist on type '{ message: string; }'.
 // ✅ Add this helper type for form-only subject data
 type SubjectFormData = {
   name: string;
@@ -85,8 +86,16 @@ export const NewCenterForm = () => {
       const session = await getSession()
       const user:any = session?.user
       
-      if (!user ) {
-        throw new Error('Unauthorized')
+      if (!user) {
+        setMessage('Unauthorized: Please log in again')
+        setLoading(false)
+        return
+      }
+
+      // ✅ Ensure role is uppercase to match API expectations
+      if (user.role && typeof user.role === 'string' && user.role !== 'ADMIN' && user.role !== 'MANAGER') {
+        // Normalize role to uppercase
+        user.role = user.role.toUpperCase()
       }
 
       // ✅ Step 1: Save center WITHOUT subjects array (normalized storage)
@@ -125,6 +134,7 @@ export const NewCenterForm = () => {
       // ✅ Step 3: Sync with server if online
       if (isOnline()) {
         try {
+          // ✅ Fix: Send subjectEntities with IDs instead of formData.subjects
           const payload = {
             id: centerId,
             name: formData.name,
@@ -132,7 +142,15 @@ export const NewCenterForm = () => {
             phone: formData.phone || null,
             classrooms: formData.classrooms,
             workingDays: formData.workingDays,
-            subjects: formData.subjects, // Server expects nested format
+            subjects: subjectEntities.map(subject => ({
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+              duration: subject.duration || null,
+              createdAt: subject.createdAt,
+              updatedAt: subject.updatedAt,
+            })),
             adminId: user.id,
             createdAt: now,
             updatedAt: now,
@@ -157,7 +175,25 @@ export const NewCenterForm = () => {
           }
         } catch (syncError) {
           console.error('Sync error:', syncError)
-          setMessage(t('savedOfflineMessage'))
+          // ✅ Improved error handling: Show actual API error details
+          if (axios.isAxiosError(syncError)) {
+            const errorMessage = syncError.response?.data?.error || syncError.message
+            console.error('API Error Details:', {
+              status: syncError.response?.status,
+              data: syncError.response?.data,
+              message: errorMessage
+            })
+            // Show specific error if available, otherwise show offline message
+            if (syncError.response?.status === 401) {
+              setMessage('Unauthorized: Please log in again')
+            } else if (syncError.response?.status === 400) {
+              setMessage(`Validation error: ${errorMessage}`)
+            } else {
+              setMessage(t('savedOfflineMessage'))
+            }
+          } else {
+            setMessage(t('savedOfflineMessage'))
+          }
         }
       } else {
         setMessage(t('savedOfflineMessage'))
