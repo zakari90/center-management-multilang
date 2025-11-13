@@ -61,7 +61,13 @@ try {
         role: submittedRole,
       }
     }
-
+    // ✅ Return error if online login fails
+    if(result.error){
+      return {
+        ...result,
+        success: false,
+      }
+    }
   }
   const localResult = await userActions.getLocalByEmail?.(email);  
   const session = await encrypt({ user: localResult })

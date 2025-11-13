@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
+import { loginWithRole } from "@/lib/actions"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
@@ -25,7 +26,7 @@ import {
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { useActionState, useEffect, useState } from "react"
+import { useActionState, useEffect, useState, useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -33,7 +34,6 @@ import {
   DialogTitle,
   DialogDescription
 } from "@/components/ui/dialog"
-import { loginWithRole } from "@/lib/actionsClient"
 
 type Role = "admin" | "manager"
 
@@ -57,17 +57,18 @@ export function LoginForm({
   const [state, action, isPending] = useActionState(loginWithRole, undefined)
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const [isTermsOpen, setIsTermsOpen] = useState(false)
-// Type error: Property 'email' does not exist on type '{ message: string; }'.
-
+  const hasNavigatedRef = useRef(false) // ✅ Prevent multiple navigations
 
   useEffect(() => {
     setRole(initialRole)
   }, [initialRole])
 
-  const activeStateMatchesRole = state?.data?.user?.role ? state.data.user.role === role : true
+  const activeStateMatchesRole = state?.role ? state.role === role : true
 
   useEffect(() => {
-    if (state?.success && activeStateMatchesRole && state?.data?.user) {
+    // ✅ Prevent infinite loop: only navigate once and if not already navigating
+    if (state?.success && activeStateMatchesRole && state?.data?.user && !hasNavigatedRef.current) {
+      hasNavigatedRef.current = true // Mark as navigated
       login(state.data.user)
       const userRole = state.data.user.role
       const destination = userRole === "MANAGER"
@@ -78,11 +79,13 @@ export function LoginForm({
             ? "/manager"
             : "/admin"
 
-      const timeout = setTimeout(() => {
-        router.push(destination)
-      }, 10)
-
-      return () => clearTimeout(timeout)
+      // ✅ Use replace instead of push to avoid history issues
+      router.replace(destination)
+    }
+    
+    // ✅ Reset navigation flag if login fails
+    if (state?.error) {
+      hasNavigatedRef.current = false
     }
   }, [state, activeStateMatchesRole, login, router, role])
 
@@ -91,6 +94,7 @@ export function LoginForm({
   const handleRoleChange = (nextRole: Role) => {
     if (nextRole !== role) {
       setRole(nextRole)
+      hasNavigatedRef.current = false // ✅ Reset navigation flag when role changes
     }
   }
 
@@ -204,7 +208,7 @@ export function LoginForm({
                         placeholder={t("email.placeholder")}
                         className={cn(
                           "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
-                          state?.error && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
+                          state?.error?.email && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
                         )}
                         required
                         disabled={isPending}
@@ -212,11 +216,11 @@ export function LoginForm({
                         autoFocus
                       />
                     </div>
-                    {state?.error && activeStateMatchesRole && (
+                    {state?.error?.email && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         <span>
-                          {Array.isArray(state.error) ? state.error[0] : state.error}
+                          {Array.isArray(state.error.email) ? state.error.email[0] : state.error.email}
                         </span>
                       </p>
                     )}
@@ -235,7 +239,7 @@ export function LoginForm({
                         placeholder={t("password.placeholder")}
                         className={cn(
                           "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
-                          state?.error && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
+                          state?.error?.password && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
                         )}
                         required
                         disabled={isPending}
@@ -251,11 +255,11 @@ export function LoginForm({
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    {state?.error && activeStateMatchesRole && (
+                    {state?.error?.password && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         <span>
-                          {Array.isArray(state.error) ? state.error[0] : state.error}
+                          {Array.isArray(state.error.password) ? state.error.password[0] : state.error.password}
                         </span>
                       </p>
                     )}
