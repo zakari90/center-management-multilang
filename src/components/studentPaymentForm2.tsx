@@ -3,8 +3,11 @@
 import type React from "react"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import axios from "axios"
+// import axios from "axios" // ✅ Commented out - using local DB
 import { useRouter, useSearchParams } from "next/navigation"
+import { receiptActions, studentActions, studentSubjectActions, subjectActions } from "@/lib/dexie/_dexieActions"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { useAuth } from "@/context/authContext"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -358,6 +361,7 @@ export default function CreateStudentPaymentForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const preSelectedStudentId = searchParams.get("studentId")
+  const { user } = useAuth() // ✅ Get current user from AuthContext
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -379,15 +383,65 @@ export default function CreateStudentPaymentForm() {
 
   const fetchStudents = useCallback(async () => {
     try {
-      const { data } = await axios.get("/api/students")
-      setStudents(data)
+      // ✅ Fetch from local DB and join with subjects
+      const [allStudents, allStudentSubjects, allSubjects] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll()
+      ])
+
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setLoadingStudents(false)
+        return
+      }
+
+      // ✅ Filter students by managerId and status
+      const managerStudents = allStudents
+        .filter(s => s.managerId === user.id && s.status !== '0')
+
+      // ✅ Build students with subjects
+      const studentsWithSubjects: Student[] = managerStudents.map(student => {
+        const studentSubjectsForStudent = allStudentSubjects
+          .filter(ss => ss.studentId === student.id && ss.status !== '0')
+          .map(ss => {
+            const subject = allSubjects.find(s => s.id === ss.subjectId)
+            return subject ? {
+              id: ss.id,
+              subject: {
+                id: subject.id,
+                name: subject.name,
+                grade: subject.grade,
+                price: subject.price,
+              }
+            } : null
+          })
+          .filter(ss => ss !== null) as StudentSubject[]
+
+        return {
+          id: student.id,
+          name: student.name,
+          email: student.email ?? null,
+          phone: student.phone ?? null,
+          parentName: student.parentName ?? null,
+          parentPhone: student.parentPhone ?? null,
+          grade: student.grade ?? null,
+          studentSubjects: studentSubjectsForStudent,
+        }
+      })
+
+      setStudents(studentsWithSubjects)
+
+      // ✅ Commented out online fetch
+      // const { data } = await axios.get("/api/students")
+      // setStudents(data)
     } catch (err) {
       setError("Failed to load students")
       console.error("Error fetching students:", err)
     } finally {
       setLoadingStudents(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     fetchStudents()
@@ -459,24 +513,82 @@ export default function CreateStudentPaymentForm() {
       setIsLoading(true)
       setError("")
 
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setIsLoading(false)
+        return
+      }
+
       try {
         if (!selectedStudent) throw new Error("Please select a student")
         if (formData.selectedSubjects.length === 0) throw new Error("Please select at least one subject")
 
-        await axios.post("/api/receipts/student-payment", {
-          studentId: selectedStudent.id,
-          subjectIds: formData.selectedSubjects,
-          paymentMethod: formData.paymentMethod,
-          description: formData.description,
-          date: formData.date,
-        })
+        // ✅ Get student subjects from local DB
+        const allStudentSubjects = await studentSubjectActions.getAll()
+        const allSubjects = await subjectActions.getAll()
 
+        const studentSubjects = allStudentSubjects.filter(ss =>
+          ss.studentId === selectedStudent.id &&
+          formData.selectedSubjects.includes(ss.subjectId) &&
+          ss.status !== '0'
+        )
+
+        if (studentSubjects.length === 0) {
+          throw new Error("No valid subjects found")
+        }
+
+        // ✅ Calculate total amount
+        const totalAmount = studentSubjects.reduce((sum, ss) => {
+          const subject = allSubjects.find(s => s.id === ss.subjectId)
+          return sum + (subject?.price || 0)
+        }, 0)
+
+        // ✅ Create description if not provided
+        const subjectNames = studentSubjects
+          .map(ss => {
+            const subject = allSubjects.find(s => s.id === ss.subjectId)
+            return subject?.name
+          })
+          .filter(Boolean)
+          .join(', ')
+        const finalDescription = formData.description || `Payment for: ${subjectNames}`
+
+        // ✅ Create receipt in local DB
+        const now = Date.now()
+        const receiptId = generateObjectId()
+        const receiptDate = formData.date ? new Date(formData.date).getTime() : now
+
+        const newReceipt = {
+          id: receiptId,
+          receiptNumber: `RCP-${now}`,
+          amount: totalAmount,
+          type: 'STUDENT_PAYMENT' as const,
+          paymentMethod: formData.paymentMethod || undefined,
+          description: finalDescription,
+          date: receiptDate,
+          studentId: selectedStudent.id,
+          managerId: user.id,
+          status: 'w' as const, // Waiting for sync
+          createdAt: now,
+          updatedAt: now,
+        }
+
+        await receiptActions.putLocal(newReceipt)
+
+        // ✅ Navigate to receipts page
         await router.push(preSelectedStudentId ? `/manager/students/${preSelectedStudentId}` : "/manager/receipts")
         router.refresh()
+
+        // ✅ Commented out online creation
+        // await axios.post("/api/receipts/student-payment", {
+        //   studentId: selectedStudent.id,
+        //   subjectIds: formData.selectedSubjects,
+        //   paymentMethod: formData.paymentMethod,
+        //   description: formData.description,
+        //   date: formData.date,
+        // })
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.error || "Failed to create receipt")
-        } else if (err instanceof Error) {
+        if (err instanceof Error) {
           setError(err.message)
         } else {
           setError("Something went wrong")
@@ -485,7 +597,7 @@ export default function CreateStudentPaymentForm() {
         setIsLoading(false)
       }
     },
-    [selectedStudent, formData, preSelectedStudentId, router],
+    [selectedStudent, formData, preSelectedStudentId, router, user],
   )
 
   const filteredStudents = students.filter((student) => {

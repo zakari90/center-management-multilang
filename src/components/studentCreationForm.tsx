@@ -12,6 +12,9 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
+import { studentActions, studentSubjectActions, subjectActions, teacherSubjectActions, teacherActions } from "@/lib/dexie/_dexieActions"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { useAuth } from "@/context/authContext"
 
 interface Teacher {
   id: string
@@ -49,6 +52,7 @@ interface EnrolledSubject {
 export default function CreateStudentForm() {
   const t = useTranslations("CreateStudentForm")
   const router = useRouter()
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -77,11 +81,56 @@ export default function CreateStudentForm() {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await fetch("/api/subjects?includeTeachers=true")
-        if (response.ok) {
-          const data = await response.json()
-          setSubjects(data)
-        }
+        // ✅ Fetch from local DB and join with teachers
+        const [allSubjects, allTeacherSubjects, allTeachers] = await Promise.all([
+          subjectActions.getAll(),
+          teacherSubjectActions.getAll(),
+          teacherActions.getAll()
+        ])
+
+        const activeSubjects = allSubjects.filter(s => s.status !== '0')
+        const activeTeacherSubjects = allTeacherSubjects.filter(ts => ts.status !== '0')
+        const activeTeachers = allTeachers.filter(t => t.status !== '0')
+
+        // ✅ Build subjects with teacher associations
+        const subjectsWithTeachers: Subject[] = activeSubjects.map(subject => {
+          const teacherSubjectsForSubject = activeTeacherSubjects
+            .filter(ts => ts.subjectId === subject.id)
+            .map(ts => {
+              const teacher = activeTeachers.find(t => t.id === ts.teacherId)
+              return {
+                id: ts.id,
+                teacherId: ts.teacherId,
+                percentage: ts.percentage ?? null,
+                hourlyRate: ts.hourlyRate ?? null,
+                teacher: teacher ? {
+                  id: teacher.id,
+                  name: teacher.name,
+                  email: teacher.email ?? null,
+                  phone: teacher.phone ?? null,
+                } : null,
+              }
+            })
+            .filter(ts => ts.teacher !== null) as TeacherSubject[]
+
+          return {
+            id: subject.id,
+            name: subject.name,
+            grade: subject.grade,
+            price: subject.price,
+            duration: subject.duration ?? null,
+            teacherSubjects: teacherSubjectsForSubject,
+          }
+        })
+
+        setSubjects(subjectsWithTeachers)
+
+        // ✅ Commented out online fetch
+        // const response = await fetch("/api/subjects?includeTeachers=true")
+        // if (response.ok) {
+        //   const data = await response.json()
+        //   setSubjects(data)
+        // }
       } catch (err) {
         console.error("Failed to fetch subjects:", err)
         setError(t("errorsfetchSubjects"))
@@ -152,6 +201,12 @@ export default function CreateStudentForm() {
     setIsLoading(true)
     setError("")
 
+    if (!user) {
+      setError("Unauthorized: Please log in again")
+      setIsLoading(false)
+      return
+    }
+
     try {
       if (!formData.name) {
         throw new Error(t("errorsrequiredName"))
@@ -160,25 +215,70 @@ export default function CreateStudentForm() {
         throw new Error(t("errorsnoSubjects"))
       }
 
-      const response = await fetch("/api/students", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          enrollments: enrolledSubjects.map((es) => ({
-            subjectId: es.subjectId,
-            teacherId: es.teacherId,
-          })),
-        }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || t("errorsgeneric"))
+      // ✅ Check if email already exists in local DB
+      if (formData.email) {
+        const existingStudent = await studentActions.getLocalByEmail?.(formData.email)
+        if (existingStudent) {
+          setError("Email already in use")
+          setIsLoading(false)
+          return
+        }
       }
 
+      // ✅ Create student in local DB
+      const now = Date.now()
+      const studentId = generateObjectId()
+      const newStudent = {
+        id: studentId,
+        name: formData.name,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+        parentName: formData.parentName || undefined,
+        parentPhone: formData.parentPhone || undefined,
+        parentEmail: formData.parentEmail || undefined,
+        grade: formData.grade || undefined,
+        managerId: user.id,
+        status: 'w' as const, // Waiting for sync
+        createdAt: now,
+        updatedAt: now,
+      }
+
+      await studentActions.putLocal(newStudent)
+
+      // ✅ Create student-subject-teacher associations in local DB
+      const studentSubjectEntities = enrolledSubjects.map((es) => ({
+        id: generateObjectId(),
+        studentId: studentId,
+        subjectId: es.subjectId,
+        teacherId: es.teacherId,
+        enrolledAt: now,
+        status: 'w' as const, // Waiting for sync
+        createdAt: now,
+        updatedAt: now,
+      }))
+
+      await studentSubjectActions.bulkPutLocal(studentSubjectEntities)
+
+      // ✅ Navigate to students page
       await router.push("/manager/students")
       router.refresh()
+
+      // ✅ Commented out online creation
+      // const response = await fetch("/api/students", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     ...formData,
+      //     enrollments: enrolledSubjects.map((es) => ({
+      //       subjectId: es.subjectId,
+      //       teacherId: es.teacherId,
+      //     })),
+      //   }),
+      // })
+      // if (!response.ok) {
+      //   const data = await response.json()
+      //   throw new Error(data.error || t("errorsgeneric"))
+      // }
     } catch (err: any) {
       setError(err.message || t("errorsgeneric"))
     } finally {

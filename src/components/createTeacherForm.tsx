@@ -2,10 +2,13 @@
 "use client"
 
 import type React from "react"
-import axios from "axios"
+// import axios from "axios" // ✅ Commented out - using local DB
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
+import { teacherActions, teacherSubjectActions, subjectActions } from "@/lib/dexie/_dexieActions"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { useAuth } from "@/context/authContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -313,6 +316,7 @@ const WeeklyScheduleSection = ({
 export default function CreateTeacherForm() {
   const router = useRouter()
   const t = useTranslations("CreateTeacherForm")
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -349,8 +353,21 @@ export default function CreateTeacherForm() {
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        const response = await axios.get("/api/subjects")
-        if (response) setSubjects(response.data)
+        // ✅ Fetch from local DB
+        const allSubjects = await subjectActions.getAll()
+        const activeSubjects = allSubjects
+          .filter(s => s.status !== '0')
+          .map(s => ({
+            id: s.id,
+            name: s.name,
+            grade: s.grade,
+            price: s.price,
+          }))
+        setSubjects(activeSubjects)
+
+        // ✅ Commented out online fetch
+        // const response = await axios.get("/api/subjects")
+        // if (response) setSubjects(response.data)
       } catch (err) {
         console.error("Failed to fetch subjects:", err)
       } finally {
@@ -397,6 +414,12 @@ export default function CreateTeacherForm() {
   setIsLoading(true)
   setError("")
 
+  if (!user) {
+    setError("Unauthorized: Please log in again")
+    setIsLoading(false)
+    return
+  }
+
   try {
     const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
 
@@ -409,30 +432,75 @@ export default function CreateTeacherForm() {
       }
     }
 
+    // ✅ Check if email already exists in local DB
+    if (formData.email) {
+      const existingTeacher = await teacherActions.getLocalByEmail?.(formData.email)
+      if (existingTeacher) {
+        setError("Email already in use")
+        setIsLoading(false)
+        return
+      }
+    }
+
+    // ✅ Prepare weekly schedule as array of JSON strings (matching API format)
     const activeSchedule = weeklySchedule
       .filter((day) => day.isAvailable)
       .map(({ day, startTime, endTime }) => 
-        // Convert each schedule item to a JSON string
         JSON.stringify({ day, startTime, endTime })
       )
 
-    const payload = {
-      ...formData,
-      // Send as array of JSON strings (each item stringified)
-      weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
-      subjects: validSubjects.map((ts) => ({
-        subjectId: ts.subjectId,
-        percentage: ts.compensationType === "percentage" ? ts.percentage : null,
-        hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
-      })),
+    // ✅ Create teacher in local DB
+    const now = Date.now()
+    const teacherId = generateObjectId()
+    const newTeacher = {
+      id: teacherId,
+      name: formData.name,
+      email: formData.email || undefined,
+      phone: formData.phone || undefined,
+      address: formData.address || undefined,
+      weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
+      managerId: user.id,
+      status: 'w' as const, // Waiting for sync
+      createdAt: now,
+      updatedAt: now,
     }
 
-    await axios.post("/api/teachers", payload)
+    await teacherActions.putLocal(newTeacher)
+
+    // ✅ Create teacher-subject associations in local DB
+    if (validSubjects.length > 0) {
+      const teacherSubjectEntities = validSubjects.map((ts) => ({
+        id: generateObjectId(),
+        teacherId: teacherId,
+        subjectId: ts.subjectId,
+        percentage: ts.compensationType === "percentage" ? ts.percentage : undefined,
+        hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
+        assignedAt: now,
+        status: 'w' as const, // Waiting for sync
+        createdAt: now,
+        updatedAt: now,
+      }))
+
+      await teacherSubjectActions.bulkPutLocal(teacherSubjectEntities)
+    }
+
+    // ✅ Navigate to teachers page
     await router.push("/manager/teachers")
     router.refresh()
+
+    // ✅ Commented out online creation
+    // const payload = {
+    //   ...formData,
+    //   weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
+    //   subjects: validSubjects.map((ts) => ({
+    //     subjectId: ts.subjectId,
+    //     percentage: ts.compensationType === "percentage" ? ts.percentage : null,
+    //     hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
+    //   })),
+    // }
+    // await axios.post("/api/teachers", payload)
   } catch (err) {
-    if (axios.isAxiosError(err)) setError(err.response?.data?.error || t("genericError"))
-    else if (err instanceof Error) setError(err.message)
+    if (err instanceof Error) setError(err.message)
     else setError(t("genericError"))
   } finally {
     setIsLoading(false)

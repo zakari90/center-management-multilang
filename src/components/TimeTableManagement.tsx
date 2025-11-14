@@ -29,11 +29,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import { Clock, Loader2, MapPin, Trash2, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { useLocalizedConstants } from './useLocalizedConstants'
+import { scheduleActions, teacherActions, subjectActions, centerActions } from '@/lib/dexie/_dexieActions'
+import { generateObjectId } from '@/lib/utils/generateObjectId'
+import { useAuth } from '@/context/authContext'
 
 interface Teacher {
   id: string
@@ -65,6 +68,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations('TimetableManagement')
   const { daysOfWeek, availableClassrooms } = useLocalizedConstants()
+  const { user } = useAuth() // ✅ Get current user from AuthContext
 
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -96,22 +100,66 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
 
   const fetchData = async () => {
     try {
-      const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
-        axios.get('/api/admin/teachers'),
-        axios.get('/api/subjects'),
-        axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
-        centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
+      // ✅ Fetch from local DB
+      const [allTeachers, allSubjects, allSchedules, allCenters] = await Promise.all([
+        teacherActions.getAll(),
+        subjectActions.getAll(),
+        scheduleActions.getAll(),
+        centerActions.getAll()
       ])
 
-      setTeachers(teachersRes.data)
-      setSubjects(subjectsRes.data)
-      setSchedule(scheduleRes.data)
+      // ✅ Filter teachers and subjects by status (not deleted)
+      const activeTeachers = allTeachers
+        .filter(t => t.status !== '0')
+        .map(t => ({ id: t.id, name: t.name }))
+      
+      const activeSubjects = allSubjects
+        .filter(s => s.status !== '0')
+        .map(s => ({ id: s.id, name: s.name, grade: s.grade }))
 
-      if (centerRes?.data?.classrooms?.length) {
-        setRooms(centerRes.data.classrooms)
+      // ✅ Filter schedules by centerId if provided, and managerId
+      let filteredSchedules = allSchedules.filter(s => s.status !== '0')
+      if (centerId) {
+        filteredSchedules = filteredSchedules.filter(s => s.centerId === centerId)
+      }
+      if (user) {
+        filteredSchedules = filteredSchedules.filter(s => s.managerId === user.id)
+      }
+
+      // ✅ Transform schedules to match ScheduleSlot interface
+      const scheduleSlots: ScheduleSlot[] = filteredSchedules.map(s => ({
+        id: s.id,
+        day: s.day,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        teacherId: s.teacherId,
+        subjectId: s.subjectId,
+        roomId: s.roomId,
+      }))
+
+      setTeachers(activeTeachers)
+      setSubjects(activeSubjects)
+      setSchedule(scheduleSlots)
+
+      // ✅ Get rooms from center if centerId provided
+      if (centerId) {
+        const center = allCenters.find(c => c.id === centerId)
+        if (center?.classrooms?.length) {
+          setRooms(center.classrooms)
+        } else {
+          setRooms(availableClassrooms)
+        }
       } else {
         setRooms(availableClassrooms)
       }
+
+      // ✅ Commented out online fetch
+      // const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
+      //   axios.get('/api/admin/teachers'),
+      //   axios.get('/api/subjects'),
+      //   axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
+      //   centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
+      // ])
     } catch (err) {
       console.error('Failed to fetch data:', err)
       setError(t('errorLoadData'))
@@ -135,26 +183,93 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       return
     }
 
+    if (!user) {
+      setError('Unauthorized: Please log in again')
+      return
+    }
+
     setIsSaving(true)
     try {
-      const { data } = await axios.post('/api/admin/schedule', {
+      // ✅ Check for conflicts in local DB
+      const allSchedules = await scheduleActions.getAll()
+      const activeSchedules = allSchedules.filter(s => s.status !== '0')
+
+      // Check teacher conflict
+      const teacherConflict = activeSchedules.find(s => 
+        s.teacherId === newEntry.teacherId &&
+        s.day === selectedSlot.day &&
+        s.startTime === selectedSlot.startTime
+      )
+
+      if (teacherConflict) {
+        setError('Teacher already has a class at this time')
+        setIsSaving(false)
+        return
+      }
+
+      // Check room conflict
+      const roomConflict = activeSchedules.find(s => 
+        s.roomId === newEntry.roomId &&
+        s.day === selectedSlot.day &&
+        s.startTime === selectedSlot.startTime &&
+        (centerId ? s.centerId === centerId : true)
+      )
+
+      if (roomConflict) {
+        setError('Room is already booked at this time')
+        setIsSaving(false)
+        return
+      }
+
+      // ✅ Create schedule in local DB
+      const now = Date.now()
+      const scheduleId = generateObjectId()
+      const newSchedule = {
+        id: scheduleId,
         day: selectedSlot.day,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
         teacherId: newEntry.teacherId,
         subjectId: newEntry.subjectId,
         roomId: newEntry.roomId,
-        centerId,
-      })
+        managerId: user.id,
+        centerId: centerId || undefined,
+        status: 'w' as const, // Waiting for sync
+        createdAt: now,
+        updatedAt: now,
+      }
 
-      setSchedule(prev => [...prev, data])
+      await scheduleActions.putLocal(newSchedule)
+
+      // ✅ Update local state
+      const scheduleSlot: ScheduleSlot = {
+        id: scheduleId,
+        day: selectedSlot.day,
+        startTime: selectedSlot.startTime,
+        endTime: selectedSlot.endTime,
+        teacherId: newEntry.teacherId,
+        subjectId: newEntry.subjectId,
+        roomId: newEntry.roomId,
+      }
+
+      setSchedule(prev => [...prev, scheduleSlot])
       setIsDialogOpen(false)
       setNewEntry({ teacherId: '', subjectId: '', roomId: '' })
       setError('')
+
+      // ✅ Commented out online creation
+      // const { data } = await axios.post('/api/admin/schedule', {
+      //   day: selectedSlot.day,
+      //   startTime: selectedSlot.startTime,
+      //   endTime: selectedSlot.endTime,
+      //   teacherId: newEntry.teacherId,
+      //   subjectId: newEntry.subjectId,
+      //   roomId: newEntry.roomId,
+      //   centerId,
+      // })
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || t('errorAddSchedule'))
-      }
+      console.error('Failed to add schedule:', err)
+      setError(t('errorAddSchedule'))
     } finally {
       setIsSaving(false)
     }
@@ -162,10 +277,16 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
 
   const handleDeleteSchedule = async (scheduleId: string) => {
     try {
-      await axios.delete(`/api/admin/schedule/${scheduleId}`)
+      // ✅ Soft delete in local DB
+      await scheduleActions.markForDelete(scheduleId)
+      
+      // ✅ Update local state
       setSchedule(prev => prev.filter(s => s.id !== scheduleId))
+
+      // ✅ Commented out online delete
+      // await axios.delete(`/api/admin/schedule/${scheduleId}`)
     } catch (err) {
-      console.log(err)
+      console.error('Failed to delete schedule:', err)
       setError(t('errorDeleteSchedule'))
     }
   }

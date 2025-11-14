@@ -37,22 +37,45 @@ export async function loginWithRole(state: unknown, formData: FormData) {
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const id = generateObjectId();
 
   
 try {
-  await userActions.putLocal({
-    id,
-    email,
-    password,
-    name:email.split('@')[0],
-    role: submittedRole === "manager" ? Role.MANAGER : Role.ADMIN,
-    createdAt:  Date.now(),
-    updatedAt:  Date.now(),
-    status: '0',
-  })
-  const localResult = await userActions.getLocalByEmail?.(email);  
-  const session = await encrypt({ user: localResult })
+  // ✅ First, check if user exists in local DB
+  const localUser = await userActions.getLocalByEmail?.(email);
+  
+  if (!localUser) {
+    return {
+      error: { email: "User not found." },
+      success: false,
+    }
+  }
+
+  // ✅ Verify password (stored as plain text in local DB for now)
+  if (localUser.password !== password) {
+    return {
+      error: { password: "Incorrect password." },
+      success: false,
+    }
+  }
+
+  // ✅ Check role matches
+  const expectedRole = submittedRole === "manager" ? Role.MANAGER : Role.ADMIN;
+  if (localUser.role !== expectedRole) {
+    return {
+      error: { message: `Invalid role. Expected ${expectedRole}, got ${localUser.role}` },
+      success: false,
+    }
+  }
+
+  // ✅ Create session with user data
+  const userForSession = {
+    id: localUser.id,
+    name: localUser.name,
+    email: localUser.email,
+    role: localUser.role,
+  }
+  
+  const session = await encrypt({ user: userForSession })
 
   // ✅ Set cookie with proper attributes (client-side only - httpOnly cannot be set from JS)
   Cookies.set('session', session, { 
@@ -62,29 +85,39 @@ try {
     secure: process.env.NODE_ENV === 'production', // Only send in HTTPS (if available)
   })
 
+  // ✅ Try online login/sync if available
   if(isOnline()){
      const result = submittedRole === "manager"
     ? await loginManager(state, formData)
     : await loginAdmin(state, formData)
     if(result.success){
-      await userActions.markSynced(id)
+      // ✅ Update local user with server data if sync succeeds
+      await userActions.putLocal({
+        ...localUser,
+        ...(result.data?.user && {
+          id: result.data.user.id,
+          name: result.data.user.name,
+          email: result.data.user.email,
+          role: result.data.user.role,
+        }),
+        status: '1' as const, // Mark as synced
+        updatedAt: Date.now(),
+      })
       return {
         ...result,
         role: submittedRole,
       }
     }
-    // ✅ Return error if online login fails
-    if(result.error){
-      return {
-        ...result,
-        success: false,
-      }
-    }
+    // ✅ If online login fails but user exists locally, still allow offline login
+    // (This handles the case where user exists locally but not on server yet)
   }
-return {
-  data: localResult,
-  success: true,
-}
+
+  // ✅ Return success with local user data
+  return {
+    data: { user: userForSession },
+    success: true,
+    role: submittedRole,
+  }
 } catch (error) {
   console.log("Error in loginWithRole", error);
   
