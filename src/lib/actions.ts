@@ -4,6 +4,7 @@ import axios from "axios";
 import { getTranslations } from "next-intl/server"; // Import for server-side translations
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { encrypt } from "./authentication";
 import { generateObjectId } from "./utils/generateObjectId";
 
 
@@ -215,9 +216,15 @@ export async function loginAdmin(
       { headers: { "Content-Type": "application/json" } }
     )
     
-    // const user = response.data.user
-    // const session = await encrypt({ user })
-    // ;(await cookies()).set("session", session, { httpOnly: true })
+    const user = response.data.user
+    const session = await encrypt({ user })
+    ;(await cookies()).set("session", session, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    })
     
     return {
       success: true,
@@ -263,9 +270,15 @@ export async function loginManager(state: unknown, formData: FormData) {
       { headers: { "Content-Type": "application/json" } }
     )
     
-    // const user = response.data.user
-    // const session = await encrypt({ user })
-    // ;(await cookies()).set("session", session, { httpOnly: true })
+    const user = response.data.user
+    const session = await encrypt({ user })
+    ;(await cookies()).set("session", session, { 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    })
     
     return {
       success: true,

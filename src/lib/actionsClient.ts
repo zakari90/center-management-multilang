@@ -54,19 +54,12 @@ try {
   const localResult = await userActions.getLocalByEmail?.(email);  
   const session = await encrypt({ user: localResult })
 
-  // ✅ Set cookie with proper attributes so server can read it
+  // ✅ Set cookie with proper attributes (client-side only - httpOnly cannot be set from JS)
   Cookies.set('session', session, { 
     expires: 7, // 7 days
     sameSite: 'lax', // Allow server to read it
     path: '/', // Available site-wide
-    secure: process.env.NODE_ENV === 'production', // Only send in HTTPS
-    httpOnly: true, // Prevent client-side JavaScript access
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-    domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined, // Set domain for production
-    sameParty: process.env.NODE_ENV === 'production', // Only send in same party
-    priority: 'high', // Set priority
-    partition: 'session', // Set partition
-    size: 1024, // Set size
+    secure: process.env.NODE_ENV === 'production', // Only send in HTTPS (if available)
   })
 
   if(isOnline()){
