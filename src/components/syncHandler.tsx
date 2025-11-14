@@ -5,8 +5,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { localDb } from "@/lib/dexie/dbSchema";
-import { importAllFromServer, syncAllEntities } from "@/lib/dexie/serverActions";
+import { importAllFromServerForRole, syncAllEntitiesForRole } from "@/lib/dexie/serverActions";
 import { isOnline } from "@/lib/utils/network";
+import { useAuth } from "@/context/authContext";
 import {
   AlertCircle,
   CheckCircle2,
@@ -29,12 +30,15 @@ interface SyncResult {
 export function SyncHandler() {
   const t = useTranslations("SyncHandler");
   const router = useRouter();
+  const { user } = useAuth(); // Get current user to check role
   const [isSyncing, setIsSyncing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
   const [importResult, setImportResult] = useState<SyncResult | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  
+  const isAdmin = user?.role === "ADMIN";
 
   // ✅ Export/Sync to Server - Push local changes to server
   const handleSyncToServer = async () => {
@@ -50,7 +54,8 @@ export function SyncHandler() {
     setSyncResult(null);
 
     try {
-      const results = await syncAllEntities();
+      // ✅ Sync users only if admin, otherwise sync all other entities
+      const results = await syncAllEntitiesForRole(isAdmin);
       
       // Count successes and failures
       let successCount = 0;
@@ -108,7 +113,8 @@ export function SyncHandler() {
     setImportResult(null);
 
     try {
-      const results = await importAllFromServer();
+      // ✅ Import users only if admin, otherwise import all other entities
+      const results = await importAllFromServerForRole(isAdmin);
       
       // Count successes and failures
       let successCount = 0;
