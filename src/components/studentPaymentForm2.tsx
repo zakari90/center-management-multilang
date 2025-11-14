@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { receiptActions, studentActions, studentSubjectActions, subjectActions } from "@/lib/dexie/_dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
+import { ReceiptType } from "@/lib/dexie/dbSchema"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -562,7 +563,7 @@ export default function CreateStudentPaymentForm() {
           id: receiptId,
           receiptNumber: `RCP-${now}`,
           amount: totalAmount,
-          type: 'STUDENT_PAYMENT' as const,
+          type: ReceiptType.STUDENT_PAYMENT,
           paymentMethod: formData.paymentMethod || undefined,
           description: finalDescription,
           date: receiptDate,
