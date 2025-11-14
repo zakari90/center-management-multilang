@@ -2,6 +2,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 export interface User {
   id: string;
@@ -55,11 +56,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      // ✅ Clear session cookie (server-side)
       await fetch('/api/auth/logout', { method: 'POST' });
+      
+      // ✅ Clear client-side session cookie
+      Cookies.remove('session', { path: '/' });
+      
+      // ✅ Note: User data remains in local DB for offline login capability
+      // This allows users to login again offline without re-syncing
+      
+      // ✅ Clear in-memory user state
       setUser(null);
+      
+      // ✅ Redirect to home
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even if API call fails, clear cookies and local state
+      Cookies.remove('session', { path: '/' });
+      setUser(null);
+      window.location.href = '/';
     }
   };
 
