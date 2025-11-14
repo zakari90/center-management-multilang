@@ -7,6 +7,7 @@ import ManagersList from "@/components/managersList";
 import { DeleteAllDataButton } from "@/components/masterDelete";
 import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
+import { SyncHandler } from "@/components/syncHandler";
 import { useTranslations } from "next-intl";
 
 export default function AdminDashboard() {
@@ -34,6 +35,9 @@ export default function AdminDashboard() {
         <ManagersList />
         <SystemActivityLog />
       </div>
+      
+      {/* Data Synchronization */}
+      <SyncHandler />
       
       <DeleteAllDataButton/>
     </div>

@@ -4,6 +4,7 @@ import ReceiptsSummary from "@/components/receiptSummary";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
 import ManagerStatsCards from "@/components/managerStateCards";
 import TopSubjects from "@/components/top-subjects";
+import { SyncHandler } from "@/components/syncHandler";
 import { useTranslations } from "next-intl";
 
 
@@ -26,6 +27,9 @@ return (
         <EnrollmentChart />
         <TopSubjects />
       </div>
+
+      {/* Data Synchronization */}
+      <SyncHandler />
 
       {/* <div className="grid gap-4 grid-cols-4">
         <RecentActivities />
