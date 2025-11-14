@@ -1,24 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Download, 
-  Upload, 
-  Trash2, 
-  Loader2, 
-  CheckCircle2, 
-  AlertCircle,
-  RefreshCw,
-  Database
-} from "lucide-react";
-import { syncAllEntities, importAllFromServer } from "@/lib/dexie/serverActions";
 import { localDb } from "@/lib/dexie/dbSchema";
+import { importAllFromServer, syncAllEntities } from "@/lib/dexie/serverActions";
 import { isOnline } from "@/lib/utils/network";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Database,
+  Download,
+  Loader2,
+  Trash2,
+  Upload
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface SyncResult {
   success: boolean;
