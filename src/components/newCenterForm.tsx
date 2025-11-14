@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { ItemInputList } from "@/components/itemInputList"
@@ -9,18 +8,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { centerActions, subjectActions } from "@/lib/dexie/_dexieActions"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { Separator } from "@radix-ui/react-separator"
-import axios from "axios"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
-import { useLocalizedConstants } from "./useLocalizedConstants"
 import { SubjectFormMultipleChoices } from "./subjectForm"
-import { centerActions, subjectActions } from "@/lib/dexie/_dexieActions"
-import { getSession } from "@/lib/actionsClient"
-import { isOnline } from "@/lib/utils/network"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { useLocalizedConstants } from "./useLocalizedConstants"
+import { useAuth } from "@/context/authContext"
 // ./src/components/login-form.tsx:208:41
 // Type error: Property 'email' does not exist on type '{ message: string; }'.
 // ✅ Add this helper type for form-only subject data
@@ -35,6 +32,7 @@ export const NewCenterForm = () => {
   const t = useTranslations('NewCenterForm')
   const { daysOfWeek, availableSubjects, availableGrades, availableClassrooms } = useLocalizedConstants();
   const router = useRouter()
+  const { user } = useAuth() // ✅ Use AuthContext instead of getSession()
   
   const [formData, setFormData] = useState({
     name: "",
@@ -83,19 +81,11 @@ export const NewCenterForm = () => {
     const now = Date.now()
   
     try {
-      const session = await getSession()
-      const user:any = session?.user
-      
+      // ✅ Use AuthContext user instead of getSession (which can't read httpOnly cookies)
       if (!user) {
         setMessage('Unauthorized: Please log in again')
         setLoading(false)
         return
-      }
-
-      // ✅ Ensure role is uppercase to match API expectations
-      if (user.role && typeof user.role === 'string' && user.role !== 'ADMIN' && user.role !== 'MANAGER') {
-        // Normalize role to uppercase
-        user.role = user.role.toUpperCase()
       }
 
       // ✅ Step 1: Save center WITHOUT subjects array (normalized storage)
@@ -107,7 +97,7 @@ export const NewCenterForm = () => {
         classrooms: formData.classrooms,
         workingDays: formData.workingDays,
         managers: [], // Initialize empty
-        adminId: user.id,
+        adminId: user.id, // ✅ user comes from AuthContext
         status: 'w',
         createdAt: now,
         updatedAt: now,
@@ -132,72 +122,72 @@ export const NewCenterForm = () => {
       )
 
       // ✅ Step 3: Sync with server if online
-      if (isOnline()) {
-        try {
-          // ✅ Fix: Send subjectEntities with IDs instead of formData.subjects
-          const payload = {
-            id: centerId,
-            name: formData.name,
-            address: formData.address || null,
-            phone: formData.phone || null,
-            classrooms: formData.classrooms,
-            workingDays: formData.workingDays,
-            subjects: subjectEntities.map(subject => ({
-              id: subject.id,
-              name: subject.name,
-              grade: subject.grade,
-              price: subject.price,
-              duration: subject.duration || null,
-              createdAt: subject.createdAt,
-              updatedAt: subject.updatedAt,
-            })),
-            adminId: user.id,
-            createdAt: now,
-            updatedAt: now,
-          }
+      // if (isOnline()) {
+      //   try {
+      //     // ✅ Fix: Send subjectEntities with IDs instead of formData.subjects
+      //     const payload = {
+      //       id: centerId,
+      //       name: formData.name,
+      //       address: formData.address || null,
+      //       phone: formData.phone || null,
+      //       classrooms: formData.classrooms,
+      //       workingDays: formData.workingDays,
+      //       subjects: subjectEntities.map(subject => ({
+      //         id: subject.id,
+      //         name: subject.name,
+      //         grade: subject.grade,
+      //         price: subject.price,
+      //         duration: subject.duration || null,
+      //         createdAt: subject.createdAt,
+      //         updatedAt: subject.updatedAt,
+      //       })),
+      //       adminId: user.id,
+      //       createdAt: now,
+      //       updatedAt: now,
+      //     }
 
-          const response = await axios.post('/api/center', payload, { 
-            headers: { 
-              "Content-Type": "application/json",
-            },
-          })
+      //     const response = await axios.post('/api/center', payload, { 
+      //       headers: { 
+      //         "Content-Type": "application/json",
+      //       },
+      //     })
 
-          if (response.status === 200 || response.status === 201) {
-            // Mark center as synced
-            await centerActions.markSynced(centerId)
+      //     if (response.status === 200 || response.status === 201) {
+      //       // Mark center as synced
+      //       await centerActions.markSynced(centerId)
             
-            // Mark all subjects as synced
-            await Promise.all(
-              subjectEntities.map(subject => subjectActions.markSynced(subject.id))
-            )
+      //       // Mark all subjects as synced
+      //       await Promise.all(
+      //         subjectEntities.map(subject => subjectActions.markSynced(subject.id))
+      //       )
             
-            setMessage(t('successMessage'))
-          }
-        } catch (syncError) {
-          console.error('Sync error:', syncError)
-          // ✅ Improved error handling: Show actual API error details
-          if (axios.isAxiosError(syncError)) {
-            const errorMessage = syncError.response?.data?.error || syncError.message
-            console.error('API Error Details:', {
-              status: syncError.response?.status,
-              data: syncError.response?.data,
-              message: errorMessage
-            })
-            // Show specific error if available, otherwise show offline message
-            if (syncError.response?.status === 401) {
-              setMessage('Unauthorized: Please log in again')
-            } else if (syncError.response?.status === 400) {
-              setMessage(`Validation error: ${errorMessage}`)
-            } else {
-              setMessage(t('savedOfflineMessage'))
-            }
-          } else {
-            setMessage(t('savedOfflineMessage'))
-          }
-        }
-      } else {
-        setMessage(t('savedOfflineMessage'))
-      }
+      //       setMessage(t('successMessage'))
+      //     }
+      //   } catch (syncError) {
+      //     console.error('Sync error:', syncError)
+      //     // ✅ Improved error handling: Show actual API error details
+      //     if (axios.isAxiosError(syncError)) {
+      //       const errorMessage = syncError.response?.data?.error || syncError.message
+      //       console.error('API Error Details:', {
+      //         status: syncError.response?.status,
+      //         data: syncError.response?.data,
+      //         message: errorMessage
+      //       })
+      //       // Show specific error if available, otherwise show offline message
+      //       if (syncError.response?.status === 401) {
+      //         setMessage('Unauthorized: Please log in again')
+      //       } else if (syncError.response?.status === 400) {
+      //         setMessage(`Validation error: ${errorMessage}`)
+      //       } else {
+      //         setMessage(t('savedOfflineMessage'))
+      //       }
+      //     } else {
+      //       setMessage(t('savedOfflineMessage'))
+      //     }
+      //   }
+      // } else {
+      //   setMessage(t('savedOfflineMessage'))
+      // }
 
       // Reset form
       setFormData({

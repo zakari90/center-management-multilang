@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client"
 
 import { ItemInputList } from "@/components/itemInputList"
@@ -11,7 +10,7 @@ import {
   CardTitle
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import axios from "axios"
+// import axios from "axios" // ✅ Commented out - using local DB
 import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useState } from "react"
@@ -21,6 +20,8 @@ import { EditSubjectCard } from "./editSubjectCard"
 import { SubjectForm } from "./subjectForm"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useLocalizedConstants } from "./useLocalizedConstants"
+import { subjectActions, centerActions } from "@/lib/dexie/_dexieActions"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
 
 type Subject = {
   id: string
@@ -59,12 +60,48 @@ export default function CenterPresentation(center: Center) {
     subjects: center.subjects
   })
 
-  const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
-    // @ts-expect-error id is missing but you might generate it in backend or UI
-    setFormData(prev => ({
-      ...prev,
-      subjects: [...prev.subjects, { name: subjectName, grade, price, duration }]
-    }))
+  const addSubject = async (subjectName: string, grade: string, price: number, duration?: number) => {
+    try {
+      // ✅ Save to local DB
+      const now = Date.now();
+      const subjectId = generateObjectId();
+      const newSubject = {
+        id: subjectId,
+        name: subjectName,
+        grade,
+        price,
+        duration: duration ?? undefined,
+        centerId: center.id,
+        status: 'w' as const,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await subjectActions.putLocal(newSubject);
+
+      // Update local state
+      const subjectForDisplay = {
+        id: subjectId,
+        name: subjectName,
+        grade,
+        price,
+        duration: duration ?? null,
+        createdAt: new Date(now).toISOString(),
+        updatedAt: new Date(now).toISOString(),
+        centerId: center.id,
+      };
+
+      setFormData(prev => ({
+        ...prev,
+        subjects: [...prev.subjects, subjectForDisplay]
+      }));
+
+      toast("Subject added successfully");
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding subject:", error);
+      toast("Failed to add subject");
+    }
   }
   
   const [tempClassrooms, setTempClassrooms] = useState(formData.classrooms)
@@ -75,43 +112,85 @@ export default function CenterPresentation(center: Center) {
     setIsAddDialogOpen(true)
   }
 
-    // Update existing subject
+  // ✅ Update existing subject using local DB
   const handleUpdateSubject = async (subjectId: string, updatedData: Partial<Subject>) => {
     try {
-      const { data } = await axios.patch(`/api/subjects`, {
-        subjectId,
-        ...updatedData
-      })
+      // Get existing subject from local DB
+      const existingSubject = await subjectActions.getLocal(subjectId);
+      
+      if (!existingSubject) {
+        toast("Subject not found");
+        return;
+      }
+
+      // Update in local DB
+      const updatedSubject = {
+        ...existingSubject,
+        name: updatedData.name ?? existingSubject.name,
+        grade: updatedData.grade ?? existingSubject.grade,
+        price: updatedData.price ?? existingSubject.price,
+        duration: updatedData.duration !== undefined 
+          ? (updatedData.duration === null ? undefined : updatedData.duration)
+          : existingSubject.duration,
+        // Keep original createdAt and centerId from DB
+        createdAt: existingSubject.createdAt,
+        centerId: existingSubject.centerId,
+        status: existingSubject.status,
+        updatedAt: Date.now(),
+      };
+
+      await subjectActions.putLocal(updatedSubject);
+
+      // Update local state
+      const subjectForDisplay = {
+        id: updatedSubject.id,
+        name: updatedSubject.name,
+        grade: updatedSubject.grade,
+        price: updatedSubject.price,
+        duration: updatedSubject.duration ?? null,
+        createdAt: new Date(updatedSubject.createdAt).toISOString(),
+        updatedAt: new Date(updatedSubject.updatedAt).toISOString(),
+        centerId: updatedSubject.centerId,
+      };
 
       setFormData(prev => ({
         ...prev,
-        subjects: prev.subjects.map(s => s.id === subjectId ? data : s)
+        subjects: prev.subjects.map(s => s.id === subjectId ? subjectForDisplay : s)
       }))
 
-      toast("Subject updated successfully")
+      toast("Subject updated successfully");
+
+      // ✅ Commented out online update
+      // const { data } = await axios.patch(`/api/subjects`, {
+      //   subjectId,
+      //   ...updatedData
+      // })
     } catch (error) {
-      console.log(error);
-      
+      console.error("Error updating subject:", error);
       toast("Failed to update subject")
     }
   }
 
-  // Delete subject
+  // ✅ Delete subject using local DB (soft delete)
   const handleDeleteSubject = async (subjectId: string) => {
     try {
-      await axios.delete(`/api/subjects`, {
-        data: { subjectId }
-      })
+      // Soft delete in local DB
+      await subjectActions.markForDelete(subjectId);
 
+      // Update local state
       setFormData(prev => ({
         ...prev,
         subjects: prev.subjects.filter(s => s.id !== subjectId)
       }))
 
-      toast("Subject deleted successfully")
+      toast("Subject deleted successfully");
+
+      // ✅ Commented out online delete
+      // await axios.delete(`/api/subjects`, {
+      //   data: { subjectId }
+      // })
     } catch (error) {
-      console.log(error );
-      
+      console.error("Error deleting subject:", error);
       toast("Failed to delete subject")
     }
   }
@@ -211,7 +290,24 @@ export default function CenterPresentation(center: Center) {
                     <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                   </Button>
                 }
-                onSave={() => setFormData(prev => ({ ...prev, classrooms: tempClassrooms }))}
+                onSave={async () => {
+                  try {
+                    // ✅ Update center in local DB
+                    const existingCenter = await centerActions.getLocal(center.id);
+                    if (existingCenter) {
+                      await centerActions.putLocal({
+                        ...existingCenter,
+                        classrooms: tempClassrooms,
+                        updatedAt: Date.now(),
+                      });
+                    }
+                    setFormData(prev => ({ ...prev, classrooms: tempClassrooms }));
+                    toast("Classrooms updated successfully");
+                  } catch (error) {
+                    console.error("Error updating classrooms:", error);
+                    toast("Failed to update classrooms");
+                  }
+                }}
               >
                 <ItemInputList
                   label={t('classroomsLabel')}
@@ -238,7 +334,24 @@ export default function CenterPresentation(center: Center) {
                     <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                   </Button>
                 }
-                onSave={() => setFormData(prev => ({ ...prev, workingDays: tempWorkingDays }))}
+                onSave={async () => {
+                  try {
+                    // ✅ Update center in local DB
+                    const existingCenter = await centerActions.getLocal(center.id);
+                    if (existingCenter) {
+                      await centerActions.putLocal({
+                        ...existingCenter,
+                        workingDays: tempWorkingDays,
+                        updatedAt: Date.now(),
+                      });
+                    }
+                    setFormData(prev => ({ ...prev, workingDays: tempWorkingDays }));
+                    toast("Working days updated successfully");
+                  } catch (error) {
+                    console.error("Error updating working days:", error);
+                    toast("Failed to update working days");
+                  }
+                }}
               >
                 <ItemInputList
                   label={t('workingDaysLabel')}
