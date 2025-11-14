@@ -48,7 +48,7 @@ export interface Teacher extends SyncEntity {
   email?: string;
   phone?: string;
   address?: string;
-  weeklySchedule?: Record<string, any>;
+  weeklySchedule?: string[] | Record<string, any>; // Array of JSON strings or object
   managerId: string;
 }
 

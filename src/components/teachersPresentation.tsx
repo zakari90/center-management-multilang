@@ -19,12 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import { Eye, Loader2, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
+import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/_dexieActions'
+import { useAuth } from '@/context/authContext'
 
 interface TeacherSubject {
   id: string
@@ -51,6 +53,7 @@ interface Teacher {
 
 export default function TeachersTable() {
   const t = useTranslations('TeachersTable')
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -58,13 +61,89 @@ export default function TeachersTable() {
 
   useEffect(() => {
     fetchTeachers()
-  }, [])
+  }, [user])
 
   const fetchTeachers = async () => {
     try {
-      const response = await axios.get('/api/teachers')
-      setTeachers(response.data)
+      setIsLoading(true)
+      setError('')
+
+      if (!user) {
+        setError('Unauthorized: Please log in again')
+        setIsLoading(false)
+        return
+      }
+
+      // ✅ Fetch from local DB and join with subjects
+      const [allTeachers, allTeacherSubjects, allSubjects] = await Promise.all([
+        teacherActions.getAll(),
+        teacherSubjectActions.getAll(),
+        subjectActions.getAll()
+      ])
+
+      // ✅ Filter teachers by managerId and status
+      const managerTeachers = allTeachers
+        .filter(t => t.managerId === user.id && t.status !== '0')
+
+      // ✅ Build teachers with subjects
+      const teachersWithSubjects: Teacher[] = managerTeachers.map(teacher => {
+        const teacherSubjectsForTeacher = allTeacherSubjects
+          .filter(ts => ts.teacherId === teacher.id && ts.status !== '0')
+          .map(ts => {
+            const subject = allSubjects.find(s => s.id === ts.subjectId && s.status !== '0')
+            return subject ? {
+              id: ts.id,
+              percentage: ts.percentage ?? null,
+              hourlyRate: ts.hourlyRate ?? null,
+              subject: {
+                id: subject.id,
+                name: subject.name,
+                grade: subject.grade,
+                price: subject.price,
+              }
+            } : null
+          })
+          .filter(ts => ts !== null) as TeacherSubject[]
+
+        // ✅ Parse weeklySchedule if it's an array of JSON strings
+        let parsedSchedule: any = null
+        if (teacher.weeklySchedule) {
+          if (Array.isArray(teacher.weeklySchedule)) {
+            try {
+              parsedSchedule = teacher.weeklySchedule.map((s: any) => {
+                if (typeof s === 'string') {
+                  return JSON.parse(s)
+                }
+                return s
+              })
+            } catch (e) {
+              console.error('Error parsing schedule:', e)
+              parsedSchedule = teacher.weeklySchedule
+            }
+          } else {
+            parsedSchedule = teacher.weeklySchedule
+          }
+        }
+
+        return {
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email ?? null,
+          phone: teacher.phone ?? null,
+          address: teacher.address ?? null,
+          weeklySchedule: parsedSchedule,
+          createdAt: new Date(teacher.createdAt).toISOString(),
+          teacherSubjects: teacherSubjectsForTeacher,
+        }
+      })
+
+      setTeachers(teachersWithSubjects)
+
+      // ✅ Commented out online fetch
+      // const response = await axios.get('/api/teachers')
+      // setTeachers(response.data)
     } catch (err) {
+      console.error('Failed to fetch teachers:', err)
       setError(err instanceof Error ? err.message : t('error'))
     } finally {
       setIsLoading(false)
