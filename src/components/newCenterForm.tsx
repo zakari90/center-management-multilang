@@ -12,7 +12,7 @@ import { centerActions, subjectActions } from "@/lib/dexie/_dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { Separator } from "@radix-ui/react-separator"
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+// import { useRouter } from "next/navigation" // ✅ Commented out - not used
 import type React from "react"
 import { useState } from "react"
 import { SubjectFormMultipleChoices } from "./subjectForm"
@@ -28,10 +28,14 @@ type SubjectFormData = {
   duration?: number;
 }
 
-export const NewCenterForm = () => {
+interface NewCenterFormProps {
+  onCenterCreated?: () => void; // ✅ Callback to refresh parent component
+}
+
+export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
   const t = useTranslations('NewCenterForm')
   const { daysOfWeek, availableSubjects, availableGrades, availableClassrooms } = useLocalizedConstants();
-  const router = useRouter()
+  // const router = useRouter() // ✅ Commented out - not used
   const { user } = useAuth() // ✅ Use AuthContext instead of getSession()
   
   const [formData, setFormData] = useState({
@@ -199,7 +203,13 @@ export const NewCenterForm = () => {
         workingDays: [],
       })
       setStep(1)
-      router.refresh()
+      
+      // ✅ Trigger refresh in parent component to show the new center
+      if (onCenterCreated) {
+        onCenterCreated();
+      }
+      
+      // router.refresh() // ✅ Commented out - using callback instead
       
     } catch (error) {
       console.error('Form submission error:', error)

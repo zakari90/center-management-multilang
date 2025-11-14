@@ -53,7 +53,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import axios from 'axios'
+import axios from 'axios' // Still used for fetchAllData, handleDelete, handleSaveEdit
 import { format } from 'date-fns'
 import {
   Calendar,
@@ -74,6 +74,10 @@ import {
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { userActions, centerActions } from '@/lib/dexie/_dexieActions'
+import { generateObjectId } from '@/lib/utils/generateObjectId'
+import { Role } from '@/lib/dexie/dbSchema'
+import { useAuth } from '@/context/authContext'
 
 interface UserData {
   id: string
@@ -137,6 +141,7 @@ interface UserFormData {
 
 export default function AllUsersTable() {
   const t = useTranslations('AllUsersTable')
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   
   const [activeTab, setActiveTab] = useState('users')
   
@@ -233,19 +238,81 @@ export default function AllUsersTable() {
       return
     }
 
+    if (!user) {
+      toast('Unauthorized: Please log in again')
+      return
+    }
+
     setIsProcessing(true)
     try {
-      console.log("Sending userFormData:", userFormData)
-      const response = await axios.post('/api/admin/users', userFormData)
-      setUsers(prev => [...prev, response.data])
+      // ✅ Check if email already exists in local DB
+      const existingUser = await userActions.getLocalByEmail?.(userFormData.email)
+      if (existingUser) {
+        toast('Email is already in use')
+        setIsProcessing(false)
+        return
+      }
+
+      // ✅ Create manager in local DB
+      const now = Date.now()
+      const managerId = generateObjectId()
+      const newManager = {
+        id: managerId,
+        email: userFormData.email,
+        password: userFormData.password, // Store plain password (will be hashed on sync)
+        name: userFormData.name,
+        role: Role.MANAGER,
+        status: 'w' as const, // Waiting for sync
+        createdAt: now,
+        updatedAt: now,
+      }
+
+      await userActions.putLocal(newManager)
+
+      // ✅ Update center to add manager to managers array
+      const centers = await centerActions.getAll()
+      const adminCenters = centers.filter(c => c.adminId === user.id)
+      
+      if (adminCenters.length > 0) {
+        const center = adminCenters[0] // Get first center
+        const updatedManagers = [...(center.managers || []), managerId]
+        
+        await centerActions.putLocal({
+          ...center,
+          managers: updatedManagers,
+          updatedAt: now,
+        })
+      }
+
+      // ✅ Update local state to show new manager
+      const managerForDisplay: UserData = {
+        id: managerId,
+        name: userFormData.name,
+        email: userFormData.email,
+        role: 'MANAGER',
+        createdAt: new Date(now).toISOString(),
+        isActive: true,
+        stats: {
+          centers: 0,
+          students: 0,
+          teachers: 0,
+        }
+      }
+
+      setUsers(prev => [...prev, managerForDisplay])
       setIsAddDialogOpen(false)
       setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
       toast(t('userAddedSuccess'))
-    } catch (err) {
-      console.log(err);
-      
-      setIsAddDialogOpen(false)
 
+      // ✅ Commented out online creation
+      // const response = await axios.post('/api/admin/users', userFormData)
+      // Alternative endpoint: await axios.post('/api/manager/register', { 
+      //   email: userFormData.email,
+      //   password: userFormData.password,
+      //   username: userFormData.name,
+      //   id: managerId
+      // })
+    } catch (err) {
       console.error('Failed to add Manager:', err)
       toast(t('userAddedError'))
     } finally {
