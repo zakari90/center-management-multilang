@@ -34,6 +34,7 @@ import {
   DialogTitle,
   DialogDescription
 } from "@/components/ui/dialog"
+import { AutoSyncProvider } from "./AutoSyncProvider"
 
 type Role = "admin" | "manager"
 
@@ -66,6 +67,7 @@ export function LoginForm({
 
   useEffect(() => {
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
+      <AutoSyncProvider />
       login(state.data.user)
       const userRole = state.data.user.role
       const destination = userRole === "MANAGER"
