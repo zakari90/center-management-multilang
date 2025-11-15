@@ -26,8 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Manager } from '@/types/types'
-import axios from 'axios'
+import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/_dexieActions'
+import { useAuth } from '@/context/authContext'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import {
   DollarSign,
   Eye,
@@ -45,7 +47,10 @@ import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 
 interface Receipt {
-  manager: Manager
+  manager?: {
+    id: string
+    name: string
+  }
   id: string
   receiptNumber: string
   amount: number
@@ -67,6 +72,7 @@ interface Receipt {
 
 export default function ReceiptsTable() {
   const t = useTranslations('ReceiptsTable')
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -77,12 +83,68 @@ export default function ReceiptsTable() {
 
   useEffect(() => {
     fetchReceipts()
-  }, [])
+  }, [user])
 
   const fetchReceipts = async () => {
     try {
-      const { data } = await axios.get('/api/receipts')
-      setReceipts(data)
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setIsLoading(false)
+        return
+      }
+
+      // ✅ Fetch from local DB
+      const [allReceipts, allStudents, allTeachers, allUsers] = await Promise.all([
+        receiptActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        userActions.getAll()
+      ])
+
+      // ✅ Filter receipts by managerId and status
+      const managerReceipts = allReceipts
+        .filter(r => r.managerId === user.id && r.status !== '0')
+
+      // ✅ Build receipts with related data
+      const receiptsWithData: Receipt[] = managerReceipts.map(receipt => {
+        const student = receipt.studentId 
+          ? allStudents.find(s => s.id === receipt.studentId && s.status !== '0')
+          : null
+        const teacher = receipt.teacherId
+          ? allTeachers.find(t => t.id === receipt.teacherId && t.status !== '0')
+          : null
+        const manager = allUsers.find(u => u.id === receipt.managerId && u.status !== '0')
+
+        return {
+          id: receipt.id,
+          receiptNumber: receipt.receiptNumber,
+          amount: receipt.amount,
+          type: receipt.type,
+          paymentMethod: receipt.paymentMethod ?? null,
+          description: receipt.description ?? null,
+          date: new Date(receipt.date).toISOString(),
+          createdAt: new Date(receipt.createdAt).toISOString(),
+          manager: manager ? {
+            id: manager.id,
+            name: manager.name,
+          } : undefined,
+          student: student ? {
+            id: student.id,
+            name: student.name,
+            grade: student.grade ?? null,
+          } : undefined,
+          teacher: teacher ? {
+            id: teacher.id,
+            name: teacher.name,
+          } : undefined,
+        }
+      })
+
+      setReceipts(receiptsWithData)
+
+      // ✅ Commented out online fetch
+      // const { data } = await axios.get('/api/receipts')
+      // setReceipts(data)
     } catch (err) {
       console.log(err);
       setError(t('errorFetchReceipts'))

@@ -1043,7 +1043,14 @@
     "students": "students",
     "errorFetchStudents": "Failed to fetch students",
     "errorDeleteStudent": "Failed to delete student",
-    "errorSomethingWrong": "Something went wrong"
+    "errorSomethingWrong": "Something went wrong",
+    "filtered": "filtered",
+    "monthlyRevenue": "Monthly Revenue",
+    "avgSubjects": "Avg. Subjects",
+    "perStudent": "per student",
+    "parent": "Parent",
+    "monthlyFee": "Monthly Fee",
+    "noStudents": "No students"
   },
   "StudentReceiptTable": {
     "MAD":"MAD",
@@ -1341,6 +1348,29 @@
   "selectSubjectPlaceholder": "Type or select a subject",
   "selectGradePlaceholder": "Type or select a grade",
   "selectRoomPlaceholder": "Type or select a room"
+},
+"FirstLoginImport": {
+  "title": "Import Data from Server",
+  "description": "Your local database is empty. Import data from the server to get started.",
+  "importNow": "Import Now",
+  "dismiss": "Dismiss",
+  "importing": "Importing...",
+  "offlineError": "You are offline. Please connect to the internet to import data.",
+  "offlineMessage": "Connect to the internet to import data from the server.",
+  "importSuccess": "Successfully imported {count} data types",
+  "importPartial": "Import completed with {success} successful and {failed} failed",
+  "importError": "Import failed: {error}"
+},
+"LocalDBDebugger": {
+  "title": "Local Database Debugger",
+  "description": "View and inspect local database contents",
+  "totalItems": "Total Items",
+  "adminView": "Admin View",
+  "managerView": "Manager View",
+  "noData": "No data in this table",
+  "showingFirst": "Showing first {count} of {total} items",
+  "helpText1": "This debugger shows the contents of your local IndexedDB.",
+  "helpText2": "Tap on a table name to expand and view its data."
 }
 
 }

@@ -5,7 +5,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ModalLink } from '@/components/modal-link'
-import axios from 'axios'
+import { receiptActions, studentActions } from '@/lib/dexie/_dexieActions'
+import { useAuth } from '@/context/authContext'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -80,6 +83,7 @@ interface Student {
 export default function StudentReceiptTable() {
   const t = useTranslations("StudentReceiptTable")
   const router = useRouter()
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -93,17 +97,76 @@ export default function StudentReceiptTable() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [user])
 
   const fetchData = async () => {
     try {
-      const [receiptsRes, studentsRes] = await Promise.all([
-        axios.get('/api/receipts/student-receipts'),
-        axios.get('/api/students')
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setIsLoading(false)
+        return
+      }
+
+      // ✅ Fetch from local DB
+      const [allReceipts, allStudents] = await Promise.all([
+        receiptActions.getAll(),
+        studentActions.getAll()
       ])
-      
-      setReceipts(receiptsRes.data)
-      setStudents(studentsRes.data)
+
+      // ✅ Filter receipts by managerId, type, and status
+      const managerStudentReceipts = allReceipts
+        .filter(r => 
+          r.managerId === user.id && 
+          r.type === ReceiptType.STUDENT_PAYMENT && 
+          r.status !== '0'
+        )
+
+      // ✅ Filter students by managerId and status
+      const managerStudents = allStudents
+        .filter(s => s.managerId === user.id && s.status !== '0')
+
+      // ✅ Build receipts with student data
+      const receiptsWithStudents: Receipt[] = managerStudentReceipts.map(receipt => {
+        const student = managerStudents.find(s => s.id === receipt.studentId)
+        return {
+          id: receipt.id,
+          receiptNumber: receipt.receiptNumber,
+          amount: receipt.amount,
+          paymentMethod: receipt.paymentMethod ?? null,
+          description: receipt.description ?? null,
+          date: new Date(receipt.date).toISOString(),
+          createdAt: new Date(receipt.createdAt).toISOString(),
+          student: student ? {
+            id: student.id,
+            name: student.name,
+            grade: student.grade ?? null,
+            email: student.email ?? null,
+          } : {
+            id: receipt.studentId || '',
+            name: 'Unknown',
+            grade: null,
+            email: null,
+          },
+        }
+      })
+
+      // ✅ Build students list for filter
+      const studentsList: Student[] = managerStudents.map(s => ({
+        id: s.id,
+        name: s.name,
+        grade: s.grade ?? null,
+      }))
+
+      setReceipts(receiptsWithStudents)
+      setStudents(studentsList)
+
+      // ✅ Commented out online fetch
+      // const [receiptsRes, studentsRes] = await Promise.all([
+      //   axios.get('/api/receipts/student-receipts'),
+      //   axios.get('/api/students')
+      // ])
+      // setReceipts(receiptsRes.data)
+      // setStudents(studentsRes.data)
     } catch (err) {
       console.error('Failed to fetch data:', err)
       setError(t("errorLoadReceipts"))

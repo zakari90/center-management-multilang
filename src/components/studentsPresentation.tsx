@@ -12,7 +12,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import axios from "axios"
+import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/_dexieActions"
+import { useAuth } from "@/context/authContext"
+// import axios from "axios" // ✅ Commented out - using local DB
 
 export interface StudentSubject {
   id: string
@@ -43,6 +45,7 @@ export interface Student {
 
 export default function StudentsTable() {
   const t = useTranslations("StudentsTable")
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,14 +55,73 @@ export default function StudentsTable() {
 
   useEffect(() => {
     fetchStudents()
-  }, [])
+  }, [user])
 
   const fetchStudents = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get("/api/students")
-      setStudents(data)
+      
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setLoading(false)
+        return
+      }
+
+      // ✅ Fetch from local DB and join with subjects and teachers
+      const [allStudents, allStudentSubjects, allSubjects, allTeachers] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        teacherActions.getAll()
+      ])
+
+      // ✅ Filter students by managerId and status
+      const managerStudents = allStudents
+        .filter(s => s.managerId === user.id && s.status !== '0')
+
+      // ✅ Build students with subjects
+      const studentsWithSubjects: Student[] = managerStudents.map(student => {
+        const studentSubjectsForStudent = allStudentSubjects
+          .filter(ss => ss.studentId === student.id && ss.status !== '0')
+          .map(ss => {
+            const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
+            const teacher = allTeachers.find(t => t.id === ss.teacherId && t.status !== '0')
+            return subject ? {
+              id: ss.id,
+              subject: {
+                id: subject.id,
+                name: subject.name,
+                grade: subject.grade,
+                price: subject.price,
+              },
+              teacher: teacher ? {
+                id: teacher.id,
+                name: teacher.name,
+              } : undefined,
+            } : null
+          })
+          .filter(ss => ss !== null) as StudentSubject[]
+
+        return {
+          id: student.id,
+          name: student.name,
+          email: student.email ?? null,
+          phone: student.phone ?? null,
+          parentName: student.parentName ?? null,
+          parentPhone: student.parentPhone ?? null,
+          parentEmail: student.parentEmail ?? null,
+          grade: student.grade ?? null,
+          createdAt: new Date(student.createdAt).toISOString(),
+          studentSubjects: studentSubjectsForStudent,
+        }
+      })
+
+      setStudents(studentsWithSubjects)
       setError("")
+
+      // ✅ Commented out online fetch
+      // const { data } = await axios.get("/api/students")
+      // setStudents(data)
     } catch (err) {
       console.error("Error fetching students:", err)
       setError("Failed to load students")

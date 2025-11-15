@@ -3,7 +3,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import axios from 'axios'
+import { teacherActions, teacherSubjectActions, studentSubjectActions, subjectActions, receiptActions } from '@/lib/dexie/_dexieActions'
+import { useAuth } from '@/context/authContext'
+import { generateObjectId } from '@/lib/utils/generateObjectId'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -57,6 +61,7 @@ export default function CreateTeacherPaymentForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const preSelectedTeacherId = searchParams.get('teacherId')
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   
   const [isLoading, setIsLoading] = useState(false)
   const [loadingTeachers, setLoadingTeachers] = useState(true)
@@ -75,7 +80,7 @@ export default function CreateTeacherPaymentForm() {
 
   useEffect(() => {
     fetchTeachers()
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if (formData.teacherId) {
@@ -85,8 +90,29 @@ export default function CreateTeacherPaymentForm() {
 
   const fetchTeachers = async () => {
     try {
-      const { data } = await axios.get('/api/teachers')
-      setTeachers(data)
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setLoadingTeachers(false)
+        return
+      }
+
+      // ✅ Fetch from local DB
+      const allTeachers = await teacherActions.getAll()
+      
+      // ✅ Filter teachers by managerId and status
+      const managerTeachers = allTeachers
+        .filter(t => t.managerId === user.id && t.status !== '0')
+        .map(t => ({
+          id: t.id,
+          name: t.name,
+          email: t.email ?? null,
+        }))
+
+      setTeachers(managerTeachers)
+
+      // ✅ Commented out online fetch
+      // const { data } = await axios.get('/api/teachers')
+      // setTeachers(data)
     } catch (err) {
       console.error('Failed to fetch teachers:', err)
       setError(t('errorloadTeachers'))
@@ -98,14 +124,83 @@ export default function CreateTeacherPaymentForm() {
   const calculateTeacherPayment = async () => {
     setLoadingCalculation(true)
     try {
-      const { data } = await axios.get(`/api/teachers/${formData.teacherId}/payment-calculation`)
-      setPaymentData(data)
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setLoadingCalculation(false)
+        return
+      }
+
+      // ✅ Fetch from local DB
+      const [allTeacherSubjects, allStudentSubjects, allSubjects, allTeachers] = await Promise.all([
+        teacherSubjectActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        teacherActions.getAll()
+      ])
+
+      const selectedTeacher = allTeachers.find(t => t.id === formData.teacherId && t.status !== '0')
+      if (!selectedTeacher) {
+        throw new Error('Teacher not found')
+      }
+
+      // ✅ Get teacher subjects for this teacher
+      const teacherSubjects = allTeacherSubjects
+        .filter(ts => ts.teacherId === formData.teacherId && ts.status !== '0')
+
+      // ✅ Calculate payment for each subject
+      const subjectsStats: SubjectStats[] = teacherSubjects.map(ts => {
+        const subject = allSubjects.find(s => s.id === ts.subjectId && s.status !== '0')
+        if (!subject) return null
+
+        // ✅ Count enrolled students for this teacher-subject combination
+        const enrolledStudents = allStudentSubjects.filter(ss =>
+          ss.subjectId === ts.subjectId &&
+          ss.teacherId === formData.teacherId &&
+          ss.status !== '0'
+        ).length
+
+        let calculatedAmount = 0
+        if (ts.percentage) {
+          calculatedAmount = (subject.price * ts.percentage / 100) * enrolledStudents
+        } else if (ts.hourlyRate) {
+          calculatedAmount = ts.hourlyRate * enrolledStudents
+        }
+
+        return {
+          subjectId: ts.subjectId,
+          subjectName: subject.name,
+          grade: subject.grade,
+          price: subject.price,
+          percentage: ts.percentage ?? null,
+          hourlyRate: ts.hourlyRate ?? null,
+          enrolledStudents,
+          calculatedAmount,
+        }
+      }).filter(s => s !== null) as SubjectStats[]
+
+      const totalAmount = subjectsStats.reduce((sum, s) => sum + s.calculatedAmount, 0)
+
+      const paymentDataResult: TeacherPaymentData = {
+        teacher: {
+          id: selectedTeacher.id,
+          name: selectedTeacher.name,
+          email: selectedTeacher.email ?? null,
+        },
+        subjects: subjectsStats,
+        totalAmount,
+      }
+
+      setPaymentData(paymentDataResult)
       
       // Auto-select all subjects by default
       setFormData(prev => ({
         ...prev,
-        selectedSubjects: data.subjects.map((s: SubjectStats) => s.subjectId)
+        selectedSubjects: subjectsStats.map(s => s.subjectId)
       }))
+
+      // ✅ Commented out online calculation
+      // const { data } = await axios.get(`/api/teachers/${formData.teacherId}/payment-calculation`)
+      // setPaymentData(data)
     } catch (err) {
       console.error('Failed to calculate payment:', err)
       setError(t('errorcalcPayment'))
@@ -148,6 +243,10 @@ export default function CreateTeacherPaymentForm() {
     setError('')
 
     try {
+      if (!user) {
+        throw new Error('Unauthorized: Please log in again')
+      }
+
       if (!formData.teacherId) {
         throw new Error('Please select a teacher')
       }
@@ -156,20 +255,58 @@ export default function CreateTeacherPaymentForm() {
         throw new Error('Please select at least one subject to include in payment')
       }
 
-      await axios.post('/api/receipts/teacher-payment', {
+      if (!paymentData) {
+        throw new Error('Payment data not calculated')
+      }
+
+      // ✅ Calculate total amount from selected subjects
+      const selectedSubjectsData = paymentData.subjects.filter(s =>
+        formData.selectedSubjects.includes(s.subjectId)
+      )
+      const totalAmount = selectedSubjectsData.reduce((sum, s) => sum + s.calculatedAmount, 0)
+
+      // ✅ Create description if not provided
+      const subjectDetails = selectedSubjectsData.map(s =>
+        `${s.subjectName} (${s.enrolledStudents} students): $${s.calculatedAmount.toFixed(2)}`
+      )
+      const finalDescription = formData.description || `Payment for: ${subjectDetails.join(', ')}`
+
+      // ✅ Create receipt in local DB
+      const now = Date.now()
+      const receiptId = generateObjectId()
+      const receiptDate = formData.date ? new Date(formData.date).getTime() : now
+
+      const newReceipt = {
+        id: receiptId,
+        receiptNumber: `RCP-${now}`,
+        amount: totalAmount,
+        type: ReceiptType.TEACHER_PAYMENT,
+        paymentMethod: formData.paymentMethod || undefined,
+        description: finalDescription,
+        date: receiptDate,
         teacherId: formData.teacherId,
-        subjectIds: formData.selectedSubjects,
-        paymentMethod: formData.paymentMethod,
-        description: formData.description,
-        date: formData.date,
-      })
+        managerId: user.id,
+        status: 'w' as const, // Waiting for sync
+        createdAt: now,
+        updatedAt: now,
+      }
+
+      await receiptActions.putLocal(newReceipt)
 
       router.push('/manager/receipts')
       router.refresh()
+
+      // ✅ Commented out online creation
+      // await axios.post('/api/receipts/teacher-payment', {
+      //   teacherId: formData.teacherId,
+      //   subjectIds: formData.selectedSubjects,
+      //   paymentMethod: formData.paymentMethod,
+      //   description: formData.description,
+      //   date: formData.date,
+      // })
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        console.log(err.response?.data?.error);        
-        setError( t('errorcreateReceipt'))
+      if (err instanceof Error) {
+        setError(err.message)
       } else {
         setError(t('errorgeneric'))
       }

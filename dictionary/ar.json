@@ -1247,4 +1247,28 @@
     "selectGradePlaceholder": "اكتب أو اختر درجة",
     "selectRoomPlaceholder": "اكتب أو اختر غرفة"
   }
+},
+"FirstLoginImport": {
+  "title": "استيراد البيانات من الخادم",
+  "description": "قاعدة البيانات المحلية فارغة. قم باستيراد البيانات من الخادم للبدء.",
+  "importNow": "استيراد الآن",
+  "dismiss": "إلغاء",
+  "importing": "جاري الاستيراد...",
+  "offlineError": "أنت غير متصل بالإنترنت. يرجى الاتصال بالإنترنت لاستيراد البيانات.",
+  "offlineMessage": "اتصل بالإنترنت لاستيراد البيانات من الخادم.",
+  "importSuccess": "تم استيراد {count} أنواع بيانات بنجاح",
+  "importPartial": "اكتمل الاستيراد مع {success} نجح و {failed} فشل",
+  "importError": "فشل الاستيراد: {error}"
+},
+"LocalDBDebugger": {
+  "title": "مصحح قاعدة البيانات المحلية",
+  "description": "عرض وفحص محتويات قاعدة البيانات المحلية",
+  "totalItems": "إجمالي العناصر",
+  "adminView": "عرض المشرف",
+  "managerView": "عرض المدير",
+  "noData": "لا توجد بيانات في هذا الجدول",
+  "showingFirst": "عرض أول {count} من {total} عنصر",
+  "helpText1": "يعرض هذا المصحح محتويات IndexedDB المحلي الخاص بك.",
+  "helpText2": "اضغط على اسم الجدول للتوسيع وعرض بياناته."
+}
 }

@@ -1002,7 +1002,14 @@
     "students": "élèves",
     "errorFetchStudents": "Impossible de récupérer les élèves",
     "errorDeleteStudent": "Impossible de supprimer l'élève",
-    "errorSomethingWrong": "Quelque chose s'est mal passé"
+    "errorSomethingWrong": "Quelque chose s'est mal passé",
+    "filtered": "filtré",
+    "monthlyRevenue": "Revenu mensuel",
+    "avgSubjects": "Moy. Matières",
+    "perStudent": "par élève",
+    "parent": "Parent",
+    "monthlyFee": "Frais mensuels",
+    "noStudents": "Aucun élève"
   },
   "StudentReceiptTable": {
     "MAD": "MAD",
@@ -1237,4 +1244,28 @@
     "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
     "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
   }
+},
+"FirstLoginImport": {
+  "title": "Importer les données du serveur",
+  "description": "Votre base de données locale est vide. Importez les données du serveur pour commencer.",
+  "importNow": "Importer maintenant",
+  "dismiss": "Ignorer",
+  "importing": "Importation en cours...",
+  "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour importer les données.",
+  "offlineMessage": "Connectez-vous à Internet pour importer les données du serveur.",
+  "importSuccess": "Importation réussie de {count} types de données",
+  "importPartial": "Importation terminée avec {success} réussies et {failed} échouées",
+  "importError": "Échec de l'importation: {error}"
+},
+"LocalDBDebugger": {
+  "title": "Débogueur de base de données locale",
+  "description": "Afficher et inspecter le contenu de la base de données locale",
+  "totalItems": "Total des éléments",
+  "adminView": "Vue administrateur",
+  "managerView": "Vue gestionnaire",
+  "noData": "Aucune donnée dans ce tableau",
+  "showingFirst": "Affichage des {count} premiers éléments sur {total}",
+  "helpText1": "Ce débogueur affiche le contenu de votre IndexedDB local.",
+  "helpText2": "Appuyez sur un nom de tableau pour l'étendre et afficher ses données."
+}
 }

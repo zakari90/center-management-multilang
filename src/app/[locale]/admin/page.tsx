@@ -9,6 +9,8 @@ import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 import { SyncHandler } from "@/components/syncHandler";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+import { FirstLoginImport } from "@/components/FirstLoginImport";
+import { LocalDBDebugger } from "@/components/LocalDBDebugger";
 import { useTranslations } from "next-intl";
 
 export default function AdminDashboard() {
@@ -22,6 +24,9 @@ export default function AdminDashboard() {
           <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
+
+      {/* First Login Import Prompt */}
+      <FirstLoginImport />
 
       {/* Stats Overview */}
       <AdminStatsCards />
@@ -41,6 +46,9 @@ export default function AdminDashboard() {
       
       {/* Data Synchronization */}
       <SyncHandler />
+      
+      {/* Local DB Debugger (for mobile debugging) */}
+      {process.env.NODE_ENV === 'development' && <LocalDBDebugger />}
       
       <DeleteAllDataButton/>
       </div>

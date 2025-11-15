@@ -6,6 +6,8 @@ import ManagerStatsCards from "@/components/managerStateCards";
 import TopSubjects from "@/components/top-subjects";
 import { SyncHandler } from "@/components/syncHandler";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+import { FirstLoginImport } from "@/components/FirstLoginImport";
+import { LocalDBDebugger } from "@/components/LocalDBDebugger";
 import { useTranslations } from "next-intl";
 
 
@@ -21,6 +23,9 @@ return (
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
 
+      {/* First Login Import Prompt */}
+      <FirstLoginImport />
+
       <ManagerStatsCards />
       <ReceiptsSummary/>
       <QuickActions />
@@ -33,6 +38,9 @@ return (
 
       {/* Data Synchronization */}
       <SyncHandler />
+
+      {/* Local DB Debugger (for mobile debugging) */}
+      {process.env.NODE_ENV === 'development' && <LocalDBDebugger />}
 
       {/* <div className="grid gap-4 grid-cols-4">
         <RecentActivities />
