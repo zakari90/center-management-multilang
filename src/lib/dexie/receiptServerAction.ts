@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // receiptServerAction.ts
 
-import { receiptActions } from "./dexieActions";
+import { receiptActions, studentSubjectActions, teacherSubjectActions } from "./dexieActions";
 import { Receipt, ReceiptType } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
@@ -24,7 +24,7 @@ function transformServerReceipt(serverReceipt: any): Receipt {
     studentId: serverReceipt.studentId || undefined,
     teacherId: serverReceipt.teacherId || undefined,
     managerId: serverReceipt.managerId,
-    status: '1' as const, // Imported receipts are synced
+    status: '1' as const,
     createdAt: typeof serverReceipt.createdAt === 'string'
       ? new Date(serverReceipt.createdAt).getTime()
       : serverReceipt.createdAt || Date.now(),
@@ -35,67 +35,82 @@ function transformServerReceipt(serverReceipt: any): Receipt {
 }
 
 const ServerActionReceipts = {
-  // ✅ Create new receipt on server (student payment)
-  async CreateStudentPaymentOnServer(receipt: Receipt, subjectIds: string[]) {
+  // ✅ Save receipt to server
+  async SaveToServer(receipt: Receipt) {
     try {
-      const response = await fetch(studentPaymentUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
-        body: JSON.stringify({
-          studentId: receipt.studentId,
-          subjectIds: subjectIds,
-          paymentMethod: receipt.paymentMethod,
-          description: receipt.description,
-          date: new Date(receipt.date).toISOString().split('T')[0],
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+      if (receipt.type === ReceiptType.STUDENT_PAYMENT && receipt.studentId) {
+        // Fetch subjectIds from studentSubjects
+        const studentSubjects = await studentSubjectActions.getAll();
+        const relevantSubjects = studentSubjects.filter(
+          ss => ss.studentId === receipt.studentId && ss.status !== '0'
+        );
+        const subjectIds = relevantSubjects.map(ss => ss.subjectId);
+
+        if (subjectIds.length === 0) {
+          throw new Error("No subjects found for student payment");
+        }
+
+        const response = await fetch(studentPaymentUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            studentId: receipt.studentId,
+            subjectIds: subjectIds,
+            paymentMethod: receipt.paymentMethod,
+            description: receipt.description,
+            date: new Date(receipt.date).toISOString().split('T')[0],
+          }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        }
+        return response.json();
+      } else if (receipt.type === ReceiptType.TEACHER_PAYMENT && receipt.teacherId) {
+        // Fetch subjectIds from teacherSubjects
+        const teacherSubjects = await teacherSubjectActions.getAll();
+        const relevantSubjects = teacherSubjects.filter(
+          ts => ts.teacherId === receipt.teacherId && ts.status !== '0'
+        );
+        const subjectIds = relevantSubjects.map(ts => ts.subjectId);
+
+        if (subjectIds.length === 0) {
+          throw new Error("No subjects found for teacher payment");
+        }
+
+        const response = await fetch(teacherPaymentUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            teacherId: receipt.teacherId,
+            subjectIds: subjectIds,
+            paymentMethod: receipt.paymentMethod,
+            description: receipt.description,
+            date: new Date(receipt.date).toISOString().split('T')[0],
+          }),
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        }
+        return response.json();
+      } else {
+        throw new Error("Invalid receipt type or missing required fields");
       }
-      return response.json();
     } catch (e) {
-      console.error("Error creating student payment on server:", e);
+      console.error("Error saving receipt to server:", e);
       return null;
     }
   },
-
-  // ✅ Create new receipt on server (teacher payment)
-  async CreateTeacherPaymentOnServer(receipt: Receipt) {
-    try {
-      const response = await fetch(teacherPaymentUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
-        body: JSON.stringify({
-          teacherId: receipt.teacherId,
-          amount: receipt.amount,
-          paymentMethod: receipt.paymentMethod,
-          description: receipt.description,
-          date: new Date(receipt.date).toISOString().split('T')[0],
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
-      }
-      return response.json();
-    } catch (e) {
-      console.error("Error creating teacher payment on server:", e);
-      return null;
-    }
-  },
-
-  // ✅ Note: Receipts are typically not updated, only created
-  // If update is needed, it would go here
 
   async DeleteFromServer(id: string) {
     try {
       const response = await fetch(`${baseUrl}/api/receipts/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       return response;
     } catch (e) {
@@ -105,12 +120,10 @@ const ServerActionReceipts = {
   },
 
   async Sync() {
-    // ✅ Check if online before syncing
     if (!isOnline()) {
       throw new Error("Cannot sync: device is offline");
     }
 
-    // Get all receipts with status "w" (waiting) or "0" (pending deletion)
     const waitingData = await receiptActions.getByStatus(["0", "w"]);
     if (waitingData.length === 0) return { message: "No receipts to sync.", results: [] };
 
@@ -119,7 +132,7 @@ const ServerActionReceipts = {
     for (const receipt of waitingData) {
       try {
         if (receipt.status === "0") {
-          // ✅ Pending deletion: remove on server and then local
+          // Pending deletion
           const result = await ServerActionReceipts.DeleteFromServer(receipt.id);
           if (result && result.ok) {
             await receiptActions.deleteLocal(receipt.id);
@@ -129,42 +142,24 @@ const ServerActionReceipts = {
             results.push({ id: receipt.id, success: false, error: errorMsg });
           }
         } else if (receipt.status === "w") {
-          // ✅ Waiting to sync: create receipt on server
-          // Note: Receipts need subjectIds for student payments, which we don't store in receipt
-          // This is a limitation - we may need to store subjectIds in receipt or handle differently
-          let result;
-          
-          if (receipt.type === 'STUDENT_PAYMENT' && receipt.studentId) {
-            // For student payments, we need subjectIds - this is a limitation
-            // In a real implementation, you might store subjectIds in the receipt or fetch them
-            result = null; // Cannot create without subjectIds
-            results.push({ id: receipt.id, success: false, error: "Student payment requires subjectIds" });
-          } else if (receipt.type === 'TEACHER_PAYMENT' && receipt.teacherId) {
-            result = await ServerActionReceipts.CreateTeacherPaymentOnServer(receipt);
-          } else {
-            result = null;
-            results.push({ id: receipt.id, success: false, error: "Invalid receipt type or missing required fields" });
-          }
-
+          // Waiting to sync
+          const result = await ServerActionReceipts.SaveToServer(receipt);
           if (result) {
-            // ✅ Mark as synced if server accepted
-            await receiptActions.markSynced(receipt.id);
-            // ✅ Update local receipt with server response data if available
-            if (result.id) {
-              await receiptActions.putLocal({
-                ...receipt,
-                ...(result.id && { id: result.id }),
-                ...(result.receiptNumber && { receiptNumber: result.receiptNumber }),
-                ...(result.amount !== undefined && { amount: result.amount }),
-                status: '1' as const,
-                updatedAt: Date.now(),
-              });
-            }
+            receipt.status = "1"; // Mark as synced
+            await receiptActions.putLocal({
+              ...receipt,
+              ...(result.id && { id: result.id }),
+              ...(result.receiptNumber && { receiptNumber: result.receiptNumber }),
+              ...(result.amount !== undefined && { amount: result.amount }),
+              status: '1' as const,
+              updatedAt: Date.now(),
+            });
             results.push({ id: receipt.id, success: true });
+          } else {
+            results.push({ id: receipt.id, success: false, error: "Server request failed" });
           }
         }
       } catch (error) {
-        // ✅ Continue with next receipt instead of stopping
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error syncing receipt ${receipt.id}:`, error);
         results.push({ id: receipt.id, success: false, error: errorMsg });
@@ -186,7 +181,7 @@ const ServerActionReceipts = {
     try {
       const res = await fetch(`${baseUrl}/api/receipts`, {
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();
@@ -197,42 +192,33 @@ const ServerActionReceipts = {
   },
 
   async ImportFromServer() {
-    // ✅ Check if online before importing
     if (!isOnline()) {
       throw new Error("Cannot import: device is offline");
     }
 
     try {
       const data = await ServerActionReceipts.ReadFromServer();
-      
-      // ✅ Store synced receipts as backup before deletion
       const syncedReceipts = await receiptActions.getByStatus(["1"]);
       const backup = [...syncedReceipts];
       
       try {
-        // ✅ Delete all synced receipts to avoid duplicates
         for (const receipt of syncedReceipts) {
           await receiptActions.deleteLocal(receipt.id);
         }
         
-        // ✅ Insert all receipts from server with proper transformation
-        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedReceipts = Array.isArray(data) 
           ? data.map((receipt: any) => transformServerReceipt(receipt))
           : [];
         for (const receipt of transformedReceipts) {
-          // Check if local receipt exists with 'w' status - preserve it
           const existing = await receiptActions.getLocal(receipt.id);
           if (existing && existing.status === 'w') {
-            // Don't overwrite local pending changes
-            continue;
+            continue; // Don't overwrite local pending changes
           }
           await receiptActions.putLocal(receipt);
         }
         
         return { message: `Imported ${transformedReceipts.length} receipts from server.`, count: transformedReceipts.length };
       } catch (error) {
-        // ✅ Restore backup on failure
         console.error("Error during import, restoring backup:", error);
         for (const receipt of backup) {
           await receiptActions.putLocal(receipt);
@@ -247,4 +233,3 @@ const ServerActionReceipts = {
 };
 
 export default ServerActionReceipts;
-

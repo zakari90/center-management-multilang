@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// ServerActionUsers.ts
+// userServerAction.ts
 
 import { userActions } from "./dexieActions";
 import { User, Role } from "./dbSchema";
@@ -14,10 +14,10 @@ function transformServerUser(serverUser: any): User {
   return {
     id: serverUser.id,
     email: serverUser.email,
-    password: serverUser.password || "", // Server may not return password
+    password: serverUser.password || "",
     name: serverUser.name,
     role: (serverUser.role || "MANAGER").toUpperCase() as Role,
-    status: '1' as const, // Imported users are synced
+    status: '1' as const,
     createdAt: typeof serverUser.createdAt === 'string'
       ? new Date(serverUser.createdAt).getTime()
       : serverUser.createdAt || Date.now(),
@@ -26,98 +26,96 @@ function transformServerUser(serverUser: any): User {
 }
 
 const ServerActionUsers = {
-  // ✅ Create new user on server (for managers)
-  async CreateOnServer(user: User) {
+  // ✅ Save user to server (handles both create and update)
+  async SaveToServer(user: User) {
     try {
-      const response = await fetch(managerRegisterUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
-        body: JSON.stringify({
-          email: user.email,
-          password: user.password, // Note: API expects plain password
-          username: user.name,
-          id: user.id, // Use client-provided ID for offline-first
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+      // For managers, use manager register endpoint
+      if (user.role === Role.MANAGER) {
+        const response = await fetch(managerRegisterUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email: user.email,
+            password: user.password,
+            username: user.name,
+            id: user.id,
+          }),
+        });
+        if (!response.ok) {
+          // If conflict, try update via admin endpoint
+          if (response.status === 409) {
+            const updateResponse = await fetch(`${api_url}/${user.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                password: user.password,
+              }),
+            });
+            if (!updateResponse.ok) {
+              const errorData = await updateResponse.json().catch(() => ({}));
+              throw new Error(`HTTP Error: ${updateResponse.status} - ${errorData.error || 'Unknown error'}`);
+            }
+            return updateResponse.json();
+          }
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        }
+        return response.json();
+      } else {
+        // For admins, use admin users endpoint
+        const response = await fetch(api_url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            password: user.password,
+          }),
+        });
+        if (!response.ok && response.status === 409) {
+          // Try update
+          const updateResponse = await fetch(`${api_url}/${user.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              password: user.password,
+            }),
+          });
+          if (!updateResponse.ok) {
+            const errorData = await updateResponse.json().catch(() => ({}));
+            throw new Error(`HTTP Error: ${updateResponse.status} - ${errorData.error || 'Unknown error'}`);
+          }
+          return updateResponse.json();
+        }
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`HTTP Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        }
+        return response.json();
       }
-      return response.json();
     } catch (e) {
-      console.error("Error creating user on server:", e);
+      console.error("Error saving user to server:", e);
       return null;
     }
   },
-
-  // ✅ Update existing user on server
-  async UpdateOnServer(user: User) {
-    try {
-      const response = await fetch(`${api_url}/${user.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
-        body: JSON.stringify({
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          password: user.password, // Include password if it was updated
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
-      }
-      return response.json();
-    } catch (e) {
-      console.error("Error updating user on server:", e);
-      return null;
-    }
-  },
-
-  // ✅ Check if user exists on server
-  async CheckUserExists(id: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${api_url}`, {
-        credentials: "include", // ✅ Include cookies for session authentication
-      });
-      if (!response.ok) {
-        console.warn(`CheckUserExists: API returned ${response.status} for user ${id}`);
-        return false;
-      }
-      const users = await response.json();
-      const exists = Array.isArray(users) && users.some((u: any) => u.id === id);
-      console.log(`CheckUserExists: User ${id} ${exists ? 'exists' : 'does not exist'} on server`);
-      return exists;
-    } catch (e) {
-      console.error(`Error checking user existence for ${id}:`, e);
-      return false;
-    }
-  },
-
-  // ✅ Commented out - replaced with CreateOnServer and UpdateOnServer
-  // async SaveToServer(user: any) {
-  //   try {
-  //     const response = await fetch(api_url, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(user),
-  //     });
-  //     if (!response.ok) throw new Error("HTTP Error: " + response.status);
-  //     return response.json();
-  //   } catch (e) {
-  //     console.log(e);
-  //     return null;
-  //   }
-  // },
 
   async DeleteFromServer(id: string) {
     try {
       const response = await fetch(`${api_url}/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       return response;
     } catch (e) {
@@ -127,14 +125,11 @@ const ServerActionUsers = {
   },
 
   async Sync() {
-    // ✅ Check if online before syncing
     if (!isOnline()) {
       throw new Error("Cannot sync: device is offline");
     }
 
-    // Get all users with status "w" (waiting) or "0" (pending deletion)
     const waitingData = await userActions.getByStatus(["0", "w"]);
-    console.log(`[UserSync] Found ${waitingData.length} users to sync:`, waitingData.map(u => ({ id: u.id, email: u.email, role: u.role, status: u.status })));
     if (waitingData.length === 0) return { message: "No users to sync.", results: [] };
 
     const results: Array<{ id: string; success: boolean; error?: string }> = [];
@@ -142,7 +137,7 @@ const ServerActionUsers = {
     for (const user of waitingData) {
       try {
         if (user.status === "0") {
-          // ✅ Pending deletion: remove on server and then local
+          // Pending deletion
           const result = await ServerActionUsers.DeleteFromServer(user.id);
           if (result && result.ok) {
             await userActions.deleteLocal(user.id);
@@ -152,54 +147,24 @@ const ServerActionUsers = {
             results.push({ id: user.id, success: false, error: errorMsg });
           }
         } else if (user.status === "w") {
-          // ✅ Waiting to sync: check if user exists, then create or update
-          console.log(`[UserSync] Syncing user ${user.id} (${user.email}, ${user.role})...`);
-          const exists = await ServerActionUsers.CheckUserExists(user.id);
-          let result;
-          
-          if (exists) {
-            // User exists on server, update it
-            console.log(`[UserSync] User ${user.id} exists on server, updating...`);
-            result = await ServerActionUsers.UpdateOnServer(user);
-          } else {
-            // New user, create it (for managers, this uses /api/manager/register)
-            console.log(`[UserSync] User ${user.id} does not exist on server, creating...`);
-            result = await ServerActionUsers.CreateOnServer(user);
-          }
-
+          // Waiting to sync
+          const result = await ServerActionUsers.SaveToServer(user);
           if (result) {
-            // ✅ Mark as synced if server accepted
-            await userActions.markSynced(user.id);
-            // ✅ Update local user with server response data if available
-            // The API returns { message, user: { id, name, email, role } }
-            if (result.user) {
-              await userActions.putLocal({
-                ...user,
-                ...(result.user.id && { id: result.user.id }),
-                ...(result.user.name && { name: result.user.name }),
-                ...(result.user.email && { email: result.user.email }),
-                ...(result.user.role && { role: result.user.role as Role }),
-                status: '1' as const,
-                updatedAt: Date.now(),
-              });
-            } else {
-              // If result doesn't have user property, still mark as synced
-              // This can happen if the API response structure is different
-              await userActions.putLocal({
-                ...user,
-                status: '1' as const,
-                updatedAt: Date.now(),
-              });
-            }
+            user.status = "1"; // Mark as synced
+            await userActions.putLocal({
+              ...user,
+              ...(result.id && { id: result.id }),
+              ...(result.name && { name: result.name }),
+              ...(result.email && { email: result.email }),
+              status: '1' as const,
+              updatedAt: Date.now(),
+            });
             results.push({ id: user.id, success: true });
           } else {
-            const errorMsg = `Failed to ${exists ? 'update' : 'create'} user on server`;
-            console.error(`Sync failed for user ${user.id} (${user.email}):`, errorMsg);
-            results.push({ id: user.id, success: false, error: errorMsg });
+            results.push({ id: user.id, success: false, error: "Server request failed" });
           }
         }
       } catch (error) {
-        // ✅ Continue with next user instead of stopping
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error syncing user ${user.id}:`, error);
         results.push({ id: user.id, success: false, error: errorMsg });
@@ -221,7 +186,7 @@ const ServerActionUsers = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();
@@ -232,34 +197,33 @@ const ServerActionUsers = {
   },
 
   async ImportFromServer() {
-    // ✅ Check if online before importing
     if (!isOnline()) {
       throw new Error("Cannot import: device is offline");
     }
 
     try {
       const data = await ServerActionUsers.ReadFromServer();
-      
-      // ✅ Store synced users as backup before deletion
       const syncedUsers = await userActions.getByStatus(["1"]);
       const backup = [...syncedUsers];
       
       try {
-        // ✅ Delete all synced users to avoid duplicates
         for (const user of syncedUsers) {
           await userActions.deleteLocal(user.id);
         }
         
-        // ✅ Insert all users from server with proper transformation
-        const transformedUsers = data.map((user: any) => transformServerUser(user));
-        // Use bulkPutLocal for better performance
+        const transformedUsers = Array.isArray(data) 
+          ? data.map((user: any) => transformServerUser(user))
+          : [];
         for (const user of transformedUsers) {
+          const existing = await userActions.getLocal(user.id);
+          if (existing && existing.status === 'w') {
+            continue; // Don't overwrite local pending changes
+          }
           await userActions.putLocal(user);
         }
         
         return { message: `Imported ${transformedUsers.length} users from server.`, count: transformedUsers.length };
       } catch (error) {
-        // ✅ Restore backup on failure
         console.error("Error during import, restoring backup:", error);
         for (const user of backup) {
           await userActions.putLocal(user);

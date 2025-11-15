@@ -19,7 +19,7 @@ function transformServerCenter(serverCenter: any): Center {
     workingDays: Array.isArray(serverCenter.workingDays) ? serverCenter.workingDays : [],
     managers: Array.isArray(serverCenter.managers) ? serverCenter.managers : [],
     adminId: serverCenter.adminId,
-    status: '1' as const, // Imported centers are synced
+    status: '1' as const,
     createdAt: typeof serverCenter.createdAt === 'string'
       ? new Date(serverCenter.createdAt).getTime()
       : serverCenter.createdAt || Date.now(),
@@ -30,13 +30,14 @@ function transformServerCenter(serverCenter: any): Center {
 }
 
 const ServerActionCenters = {
-  // ✅ Create new center on server
-  async CreateOnServer(center: Center) {
+  // ✅ Save center to server (handles both create and update)
+  async SaveToServer(center: Center) {
     try {
-      const response = await fetch(api_url, {
+      // Try POST first (create)
+      let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
         body: JSON.stringify({
           id: center.id,
           name: center.name,
@@ -44,62 +45,38 @@ const ServerActionCenters = {
           phone: center.phone,
           classrooms: center.classrooms,
           workingDays: center.workingDays,
-          subjects: [], // Subjects are handled separately
+          subjects: [],
           createdAt: new Date(center.createdAt).toISOString(),
           updatedAt: new Date(center.updatedAt).toISOString(),
         }),
       });
+
+      // If POST fails with conflict, try PATCH (update)
+      if (!response.ok && response.status === 409) {
+        response = await fetch(api_url, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            centerId: center.id,
+            name: center.name,
+            address: center.address,
+            phone: center.phone,
+            classrooms: center.classrooms,
+            workingDays: center.workingDays,
+            updatedAt: new Date(center.updatedAt).toISOString(),
+          }),
+        });
+      }
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
       }
       return response.json();
     } catch (e) {
-      console.error("Error creating center on server:", e);
+      console.error("Error saving center to server:", e);
       return null;
-    }
-  },
-
-  // ✅ Update existing center on server
-  async UpdateOnServer(center: Center) {
-    try {
-      const response = await fetch(api_url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
-        body: JSON.stringify({
-          centerId: center.id,
-          name: center.name,
-          address: center.address,
-          phone: center.phone,
-          classrooms: center.classrooms,
-          workingDays: center.workingDays,
-          updatedAt: new Date(center.updatedAt).toISOString(),
-        }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
-      }
-      return response.json();
-    } catch (e) {
-      console.error("Error updating center on server:", e);
-      return null;
-    }
-  },
-
-  // ✅ Check if center exists on server
-  async CheckCenterExists(id: string): Promise<boolean> {
-    try {
-      const response = await fetch(api_url, {
-        credentials: "include", // ✅ Include cookies for session authentication
-      });
-      if (!response.ok) return false;
-      const centers = await response.json();
-      return Array.isArray(centers) && centers.some((c: any) => c.id === id);
-    } catch (e) {
-      console.error("Error checking center existence:", e);
-      return false;
     }
   },
 
@@ -108,7 +85,7 @@ const ServerActionCenters = {
       const response = await fetch(`${api_url}?id=${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       return response;
     } catch (e) {
@@ -118,12 +95,10 @@ const ServerActionCenters = {
   },
 
   async Sync() {
-    // ✅ Check if online before syncing
     if (!isOnline()) {
       throw new Error("Cannot sync: device is offline");
     }
 
-    // Get all centers with status "w" (waiting) or "0" (pending deletion)
     const waitingData = await centerActions.getByStatus(["0", "w"]);
     if (waitingData.length === 0) return { message: "No centers to sync.", results: [] };
 
@@ -132,7 +107,7 @@ const ServerActionCenters = {
     for (const center of waitingData) {
       try {
         if (center.status === "0") {
-          // ✅ Pending deletion: remove on server and then local
+          // Pending deletion
           const result = await ServerActionCenters.DeleteFromServer(center.id);
           if (result && result.ok) {
             await centerActions.deleteLocal(center.id);
@@ -142,43 +117,28 @@ const ServerActionCenters = {
             results.push({ id: center.id, success: false, error: errorMsg });
           }
         } else if (center.status === "w") {
-          // ✅ Waiting to sync: check if center exists, then create or update
-          const exists = await ServerActionCenters.CheckCenterExists(center.id);
-          let result;
-          
-          if (exists) {
-            // Center exists on server, update it
-            result = await ServerActionCenters.UpdateOnServer(center);
-          } else {
-            // New center, create it
-            result = await ServerActionCenters.CreateOnServer(center);
-          }
-
+          // Waiting to sync
+          const result = await ServerActionCenters.SaveToServer(center);
           if (result) {
-            // ✅ Mark as synced if server accepted
-            await centerActions.markSynced(center.id);
-            // ✅ Update local center with server response data if available
-            if (result.id) {
-              await centerActions.putLocal({
-                ...center,
-                ...(result.id && { id: result.id }),
-                ...(result.name && { name: result.name }),
-                ...(result.address !== undefined && { address: result.address }),
-                ...(result.phone !== undefined && { phone: result.phone }),
-                ...(result.classrooms && { classrooms: result.classrooms }),
-                ...(result.workingDays && { workingDays: result.workingDays }),
-                ...(result.managers && { managers: result.managers }),
-                status: '1' as const,
-                updatedAt: Date.now(),
-              });
-            }
+            center.status = "1"; // Mark as synced
+            await centerActions.putLocal({
+              ...center,
+              ...(result.id && { id: result.id }),
+              ...(result.name && { name: result.name }),
+              ...(result.address !== undefined && { address: result.address }),
+              ...(result.phone !== undefined && { phone: result.phone }),
+              ...(result.classrooms && { classrooms: result.classrooms }),
+              ...(result.workingDays && { workingDays: result.workingDays }),
+              ...(result.managers && { managers: result.managers }),
+              status: '1' as const,
+              updatedAt: Date.now(),
+            });
             results.push({ id: center.id, success: true });
           } else {
             results.push({ id: center.id, success: false, error: "Server request failed" });
           }
         }
       } catch (error) {
-        // ✅ Continue with next center instead of stopping
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error syncing center ${center.id}:`, error);
         results.push({ id: center.id, success: false, error: errorMsg });
@@ -200,7 +160,7 @@ const ServerActionCenters = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();
@@ -211,25 +171,20 @@ const ServerActionCenters = {
   },
 
   async ImportFromServer() {
-    // ✅ Check if online before importing
     if (!isOnline()) {
       throw new Error("Cannot import: device is offline");
     }
 
     try {
       const data = await ServerActionCenters.ReadFromServer();
-      
-      // ✅ Store synced centers as backup before deletion
       const syncedCenters = await centerActions.getByStatus(["1"]);
       const backup = [...syncedCenters];
       
       try {
-        // ✅ Delete all synced centers to avoid duplicates
         for (const center of syncedCenters) {
           await centerActions.deleteLocal(center.id);
         }
         
-        // ✅ Insert all centers from server with proper transformation
         const transformedCenters = Array.isArray(data) 
           ? data.map((center: any) => transformServerCenter(center))
           : [];
@@ -239,7 +194,6 @@ const ServerActionCenters = {
         
         return { message: `Imported ${transformedCenters.length} centers from server.`, count: transformedCenters.length };
       } catch (error) {
-        // ✅ Restore backup on failure
         console.error("Error during import, restoring backup:", error);
         for (const center of backup) {
           await centerActions.putLocal(center);
@@ -254,4 +208,3 @@ const ServerActionCenters = {
 };
 
 export default ServerActionCenters;
-

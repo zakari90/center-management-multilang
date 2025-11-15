@@ -20,7 +20,7 @@ function transformServerSchedule(serverSchedule: any): Schedule {
     subjectId: serverSchedule.subjectId,
     managerId: serverSchedule.managerId,
     centerId: serverSchedule.centerId || undefined,
-    status: '1' as const, // Imported schedules are synced
+    status: '1' as const,
     createdAt: typeof serverSchedule.createdAt === 'string'
       ? new Date(serverSchedule.createdAt).getTime()
       : serverSchedule.createdAt || Date.now(),
@@ -31,13 +31,13 @@ function transformServerSchedule(serverSchedule: any): Schedule {
 }
 
 const ServerActionSchedules = {
-  // ✅ Create new schedule on server
-  async CreateOnServer(schedule: Schedule) {
+  // ✅ Save schedule to server
+  async SaveToServer(schedule: Schedule) {
     try {
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
         body: JSON.stringify({
           day: schedule.day,
           startTime: schedule.startTime,
@@ -54,26 +54,8 @@ const ServerActionSchedules = {
       }
       return response.json();
     } catch (e) {
-      console.error("Error creating schedule on server:", e);
+      console.error("Error saving schedule to server:", e);
       return null;
-    }
-  },
-
-  // ✅ Note: Schedules typically don't have update endpoints
-  // If update is needed, it would go here
-
-  // ✅ Check if schedule exists on server
-  async CheckScheduleExists(id: string): Promise<boolean> {
-    try {
-      const response = await fetch(api_url, {
-        credentials: "include", // ✅ Include cookies for session authentication
-      });
-      if (!response.ok) return false;
-      const schedules = await response.json();
-      return Array.isArray(schedules) && schedules.some((s: any) => s.id === id);
-    } catch (e) {
-      console.error("Error checking schedule existence:", e);
-      return false;
     }
   },
 
@@ -82,7 +64,7 @@ const ServerActionSchedules = {
       const response = await fetch(`${api_url}/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       return response;
     } catch (e) {
@@ -92,12 +74,10 @@ const ServerActionSchedules = {
   },
 
   async Sync() {
-    // ✅ Check if online before syncing
     if (!isOnline()) {
       throw new Error("Cannot sync: device is offline");
     }
 
-    // Get all schedules with status "w" (waiting) or "0" (pending deletion)
     const waitingData = await scheduleActions.getByStatus(["0", "w"]);
     if (waitingData.length === 0) return { message: "No schedules to sync.", results: [] };
 
@@ -106,7 +86,7 @@ const ServerActionSchedules = {
     for (const schedule of waitingData) {
       try {
         if (schedule.status === "0") {
-          // ✅ Pending deletion: remove on server and then local
+          // Pending deletion
           const result = await ServerActionSchedules.DeleteFromServer(schedule.id);
           if (result && result.ok) {
             await scheduleActions.deleteLocal(schedule.id);
@@ -116,40 +96,22 @@ const ServerActionSchedules = {
             results.push({ id: schedule.id, success: false, error: errorMsg });
           }
         } else if (schedule.status === "w") {
-          // ✅ Waiting to sync: check if schedule exists, then create
-          // Note: Schedules typically don't have update, only create/delete
-          const exists = await ServerActionSchedules.CheckScheduleExists(schedule.id);
-          let result;
-          
-          if (!exists) {
-            // New schedule, create it
-            result = await ServerActionSchedules.CreateOnServer(schedule);
-          } else {
-            // Schedule already exists, skip or mark as synced
-            await scheduleActions.markSynced(schedule.id);
-            results.push({ id: schedule.id, success: true });
-            continue;
-          }
-
+          // Waiting to sync
+          const result = await ServerActionSchedules.SaveToServer(schedule);
           if (result) {
-            // ✅ Mark as synced if server accepted
-            await scheduleActions.markSynced(schedule.id);
-            // ✅ Update local schedule with server response data if available
-            if (result.id) {
-              await scheduleActions.putLocal({
-                ...schedule,
-                ...(result.id && { id: result.id }),
-                status: '1' as const,
-                updatedAt: Date.now(),
-              });
-            }
+            schedule.status = "1"; // Mark as synced
+            await scheduleActions.putLocal({
+              ...schedule,
+              ...(result.id && { id: result.id }),
+              status: '1' as const,
+              updatedAt: Date.now(),
+            });
             results.push({ id: schedule.id, success: true });
           } else {
             results.push({ id: schedule.id, success: false, error: "Server request failed" });
           }
         }
       } catch (error) {
-        // ✅ Continue with next schedule instead of stopping
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error syncing schedule ${schedule.id}:`, error);
         results.push({ id: schedule.id, success: false, error: errorMsg });
@@ -171,7 +133,7 @@ const ServerActionSchedules = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session authentication
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();
@@ -182,42 +144,33 @@ const ServerActionSchedules = {
   },
 
   async ImportFromServer() {
-    // ✅ Check if online before importing
     if (!isOnline()) {
       throw new Error("Cannot import: device is offline");
     }
 
     try {
       const data = await ServerActionSchedules.ReadFromServer();
-      
-      // ✅ Store synced schedules as backup before deletion
       const syncedSchedules = await scheduleActions.getByStatus(["1"]);
       const backup = [...syncedSchedules];
       
       try {
-        // ✅ Delete all synced schedules to avoid duplicates
         for (const schedule of syncedSchedules) {
           await scheduleActions.deleteLocal(schedule.id);
         }
         
-        // ✅ Insert all schedules from server with proper transformation
-        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedSchedules = Array.isArray(data) 
           ? data.map((schedule: any) => transformServerSchedule(schedule))
           : [];
         for (const schedule of transformedSchedules) {
-          // Check if local schedule exists with 'w' status - preserve it
           const existing = await scheduleActions.getLocal(schedule.id);
           if (existing && existing.status === 'w') {
-            // Don't overwrite local pending changes
-            continue;
+            continue; // Don't overwrite local pending changes
           }
           await scheduleActions.putLocal(schedule);
         }
         
         return { message: `Imported ${transformedSchedules.length} schedules from server.`, count: transformedSchedules.length };
       } catch (error) {
-        // ✅ Restore backup on failure
         console.error("Error during import, restoring backup:", error);
         for (const schedule of backup) {
           await scheduleActions.putLocal(schedule);
@@ -232,4 +185,3 @@ const ServerActionSchedules = {
 };
 
 export default ServerActionSchedules;
-
