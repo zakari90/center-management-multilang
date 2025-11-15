@@ -215,10 +215,17 @@ const ServerActionSubjects = {
         }
         
         // ✅ Insert all subjects from server with proper transformation
+        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedSubjects = Array.isArray(data) 
           ? data.map((subject: any) => transformServerSubject(subject))
           : [];
         for (const subject of transformedSubjects) {
+          // Check if local subject exists with 'w' status - preserve it
+          const existing = await subjectActions.getLocal(subject.id);
+          if (existing && existing.status === 'w') {
+            // Don't overwrite local pending changes
+            continue;
+          }
           await subjectActions.putLocal(subject);
         }
         

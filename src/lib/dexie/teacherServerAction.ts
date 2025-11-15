@@ -218,10 +218,17 @@ const ServerActionTeachers = {
         }
         
         // ✅ Insert all teachers from server with proper transformation
+        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedTeachers = Array.isArray(data) 
           ? data.map((teacher: any) => transformServerTeacher(teacher))
           : [];
         for (const teacher of transformedTeachers) {
+          // Check if local teacher exists with 'w' status - preserve it
+          const existing = await teacherActions.getLocal(teacher.id);
+          if (existing && existing.status === 'w') {
+            // Don't overwrite local pending changes
+            continue;
+          }
           await teacherActions.putLocal(teacher);
         }
         

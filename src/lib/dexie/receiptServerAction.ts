@@ -212,10 +212,17 @@ const ServerActionReceipts = {
         }
         
         // ✅ Insert all receipts from server with proper transformation
+        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedReceipts = Array.isArray(data) 
           ? data.map((receipt: any) => transformServerReceipt(receipt))
           : [];
         for (const receipt of transformedReceipts) {
+          // Check if local receipt exists with 'w' status - preserve it
+          const existing = await receiptActions.getLocal(receipt.id);
+          if (existing && existing.status === 'w') {
+            // Don't overwrite local pending changes
+            continue;
+          }
           await receiptActions.putLocal(receipt);
         }
         

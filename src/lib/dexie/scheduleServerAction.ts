@@ -196,10 +196,17 @@ const ServerActionSchedules = {
         }
         
         // ✅ Insert all schedules from server with proper transformation
+        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedSchedules = Array.isArray(data) 
           ? data.map((schedule: any) => transformServerSchedule(schedule))
           : [];
         for (const schedule of transformedSchedules) {
+          // Check if local schedule exists with 'w' status - preserve it
+          const existing = await scheduleActions.getLocal(schedule.id);
+          if (existing && existing.status === 'w') {
+            // Don't overwrite local pending changes
+            continue;
+          }
           await scheduleActions.putLocal(schedule);
         }
         

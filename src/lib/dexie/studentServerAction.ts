@@ -226,10 +226,17 @@ const ServerActionStudents = {
         }
         
         // ✅ Insert all students from server with proper transformation
+        // ✅ Preserve local 'w' status data - don't overwrite pending local changes
         const transformedStudents = Array.isArray(data) 
           ? data.map((student: any) => transformServerStudent(student))
           : [];
         for (const student of transformedStudents) {
+          // Check if local student exists with 'w' status - preserve it
+          const existing = await studentActions.getLocal(student.id);
+          if (existing && existing.status === 'w') {
+            // Don't overwrite local pending changes
+            continue;
+          }
           await studentActions.putLocal(student);
         }
         
