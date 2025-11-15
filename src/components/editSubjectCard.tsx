@@ -30,6 +30,7 @@ interface Subject {
   duration: number | null
 }
 
+
 interface SubjectCardProps {
   subject: Subject
   onUpdate: (id: string, data: Partial<Subject>) => void
