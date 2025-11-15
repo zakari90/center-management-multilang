@@ -1,9 +1,9 @@
 { 
   "offline": {
-    "status-disconnected": "أنت غير متصل بالإنترنت",
-    "status-reconnected": "تم استعادة الاتصال! جارٍ إعادة التحميل...",
-    "status-checking": "جارٍ التحقق من الاتصال...",
-    "status-synced": "تمت المزامنة",
+    "statusDisconnected": "أنت غير متصل بالإنترنت",
+    "statusReconnected": "تم استعادة الاتصال! جارٍ إعادة التحميل...",
+    "statusChecking": "جارٍ التحقق من الاتصال...",
+    "statusSynced": "تمت المزامنة",
     "offlineInfoSafe": "بياناتك آمنة ومحفوظة محلياً.",
     "offlineInfoSync": "سيتم مزامنة التغييرات تلقائياً عند عودة الاتصال بالإنترنت.",
     "offlineInfoContinue": "يمكنك الاستمرار في العمل دون اتصال بالإنترنت.",
