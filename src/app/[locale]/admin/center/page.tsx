@@ -16,7 +16,7 @@ function Page() {
 
   // ✅ Extract fetch function so it can be called after center creation
   const fetchData = useCallback(async () => {
-    try {
+      try {
       setIsLoading(true);
       // ✅ Use AuthContext user instead of getSession (which can't read httpOnly cookies)
       if (!user) {
@@ -30,8 +30,8 @@ function Page() {
       const adminCenters = centers.filter(c => c.adminId === user.id);
       
       if (adminCenters.length === 0) {
-        setCenterData(null);
-      } else {
+          setCenterData(null);
+        } else {
         // Get the first center (most recent)
         const center = adminCenters[0];
         
@@ -83,13 +83,13 @@ function Page() {
       //   console.error("Error fetching center data:", error);
       //   setCenterData(null);
       // }
-      
-    } catch (error) {
+        
+      } catch (error) {
       console.error("Error fetching center data from local DB:", error);
-      setCenterData(null);
-    } finally {
-      setIsLoading(false);
-    }
+        setCenterData(null);
+      } finally {
+        setIsLoading(false);
+      }
   }, [user]); // ✅ Add user as dependency
 
   // ✅ Fetch on mount and when refreshKey changes

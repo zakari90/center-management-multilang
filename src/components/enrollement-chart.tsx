@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import axios from 'axios'
+import { useEffect, useState, useCallback } from 'react'
+// import axios from 'axios' // ✅ Commented out - using localDB instead
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   BarChart,
@@ -16,6 +16,8 @@ import {
 } from 'recharts'
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useAuth } from '@/context/authContext'
+import { studentSubjectActions, subjectActions, studentActions } from '@/lib/dexie/_dexieActions'
 
 interface SubjectEnrollment {
   subject: string
@@ -29,21 +31,65 @@ export default function EnrollmentChart() {
   const [data, setData] = useState<SubjectEnrollment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const t = useTranslations('EnrollmentChart')
+  const { user } = useAuth()
 
-  useEffect(() => {
-    fetchEnrollmentData()
-  }, [])
-
-  const fetchEnrollmentData = async () => {
+  const fetchEnrollmentData = useCallback(async () => {
     try {
-      const { data } = await axios.get('/api/dashboard/enrollments')
-      setData(data)
+      if (!user) return
+
+      // ✅ Fetch from localDB instead of API
+      const [studentSubjects, subjects, students] = await Promise.all([
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        studentActions.getAll(),
+      ])
+
+      // Filter by manager and status (exclude deleted items)
+      const managerStudents = students.filter(s => 
+        s.managerId === user.id && s.status !== '0'
+      )
+      const activeSubjects = subjects.filter(s => s.status !== '0')
+      const activeEnrollments = studentSubjects.filter(ss => 
+        ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
+      )
+
+      // Group enrollments by subjectId
+      const enrollmentMap = new Map<string, number>()
+      activeEnrollments.forEach(enrollment => {
+        const count = enrollmentMap.get(enrollment.subjectId) || 0
+        enrollmentMap.set(enrollment.subjectId, count + 1)
+      })
+
+      // Join with subjects and calculate revenue
+      const chartData = Array.from(enrollmentMap.entries())
+        .map(([subjectId, students]) => {
+          const subject = activeSubjects.find(s => s.id === subjectId)
+          return {
+            subject: subject?.name || 'Unknown',
+            students,
+            revenue: (subject?.price || 0) * students
+          }
+        })
+        .sort((a, b) => b.students - a.students) // Sort by most students
+        .slice(0, 6) // Take top 6 subjects
+
+      setData(chartData)
+
+      // ✅ Old API call - commented out
+      // const { data } = await axios.get('/api/dashboard/enrollments')
+      // setData(data)
     } catch (err) {
       console.error('Failed to fetch enrollment data:', err)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      fetchEnrollmentData()
+    }
+  }, [user, fetchEnrollmentData])
 
   return (
     <Card>
@@ -74,7 +120,7 @@ export default function EnrollmentChart() {
               <YAxis />
               <Tooltip 
                 formatter={(value: number, name: string) => {
-                  if (name === 'revenue') return `$${value.toFixed(2)}`
+                  if (name === 'revenue') return `MAD ${value.toFixed(2)}`
                   return value
                 }}
                 contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px' }}

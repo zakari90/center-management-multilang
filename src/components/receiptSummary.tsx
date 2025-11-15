@@ -7,6 +7,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@/context/authContext'
+import { receiptActions } from '@/lib/dexie/_dexieActions'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
 
 interface ReceiptStats {
   totalReceipts: number
@@ -20,18 +23,62 @@ export default function ReceiptsSummary() {
   const t = useTranslations('ManagerReceiptsSummary')
   const [stats, setStats] = useState<ReceiptStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    if (user) {
+      fetchStats()
+    }
+  }, [user])
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/receipts/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
-      }
+      if (!user) return
+
+      // ✅ Fetch from localDB instead of API
+      const receipts = await receiptActions.getAll()
+
+      // Filter by manager and status (exclude deleted items)
+      const managerReceipts = receipts.filter(r => 
+        r.managerId === user.id && r.status !== '0'
+      )
+
+      // Calculate date range for this month
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+      // Calculate stats
+      const stats = managerReceipts.reduce((acc, receipt) => {
+        acc.totalReceipts++
+        acc.totalRevenue += receipt.amount
+
+        if (receipt.type === ReceiptType.STUDENT_PAYMENT) {
+          acc.studentPayments += receipt.amount
+        } else if (receipt.type === ReceiptType.TEACHER_PAYMENT) {
+          acc.teacherPayments += receipt.amount
+        }
+
+        if (new Date(receipt.date) >= firstDayOfMonth) {
+          acc.thisMonthRevenue += receipt.amount
+        }
+
+        return acc
+      }, {
+        totalReceipts: 0,
+        totalRevenue: 0,
+        studentPayments: 0,
+        teacherPayments: 0,
+        thisMonthRevenue: 0
+      })
+
+      setStats(stats)
+
+      // ✅ Old API call - commented out
+      // const response = await fetch('/api/receipts/stats')
+      // if (response.ok) {
+      //   const data = await response.json()
+      //   setStats(data)
+      // }
     } catch (err) {
       console.error(t('errorFetchStats'), err)
     } finally {
@@ -87,7 +134,7 @@ function Stat({ label, value, color }: { label: string; value: number; color: st
   return (
     <div>
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${color}`}>${value.toFixed(2)}</p>
+      <p className={`text-2xl font-bold ${color}`}>MAD {value.toFixed(2)}</p>
     </div>
   )
 }

@@ -3,11 +3,13 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using localDB instead
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useAuth } from '@/context/authContext'
+import { subjectActions, studentSubjectActions, studentActions } from '@/lib/dexie/_dexieActions'
 
 interface TopSubject {
   id: string
@@ -22,15 +24,56 @@ export default function TopSubjects() {
   const [subjects, setSubjects] = useState<TopSubject[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const t = useTranslations('TopSubjects')
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchTopSubjects()
-  }, [])
+    if (user) {
+      fetchTopSubjects()
+    }
+  }, [user])
 
   const fetchTopSubjects = async () => {
     try {
-      const { data } = await axios.get('/api/dashboard/top-subjects')
-      setSubjects(data)
+      if (!user) return
+
+      // ✅ Fetch from localDB instead of API
+      const [subjectsData, studentSubjectsData, studentsData] = await Promise.all([
+        subjectActions.getAll(),
+        studentSubjectActions.getAll(),
+        studentActions.getAll(),
+      ])
+
+      // Filter by manager and status (exclude deleted items)
+      const managerStudents = studentsData.filter(s => 
+        s.managerId === user.id && s.status !== '0'
+      )
+      const activeSubjects = subjectsData.filter(s => s.status !== '0')
+      const activeEnrollments = studentSubjectsData.filter(ss => 
+        ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
+      )
+
+      // Map subjects with enrollment counts
+      const topSubjects = activeSubjects
+        .map(subject => {
+          const enrollments = activeEnrollments.filter(ss => ss.subjectId === subject.id)
+          return {
+            id: subject.id,
+            name: subject.name,
+            grade: subject.grade,
+            students: enrollments.length,
+            revenue: subject.price * enrollments.length,
+            maxCapacity: 30 // Hardcoded as in API
+          }
+        })
+        .filter(s => s.students > 0) // Filter subjects with students
+        .sort((a, b) => b.revenue - a.revenue) // Sort by revenue descending
+        .slice(0, 5) // Take top 5
+
+      setSubjects(topSubjects)
+
+      // ✅ Old API call - commented out
+      // const { data } = await axios.get('/api/dashboard/top-subjects')
+      // setSubjects(data)
     } catch (err) {
       console.error('Failed to fetch top subjects:', err)
     } finally {

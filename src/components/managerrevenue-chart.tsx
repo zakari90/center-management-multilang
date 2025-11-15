@@ -4,7 +4,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using localDB instead
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
@@ -18,6 +18,10 @@ import {
   YAxis
 } from 'recharts'
 import { useTranslations } from 'next-intl'
+import { useAuth } from '@/context/authContext'
+import { receiptActions } from '@/lib/dexie/_dexieActions'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
+import { eachDayOfInterval, eachMonthOfInterval, format, startOfYear, subDays } from 'date-fns'
 
 interface RevenueData {
   date: string
@@ -31,16 +35,91 @@ export default function ManagerRevenueChart() {
   const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
   const t = useTranslations('ManagerRevenueChart')
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchRevenueData()
-  }, [period])
+    if (user) {
+      fetchRevenueData()
+    }
+  }, [period, user])
 
   const fetchRevenueData = async () => {
     setIsLoading(true)
     try {
-      const { data } = await axios.get(`/api/dashboard/revenue?period=${period}`)
-      setData(data)
+      if (!user) return
+
+      // ✅ Fetch from localDB instead of API
+      const receipts = await receiptActions.getAll()
+
+      // Filter by manager and status (exclude deleted items)
+      const managerReceipts = receipts.filter(r => 
+        r.managerId === user.id && r.status !== '0'
+      )
+
+      // Calculate date range based on period
+      const now = new Date()
+      let startDate: Date
+      let dateFormat: string
+      let intervals: Date[]
+
+      switch (period) {
+        case 'week':
+          startDate = subDays(now, 7)
+          dateFormat = 'MMM dd'
+          intervals = eachDayOfInterval({ start: startDate, end: now })
+          break
+        case 'year':
+          startDate = startOfYear(now)
+          dateFormat = 'MMM'
+          intervals = eachMonthOfInterval({ start: startDate, end: now })
+          break
+        case 'month':
+        default:
+          startDate = subDays(now, 30)
+          dateFormat = 'MMM dd'
+          intervals = eachDayOfInterval({ start: startDate, end: now })
+          break
+      }
+
+      // Filter receipts by date range
+      const filteredReceipts = managerReceipts.filter(r => {
+        const receiptDate = new Date(r.date)
+        return receiptDate >= startDate
+      })
+
+      // Group receipts by date
+      const revenueMap = new Map<string, { income: number; expense: number }>()
+
+      intervals.forEach(date => {
+        const key = format(date, dateFormat)
+        revenueMap.set(key, { income: 0, expense: 0 })
+      })
+
+      filteredReceipts.forEach(receipt => {
+        const key = format(new Date(receipt.date), dateFormat)
+        const existing = revenueMap.get(key) || { income: 0, expense: 0 }
+
+        if (receipt.type === ReceiptType.STUDENT_PAYMENT) {
+          existing.income += receipt.amount
+        } else if (receipt.type === ReceiptType.TEACHER_PAYMENT) {
+          existing.expense += receipt.amount
+        }
+
+        revenueMap.set(key, existing)
+      })
+
+      const chartData = Array.from(revenueMap.entries()).map(([date, values]) => ({
+        date,
+        income: values.income,
+        expense: values.expense,
+        net: values.income - values.expense
+      }))
+
+      setData(chartData)
+
+      // ✅ Old API call - commented out
+      // const { data } = await axios.get(`/api/dashboard/revenue?period=${period}`)
+      // setData(data)
     } catch (err) {
       console.error('Failed to fetch revenue data:', err)
     } finally {
@@ -87,7 +166,7 @@ export default function ManagerRevenueChart() {
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip 
-                formatter={(value: number) => `$${value.toFixed(2)}`}
+                formatter={(value: number) => `MAD ${value.toFixed(2)}`}
                 contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px' }}
               />
               <Legend />

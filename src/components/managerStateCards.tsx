@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using localDB instead
 import {
   DollarSign,
   GraduationCap,
@@ -11,6 +11,9 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@/context/authContext'
+import { studentActions, teacherActions, subjectActions, receiptActions, studentSubjectActions } from '@/lib/dexie/_dexieActions'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
 
 interface DashboardStats {
   totalStudents: number
@@ -28,18 +31,89 @@ export default function ManagerStatsCards() {
   const [isLoading, setIsLoading] = useState(true)
   const t = useTranslations('ManagerStatsCards')
   const [error, setError] = useState<string | null>(null)
-
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchStats()
-  }, [])
+    if (user) {
+      fetchStats()
+    }
+  }, [user])
 
   const fetchStats = async () => {
-        setError(null)
+    setError(null)
     setIsLoading(true)
     try {
-      const { data } = await axios.get('/api/dashboard/stats')
-      setStats(data)
+      if (!user) {
+        setError('User not authenticated')
+        return
+      }
+
+      // ✅ Fetch from localDB instead of API
+      const [students, teachers, subjects, receipts, studentSubjects] = await Promise.all([
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        subjectActions.getAll(),
+        receiptActions.getAll(),
+        studentSubjectActions.getAll(),
+      ])
+
+      // Filter by manager and status (exclude deleted items)
+      const managerStudents = students.filter(s => 
+        s.managerId === user.id && s.status !== '0'
+      )
+      const managerTeachers = teachers.filter(t => 
+        t.managerId === user.id && t.status !== '0'
+      )
+      const activeSubjects = subjects.filter(s => s.status !== '0')
+      const managerReceipts = receipts.filter(r => 
+        r.managerId === user.id && r.status !== '0'
+      )
+      const activeEnrollments = studentSubjects.filter(ss => 
+        ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
+      )
+
+      // Calculate date ranges
+      const now = new Date()
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+
+      // Filter receipts by date
+      const thisMonthReceipts = managerReceipts.filter(r => {
+        const receiptDate = new Date(r.date)
+        return receiptDate >= firstDayOfMonth && r.type === ReceiptType.STUDENT_PAYMENT
+      })
+      const lastMonthReceipts = managerReceipts.filter(r => {
+        const receiptDate = new Date(r.date)
+        return receiptDate >= firstDayOfLastMonth && 
+               receiptDate <= lastDayOfLastMonth && 
+               r.type === ReceiptType.STUDENT_PAYMENT
+      })
+
+      // Calculate revenue
+      const monthlyRevenue = thisMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
+      const lastMonthRevenue = lastMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
+      const revenueGrowth = lastMonthRevenue > 0 
+        ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
+        : 0
+      const totalRevenue = managerReceipts
+        .filter(r => r.type === ReceiptType.STUDENT_PAYMENT)
+        .reduce((sum, r) => sum + r.amount, 0)
+
+      setStats({
+        totalStudents: managerStudents.length,
+        totalTeachers: managerTeachers.length,
+        totalSubjects: activeSubjects.length,
+        totalRevenue,
+        monthlyRevenue,
+        totalReceipts: managerReceipts.length,
+        activeEnrollments: activeEnrollments.length,
+        revenueGrowth
+      })
+
+      // ✅ Old API call - commented out
+      // const { data } = await axios.get('/api/dashboard/stats')
+      // setStats(data)
     } catch (err) {
       console.error('Failed to fetch stats:', err)
       setError('Failed to load statistics')
