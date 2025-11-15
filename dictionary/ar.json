@@ -19,8 +19,8 @@
     "offlineLoginIncorrect": "البريد الإلكتروني أو كلمة المرور غير صحيحة لتسجيل الدخول بدون اتصال.",
     "offlineInvalidCredentials": "لم نتمكن من التحقق من بيانات الاعتماد هذه بدون اتصال. يرجى المحاولة مرة أخرى عند الاتصال بالإنترنت.",
     "offlineLoginError": "حدث خطأ أثناء تسجيل الدخول بدون اتصال."
-  }
-,
+  },
+
   "deleteALL": {
   "allDataDeletedSuccessfully": "تم الحذف",
   "failedToDeleteData": "فشل الحذف",
@@ -29,9 +29,8 @@
   "cannotBeUndone": "هذا لا يمكن التراجع عنه",
   "yesDeleteEverything": "نعم، احذف",
   "cancel": "إلغاء"
-}
-  
-,"InstallPWA": {
+  },
+  "InstallPWA": {
     "installMessage": "تثبيت التطبيق للحصول على تجربة أفضل",
     "iosInstructions": "لتثبيت التطبيق: اضغط على زر المشاركة ثم 'إضافة إلى الشاشة الرئيسية'",
     "install": "تثبيت",
@@ -89,8 +88,8 @@
       "createFailed": "فشل إنشاء المركز",
       "unexpectedError": "حدث خطأ غير متوقع"
     }
-  }
-,
+  },
+
   "StudentCard": {
     "title": "بطاقة الطالب",
     "idLabel": "رقم ",
@@ -171,8 +170,8 @@
     "backToHome": "العودة إلى الصفحة الرئيسية",
     "infoTitle": "وصول المشرف فقط",
     "infoDescription": "هذا تسجيل الدخول مخصص لمديري المراكز. إذا كنت مسؤولاً، يرجى استخدام تسجيل دخول المسؤول."
-  }
-  ,
+  },
+
   "register": {
     "successMessage": "تم إنشاء الحساب بنجاح! جارٍ إعادة التوجيه...",
     "title": "إنشاء حساب",
@@ -995,7 +994,7 @@
     "errorFetchStudents": "فشل جلب الطلاب",
     "errorDeleteStudent": "فشل حذف الطالب",
     "errorSomethingWrong": "حدث خطأ ما",
- "pendingChanges": "تغيير في انتظار المزامنة",
+    "pendingChanges": "تغيير في انتظار المزامنة",
     "syncing": "جارٍ المزامنة...",
     "sync": "مزامنة",
     "filtered": "مُرشَّح",
@@ -1232,21 +1231,21 @@
     "saving": "جاري الحفظ...",
     "nameRequired": "اسم الطالب مطلوب",
     "atLeastOneSubject": "يرجى تسجيل الطالب في مادة واحدة على الأقل"
-  },
-  "subjectForm": {  
-    "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
-    "selectSubject": "اختر المادة *",
-    "selected": "مختار: {{value}}",
-    "selectGrade": "اختر الدرجة *",
-    "price": "السعر (درهم) *",
-    "duration": "المدة (بالساعات)",
-    "addButton": "إضافة المادة إلى المركز",
-    "required": "مطلوب",
-    "selectTeacherPlaceholder": "اكتب أو اختر مادة",
-    "selectSubjectPlaceholder": "اكتب أو اختر مادة",
-    "selectGradePlaceholder": "اكتب أو اختر درجة",
-    "selectRoomPlaceholder": "اكتب أو اختر غرفة"
   }
+},
+"subjectForm": {
+  "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
+  "selectSubject": "اختر المادة *",
+  "selected": "مختار: {{value}}",
+  "selectGrade": "اختر الدرجة *",
+  "price": "السعر (درهم) *",
+  "duration": "المدة (بالساعات)",
+  "addButton": "إضافة المادة إلى المركز",
+  "required": "مطلوب",
+  "selectTeacherPlaceholder": "اكتب أو اختر مادة",
+  "selectSubjectPlaceholder": "اكتب أو اختر مادة",
+  "selectGradePlaceholder": "اكتب أو اختر درجة",
+  "selectRoomPlaceholder": "اكتب أو اختر غرفة"
 },
 "FirstLoginImport": {
   "title": "استيراد البيانات من الخادم",
