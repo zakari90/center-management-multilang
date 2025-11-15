@@ -74,7 +74,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { userActions, centerActions } from '@/lib/dexie/_dexieActions'
+import { userActions, centerActions } from '@/lib/dexie/dexieActions'
 import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { Role } from '@/lib/dexie/dbSchema'
 import { useAuth } from '@/context/authContext'
@@ -285,21 +285,21 @@ export default function AllUsersTable() {
       }
 
       // ✅ Update local state to show new manager
-      const managerForDisplay: UserData = {
-        id: managerId,
-        name: userFormData.name,
-        email: userFormData.email,
-        role: 'MANAGER',
-        createdAt: new Date(now).toISOString(),
-        isActive: true,
-        stats: {
-          centers: 0,
-          students: 0,
-          teachers: 0,
-        }
-      }
+      // const managerForDisplay: UserData = {
+      //   id: managerId,
+      //   name: userFormData.name,
+      //   email: userFormData.email,
+      //   role: 'MANAGER',
+      //   createdAt: new Date(now).toISOString(),
+      //   isActive: true,
+      //   stats: {
+      //     centers: 0,
+      //     students: 0,
+      //     teachers: 0,
+      //   }
+      // }
 
-      setUsers(prev => [...prev, managerForDisplay])
+      // setUsers(prev => [...prev, managerForDisplay])
       setIsAddDialogOpen(false)
       setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
       toast(t('userAddedSuccess'))

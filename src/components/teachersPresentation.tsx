@@ -25,8 +25,9 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
-import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/_dexieActions'
+import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
+import { toast } from 'sonner'
 
 interface TeacherSubject {
   id: string
@@ -61,7 +62,9 @@ export default function TeachersTable() {
 
   useEffect(() => {
     fetchTeachers()
+    toast(user?.email)
   }, [user])
+  
 
   const fetchTeachers = async () => {
     try {
