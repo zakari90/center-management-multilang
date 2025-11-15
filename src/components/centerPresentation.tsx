@@ -20,7 +20,7 @@ import { EditSubjectCard } from "./editSubjectCard"
 import { SubjectForm } from "./subjectForm"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useLocalizedConstants } from "./useLocalizedConstants"
-import { subjectActions, centerActions } from "@/lib/dexie/_dexieActions"
+import { subjectActions, centerActions } from "@/lib/dexie/dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 
 type Subject = {

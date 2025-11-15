@@ -9,6 +9,7 @@ export interface SyncTargets<T> {
 
 export interface DexieActions<T extends SyncEntity> {
   putLocal: (item: T) => Promise<string>;
+  bulkPutLocal: (items: T[]) => Promise<string[]>;
   getAll: () => Promise<T[]>;
   getByStatus: (statuses: string[]) => Promise<T[]>;
   getLocal: (id: string) => Promise<T | undefined>;
@@ -35,7 +36,11 @@ export function generateDexieActions<T extends SyncEntity>(
         .reverse()
         .toArray();
     },
-    
+    bulkPutLocal: async (items: T[]): Promise<string[]> => {
+      if (items.length === 0) return [];
+      const keys = await table.bulkPut(items, { allKeys: true });
+      return keys as string[];
+    },
     getByStatus: async (statuses: string[]): Promise<T[]> => {
       return await table
         .where('status')
