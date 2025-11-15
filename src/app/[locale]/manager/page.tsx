@@ -1,3 +1,5 @@
+"use client";
+
 import EnrollmentChart from "@/components/enrollement-chart";
 import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
@@ -13,6 +15,7 @@ import { useTranslations } from "next-intl";
 
 function Page() {
   const t = useTranslations('Dashboard')
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
 return (
    <>
@@ -40,7 +43,7 @@ return (
       <SyncHandler />
 
       {/* Local DB Debugger (for mobile debugging) */}
-      {process.env.NODE_ENV === 'development' && <LocalDBDebugger />}
+      {isDevelopment && <LocalDBDebugger />}
 
       {/* <div className="grid gap-4 grid-cols-4">
         <RecentActivities />

@@ -1,3 +1,5 @@
+"use client";
+
 import AdminQuickActions from "@/components/adminQuickActions";
 import AdminRevenueChart from "@/components/adminrevenue-chart";
 import AdminStatsCards from "@/components/adminStatsCards";
@@ -15,6 +17,7 @@ import { useTranslations } from "next-intl";
 
 export default function AdminDashboard() {
   const t = useTranslations('Dashboard')
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <>
@@ -48,7 +51,7 @@ export default function AdminDashboard() {
       <SyncHandler />
       
       {/* Local DB Debugger (for mobile debugging) */}
-      {process.env.NODE_ENV === 'development' && <LocalDBDebugger />}
+      {isDevelopment && <LocalDBDebugger />}
       
       <DeleteAllDataButton/>
       </div>
