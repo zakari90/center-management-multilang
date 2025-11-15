@@ -1243,8 +1243,7 @@
     "selectSubjectPlaceholder": "Tapez ou sélectionnez une matière",
     "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
     "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
-  }
-},
+  },
 "FirstLoginImport": {
   "title": "Importer les données du serveur",
   "description": "Votre base de données locale est vide. Importez les données du serveur pour commencer.",
