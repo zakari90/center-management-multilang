@@ -1371,6 +1371,33 @@
   "showingFirst": "Showing first {count} of {total} items",
   "helpText1": "This debugger shows the contents of your local IndexedDB.",
   "helpText2": "Tap on a table name to expand and view its data."
+},
+"SyncHandler": {
+  "title": "Data Synchronization",
+  "description": "Manage data synchronization between local storage and server",
+  "online": "Online",
+  "offline": "Offline",
+  "syncToServer": "Sync to Server",
+  "syncing": "Syncing...",
+  "importFromServer": "Import from Server",
+  "importing": "Importing...",
+  "deleteLocalDB": "Delete Local DB",
+  "confirmDelete": "Are you sure you want to delete all local data? This cannot be undone.",
+  "deleting": "Deleting...",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "syncSuccess": "Successfully synced {count} data types",
+  "syncPartial": "Sync completed with {success} successful and {failed} failed",
+  "syncError": "Sync failed: {error}",
+  "importSuccess": "Successfully imported {count} data types",
+  "importPartial": "Import completed with {success} successful and {failed} failed",
+  "importError": "Import failed: {error}",
+  "deleteSuccess": "All local data deleted successfully",
+  "deleteError": "Delete failed: {error}",
+  "offlineError": "You are offline. Please connect to the internet to sync or import data.",
+  "syncToServerHelp": "Uploads your local changes to the server. This will sync all pending local data.",
+  "importFromServerHelp": "Downloads all data from the server to your local database. This will replace synced data but preserve pending local changes.",
+  "deleteLocalDBHelp": "Permanently deletes all local data. This action cannot be undone. You will need to import data again to use the app."
 }
 
 }

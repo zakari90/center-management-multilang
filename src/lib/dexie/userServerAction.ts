@@ -32,6 +32,7 @@ const ServerActionUsers = {
       const response = await fetch(managerRegisterUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           email: user.email,
           password: user.password, // Note: API expects plain password
@@ -56,6 +57,7 @@ const ServerActionUsers = {
       const response = await fetch(`${api_url}/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           name: user.name,
           email: user.email,
@@ -77,12 +79,19 @@ const ServerActionUsers = {
   // ✅ Check if user exists on server
   async CheckUserExists(id: string): Promise<boolean> {
     try {
-      const response = await fetch(`${api_url}`);
-      if (!response.ok) return false;
+      const response = await fetch(`${api_url}`, {
+        credentials: "include", // ✅ Include cookies for session authentication
+      });
+      if (!response.ok) {
+        console.warn(`CheckUserExists: API returned ${response.status} for user ${id}`);
+        return false;
+      }
       const users = await response.json();
-      return users.some((u: any) => u.id === id);
+      const exists = Array.isArray(users) && users.some((u: any) => u.id === id);
+      console.log(`CheckUserExists: User ${id} ${exists ? 'exists' : 'does not exist'} on server`);
+      return exists;
     } catch (e) {
-      console.error("Error checking user existence:", e);
+      console.error(`Error checking user existence for ${id}:`, e);
       return false;
     }
   },
@@ -108,6 +117,7 @@ const ServerActionUsers = {
       const response = await fetch(`${api_url}/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       return response;
     } catch (e) {
@@ -124,6 +134,7 @@ const ServerActionUsers = {
 
     // Get all users with status "w" (waiting) or "0" (pending deletion)
     const waitingData = await userActions.getByStatus(["0", "w"]);
+    console.log(`[UserSync] Found ${waitingData.length} users to sync:`, waitingData.map(u => ({ id: u.id, email: u.email, role: u.role, status: u.status })));
     if (waitingData.length === 0) return { message: "No users to sync.", results: [] };
 
     const results: Array<{ id: string; success: boolean; error?: string }> = [];
@@ -142,14 +153,17 @@ const ServerActionUsers = {
           }
         } else if (user.status === "w") {
           // ✅ Waiting to sync: check if user exists, then create or update
+          console.log(`[UserSync] Syncing user ${user.id} (${user.email}, ${user.role})...`);
           const exists = await ServerActionUsers.CheckUserExists(user.id);
           let result;
           
           if (exists) {
             // User exists on server, update it
+            console.log(`[UserSync] User ${user.id} exists on server, updating...`);
             result = await ServerActionUsers.UpdateOnServer(user);
           } else {
-            // New user, create it
+            // New user, create it (for managers, this uses /api/manager/register)
+            console.log(`[UserSync] User ${user.id} does not exist on server, creating...`);
             result = await ServerActionUsers.CreateOnServer(user);
           }
 
@@ -157,6 +171,7 @@ const ServerActionUsers = {
             // ✅ Mark as synced if server accepted
             await userActions.markSynced(user.id);
             // ✅ Update local user with server response data if available
+            // The API returns { message, user: { id, name, email, role } }
             if (result.user) {
               await userActions.putLocal({
                 ...user,
@@ -167,10 +182,20 @@ const ServerActionUsers = {
                 status: '1' as const,
                 updatedAt: Date.now(),
               });
+            } else {
+              // If result doesn't have user property, still mark as synced
+              // This can happen if the API response structure is different
+              await userActions.putLocal({
+                ...user,
+                status: '1' as const,
+                updatedAt: Date.now(),
+              });
             }
             results.push({ id: user.id, success: true });
           } else {
-            results.push({ id: user.id, success: false, error: "Server request failed" });
+            const errorMsg = `Failed to ${exists ? 'update' : 'create'} user on server`;
+            console.error(`Sync failed for user ${user.id} (${user.email}):`, errorMsg);
+            results.push({ id: user.id, success: false, error: errorMsg });
           }
         }
       } catch (error) {
@@ -196,6 +221,7 @@ const ServerActionUsers = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();

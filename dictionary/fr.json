@@ -1266,5 +1266,32 @@
   "showingFirst": "Affichage des {count} premiers éléments sur {total}",
   "helpText1": "Ce débogueur affiche le contenu de votre IndexedDB local.",
   "helpText2": "Appuyez sur un nom de tableau pour l'étendre et afficher ses données."
+},
+"SyncHandler": {
+  "title": "Synchronisation des données",
+  "description": "Gérer la synchronisation des données entre le stockage local et le serveur",
+  "online": "En ligne",
+  "offline": "Hors ligne",
+  "syncToServer": "Synchroniser avec le serveur",
+  "syncing": "Synchronisation...",
+  "importFromServer": "Importer depuis le serveur",
+  "importing": "Importation...",
+  "deleteLocalDB": "Supprimer la base de données locale",
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer toutes les données locales ? Cette action ne peut pas être annulée.",
+  "deleting": "Suppression...",
+  "confirm": "Confirmer",
+  "cancel": "Annuler",
+  "syncSuccess": "Synchronisation réussie de {count} types de données",
+  "syncPartial": "Synchronisation terminée avec {success} réussies et {failed} échouées",
+  "syncError": "Échec de la synchronisation : {error}",
+  "importSuccess": "Importation réussie de {count} types de données",
+  "importPartial": "Importation terminée avec {success} réussies et {failed} échouées",
+  "importError": "Échec de l'importation : {error}",
+  "deleteSuccess": "Toutes les données locales ont été supprimées avec succès",
+  "deleteError": "Échec de la suppression : {error}",
+  "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour synchroniser ou importer des données.",
+  "syncToServerHelp": "Télécharge vos modifications locales vers le serveur. Cela synchronisera toutes les données locales en attente.",
+  "importFromServerHelp": "Télécharge toutes les données du serveur vers votre base de données locale. Cela remplacera les données synchronisées mais préservera les modifications locales en attente.",
+  "deleteLocalDBHelp": "Supprime définitivement toutes les données locales. Cette action ne peut pas être annulée. Vous devrez réimporter les données pour utiliser l'application."
 }
 }
