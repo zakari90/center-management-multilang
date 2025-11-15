@@ -36,6 +36,7 @@ const ServerActionCenters = {
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           id: center.id,
           name: center.name,
@@ -65,6 +66,7 @@ const ServerActionCenters = {
       const response = await fetch(api_url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           centerId: center.id,
           name: center.name,
@@ -89,7 +91,9 @@ const ServerActionCenters = {
   // ✅ Check if center exists on server
   async CheckCenterExists(id: string): Promise<boolean> {
     try {
-      const response = await fetch(api_url);
+      const response = await fetch(api_url, {
+        credentials: "include", // ✅ Include cookies for session authentication
+      });
       if (!response.ok) return false;
       const centers = await response.json();
       return Array.isArray(centers) && centers.some((c: any) => c.id === id);
@@ -104,6 +108,7 @@ const ServerActionCenters = {
       const response = await fetch(`${api_url}?id=${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       return response;
     } catch (e) {
@@ -195,6 +200,7 @@ const ServerActionCenters = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();

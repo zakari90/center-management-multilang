@@ -34,6 +34,7 @@ const ServerActionSubjects = {
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           centerId: subject.centerId,
           name: subject.name,
@@ -59,6 +60,7 @@ const ServerActionSubjects = {
       const response = await fetch(api_url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           subjectId: subject.id,
           name: subject.name,
@@ -81,7 +83,9 @@ const ServerActionSubjects = {
   // ✅ Check if subject exists on server
   async CheckSubjectExists(id: string): Promise<boolean> {
     try {
-      const response = await fetch(api_url);
+      const response = await fetch(api_url, {
+        credentials: "include", // ✅ Include cookies for session authentication
+      });
       if (!response.ok) return false;
       const subjects = await response.json();
       return Array.isArray(subjects) && subjects.some((s: any) => s.id === id);
@@ -96,6 +100,7 @@ const ServerActionSubjects = {
       const response = await fetch(api_url, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({ subjectId: id }),
       });
       return response;
@@ -186,6 +191,7 @@ const ServerActionSubjects = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();

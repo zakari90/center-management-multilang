@@ -37,6 +37,7 @@ const ServerActionSchedules = {
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           day: schedule.day,
           startTime: schedule.startTime,
@@ -64,7 +65,9 @@ const ServerActionSchedules = {
   // ✅ Check if schedule exists on server
   async CheckScheduleExists(id: string): Promise<boolean> {
     try {
-      const response = await fetch(api_url);
+      const response = await fetch(api_url, {
+        credentials: "include", // ✅ Include cookies for session authentication
+      });
       if (!response.ok) return false;
       const schedules = await response.json();
       return Array.isArray(schedules) && schedules.some((s: any) => s.id === id);
@@ -79,6 +82,7 @@ const ServerActionSchedules = {
       const response = await fetch(`${api_url}/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       return response;
     } catch (e) {
@@ -167,6 +171,7 @@ const ServerActionSchedules = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();

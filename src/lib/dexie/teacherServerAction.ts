@@ -35,6 +35,7 @@ const ServerActionTeachers = {
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           name: teacher.name,
           email: teacher.email,
@@ -61,6 +62,7 @@ const ServerActionTeachers = {
       const response = await fetch(`${api_url}/${teacher.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           name: teacher.name,
           email: teacher.email,
@@ -84,7 +86,9 @@ const ServerActionTeachers = {
   // ✅ Check if teacher exists on server
   async CheckTeacherExists(id: string): Promise<boolean> {
     try {
-      const response = await fetch(api_url);
+      const response = await fetch(api_url, {
+        credentials: "include", // ✅ Include cookies for session authentication
+      });
       if (!response.ok) return false;
       const teachers = await response.json();
       return Array.isArray(teachers) && teachers.some((t: any) => t.id === id);
@@ -99,6 +103,7 @@ const ServerActionTeachers = {
       const response = await fetch(`${api_url}/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       return response;
     } catch (e) {
@@ -189,6 +194,7 @@ const ServerActionTeachers = {
     try {
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();

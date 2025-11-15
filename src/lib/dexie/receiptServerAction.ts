@@ -41,6 +41,7 @@ const ServerActionReceipts = {
       const response = await fetch(studentPaymentUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           studentId: receipt.studentId,
           subjectIds: subjectIds,
@@ -66,6 +67,7 @@ const ServerActionReceipts = {
       const response = await fetch(teacherPaymentUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
         body: JSON.stringify({
           teacherId: receipt.teacherId,
           amount: receipt.amount,
@@ -93,6 +95,7 @@ const ServerActionReceipts = {
       const response = await fetch(`${baseUrl}/api/receipts/${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       return response;
     } catch (e) {
@@ -183,6 +186,7 @@ const ServerActionReceipts = {
     try {
       const res = await fetch(`${baseUrl}/api/receipts`, {
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session authentication
       });
       if (!res.ok) throw new Error("Fetch failed with status: " + res.status);
       return res.json();
