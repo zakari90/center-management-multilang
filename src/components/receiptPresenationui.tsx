@@ -26,10 +26,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/_dexieActions'
 import { useAuth } from '@/context/authContext'
-import { ReceiptType } from '@/lib/dexie/dbSchema'
+import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/_dexieActions'
 // import axios from 'axios' // ✅ Commented out - using local DB
+import { ModalLink } from '@/components/modal-link'
 import {
   DollarSign,
   Eye,
@@ -43,7 +43,6 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 
 interface Receipt {
