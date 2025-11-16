@@ -57,6 +57,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
+import { EntitySyncControls } from '@/components/EntitySyncControls'
 
 interface Receipt {
   id: string
@@ -273,17 +274,21 @@ export default function StudentReceiptTable() {
           <h1 className="text-3xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
-        <div className="flex gap-2 mt-2">
-          <Button variant="outline" onClick={handleExportCSV}>
-            <Download className="mr-2 h-4 w-4" />
-            {t("exportCSV")}
-          </Button>
-          <Button asChild>
-            <Link href="/receipts/create">
-              <Plus className="mr-2 h-4 w-4" />
-              {t("newPayment")}
-            </Link>
-          </Button>
+        <div className="flex flex-col items-end gap-2 mt-2">
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleExportCSV}>
+              <Download className="mr-2 h-4 w-4" />
+              {t("exportCSV")}
+            </Button>
+            <Button asChild>
+              <Link href="/receipts/create">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("newPayment")}
+              </Link>
+            </Button>
+          </div>
+          {/* Per-entity sync controls for receipts */}
+          <EntitySyncControls entity="receipts" />
         </div>
       </div>
 

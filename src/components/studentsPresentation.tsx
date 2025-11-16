@@ -4,7 +4,7 @@ import { Loader2, Eye, Pencil, Search, Users, GraduationCap, DollarSign } from "
 import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { ModalLink } from "@/components/modal-link"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/_dexieActions"
 import { useAuth } from "@/context/authContext"
 // import axios from "axios" // ✅ Commented out - using local DB
+import { EntitySyncControls } from "@/components/EntitySyncControls"
 
 export interface StudentSubject {
   id: string
@@ -53,11 +54,7 @@ export default function StudentsTable() {
   const [searchTerm, setSearchTerm] = useState("")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
 
-  useEffect(() => {
-    fetchStudents()
-  }, [user])
-
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -128,7 +125,13 @@ export default function StudentsTable() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      fetchStudents()
+    }
+  }, [user, fetchStudents])
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -179,9 +182,12 @@ export default function StudentsTable() {
             <h1 className="text-3xl font-bold">{t("student")}</h1>
             <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
           </div>
-          <Button asChild>
-            <Link href="/manager/students/create">{t("addStudent")}</Link>
-          </Button>
+          <div className="flex flex-col items-end gap-2">
+            <Button asChild>
+              <Link href="/manager/students/create">{t("addStudent")}</Link>
+            </Button>
+            <EntitySyncControls entity="students" />
+          </div>
         </div>
 
         {/* Search and Filter */}

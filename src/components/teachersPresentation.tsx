@@ -27,6 +27,7 @@ import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/_dexieActions'
 import { useAuth } from '@/context/authContext'
+import { EntitySyncControls } from '@/components/EntitySyncControls'
 
 interface TeacherSubject {
   id: string
@@ -177,9 +178,13 @@ export default function TeachersTable() {
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
-        <Button asChild>
-          <Link href="/manager/teachers/create">{t('addTeacher')}</Link>
-        </Button>
+        <div className="flex flex-col items-stretch gap-2 md:items-end">
+          <Button asChild>
+            <Link href="/manager/teachers/create">{t('addTeacher')}</Link>
+          </Button>
+          {/* Per-entity sync controls for teachers */}
+          <EntitySyncControls entity="teachers" />
+        </div>
       </div>
 
       {/* Error Message */}
