@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import {
@@ -22,18 +23,10 @@ import { useState } from 'react'
 import { EditDialog } from './editDialog'
 import { ItemInputList } from './itemInputList'
 
-interface Subject {
-  id: string
-  name: string
-  grade: string
-  price: number
-  duration: number | null
-}
-
 
 interface SubjectCardProps {
-  subject: Subject
-  onUpdate: (id: string, data: Partial<Subject>) => void
+  subject: any
+  onUpdate: (id: string, data: Partial<any>) => void
   onDelete: (id: string) => void
   availableSubjects: string[]
   availableGrades: string[]

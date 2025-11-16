@@ -237,7 +237,7 @@ export const SubjectFormMultipleChoices = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="subjectDuration">{t('durationOptional')}</Label>
+            <Label htmlFor="subjectDuration">{t('duration')}</Label>
             <Input
               id="subjectDuration"
               type="number"

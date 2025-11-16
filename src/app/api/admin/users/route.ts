@@ -140,8 +140,19 @@ console.log("Id received ---------------------------------------------", id);
         }
       }, { status: 201 });
     }
-   } catch (error) {
+   } catch (error: any) {
     console.log("Error creating admin user::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", error);
+    
+    // Check if it's a MongoDB replica set error
+    if (error?.code === 'P2031' || error?.message?.includes('replica set')) {
+      return NextResponse.json({
+        error: { 
+          message: "MongoDB replica set is required. Please run: mongosh --eval \"rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] })\"",
+          code: "REPLICA_SET_REQUIRED"
+        }
+      }, { status: 500 });
+    }
+    
     return NextResponse.json({
       error: { message: "Internal server error" }
     }, { status: 500 });

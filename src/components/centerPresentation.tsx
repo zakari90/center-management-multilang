@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
+import { EntitySyncControls } from "@/components/EntitySyncControls"
 import { ItemInputList } from "@/components/itemInputList"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -10,121 +12,113 @@ import {
   CardTitle
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-// import axios from "axios" // ✅ Commented out - using local DB
-import { BookOpen, Building2, CalendarDays, Clock, DollarSign, Pencil, Plus } from "lucide-react"
+import { centerActions, subjectActions } from "@/lib/dexie/dexieActions"
+import { ServerActionCenters } from "@/lib/dexie/serverActions"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { useLiveQuery } from "dexie-react-hooks"
+import { BookOpen, Building2, CalendarDays, Loader2, Pencil, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { EditDialog } from "./editDialog"
 import { EditSubjectCard } from "./editSubjectCard"
 import { SubjectForm } from "./subjectForm"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useLocalizedConstants } from "./useLocalizedConstants"
-import { subjectActions, centerActions } from "@/lib/dexie/dexieActions"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
 
-type Subject = {
-  id: string
-  name: string
-  grade: string
-  price: number
-  duration: number | null
-  createdAt: string
-  updatedAt: string
-  centerId: string
-}
 
-export type Center = {
-  id: string
-  name: string
-  address?: string
-  phone?: string
-  classrooms: string[]
-  workingDays: string[]
-  subjects: Subject[]
-  createdAt: string | number
-  updatedAt: string | number
-  adminId: string
-}
-
-export default function CenterPresentation(center: Center) {
+export default function CenterPresentation({ centerId }: any) {
   const t = useTranslations('CenterPresentation')
-  const { availableSubjects, availableGrades } = useLocalizedConstants();
-  
-  const [formData, setFormData] = useState({
-    name: center.name,
-    address: center.address,
-    phone: center.phone,
-    classrooms: center.classrooms,
-    workingDays: center.workingDays,
-    subjects: center.subjects
-  })
+  const { availableSubjects, availableGrades } = useLocalizedConstants()
 
+  // ✅ Use useLiveQuery for real-time updates from IndexedDB
+  const center = useLiveQuery(
+    () => centerActions.getLocal(centerId),
+    [centerId]
+  )
+
+  // ✅ Use useLiveQuery for subjects with filtering (excludes deleted items)
+  const subjects = useLiveQuery(
+    async () => {
+      if (!centerId) return []
+      const allSubjects = await subjectActions.getAll()
+      return allSubjects.filter(s => 
+        s.centerId === centerId && s.status !== '0'
+      )
+    },
+    [centerId]
+  )
+
+  const [tempClassrooms, setTempClassrooms] = useState<string[]>([])
+  const [tempWorkingDays, setTempWorkingDays] = useState<string[]>([])
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isCenterDebugSyncing, setIsCenterDebugSyncing] = useState(false)
+
+  // ✅ Sync temp states when center loads
+  useEffect(() => {
+    if (center) {
+      setTempClassrooms(center.classrooms)
+      setTempWorkingDays(center.workingDays)
+    }
+  }, [center])
+
+  // ✅ Show loading state
+  if (!center) {
+    return (
+      <main className="max-w-3xl mx-auto p-4 sm:p-6">
+        <Card className="shadow-lg border border-border bg-background">
+          <CardContent className="p-8">
+            <p className="text-center text-muted-foreground">{t('loading') || 'Loading...'}</p>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
+
+  const handleAddSubject = () => {
+    setIsAddDialogOpen(true)
+  }
+
+  // ✅ Add subject - simplified, useLiveQuery handles state updates
   const addSubject = async (subjectName: string, grade: string, price: number, duration?: number) => {
     try {
-      // ✅ Save to local DB
-      const now = Date.now();
-      const subjectId = generateObjectId();
-      const newSubject = {
+      const now = Date.now()
+      const subjectId = generateObjectId()
+      
+      const newSubject: any = {
         id: subjectId,
         name: subjectName,
         grade,
         price,
         duration: duration ?? undefined,
-        centerId: center.id,
-        status: 'w' as const,
+        centerId: centerId,
+        status: 'w',
         createdAt: now,
         updatedAt: now,
-      };
-
-      await subjectActions.putLocal(newSubject);
-
-      // Update local state
-      const subjectForDisplay = {
-        id: subjectId,
-        name: subjectName,
-        grade,
-        price,
-        duration: duration ?? null,
-        createdAt: new Date(now).toISOString(),
-        updatedAt: new Date(now).toISOString(),
-        centerId: center.id,
-      };
-
-    setFormData(prev => ({
-      ...prev,
-        subjects: [...prev.subjects, subjectForDisplay]
-      }));
-
-      toast("Subject added successfully");
-      setIsAddDialogOpen(false);
-    } catch (error) {
-      console.error("Error adding subject:", error);
-      toast("Failed to add subject");
-    }
-  }
-  
-  const [tempClassrooms, setTempClassrooms] = useState(formData.classrooms)
-  const [tempWorkingDays, setTempWorkingDays] = useState(formData.workingDays)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  
-  const handleAddSubject = () => {
-    setIsAddDialogOpen(true)
-  }
-
-  // ✅ Update existing subject using local DB
-  const handleUpdateSubject = async (subjectId: string, updatedData: Partial<Subject>) => {
-    try {
-      // Get existing subject from local DB
-      const existingSubject = await subjectActions.getLocal(subjectId);
-      
-      if (!existingSubject) {
-        toast("Subject not found");
-        return;
       }
 
-      // Update in local DB
-      const updatedSubject = {
+      await subjectActions.putLocal(newSubject)
+      
+      // ✅ No need to update local state - useLiveQuery auto-updates
+      toast.success(t('subjectAdded') || "Subject added successfully")
+      setIsAddDialogOpen(false)
+    } catch (error) {
+      console.error("Error adding subject:", error)
+      toast.error(t('subjectAddFailed') || "Failed to add subject")
+    }
+  }
+
+  // ✅ Update subject - simplified
+  const handleUpdateSubject = async (subjectId: string, updatedData: Partial<any>) => {
+    try {
+      const existingSubject = await subjectActions.getLocal(subjectId)
+      
+      if (!existingSubject) {
+        toast.error(t('subjectNotFound') || "Subject not found")
+        return
+      }
+
+      const updatedSubject: any = {
         ...existingSubject,
         name: updatedData.name ?? existingSubject.name,
         grade: updatedData.grade ?? existingSubject.grade,
@@ -132,66 +126,85 @@ export default function CenterPresentation(center: Center) {
         duration: updatedData.duration !== undefined 
           ? (updatedData.duration === null ? undefined : updatedData.duration)
           : existingSubject.duration,
-        // Keep original createdAt and centerId from DB
-        createdAt: existingSubject.createdAt,
-        centerId: existingSubject.centerId,
-        status: existingSubject.status,
+        status: 'w', // Mark as waiting for sync
         updatedAt: Date.now(),
-      };
+      }
 
-      await subjectActions.putLocal(updatedSubject);
-
-      // Update local state
-      const subjectForDisplay = {
-        id: updatedSubject.id,
-        name: updatedSubject.name,
-        grade: updatedSubject.grade,
-        price: updatedSubject.price,
-        duration: updatedSubject.duration ?? null,
-        createdAt: new Date(updatedSubject.createdAt).toISOString(),
-        updatedAt: new Date(updatedSubject.updatedAt).toISOString(),
-        centerId: updatedSubject.centerId,
-      };
-
-      setFormData(prev => ({
-        ...prev,
-        subjects: prev.subjects.map(s => s.id === subjectId ? subjectForDisplay : s)
-      }))
-
-      toast("Subject updated successfully");
-
-      // ✅ Commented out online update
-      // const { data } = await axios.patch(`/api/subjects`, {
-      //   subjectId,
-      //   ...updatedData
-      // })
+      await subjectActions.putLocal(updatedSubject)
+      
+      // ✅ No need to update local state - useLiveQuery auto-updates
+      toast.success(t('subjectUpdated') || "Subject updated successfully")
     } catch (error) {
-      console.error("Error updating subject:", error);
-      toast("Failed to update subject")
+      console.error("Error updating subject:", error)
+      toast.error(t('subjectUpdateFailed') || "Failed to update subject")
     }
   }
 
-  // ✅ Delete subject using local DB (soft delete)
+  // ✅ Delete subject - simplified
   const handleDeleteSubject = async (subjectId: string) => {
     try {
-      // Soft delete in local DB
-      await subjectActions.markForDelete(subjectId);
-
-      // Update local state
-      setFormData(prev => ({
-        ...prev,
-        subjects: prev.subjects.filter(s => s.id !== subjectId)
-      }))
-
-      toast("Subject deleted successfully");
-
-      // ✅ Commented out online delete
-      // await axios.delete(`/api/subjects`, {
-      //   data: { subjectId }
-      // })
+      await subjectActions.markForDelete(subjectId)
+      
+      // ✅ No need to update local state - useLiveQuery auto-updates
+      toast.success(t('subjectDeleted') || "Subject deleted successfully")
     } catch (error) {
-      console.error("Error deleting subject:", error);
-      toast("Failed to delete subject")
+      console.error("Error deleting subject:", error)
+      toast.error(t('subjectDeleteFailed') || "Failed to delete subject")
+    }
+  }
+
+  // ✅ Update classrooms - simplified
+  const handleSaveClassrooms = async () => {
+    try {
+      const updatedCenter: any = {
+        ...center,
+        classrooms: tempClassrooms,
+        status: 'w',
+        updatedAt: Date.now(),
+      }
+      
+      await centerActions.putLocal(updatedCenter)
+      
+      // ✅ No need to update local state - useLiveQuery auto-updates
+      toast.success(t('classroomsUpdated') || "Classrooms updated successfully")
+    } catch (error) {
+      console.error("Error updating classrooms:", error)
+      toast.error(t('classroomsUpdateFailed') || "Failed to update classrooms")
+    }
+  }
+
+  // ✅ Update working days - simplified
+  const handleSaveWorkingDays = async () => {
+    try {
+      const updatedCenter: any = {
+        ...center,
+        workingDays: tempWorkingDays,
+        status: 'w',
+        updatedAt: Date.now(),
+      }
+      
+      await centerActions.putLocal(updatedCenter)
+      
+      // ✅ No need to update local state - useLiveQuery auto-updates
+      toast.success(t('workingDaysUpdated') || "Working days updated successfully")
+    } catch (error) {
+      console.error("Error updating working days:", error)
+      toast.error(t('workingDaysUpdateFailed') || "Failed to update working days")
+    }
+  }
+
+  // 🔍 Debug sync button for center entity
+  const handleDebugCenterSync = async () => {
+    setIsCenterDebugSyncing(true)
+    try {
+      const result = await ServerActionCenters.Sync()
+      console.log("[CenterSync Debug] Result:", result)
+      toast.success(result?.message || "Center sync completed. See console for details.")
+    } catch (error) {
+      console.error("[CenterSync Debug] Error:", error)
+      toast.error("Center sync failed. Check console for details.")
+    } finally {
+      setIsCenterDebugSyncing(false)
     }
   }
 
@@ -200,17 +213,42 @@ export default function CenterPresentation(center: Center) {
       <Card className="shadow-lg border border-border bg-background">
         <CardHeader className="text-center space-y-2 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
-            {formData.name}
+            {center.name}
           </CardTitle>
           <p className="text-muted-foreground text-sm">{t('centerOverview')}</p>
-          {formData.address && (
-            <p className="text-sm text-muted-foreground whitespace-pre-line break-words px-2 sm:px-0">{formData.address}</p>
-          )}
-          {formData.phone && (
-            <p className="text-sm text-muted-foreground px-2 sm:px-0">
-              {t('phone')} {formData.phone}
+          {center.address && (
+            <p className="text-sm text-muted-foreground whitespace-pre-line break-words px-2 sm:px-0">
+              {center.address}
             </p>
           )}
+          {center.phone && (
+            <p className="text-sm text-muted-foreground px-2 sm:px-0">
+              {t('phone')} {center.phone}
+            </p>
+          )}
+          
+          {/* Center sync controls */}
+          <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center sm:justify-end">
+            <EntitySyncControls entity="centers" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDebugCenterSync}
+              disabled={isCenterDebugSyncing}
+            >
+              {isCenterDebugSyncing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('debugSyncing') || 'Debug syncing...'}
+                </>
+              ) : (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4" />
+                  {t('debugSync') || 'Debug Center Sync'}
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
 
         <Separator className="my-2" />
@@ -228,12 +266,22 @@ export default function CenterPresentation(center: Center) {
                 {t('addSubject')}
               </Button>
             </div>
+            
+            {/* ✅ Single subject list rendering */}
             <div className="space-y-3">
-              {formData.subjects.length > 0 ? (
-                formData.subjects.map((subject) => (
+              {subjects && subjects.length > 0 ? (
+                subjects.map((subject) => (
                   <EditSubjectCard
                     key={subject.id}
-                    subject={subject}
+                    subject={{
+                      id: subject.id,
+                      name: subject.name,
+                      grade: subject.grade,
+                      price: subject.price,
+                      duration: subject.duration ?? null,
+                      onUpdate: new Date(subject.updatedAt).toISOString(),
+                      centerId: subject.centerId,
+                    }}
                     onUpdate={handleUpdateSubject}
                     onDelete={handleDeleteSubject}
                     availableSubjects={availableSubjects}
@@ -241,47 +289,18 @@ export default function CenterPresentation(center: Center) {
                   />
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground italic">No subjects added</p>
+                <p className="text-sm text-muted-foreground italic">
+                  {t('noSubjects') || 'No subjects added'}
+                </p>
               )}
             </div>
-            {formData.subjects.length > 0 ? (
-              <div className="space-y-3">
-                {formData.subjects.map(subject => (
-                  <Card key={subject.id || subject.name} className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <h4 className="font-semibold text-base truncate">{subject.name}</h4>
-                        <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                          <Badge variant="outline">{subject.grade}</Badge>
-                          <span className="flex items-center gap-1 whitespace-nowrap">
-                            <DollarSign className="h-3 w-3" />
-                            {subject.price} {t('currency')}
-                          </span>
-                          {subject.duration !== null && subject.duration !== undefined && (
-                            <span className="flex items-center gap-1 whitespace-nowrap">
-                              <Clock className="h-3 w-3" />
-                              {subject.duration} {t('duration')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm" aria-label={t('edit')}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">{t('noSubjects')}</p>
-            )}
           </div>
 
           {/* Classrooms Section */}
           <Section
             title={t('availableClassrooms')}
             icon={<Building2 className="h-4 w-4 text-muted-foreground" />}
-            items={formData.classrooms}
+            items={center.classrooms}
             onEditButton={
               <EditDialog
                 title={t('editClassrooms')}
@@ -290,31 +309,14 @@ export default function CenterPresentation(center: Center) {
                     <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                   </Button>
                 }
-                onSave={async () => {
-                  try {
-                    // ✅ Update center in local DB
-                    const existingCenter = await centerActions.getLocal(center.id);
-                    if (existingCenter) {
-                      await centerActions.putLocal({
-                        ...existingCenter,
-                        classrooms: tempClassrooms,
-                        updatedAt: Date.now(),
-                      });
-                    }
-                    setFormData(prev => ({ ...prev, classrooms: tempClassrooms }));
-                    toast("Classrooms updated successfully");
-                  } catch (error) {
-                    console.error("Error updating classrooms:", error);
-                    toast("Failed to update classrooms");
-                  }
-                }}
+                onSave={handleSaveClassrooms}
               >
                 <ItemInputList
                   label={t('classroomsLabel')}
                   placeholder={t('classroomPlaceholder')}
                   items={tempClassrooms}
                   onChange={setTempClassrooms}
-                  suggestions={formData.classrooms}
+                  suggestions={center.classrooms}
                 />
               </EditDialog>
             }
@@ -325,7 +327,7 @@ export default function CenterPresentation(center: Center) {
           <Section
             title={t('workingDays')}
             icon={<CalendarDays className="h-4 w-4 text-muted-foreground" />}
-            items={formData.workingDays}
+            items={center.workingDays}
             onEditButton={
               <EditDialog
                 title={t('editWorkingDays')}
@@ -334,31 +336,14 @@ export default function CenterPresentation(center: Center) {
                     <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
                   </Button>
                 }
-                onSave={async () => {
-                  try {
-                    // ✅ Update center in local DB
-                    const existingCenter = await centerActions.getLocal(center.id);
-                    if (existingCenter) {
-                      await centerActions.putLocal({
-                        ...existingCenter,
-                        workingDays: tempWorkingDays,
-                        updatedAt: Date.now(),
-                      });
-                    }
-                    setFormData(prev => ({ ...prev, workingDays: tempWorkingDays }));
-                    toast("Working days updated successfully");
-                  } catch (error) {
-                    console.error("Error updating working days:", error);
-                    toast("Failed to update working days");
-                  }
-                }}
+                onSave={handleSaveWorkingDays}
               >
                 <ItemInputList
                   label={t('workingDaysLabel')}
                   placeholder={t('dayPlaceholder')}
                   items={tempWorkingDays}
                   onChange={setTempWorkingDays}
-                  suggestions={formData.workingDays}
+                  suggestions={center.workingDays}
                 />
               </EditDialog>
             }
@@ -367,24 +352,22 @@ export default function CenterPresentation(center: Center) {
         </CardContent>
       </Card>
 
-<Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-  <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
-    <DialogHeader className="flex-shrink-0">
-      <DialogTitle>{t('addNewSubject')}</DialogTitle>
-      <DialogDescription>{t('addSubjectDescription')}</DialogDescription>
-    </DialogHeader>
-    
-    {/* Scrollable content area */}
-    <div className="overflow-y-auto flex-1 py-4 px-1">
-      <SubjectForm
-        onAddSubject={addSubject}
-        availableSubjects={availableSubjects}
-        availableGrades={availableGrades}
-      />
-    </div>
-  </DialogContent>
-</Dialog>
-
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle>{t('addNewSubject')}</DialogTitle>
+            <DialogDescription>{t('addSubjectDescription')}</DialogDescription>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto flex-1 py-4 px-1">
+            <SubjectForm
+              onAddSubject={addSubject}
+              availableSubjects={availableSubjects}
+              availableGrades={availableGrades}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }
@@ -422,4 +405,3 @@ function Section({ title, icon, items, onEditButton, noDataText = "No data" }: S
     </div>
   )
 }
-

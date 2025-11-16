@@ -1,15 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import type { Center } from "@/components/centerPresentation";
 import CenterPresentation from "@/components/centerPresentation";
 import { NewCenterForm } from "@/components/newCenterForm";
-import { centerActions, subjectActions } from "@/lib/dexie/_dexieActions";
+import { centerActions, subjectActions } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 
 function Page() {
-  const [centerData, setCenterData] = useState<Center | null>(null);
+  const [centerData, setCenterData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0); // ✅ Add refresh trigger
   const { user } = useAuth(); // ✅ Use AuthContext instead of getSession
@@ -51,7 +51,7 @@ function Page() {
           }));
 
         // Combine center with subjects to match API structure
-        const centerWithSubjects: Center = {
+        const centerWithSubjects: any = {
           id: center.id,
           name: center.name,
           address: center.address,
