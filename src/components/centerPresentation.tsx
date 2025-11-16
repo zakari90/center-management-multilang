@@ -32,22 +32,12 @@ export default function CenterPresentation({ centerId }: any) {
   const { availableSubjects, availableGrades } = useLocalizedConstants()
 
   // ✅ Use useLiveQuery for real-time updates from IndexedDB
-  const center = useLiveQuery(
-    () => centerActions.getLocal(centerId),
-    [centerId]
-  )
-
-  // ✅ Use useLiveQuery for subjects with filtering (excludes deleted items)
-  const subjects = useLiveQuery(
-    async () => {
-      if (!centerId) return []
-      const allSubjects = await subjectActions.getAll()
-      return allSubjects.filter(s => 
-        s.centerId === centerId && s.status !== '0'
-      )
-    },
-    [centerId]
-  )
+  const center = useLiveQuery(() => centerActions.getLocal(centerId), [centerId])
+  
+  const subjects = useLiveQuery(async () => {
+    const allSubjects = await subjectActions.getAll()
+    return allSubjects.filter(s => s.centerId === centerId && s.status !== '0')
+  }, [centerId])
 
   const [tempClassrooms, setTempClassrooms] = useState<string[]>([])
   const [tempWorkingDays, setTempWorkingDays] = useState<string[]>([])
@@ -100,11 +90,11 @@ export default function CenterPresentation({ centerId }: any) {
       await subjectActions.putLocal(newSubject)
       
       // ✅ No need to update local state - useLiveQuery auto-updates
-      toast.success(t('subjectAdded') || "Subject added successfully")
+      toast(t('subjectAdded') || "Subject added successfully")
       setIsAddDialogOpen(false)
     } catch (error) {
       console.error("Error adding subject:", error)
-      toast.error(t('subjectAddFailed') || "Failed to add subject")
+      toast(t('subjectAddFailed') || "Failed to add subject")
     }
   }
 
@@ -114,7 +104,7 @@ export default function CenterPresentation({ centerId }: any) {
       const existingSubject = await subjectActions.getLocal(subjectId)
       
       if (!existingSubject) {
-        toast.error(t('subjectNotFound') || "Subject not found")
+        toast(t('subjectNotFound') || "Subject not found")
         return
       }
 
@@ -133,10 +123,10 @@ export default function CenterPresentation({ centerId }: any) {
       await subjectActions.putLocal(updatedSubject)
       
       // ✅ No need to update local state - useLiveQuery auto-updates
-      toast.success(t('subjectUpdated') || "Subject updated successfully")
+      toast(t('subjectUpdated') || "Subject updated successfully")
     } catch (error) {
       console.error("Error updating subject:", error)
-      toast.error(t('subjectUpdateFailed') || "Failed to update subject")
+      toast(t('subjectUpdateFailed') || "Failed to update subject")
     }
   }
 
@@ -146,10 +136,10 @@ export default function CenterPresentation({ centerId }: any) {
       await subjectActions.markForDelete(subjectId)
       
       // ✅ No need to update local state - useLiveQuery auto-updates
-      toast.success(t('subjectDeleted') || "Subject deleted successfully")
+      toast(t('subjectDeleted') || "Subject deleted successfully")
     } catch (error) {
       console.error("Error deleting subject:", error)
-      toast.error(t('subjectDeleteFailed') || "Failed to delete subject")
+      toast(t('subjectDeleteFailed') || "Failed to delete subject")
     }
   }
 
@@ -166,10 +156,10 @@ export default function CenterPresentation({ centerId }: any) {
       await centerActions.putLocal(updatedCenter)
       
       // ✅ No need to update local state - useLiveQuery auto-updates
-      toast.success(t('classroomsUpdated') || "Classrooms updated successfully")
+      toast(t('classroomsUpdated') || "Classrooms updated successfully")
     } catch (error) {
       console.error("Error updating classrooms:", error)
-      toast.error(t('classroomsUpdateFailed') || "Failed to update classrooms")
+      toast(t('classroomsUpdateFailed') || "Failed to update classrooms")
     }
   }
 
@@ -186,10 +176,10 @@ export default function CenterPresentation({ centerId }: any) {
       await centerActions.putLocal(updatedCenter)
       
       // ✅ No need to update local state - useLiveQuery auto-updates
-      toast.success(t('workingDaysUpdated') || "Working days updated successfully")
+      toast(t('workingDaysUpdated') || "Working days updated successfully")
     } catch (error) {
       console.error("Error updating working days:", error)
-      toast.error(t('workingDaysUpdateFailed') || "Failed to update working days")
+      toast(t('workingDaysUpdateFailed') || "Failed to update working days")
     }
   }
 
@@ -199,10 +189,10 @@ export default function CenterPresentation({ centerId }: any) {
     try {
       const result = await ServerActionCenters.Sync()
       console.log("[CenterSync Debug] Result:", result)
-      toast.success(result?.message || "Center sync completed. See console for details.")
+      toast(result?.message || "Center sync completed. See console for details.")
     } catch (error) {
       console.error("[CenterSync Debug] Error:", error)
-      toast.error("Center sync failed. Check console for details.")
+      toast("Center sync failed. Check console for details.")
     } finally {
       setIsCenterDebugSyncing(false)
     }

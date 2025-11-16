@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// centerServerAction.ts
-
 import { centerActions } from "./dexieActions";
-import { Center } from "./dbSchema";
+import { Center, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 const api_url = `${baseUrl}/api/center`;
 
-// ✅ Transform server center data to match local Center interface
 function transformServerCenter(serverCenter: any): Center {
   return {
     id: serverCenter.id,
@@ -30,10 +27,8 @@ function transformServerCenter(serverCenter: any): Center {
 }
 
 const ServerActionCenters = {
-  // ✅ Save center to server (handles both create and update)
   async SaveToServer(center: Center) {
     try {
-      // Try POST first (create)
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,7 +46,6 @@ const ServerActionCenters = {
         }),
       });
 
-      // If POST fails with conflict, try PATCH (update)
       if (!response.ok && response.status === 409) {
         response = await fetch(api_url, {
           method: "PATCH",
@@ -94,54 +88,67 @@ const ServerActionCenters = {
     }
   },
 
+  // ✅ Optimized sync with bulk operations
   async Sync() {
     if (!isOnline()) {
       throw new Error("Cannot sync: device is offline");
     }
 
-    const waitingData = await centerActions.getByStatus(["0", "w"]);
-    if (waitingData.length === 0) return { message: "No centers to sync.", results: [] };
+    const { waiting, pending } = await centerActions.getSyncTargets();
+    
+    if (waiting.length === 0 && pending.length === 0) {
+      return { message: "No centers to sync.", results: [] };
+    }
 
     const results: Array<{ id: string; success: boolean; error?: string }> = [];
 
-    for (const center of waitingData) {
-      try {
-        if (center.status === "0") {
-          // Pending deletion
-          const result = await ServerActionCenters.DeleteFromServer(center.id);
-          if (result && result.ok) {
-            await centerActions.deleteLocal(center.id);
-            results.push({ id: center.id, success: true });
-          } else {
-            const errorMsg = result ? `Server returned ${result.status}` : "Network error";
-            results.push({ id: center.id, success: false, error: errorMsg });
-          }
-        } else if (center.status === "w") {
-          // Waiting to sync
-          const result = await ServerActionCenters.SaveToServer(center);
-          if (result) {
-            center.status = "1"; // Mark as synced
-            await centerActions.putLocal({
-              ...center,
-              ...(result.id && { id: result.id }),
-              ...(result.name && { name: result.name }),
-              ...(result.address !== undefined && { address: result.address }),
-              ...(result.phone !== undefined && { phone: result.phone }),
-              ...(result.classrooms && { classrooms: result.classrooms }),
-              ...(result.workingDays && { workingDays: result.workingDays }),
-              ...(result.managers && { managers: result.managers }),
-              status: '1' as const,
-              updatedAt: Date.now(),
-            });
-            results.push({ id: center.id, success: true });
-          } else {
-            results.push({ id: center.id, success: false, error: "Server request failed" });
-          }
+    // ✅ Process deletions in parallel
+    if (pending.length > 0) {
+      const deleteResults = await Promise.allSettled(
+        pending.map(center => ServerActionCenters.DeleteFromServer(center.id))
+      );
+
+      const successfulDeletes: string[] = [];
+      
+      deleteResults.forEach((result, index) => {
+        const center = pending[index];
+        if (result.status === 'fulfilled' && result.value?.ok) {
+          successfulDeletes.push(center.id);
+          results.push({ id: center.id, success: true });
+        } else {
+          const error = result.status === 'rejected' ? result.reason : 'Server error';
+          results.push({ id: center.id, success: false, error });
         }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error syncing center ${center.id}:`, error);
-        results.push({ id: center.id, success: false, error: errorMsg });
+      });
+
+      // ✅ Bulk delete from local DB
+      if (successfulDeletes.length > 0) {
+        await centerActions.bulkDeleteLocal(successfulDeletes);
+      }
+    }
+
+    // ✅ Process updates in parallel
+    if (waiting.length > 0) {
+      const updateResults = await Promise.allSettled(
+        waiting.map(center => ServerActionCenters.SaveToServer(center))
+      );
+
+      const successfulUpdates: string[] = [];
+      
+      updateResults.forEach((result, index) => {
+        const center = waiting[index];
+        if (result.status === 'fulfilled' && result.value) {
+          successfulUpdates.push(center.id);
+          results.push({ id: center.id, success: true });
+        } else {
+          const error = result.status === 'rejected' ? result.reason : 'Server error';
+          results.push({ id: center.id, success: false, error });
+        }
+      });
+
+      // ✅ Bulk mark as synced
+      if (successfulUpdates.length > 0) {
+        await centerActions.bulkMarkSynced(successfulUpdates);
       }
     }
 
@@ -170,6 +177,7 @@ const ServerActionCenters = {
     }
   },
 
+  // ✅ Optimized import with bulk operations and transaction
   async ImportFromServer() {
     if (!isOnline()) {
       throw new Error("Cannot import: device is offline");
@@ -177,29 +185,31 @@ const ServerActionCenters = {
 
     try {
       const data = await ServerActionCenters.ReadFromServer();
-      const syncedCenters = await centerActions.getByStatus(["1"]);
-      const backup = [...syncedCenters];
+      const transformedCenters = Array.isArray(data) 
+        ? data.map((center: any) => transformServerCenter(center))
+        : [];
       
-      try {
-        for (const center of syncedCenters) {
-          await centerActions.deleteLocal(center.id);
+      // ✅ Use transaction for atomicity
+      await localDb.transaction('rw', localDb.centers, async () => {
+        // Get existing synced centers
+        const syncedCenters = await centerActions.getByStatus(["1"]);
+        const syncedIds = syncedCenters.map(c => c.id);
+        
+        // Delete old synced records
+        if (syncedIds.length > 0) {
+          await centerActions.bulkDeleteLocal(syncedIds);
         }
         
-        const transformedCenters = Array.isArray(data) 
-          ? data.map((center: any) => transformServerCenter(center))
-          : [];
-        for (const center of transformedCenters) {
-          await centerActions.putLocal(center);
+        // Bulk insert new records
+        if (transformedCenters.length > 0) {
+          await centerActions.bulkPutLocal(transformedCenters);
         }
-        
-        return { message: `Imported ${transformedCenters.length} centers from server.`, count: transformedCenters.length };
-      } catch (error) {
-        console.error("Error during import, restoring backup:", error);
-        for (const center of backup) {
-          await centerActions.putLocal(center);
-        }
-        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
-      }
+      });
+      
+      return { 
+        message: `Imported ${transformedCenters.length} centers from server.`, 
+        count: transformedCenters.length 
+      };
     } catch (error) {
       console.error("Error importing from server:", error);
       throw error;

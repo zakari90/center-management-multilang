@@ -48,7 +48,7 @@ export interface Teacher extends SyncEntity {
   email?: string;
   phone?: string;
   address?: string;
-  weeklySchedule?: string[] | Record<string, any>; // Array of JSON strings or object
+  weeklySchedule?: string[] | Record<string, any>;
   managerId: string;
 }
 
@@ -133,43 +133,24 @@ export class AppDatabase extends Dexie {
     super('EducationAppDatabase');
 
     this.version(1).stores({
-      // Centers: query by admin, sync status
       centers: 
         'id, status, adminId, [status+updatedAt], updatedAt',
-
-      // Users: query by email (login), role, sync status
       users: 
         'id, &email, status, role, [status+updatedAt], updatedAt',
-
-      // Teachers: query by manager, email (lookup), sync status
       teachers: 
         'id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt',
-
-      // Students: query by manager, grade (filtering), email (lookup), sync status
       students: 
         'id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt',
-
-      // Subjects: query by center, grade (filtering), center+grade combo
       subjects: 
         'id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt',
-
-      // TeacherSubjects: query by teacher or subject, teacher+subject combo for relations
       teacherSubjects: 
         'id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt',
-
-      // StudentSubjects: query by student, subject, teacher, combinations for enrollment lookups
       studentSubjects: 
         'id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt',
-
-      // Receipts: query by receipt number (unique), manager, student, teacher, type, date ranges
       receipts: 
         'id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt',
-
-      // Schedules: query by teacher, subject, center, day, center+day combo for calendar views
       schedules: 
         'id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt',
-
-      // PushSubscriptions: query by endpoint (unique), user, role
       pushSubscriptions: 
         'id, &endpoint, status, userId, role, [status+updatedAt], updatedAt',
     });

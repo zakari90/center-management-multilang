@@ -14,8 +14,10 @@ export interface DexieActions<T extends SyncEntity> {
   getByStatus: (statuses: string[]) => Promise<T[]>;
   getLocal: (id: string) => Promise<T | undefined>;
   deleteLocal: (id: string) => Promise<void>;
+  bulkDeleteLocal: (ids: string[]) => Promise<void>;
   markForDelete: (id: string) => Promise<void>;
   markSynced: (id: string) => Promise<void>;
+  bulkMarkSynced: (ids: string[]) => Promise<void>;
   getSyncTargets: () => Promise<SyncTargets<T>>;
   getLocalByEmail?: (email: string) => Promise<T | undefined>;
 }
@@ -30,17 +32,20 @@ export function generateDexieActions<T extends SyncEntity>(
       return key as string;
     },
     
+    // ✅ Optimized bulk insert - 10-100x faster than individual puts
+    bulkPutLocal: async (items: T[]): Promise<string[]> => {
+      if (items.length === 0) return [];
+      const keys = await table.bulkPut(items, { allKeys: true });
+      return keys as string[];
+    },
+    
     getAll: async (): Promise<T[]> => {
       return await table
         .orderBy('updatedAt')
         .reverse()
         .toArray();
     },
-    bulkPutLocal: async (items: T[]): Promise<string[]> => {
-      if (items.length === 0) return [];
-      const keys = await table.bulkPut(items, { allKeys: true });
-      return keys as string[];
-    },
+    
     getByStatus: async (statuses: string[]): Promise<T[]> => {
       return await table
         .where('status')
@@ -48,17 +53,20 @@ export function generateDexieActions<T extends SyncEntity>(
         .toArray();
     },
     
-    // ✅ Use direct .get() for primary key - 10-100x faster
     getLocal: async (id: string): Promise<T | undefined> => {
       return await table.get(id);
     },
     
-    // ✅ Use direct .delete() for primary key
     deleteLocal: async (id: string): Promise<void> => {
       await table.delete(id);
     },
     
-    // ✅ Use .update() instead of .modify() for single records
+    // ✅ Bulk delete - much faster for cascade operations
+    bulkDeleteLocal: async (ids: string[]): Promise<void> => {
+      if (ids.length === 0) return;
+      await table.bulkDelete(ids);
+    },
+    
     markForDelete: async (id: string): Promise<void> => {
       await table.update(id, { 
         status: '0',
@@ -73,7 +81,18 @@ export function generateDexieActions<T extends SyncEntity>(
       } as any);
     },
     
-    // ✅ Use compound index for better performance
+    // ✅ Bulk mark synced for batch sync operations
+    bulkMarkSynced: async (ids: string[]): Promise<void> => {
+      if (ids.length === 0) return;
+      const now = Date.now();
+      await Promise.all(
+        ids.map(id => table.update(id, { 
+          status: '1',
+          updatedAt: now 
+        } as any))
+      );
+    },
+    
     getSyncTargets: async (): Promise<SyncTargets<T>> => {
       const waiting = await table
         .where('[status+updatedAt]')
@@ -89,7 +108,6 @@ export function generateDexieActions<T extends SyncEntity>(
     },
   };
   
-  // Only add email lookup if table has email field
   if (hasEmailField) {
     actions.getLocalByEmail = async (email: string): Promise<T | undefined> => {
       return await table.where('email').equals(email).first();
@@ -99,7 +117,7 @@ export function generateDexieActions<T extends SyncEntity>(
   return actions;
 }
 
-// Export with correct email flags
+// Export actions
 export const centerActions = generateDexieActions(localDb.centers, false);
 export const userActions = generateDexieActions(localDb.users, true);
 export const teacherActions = generateDexieActions(localDb.teachers, true);
@@ -110,3 +128,42 @@ export const studentSubjectActions = generateDexieActions(localDb.studentSubject
 export const receiptActions = generateDexieActions(localDb.receipts, false);
 export const scheduleActions = generateDexieActions(localDb.schedules, false);
 export const pushSubscriptionActions = generateDexieActions(localDb.pushSubscriptions, false);
+
+// ✅ Cascade delete helper for center with all related entities
+export async function deleteCenterWithRelations(centerId: string): Promise<void> {
+  const subjects = await subjectActions.getAll();
+  const centerSubjects = subjects.filter(s => s.centerId === centerId);
+  const subjectIds = centerSubjects.map(s => s.id);
+  
+  // Get all related entities that reference these subjects
+  const schedules = await scheduleActions.getAll();
+  const teacherSubjects = await teacherSubjectActions.getAll();
+  const studentSubjects = await studentSubjectActions.getAll();
+  
+  const relatedScheduleIds = schedules
+    .filter(s => s.centerId === centerId || subjectIds.includes(s.subjectId))
+    .map(s => s.id);
+  
+  const relatedTeacherSubjectIds = teacherSubjects
+    .filter(ts => subjectIds.includes(ts.subjectId))
+    .map(ts => ts.id);
+  
+  const relatedStudentSubjectIds = studentSubjects
+    .filter(ss => subjectIds.includes(ss.subjectId))
+    .map(ss => ss.id);
+  
+  // Mark everything for deletion in a single transaction
+  await localDb.transaction('rw', [
+    localDb.centers,
+    localDb.subjects,
+    localDb.schedules,
+    localDb.teacherSubjects,
+    localDb.studentSubjects
+  ], async () => {
+    await centerActions.markForDelete(centerId);
+    await Promise.all(subjectIds.map(id => subjectActions.markForDelete(id)));
+    await Promise.all(relatedScheduleIds.map(id => scheduleActions.markForDelete(id)));
+    await Promise.all(relatedTeacherSubjectIds.map(id => teacherSubjectActions.markForDelete(id)));
+    await Promise.all(relatedStudentSubjectIds.map(id => studentSubjectActions.markForDelete(id)));
+  });
+}

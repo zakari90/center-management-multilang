@@ -11,34 +11,29 @@ import { useEffect, useState, useCallback } from "react";
 function Page() {
   const [centerData, setCenterData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0); // ✅ Add refresh trigger
-  const { user } = useAuth(); // ✅ Use AuthContext instead of getSession
+  const { user } = useAuth();
 
-  // ✅ Extract fetch function so it can be called after center creation
   const fetchData = useCallback(async () => {
-      try {
+    try {
       setIsLoading(true);
-      // ✅ Use AuthContext user instead of getSession (which can't read httpOnly cookies)
+      
       if (!user) {
         setCenterData(null);
         setIsLoading(false);
         return;
       }
 
-      // Get all centers for this admin
       const centers = await centerActions.getAll();
-      const adminCenters = centers.filter(c => c.adminId === user.id);
+      const adminCenters = centers.filter(c => c.adminId === user.id && c.status !== '0');
       
       if (adminCenters.length === 0) {
-          setCenterData(null);
-        } else {
-        // Get the first center (most recent)
+        setCenterData(null);
+      } else {
         const center = adminCenters[0];
         
-        // ✅ Get subjects for this center from local DB
         const allSubjects = await subjectActions.getAll();
         const centerSubjects = allSubjects
-          .filter(s => s.centerId === center.id && s.status !== '0') // Exclude deleted
+          .filter(s => s.centerId === center.id && s.status !== '0')
           .map(s => ({
             id: s.id,
             name: s.name,
@@ -50,7 +45,6 @@ function Page() {
             centerId: s.centerId,
           }));
 
-        // Combine center with subjects to match API structure
         const centerWithSubjects: any = {
           id: center.id,
           name: center.name,
@@ -66,41 +60,17 @@ function Page() {
 
         setCenterData(centerWithSubjects);
       }
-      
-      // ✅ Commented out online fetch
-      // try {
-      //   const response = await axios.get(`/api/center`, {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   });
-      //   if (response.data.length === 0) {
-      //     setCenterData(null);
-      //   } else {
-      //     setCenterData(response.data[0]);
-      //   }
-      // } catch (error) {
-      //   console.error("Error fetching center data:", error);
-      //   setCenterData(null);
-      // }
-        
-      } catch (error) {
+    } catch (error) {
       console.error("Error fetching center data from local DB:", error);
-        setCenterData(null);
-      } finally {
-        setIsLoading(false);
-      }
-  }, [user]); // ✅ Add user as dependency
+      setCenterData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
 
-  // ✅ Fetch on mount and when refreshKey changes
   useEffect(() => {
     fetchData();
-  }, [fetchData, refreshKey]);
-
-  // ✅ Function to trigger refresh (can be passed to NewCenterForm)
-  const handleRefresh = useCallback(() => {
-    setRefreshKey(prev => prev + 1);
-  }, []);
+  }, [fetchData]);
   
   return (
     <div className="max-w-3xl mx-auto p-6">
@@ -109,11 +79,12 @@ function Page() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : centerData ? (
-        <CenterPresentation {...centerData} />
+        <CenterPresentation centerId={centerData.id} />
       ) : (
-        <NewCenterForm onCenterCreated={handleRefresh} />
+        <NewCenterForm />
       )}
     </div>
   );
 }
+
 export default Page;
