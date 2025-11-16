@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import EnrollmentChart from "@/components/enrollement-chart";
@@ -11,14 +12,27 @@ import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
 import { useTranslations } from "next-intl";
+import { importAllFromServer } from "@/lib/dexie/serverActions";
+import { useState } from "react";
 
 
 function Page() {
   const t = useTranslations('Dashboard')
   const isDevelopment = process.env.NODE_ENV === 'development';
+  const [data, setData] = useState<any>(null);
+  async function dataTest() {
+    const stats = await importAllFromServer();
+    setData(stats);
+  }
 
 return (
    <>
+   <div className="container mx-auto p-3 sm:p-6 space-y-6 bg-amber-300">
+
+   <button onClick={dataTest}>Data Test</button>
+   </div>
+
+   {data}
       <AutoSyncProvider />
       <div className="container mx-auto p-3 sm:p-6 space-y-6">
         <div>
