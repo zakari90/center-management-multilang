@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { EntitySyncControls } from "@/components/EntitySyncControls"
@@ -14,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { centerActions, subjectActions } from "@/lib/dexie/dexieActions"
 import { ServerActionCenters } from "@/lib/dexie/serverActions"
+import { Center, Subject } from "@/lib/dexie/dbSchema"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useLiveQuery } from "dexie-react-hooks"
 import { BookOpen, Building2, CalendarDays, Loader2, Pencil, Plus } from "lucide-react"
@@ -26,14 +26,18 @@ import { SubjectForm } from "./subjectForm"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog"
 import { useLocalizedConstants } from "./useLocalizedConstants"
 
+interface CenterPresentationProps {
+  centerId: string
+}
 
-export default function CenterPresentation({ centerId }: any) {
+export default function CenterPresentation({ centerId }: CenterPresentationProps) {
   const t = useTranslations('CenterPresentation')
-  const { availableSubjects, availableGrades } = useLocalizedConstants()
+  const { availableSubjects, availableGrades, availableClassrooms, daysOfWeek } = useLocalizedConstants()
 
   // ✅ Use useLiveQuery for real-time updates from IndexedDB
   const center = useLiveQuery(() => centerActions.getLocal(centerId), [centerId])
   
+  // ✅ Optimized: Filter by centerId and status in the query
   const subjects = useLiveQuery(async () => {
     const allSubjects = await subjectActions.getAll()
     return allSubjects.filter(s => s.centerId === centerId && s.status !== '0')
@@ -75,7 +79,7 @@ export default function CenterPresentation({ centerId }: any) {
       const now = Date.now()
       const subjectId = generateObjectId()
       
-      const newSubject: any = {
+      const newSubject: Subject = {
         id: subjectId,
         name: subjectName,
         grade,
@@ -99,7 +103,7 @@ export default function CenterPresentation({ centerId }: any) {
   }
 
   // ✅ Update subject - simplified
-  const handleUpdateSubject = async (subjectId: string, updatedData: Partial<any>) => {
+  const handleUpdateSubject = async (subjectId: string, updatedData: Partial<Pick<Subject, 'name' | 'grade' | 'price' | 'duration'>>) => {
     try {
       const existingSubject = await subjectActions.getLocal(subjectId)
       
@@ -108,7 +112,7 @@ export default function CenterPresentation({ centerId }: any) {
         return
       }
 
-      const updatedSubject: any = {
+      const updatedSubject: Subject = {
         ...existingSubject,
         name: updatedData.name ?? existingSubject.name,
         grade: updatedData.grade ?? existingSubject.grade,
@@ -145,8 +149,10 @@ export default function CenterPresentation({ centerId }: any) {
 
   // ✅ Update classrooms - simplified
   const handleSaveClassrooms = async () => {
+    if (!center) return
+    
     try {
-      const updatedCenter: any = {
+      const updatedCenter: Center = {
         ...center,
         classrooms: tempClassrooms,
         status: 'w',
@@ -165,8 +171,10 @@ export default function CenterPresentation({ centerId }: any) {
 
   // ✅ Update working days - simplified
   const handleSaveWorkingDays = async () => {
+    if (!center) return
+    
     try {
-      const updatedCenter: any = {
+      const updatedCenter: Center = {
         ...center,
         workingDays: tempWorkingDays,
         status: 'w',
@@ -306,7 +314,7 @@ export default function CenterPresentation({ centerId }: any) {
                   placeholder={t('classroomPlaceholder')}
                   items={tempClassrooms}
                   onChange={setTempClassrooms}
-                  suggestions={center.classrooms}
+                  suggestions={availableClassrooms}
                 />
               </EditDialog>
             }
@@ -333,7 +341,7 @@ export default function CenterPresentation({ centerId }: any) {
                   placeholder={t('dayPlaceholder')}
                   items={tempWorkingDays}
                   onChange={setTempWorkingDays}
-                  suggestions={center.workingDays}
+                  suggestions={daysOfWeek.map(day => day.key)}
                 />
               </EditDialog>
             }

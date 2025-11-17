@@ -1,24 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import CenterPresentation from "@/components/centerPresentation";
 import { NewCenterForm } from "@/components/newCenterForm";
-import { centerActions, subjectActions } from "@/lib/dexie/dexieActions";
+import { centerActions } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 
 function Page() {
-  const [centerData, setCenterData] = useState<any | null>(null);
+  const [centerId, setCenterId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
-  const fetchData = useCallback(async () => {
+  const fetchCenterId = useCallback(async () => {
     try {
       setIsLoading(true);
       
       if (!user) {
-        setCenterData(null);
+        setCenterId(null);
         setIsLoading(false);
         return;
       }
@@ -27,50 +26,27 @@ function Page() {
       const adminCenters = centers.filter(c => c.adminId === user.id && c.status !== '0');
       
       if (adminCenters.length === 0) {
-        setCenterData(null);
+        setCenterId(null);
       } else {
-        const center = adminCenters[0];
-        
-        const allSubjects = await subjectActions.getAll();
-        const centerSubjects = allSubjects
-          .filter(s => s.centerId === center.id && s.status !== '0')
-          .map(s => ({
-            id: s.id,
-            name: s.name,
-            grade: s.grade,
-            price: s.price,
-            duration: s.duration ?? null,
-            createdAt: new Date(s.createdAt).toISOString(),
-            updatedAt: new Date(s.updatedAt).toISOString(),
-            centerId: s.centerId,
-          }));
-
-        const centerWithSubjects: any = {
-          id: center.id,
-          name: center.name,
-          address: center.address,
-          phone: center.phone,
-          classrooms: center.classrooms,
-          workingDays: center.workingDays,
-          subjects: centerSubjects,
-          createdAt: new Date(center.createdAt).toISOString(),
-          updatedAt: new Date(center.updatedAt).toISOString(),
-          adminId: center.adminId,
-        };
-
-        setCenterData(centerWithSubjects);
+        // ✅ CenterPresentation uses useLiveQuery, so we only need the ID
+        setCenterId(adminCenters[0].id);
       }
     } catch (error) {
       console.error("Error fetching center data from local DB:", error);
-      setCenterData(null);
+      setCenterId(null);
     } finally {
       setIsLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchCenterId();
+  }, [fetchCenterId]);
+
+  // ✅ Callback to refresh after center creation
+  const handleCenterCreated = useCallback(() => {
+    fetchCenterId();
+  }, [fetchCenterId]);
   
   return (
     <div className="max-w-3xl mx-auto p-6">
@@ -78,10 +54,10 @@ function Page() {
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-      ) : centerData ? (
-        <CenterPresentation centerId={centerData.id} />
+      ) : centerId ? (
+        <CenterPresentation centerId={centerId} />
       ) : (
-        <NewCenterForm />
+        <NewCenterForm onCenterCreated={handleCenterCreated} />
       )}
     </div>
   );
