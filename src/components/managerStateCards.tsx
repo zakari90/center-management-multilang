@@ -12,7 +12,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/authContext'
-import { studentActions, teacherActions, subjectActions, receiptActions, studentSubjectActions } from '@/lib/dexie/_dexieActions'
+import { studentActions, teacherActions, subjectActions, receiptActions, studentSubjectActions } from '@/lib/dexie/dexieActions'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
 
 interface DashboardStats {

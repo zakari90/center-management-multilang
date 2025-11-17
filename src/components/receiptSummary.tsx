@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/authContext'
-import { receiptActions } from '@/lib/dexie/_dexieActions'
+import { receiptActions } from '@/lib/dexie/dexieActions'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
 
 interface ReceiptStats {

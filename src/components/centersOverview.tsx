@@ -44,7 +44,9 @@ export default function CenterOverview() {
     setIsLoading(true)
     try {
       // ✅ Fetch from local DB
-      const [allCenters, allStudents, allTeachers, allReceipts, allUsers] = await Promise.all([
+      const [allCenters, allStudents, allTeachers, allReceipts,
+        //  allUsers
+      ] = await Promise.all([
         centerActions.getAll(),
         studentActions.getAll(),
         teacherActions.getAll(),
@@ -57,7 +59,7 @@ export default function CenterOverview() {
       const activeStudents = allStudents.filter(s => s.status !== '0')
       const activeTeachers = allTeachers.filter(t => t.status !== '0')
       const activeReceipts = allReceipts.filter(r => r.status !== '0')
-      const activeUsers = allUsers.filter(u => u.status !== '0')
+      // const activeUsers = allUsers.filter(u => u.status !== '0')
 
       // ✅ Build centers data with stats
       const centersData: Center[] = activeCenters.map(center => {

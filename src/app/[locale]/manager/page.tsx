@@ -1,38 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import EnrollmentChart from "@/components/enrollement-chart";
-import QuickActions from "@/components/quickActions";
-import ReceiptsSummary from "@/components/receiptSummary";
-import ManagerRevenueChart from "@/components/managerrevenue-chart";
-import ManagerStatsCards from "@/components/managerStateCards";
-import TopSubjects from "@/components/top-subjects";
-import { SyncHandler } from "@/components/syncHandler";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+import EnrollmentChart from "@/components/enrollement-chart";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
+import ManagerRevenueChart from "@/components/managerrevenue-chart";
+import ManagerStatsCards from "@/components/managerStateCards";
+import QuickActions from "@/components/quickActions";
+import ReceiptsSummary from "@/components/receiptSummary";
+import { SyncHandler } from "@/components/syncHandler";
+import TopSubjects from "@/components/top-subjects";
 import { useTranslations } from "next-intl";
-import { importAllFromServer } from "@/lib/dexie/serverActions";
-import { useState } from "react";
 
 
 function Page() {
   const t = useTranslations('Dashboard')
   const isDevelopment = process.env.NODE_ENV === 'development';
-  const [data, setData] = useState<any>(null);
-  async function dataTest() {
-    const stats = await importAllFromServer();
-    setData(stats);
-  }
 
 return (
    <>
-   <div className="container mx-auto p-3 sm:p-6 space-y-6 bg-amber-300">
 
-   <button onClick={dataTest}>Data Test</button>
-   </div>
-
-   {data}
       <AutoSyncProvider />
       <div className="container mx-auto p-3 sm:p-6 space-y-6">
         <div>

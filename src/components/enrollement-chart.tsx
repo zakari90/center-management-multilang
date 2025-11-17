@@ -17,7 +17,7 @@ import {
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/context/authContext'
-import { studentSubjectActions, subjectActions, studentActions } from '@/lib/dexie/_dexieActions'
+import { studentSubjectActions, subjectActions, studentActions } from '@/lib/dexie/dexieActions'
 
 interface SubjectEnrollment {
   subject: string
