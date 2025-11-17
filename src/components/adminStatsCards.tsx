@@ -2,7 +2,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB instead
 import {
   DollarSign,
   TrendingUp,
@@ -11,6 +11,13 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
+import { 
+  userActions, 
+  studentActions, 
+  teacherActions, 
+  receiptActions 
+} from '@/lib/dexie/dexieActions'
+import { Role } from '@/lib/dexie/dbSchema'
 
 interface AdminStats {
   totalCenters: number
@@ -32,10 +39,60 @@ export default function AdminStatsCards() {
     setIsLoading(true)
     setError(null)
     try {
-      const { data } = await axios.get('/api/admin/dashboard/stats')
-      setStats(data)
+      // ✅ Fetch from local DB
+      const [allUsers, allStudents, allTeachers, allReceipts] = await Promise.all([
+        userActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        receiptActions.getAll()
+      ])
+
+      // ✅ Filter active entities (exclude deleted)
+      const activeUsers = allUsers.filter(u => u.status !== '0')
+      const activeStudents = allStudents.filter(s => s.status !== '0')
+      const activeTeachers = allTeachers.filter(t => t.status !== '0')
+      const activeReceipts = allReceipts.filter(r => r.status !== '0')
+
+      // ✅ Calculate stats
+      const totalManagers = activeUsers.filter(u => u.role === Role.MANAGER).length
+      const totalStudents = activeStudents.length
+      const totalTeachers = activeTeachers.length
+
+      // ✅ Calculate revenue
+      const totalRevenue = activeReceipts.reduce((sum, r) => sum + r.amount, 0)
+      
+      // ✅ Calculate monthly revenue (current month)
+      const now = new Date()
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
+      const monthlyReceipts = activeReceipts.filter(r => r.date >= currentMonthStart)
+      const monthlyRevenue = monthlyReceipts.reduce((sum, r) => sum + r.amount, 0)
+
+      // ✅ Calculate revenue growth (compare with previous month)
+      const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime()
+      const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0).getTime()
+      const previousMonthReceipts = activeReceipts.filter(r => 
+        r.date >= previousMonthStart && r.date <= previousMonthEnd
+      )
+      const previousMonthRevenue = previousMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
+      const revenueGrowth = previousMonthRevenue > 0 
+        ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 
+        : 0
+
+      setStats({
+        totalCenters: 0, // Centers are managed separately
+        totalManagers,
+        totalStudents,
+        totalTeachers,
+        totalRevenue,
+        monthlyRevenue,
+        revenueGrowth
+      })
+
+      // ✅ Commented out API call
+      // const { data } = await axios.get('/api/admin/dashboard/stats')
+      // setStats(data)
     } catch (err) {
-      console.error('Failed to fetch stats:', err)
+      console.error('Failed to fetch stats from local DB:', err)
       setError('Failed to load statistics')
     } finally {
       setIsLoading(false)

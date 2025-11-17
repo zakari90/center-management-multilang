@@ -4,7 +4,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB instead
 import {
   Building2,
   Loader2,
@@ -13,7 +13,14 @@ import {
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { 
+  userActions, 
+  centerActions, 
+  studentActions, 
+  teacherActions 
+} from '@/lib/dexie/dexieActions'
+import { Role } from '@/lib/dexie/dbSchema'
 
 interface Manager {
   id: string
@@ -29,20 +36,67 @@ export default function ManagersList() {
   const [managers, setManagers] = useState<Manager[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    fetchManagers()
-  }, [])
-
-  const fetchManagers = async () => {
+  const fetchManagers = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const { data } = await axios.get('/api/admin/managers')
-      setManagers(data)
+      // ✅ Fetch from local DB
+      const [allUsers, allCenters, allStudents, allTeachers] = await Promise.all([
+        userActions.getAll(),
+        centerActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll()
+      ])
+
+      // ✅ Filter active entities
+      const activeUsers = allUsers.filter(u => u.status !== '0')
+      const activeCenters = allCenters.filter(c => c.status !== '0')
+      const activeStudents = allStudents.filter(s => s.status !== '0')
+      const activeTeachers = allTeachers.filter(t => t.status !== '0')
+
+      // ✅ Get managers only
+      const managers = activeUsers.filter(u => u.role === Role.MANAGER)
+
+      // ✅ Build managers data with stats
+      const managersData: Manager[] = managers.map(manager => {
+        // Count centers where this manager is in managers array
+        const centersCount = activeCenters.filter(c => 
+          (c.managers || []).includes(manager.id)
+        ).length
+
+        // Count students and teachers for this manager
+        const studentsCount = activeStudents.filter(s => 
+          s.managerId === manager.id
+        ).length
+
+        const teachersCount = activeTeachers.filter(t => 
+          t.managerId === manager.id
+        ).length
+
+        return {
+          id: manager.id,
+          name: manager.name,
+          email: manager.email,
+          centersCount,
+          studentsCount,
+          teachersCount
+        }
+      })
+
+      setManagers(managersData)
+
+      // ✅ Commented out API call
+      // const { data } = await axios.get('/api/admin/managers')
+      // setManagers(data)
     } catch (err) {
-      console.error('Failed to fetch managers:', err)
+      console.error('Failed to fetch managers from local DB:', err)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchManagers()
+  }, [fetchManagers])
 
   return (
     <Card>

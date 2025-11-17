@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB instead
 import {
   Building2,
   Coins,
@@ -15,7 +15,15 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { 
+  centerActions, 
+  studentActions, 
+  teacherActions, 
+  receiptActions,
+  userActions 
+} from '@/lib/dexie/dexieActions'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
 
 interface Center {
   id: string
@@ -32,20 +40,74 @@ export default function CenterOverview() {
   const [centers, setCenters] = useState<Center[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    fetchCenters()
-  }, [])
-
-  const fetchCenters = async () => {
+  const fetchCenters = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const { data } = await axios.get('/api/admin/centers')
-      setCenters(data)
+      // ✅ Fetch from local DB
+      const [allCenters, allStudents, allTeachers, allReceipts, allUsers] = await Promise.all([
+        centerActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        receiptActions.getAll(),
+        userActions.getAll()
+      ])
+
+      // ✅ Filter active entities
+      const activeCenters = allCenters.filter(c => c.status !== '0')
+      const activeStudents = allStudents.filter(s => s.status !== '0')
+      const activeTeachers = allTeachers.filter(t => t.status !== '0')
+      const activeReceipts = allReceipts.filter(r => r.status !== '0')
+      const activeUsers = allUsers.filter(u => u.status !== '0')
+
+      // ✅ Build centers data with stats
+      const centersData: Center[] = activeCenters.map(center => {
+        // Get manager IDs for this center
+        const managerIds = center.managers || []
+        
+        // Count students and teachers for managers in this center
+        const studentsCount = activeStudents.filter(s => 
+          managerIds.includes(s.managerId)
+        ).length
+        
+        const teachersCount = activeTeachers.filter(t => 
+          managerIds.includes(t.managerId)
+        ).length
+
+        // Calculate revenue from receipts for managers in this center
+        const centerReceipts = activeReceipts.filter(r => 
+          managerIds.includes(r.managerId) && r.type === ReceiptType.STUDENT_PAYMENT
+        )
+        const revenue = centerReceipts.reduce((sum, r) => sum + r.amount, 0)
+
+        // Count managers
+        const managersCount = managerIds.length
+
+        return {
+          id: center.id,
+          name: center.name,
+          address: center.address || null,
+          studentsCount,
+          teachersCount,
+          revenue,
+          managersCount
+        }
+      })
+
+      setCenters(centersData)
+
+      // ✅ Commented out API call
+      // const { data } = await axios.get('/api/admin/centers')
+      // setCenters(data)
     } catch (err) {
-      console.error('Failed to fetch centers:', err)
+      console.error('Failed to fetch centers from local DB:', err)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchCenters()
+  }, [fetchCenters])
 
   const totalRevenue = centers.reduce((sum, c) => sum + c.revenue, 0)
 
