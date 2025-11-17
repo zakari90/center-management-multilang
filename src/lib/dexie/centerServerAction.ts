@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { centerActions } from "./dexieActions";
+import { centerActions, subjectActions } from "./dexieActions";
 import { Center, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
@@ -29,6 +29,18 @@ function transformServerCenter(serverCenter: any): Center {
 const ServerActionCenters = {
   async SaveToServer(center: Center) {
     try {
+      // ✅ Fetch all subjects for this center (exclude deleted)
+      const allSubjects = await subjectActions.getAll();
+      const centerSubjects = allSubjects
+        .filter(s => s.centerId === center.id && s.status !== '0')
+        .map(s => ({
+          centerId: s.centerId,
+          name: s.name,
+          grade: s.grade,
+          price: s.price,
+          duration: s.duration,
+        }));
+
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,7 +52,7 @@ const ServerActionCenters = {
           phone: center.phone,
           classrooms: center.classrooms,
           workingDays: center.workingDays,
-          subjects: [],
+          subjects: centerSubjects, // ✅ Include actual subjects
           createdAt: new Date(center.createdAt).toISOString(),
           updatedAt: new Date(center.updatedAt).toISOString(),
         }),
@@ -58,6 +70,7 @@ const ServerActionCenters = {
             phone: center.phone,
             classrooms: center.classrooms,
             workingDays: center.workingDays,
+            subjects: centerSubjects, // ✅ Include subjects in PATCH too
             updatedAt: new Date(center.updatedAt).toISOString(),
           }),
         });
@@ -149,6 +162,24 @@ const ServerActionCenters = {
       // ✅ Bulk mark as synced
       if (successfulUpdates.length > 0) {
         await centerActions.bulkMarkSynced(successfulUpdates);
+        
+        // ✅ Also mark subjects as synced for successfully synced centers
+        const allSubjects = await subjectActions.getAll();
+        const subjectsToMarkSynced = allSubjects.filter(s => 
+          successfulUpdates.includes(s.centerId) && s.status === 'w'
+        );
+        
+        if (subjectsToMarkSynced.length > 0) {
+          await Promise.all(
+            subjectsToMarkSynced.map(subject => 
+              subjectActions.putLocal({
+                ...subject,
+                status: '1' as const,
+                updatedAt: Date.now(),
+              })
+            )
+          );
+        }
       }
     }
 

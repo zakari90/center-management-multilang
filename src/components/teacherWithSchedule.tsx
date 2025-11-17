@@ -1,9 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { FileSpreadsheet, FileText } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { useState, useEffect, useCallback } from 'react'
+// import axios from 'axios' // ✅ Commented out - using local DB instead
+import { teacherActions, scheduleActions, subjectActions } from '@/lib/dexie/dexieActions'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -91,7 +90,7 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 
 // ==================== HELPER FUNCTIONS ====================
 
-const parseWeeklySchedule = (schedule: any): WeeklyScheduleSlot[] => {
+const parseWeeklySchedule = (schedule: WeeklyScheduleSlot[] | string | Record<string, unknown> | undefined): WeeklyScheduleSlot[] => {
   if (!schedule) return []
   if (Array.isArray(schedule)) return schedule
   if (typeof schedule === 'string') {
@@ -128,7 +127,7 @@ const timeToPosition = (time: string): number => {
 }
 
 // Export functions with translations
-const exportTeacherSchedule = (teacher: TeacherWithSchedule, t: any) => {
+const exportTeacherSchedule = (teacher: TeacherWithSchedule, t: ReturnType<typeof useTranslations<'TeacherScheduleView'>>) => {
   let text = `${t('title')} - ${teacher.name}\n`
   text += `${'='.repeat(50)}\n\n`
   text += `Email: ${teacher.email || 'N/A'}\n`
@@ -196,7 +195,7 @@ const exportTeacherSchedule = (teacher: TeacherWithSchedule, t: any) => {
   URL.revokeObjectURL(url)
 }
 
-const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: any) => {
+const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: ReturnType<typeof useTranslations<'TeacherScheduleView'>>) => {
   const workbook = new ExcelJS.Workbook()
 
   // ==================== Sheet 1: Teacher Info ====================
@@ -385,7 +384,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: any
   weeklySheet.getRow(1).fill = { type: 'pattern' as const, pattern: 'solid', fgColor: { argb: 'FF4472C4' } }
 
   timeSlots.forEach(time => {
-    const row: any = { time }
+    const row: Record<string, string> = { time }
     
     DAYS.forEach(day => {
       const schedule = teacher.schedules.find(
@@ -435,26 +434,90 @@ export default function TeacherScheduleView() {
   const [error, setError] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'timeline'>('grid')
 
-  useEffect(() => {
-    fetchTeacherSchedules()
-  }, [])
-
-  const fetchTeacherSchedules = async () => {
+  const fetchTeacherSchedules = useCallback(async () => {
     try {
-      const [teachersRes, schedulesRes] = await Promise.all([
-        axios.get('/api/admin/teachers'),
-        axios.get(`/api/admin/schedule`)
-      ])
-      const teachersData: Teacher[] = teachersRes.data
-      const schedulesData: Schedule[] = schedulesRes.data
-console.log("--------------------------------------------");
-console.log(teachersRes, schedulesRes);
+      setIsLoading(true)
+      setError('')
 
+      // ✅ Fetch from local DB (all entities in parallel)
+      const [allTeachers, allSchedules, allSubjects] = await Promise.all([
+        teacherActions.getAll(),
+        scheduleActions.getAll(),
+        subjectActions.getAll()
+      ])
+
+      // ✅ Filter active entities (exclude deleted)
+      const activeTeachers = allTeachers.filter(t => t.status !== '0')
+      const activeSchedules = allSchedules.filter(s => s.status !== '0')
+      const activeSubjects = allSubjects.filter(s => s.status !== '0')
+
+      // ✅ Build schedules with related data (teacher and subject)
+      const schedulesWithData: Schedule[] = activeSchedules.map(schedule => {
+        const teacher = activeTeachers.find(t => t.id === schedule.teacherId)
+        const subject = activeSubjects.find(s => s.id === schedule.subjectId)
+
+        // ✅ Convert weeklySchedule to proper type
+        const teacherWeeklySchedule = teacher?.weeklySchedule
+          ? (typeof teacher.weeklySchedule === 'string' 
+              ? teacher.weeklySchedule 
+              : Array.isArray(teacher.weeklySchedule)
+              ? teacher.weeklySchedule as WeeklyScheduleSlot[]
+              : undefined)
+          : undefined
+
+        return {
+          id: schedule.id,
+          day: schedule.day,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          roomId: schedule.roomId,
+          teacherId: schedule.teacherId,
+          subjectId: schedule.subjectId,
+          teacher: teacher ? {
+            id: teacher.id,
+            name: teacher.name,
+            email: teacher.email,
+            weeklySchedule: teacherWeeklySchedule
+          } : {
+            id: schedule.teacherId,
+            name: 'Unknown Teacher',
+            weeklySchedule: undefined
+          },
+          subject: subject ? {
+            id: subject.id,
+            name: subject.name,
+            grade: subject.grade
+          } : {
+            id: schedule.subjectId,
+            name: 'Unknown Subject',
+            grade: 'N/A'
+          }
+        }
+      })
+
+      // ✅ Build teachers data (matching API structure)
+      const teachersData: Teacher[] = activeTeachers.map(teacher => {
+        // ✅ Convert weeklySchedule to proper type
+        const weeklySchedule = teacher.weeklySchedule
+          ? (typeof teacher.weeklySchedule === 'string'
+              ? teacher.weeklySchedule
+              : Array.isArray(teacher.weeklySchedule)
+              ? teacher.weeklySchedule as WeeklyScheduleSlot[]
+              : undefined)
+          : undefined
+
+        return {
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email,
+          phone: teacher.phone,
+          weeklySchedule
+        }
+      })
+
+      // ✅ Build teachers with schedules and calculations
       const teachersWithSchedules: TeacherWithSchedule[] = teachersData.map((teacher) => {
-      console.log("-----------------------2-");
-      console.log(teacher)
-      
-        const teacherSchedules = schedulesData.filter(
+        const teacherSchedules = schedulesWithData.filter(
           (s) => s.teacherId === teacher.id
         )
 
@@ -495,13 +558,25 @@ console.log(teachersRes, schedulesRes);
       if (teachersWithSchedules.length > 0) {
         setSelectedTeacherId(teachersWithSchedules[0].id)
       }
+
+      // ✅ Commented out API calls
+      // const [teachersRes, schedulesRes] = await Promise.all([
+      //   axios.get('/api/admin/teachers'),
+      //   axios.get(`/api/admin/schedule`)
+      // ])
+      // const teachersData: Teacher[] = teachersRes.data
+      // const schedulesData: Schedule[] = schedulesRes.data
     } catch (err) {
-      console.error('Failed to fetch teacher schedules:', err)
+      console.error('Failed to fetch teacher schedules from local DB:', err)
       setError(t('errorLoadSchedules'))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    fetchTeacherSchedules()
+  }, [fetchTeacherSchedules])
 
   if (isLoading) {
     return (
@@ -519,7 +594,7 @@ console.log(teachersRes, schedulesRes);
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
+          <Select value={viewMode} onValueChange={(value: 'grid' | 'list' | 'timeline') => setViewMode(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
             </SelectTrigger>

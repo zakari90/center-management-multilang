@@ -53,7 +53,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import axios from 'axios' // Still used for fetchAllData, handleDelete, handleSaveEdit
+// import axios from 'axios' // ✅ Commented out - using local DB instead
 import { format } from 'date-fns'
 import {
   Calendar,
@@ -72,9 +72,17 @@ import {
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { userActions, centerActions } from '@/lib/dexie/dexieActions'
+import { 
+  userActions, 
+  centerActions, 
+  teacherActions, 
+  studentActions,
+  teacherSubjectActions,
+  studentSubjectActions,
+  receiptActions
+} from '@/lib/dexie/dexieActions'
 import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { Role } from '@/lib/dexie/dbSchema'
 import { useAuth } from '@/context/authContext'
@@ -170,29 +178,147 @@ export default function AllUsersTable() {
 
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    fetchAllData()
-  }, [])
-
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     setIsLoading(true)
+    setError('')
     try {
-      const [usersRes, teachersRes, studentsRes] = await Promise.all([
-        axios.get('/api/admin/users'),
-        axios.get('/api/admin/teachers'),
-        axios.get('/api/admin/students')
+      // ✅ Fetch all data from local DB
+      const [allUsers, allTeachers, allStudents, allCenters, allTeacherSubjects, allStudentSubjects, allReceipts] = await Promise.all([
+        userActions.getAll(),
+        teacherActions.getAll(),
+        studentActions.getAll(),
+        centerActions.getAll(),
+        teacherSubjectActions.getAll(),
+        studentSubjectActions.getAll(),
+        receiptActions.getAll()
       ])
-      
-      setUsers(usersRes.data)
-      setTeachers(teachersRes.data)
-      setStudents(studentsRes.data)
+
+      // ✅ Filter active entities (exclude deleted)
+      const activeUsers = allUsers.filter(u => u.status !== '0')
+      const activeTeachers = allTeachers.filter(t => t.status !== '0')
+      const activeStudents = allStudents.filter(s => s.status !== '0')
+      const activeCenters = allCenters.filter(c => c.status !== '0')
+      const activeTeacherSubjects = allTeacherSubjects.filter(ts => ts.status !== '0')
+      const activeStudentSubjects = allStudentSubjects.filter(ss => ss.status !== '0')
+      const activeReceipts = allReceipts.filter(r => r.status !== '0')
+
+      // ✅ Build users data with stats
+      const usersData: UserData[] = activeUsers.map(user => {
+        // Count centers for admins
+        const centers = user.role === Role.ADMIN 
+          ? activeCenters.filter(c => c.adminId === user.id).length
+          : 0
+        
+        // Count students and teachers for managers
+        const students = user.role === Role.MANAGER
+          ? activeStudents.filter(s => s.managerId === user.id).length
+          : 0
+        
+        const teachers = user.role === Role.MANAGER
+          ? activeTeachers.filter(t => t.managerId === user.id).length
+          : 0
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role as 'ADMIN' | 'MANAGER',
+          password: user.password,
+          createdAt: new Date(user.createdAt).toISOString(),
+          isActive: user.status === '1',
+          stats: {
+            centers,
+            students,
+            teachers
+          }
+        }
+      })
+
+      // ✅ Build teachers data with manager and stats
+      const teachersData: TeacherData[] = activeTeachers.map(teacher => {
+        const manager = activeUsers.find(u => u.id === teacher.managerId)
+        
+        const teacherSubs = activeTeacherSubjects.filter(ts => ts.teacherId === teacher.id)
+        const studentSubs = activeStudentSubjects.filter(ss => ss.teacherId === teacher.id)
+        const teacherReceipts = activeReceipts.filter(r => r.teacherId === teacher.id)
+
+        return {
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email || null,
+          phone: teacher.phone || null,
+          address: teacher.address || null,
+          createdAt: new Date(teacher.createdAt).toISOString(),
+          manager: manager ? {
+            id: manager.id,
+            name: manager.name
+          } : {
+            id: teacher.managerId,
+            name: 'Unknown Manager'
+          },
+          stats: {
+            subjects: teacherSubs.length,
+            students: studentSubs.length,
+            receipts: teacherReceipts.length
+          }
+        }
+      })
+
+      // ✅ Build students data with manager and stats
+      const studentsData: StudentData[] = activeStudents.map(student => {
+        const manager = activeUsers.find(u => u.id === student.managerId)
+        
+        const studentSubs = activeStudentSubjects.filter(ss => ss.studentId === student.id)
+        const studentReceipts = activeReceipts.filter(r => r.studentId === student.id)
+
+        return {
+          id: student.id,
+          name: student.name,
+          email: student.email || null,
+          phone: student.phone || null,
+          parentName: student.parentName || null,
+          parentPhone: student.parentPhone || null,
+          parentEmail: student.parentEmail || null,
+          grade: student.grade || null,
+          createdAt: new Date(student.createdAt).toISOString(),
+          manager: manager ? {
+            id: manager.id,
+            name: manager.name
+          } : {
+            id: student.managerId,
+            name: 'Unknown Manager'
+          },
+          stats: {
+            subjects: studentSubs.length,
+            receipts: studentReceipts.length
+          }
+        }
+      })
+
+      setUsers(usersData)
+      setTeachers(teachersData)
+      setStudents(studentsData)
+
+      // ✅ Commented out API calls
+      // const [usersRes, teachersRes, studentsRes] = await Promise.all([
+      //   axios.get('/api/admin/users'),
+      //   axios.get('/api/admin/teachers'),
+      //   axios.get('/api/admin/students')
+      // ])
+      // setUsers(usersRes.data)
+      // setTeachers(teachersRes.data)
+      // setStudents(studentsRes.data)
     } catch (err) {
-      console.error('Failed to fetch data:', err)
+      console.error('Failed to fetch data from local DB:', err)
       setError(t('errorLoadData'))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    fetchAllData()
+  }, [fetchAllData])
 
   const togglePasswordVisibility = (id: string) => {
     setVisiblePasswords((prev) => ({
@@ -206,26 +332,30 @@ export default function AllUsersTable() {
     
     setIsProcessing(true)
     try {
-      const endpoint = itemToDelete.type === 'user' 
-        ? `/api/admin/users/${itemToDelete.id}`
-        : itemToDelete.type === 'teacher'
-        ? `/api/admin/teachers/${itemToDelete.id}`
-        : `/api/admin/students/${itemToDelete.id}`
-      
-      await axios.delete(endpoint)
-      
+      // ✅ Mark for delete in local DB (soft delete)
       if (itemToDelete.type === 'user') {
+        await userActions.markForDelete(itemToDelete.id)
         setUsers(prev => prev.filter(u => u.id !== itemToDelete.id))
       } else if (itemToDelete.type === 'teacher') {
+        await teacherActions.markForDelete(itemToDelete.id)
         setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id))
       } else {
+        await studentActions.markForDelete(itemToDelete.id)
         setStudents(prev => prev.filter(s => s.id !== itemToDelete.id))
       }
       
       toast(`${t(itemToDelete.type)} ${t('deletedSuccess')}`)
       setItemToDelete(null)
+
+      // ✅ Commented out API call
+      // const endpoint = itemToDelete.type === 'user' 
+      //   ? `/api/admin/users/${itemToDelete.id}`
+      //   : itemToDelete.type === 'teacher'
+      //   ? `/api/admin/teachers/${itemToDelete.id}`
+      //   : `/api/admin/students/${itemToDelete.id}`
+      // await axios.delete(endpoint)
     } catch (err) {
-      console.error('Failed to delete:', err)
+      console.error('Failed to delete from local DB:', err)
       toast(`${t('deletedError')} ${t(itemToDelete.type)}`)
     } finally {
       setIsProcessing(false)
@@ -284,27 +414,14 @@ export default function AllUsersTable() {
         })
       }
 
-      // ✅ Update local state to show new manager
-      // const managerForDisplay: UserData = {
-      //   id: managerId,
-      //   name: userFormData.name,
-      //   email: userFormData.email,
-      //   role: 'MANAGER',
-      //   createdAt: new Date(now).toISOString(),
-      //   isActive: true,
-      //   stats: {
-      //     centers: 0,
-      //     students: 0,
-      //     teachers: 0,
-      //   }
-      // }
-
-      // setUsers(prev => [...prev, managerForDisplay])
       setIsAddDialogOpen(false)
       setUserFormData({ name: '', email: '', password: '', role: 'MANAGER' })
       toast(t('userAddedSuccess'))
+      
+      // ✅ Refresh data to show new manager
+      await fetchAllData()
 
-      // ✅ Commented out online creation
+      // ✅ Commented out API calls
       // const response = await axios.post('/api/admin/users', userFormData)
       // Alternative endpoint: await axios.post('/api/manager/register', { 
       //   email: userFormData.email,
@@ -335,22 +452,46 @@ export default function AllUsersTable() {
 
     setIsProcessing(true)
     try {
-      const response = await axios.put(`/api/admin/users/${editingUser.id}`, {
+      // ✅ Get existing user from local DB
+      const existingUser = await userActions.getLocal(editingUser.id)
+      if (!existingUser) {
+        toast(t('userNotFound') || 'User not found')
+        setIsProcessing(false)
+        return
+      }
+
+      // ✅ Update user in local DB and mark for sync
+      const updatedUser = {
+        ...existingUser,
         name: editingUser.name,
         email: editingUser.email,
-        role: editingUser.role,
-        ...(editingUser.password && { password: editingUser.password })
-      })
+        role: editingUser.role as Role,
+        ...(editingUser.password && { password: editingUser.password }),
+        status: 'w' as const, // Mark as waiting for sync
+        updatedAt: Date.now()
+      }
 
-      setUsers(prev =>
-        prev.map(u => u.id === editingUser.id ? { ...u, ...response.data } : u)
-      )
+      await userActions.putLocal(updatedUser)
+
+      // ✅ Refresh data to show updated user
+      await fetchAllData()
       
       setIsEditDialogOpen(false)
       setEditingUser(null)
       toast(t('userUpdatedSuccess'))
+
+      // ✅ Commented out API call
+      // const response = await axios.put(`/api/admin/users/${editingUser.id}`, {
+      //   name: editingUser.name,
+      //   email: editingUser.email,
+      //   role: editingUser.role,
+      //   ...(editingUser.password && { password: editingUser.password })
+      // })
+      // setUsers(prev =>
+      //   prev.map(u => u.id === editingUser.id ? { ...u, ...response.data } : u)
+      // )
     } catch (err) {
-      console.error('Failed to update user:', err)
+      console.error('Failed to update user in local DB:', err)
       toast(t('userUpdatedError'))
     } finally {
       setIsProcessing(false)
