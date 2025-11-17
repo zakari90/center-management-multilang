@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -28,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import axios from 'axios'
+import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
 import {
   Coins,
   Loader2,
@@ -39,10 +37,13 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Receipt {
-  manager: any
+  manager?: {
+    id: string
+    name: string
+  }
   id: string
   receiptNumber: string
   amount: number
@@ -72,22 +73,70 @@ export default function AdminReceiptsTable() {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [methodFilter, setMethodFilter] = useState<string>('all')
 
-  useEffect(() => {
-    fetchReceipts()
-  }, [])
-
-  const fetchReceipts = async () => {
+  const fetchReceipts = useCallback(async () => {
     try {
-      const { data } = await axios.get('/api/receipts')
-      setReceipts(data)
+      setIsLoading(true)
+      setError('')
+
+      // ✅ Fetch from local DB (all entities in parallel)
+      const [allReceipts, allStudents, allTeachers, allUsers] = await Promise.all([
+        receiptActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        userActions.getAll()
+      ])
+
+      // ✅ Filter receipts by status (exclude deleted)
+      const activeReceipts = allReceipts.filter(r => r.status !== '0')
+
+      // ✅ Build receipts with related data (admin view - show all receipts)
+      const receiptsWithData: Receipt[] = activeReceipts.map(receipt => {
+        const student = receipt.studentId 
+          ? allStudents.find(s => s.id === receipt.studentId && s.status !== '0')
+          : null
+        const teacher = receipt.teacherId
+          ? allTeachers.find(t => t.id === receipt.teacherId && t.status !== '0')
+          : null
+        const manager = allUsers.find(u => u.id === receipt.managerId && u.status !== '0')
+
+        return {
+          id: receipt.id,
+          receiptNumber: receipt.receiptNumber,
+          amount: receipt.amount,
+          type: receipt.type,
+          paymentMethod: receipt.paymentMethod ?? null,
+          description: receipt.description ?? null,
+          date: new Date(receipt.date).toISOString(),
+          createdAt: new Date(receipt.createdAt).toISOString(),
+          manager: manager ? {
+            id: manager.id,
+            name: manager.name,
+          } : undefined,
+          student: student ? {
+            id: student.id,
+            name: student.name,
+            grade: student.grade ?? null,
+          } : undefined,
+          teacher: teacher ? {
+            id: teacher.id,
+            name: teacher.name,
+          } : undefined,
+        }
+      })
+      // const { data } = await axios.get('/api/receipts')
+
+      setReceipts(receiptsWithData)
     } catch (err) {
-      console.log(err);
-      
+      console.error('Error fetching receipts from local DB:', err)
       setError(t('errorFetchReceipts'))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    fetchReceipts()
+  }, [fetchReceipts])
 
   const filteredReceipts = receipts.filter(receipt => {
     const matchesSearch = 

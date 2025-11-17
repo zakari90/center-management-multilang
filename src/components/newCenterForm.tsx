@@ -8,20 +8,21 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { centerActions, subjectActions } from "@/lib/dexie/_dexieActions"
+import { centerActions, subjectActions } from "@/lib/dexie/dexieActions"
+import { Center, Subject } from "@/lib/dexie/dbSchema"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { Separator } from "@radix-ui/react-separator"
 import { useTranslations } from "next-intl"
-// import { useRouter } from "next/navigation" // ✅ Commented out - not used
 import type React from "react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { SubjectFormMultipleChoices } from "./subjectForm"
 import { useLocalizedConstants } from "./useLocalizedConstants"
 import { useAuth } from "@/context/authContext"
-// ./src/components/login-form.tsx:208:41
-// Type error: Property 'email' does not exist on type '{ message: string; }'.
-// ✅ Add this helper type for form-only subject data
+
+// ✅ Form-only subject data (before creating Subject entity)
 type SubjectFormData = {
+  id: string; // Temporary ID for React keys
   name: string;
   grade: string;
   price: number;
@@ -44,12 +45,26 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
     phone: "",
     workingDays: [] as string[],
     classrooms: [] as string[],
-    subjects: [] as SubjectFormData[], // ✅ Use form type, not Dexie Subject type
+    subjects: [] as SubjectFormData[],
   })
 
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null)
   const [step, setStep] = useState(1)
+
+  // ✅ Reset form to initial state
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      address: "",
+      phone: "",
+      subjects: [],
+      classrooms: [],
+      workingDays: [],
+    })
+    setStep(1)
+    setMessage(null)
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -65,155 +80,94 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
   const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
     setFormData(prev => ({
       ...prev,
-      subjects: [...prev.subjects, { name: subjectName, grade, price, duration }]
+      subjects: [...prev.subjects, { 
+        id: generateObjectId(), // ✅ Unique ID for React key
+        name: subjectName, 
+        grade, 
+        price, 
+        duration 
+      }]
     }))
   }
 
-  const removeSubject = (index: number) => {
+  const removeSubject = (subjectId: string) => {
     setFormData(prev => ({
       ...prev,
-      subjects: prev.subjects.filter((_, i) => i !== index)
+      subjects: prev.subjects.filter(s => s.id !== subjectId)
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setMessage("")
+    setMessage(null)
     
     const centerId = generateObjectId()
     const now = Date.now()
   
     try {
-      // ✅ Use AuthContext user instead of getSession (which can't read httpOnly cookies)
       if (!user) {
-        setMessage('Unauthorized: Please log in again')
+        const errorMsg = 'Unauthorized: Please log in again'
+        setMessage({ text: errorMsg, type: 'error' })
+        toast.error(errorMsg)
         setLoading(false)
         return
       }
 
-      // ✅ Step 1: Save center WITHOUT subjects array (normalized storage)
-      await centerActions.putLocal({
+      // ✅ Step 1: Save center (normalized storage)
+      const newCenter: Center = {
         id: centerId,
         name: formData.name,
         address: formData.address || "",
         phone: formData.phone || "",
         classrooms: formData.classrooms,
         workingDays: formData.workingDays,
-        managers: [], // Initialize empty
-        adminId: user.id, // ✅ user comes from AuthContext
+        managers: [],
+        adminId: user.id,
         status: 'w',
         createdAt: now,
         updatedAt: now,
-      })
+      }
+      await centerActions.putLocal(newCenter)
 
       // ✅ Step 2: Create subject entities separately (normalized)
-      const subjectEntities = formData.subjects.map(subject => ({
+      const subjectEntities: Subject[] = formData.subjects.map(subject => ({
         id: generateObjectId(),
         name: subject.name,
         grade: subject.grade,
         price: subject.price,
         duration: subject.duration,
-        centerId: centerId, // Link to parent center
-        status: 'w' as const,
+        centerId: centerId,
+        status: 'w',
         createdAt: now,
         updatedAt: now,
       }))
 
       // Save all subjects in parallel
-      await Promise.all(
-        subjectEntities.map(subject => subjectActions.putLocal(subject))
-      )
-
-      // ✅ Step 3: Sync with server if online
-      // if (isOnline()) {
-      //   try {
-      //     // ✅ Fix: Send subjectEntities with IDs instead of formData.subjects
-      //     const payload = {
-      //       id: centerId,
-      //       name: formData.name,
-      //       address: formData.address || null,
-      //       phone: formData.phone || null,
-      //       classrooms: formData.classrooms,
-      //       workingDays: formData.workingDays,
-      //       subjects: subjectEntities.map(subject => ({
-      //         id: subject.id,
-      //         name: subject.name,
-      //         grade: subject.grade,
-      //         price: subject.price,
-      //         duration: subject.duration || null,
-      //         createdAt: subject.createdAt,
-      //         updatedAt: subject.updatedAt,
-      //       })),
-      //       adminId: user.id,
-      //       createdAt: now,
-      //       updatedAt: now,
-      //     }
-
-      //     const response = await axios.post('/api/center', payload, { 
-      //       headers: { 
-      //         "Content-Type": "application/json",
-      //       },
-      //     })
-
-      //     if (response.status === 200 || response.status === 201) {
-      //       // Mark center as synced
-      //       await centerActions.markSynced(centerId)
-            
-      //       // Mark all subjects as synced
-      //       await Promise.all(
-      //         subjectEntities.map(subject => subjectActions.markSynced(subject.id))
-      //       )
-            
-      //       setMessage(t('successMessage'))
-      //     }
-      //   } catch (syncError) {
-      //     console.error('Sync error:', syncError)
-      //     // ✅ Improved error handling: Show actual API error details
-      //     if (axios.isAxiosError(syncError)) {
-      //       const errorMessage = syncError.response?.data?.error || syncError.message
-      //       console.error('API Error Details:', {
-      //         status: syncError.response?.status,
-      //         data: syncError.response?.data,
-      //         message: errorMessage
-      //       })
-      //       // Show specific error if available, otherwise show offline message
-      //       if (syncError.response?.status === 401) {
-      //         setMessage('Unauthorized: Please log in again')
-      //       } else if (syncError.response?.status === 400) {
-      //         setMessage(`Validation error: ${errorMessage}`)
-      //       } else {
-      //         setMessage(t('savedOfflineMessage'))
-      //       }
-      //     } else {
-      //       setMessage(t('savedOfflineMessage'))
-      //     }
-      //   }
-      // } else {
-      //   setMessage(t('savedOfflineMessage'))
-      // }
-
-      // Reset form
-      setFormData({
-        name: "",
-        address: "",
-        phone: "",
-        subjects: [],
-        classrooms: [],
-        workingDays: [],
-      })
-      setStep(1)
-      
-      // ✅ Trigger refresh in parent component to show the new center
-      if (onCenterCreated) {
-        onCenterCreated();
+      if (subjectEntities.length > 0) {
+        await Promise.all(
+          subjectEntities.map(subject => subjectActions.putLocal(subject))
+        )
       }
+
+      // ✅ Success feedback
+      const successMsg = t('centerCreatedSuccess') || 'Center created successfully!'
+      toast.success(successMsg)
+      setMessage({ text: successMsg, type: 'success' })
       
-      // router.refresh() // ✅ Commented out - using callback instead
+      // Reset form
+      resetForm()
+      
+      // ✅ Trigger refresh in parent component
+      if (onCenterCreated) {
+        onCenterCreated()
+      }
       
     } catch (error) {
       console.error('Form submission error:', error)
-      setMessage(t('errorMessage'))
+      const errorMsg = t('errorMessage') || 'Failed to create center. Please try again.'
+      setMessage({ text: errorMsg, type: 'error' })
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -351,8 +305,8 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                 <div className="space-y-2">
                   <Label>{t('addedSubjects')} ({formData.subjects.length}):</Label>
                   <div className="max-h-60 overflow-y-auto space-y-2">
-                    {formData.subjects.map((subject, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                    {formData.subjects.map((subject) => (
+                      <div key={subject.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{subject.name}</span>
@@ -369,7 +323,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => removeSubject(index)}
+                          onClick={() => removeSubject(subject.id)}
                           className="ml-2"
                         >
                           {t('remove')}
@@ -392,8 +346,8 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
           )}
 
           {message && (
-            <Alert className={message.includes(t('errorMessage').split('.')[0]) ? "border-destructive" : "border-green-500"}>
-              <AlertDescription>{message}</AlertDescription>
+            <Alert className={message.type === 'error' ? "border-destructive" : "border-green-500"}>
+              <AlertDescription>{message.text}</AlertDescription>
             </Alert>
           )}
         </form>
