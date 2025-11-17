@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useRef, useState, useCallback } from "react"
 // import axios from "axios" // ✅ Commented out - using local DB
 import { useRouter, useSearchParams } from "next/navigation"
-import { receiptActions, studentActions, studentSubjectActions, subjectActions } from "@/lib/dexie/_dexieActions"
+import { receiptActions, studentActions, studentSubjectActions, subjectActions } from "@/lib/dexie/dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
 import { ReceiptType } from "@/lib/dexie/dbSchema"

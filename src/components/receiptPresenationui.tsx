@@ -27,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useAuth } from '@/context/authContext'
-import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/_dexieActions'
+import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
 // import axios from 'axios' // ✅ Commented out - using local DB
 import { ModalLink } from '@/components/modal-link'
 import {

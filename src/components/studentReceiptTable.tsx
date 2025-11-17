@@ -1,11 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ModalLink } from '@/components/modal-link'
-import { receiptActions, studentActions } from '@/lib/dexie/_dexieActions'
+import { receiptActions, studentActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
 // import axios from 'axios' // ✅ Commented out - using local DB
@@ -84,7 +83,7 @@ interface Student {
 export default function StudentReceiptTable() {
   const t = useTranslations("StudentReceiptTable")
   const router = useRouter()
-  const { user } = useAuth() // ✅ Get current user from AuthContext
+  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
   const [receipts, setReceipts] = useState<Receipt[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -96,12 +95,13 @@ export default function StudentReceiptTable() {
   const [methodFilter, setMethodFilter] = useState<string>('all')
   const [dateFilter, setDateFilter] = useState<string>('all') // all, today, week, month
 
-  useEffect(() => {
-    fetchData()
-  }, [user])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
+      // Wait for auth to finish loading
+      if (authLoading) {
+        return
+      }
+
       if (!user) {
         setError("Unauthorized: Please log in again")
         setIsLoading(false)
@@ -174,7 +174,14 @@ export default function StudentReceiptTable() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, authLoading, t])
+
+  useEffect(() => {
+    // Wait for auth to finish loading before fetching data
+    if (!authLoading) {
+      fetchData()
+    }
+  }, [authLoading, fetchData])
 
   // Filter receipts
   const filteredReceipts = receipts.filter(receipt => {
@@ -258,7 +265,8 @@ export default function StudentReceiptTable() {
     window.URL.revokeObjectURL(url)
   }
 
-  if (isLoading) {
+  // Show loading while auth is checking or data is loading
+  if (authLoading || isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />

@@ -1,12 +1,19 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Printer } from "lucide-react"
+import { 
+  receiptActions, 
+  studentActions, 
+  teacherActions, 
+  userActions,
+  centerActions 
+} from "@/lib/dexie/dexieActions"
 
 interface Receipt {
   id: string
@@ -53,22 +60,97 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    fetchReceipt()
-  }, [receiptId])
-
-  const fetchReceipt = async () => {
+  const fetchReceipt = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
     try {
-      const response = await fetch(`/api/receipts/${receiptId}`)
-      if (!response.ok) throw new Error(t("errorFetchReceipt"))
-      const data = await response.json()
-      setReceipt(data)
+      // ✅ Fetch from local DB
+      const [allReceipts, allStudents, allTeachers, allUsers, allCenters] = await Promise.all([
+        receiptActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        userActions.getAll(),
+        centerActions.getAll()
+      ])
+
+      // ✅ Find receipt by ID
+      const receipt = allReceipts.find(r => r.id === receiptId && r.status !== '0')
+      
+      if (!receipt) {
+        throw new Error(t("receiptNotFound"))
+      }
+
+      // ✅ Get related data
+      const student = receipt.studentId 
+        ? allStudents.find(s => s.id === receipt.studentId && s.status !== '0')
+        : null
+      
+      const teacher = receipt.teacherId
+        ? allTeachers.find(t => t.id === receipt.teacherId && t.status !== '0')
+        : null
+      
+      const manager = allUsers.find(u => u.id === receipt.managerId && u.status !== '0')
+      
+      // ✅ Find center (if needed - receipts don't have centerId directly, but we can find via manager)
+      const center = allCenters.find(c => 
+        (c.managers || []).includes(receipt.managerId) && c.status !== '0'
+      )
+
+      // ✅ Build receipt data matching the interface
+      const receiptData: Receipt = {
+        id: receipt.id,
+        receiptNumber: receipt.receiptNumber,
+        amount: receipt.amount,
+        type: receipt.type,
+        paymentMethod: receipt.paymentMethod ?? null,
+        description: receipt.description ?? null,
+        date: new Date(receipt.date).toISOString(),
+        createdAt: new Date(receipt.createdAt).toISOString(),
+        student: student ? {
+          id: student.id,
+          name: student.name,
+          email: student.email ?? null,
+          phone: student.phone ?? null,
+          grade: student.grade ?? null,
+        } : undefined,
+        teacher: teacher ? {
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email ?? null,
+          phone: teacher.phone ?? null,
+        } : undefined,
+        manager: manager ? {
+          name: manager.name,
+          email: manager.email,
+        } : {
+          name: 'Unknown Manager',
+          email: ''
+        },
+        center: center ? {
+          id: center.id,
+          name: center.name,
+          address: center.address ?? null,
+          phone: center.phone ?? null,
+        } : undefined
+      }
+
+      setReceipt(receiptData)
+
+      // ✅ Commented out API call
+      // const response = await fetch(`/api/receipts/${receiptId}`)
+      // if (!response.ok) throw new Error(t("errorFetchReceipt"))
+      // const data = await response.json()
+      // setReceipt(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : t("somethingWentWrong"))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [receiptId, t])
+
+  useEffect(() => {
+    fetchReceipt()
+  }, [fetchReceipt])
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {

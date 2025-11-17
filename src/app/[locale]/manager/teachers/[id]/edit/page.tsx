@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -23,11 +21,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import { AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { useTranslations } from 'use-intl'
+import { useEffect, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
+import { 
+  teacherActions, 
+  teacherSubjectActions, 
+  subjectActions 
+} from '@/lib/dexie/dexieActions'
+import { useAuth } from '@/context/authContext'
 
 interface Subject {
   id: string
@@ -63,6 +67,7 @@ interface Teacher {
 
 export default function EditTeacherPage() {
   const t = useTranslations('EditTeacherPage')
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   const DAYS = [
     t('monday'), t('tuesday'), t('wednesday'), t('thursday'),
     t('friday'), t('saturday'), t('sunday')
@@ -98,20 +103,117 @@ export default function EditTeacherPage() {
     compensationType: 'percentage' | 'hourly'
   }[]>([])
 
-  useEffect(() => {
-    fetchData()
-  }, [params.id])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setIsFetching(true)
+    setError('')
     try {
-      const [teacherRes, subjectsRes] = await Promise.all([
-        axios.get(`/api/teachers/${params.id}`),
-        axios.get('/api/subjects')
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setIsFetching(false)
+        return
+      }
+
+      // ✅ Fetch from local DB
+      const [allTeachers, allTeacherSubjects, allSubjects] = await Promise.all([
+        teacherActions.getAll(),
+        teacherSubjectActions.getAll(),
+        subjectActions.getAll()
       ])
 
-      const teacherData: Teacher = teacherRes.data
-      setTeacher(teacherData)
-      setSubjects(subjectsRes.data)
+      // ✅ Find teacher by ID
+      const teacherData = allTeachers.find(t => t.id === params.id && t.status !== '0')
+      
+      if (!teacherData) {
+        throw new Error(t('teacherNotFound'))
+      }
+
+      // ✅ Get teacher subjects
+      const teacherSubjectsData = allTeacherSubjects
+        .filter(ts => ts.teacherId === params.id && ts.status !== '0')
+        .map(ts => {
+          const subject = allSubjects.find(s => s.id === ts.subjectId && s.status !== '0')
+          if (!subject) return null
+          
+          return {
+            id: ts.id,
+            subjectId: ts.subjectId,
+            percentage: ts.percentage ?? null,
+            hourlyRate: ts.hourlyRate ?? null,
+            subject: {
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+            },
+          }
+        })
+        .filter(ts => ts !== null) as TeacherSubject[]
+
+      // ✅ Get subjects (filter by manager)
+      const managerSubjects = allSubjects
+        .filter(s => s.managerId === user.id && s.status !== '0')
+        .map(s => ({
+          id: s.id,
+          name: s.name,
+          grade: s.grade,
+          price: s.price,
+        }))
+
+      // ✅ Parse weekly schedule
+      let weeklyScheduleData: DaySchedule[] = DAYS.map(day => ({
+        day,
+        startTime: '09:00',
+        endTime: '17:00',
+        isAvailable: false
+      }))
+
+      if (teacherData.weeklySchedule) {
+        try {
+          const schedule = typeof teacherData.weeklySchedule === 'string' 
+            ? JSON.parse(teacherData.weeklySchedule) 
+            : teacherData.weeklySchedule
+          
+          if (Array.isArray(schedule)) {
+            const scheduleMap = new Map(
+              schedule.map((s: unknown) => {
+                const parsed = typeof s === 'string' ? JSON.parse(s) : s
+                return [parsed.day, parsed]
+              })
+            )
+            
+            weeklyScheduleData = DAYS.map(day => {
+              const existing = scheduleMap.get(day)
+              return existing ? {
+                day,
+                startTime: existing.startTime,
+                endTime: existing.endTime,
+                isAvailable: true
+              } : {
+                day,
+                startTime: '09:00',
+                endTime: '17:00',
+                isAvailable: false
+              }
+            })
+          }
+        } catch (e) {
+          console.error('Error parsing weekly schedule:', e)
+        }
+      }
+
+      // ✅ Build teacher object matching the interface
+      const teacherResult: Teacher = {
+        id: teacherData.id,
+        name: teacherData.name,
+        email: teacherData.email ?? null,
+        phone: teacherData.phone ?? null,
+        address: teacherData.address ?? null,
+        weeklySchedule: weeklyScheduleData,
+        teacherSubjects: teacherSubjectsData,
+      }
+
+      setTeacher(teacherResult)
+      setSubjects(managerSubjects)
 
       setFormData({
         name: teacherData.name,
@@ -120,45 +222,33 @@ export default function EditTeacherPage() {
         address: teacherData.address || '',
       })
 
-      if (teacherData.weeklySchedule && Array.isArray(teacherData.weeklySchedule)) {
-        const scheduleMap = new Map(
-          teacherData.weeklySchedule.map((s: any) => {
-            const parsed = typeof s === 'string' ? JSON.parse(s) : s
-            return [parsed.day, parsed]
-          })
-        )
-        
-        setWeeklySchedule(DAYS.map(day => {
-          const existing = scheduleMap.get(day)
-          return existing ? {
-            day,
-            startTime: existing.startTime,
-            endTime: existing.endTime,
-            isAvailable: true
-          } : {
-            day,
-            startTime: '09:00',
-            endTime: '17:00',
-            isAvailable: false
-          }
-        }))
-      }
+      setWeeklySchedule(weeklyScheduleData)
 
       setTeacherSubjects(
-        teacherData.teacherSubjects.map(ts => ({
+        teacherSubjectsData.map(ts => ({
           subjectId: ts.subject.id,
           percentage: ts.percentage || undefined,
           hourlyRate: ts.hourlyRate || undefined,
           compensationType: ts.percentage ? 'percentage' : 'hourly'
         }))
       )
+
+      // ✅ Commented out API calls
+      // const [teacherRes, subjectsRes] = await Promise.all([
+      //   axios.get(`/api/teachers/${params.id}`),
+      //   axios.get('/api/subjects')
+      // ])
     } catch (err) {
       console.error('Failed to fetch data:', err)
-      setError(t('errorFetchData'))
+      setError(err instanceof Error ? err.message : t('errorFetchData'))
     } finally {
       setIsFetching(false)
     }
-  }
+  }, [params.id, user, t, DAYS])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -198,6 +288,10 @@ export default function EditTeacherPage() {
     setError('')
 
     try {
+      if (!user) {
+        throw new Error("Unauthorized: Please log in again")
+      }
+
       const validSubjects = teacherSubjects.filter(ts => ts.subjectId)
       
       for (const ts of validSubjects) {
@@ -209,26 +303,97 @@ export default function EditTeacherPage() {
         }
       }
 
+      // ✅ Get existing teacher
+      const existingTeacher = await teacherActions.getLocal(params.id as string)
+      if (!existingTeacher) {
+        throw new Error(t('teacherNotFound'))
+      }
+
+      // ✅ Update teacher in local DB
+      const now = Date.now()
       const activeSchedule = weeklySchedule
         .filter(day => day.isAvailable)
         .map(({ day, startTime, endTime }) => JSON.stringify({ day, startTime, endTime }))
 
-      await axios.patch(`/api/teachers/${params.id}`, {
-        ...formData,
+      const updatedTeacher = {
+        ...existingTeacher,
+        name: formData.name,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+        address: formData.address || undefined,
         weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
-        subjects: validSubjects.map(ts => ({
-          subjectId: ts.subjectId,
-          percentage: ts.compensationType === 'percentage' ? ts.percentage : null,
-          hourlyRate: ts.compensationType === 'hourly' ? ts.hourlyRate : null,
-        }))
-      })
+        status: 'w' as const, // Mark for sync
+        updatedAt: now,
+      }
+
+      await teacherActions.putLocal(updatedTeacher)
+
+      // ✅ Update teacher subjects
+      // First, get existing teacher subjects
+      const existingTeacherSubjects = await teacherSubjectActions.getAll()
+      const currentTeacherSubjects = existingTeacherSubjects.filter(
+        ts => ts.teacherId === params.id && ts.status !== '0'
+      )
+
+      // Remove teacher subjects that are no longer in the list
+      const teacherSubjectsToRemove = currentTeacherSubjects.filter(
+        cts => !validSubjects.some(
+          vs => vs.subjectId === cts.subjectId
+        )
+      )
+      
+      for (const ts of teacherSubjectsToRemove) {
+        await teacherSubjectActions.markForDelete(ts.id)
+      }
+
+      // Update or add teacher subjects
+      for (const vs of validSubjects) {
+        const existing = currentTeacherSubjects.find(
+          cts => cts.subjectId === vs.subjectId
+        )
+
+        if (existing) {
+          // Update existing
+          await teacherSubjectActions.putLocal({
+            ...existing,
+            percentage: vs.compensationType === 'percentage' ? vs.percentage ?? null : null,
+            hourlyRate: vs.compensationType === 'hourly' ? vs.hourlyRate ?? null : null,
+            status: 'w' as const, // Mark for sync
+            updatedAt: now,
+          })
+        } else {
+          // Add new
+          const { generateObjectId } = await import('@/lib/utils/generateObjectId')
+          const teacherSubjectId = generateObjectId()
+          await teacherSubjectActions.putLocal({
+            id: teacherSubjectId,
+            teacherId: params.id as string,
+            subjectId: vs.subjectId,
+            percentage: vs.compensationType === 'percentage' ? vs.percentage ?? null : null,
+            hourlyRate: vs.compensationType === 'hourly' ? vs.hourlyRate ?? null : null,
+            managerId: user.id,
+            status: 'w' as const, // Mark for sync
+            createdAt: now,
+            updatedAt: now,
+          })
+        }
+      }
 
       router.push(`/manager/teachers/${params.id}`)
       router.refresh()
+
+      // ✅ Commented out API call
+      // await axios.patch(`/api/teachers/${params.id}`, {
+      //   ...formData,
+      //   weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
+      //   subjects: validSubjects.map(ts => ({
+      //     subjectId: ts.subjectId,
+      //     percentage: ts.compensationType === 'percentage' ? ts.percentage : null,
+      //     hourlyRate: ts.compensationType === 'hourly' ? ts.hourlyRate : null,
+      //   }))
+      // })
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || t('errorUpdateTeacher'))
-      } else if (err instanceof Error) {
+      if (err instanceof Error) {
         setError(err.message)
       } else {
         setError(t('errorSomethingWrong'))      

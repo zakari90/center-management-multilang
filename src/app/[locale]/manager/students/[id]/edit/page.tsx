@@ -1,13 +1,12 @@
 // manager/students/[id]/edit/page.tsx
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import type React from "react"
 
-import axios from "axios"
+// import axios from "axios" // ✅ Commented out - using local DB
 import { useTranslations } from "next-intl"
 import { useParams, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Loader2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +14,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { 
+  studentActions, 
+  studentSubjectActions, 
+  subjectActions, 
+  teacherSubjectActions, 
+  teacherActions 
+} from "@/lib/dexie/dexieActions"
+import { useAuth } from "@/context/authContext"
 
 interface Teacher {
   id: string
@@ -73,6 +80,7 @@ export default function EditStudentForm() {
   const t = useTranslations("editStudent")
   const params = useParams()
   const router = useRouter()
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const [error, setError] = useState("")
@@ -99,26 +107,114 @@ export default function EditStudentForm() {
   // Enrolled subjects list
   const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>([])
 
-  // Fetch student data and subjects
-  useEffect(() => {
-    fetchData()
-  }, [params.id])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setIsFetching(true)
+    setLoadingSubjects(true)
+    setError('')
     try {
-      const [studentRes, subjectsRes] = await Promise.all([
-        fetch(`/api/students/${params.id}`),
-        fetch("/api/subjects?includeTeachers=true"),
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setIsFetching(false)
+        setLoadingSubjects(false)
+        return
+      }
+
+      // ✅ Fetch from local DB
+      const [allStudents, allStudentSubjects, allSubjects, allTeacherSubjects, allTeachers] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        teacherSubjectActions.getAll(),
+        teacherActions.getAll()
       ])
 
-      if (!studentRes.ok) throw new Error("Failed to fetch student")
-      if (!subjectsRes.ok) throw new Error("Failed to fetch subjects")
+      // ✅ Find student by ID
+      const studentData = allStudents.find(s => s.id === params.id && s.status !== '0')
+      
+      if (!studentData) {
+        throw new Error("Student not found")
+      }
 
-      const studentData: Student = await studentRes.json()
-      const subjectsData: Subject[] = await subjectsRes.json()
+      // ✅ Get student subjects with related data
+      const studentSubjectsData = allStudentSubjects
+        .filter(ss => ss.studentId === params.id && ss.status !== '0')
+        .map(ss => {
+          const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
+          const teacher = allTeachers.find(t => t.id === ss.teacherId && t.status !== '0')
+          
+          if (!subject || !teacher) return null
+          
+          return {
+            id: ss.id,
+            subjectId: ss.subjectId,
+            teacherId: ss.teacherId,
+            subject: {
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+              duration: subject.duration ?? null,
+              teacherSubjects: [], // Will be populated below
+            },
+            teacher: {
+              id: teacher.id,
+              name: teacher.name,
+              email: teacher.email ?? null,
+              phone: teacher.phone ?? null,
+            },
+          }
+        })
+        .filter(ss => ss !== null) as StudentSubject[]
 
-      setStudent(studentData)
-      setSubjects(subjectsData)
+      // ✅ Build subjects with teachers (filter by manager)
+      const managerSubjects = allSubjects
+        .filter(s => s.managerId === user.id && s.status !== '0')
+      
+      const subjectsWithTeachers: Subject[] = managerSubjects.map(subject => {
+        const teacherSubjectsForSubject = allTeacherSubjects
+          .filter(ts => ts.subjectId === subject.id && ts.status !== '0')
+          .map(ts => {
+            const teacher = allTeachers.find(t => t.id === ts.teacherId && t.status !== '0')
+            return teacher ? {
+              id: ts.id,
+              teacherId: ts.teacherId,
+              percentage: ts.percentage ?? null,
+              hourlyRate: ts.hourlyRate ?? null,
+              teacher: {
+                id: teacher.id,
+                name: teacher.name,
+                email: teacher.email ?? null,
+                phone: teacher.phone ?? null,
+              },
+            } : null
+          })
+          .filter(ts => ts !== null) as TeacherSubject[]
+
+        return {
+          id: subject.id,
+          name: subject.name,
+          grade: subject.grade,
+          price: subject.price,
+          duration: subject.duration ?? null,
+          teacherSubjects: teacherSubjectsForSubject,
+        }
+      })
+
+      // ✅ Build student object matching the interface
+      const studentResult: Student = {
+        id: studentData.id,
+        name: studentData.name,
+        email: studentData.email ?? null,
+        phone: studentData.phone ?? null,
+        parentName: studentData.parentName ?? null,
+        parentPhone: studentData.parentPhone ?? null,
+        parentEmail: studentData.parentEmail ?? null,
+        grade: studentData.grade ?? null,
+        studentSubjects: studentSubjectsData,
+      }
+
+      setStudent(studentResult)
+      setSubjects(subjectsWithTeachers)
 
       // Set form data
       setFormData({
@@ -133,7 +229,7 @@ export default function EditStudentForm() {
 
       // Set enrolled subjects
       setEnrolledSubjects(
-        studentData.studentSubjects.map((ss) => ({
+        studentSubjectsData.map((ss) => ({
           subjectId: ss.subject.id,
           teacherId: ss.teacher.id,
           subjectName: ss.subject.name,
@@ -142,6 +238,12 @@ export default function EditStudentForm() {
           price: ss.subject.price,
         })),
       )
+
+      // ✅ Commented out API calls
+      // const [studentRes, subjectsRes] = await Promise.all([
+      //   fetch(`/api/students/${params.id}`),
+      //   fetch("/api/subjects?includeTeachers=true"),
+      // ])
     } catch (err) {
       console.error("Failed to fetch data:", err)
       setError(t("fetchStudent"))
@@ -149,7 +251,12 @@ export default function EditStudentForm() {
       setIsFetching(false)
       setLoadingSubjects(false)
     }
-  }
+  }, [params.id, user, t])
+
+  // Fetch student data and subjects
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -214,6 +321,10 @@ export default function EditStudentForm() {
     setError("")
 
     try {
+      if (!user) {
+        throw new Error("Unauthorized: Please log in again")
+      }
+
       if (!formData.name) {
         throw new Error("Student name is required")
       }
@@ -222,28 +333,89 @@ export default function EditStudentForm() {
         throw new Error("Please enroll the student in at least one subject")
       }
 
-      const response = await axios.patch(
-        `/api/students/${params.id}`,
-        {
-          ...formData,
-          enrollments: enrolledSubjects.map((es) => ({
-            subjectId: es.subjectId,
-            teacherId: es.teacherId,
-          })),
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        },
+      // ✅ Get existing student
+      const existingStudent = await studentActions.getLocal(params.id as string)
+      if (!existingStudent) {
+        throw new Error("Student not found")
+      }
+
+      // ✅ Update student in local DB
+      const now = Date.now()
+      const updatedStudent = {
+        ...existingStudent,
+        name: formData.name,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+        parentName: formData.parentName || undefined,
+        parentPhone: formData.parentPhone || undefined,
+        parentEmail: formData.parentEmail || undefined,
+        grade: formData.grade || undefined,
+        status: 'w' as const, // Mark for sync
+        updatedAt: now,
+      }
+
+      await studentActions.putLocal(updatedStudent)
+
+      // ✅ Update student subjects
+      // First, get existing enrollments
+      const existingEnrollments = await studentSubjectActions.getAll()
+      const currentEnrollments = existingEnrollments.filter(
+        ss => ss.studentId === params.id && ss.status !== '0'
       )
 
-      if (!response.data) {
-        throw new Error(response.data || "Failed to update student")
+      // Remove enrollments that are no longer in the list
+      const enrollmentsToRemove = currentEnrollments.filter(
+        ce => !enrolledSubjects.some(
+          es => es.subjectId === ce.subjectId && es.teacherId === ce.teacherId
+        )
+      )
+      
+      for (const enrollment of enrollmentsToRemove) {
+        await studentSubjectActions.markForDelete(enrollment.id)
+      }
+
+      // Add new enrollments
+      const enrollmentsToAdd = enrolledSubjects.filter(
+        es => !currentEnrollments.some(
+          ce => ce.subjectId === es.subjectId && ce.teacherId === es.teacherId
+        )
+      )
+
+      for (const enrollment of enrollmentsToAdd) {
+        const { generateObjectId } = await import('@/lib/utils/generateObjectId')
+        const enrollmentId = generateObjectId()
+        await studentSubjectActions.putLocal({
+          id: enrollmentId,
+          studentId: params.id as string,
+          subjectId: enrollment.subjectId,
+          teacherId: enrollment.teacherId,
+          managerId: user.id,
+          status: 'w' as const, // Mark for sync
+          createdAt: now,
+          updatedAt: now,
+        })
       }
 
       router.push(`/manager/students/${params.id}`)
+      router.refresh()
+
+      // ✅ Commented out API call
+      // const response = await axios.patch(
+      //   `/api/students/${params.id}`,
+      //   {
+      //     ...formData,
+      //     enrollments: enrolledSubjects.map((es) => ({
+      //       subjectId: es.subjectId,
+      //       teacherId: es.teacherId,
+      //     })),
+      //   },
+      //   {
+      //     headers: { "Content-Type": "application/json" },
+      //   },
+      // )
     } catch (err) {
       console.log(err instanceof Error ? err.message : t("somethingWentWrong"))
-      setError(t("somethingWentWrong"))
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"))
     } finally {
       setIsLoading(false)
     }

@@ -1,8 +1,12 @@
+"use client"
+
 import TimetableManagement from "@/components/TimeTableManagementRead"
 
 function Page() {
   return (
-    <div><TimetableManagement/></div>
+    <div className="container mx-auto p-4 sm:p-6">
+      <TimetableManagement />
+    </div>
   )
 }
 

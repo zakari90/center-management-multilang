@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { teacherActions, teacherSubjectActions, studentSubjectActions, subjectActions, receiptActions } from '@/lib/dexie/_dexieActions'
+import { teacherActions, teacherSubjectActions, studentSubjectActions, subjectActions, receiptActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
 import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { ReceiptType } from '@/lib/dexie/dbSchema'

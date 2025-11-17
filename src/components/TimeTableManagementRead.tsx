@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -20,10 +18,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import axios from 'axios'
+// import axios from 'axios' // ✅ Commented out - using local DB
 import { Clock, Loader2, MapPin, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { 
+  scheduleActions, 
+  teacherActions, 
+  subjectActions, 
+  centerActions 
+} from '@/lib/dexie/dexieActions'
+import { useAuth } from '@/context/authContext'
 
 interface Teacher {
   id: string
@@ -55,6 +60,7 @@ const TIME_SLOTS = [
 
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
   const t = useTranslations('TimetableOverview')
+  const { user } = useAuth() // ✅ Get current user from AuthContext
   
   const DAYS = [
     t('monday'), t('tuesday'), t('wednesday'), 
@@ -71,43 +77,122 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   const [viewMode, setViewMode] = useState<'all' | 'teacher' | 'room'>('all')
   const [selectedFilter, setSelectedFilter] = useState<string>('')
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
     try {
-      const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
-        axios.get('/api/admin/teachers'),
-        axios.get('/api/subjects'),
-        axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
-        centerId ? axios.get(`/api/admin/centers/${centerId}`) : axios.get('/api/admin/centers')
-      ])
-      
-      console.log("*******************************")
-      console.log("Teachers:", teachersRes.data)
-      console.log("Subjects:", subjectsRes.data)
-      console.log("Schedule:", scheduleRes.data)
-      console.log("*******************************")
-      
-      setTeachers(teachersRes.data)
-      setSubjects(subjectsRes.data)
-      setSchedule(scheduleRes.data)
-      
-      if (centerRes?.data?.classrooms) {
-        setRooms(centerRes.data.classrooms)
-      } else if (centerRes?.data?.[0]?.classrooms) {
-        setRooms(centerRes.data[0].classrooms)
-      } else {
-        setRooms(['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'])
+      if (!user) {
+        setError("Unauthorized: Please log in again")
+        setIsLoading(false)
+        return
       }
+
+      // ✅ Fetch from local DB
+      const [allSchedules, allTeachers, allSubjects, allCenters] = await Promise.all([
+        scheduleActions.getAll(),
+        teacherActions.getAll(),
+        subjectActions.getAll(),
+        centerActions.getAll()
+      ])
+
+      // ✅ Filter by managerId and status
+      const managerSchedules = allSchedules
+        .filter(s => s.managerId === user.id && s.status !== '0')
+        .filter(s => !centerId || s.centerId === centerId)
+
+      const managerTeachers = allTeachers
+        .filter(t => t.managerId === user.id && t.status !== '0')
+        .map(t => ({
+          id: t.id,
+          name: t.name,
+        }))
+
+      const managerSubjects = allSubjects
+        .filter(s => {
+          // Filter subjects by centerId if provided, or by manager's centers
+          if (centerId) {
+            return s.centerId === centerId && s.status !== '0'
+          }
+          const managerCenters = allCenters.filter(c => 
+            (c.managers || []).includes(user.id) && c.status !== '0'
+          )
+          return managerCenters.some(c => c.id === s.centerId) && s.status !== '0'
+        })
+        .map(s => ({
+          id: s.id,
+          name: s.name,
+          grade: s.grade,
+        }))
+
+      // ✅ Build schedule slots with related data
+      const schedulesWithData: ScheduleSlot[] = managerSchedules.map(schedule => {
+        const teacher = managerTeachers.find(t => t.id === schedule.teacherId)
+        const subject = managerSubjects.find(s => s.id === schedule.subjectId)
+
+        return {
+          id: schedule.id,
+          day: schedule.day,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          teacherId: schedule.teacherId,
+          subjectId: schedule.subjectId,
+          roomId: schedule.roomId,
+          teacher: teacher ? {
+            id: teacher.id,
+            name: teacher.name,
+          } : undefined,
+          subject: subject ? {
+            id: subject.id,
+            name: subject.name,
+            grade: subject.grade,
+          } : undefined,
+        }
+      })
+
+      // ✅ Get rooms from center(s)
+      let centerRooms: string[] = []
+      if (centerId) {
+        const center = allCenters.find(c => c.id === centerId && c.status !== '0')
+        if (center?.classrooms) {
+          centerRooms = center.classrooms
+        }
+      } else {
+        // Get rooms from all manager's centers
+        const managerCenters = allCenters.filter(c => 
+          (c.managers || []).includes(user.id) && c.status !== '0'
+        )
+        const allRooms = new Set<string>()
+        managerCenters.forEach(c => {
+          if (c.classrooms) {
+            c.classrooms.forEach(room => allRooms.add(room))
+          }
+        })
+        centerRooms = Array.from(allRooms)
+      }
+
+      setTeachers(managerTeachers)
+      setSubjects(managerSubjects)
+      setSchedule(schedulesWithData)
+      setRooms(centerRooms.length > 0 ? centerRooms : ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5'])
+
+      // ✅ Commented out API calls
+      // const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
+      //   axios.get('/api/admin/teachers'),
+      //   axios.get('/api/subjects'),
+      //   axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
+      //   centerId ? axios.get(`/api/admin/centers/${centerId}`) : axios.get('/api/admin/centers')
+      // ])
     } catch (err) {
       console.error('Failed to fetch data:', err)
       setError(t('errorLoadSchedule'))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, centerId, t])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const filteredSchedule = schedule.filter(slot => {
     if (viewMode === 'teacher' && selectedFilter) {
@@ -154,7 +239,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           <div className="flex gap-4">
             <div className="flex-1">
               <Label>{t('viewMode')}</Label>
-              <Select value={viewMode} onValueChange={(value: any) => {
+              <Select value={viewMode} onValueChange={(value: 'all' | 'teacher' | 'room') => {
                 setViewMode(value)
                 setSelectedFilter('')
               }}>

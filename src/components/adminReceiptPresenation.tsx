@@ -2,7 +2,6 @@
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -36,7 +35,6 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 interface Receipt {
@@ -301,13 +299,6 @@ export default function AdminReceiptsTable() {
                   ? t('noReceiptsFound')
                   : t('noReceiptsYet')}
               </p>
-              {!searchTerm && typeFilter === 'all' && methodFilter === 'all' && (
-                <Button asChild className="mt-4">
-                  <Link href="/receipts/create">
-                    {t('createFirstReceipt')}
-                  </Link>
-                </Button>
-              )}
             </div>
           ) : (
             <Table>

@@ -12,7 +12,7 @@ import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { studentActions, studentSubjectActions, subjectActions, teacherSubjectActions, teacherActions } from "@/lib/dexie/_dexieActions"
+import { studentActions, studentSubjectActions, subjectActions, teacherSubjectActions, teacherActions } from "@/lib/dexie/dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
 

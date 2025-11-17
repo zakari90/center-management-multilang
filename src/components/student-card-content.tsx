@@ -1,12 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import StudentCard from "@/components/studentCard"
 import PdfExporter from "@/components/pdfExporter"
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { studentActions } from "@/lib/dexie/dexieActions"
+
+interface Student {
+  id: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  grade?: string | null
+  [key: string]: unknown
+}
 
 interface StudentCardContentProps {
   studentId: string
@@ -15,32 +24,55 @@ interface StudentCardContentProps {
 
 export function StudentCardContent({ studentId, isModal = false }: StudentCardContentProps) {
   const t = useTranslations("StudentCardPage")
-  const [student, setStudent] = useState<any>(null)
+  const [student, setStudent] = useState<Student | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const response = await fetch(`/api/students/${studentId}`)
-        if (response.ok) {
-          const data = await response.json()
-          setStudent(data)
-        } else {
-          setError(t("studentNotFound"))
-        }
-      } catch (err) {
-        console.error(t("errorFetchStudent"), err)
-        setError(t("errorFetchStudent"))
-      } finally {
-        setLoading(false)
+  const fetchStudent = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // ✅ Fetch from local DB
+      const allStudents = await studentActions.getAll()
+      const studentData = allStudents.find(s => s.id === studentId && s.status !== '0')
+      
+      if (!studentData) {
+        setError(t("studentNotFound"))
+        return
       }
-    }
 
+      // ✅ Build student data
+      const studentResult: Student = {
+        id: studentData.id,
+        name: studentData.name,
+        email: studentData.email ?? null,
+        phone: studentData.phone ?? null,
+        grade: studentData.grade ?? null,
+      }
+
+      setStudent(studentResult)
+
+      // ✅ Commented out API call
+      // const response = await fetch(`/api/students/${studentId}`)
+      // if (response.ok) {
+      //   const data = await response.json()
+      //   setStudent(data)
+      // } else {
+      //   setError(t("studentNotFound"))
+      // }
+    } catch (err) {
+      console.error(t("errorFetchStudent"), err)
+      setError(t("errorFetchStudent"))
+    } finally {
+      setLoading(false)
+    }
+  }, [studentId, t])
+
+  useEffect(() => {
     if (studentId) {
       fetchStudent()
     }
-  }, [studentId, t])
+  }, [studentId, fetchStudent])
 
   if (loading) {
     return (

@@ -5,11 +5,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import axios from "axios"
+// import axios from "axios" // ✅ Commented out - using local DB
 import { AlertCircle, Edit, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
+import { 
+  teacherActions, 
+  teacherSubjectActions, 
+  subjectActions 
+} from "@/lib/dexie/dexieActions"
 
 interface Subject {
   id: string
@@ -55,21 +60,99 @@ export function TeacherDetailContent({ teacherId, isModal = false }: TeacherDeta
   const [error, setError] = useState("")
   const t = useTranslations("TeacherProfile")
 
-  useEffect(() => {
-    const fetchTeacher = async () => {
-      try {
-        const res = await axios.get(`/api/teachers/${teacherId}`)
-        setTeacher(res.data)
-      } catch (err) {
-        console.error(err)
-        setError(t("errorLoad"))
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const fetchTeacher = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
+    try {
+      // ✅ Fetch from local DB
+      const [allTeachers, allTeacherSubjects, allSubjects] = await Promise.all([
+        teacherActions.getAll(),
+        teacherSubjectActions.getAll(),
+        subjectActions.getAll()
+      ])
 
-    if (teacherId) fetchTeacher()
+      // ✅ Find teacher by ID
+      const teacherData = allTeachers.find(t => t.id === teacherId && t.status !== '0')
+      
+      if (!teacherData) {
+        throw new Error(t("notFound"))
+      }
+
+      // ✅ Get teacher subjects
+      const teacherSubjectsData = allTeacherSubjects
+        .filter(ts => ts.teacherId === teacherId && ts.status !== '0')
+        .map(ts => {
+          const subject = allSubjects.find(s => s.id === ts.subjectId && s.status !== '0')
+          if (!subject) return null
+          
+          return {
+            id: ts.id,
+            subjectId: ts.subjectId,
+            percentage: ts.percentage ?? null,
+            hourlyRate: ts.hourlyRate ?? null,
+            subject: {
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+            },
+          }
+        })
+        .filter(ts => ts !== null) as TeacherSubject[]
+
+      // ✅ Parse weekly schedule
+      let weeklyScheduleData: DaySchedule[] = []
+      if (teacherData.weeklySchedule) {
+        try {
+          const schedule = typeof teacherData.weeklySchedule === 'string' 
+            ? JSON.parse(teacherData.weeklySchedule) 
+            : teacherData.weeklySchedule
+          
+          if (Array.isArray(schedule)) {
+            weeklyScheduleData = schedule.map((s: unknown) => {
+              const parsed = typeof s === 'string' ? JSON.parse(s) : s
+              return {
+                day: parsed.day,
+                startTime: parsed.startTime,
+                endTime: parsed.endTime,
+                isAvailable: true,
+              }
+            })
+          }
+        } catch (e) {
+          console.error('Error parsing weekly schedule:', e)
+        }
+      }
+
+      // ✅ Build teacher data matching the interface
+      const teacherResult: Teacher = {
+        id: teacherData.id,
+        name: teacherData.name,
+        email: teacherData.email ?? null,
+        phone: teacherData.phone ?? null,
+        address: teacherData.address ?? null,
+        weeklySchedule: weeklyScheduleData,
+        teacherSubjects: teacherSubjectsData,
+      }
+
+      setTeacher(teacherResult)
+
+      // ✅ Commented out API call
+      // const res = await axios.get(`/api/teachers/${teacherId}`)
+      // setTeacher(res.data)
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : t("errorLoad"))
+    } finally {
+      setIsLoading(false)
+    }
   }, [teacherId, t])
+
+  useEffect(() => {
+    if (teacherId) {
+      fetchTeacher()
+    }
+  }, [teacherId, fetchTeacher])
 
   if (isLoading) {
     return (

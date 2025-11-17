@@ -1,15 +1,20 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import axios from "axios"
+// import axios from "axios" // ✅ Commented out - using local DB
 import { useTranslations } from "next-intl"
 import { Spinner } from "@/components/ui/spinner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { 
+  studentActions, 
+  studentSubjectActions, 
+  subjectActions, 
+  receiptActions 
+} from "@/lib/dexie/dexieActions"
 
 interface StudentSubject {
   id: string
@@ -56,21 +61,90 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
   const [student, setStudent] = useState<Student | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
-  useEffect(() => {
-    fetchStudent()
-  }, [studentId])
 
-  const fetchStudent = async () => {
+  const fetchStudent = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
     try {
-      const { data } = await axios.get(`/api/students/${studentId}`)
-      if (!data) throw new Error(t("errorFetchStudent"))
-      setStudent(data)
+      // ✅ Fetch from local DB
+      const [allStudents, allStudentSubjects, allSubjects, allReceipts] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        receiptActions.getAll()
+      ])
+
+      // ✅ Find student by ID
+      const studentData = allStudents.find(s => s.id === studentId && s.status !== '0')
+      
+      if (!studentData) {
+        throw new Error(t("studentNotFound"))
+      }
+
+      // ✅ Get student subjects
+      const studentSubjectsData = allStudentSubjects
+        .filter(ss => ss.studentId === studentId && ss.status !== '0')
+        .map(ss => {
+          const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
+          if (!subject) return null
+          
+          return {
+            id: ss.id,
+            subject: {
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+              duration: subject.duration ?? null,
+            },
+            enrolledAt: new Date(ss.createdAt).toISOString(),
+          }
+        })
+        .filter(ss => ss !== null) as StudentSubject[]
+
+      // ✅ Get student receipts
+      const studentReceipts = allReceipts
+        .filter(r => r.studentId === studentId && r.status !== '0')
+        .map(r => ({
+          id: r.id,
+          receiptNumber: r.receiptNumber,
+          amount: r.amount,
+          date: new Date(r.date).toISOString(),
+          paymentMethod: r.paymentMethod ?? null,
+          description: r.description ?? null,
+        }))
+
+      // ✅ Build student data matching the interface
+      const studentResult: Student = {
+        id: studentData.id,
+        name: studentData.name,
+        email: studentData.email ?? null,
+        phone: studentData.phone ?? null,
+        parentName: studentData.parentName ?? null,
+        parentPhone: studentData.parentPhone ?? null,
+        parentEmail: studentData.parentEmail ?? null,
+        grade: studentData.grade ?? null,
+        createdAt: new Date(studentData.createdAt).toISOString(),
+        studentSubjects: studentSubjectsData,
+        receipts: studentReceipts,
+      }
+
+      setStudent(studentResult)
+
+      // ✅ Commented out API call
+      // const { data } = await axios.get(`/api/students/${studentId}`)
+      // if (!data) throw new Error(t("errorFetchStudent"))
+      // setStudent(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : t("somethingWentWrong"))
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [studentId, t])
+
+  useEffect(() => {
+    fetchStudent()
+  }, [fetchStudent])
 
   if (isLoading) {
     return (
