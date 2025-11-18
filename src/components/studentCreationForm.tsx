@@ -15,6 +15,7 @@ import { useEffect, useState } from "react"
 import { studentActions, studentSubjectActions, subjectActions, teacherSubjectActions, teacherActions } from "@/lib/dexie/dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
+import { Badge } from "./ui/badge"
 
 interface Teacher {
   id: string
@@ -417,113 +418,106 @@ export default function CreateStudentForm() {
               ) : (
                 <div className="space-y-6">
                   {/* Step 1: Select Grade */}
-<div>
+<div >
   <Label className="text-base mb-3 block">
     {t("enrollmentstep1title")}
   </Label>
 
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-cols-max">
+  <div className="flex flex-wrap gap-3">
     {availableGrades.map((grade) => (
-      <Button
-        key={grade}
-        type="button"
-        onClick={() => {
-          setSelectedGrade(grade)
-          setSelectedSubject(null)
-          setSelectedTeacher("");
-        }}
-        variant={selectedGrade === grade ? "default" : "outline"}
-        className="w-fit px-4"
-      >
+      <Badge key={grade}
+      onClick={() => {
+        setSelectedGrade(grade)
+        setSelectedSubject(null)
+        setSelectedTeacher(""); }}
+      variant={selectedGrade === grade ? "default" : "outline"}>
         {grade}
-      </Button>
+      </Badge>
     ))}
   </div>
 </div>
-
-
                   {/* Step 2: Select Subject */}
-                  {selectedGrade && (
-                    <div>
-                      <Label className="text-base mb-3 block">{t("enrollmentstep2title")}</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {subjectsForGrade.length === 0 ? (
-                          <p className="text-muted-foreground col-span-2">{t("enrollmentnoSubjectsForGrade")}</p>
-                        ) : (
-                          subjectsForGrade.map((subject) => (
-                            <Button
-                              key={subject.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedSubject(subject)
-                                setSelectedTeacher("")
-                              }}
-                              disabled={subject.teacherSubjects.length === 0}
-                              variant={selectedSubject?.id === subject.id ? "default" : "outline"}
-                              className="h-auto w-auto gap-2 p-4 justify-start text-left"
-                            >
-                              <div className="w-full flex justify-between items-start">
-                                <div>
-                                  <h4 className="font-semibold">{subject.name}</h4>
-                                  {subject.duration && (
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {subject.duration} {t("hours")}
-                                    </p>
-                                  )}
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {subject.teacherSubjects.length} {t("enrollmentteachersAvailable")}
-                                  </p>
-                                </div>
-                                <p className="text-lg font-bold text-primary">{subject.price.toFixed(2)} درهم</p>
-                              </div>
-                            </Button>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Step 3: Select Teacher */}
-                  {selectedSubject && (
-                    <div>
-                      <Label className="text-base mb-3 block">
-                        {t("enrollmentstep3title", { subject: selectedSubject.name })}
-                      </Label>
-                      {teachersForSubject.length === 0 ? (
-                        <Card className="bg-muted">
-                          <CardContent className="pt-6 text-center text-muted-foreground">
-                            {t("enrollmentnoTeachers")}
-                          </CardContent>
-                        </Card>
-                      ) : (
-                        <div className="space-y-3">
-                          {teachersForSubject.map((ts) => (
-                            <Button
-                              key={ts.id}
-                              type="button"
-                              onClick={() => setSelectedTeacher(ts.teacherId)}
-                              variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
-                              className="h-auto p-4 justify-start w-full"
-                            >
-                              <div className="flex items-center justify-between w-full">
-  
-                                    <h4 className="font-semibold">{ts.teacher.name}</h4>
-                                    <p className="text-sm text-muted-foreground">
-                                      {ts.teacher.email || ts.teacher.phone || t("enrollmentnoContactInfo")}
-                                    </p>
-                                </div>
-                            </Button>
-                          ))}
+            {selectedGrade && (
+              <div>
+                <Label className="text-base mb-3 block">{t("enrollmentstep2title")}</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {subjectsForGrade.length === 0 ? (
+                    <p className="text-muted-foreground col-span-2">{t("enrollmentnoSubjectsForGrade")}</p>
+                  ) : (
+                    subjectsForGrade.map((subject) => (
+                      <Button
+                        key={subject.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSubject(subject)
+                          setSelectedTeacher("")
+                        }}
+                        disabled={subject.teacherSubjects.length === 0}
+                        variant={selectedSubject?.id === subject.id ? "default" : "outline"}
+                        className="h-auto w-auto gap-2 p-4 justify-start text-left"
+                      >
+                        <div className="w-full flex justify-between items-start">
+                          <div>
+                            <h4 className="font-semibold">{subject.name}</h4>
+                            {subject.duration && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {subject.duration} {t("hours")}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {subject.teacherSubjects.length} {t("enrollmentteachersAvailable")}
+                            </p>
+                          </div>
+                          <p className="text-lg font-bold text-primary">{subject.price.toFixed(2)} درهم</p>
                         </div>
-                      )}
-
-                      {selectedTeacher && (
-                        <Button type="button" onClick={handleAddEnrollment} className="mt-4 w-full">
-                          {t("enrollmentaddButton")}
-                        </Button>
-                      )}
-                    </div>
+                      </Button>
+                    ))
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Select Teacher */}
+            {selectedSubject && (
+              <div>
+                <Label className="text-base mb-3 block">
+                  {t("enrollmentstep3title", { subject: selectedSubject.name })}
+                </Label>
+                {teachersForSubject.length === 0 ? (
+                  <Card className="bg-muted">
+                    <CardContent className="pt-6 text-center text-muted-foreground">
+                      {t("enrollmentnoTeachers")}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {teachersForSubject.map((ts) => (
+                      <Button
+                        key={ts.id}
+                        type="button"
+                        onClick={() => setSelectedTeacher(ts.teacherId)}
+                        variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
+                        className="h-auto p-4 justify-start w-full"
+                      >
+                        <div className="flex items-center justify-between w-full">
+
+                              <h4 className="font-semibold">{ts.teacher.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {ts.teacher.email || ts.teacher.phone || t("enrollmentnoContactInfo")}
+                              </p>
+                          </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {selectedTeacher && (
+                  <Button type="button" onClick={handleAddEnrollment} className="mt-4 w-full">
+                    {t("enrollmentaddButton")}
+                  </Button>
+                )}
+              </div>
+            )}
                 </div>
               )}
             </div>

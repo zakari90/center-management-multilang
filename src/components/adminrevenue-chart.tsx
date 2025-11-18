@@ -19,6 +19,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts'
+import { getChartColors } from '@/lib/utils/themeColors'
 
 interface RevenueData {
   date: string
@@ -32,6 +33,7 @@ export default function AdminRevenueChart() {
   const [data, setData] = useState<RevenueData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
+  const chartColors = getChartColors()
 
   const fetchRevenueData = useCallback(async () => {
     setIsLoading(true)
@@ -139,12 +141,12 @@ export default function AdminRevenueChart() {
                 <AreaChart data={data}>
                   <defs>
                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      <stop offset="5%" stopColor={chartColors.chart2} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={chartColors.chart2} stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      <stop offset="5%" stopColor={chartColors.destructive} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={chartColors.destructive} stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -152,13 +154,13 @@ export default function AdminRevenueChart() {
                   <YAxis />
                   <Tooltip 
                     formatter={(value: number) => `$${value.toFixed(2)}`}
-                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px' }}
+                    contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '8px' }}
                   />
                   <Legend />
                   <Area 
                     type="monotone" 
                     dataKey="income" 
-                    stroke="#10b981" 
+                    stroke={chartColors.chart2} 
                     fillOpacity={1} 
                     fill="url(#colorIncome)" 
                     name={t('income')}
@@ -166,7 +168,7 @@ export default function AdminRevenueChart() {
                   <Area 
                     type="monotone" 
                     dataKey="expense" 
-                    stroke="#ef4444" 
+                    stroke={chartColors.destructive} 
                     fillOpacity={1} 
                     fill="url(#colorExpense)" 
                     name={t('expenses')}

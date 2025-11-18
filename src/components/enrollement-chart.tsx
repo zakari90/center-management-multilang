@@ -18,14 +18,13 @@ import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/context/authContext'
 import { studentSubjectActions, subjectActions, studentActions } from '@/lib/dexie/dexieActions'
+import { getChartColorArray } from '@/lib/utils/themeColors'
 
 interface SubjectEnrollment {
   subject: string
   students: number
   revenue: number
 }
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
 
 export default function EnrollmentChart() {
   const [data, setData] = useState<SubjectEnrollment[]>([])
@@ -123,18 +122,19 @@ export default function EnrollmentChart() {
                   if (name === 'revenue') return `MAD ${value.toFixed(2)}`
                   return value
                 }}
-                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px' }}
+                contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '8px' }}
               />
               <Legend />
               <Bar
                 dataKey="students"
-                fill="#3b82f6"
+                fill="var(--chart-1)"
                 name={t('chart.students')}
                 radius={[8, 8, 0, 0]}
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
+                {data.map((entry, index) => {
+                  const colors = getChartColorArray()
+                  return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

@@ -339,7 +339,7 @@ interface HoverGlowProps {
 export function HoverGlow({
   children,
   className,
-  glowColor = 'rgba(59, 130, 246, 0.5)',
+  glowColor = 'var(--primary)',
   intensity = 0.5,
   duration = 300
 }: HoverGlowProps) {

@@ -23,10 +23,15 @@ export default function PdfExporter({
     if (!contentRef.current) return
 
     const element = contentRef.current
+    // Get background color from theme
+    const bgColor = typeof window !== 'undefined' 
+      ? getComputedStyle(document.documentElement).getPropertyValue('--background').trim() || '#ffffff'
+      : '#ffffff'
+    
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
-      backgroundColor: '#ffffff',
+      backgroundColor: bgColor,
     })
 
     const imgData = canvas.toDataURL('image/png')

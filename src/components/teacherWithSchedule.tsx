@@ -801,9 +801,9 @@ function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
         {teacher.weeklySchedule.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {teacher.weeklySchedule.map((slot, idx) => (
-              <div key={idx} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="font-semibold text-sm text-blue-900">{slot.day}</div>
-                <div className="text-sm text-blue-700 mt-1 flex items-center gap-1">
+              <div key={idx} className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                <div className="font-semibold text-sm text-primary">{slot.day}</div>
+                <div className="text-sm text-primary/80 mt-1 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {slot.startTime} - {slot.endTime}
                 </div>
@@ -975,8 +975,8 @@ function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                       className={cn(
                         "flex items-center justify-between p-4 border rounded-lg transition-colors",
                         withinAvailability 
-                          ? "hover:bg-green-50 border-green-200" 
-                          : "hover:bg-red-50 border-red-200 bg-red-50"
+                          ? "hover:bg-secondary/10 border-secondary/20" 
+                          : "hover:bg-destructive/10 border-destructive/20 bg-destructive/10"
                       )}
                     >
                       <div className="flex items-center gap-4 flex-1">
@@ -1251,7 +1251,7 @@ function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
             className="fixed inset-0 z-10" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-20 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-48 bg-popover rounded-lg shadow-lg border z-20 overflow-hidden">
             <button
               onClick={() => {
                 exportTeacherScheduleToExcel(teacher, t)

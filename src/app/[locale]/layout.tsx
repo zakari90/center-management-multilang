@@ -19,8 +19,10 @@ import LoadWS from "./loadws";
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
 // ✅ PWA Viewport Configuration
+// Note: themeColor needs a static value, but we'll use primary color from theme
+// The actual theme color is set in the meta tag below
 export const viewport: Viewport = {
-  themeColor: '#1e40af',
+  themeColor: 'oklch(0.6209 0.1801 348.1385)', // Primary color from theme
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -57,8 +59,8 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <meta name="theme-color" content="#1e40af" />
-        <meta name="msapplication-TileColor" content="#1e40af" />
+        <meta name="theme-color" content="oklch(0.6209 0.1801 348.1385)" />
+        <meta name="msapplication-TileColor" content="oklch(0.6209 0.1801 348.1385)" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
         {/* ✅ PWA Apple Specific */}
