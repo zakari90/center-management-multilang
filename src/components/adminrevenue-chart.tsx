@@ -1,14 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-// import axios from 'axios' // ✅ Commented out - using local DB instead
+// import axios from 'axios' // ✅ Commented out - using localDB instead
 import { Loader2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-import { receiptActions } from '@/lib/dexie/dexieActions'
-import { ReceiptType } from '@/lib/dexie/dbSchema'
+import { useEffect, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -19,6 +17,10 @@ import {
   XAxis,
   YAxis
 } from 'recharts'
+import { useTranslations } from 'next-intl'
+import { receiptActions } from '@/lib/dexie/dexieActions'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
+import { eachDayOfInterval, eachMonthOfInterval, format, startOfYear, subDays } from 'date-fns'
 import { getChartColors } from '@/lib/utils/themeColors'
 
 interface RevenueData {
@@ -29,91 +31,98 @@ interface RevenueData {
 }
 
 export default function AdminRevenueChart() {
-  const t = useTranslations('adminRevenueChart')
   const [data, setData] = useState<RevenueData[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
+  const t = useTranslations('adminRevenueChart')
   const chartColors = getChartColors()
 
-  const fetchRevenueData = useCallback(async () => {
+  useEffect(() => {
+    fetchRevenueData()
+  }, [period])
+
+  const fetchRevenueData = async () => {
     setIsLoading(true)
     try {
-      // ✅ Fetch receipts from local DB
-      const allReceipts = await receiptActions.getAll()
-      const activeReceipts = allReceipts.filter(r => r.status !== '0')
+      // ✅ Fetch from localDB instead of API
+      const receipts = await receiptActions.getAll()
 
-      // ✅ Calculate date range based on period
+      // Filter by status (exclude deleted items)
+      const activeReceipts = receipts.filter(r => r.status !== '0')
+
+      // Calculate date range based on period
       const now = new Date()
       let startDate: Date
-      
-      if (period === 'week') {
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      } else if (period === 'month') {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-      } else { // year
-        startDate = new Date(now.getFullYear(), 0, 1)
+      let dateFormat: string
+      let intervals: Date[]
+
+      switch (period) {
+        case 'week':
+          startDate = subDays(now, 7)
+          dateFormat = 'MMM dd'
+          intervals = eachDayOfInterval({ start: startDate, end: now })
+          break
+        case 'year':
+          startDate = startOfYear(now)
+          dateFormat = 'MMM'
+          intervals = eachMonthOfInterval({ start: startDate, end: now })
+          break
+        case 'month':
+        default:
+          startDate = subDays(now, 30)
+          dateFormat = 'MMM dd'
+          intervals = eachDayOfInterval({ start: startDate, end: now })
+          break
       }
 
-      const startTime = startDate.getTime()
-      const filteredReceipts = activeReceipts.filter(r => r.date >= startTime)
+      // Filter receipts by date range
+      const filteredReceipts = activeReceipts.filter(r => {
+        const receiptDate = new Date(r.date)
+        return receiptDate >= startDate
+      })
 
-      // ✅ Group by date and calculate income/expense
+      // Group receipts by date
       const revenueMap = new Map<string, { income: number; expense: number }>()
 
-      filteredReceipts.forEach(receipt => {
-        const date = new Date(receipt.date)
-        let key: string
-        
-        if (period === 'week') {
-          key = date.toLocaleDateString('en-US', { weekday: 'short' })
-        } else if (period === 'month') {
-          key = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        } else {
-          key = date.toLocaleDateString('en-US', { month: 'short' })
-        }
+      intervals.forEach(date => {
+        const key = format(date, dateFormat)
+        revenueMap.set(key, { income: 0, expense: 0 })
+      })
 
+      filteredReceipts.forEach(receipt => {
+        const key = format(new Date(receipt.date), dateFormat)
         const existing = revenueMap.get(key) || { income: 0, expense: 0 }
-        
+
         if (receipt.type === ReceiptType.STUDENT_PAYMENT) {
           existing.income += receipt.amount
         } else if (receipt.type === ReceiptType.TEACHER_PAYMENT) {
           existing.expense += receipt.amount
         }
-        
+
         revenueMap.set(key, existing)
       })
 
-      // ✅ Convert to array and sort
-      const revenueData: RevenueData[] = Array.from(revenueMap.entries())
-        .map(([date, values]) => ({
-          date,
-          income: values.income,
-          expense: values.expense,
-          net: values.income - values.expense
-        }))
-        .sort((a, b) => {
-          // Simple sort - in production, you'd parse dates properly
-          return a.date.localeCompare(b.date)
-        })
+      const chartData = Array.from(revenueMap.entries()).map(([date, values]) => ({
+        date,
+        income: values.income,
+        expense: values.expense,
+        net: values.income - values.expense
+      }))
 
-      setData(revenueData)
+      setData(chartData)
 
-      // ✅ Commented out API call
+      // ✅ Old API call - commented out
       // const { data } = await axios.get(`/api/admin/dashboard/revenue?period=${period}`)
       // setData(data)
     } catch (err) {
-      console.error('Failed to fetch revenue data from local DB:', err)
+      console.error('Failed to fetch revenue data:', err)
     } finally {
       setIsLoading(false)
     }
-  }, [period])
-
-  useEffect(() => {
-    fetchRevenueData()
-  }, [fetchRevenueData])
+  }
 
   return (
-    <Card className="col-span-4 w-full">
+    <Card>
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div>
@@ -122,61 +131,57 @@ export default function AdminRevenueChart() {
           </div>
           <Tabs value={period} onValueChange={(v) => setPeriod(v as any)}>
             <TabsList>
-              <TabsTrigger value="week">{t('week')}</TabsTrigger>
-              <TabsTrigger value="month">{t('month')}</TabsTrigger>
-              <TabsTrigger value="year">{t('year')}</TabsTrigger>
+              <TabsTrigger value="week">{t('tabs.week')}</TabsTrigger>
+              <TabsTrigger value="month">{t('tabs.month')}</TabsTrigger>
+              <TabsTrigger value="year">{t('tabs.year')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </CardHeader>
-      <CardContent className="w-full">
+      <CardContent>
         {isLoading ? (
           <div className="flex justify-center items-center h-[350px]">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         ) : (
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[300px] w-[90vw] sm:w-full">
-              <ResponsiveContainer width="100%" height={350}>
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.chart2} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={chartColors.chart2} stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColors.destructive} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={chartColors.destructive} stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip 
-                    formatter={(value: number) => `$${value.toFixed(2)}`}
-                    contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '8px' }}
-                  />
-                  <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="income" 
-                    stroke={chartColors.chart2} 
-                    fillOpacity={1} 
-                    fill="url(#colorIncome)" 
-                    name={t('income')}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="expense" 
-                    stroke={chartColors.destructive} 
-                    fillOpacity={1} 
-                    fill="url(#colorExpense)" 
-                    name={t('expenses')}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <ResponsiveContainer width="100%" height={350}>
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={chartColors.chart2} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={chartColors.chart2} stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={chartColors.destructive} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={chartColors.destructive} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip 
+                formatter={(value: number) => `MAD ${value.toFixed(2)}`}
+                contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '8px' }}
+              />
+              <Legend />
+              <Area 
+                type="monotone" 
+                dataKey="income" 
+                stroke={chartColors.chart2} 
+                fillOpacity={1} 
+                fill="url(#colorIncome)" 
+                name={t('chart.income')}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="expense" 
+                stroke={chartColors.destructive} 
+                fillOpacity={1} 
+                fill="url(#colorExpense)" 
+                name={t('chart.expense')}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         )}
       </CardContent>
     </Card>

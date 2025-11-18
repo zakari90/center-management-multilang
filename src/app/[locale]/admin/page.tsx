@@ -34,7 +34,7 @@ export default function AdminDashboard() {
       {/* Stats Overview */}
       <AdminStatsCards />
       <AdminQuickActions />
-      <AdminRevenueChart/>
+      <AdminRevenueChart />
       <CentersOverview />
       
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
