@@ -1434,7 +1434,8 @@
     "saveChanges": "Save Changes",
     "saving": "Saving...",
     "nameRequired": "Student name is required",
-    "atLeastOneSubject": "Please enroll the student in at least one subject"
+    "atLeastOneSubject": "Please enroll the student in at least one subject",
+    "unauthorized": "Unauthorized: Please log in again"
   },    
   "Metadata": {
     "title": "center management, تدبير مراجعتي",

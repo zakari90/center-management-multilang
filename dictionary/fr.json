@@ -1275,7 +1275,8 @@
     "saveChanges": "Enregistrer les modifications",
     "saving": "Enregistrement en cours...",
     "nameRequired": "Le nom de l'élève est obligatoire",
-    "atLeastOneSubject": "Veuillez inscrire l'élève à au moins une matière"
+    "atLeastOneSubject": "Veuillez inscrire l'élève à au moins une matière",
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter"
   },
   "subjectForm": {
     "instructions": "Veuillez sélectionner une matière et un niveau. La durée est optionnelle.",

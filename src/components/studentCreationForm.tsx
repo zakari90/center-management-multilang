@@ -251,6 +251,7 @@ export default function CreateStudentForm() {
         studentId: studentId,
         subjectId: es.subjectId,
         teacherId: es.teacherId,
+        managerId: user.id,
         enrolledAt: now,
         status: 'w' as const, // Waiting for sync
         createdAt: now,

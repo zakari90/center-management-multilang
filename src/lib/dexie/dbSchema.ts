@@ -80,10 +80,11 @@ export interface TeacherSubject extends SyncEntity {
 }
 
 export interface StudentSubject extends SyncEntity {
-  enrolledAt: number;
+  enrolledAt: number | string;
   studentId: string;
   subjectId: string;
   teacherId: string;
+  managerId: string;
 }
 
 export interface Receipt extends SyncEntity {

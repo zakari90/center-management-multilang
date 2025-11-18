@@ -19,7 +19,8 @@ import {
   studentSubjectActions, 
   subjectActions, 
   teacherSubjectActions, 
-  teacherActions 
+  teacherActions,
+  centerActions
 } from "@/lib/dexie/dexieActions"
 import { useAuth } from "@/context/authContext"
 
@@ -80,7 +81,7 @@ export default function EditStudentForm() {
   const t = useTranslations("editStudent")
   const params = useParams()
   const router = useRouter()
-  const { user } = useAuth() // ✅ Get current user from AuthContext
+  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
   const [error, setError] = useState("")
@@ -112,20 +113,29 @@ export default function EditStudentForm() {
     setLoadingSubjects(true)
     setError('')
     try {
-      if (!user) {
-        setError("Unauthorized: Please log in again")
+      // Only proceed if auth has finished loading and user is available
+      if (!user && !authLoading) {
+        setError(t('unauthorized'))
+        setIsFetching(false)
+        setLoadingSubjects(false)
+        return
+      }
+      
+      if (!user?.id) {
+        setError(t('unauthorized'))
         setIsFetching(false)
         setLoadingSubjects(false)
         return
       }
 
       // ✅ Fetch from local DB
-      const [allStudents, allStudentSubjects, allSubjects, allTeacherSubjects, allTeachers] = await Promise.all([
+      const [allStudents, allStudentSubjects, allSubjects, allTeacherSubjects, allTeachers, allCenters] = await Promise.all([
         studentActions.getAll(),
         studentSubjectActions.getAll(),
         subjectActions.getAll(),
         teacherSubjectActions.getAll(),
-        teacherActions.getAll()
+        teacherActions.getAll(),
+        centerActions.getAll()
       ])
 
       // ✅ Find student by ID
@@ -166,9 +176,13 @@ export default function EditStudentForm() {
         })
         .filter(ss => ss !== null) as StudentSubject[]
 
-      // ✅ Build subjects with teachers (filter by manager)
+      // ✅ Build subjects with teachers (filter by manager's centers)
+      const managerCenters = allCenters.filter(c => 
+        (c.managers || []).includes(user.id) && c.status !== '0'
+      )
+      const managerCenterIds = managerCenters.map(c => c.id)
       const managerSubjects = allSubjects
-        .filter(s => s.managerId === user.id && s.status !== '0')
+        .filter(s => managerCenterIds.includes(s.centerId) && s.status !== '0')
       
       const subjectsWithTeachers: Subject[] = managerSubjects.map(subject => {
         const teacherSubjectsForSubject = allTeacherSubjects
@@ -251,12 +265,15 @@ export default function EditStudentForm() {
       setIsFetching(false)
       setLoadingSubjects(false)
     }
-  }, [params.id, user, t])
+  }, [params.id, user, authLoading, t])
 
   // Fetch student data and subjects
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    // Wait for auth to finish loading before fetching data
+    if (!authLoading) {
+      fetchData()
+    }
+  }, [authLoading, fetchData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -321,8 +338,8 @@ export default function EditStudentForm() {
     setError("")
 
     try {
-      if (!user) {
-        throw new Error("Unauthorized: Please log in again")
+      if (!user || !user.id) {
+        throw new Error(t('unauthorized'))
       }
 
       if (!formData.name) {
@@ -386,6 +403,7 @@ export default function EditStudentForm() {
         const enrollmentId = generateObjectId()
         await studentSubjectActions.putLocal({
           id: enrollmentId,
+          enrolledAt: now,
           studentId: params.id as string,
           subjectId: enrollment.subjectId,
           teacherId: enrollment.teacherId,
@@ -424,7 +442,8 @@ export default function EditStudentForm() {
   // Calculate total price
   const totalPrice = enrolledSubjects.reduce((total, es) => total + es.price, 0)
 
-  if (isFetching) {
+  // Show loading while auth is checking or data is fetching
+  if (authLoading || isFetching) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="animate-spin" />
