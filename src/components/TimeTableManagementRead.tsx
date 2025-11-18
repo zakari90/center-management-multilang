@@ -60,7 +60,7 @@ const TIME_SLOTS = [
 
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
   const t = useTranslations('TimetableOverview')
-  const { user } = useAuth() // ✅ Get current user from AuthContext
+  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
   
   const DAYS = [
     t('monday'), t('tuesday'), t('wednesday'), 
@@ -81,8 +81,15 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     setIsLoading(true)
     setError('')
     try {
-      if (!user) {
-        setError("Unauthorized: Please log in again")
+      // Only proceed if auth has finished loading and user is available
+      if (!user && !authLoading) {
+        setError(t('unauthorized'))
+        setIsLoading(false)
+        return
+      }
+      
+      if (!user?.id) {
+        setError(t('unauthorized'))
         setIsLoading(false)
         return
       }
@@ -188,11 +195,14 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     } finally {
       setIsLoading(false)
     }
-  }, [user, centerId, t])
+  }, [user, authLoading, centerId, t])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    // Wait for auth to finish loading before fetching data
+    if (!authLoading) {
+      fetchData()
+    }
+  }, [authLoading, fetchData])
 
   const filteredSchedule = schedule.filter(slot => {
     if (viewMode === 'teacher' && selectedFilter) {
@@ -208,7 +218,8 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     return filteredSchedule.filter(s => s.day === day && s.startTime === time)
   }
 
-  if (isLoading) {
+  // Show loading while auth is checking or data is loading
+  if (authLoading || isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

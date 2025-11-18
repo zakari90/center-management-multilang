@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/_dexieActions"
+import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/dexieActions"
 import { useAuth } from "@/context/authContext"
 // import axios from "axios" // ✅ Commented out - using local DB
 import { EntitySyncControls } from "@/components/EntitySyncControls"
@@ -46,7 +46,7 @@ export interface Student {
 
 export default function StudentsTable() {
   const t = useTranslations("StudentsTable")
-  const { user } = useAuth() // ✅ Get current user from AuthContext
+  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
   
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,9 +57,17 @@ export default function StudentsTable() {
   const fetchStudents = useCallback(async () => {
     try {
       setLoading(true)
+      setError("")
       
-      if (!user) {
-        setError("Unauthorized: Please log in again")
+      // Only proceed if auth has finished loading and user is available
+      if (!user && !authLoading) {
+        setError(t("unauthorized"))
+        setLoading(false)
+        return
+      }
+      
+      if (!user?.id) {
+        setError(t("unauthorized"))
         setLoading(false)
         return
       }
@@ -121,17 +129,18 @@ export default function StudentsTable() {
       // setStudents(data)
     } catch (err) {
       console.error("Error fetching students:", err)
-      setError("Failed to load students")
+      setError(t("errorFetchStudents"))
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, authLoading, t])
 
   useEffect(() => {
-    if (user) {
+    // Wait for auth to finish loading before fetching data
+    if (!authLoading) {
       fetchStudents()
     }
-  }, [user, fetchStudents])
+  }, [authLoading, fetchStudents])
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -158,7 +167,8 @@ export default function StudentsTable() {
     ? students.reduce((sum, s) => sum + (s.studentSubjects?.length || 0), 0) / totalStudents 
     : 0
 
-  if (loading) {
+  // Show loading while auth is checking or data is loading
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -179,7 +189,7 @@ export default function StudentsTable() {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">{t("student")}</h1>
+            <h1 className="text-3xl font-bold">{t("title")}</h1>
             <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
@@ -227,7 +237,7 @@ export default function StudentsTable() {
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {filteredStudents.length} {t("filtered") || "مُرشَّح"}
+              {filteredStudents.length} {t("filtered")}
             </p>
           </CardContent>
         </Card>
@@ -239,18 +249,18 @@ export default function StudentsTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">MAD {totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t("monthlyRevenue") || "الإيرادات الشهرية"}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("monthlyRevenue")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("avgSubjects") || "متوسط المواد"}</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("avgSubjects")}</CardTitle>
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{averageSubjects.toFixed(1)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t("perStudent") || "لكل طالب"}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}</p>
           </CardContent>
         </Card>
       </div>

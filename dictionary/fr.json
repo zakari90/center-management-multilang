@@ -302,7 +302,19 @@
     "classroomsLabel": "Salles",
     "classroomPlaceholder": "Entrez un nom de salle",
     "workingDaysLabel": "Jours ouvrables",
-    "dayPlaceholder": "Entrez un nom de jour"
+    "dayPlaceholder": "Entrez un nom de jour",
+    "loading": "Chargement...",
+    "subjectAdded": "Matière ajoutée avec succès",
+    "subjectAddFailed": "Échec de l'ajout de la matière",
+    "subjectNotFound": "Matière introuvable",
+    "subjectUpdated": "Matière mise à jour avec succès",
+    "subjectUpdateFailed": "Échec de la mise à jour de la matière",
+    "subjectDeleted": "Matière supprimée avec succès",
+    "subjectDeleteFailed": "Échec de la suppression de la matière",
+    "classroomsUpdated": "Salles mises à jour avec succès",
+    "classroomsUpdateFailed": "Échec de la mise à jour des salles",
+    "workingDaysUpdated": "Jours ouvrables mis à jour avec succès",
+    "workingDaysUpdateFailed": "Échec de la mise à jour des jours ouvrables"
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",
@@ -334,6 +346,7 @@
     "createCenter": "Créer le centre",
     "creatingCenter": "Création du centre en cours...",
     "successMessage": "Centre créé avec succès!",
+    "centerCreatedSuccess": "Centre créé avec succès!",
     "errorMessage": "Erreur lors de la création du centre. Veuillez réessayer"
   },
   "SubjectForm": {
@@ -504,7 +517,10 @@
     "userUpdatedError": "Erreur lors de la mise à jour de l'utilisateur",
     "nameEmailRequired": "Le nom et l'email sont obligatoires",
     "deletedSuccess": "Supprimé avec succès",
-    "deletedError": "Erreur lors de la suppression"
+    "deletedError": "Erreur lors de la suppression",
+    "userNotFound": "Utilisateur introuvable",
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter",
+    "emailAlreadyInUse": "L'email est déjà utilisé"
   },
   "TimetableManagement": {
     "title": "Gestion des horaires",
@@ -798,7 +814,8 @@
     "dashboard": "Tableau de bord",
     "teachers": "Enseignants",
     "students": "Élèves",
-    "receipts": "Reçus"
+    "receipts": "Reçus",
+    "schedule": "Calendrier"
   },
   "AdminLayout": {
     "dashboard": "Tableau de bord",
@@ -1009,7 +1026,8 @@
     "perStudent": "par élève",
     "parent": "Parent",
     "monthlyFee": "Frais mensuels",
-    "noStudents": "Aucun élève"
+    "noStudents": "Aucun élève",
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter"
   },
   "StudentReceiptTable": {
     "MAD": "MAD",
@@ -1122,7 +1140,6 @@
     "loss": "Perte",
     "receipts": "reçus",
     "filters": "Filtres",
-
     "searchPlaceholder": "Rechercher par numéro de reçu, personne ou description...",
     "allTypes": "Tous les types",
     "studentPayments": "Paiements des élèves",
@@ -1141,8 +1158,37 @@
     "amount": "Montant",
     "method": "Méthode",
     "date": "Date",
+    "actions": "Actions",
     "income": "Revenu",
     "expense": "Dépense"
+  },
+  "TimetableOverview": {
+    "title": "Aperçu de l'emploi du temps",
+    "subtitle": "Voir les horaires des classes, les enseignants et les salles",
+    "errorLoadSchedule": "Impossible de charger les données de l'emploi du temps",
+    "viewOptions": "Options d'affichage",
+    "viewMode": "Mode d'affichage",
+    "allSchedules": "Tous les horaires",
+    "byTeacher": "Par enseignant",
+    "byRoom": "Par salle",
+    "selectTeacher": "Sélectionner l'enseignant",
+    "selectRoom": "Sélectionner la salle",
+    "chooseTeacher": "Choisir un enseignant",
+    "chooseRoom": "Choisir une salle",
+    "weeklySchedule": "Emploi du temps hebdomadaire",
+    "viewFullTimetable": "Voir l'emploi du temps hebdomadaire complet des classes",
+    "time": "Heure",
+    "monday": "Lundi",
+    "tuesday": "Mardi",
+    "wednesday": "Mercredi",
+    "thursday": "Jeudi",
+    "friday": "Vendredi",
+    "saturday": "Samedi",
+    "sunday": "Dimanche",
+    "unknownSubject": "Matière inconnue",
+    "unknownTeacher": "Enseignant inconnu",
+    "grade": "Niveau",
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter"
   },
   "StudentProfile": {
     "backToStudents": "Retour aux élèves",

@@ -369,7 +369,7 @@ export default function AllUsersTable() {
     }
 
     if (!user) {
-      toast('Unauthorized: Please log in again')
+      toast(t('unauthorized'))
       return
     }
 
@@ -378,7 +378,7 @@ export default function AllUsersTable() {
       // ✅ Check if email already exists in local DB
       const existingUser = await userActions.getLocalByEmail?.(userFormData.email)
       if (existingUser) {
-        toast('Email is already in use')
+        toast(t('emailAlreadyInUse'))
         setIsProcessing(false)
         return
       }
@@ -455,7 +455,7 @@ export default function AllUsersTable() {
       // ✅ Get existing user from local DB
       const existingUser = await userActions.getLocal(editingUser.id)
       if (!existingUser) {
-        toast(t('userNotFound') || 'User not found')
+        toast(t('userNotFound'))
         setIsProcessing(false)
         return
       }
