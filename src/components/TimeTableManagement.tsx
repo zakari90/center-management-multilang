@@ -122,18 +122,40 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       const isAdmin = user.role?.toUpperCase() === 'ADMIN'
       
       // ✅ Filter teachers: for admin, show all teachers in center; for manager, filter by managerId
-      const relevantTeachers = isAdmin
-        ? allTeachers.filter(t => {
-            // For admin, if centerId is provided, show teachers from that center's managers
-            if (centerId) {
-              const center = allCenters.find(c => c.id === centerId && c.status !== '0')
-              const managerIds = center?.managers || []
-              return managerIds.includes(t.managerId) && t.status !== '0'
-            }
-            // If no centerId, show all active teachers
-            return t.status !== '0'
-          })
-        : allTeachers.filter(t => t.managerId === user.id && t.status !== '0')
+      let relevantTeachers: typeof allTeachers = []
+      
+      if (isAdmin) {
+        // For admin, if centerId is provided, show teachers from that center's managers
+        if (centerId) {
+          const center = allCenters.find(c => c.id === centerId && c.status !== '0')
+          const managerIds = center?.managers || []
+          relevantTeachers = allTeachers.filter(t => 
+            managerIds.includes(t.managerId) && t.status !== '0'
+          )
+        } else {
+          // If no centerId, show all active teachers from admin's centers
+          const adminCenters = allCenters.filter(c => 
+            c.adminId === user.id && c.status !== '0'
+          )
+          const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
+          relevantTeachers = allTeachers.filter(t => 
+            adminManagerIds.includes(t.managerId) && t.status !== '0'
+          )
+        }
+      } else {
+        // Manager sees only their teachers
+        relevantTeachers = allTeachers.filter(t => 
+          t.managerId === user.id && t.status !== '0'
+        )
+      }
+      
+      console.log("🔍 Teachers Debug:", {
+        isAdmin,
+        centerId,
+        totalTeachers: allTeachers.length,
+        relevantTeachers: relevantTeachers.length,
+        teachers: relevantTeachers.map(t => ({ id: t.id, name: t.name, managerId: t.managerId }))
+      })
       
       const managerTeachers = relevantTeachers.map(t => ({ id: t.id, name: t.name }))
       
@@ -172,11 +194,21 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       if (isAdmin) {
         // Admin sees all schedules for their center(s)
         if (centerId) {
-          filteredSchedules = filteredSchedules.filter(s => s.centerId === centerId)
-        } else {
-          // Filter by admin's centers
+          // Get manager IDs for this center
+          const center = allCenters.find(c => c.id === centerId && c.status !== '0')
+          const managerIds = center?.managers || []
+          // Show schedules from managers in this center
           filteredSchedules = filteredSchedules.filter(s => 
-            relevantCenterIds.includes(s.centerId || '')
+            managerIds.includes(s.managerId) && (s.centerId === centerId || !s.centerId)
+          )
+        } else {
+          // Filter by admin's centers and their managers
+          const adminCenters = allCenters.filter(c => 
+            c.adminId === user.id && c.status !== '0'
+          )
+          const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
+          filteredSchedules = filteredSchedules.filter(s => 
+            adminManagerIds.includes(s.managerId)
           )
         }
       } else {
@@ -185,6 +217,20 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           .filter(s => s.managerId === user.id)
           .filter(s => !centerId || s.centerId === centerId)
       }
+      
+      console.log("🔍 Schedules Debug:", {
+        isAdmin,
+        centerId,
+        totalSchedules: allSchedules.length,
+        filteredSchedules: filteredSchedules.length,
+        schedules: filteredSchedules.map(s => ({
+          id: s.id,
+          day: s.day,
+          teacherId: s.teacherId,
+          managerId: s.managerId,
+          centerId: s.centerId
+        }))
+      })
 
       // ✅ Transform schedules to match ScheduleSlot interface
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map(s => ({

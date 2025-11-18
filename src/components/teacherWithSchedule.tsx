@@ -2,7 +2,8 @@
 import { FileSpreadsheet, FileText } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 // import axios from 'axios' // ✅ Commented out - using local DB instead
-import { teacherActions, scheduleActions, subjectActions } from '@/lib/dexie/dexieActions'
+import { teacherActions, scheduleActions, subjectActions, centerActions } from '@/lib/dexie/dexieActions'
+import { useAuth } from '@/context/authContext'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -427,6 +428,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: Ret
 
 export default function TeacherScheduleView() {
   const t = useTranslations('TeacherScheduleView')
+  const { user } = useAuth()
   
   const [teachers, setTeachers] = useState<TeacherWithSchedule[]>([])
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>('')
@@ -439,17 +441,49 @@ export default function TeacherScheduleView() {
       setIsLoading(true)
       setError('')
 
+      if (!user) {
+        setIsLoading(false)
+        return
+      }
+
+      const isAdmin = user.role?.toUpperCase() === 'ADMIN'
+
       // ✅ Fetch from local DB (all entities in parallel)
-      const [allTeachers, allSchedules, allSubjects] = await Promise.all([
+      const [allTeachers, allSchedules, allSubjects, allCenters] = await Promise.all([
         teacherActions.getAll(),
         scheduleActions.getAll(),
-        subjectActions.getAll()
+        subjectActions.getAll(),
+        centerActions.getAll()
       ])
 
       // ✅ Filter active entities (exclude deleted)
-      const activeTeachers = allTeachers.filter(t => t.status !== '0')
+      let activeTeachers = allTeachers.filter(t => t.status !== '0')
+      
+      // ✅ For admin, filter teachers by their center's managers
+      if (isAdmin && user.id) {
+        const adminCenters = allCenters.filter(c => 
+          c.adminId === user.id && c.status !== '0'
+        )
+        const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
+        activeTeachers = activeTeachers.filter(t => 
+          adminManagerIds.includes(t.managerId)
+        )
+      } else if (user.id) {
+        // For manager, filter by managerId
+        activeTeachers = activeTeachers.filter(t => t.managerId === user.id)
+      }
+      
       const activeSchedules = allSchedules.filter(s => s.status !== '0')
       const activeSubjects = allSubjects.filter(s => s.status !== '0')
+      
+      console.log("🔍 TeacherScheduleView Debug:", {
+        isAdmin,
+        userId: user.id,
+        totalTeachers: allTeachers.length,
+        activeTeachers: activeTeachers.length,
+        adminCenters: isAdmin ? allCenters.filter(c => c.adminId === user.id && c.status !== '0').map(c => ({ id: c.id, name: c.name, managers: c.managers })) : [],
+        teachers: activeTeachers.map(t => ({ id: t.id, name: t.name, managerId: t.managerId }))
+      })
 
       // ✅ Build schedules with related data (teacher and subject)
       const schedulesWithData: Schedule[] = activeSchedules.map(schedule => {
@@ -572,7 +606,7 @@ export default function TeacherScheduleView() {
     } finally {
       setIsLoading(false)
     }
-  }, [t])
+  }, [t, user])
 
   useEffect(() => {
     fetchTeacherSchedules()
