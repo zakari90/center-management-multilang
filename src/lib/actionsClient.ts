@@ -8,9 +8,33 @@ import { loginAdmin, loginManager } from "./actions";
 import { Role, localDb } from "./dexie/dbSchema";
 import { userActions } from "./dexie/dexieActions";
 import { isOnline } from "./utils/network";
+import bcrypt from "bcryptjs";
 
 const secretKey = "secret";
 const key = new TextEncoder().encode(secretKey);
+
+// Client-side translation helper
+async function getClientTranslations(namespace: string) {
+  // Get locale from cookie or default to 'ar'
+  const locale = Cookies.get('NEXT_LOCALE') || 'ar';
+  
+  // Dynamically import the dictionary file
+  const messages = await import(`../../dictionary/${locale}.json`);
+  
+  // Get the namespace (e.g., 'auth')
+  const namespaceMessages = messages.default[namespace] || {};
+  
+  // Return a translation function
+  return (key: string): string => {
+    const keys = key.split('.');
+    let value: any = namespaceMessages;
+    for (const k of keys) {
+      value = value?.[k];
+      if (value === undefined) return key;
+    }
+    return typeof value === 'string' ? value : key;
+  };
+}
 
 export async function encrypt(payload: any) {
   return await new SignJWT(payload)
@@ -30,20 +54,31 @@ export async function getSession() {
   return await decrypt(session);
 }
 
-// Combined login logic
-export async function loginWithRole(state: unknown, formData: FormData) {
+// Consistent error type
+type LoginError = {
+  error: { field: "email" | "password" | "role" | "db" | "general", message: string },
+  success: false,
+  role: string,
+  data: undefined
+}
+
+export async function loginWithRole(state: unknown, formData: FormData): Promise<
+  LoginError | { data: { user: any }, success: true, role: string }
+> {
   const submittedRole =
     (formData.get("role") as string) === "manager" ? "manager" : "admin";
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const ADMIN_EMAIL = "admin@admin.com";
-  const ADMIN_PASSWORD = "your_admin_password"; // Replace with your strong password
-
+  // const ADMIN_PASSWORD = "admin"; // Replace with your strong password
+  const hashedAdminPassword = "$2b$10$08j0woT3eQ021kqX3w4R2.RLntSwjIuPDVVsUVwtqNc546.Bjkemq"
   try {
+    const t = await getClientTranslations('auth');
+    
     // Validate inputs
     if (!email || !password) {
       return {
-        error: { message: "Email and password are required." },
+        error: { field: "general", message: t('validation.emailRequired') + " " + t('validation.passwordRequired') },
         success: false,
         role: submittedRole,
         data: undefined,
@@ -52,7 +87,7 @@ export async function loginWithRole(state: unknown, formData: FormData) {
 
     if (!userActions.getLocalByEmail) {
       return {
-        error: { message: "Database not initialized. Please refresh the page." },
+        error: { field: "db", message: t('errors.unexpectedError') },
         success: false,
         role: submittedRole,
         data: undefined,
@@ -61,9 +96,9 @@ export async function loginWithRole(state: unknown, formData: FormData) {
 
     try {
       await localDb.open();
-    } catch (dbError: any) {
+    } catch {
       return {
-        error: { message: `Database error: ${dbError?.message || "Please refresh the page."}` },
+        error: { field: "db", message: t('errors.unexpectedError') },
         success: false,
         role: submittedRole,
         data: undefined,
@@ -77,7 +112,7 @@ export async function loginWithRole(state: unknown, formData: FormData) {
     if (localUser) {
       if (localUser.password !== password) {
         return {
-          error: { password: "Incorrect password." },
+          error: { field: "password", message: t('errors.loginFailed') },
           success: false,
           role: submittedRole,
           data: undefined,
@@ -87,7 +122,7 @@ export async function loginWithRole(state: unknown, formData: FormData) {
       const expectedRole = submittedRole === "manager" ? Role.MANAGER : Role.ADMIN;
       if (localUser.role !== expectedRole) {
         return {
-          error: { message: `Invalid role. Expected ${expectedRole}, got ${localUser.role}` },
+          error: { field: "role", message: t('errors.unexpectedError') },
           success: false,
           role: submittedRole,
           data: undefined,
@@ -129,7 +164,8 @@ export async function loginWithRole(state: unknown, formData: FormData) {
               // Ignore sync update error
             }
             return {
-              ...result,
+              data: { user: result.data.user },
+              success: true,
               role: submittedRole,
             };
           }
@@ -146,7 +182,9 @@ export async function loginWithRole(state: unknown, formData: FormData) {
     }
 
     // User not found locally — only admin fallback allowed
-    if (submittedRole === "admin" && email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const checkPassword =  await bcrypt.compare(password, hashedAdminPassword);
+    
+    if (submittedRole === "admin" && email === ADMIN_EMAIL && checkPassword) {
       const adminUser = {
         id: "admin",
         name: "Admin",
@@ -168,19 +206,21 @@ export async function loginWithRole(state: unknown, formData: FormData) {
     }
 
     // If not admin, return not found
+    const tNotFound = await getClientTranslations('auth');
     return {
-      error: { message: "User not found." },
+      error: { field: "email", message: tNotFound('errors.loginFailed') },
       success: false,
       role: submittedRole,
       data: undefined,
     };
   } catch (error) {
+    const t = await getClientTranslations('auth');
     const errorMessage =
       error instanceof Error
         ? error.message
-        : "Internal server error. Please check the console for details.";
+        : t('errors.unexpectedError');
     return {
-      error: { message: errorMessage },
+      error: { field: "general", message: errorMessage },
       success: false,
       role: submittedRole,
       data: undefined,

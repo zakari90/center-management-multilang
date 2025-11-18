@@ -24,7 +24,8 @@ setup-mongodb-replica-set.md
 /prisma/migrations
 # testing
 /coverage
-
+.hash.js
+/.hash.js
 # next.js
 /.next/
 /out/

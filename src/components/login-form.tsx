@@ -42,6 +42,13 @@ interface LoginFormProps extends React.ComponentProps<"div"> {
   initialRole?: Role
 }
 
+// Type guard to check if state is an error
+function isErrorState(
+  state: Awaited<ReturnType<typeof loginWithRole>> | undefined
+): state is Extract<Awaited<ReturnType<typeof loginWithRole>>, { success: false }> {
+  return state !== undefined && !state.success
+}
+
 export function LoginForm({
   className,
   initialRole = "admin",
@@ -64,6 +71,7 @@ export function LoginForm({
   }, [initialRole])
 
   const activeStateMatchesRole = state?.role ? state.role === role : true
+  const errorState = isErrorState(state) ? state : null
 
   useEffect(() => {
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
@@ -177,16 +185,16 @@ export function LoginForm({
                     <Alert className="border-green-200 bg-green-50" aria-live="polite">
                       <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
                       <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
-                        {state?.data?.message ?? successFallback}
+                        {successFallback}
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  {state?.error?.message && activeStateMatchesRole && (
+                  {errorState?.error?.message && activeStateMatchesRole && (
                     <Alert variant="destructive" aria-live="assertive">
                       <AlertCircle className="h-4 w-4 flex-shrink-0" />
                       <AlertDescription className="text-xs sm:text-sm ml-2">
-                        {state.error.message}
+                        {errorState.error.message}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -204,7 +212,7 @@ export function LoginForm({
                         placeholder={t("email.placeholder")}
                         className={cn(
                           "pl-10 pr-3 h-11 sm:h-12 w-full text-sm",
-                          state?.error?.email && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
+                          errorState?.error?.field === "email" && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
                         )}
                         required
                         disabled={isPending}
@@ -212,11 +220,11 @@ export function LoginForm({
                         autoFocus
                       />
                     </div>
-                    {state?.error?.email && activeStateMatchesRole && (
+                    {errorState?.error?.field === "email" && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         <span>
-                          {Array.isArray(state.error.email) ? state.error.email[0] : state.error.email}
+                          {errorState.error.message}
                         </span>
                       </p>
                     )}
@@ -235,7 +243,7 @@ export function LoginForm({
                         placeholder={t("password.placeholder")}
                         className={cn(
                           "pl-10 pr-10 h-11 sm:h-12 w-full text-sm",
-                          state?.error?.password && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
+                          errorState?.error?.field === "password" && activeStateMatchesRole && "border-red-500 focus-visible:ring-red-500"
                         )}
                         required
                         disabled={isPending}
@@ -251,11 +259,11 @@ export function LoginForm({
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    {state?.error?.password && activeStateMatchesRole && (
+                    {errorState?.error?.field === "password" && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3 flex-shrink-0" />
                         <span>
-                          {Array.isArray(state.error.password) ? state.error.password[0] : state.error.password}
+                          {errorState.error.message}
                         </span>
                       </p>
                     )}
