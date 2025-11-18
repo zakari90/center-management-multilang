@@ -1025,7 +1025,8 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "unauthorized": "Unauthorized: Please log in again"
   },
   "StudentsTable": {
     "title": "Students",

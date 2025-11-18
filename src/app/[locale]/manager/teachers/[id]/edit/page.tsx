@@ -24,12 +24,13 @@ import { Separator } from '@/components/ui/separator'
 // import axios from 'axios' // ✅ Commented out - using local DB
 import { AlertCircle, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { 
   teacherActions, 
   teacherSubjectActions, 
-  subjectActions 
+  subjectActions,
+  centerActions
 } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
 
@@ -61,17 +62,17 @@ interface Teacher {
   email: string | null
   phone: string | null
   address: string | null
-  weeklySchedule: any
+  weeklySchedule: DaySchedule[] | string | Record<string, unknown> | undefined
   teacherSubjects: TeacherSubject[]
 }
 
 export default function EditTeacherPage() {
   const t = useTranslations('EditTeacherPage')
-  const { user } = useAuth() // ✅ Get current user from AuthContext
-  const DAYS = [
+  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
+  const DAYS = useMemo(() => [
     t('monday'), t('tuesday'), t('wednesday'), t('thursday'),
     t('friday'), t('saturday'), t('sunday')
-  ]
+  ], [t])
   const params = useParams()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -107,17 +108,25 @@ export default function EditTeacherPage() {
     setIsFetching(true)
     setError('')
     try {
-      if (!user) {
-        setError("Unauthorized: Please log in again")
+      // Only proceed if auth has finished loading and user is available
+      if (!user && !authLoading) {
+        setError(t('unauthorized'))
+        setIsFetching(false)
+        return
+      }
+      
+      if (!user?.id) {
+        setError(t('unauthorized'))
         setIsFetching(false)
         return
       }
 
       // ✅ Fetch from local DB
-      const [allTeachers, allTeacherSubjects, allSubjects] = await Promise.all([
+      const [allTeachers, allTeacherSubjects, allSubjects, allCenters] = await Promise.all([
         teacherActions.getAll(),
         teacherSubjectActions.getAll(),
-        subjectActions.getAll()
+        subjectActions.getAll(),
+        centerActions.getAll()
       ])
 
       // ✅ Find teacher by ID
@@ -149,9 +158,13 @@ export default function EditTeacherPage() {
         })
         .filter(ts => ts !== null) as TeacherSubject[]
 
-      // ✅ Get subjects (filter by manager)
+      // ✅ Get subjects (filter by manager's centers)
+      const managerCenters = allCenters.filter(c => 
+        (c.managers || []).includes(user.id) && c.status !== '0'
+      )
+      const managerCenterIds = managerCenters.map(c => c.id)
       const managerSubjects = allSubjects
-        .filter(s => s.managerId === user.id && s.status !== '0')
+        .filter(s => managerCenterIds.includes(s.centerId) && s.status !== '0')
         .map(s => ({
           id: s.id,
           name: s.name,
@@ -244,11 +257,14 @@ export default function EditTeacherPage() {
     } finally {
       setIsFetching(false)
     }
-  }, [params.id, user, t, DAYS])
+  }, [params.id, user, authLoading, t, DAYS])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    // Wait for auth to finish loading before fetching data
+    if (!authLoading) {
+      fetchData()
+    }
+  }, [authLoading, fetchData])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -274,7 +290,7 @@ export default function EditTeacherPage() {
     setTeacherSubjects(prev => prev.filter((_, i) => i !== index))
   }
 
-  const updateSubject = (index: number, field: string, value: any) => {
+  const updateSubject = (index: number, field: string, value: string | number | 'percentage' | 'hourly') => {
     setTeacherSubjects(prev => {
       const updated = [...prev]
       updated[index] = { ...updated[index], [field]: value }
@@ -288,8 +304,8 @@ export default function EditTeacherPage() {
     setError('')
 
     try {
-      if (!user) {
-        throw new Error("Unauthorized: Please log in again")
+      if (!user || !user.id) {
+        throw new Error(t('unauthorized'))
       }
 
       const validSubjects = teacherSubjects.filter(ts => ts.subjectId)
@@ -356,8 +372,8 @@ export default function EditTeacherPage() {
           // Update existing
           await teacherSubjectActions.putLocal({
             ...existing,
-            percentage: vs.compensationType === 'percentage' ? vs.percentage ?? null : null,
-            hourlyRate: vs.compensationType === 'hourly' ? vs.hourlyRate ?? null : null,
+            percentage: vs.compensationType === 'percentage' ? vs.percentage : undefined,
+            hourlyRate: vs.compensationType === 'hourly' ? vs.hourlyRate : undefined,
             status: 'w' as const, // Mark for sync
             updatedAt: now,
           })
@@ -369,9 +385,9 @@ export default function EditTeacherPage() {
             id: teacherSubjectId,
             teacherId: params.id as string,
             subjectId: vs.subjectId,
-            percentage: vs.compensationType === 'percentage' ? vs.percentage ?? null : null,
-            hourlyRate: vs.compensationType === 'hourly' ? vs.hourlyRate ?? null : null,
-            managerId: user.id,
+            percentage: vs.compensationType === 'percentage' ? vs.percentage : undefined,
+            hourlyRate: vs.compensationType === 'hourly' ? vs.hourlyRate : undefined,
+            assignedAt: now,
             status: 'w' as const, // Mark for sync
             createdAt: now,
             updatedAt: now,
@@ -403,7 +419,8 @@ export default function EditTeacherPage() {
     }
   }
 
-  if (isFetching) {
+  // Show loading while auth is checking or data is fetching
+  if (authLoading || isFetching) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />

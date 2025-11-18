@@ -984,7 +984,8 @@
     "thursday": "Jeudi",
     "friday": "Vendredi",
     "saturday": "Samedi",
-    "sunday": "Dimanche"
+    "sunday": "Dimanche",
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter"
   },
   "StudentsTable": {
     "title": "Élèves",

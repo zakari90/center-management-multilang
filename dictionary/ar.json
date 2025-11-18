@@ -975,7 +975,8 @@
     "thursday": "الخميس",
     "friday": "الجمعة",
     "saturday": "السبت",
-    "sunday": "الأحد"
+    "sunday": "الأحد",
+    "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى"
   },
   "StudentsTable": {
     "title": "الطلاب",
