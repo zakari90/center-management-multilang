@@ -548,7 +548,10 @@
     "thursday": "الخميس",
     "friday": "الجمعة",
     "saturday": "السبت",
-    "sunday": "الأحد"
+    "sunday": "الأحد",
+    "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى",
+    "teacherConflict": "المعلم لديه بالفعل فئة في هذا الوقت",
+    "roomConflict": "القاعة محجوزة بالفعل في هذا الوقت"
   },
   "ReceiptDetailPage": {
     "loading": "جاري تحميل الإيصال...",
@@ -1379,6 +1382,10 @@
   "showingFirst": "عرض أول {count} من {total} عنصر",
   "helpText1": "يعرض هذا المصحح محتويات IndexedDB المحلي الخاص بك.",
   "helpText2": "اضغط على اسم الجدول للتوسيع وعرض بياناته."
+},
+"NavUser": {
+  "logout": "تسجيل الخروج",
+  "userAvatar": "صورة المستخدم"
 },
 "SyncHandler": {
   "title": "مزامنة البيانات",

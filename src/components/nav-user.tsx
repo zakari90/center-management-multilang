@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/context/authContext"
 import { DotSquare, LogOut } from "lucide-react"
+import { useTranslations } from "next-intl"
 import LanguageSwitcher from "./LanguageSwitcher"
 import { ModeToggle } from "./ModeToggle"
 
@@ -36,7 +37,8 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { logout, isLoading } = useAuth();
+  const { logout, isLoading } = useAuth()
+  const t = useTranslations("NavUser")
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -69,7 +71,7 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">User avatar</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">{t("userAvatar")}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -89,13 +91,15 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="hover:cursor-pointer"
-            disabled={isLoading}
-            onClick={()=>{
-              logout()
-            }}>
+            <DropdownMenuItem 
+              className="hover:cursor-pointer"
+              disabled={isLoading}
+              onClick={() => {
+                logout()
+              }}
+            >
               <LogOut />
-              Log out
+              {t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

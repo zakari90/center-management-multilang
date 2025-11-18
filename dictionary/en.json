@@ -584,7 +584,10 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "unauthorized": "Unauthorized: Please log in again",
+    "teacherConflict": "Teacher already has a class at this time",
+    "roomConflict": "Room is already booked at this time"
   },
   "ReceiptDetailPage": {
     "loading": "Loading receipt...",
@@ -1437,6 +1440,10 @@
     "atLeastOneSubject": "Please enroll the student in at least one subject",
     "unauthorized": "Unauthorized: Please log in again"
   },    
+  "NavUser": {
+    "logout": "Log out",
+    "userAvatar": "User avatar"
+  },
   "Metadata": {
     "title": "center management, تدبير مراجعتي",
     "description":"Expense tracker is a tool designed to help track financial transactions",

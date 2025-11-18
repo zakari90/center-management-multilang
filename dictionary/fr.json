@@ -557,7 +557,10 @@
     "thursday": "Jeudi",
     "friday": "Vendredi",
     "saturday": "Samedi",
-    "sunday": "Dimanche"
+    "sunday": "Dimanche",
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter",
+    "teacherConflict": "L'enseignant a déjà une classe à ce moment-là",
+    "roomConflict": "La salle est déjà réservée à ce moment-là"
   },
   "ReceiptDetailPage": {
     "loading": "Chargement du reçu...",
@@ -1341,5 +1344,9 @@
   "syncToServerHelp": "Télécharge vos modifications locales vers le serveur. Cela synchronisera toutes les données locales en attente.",
   "importFromServerHelp": "Télécharge toutes les données du serveur vers votre base de données locale. Cela remplacera les données synchronisées mais préservera les modifications locales en attente.",
   "deleteLocalDBHelp": "Supprime définitivement toutes les données locales. Cette action ne peut pas être annulée. Vous devrez réimporter les données pour utiliser l'application."
+},
+"NavUser": {
+  "logout": "Déconnexion",
+  "userAvatar": "Avatar utilisateur"
 }
 }

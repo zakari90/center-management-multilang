@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -32,9 +30,9 @@ import { cn } from '@/lib/utils'
 // import axios from 'axios' // ✅ Commented out - using local DB
 import { Clock, Loader2, MapPin, Trash2, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useLocalizedConstants } from './useLocalizedConstants'
-import { scheduleActions, teacherActions, subjectActions, centerActions } from '@/lib/dexie/_dexieActions'
+import { scheduleActions, teacherActions, subjectActions, centerActions } from '@/lib/dexie/dexieActions'
 import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { useAuth } from '@/context/authContext'
 import { EntitySyncControls } from '@/components/EntitySyncControls'
@@ -69,7 +67,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations('TimetableManagement')
   const { daysOfWeek, availableClassrooms } = useLocalizedConstants()
-  const { user } = useAuth() // ✅ Get current user from AuthContext
+  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
 
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
@@ -95,12 +93,23 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   const [viewMode, setViewMode] = useState<'all' | 'teacher' | 'room'>('all')
   const [selectedFilter, setSelectedFilter] = useState<string>('')
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
     try {
+      // Only proceed if auth has finished loading and user is available
+      if (!user && !authLoading) {
+        setError(t('unauthorized') || 'Unauthorized: Please log in again')
+        setIsLoading(false)
+        return
+      }
+      
+      if (!user?.id) {
+        setError(t('unauthorized') || 'User ID not available. Please log in again.')
+        setIsLoading(false)
+        return
+      }
+
       // ✅ Fetch from local DB
       const [allTeachers, allSubjects, allSchedules, allCenters] = await Promise.all([
         teacherActions.getAll(),
@@ -109,23 +118,31 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         centerActions.getAll()
       ])
 
-      // ✅ Filter teachers and subjects by status (not deleted)
-      const activeTeachers = allTeachers
-        .filter(t => t.status !== '0')
+      // ✅ Filter teachers by managerId and status (not deleted)
+      const managerTeachers = allTeachers
+        .filter(t => t.managerId === user.id && t.status !== '0')
         .map(t => ({ id: t.id, name: t.name }))
       
-      const activeSubjects = allSubjects
-        .filter(s => s.status !== '0')
+      // ✅ Filter subjects by manager's centers
+      const managerCenters = allCenters.filter(c => 
+        (c.managers || []).includes(user.id) && c.status !== '0'
+      )
+      const managerCenterIds = managerCenters.map(c => c.id)
+      
+      const managerSubjects = allSubjects
+        .filter(s => {
+          // Filter subjects by centerId if provided, or by manager's centers
+          if (centerId) {
+            return s.centerId === centerId && s.status !== '0'
+          }
+          return managerCenterIds.includes(s.centerId) && s.status !== '0'
+        })
         .map(s => ({ id: s.id, name: s.name, grade: s.grade }))
 
       // ✅ Filter schedules by centerId if provided, and managerId
-      let filteredSchedules = allSchedules.filter(s => s.status !== '0')
-      if (centerId) {
-        filteredSchedules = filteredSchedules.filter(s => s.centerId === centerId)
-      }
-      if (user) {
-        filteredSchedules = filteredSchedules.filter(s => s.managerId === user.id)
-      }
+      const filteredSchedules = allSchedules
+        .filter(s => s.managerId === user.id && s.status !== '0')
+        .filter(s => !centerId || s.centerId === centerId)
 
       // ✅ Transform schedules to match ScheduleSlot interface
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map(s => ({
@@ -138,20 +155,29 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         roomId: s.roomId,
       }))
 
-      setTeachers(activeTeachers)
-      setSubjects(activeSubjects)
+      setTeachers(managerTeachers)
+      setSubjects(managerSubjects)
       setSchedule(scheduleSlots)
 
-      // ✅ Get rooms from center if centerId provided
+      // ✅ Get rooms from manager's centers
       if (centerId) {
-        const center = allCenters.find(c => c.id === centerId)
+        const center = allCenters.find(c => c.id === centerId && c.status !== '0')
         if (center?.classrooms?.length) {
           setRooms(center.classrooms)
         } else {
           setRooms(availableClassrooms)
         }
       } else {
-        setRooms(availableClassrooms)
+        // Get all unique classrooms from manager's centers
+        const allManagerClassrooms = managerCenters
+          .flatMap(c => c.classrooms || [])
+          .filter((room, index, self) => self.indexOf(room) === index) // Remove duplicates
+        
+        if (allManagerClassrooms.length > 0) {
+          setRooms(allManagerClassrooms)
+        } else {
+          setRooms(availableClassrooms)
+        }
       }
 
       // ✅ Commented out online fetch
@@ -167,7 +193,14 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, authLoading, centerId, t, availableClassrooms])
+
+  useEffect(() => {
+    // Wait for auth to finish loading before fetching data
+    if (!authLoading) {
+      fetchData()
+    }
+  }, [authLoading, fetchData])
 
   const handleSlotClick = (day: string, startTime: string) => {
     const endTimeIndex = TIME_SLOTS.indexOf(startTime) + 1
@@ -184,8 +217,8 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       return
     }
 
-    if (!user) {
-      setError('Unauthorized: Please log in again')
+    if (!user || !user.id) {
+      setError(t('unauthorized') || 'Unauthorized: Please log in again')
       return
     }
 
@@ -203,7 +236,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       )
 
       if (teacherConflict) {
-        setError('Teacher already has a class at this time')
+        setError(t('teacherConflict') || 'Teacher already has a class at this time')
         setIsSaving(false)
         return
       }
@@ -217,7 +250,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       )
 
       if (roomConflict) {
-        setError('Room is already booked at this time')
+        setError(t('roomConflict') || 'Room is already booked at this time')
         setIsSaving(false)
         return
       }
@@ -306,7 +339,8 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     return filteredSchedule.filter(s => s.day === day && s.startTime === time)
   }
 
-  if (isLoading) {
+  // Show loading while auth is checking or data is fetching
+  if (authLoading || isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -343,7 +377,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
               <Label>{t('viewMode')}</Label>
               <Select
                 value={viewMode}
-                onValueChange={(value: any) => {
+                onValueChange={(value: 'all' | 'teacher' | 'room') => {
                   setViewMode(value)
                   setSelectedFilter('')
                 }}
