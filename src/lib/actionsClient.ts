@@ -46,6 +46,8 @@ try {
     return {
       error: { email: "User not found." },
       success: false,
+      role: submittedRole,
+      data: undefined,
     }
   }
 
@@ -54,6 +56,8 @@ try {
     return {
       error: { password: "Incorrect password." },
       success: false,
+      role: submittedRole,
+      data: undefined,
     }
   }
 
@@ -63,6 +67,8 @@ try {
     return {
       error: { message: `Invalid role. Expected ${expectedRole}, got ${localUser.role}` },
       success: false,
+      role: submittedRole,
+      data: undefined,
     }
   }
 
@@ -123,6 +129,8 @@ try {
   return {
     error: { message: "Internal server error" },
     success: false,
+    role: submittedRole,
+    data: undefined,
   }
 }
 

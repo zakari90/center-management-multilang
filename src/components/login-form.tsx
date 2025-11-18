@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/authContext"
-import { loginWithRole } from "@/lib/actions"
+import { loginWithRole } from "@/lib/actionsClient"
 import { cn } from "@/lib/utils"
 import {
   AlertCircle,
