@@ -6,15 +6,38 @@ import StudentCard from "@/components/studentCard"
 import PdfExporter from "@/components/pdfExporter"
 import { Loader2 } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { studentActions } from "@/lib/dexie/dexieActions"
+import { 
+  studentActions, 
+  studentSubjectActions, 
+  subjectActions, 
+  teacherActions 
+} from "@/lib/dexie/dexieActions"
+
+interface Subject {
+  id: string
+  name: string
+  grade: string
+  price?: number
+}
+
+interface Teacher {
+  id: string
+  name: string
+}
+
+interface StudentSubject {
+  id: string
+  subject: Subject
+  teacher: Teacher
+}
 
 interface Student {
   id: string
   name: string
-  email?: string | null
-  phone?: string | null
-  grade?: string | null
-  [key: string]: unknown
+  grade: string | null
+  email: string | null
+  phone: string | null
+  studentSubjects: StudentSubject[]
 }
 
 interface StudentCardContentProps {
@@ -33,13 +56,44 @@ export function StudentCardContent({ studentId, isModal = false }: StudentCardCo
     setError(null)
     try {
       // ✅ Fetch from local DB
-      const allStudents = await studentActions.getAll()
+      const [allStudents, allStudentSubjects, allSubjects, allTeachers] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        teacherActions.getAll()
+      ])
+      
       const studentData = allStudents.find(s => s.id === studentId && s.status !== '0')
       
       if (!studentData) {
         setError(t("studentNotFound"))
         return
       }
+
+      // ✅ Get student subjects with related data
+      const studentSubjectsData = allStudentSubjects
+        .filter(ss => ss.studentId === studentId && ss.status !== '0')
+        .map(ss => {
+          const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
+          const teacher = allTeachers.find(t => t.id === ss.teacherId && t.status !== '0')
+          
+          if (!subject || !teacher) return null
+          
+          return {
+            id: ss.id,
+            subject: {
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+            },
+            teacher: {
+              id: teacher.id,
+              name: teacher.name,
+            },
+          }
+        })
+        .filter(ss => ss !== null) as StudentSubject[]
 
       // ✅ Build student data
       const studentResult: Student = {
@@ -48,6 +102,7 @@ export function StudentCardContent({ studentId, isModal = false }: StudentCardCo
         email: studentData.email ?? null,
         phone: studentData.phone ?? null,
         grade: studentData.grade ?? null,
+        studentSubjects: studentSubjectsData,
       }
 
       setStudent(studentResult)
