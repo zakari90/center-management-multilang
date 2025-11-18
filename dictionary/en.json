@@ -275,11 +275,15 @@
   "adminRevenueChart": {
     "title": "Revenue Overview",
     "description": "Income vs Expenses over time",
-    "week": "Week",
-    "month": "Month",
-    "year": "Year",
-    "income": "Income",
-    "expenses": "Expenses"
+    "tabs": {
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "chart": {
+      "income": "Income",
+      "expense": "Expenses"
+    }
   },
   "centerOverview": {
     "title": "Your Center",

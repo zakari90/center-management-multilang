@@ -21,7 +21,6 @@ import { useTranslations } from 'next-intl'
 import { receiptActions } from '@/lib/dexie/dexieActions'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
 import { eachDayOfInterval, eachMonthOfInterval, format, startOfYear, subDays } from 'date-fns'
-import { getChartColors } from '@/lib/utils/themeColors'
 
 interface RevenueData {
   date: string
@@ -35,7 +34,6 @@ export default function AdminRevenueChart() {
   const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
   const t = useTranslations('adminRevenueChart')
-  const chartColors = getChartColors()
 
   useEffect(() => {
     fetchRevenueData()
@@ -148,12 +146,12 @@ export default function AdminRevenueChart() {
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={chartColors.chart2} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={chartColors.chart2} stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
                 </linearGradient>
                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={chartColors.destructive} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={chartColors.destructive} stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
@@ -167,7 +165,7 @@ export default function AdminRevenueChart() {
               <Area 
                 type="monotone" 
                 dataKey="income" 
-                stroke={chartColors.chart2} 
+                stroke="#22c55e" 
                 fillOpacity={1} 
                 fill="url(#colorIncome)" 
                 name={t('chart.income')}
@@ -175,7 +173,7 @@ export default function AdminRevenueChart() {
               <Area 
                 type="monotone" 
                 dataKey="expense" 
-                stroke={chartColors.destructive} 
+                stroke="#ef4444" 
                 fillOpacity={1} 
                 fill="url(#colorExpense)" 
                 name={t('chart.expense')}

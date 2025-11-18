@@ -239,11 +239,15 @@
   "adminRevenueChart": {
     "title": "Aperçu des revenus",
     "description": "Revenus vs dépenses au fil du temps",
-    "week": "Semaine",
-    "month": "Mois",
-    "year": "Année",
-    "income": "Revenu",
-    "expenses": "Dépenses"
+    "tabs": {
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année"
+    },
+    "chart": {
+      "income": "Revenu",
+      "expense": "Dépenses"
+    }
   },
   "centerOverview": {
     "title": "Votre centre",

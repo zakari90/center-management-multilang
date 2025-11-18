@@ -239,11 +239,15 @@
   "adminRevenueChart": {
     "title": "نظرة عامة على الإيرادات",
     "description": "الدخل مقابل النفقات على مدى الوقت",
-    "week": "أسبوع",
-    "month": "شهر",
-    "year": "سنة",
-    "income": "الدخل",
-    "expenses": "النفقات"
+    "tabs": {
+      "week": "أسبوع",
+      "month": "شهر",
+      "year": "سنة"
+    },
+    "chart": {
+      "income": "الدخل",
+      "expense": "النفقات"
+    }
   },
   "centerOverview": {
     "title": "مركزك",

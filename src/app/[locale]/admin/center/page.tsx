@@ -23,13 +23,41 @@ function Page() {
       }
 
       const centers = await centerActions.getAll();
-      const adminCenters = centers.filter(c => c.adminId === user.id && c.status !== '0');
       
-      if (adminCenters.length === 0) {
-        setCenterId(null);
+      // Debug logging
+      console.log("🔍 Center Debug:", {
+        userId: user.id,
+        userRole: user.role,
+        totalCenters: centers.length,
+        centers: centers.map(c => ({
+          id: c.id,
+          name: c.name,
+          adminId: c.adminId,
+          status: c.status,
+          matches: c.adminId === user.id
+        }))
+      });
+
+      // Filter: For admin users, show centers where adminId matches OR if no adminId, show first active center
+      // This handles cases where adminId might not be set correctly during sync
+      const activeCenters = centers.filter(c => c.status !== '0');
+      const adminCenters = activeCenters.filter(c => c.adminId === user.id);
+      
+      // If no exact match but user is admin, use first active center
+      // This helps when centers exist but adminId wasn't synced correctly
+      const isAdmin = user.role?.toUpperCase() === 'ADMIN';
+      const centerToShow = adminCenters.length > 0 
+        ? adminCenters[0] 
+        : (isAdmin && activeCenters.length > 0)
+          ? activeCenters[0]
+          : null;
+      
+      if (centerToShow) {
+        console.log("✅ Using center:", centerToShow.id, centerToShow.name);
+        setCenterId(centerToShow.id);
       } else {
-        // ✅ CenterPresentation uses useLiveQuery, so we only need the ID
-        setCenterId(adminCenters[0].id);
+        console.log("❌ No center found");
+        setCenterId(null);
       }
     } catch (error) {
       console.error("Error fetching center data from local DB:", error);
