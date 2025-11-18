@@ -118,31 +118,73 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         centerActions.getAll()
       ])
 
-      // ✅ Filter teachers by managerId and status (not deleted)
-      const managerTeachers = allTeachers
-        .filter(t => t.managerId === user.id && t.status !== '0')
-        .map(t => ({ id: t.id, name: t.name }))
+      // ✅ Check if user is admin
+      const isAdmin = user.role?.toUpperCase() === 'ADMIN'
       
-      // ✅ Filter subjects by manager's centers
-      const managerCenters = allCenters.filter(c => 
-        (c.managers || []).includes(user.id) && c.status !== '0'
-      )
-      const managerCenterIds = managerCenters.map(c => c.id)
+      // ✅ Filter teachers: for admin, show all teachers in center; for manager, filter by managerId
+      const relevantTeachers = isAdmin
+        ? allTeachers.filter(t => {
+            // For admin, if centerId is provided, show teachers from that center's managers
+            if (centerId) {
+              const center = allCenters.find(c => c.id === centerId && c.status !== '0')
+              const managerIds = center?.managers || []
+              return managerIds.includes(t.managerId) && t.status !== '0'
+            }
+            // If no centerId, show all active teachers
+            return t.status !== '0'
+          })
+        : allTeachers.filter(t => t.managerId === user.id && t.status !== '0')
+      
+      const managerTeachers = relevantTeachers.map(t => ({ id: t.id, name: t.name }))
+      
+      // ✅ Filter subjects by center or manager's centers
+      let relevantCenterIds: string[] = []
+      if (isAdmin) {
+        if (centerId) {
+          relevantCenterIds = [centerId]
+        } else {
+          // Admin sees all centers they own
+          const adminCenters = allCenters.filter(c => 
+            c.adminId === user.id && c.status !== '0'
+          )
+          relevantCenterIds = adminCenters.map(c => c.id)
+        }
+      } else {
+        // Manager sees centers they manage
+        const managerCenters = allCenters.filter(c => 
+          (c.managers || []).includes(user.id) && c.status !== '0'
+        )
+        relevantCenterIds = managerCenters.map(c => c.id)
+      }
       
       const managerSubjects = allSubjects
         .filter(s => {
-          // Filter subjects by centerId if provided, or by manager's centers
           if (centerId) {
             return s.centerId === centerId && s.status !== '0'
           }
-          return managerCenterIds.includes(s.centerId) && s.status !== '0'
+          return relevantCenterIds.includes(s.centerId) && s.status !== '0'
         })
         .map(s => ({ id: s.id, name: s.name, grade: s.grade }))
 
-      // ✅ Filter schedules by centerId if provided, and managerId
-      const filteredSchedules = allSchedules
-        .filter(s => s.managerId === user.id && s.status !== '0')
-        .filter(s => !centerId || s.centerId === centerId)
+      // ✅ Filter schedules: for admin, show all schedules in center; for manager, filter by managerId
+      let filteredSchedules = allSchedules.filter(s => s.status !== '0')
+      
+      if (isAdmin) {
+        // Admin sees all schedules for their center(s)
+        if (centerId) {
+          filteredSchedules = filteredSchedules.filter(s => s.centerId === centerId)
+        } else {
+          // Filter by admin's centers
+          filteredSchedules = filteredSchedules.filter(s => 
+            relevantCenterIds.includes(s.centerId || '')
+          )
+        }
+      } else {
+        // Manager sees only their schedules
+        filteredSchedules = filteredSchedules
+          .filter(s => s.managerId === user.id)
+          .filter(s => !centerId || s.centerId === centerId)
+      }
 
       // ✅ Transform schedules to match ScheduleSlot interface
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map(s => ({
@@ -159,7 +201,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       setSubjects(managerSubjects)
       setSchedule(scheduleSlots)
 
-      // ✅ Get rooms from manager's centers
+      // ✅ Get rooms from relevant centers
       if (centerId) {
         const center = allCenters.find(c => c.id === centerId && c.status !== '0')
         if (center?.classrooms?.length) {
@@ -168,8 +210,12 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           setRooms(availableClassrooms)
         }
       } else {
-        // Get all unique classrooms from manager's centers
-        const allManagerClassrooms = managerCenters
+        // Get all unique classrooms from relevant centers
+        const relevantCenters = isAdmin
+          ? allCenters.filter(c => c.adminId === user.id && c.status !== '0')
+          : allCenters.filter(c => (c.managers || []).includes(user.id) && c.status !== '0')
+        
+        const allManagerClassrooms = relevantCenters
           .flatMap(c => c.classrooms || [])
           .filter((room, index, self) => self.indexOf(room) === index) // Remove duplicates
         
