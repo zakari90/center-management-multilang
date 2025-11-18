@@ -4,7 +4,7 @@
 import { jwtVerify, SignJWT } from "jose";
 import Cookies from 'js-cookie';
 import { loginAdmin, loginManager } from "./actions";
-import { Role } from "./dexie/dbSchema";
+import { Role, localDb } from "./dexie/dbSchema";
 import { userActions } from "./dexie/dexieActions";
 import { isOnline } from "./utils/network";
 
@@ -39,8 +39,55 @@ export async function loginWithRole(state: unknown, formData: FormData) {
 
   
 try {
+  // Validate inputs
+  if (!email || !password) {
+    return {
+      error: { message: "Email and password are required." },
+      success: false,
+      role: submittedRole,
+      data: undefined,
+    }
+  }
+
+  // ✅ Check if getLocalByEmail is available
+  if (!userActions.getLocalByEmail) {
+    console.error("getLocalByEmail is not available on userActions")
+    return {
+      error: { message: "Database not initialized. Please refresh the page." },
+      success: false,
+      role: submittedRole,
+      data: undefined,
+    }
+  }
+
+  // ✅ Ensure database is open (Dexie handles already-open gracefully)
+  try {
+    await localDb.open();
+  } catch (dbError: any) {
+    // Dexie.open() is idempotent - it won't error if already open
+    // If we get an error, it's a real problem
+    console.error("Database open error:", dbError);
+    return {
+      error: { message: `Database error: ${dbError?.message || 'Please refresh the page.'}` },
+      success: false,
+      role: submittedRole,
+      data: undefined,
+    }
+  }
+
   // ✅ First, check if user exists in local DB
-  const localUser = await userActions.getLocalByEmail?.(email);
+  let localUser;
+  try {
+    localUser = await userActions.getLocalByEmail(email);
+  } catch (queryError) {
+    console.error("Error querying user from local DB:", queryError);
+    return {
+      error: { message: `Database query error: ${queryError instanceof Error ? queryError.message : 'Please try again.'}` },
+      success: false,
+      role: submittedRole,
+      data: undefined,
+    }
+  }
   
   if (!localUser) {
     return {
@@ -80,7 +127,19 @@ try {
     role: localUser.role,
   }
   
-  const session = await encrypt({ user: userForSession })
+  // ✅ Encrypt session token
+  let session: string;
+  try {
+    session = await encrypt({ user: userForSession });
+  } catch (encryptError) {
+    console.error("Session encryption error:", encryptError);
+    return {
+      error: { message: "Failed to create session. Please try again." },
+      success: false,
+      role: submittedRole,
+      data: undefined,
+    }
+  }
 
   // ✅ Set cookie with proper attributes (client-side only - httpOnly cannot be set from JS)
   Cookies.set('session', session, { 
@@ -90,31 +149,43 @@ try {
     secure: process.env.NODE_ENV === 'production', // Only send in HTTPS (if available)
   })
 
-  // ✅ Try online login/sync if available
+  // ✅ Try online login/sync if available (wrapped in try-catch to not break offline login)
   if(isOnline()){
-     const result = submittedRole === "manager"
-    ? await loginManager(state, formData)
-    : await loginAdmin(state, formData)
-    if(result.success){
-      // ✅ Update local user with server data if sync succeeds
-      await userActions.putLocal({
-        ...localUser,
-        ...(result.data?.user && {
-          id: result.data.user.id,
-          name: result.data.user.name,
-          email: result.data.user.email,
-          role: result.data.user.role,
-        }),
-        status: '1' as const, // Mark as synced
-        updatedAt: Date.now(),
-      })
-      return {
-        ...result,
-        role: submittedRole,
+    try {
+      const result = submittedRole === "manager"
+        ? await loginManager(state, formData)
+        : await loginAdmin(state, formData)
+      
+      if(result.success){
+        // ✅ Update local user with server data if sync succeeds
+        try {
+          await userActions.putLocal({
+            ...localUser,
+            ...(result.data?.user && {
+              id: result.data.user.id,
+              name: result.data.user.name,
+              email: result.data.user.email,
+              role: result.data.user.role,
+            }),
+            status: '1' as const, // Mark as synced
+            updatedAt: Date.now(),
+          })
+        } catch (updateError) {
+          console.error("Failed to update local user after sync:", updateError);
+          // Continue with login even if update fails
+        }
+        
+        return {
+          ...result,
+          role: submittedRole,
+        }
       }
+      // ✅ If online login fails but user exists locally, still allow offline login
+      // (This handles the case where user exists locally but not on server yet)
+    } catch (onlineError) {
+      console.error("Online login/sync error (falling back to offline):", onlineError);
+      // Continue with offline login - don't break the flow
     }
-    // ✅ If online login fails but user exists locally, still allow offline login
-    // (This handles the case where user exists locally but not on server yet)
   }
 
   // ✅ Return success with local user data
@@ -124,10 +195,15 @@ try {
     role: submittedRole,
   }
 } catch (error) {
-  console.log("Error in loginWithRole", error);
+  console.error("Error in loginWithRole:", error);
+  
+  // Provide more specific error messages
+  const errorMessage = error instanceof Error 
+    ? error.message 
+    : "Internal server error. Please check the console for details.";
   
   return {
-    error: { message: "Internal server error" },
+    error: { message: errorMessage },
     success: false,
     role: submittedRole,
     data: undefined,
