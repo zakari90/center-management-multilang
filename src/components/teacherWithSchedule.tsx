@@ -476,15 +476,6 @@ export default function TeacherScheduleView() {
       const activeSchedules = allSchedules.filter(s => s.status !== '0')
       const activeSubjects = allSubjects.filter(s => s.status !== '0')
       
-      console.log("🔍 TeacherScheduleView Debug:", {
-        isAdmin,
-        userId: user.id,
-        totalTeachers: allTeachers.length,
-        activeTeachers: activeTeachers.length,
-        adminCenters: isAdmin ? allCenters.filter(c => c.adminId === user.id && c.status !== '0').map(c => ({ id: c.id, name: c.name, managers: c.managers })) : [],
-        teachers: activeTeachers.map(t => ({ id: t.id, name: t.name, managerId: t.managerId }))
-      })
-
       // ✅ Build schedules with related data (teacher and subject)
       const schedulesWithData: Schedule[] = activeSchedules.map(schedule => {
         const teacher = activeTeachers.find(t => t.id === schedule.teacherId)

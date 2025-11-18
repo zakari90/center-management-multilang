@@ -118,6 +118,25 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         centerActions.getAll()
       ])
 
+      // ✅ One-time debug log (only log once per session)
+      if (!(window as any).__scheduleDebugLogged) {
+        console.log("🔍 Schedule Data Debug:", {
+          userId: user.id,
+          userRole: user.role,
+          totalCenters: allCenters.length,
+          centers: allCenters.map(c => ({
+            id: c.id,
+            name: c.name,
+            adminId: c.adminId,
+            managers: c.managers,
+            status: c.status
+          })),
+          totalTeachers: allTeachers.length,
+          totalSchedules: allSchedules.length
+        })
+        ;(window as any).__scheduleDebugLogged = true
+      }
+
       // ✅ Check if user is admin
       const isAdmin = user.role?.toUpperCase() === 'ADMIN'
       
@@ -148,14 +167,6 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           t.managerId === user.id && t.status !== '0'
         )
       }
-      
-      console.log("🔍 Teachers Debug:", {
-        isAdmin,
-        centerId,
-        totalTeachers: allTeachers.length,
-        relevantTeachers: relevantTeachers.length,
-        teachers: relevantTeachers.map(t => ({ id: t.id, name: t.name, managerId: t.managerId }))
-      })
       
       const managerTeachers = relevantTeachers.map(t => ({ id: t.id, name: t.name }))
       
@@ -218,20 +229,6 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           .filter(s => !centerId || s.centerId === centerId)
       }
       
-      console.log("🔍 Schedules Debug:", {
-        isAdmin,
-        centerId,
-        totalSchedules: allSchedules.length,
-        filteredSchedules: filteredSchedules.length,
-        schedules: filteredSchedules.map(s => ({
-          id: s.id,
-          day: s.day,
-          teacherId: s.teacherId,
-          managerId: s.managerId,
-          centerId: s.centerId
-        }))
-      })
-
       // ✅ Transform schedules to match ScheduleSlot interface
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map(s => ({
         id: s.id,
@@ -285,7 +282,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     } finally {
       setIsLoading(false)
     }
-  }, [user, authLoading, centerId, t, availableClassrooms])
+  }, [user?.id, user?.role, authLoading, centerId, t])
 
   useEffect(() => {
     // Wait for auth to finish loading before fetching data
