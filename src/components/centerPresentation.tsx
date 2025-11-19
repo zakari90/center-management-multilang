@@ -33,6 +33,11 @@ interface CenterPresentationProps {
 export default function CenterPresentation({ centerId }: CenterPresentationProps) {
   const t = useTranslations('CenterPresentation')
   const { availableSubjects, availableGrades, availableClassrooms, daysOfWeek } = useLocalizedConstants()
+  
+  // Extract labels for components that expect string arrays
+  const subjectLabels = availableSubjects.map(s => s.label)
+  const gradeLabels = availableGrades.map(g => g.label)
+  const classroomLabels = availableClassrooms.map(c => c.label)
 
   // ✅ Use useLiveQuery for real-time updates from IndexedDB
   const center = useLiveQuery(() => centerActions.getLocal(centerId), [centerId])
@@ -282,8 +287,8 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
                     }}
                     onUpdate={handleUpdateSubject}
                     onDelete={handleDeleteSubject}
-                    availableSubjects={availableSubjects}
-                    availableGrades={availableGrades}
+                    availableSubjects={subjectLabels}
+                    availableGrades={gradeLabels}
                   />
                 ))
               ) : (
@@ -314,7 +319,7 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
                   placeholder={t('classroomPlaceholder')}
                   items={tempClassrooms}
                   onChange={setTempClassrooms}
-                  suggestions={availableClassrooms}
+                  suggestions={classroomLabels}
                 />
               </EditDialog>
             }
@@ -360,8 +365,8 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
           <div className="overflow-y-auto flex-1 py-4 px-1">
             <SubjectForm
               onAddSubject={addSubject}
-              availableSubjects={availableSubjects}
-              availableGrades={availableGrades}
+              availableSubjects={subjectLabels}
+              availableGrades={gradeLabels}
             />
           </div>
         </DialogContent>
