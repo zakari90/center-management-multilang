@@ -209,19 +209,30 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
           // Get manager IDs for this center
           const center = allCenters.find(c => c.id === centerId && c.status !== '0')
           const managerIds = center?.managers || []
-          // Show schedules from managers in this center
-          filteredSchedules = filteredSchedules.filter(s => 
-            managerIds.includes(s.managerId) && (s.centerId === centerId || !s.centerId)
-          )
+          // Show schedules from managers in this center OR schedules directly for this center
+          filteredSchedules = filteredSchedules.filter(s => {
+            // Include if schedule belongs to this center (by centerId)
+            if (s.centerId === centerId) {
+              return true
+            }
+            // OR if schedule's manager is in this center's managers list
+            if (managerIds.includes(s.managerId)) {
+              return true
+            }
+            return false
+          })
         } else {
           // Filter by admin's centers and their managers
           const adminCenters = allCenters.filter(c => 
             c.adminId === user.id && c.status !== '0'
           )
+          const adminCenterIds = adminCenters.map(c => c.id)
           const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
-          filteredSchedules = filteredSchedules.filter(s => 
-            adminManagerIds.includes(s.managerId)
-          )
+          filteredSchedules = filteredSchedules.filter(s => {
+            // Include if: schedule is in admin's center OR schedule's manager is in admin's centers
+            return (s.centerId && adminCenterIds.includes(s.centerId)) || 
+                   adminManagerIds.includes(s.managerId)
+          })
         }
       } else {
         // Manager sees only their schedules
@@ -283,6 +294,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
     } finally {
       setIsLoading(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, user?.role, authLoading, centerId, t])
 
   useEffect(() => {
@@ -345,6 +357,11 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         return
       }
 
+      // ✅ Get teacher's managerId (for admin-created schedules, use teacher's managerId)
+      const allTeachers = await teacherActions.getAll()
+      const selectedTeacher = allTeachers.find(t => t.id === newEntry.teacherId)
+      const scheduleManagerId = selectedTeacher?.managerId || user.id
+
       // ✅ Create schedule in local DB
       const now = Date.now()
       const scheduleId = generateObjectId()
@@ -356,7 +373,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         teacherId: newEntry.teacherId,
         subjectId: newEntry.subjectId,
         roomId: newEntry.roomId,
-        managerId: user.id,
+        managerId: scheduleManagerId,
         centerId: centerId || undefined,
         status: 'w' as const, // Waiting for sync
         createdAt: now,
@@ -580,11 +597,11 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                               return (
                                 <div
                                   key={slot.id || idx}
-                                  className="p-2 bg-white border rounded text-xs space-y-1 group relative"
+                                  className="p-2 bg-amber-200 border rounded text-xs space-y-1 group relative overflow-auto bg"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <div className="flex justify-between items-start">
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs ">
                                       {subject?.name}
                                     </Badge>
                                     <Button
