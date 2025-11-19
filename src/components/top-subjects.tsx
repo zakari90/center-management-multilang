@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/context/authContext'
-import { subjectActions, studentSubjectActions, studentActions } from '@/lib/dexie/_dexieActions'
+import { subjectActions, studentSubjectActions, studentActions, centerActions } from '@/lib/dexie/dexieActions'
 
 interface TopSubject {
   id: string
@@ -37,19 +37,41 @@ export default function TopSubjects() {
       if (!user) return
 
       // ✅ Fetch from localDB instead of API
-      const [subjectsData, studentSubjectsData, studentsData] = await Promise.all([
+      const [subjectsData, studentSubjectsData, studentsData, centersData] = await Promise.all([
         subjectActions.getAll(),
         studentSubjectActions.getAll(),
         studentActions.getAll(),
+        centerActions.getAll(),
       ])
 
-      // Filter by manager and status (exclude deleted items)
-      const managerStudents = studentsData.filter(s => 
-        s.managerId === user.id && s.status !== '0'
-      )
+      // ✅ Filter students based on role
+      let relevantStudents = studentsData.filter(s => s.status !== '0')
+      
+      if (user.role === 'ADMIN') {
+        // For admin: get all centers owned by admin, then get all managers in those centers
+        const adminCenters = centersData.filter(c => 
+          c.adminId === user.id && c.status !== '0'
+        )
+        const managerIds = new Set<string>()
+        adminCenters.forEach(center => {
+          if (Array.isArray(center.managers)) {
+            center.managers.forEach((managerId: string) => managerIds.add(managerId))
+          }
+        })
+        // Get all students managed by managers in admin's centers
+        relevantStudents = studentsData.filter(s => 
+          s.status !== '0' && managerIds.has(s.managerId)
+        )
+      } else {
+        // For manager: filter by managerId
+        relevantStudents = studentsData.filter(s => 
+          s.managerId === user.id && s.status !== '0'
+        )
+      }
+
       const activeSubjects = subjectsData.filter(s => s.status !== '0')
       const activeEnrollments = studentSubjectsData.filter(ss => 
-        ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
+        ss.status !== '0' && relevantStudents.some(s => s.id === ss.studentId)
       )
 
       // Map subjects with enrollment counts

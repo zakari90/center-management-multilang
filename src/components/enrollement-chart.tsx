@@ -17,7 +17,7 @@ import {
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/context/authContext'
-import { studentSubjectActions, subjectActions, studentActions } from '@/lib/dexie/dexieActions'
+import { studentSubjectActions, subjectActions, studentActions, centerActions } from '@/lib/dexie/dexieActions'
 import { getChartColorArray } from '@/lib/utils/themeColors'
 
 interface SubjectEnrollment {
@@ -37,19 +37,41 @@ export default function EnrollmentChart() {
       if (!user) return
 
       // ✅ Fetch from localDB instead of API
-      const [studentSubjects, subjects, students] = await Promise.all([
+      const [studentSubjects, subjects, students, centers] = await Promise.all([
         studentSubjectActions.getAll(),
         subjectActions.getAll(),
         studentActions.getAll(),
+        centerActions.getAll(),
       ])
 
-      // Filter by manager and status (exclude deleted items)
-      const managerStudents = students.filter(s => 
-        s.managerId === user.id && s.status !== '0'
-      )
+      // ✅ Filter students based on role
+      let relevantStudents = students.filter(s => s.status !== '0')
+      
+      if (user.role === 'ADMIN') {
+        // For admin: get all centers owned by admin, then get all managers in those centers
+        const adminCenters = centers.filter(c => 
+          c.adminId === user.id && c.status !== '0'
+        )
+        const managerIds = new Set<string>()
+        adminCenters.forEach(center => {
+          if (Array.isArray(center.managers)) {
+            center.managers.forEach((managerId: string) => managerIds.add(managerId))
+          }
+        })
+        // Get all students managed by managers in admin's centers
+        relevantStudents = students.filter(s => 
+          s.status !== '0' && managerIds.has(s.managerId)
+        )
+      } else {
+        // For manager: filter by managerId
+        relevantStudents = students.filter(s => 
+          s.managerId === user.id && s.status !== '0'
+        )
+      }
+
       const activeSubjects = subjects.filter(s => s.status !== '0')
       const activeEnrollments = studentSubjects.filter(ss => 
-        ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
+        ss.status !== '0' && relevantStudents.some(s => s.id === ss.studentId)
       )
 
       // Group enrollments by subjectId
