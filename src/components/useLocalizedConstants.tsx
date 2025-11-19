@@ -13,55 +13,67 @@ export function useLocalizedConstants() {
     { key: 'sunday', label: t('daysOfWeek.sunday') }
   ];
 
-  const availableSubjects = [
-    t('subjects.arabic'),
-    t('subjects.french'),
-    t('subjects.english'),
-    t('subjects.amazigh'),
-    t('subjects.math'),
-    t('subjects.lifeEarth'),
-    t('subjects.physicsChem'),
-    t('subjects.scienceActivities'),
-    t('subjects.historyGeo'),
-    t('subjects.philosophy'),
-    t('subjects.civic'),
-    t('subjects.islamic'),
-    t('subjects.computer'),
-    t('subjects.technology'),
-    t('subjects.economics'),
-    t('subjects.accounting'),
-    t('subjects.electrical'),
-    t('subjects.mechanical'),
-    t('subjects.art'),
-    t('subjects.physical')
+  // Subject keys (stored in DB) and their translated labels
+  const subjectKeys = [
+    'arabic',
+    'french',
+    'english',
+    'amazigh',
+    'math',
+    'lifeEarth',
+    'physicsChem',
+    'scienceActivities',
+    'historyGeo',
+    'philosophy',
+    'civic',
+    'islamic',
+    'computer',
+    'technology',
+    'economics',
+    'accounting',
+    'electrical',
+    'mechanical',
+    'art',
+    'physical'
   ];
 
-  const availableGrades = [
-    t('grades.preschool1'),
-    t('grades.preschool2'),
-    t('grades.primary1'),
-    t('grades.primary2'),
-    t('grades.primary3'),
-    t('grades.primary4'),
-    t('grades.primary5'),
-    t('grades.primary6'),
-    t('grades.middle1'),
-    t('grades.middle2'),
-    t('grades.middle3'),
-    t('grades.coreScience'),
-    t('grades.coreLit'),
-    t('grades.bac1Phys'),
-    t('grades.bac1Life'),
-    t('grades.bac1Lit'),
-    t('grades.bac1Eco'),
-    t('grades.bac2Phys'),
-    t('grades.bac2Life'),
-    t('grades.bac2Lit'),
-    t('grades.bac2Eco'),
-    t('grades.bac2Tech'),
-    t('grades.bac2MathA'),
-    t('grades.bac2MathB')
+  const availableSubjects = subjectKeys.map(key => ({
+    key,
+    label: t(`subjects.${key}`)
+  }));
+
+  // Grade keys (stored in DB) and their translated labels
+  const gradeKeys = [
+    'preschool1',
+    'preschool2',
+    'primary1',
+    'primary2',
+    'primary3',
+    'primary4',
+    'primary5',
+    'primary6',
+    'middle1',
+    'middle2',
+    'middle3',
+    'coreScience',
+    'coreLit',
+    'bac1Phys',
+    'bac1Life',
+    'bac1Lit',
+    'bac1Eco',
+    'bac2Phys',
+    'bac2Life',
+    'bac2Lit',
+    'bac2Eco',
+    'bac2Tech',
+    'bac2MathA',
+    'bac2MathB'
   ];
+
+  const availableGrades = gradeKeys.map(key => ({
+    key,
+    label: t(`grades.${key}`)
+  }));
 
   // Room keys (stored in DB) and their translated labels
   const roomKeys = [
@@ -101,5 +113,71 @@ export function useLocalizedConstants() {
     return matchingRoom?.key || roomId; // Return key if found, otherwise return original (might be custom room)
   };
 
-  return { daysOfWeek, availableSubjects, availableGrades, availableClassrooms, getRoomLabel, roomKeys, normalizeRoomId };
+  // Helper function to get subject label by key or translated string
+  const getSubjectLabel = (subjectName: string): string => {
+    // If it's already a key, translate it
+    if (subjectKeys.includes(subjectName)) {
+      return t(`subjects.${subjectName}`);
+    }
+    // Try to find matching key by comparing with translated labels
+    const matchingSubject = availableSubjects.find(s => s.label === subjectName);
+    if (matchingSubject) {
+      return t(`subjects.${matchingSubject.key}`);
+    }
+    // If not found, return original (might be custom subject name)
+    return subjectName;
+  };
+
+  // Helper function to get grade label by key or translated string
+  const getGradeLabel = (grade: string): string => {
+    // If it's already a key, translate it
+    if (gradeKeys.includes(grade)) {
+      return t(`grades.${grade}`);
+    }
+    // Try to find matching key by comparing with translated labels
+    const matchingGrade = availableGrades.find(g => g.label === grade);
+    if (matchingGrade) {
+      return t(`grades.${matchingGrade.key}`);
+    }
+    // If not found, return original (might be custom grade name)
+    return grade;
+  };
+
+  // Helper function to normalize subject name (convert translated string to key if possible)
+  const normalizeSubjectName = (subjectName: string): string => {
+    // If it's already a key, return it
+    if (subjectKeys.includes(subjectName)) {
+      return subjectName;
+    }
+    // Try to find matching key by comparing with translated labels
+    const matchingSubject = availableSubjects.find(s => s.label === subjectName);
+    return matchingSubject?.key || subjectName; // Return key if found, otherwise return original
+  };
+
+  // Helper function to normalize grade (convert translated string to key if possible)
+  const normalizeGrade = (grade: string): string => {
+    // If it's already a key, return it
+    if (gradeKeys.includes(grade)) {
+      return grade;
+    }
+    // Try to find matching key by comparing with translated labels
+    const matchingGrade = availableGrades.find(g => g.label === grade);
+    return matchingGrade?.key || grade; // Return key if found, otherwise return original
+  };
+
+  return { 
+    daysOfWeek, 
+    availableSubjects, 
+    availableGrades, 
+    availableClassrooms, 
+    getRoomLabel, 
+    roomKeys, 
+    normalizeRoomId,
+    getSubjectLabel,
+    getGradeLabel,
+    normalizeSubjectName,
+    normalizeGrade,
+    subjectKeys,
+    gradeKeys
+  };
 }

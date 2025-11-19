@@ -67,7 +67,7 @@ const TIME_SLOTS = [
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations('TimetableManagement')
-  const { daysOfWeek, getRoomLabel, roomKeys, normalizeRoomId } = useLocalizedConstants()
+  const { daysOfWeek, getRoomLabel, roomKeys, normalizeRoomId, getSubjectLabel, getGradeLabel } = useLocalizedConstants()
   const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
 
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -605,7 +605,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                                 >
                                   <div className="flex justify-between items-start">
                                     <Badge variant="outline" className="text-xs ">
-                                      {subject?.name}
+                                      {subject?.name ? getSubjectLabel(subject.name) : ''}
                                     </Badge>
                                     <Button
                                       variant="ghost"
@@ -626,7 +626,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                                   </div>
                                   {subject?.grade && (
                                     <Badge variant="secondary" className="text-xs">
-                                      {subject.grade}
+                                      {getGradeLabel(subject.grade)}
                                     </Badge>
                                   )}
                                 </div>
@@ -690,7 +690,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                 <SelectContent>
                   {subjects.map(subject => (
                     <SelectItem key={subject.id} value={subject.id}>
-                      {subject.name} ({subject.grade})
+                      {getSubjectLabel(subject.name)} ({getGradeLabel(subject.grade)})
                     </SelectItem>
                   ))}
                 </SelectContent>
