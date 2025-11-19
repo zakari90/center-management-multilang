@@ -354,6 +354,6 @@ export async function loginWithRole(state: unknown, formData: FormData) {
   }
 }
 
-export async function logout() {
-  ;(await cookies()).set("session", "", { expires: new Date(0) })
-}
+// export async function logout() {
+//   ;(await cookies()).set("session", "", { expires: new Date(0) })
+// }

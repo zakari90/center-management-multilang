@@ -227,3 +227,9 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
     };
   }
 }
+
+
+
+export function logout() {
+  Cookies.remove('session', { path: '/' });
+}

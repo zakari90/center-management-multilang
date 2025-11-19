@@ -39,6 +39,11 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
   // const router = useRouter() // ✅ Commented out - not used
   const { user } = useAuth() // ✅ Use AuthContext instead of getSession()
   
+  // Extract labels for components that expect string arrays
+  const subjectLabels = availableSubjects.map(s => s.label)
+  const gradeLabels = availableGrades.map(g => g.label)
+  const classroomLabels = availableClassrooms.map(c => c.label)
+  
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -239,7 +244,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                 placeholder={t('classroomPlaceholder')}
                 items={formData.classrooms}
                 onChange={updateClassrooms}
-                suggestions={availableClassrooms}
+                suggestions={classroomLabels}
               />
 
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
@@ -297,8 +302,8 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
 
               <SubjectFormMultipleChoices
                 onAddSubject={addSubject} 
-                availableSubjects={availableSubjects}
-                availableGrades={availableGrades}
+                availableSubjects={subjectLabels}
+                availableGrades={gradeLabels}
               />
 
               {formData.subjects.length > 0 && (

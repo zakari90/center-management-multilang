@@ -1,24 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"
+
 // app/admin/layout.tsx
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { getSession } from "@/lib/authentication";
-import { redirect } from "next/navigation";
-import { ReactNode } from "react";
-import { getTranslations } from "next-intl/server";
+import { useAuth } from "@/context/authContext";
+import { useRouter, useParams } from "next/navigation";
+import { ReactNode, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: string }>;
 }
 
-export default async function AdminLayout({ children, params }: DashboardLayoutProps) {
-  const session: any = await getSession();
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "AdminLayout" });
+export default function AdminLayout({ children }: DashboardLayoutProps) {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations("AdminLayout");
   const isArabic = locale === "ar";
 
-  const navItems = [
+  const navItems = useMemo(() => [
     {
       title: t("dashboard"),
       url: "/admin",
@@ -44,20 +46,36 @@ export default async function AdminLayout({ children, params }: DashboardLayoutP
       url: "/admin/schedule",
       icon: "/calendar.svg",
     },
-  ];
+  ], [t]);
 
-  // Server-side protection
-  if (!session?.user) {
-    redirect("/login");
+  // Client-side protection
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.push("/login");
+      } else if (user.role !== "ADMIN") {
+        router.push("/manager"); // Redirect to their correct dashboard
+      }
+    }
+  }, [user, isLoading, router]);
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
   }
 
-  if (session.user.role !== "ADMIN") {
-    redirect("/manager"); // Redirect to their correct dashboard
+  // Don't render if user is not authenticated or not admin (redirect will happen)
+  if (!user || user.role !== "ADMIN") {
+    return null;
   }
 
-  const user = {
-    name: session.user.name,
-    email: session.user.email,
+  const sidebarUser = {
+    name: user.name,
+    email: user.email,
     avatar: "/school.svg",
   };
 
@@ -74,7 +92,7 @@ export default async function AdminLayout({ children, params }: DashboardLayoutP
         side={isArabic ? "right" : "left"}
         variant="inset"
         items={navItems}
-        user={user}
+        user={sidebarUser}
       />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">

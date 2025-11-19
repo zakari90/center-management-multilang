@@ -1,3 +1,5 @@
+"use client"
+
 import AllUsersTable from "@/components/all-users-table";
 
 export default function AdminUsersPage() {

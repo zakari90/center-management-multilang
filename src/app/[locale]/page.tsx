@@ -1,22 +1,44 @@
+"use client"
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getSession } from "@/lib/authentication"
-import { getTranslations } from "next-intl/server"
+import { useAuth } from "@/context/authContext"
+import { useTranslations } from "next-intl"
 import Link from "next/link"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
 import { ModeToggle } from "@/components/ModeToggle"
+import { useEffect } from "react"
 
-export default async function HomePage() {
-  const t = await getTranslations("homePage")
-  const session: any = await getSession()
+export default function HomePage() {
+  const t = useTranslations("homePage")
+  const { user, isLoading } = useAuth()
+  const router = useRouter()
 
-  if (session?.user?.role === "ADMIN") {
-    redirect("/admin")
+  useEffect(() => {
+    if (!isLoading && user) {
+      if (user.role === "ADMIN") {
+        router.push("/admin")
+      } else if (user.role === "MANAGER") {
+        router.push("/manager")
+      }
+    }
+  }, [user, isLoading, router])
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md sm:max-w-lg md:max-w-2xl text-center">
+          <p>Loading...</p>
+        </div>
+      </main>
+    )
   }
 
-  if (session?.user?.role === "MANAGER") {
-    redirect("/manager")
+  // Don't render if user is authenticated (redirect will happen)
+  if (user) {
+    return null
   }
 
   return (
