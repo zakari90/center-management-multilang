@@ -67,12 +67,12 @@ const TIME_SLOTS = [
 export default function TimetableManagement({ centerId }: { centerId?: string }) {
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations('TimetableManagement')
-  const { daysOfWeek, availableClassrooms } = useLocalizedConstants()
+  const { daysOfWeek, getRoomLabel, roomKeys, normalizeRoomId } = useLocalizedConstants()
   const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
 
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [rooms, setRooms] = useState<string[]>(availableClassrooms)
+  const [rooms, setRooms] = useState<string[]>(roomKeys)
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -242,6 +242,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       }
       
       // ✅ Transform schedules to match ScheduleSlot interface
+      // Normalize roomId to handle old schedules with translated room names
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map(s => ({
         id: s.id,
         day: s.day,
@@ -249,7 +250,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         endTime: s.endTime,
         teacherId: s.teacherId,
         subjectId: s.subjectId,
-        roomId: s.roomId,
+        roomId: normalizeRoomId(s.roomId), // Normalize room ID (convert translated string to key if needed)
       }))
 
       setTeachers(managerTeachers)
@@ -259,10 +260,12 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
       // ✅ Get rooms from relevant centers
       if (centerId) {
         const center = allCenters.find(c => c.id === centerId && c.status !== '0')
+       
         if (center?.classrooms?.length) {
+          // Use center's classrooms (they should be stored as keys)
           setRooms(center.classrooms)
         } else {
-          setRooms(availableClassrooms)
+          setRooms(roomKeys)
         }
       } else {
         // Get all unique classrooms from relevant centers
@@ -277,7 +280,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         if (allManagerClassrooms.length > 0) {
           setRooms(allManagerClassrooms)
         } else {
-          setRooms(availableClassrooms)
+          setRooms(roomKeys)
         }
       }
 
@@ -619,7 +622,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                                   </div>
                                   <div className="flex items-center gap-1 text-muted-foreground">
                                     <MapPin className="h-3 w-3" />
-                                    <span>{slot.roomId}</span>
+                                    <span>{getRoomLabel(slot.roomId)}</span>
                                   </div>
                                   {subject?.grade && (
                                     <Badge variant="secondary" className="text-xs">
@@ -706,7 +709,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                 <SelectContent>
                   {rooms.map(room => (
                     <SelectItem key={room} value={room}>
-                      {room}
+                      {getRoomLabel(room)}
                     </SelectItem>
                   ))}
                 </SelectContent>

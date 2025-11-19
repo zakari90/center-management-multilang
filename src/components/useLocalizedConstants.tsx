@@ -63,20 +63,43 @@ export function useLocalizedConstants() {
     t('grades.bac2MathB')
   ];
 
-  const availableClassrooms = [
-    t('classrooms.room1'),
-    t('classrooms.room2'),
-    t('classrooms.room3'),
-    t('classrooms.room4'),
-    t('classrooms.room5'),
-    t('classrooms.room6'),
-    t('classrooms.classA'),
-    t('classrooms.classB'),
-    t('classrooms.lab1'),
-    t('classrooms.labComputer'),
-    t('classrooms.labScience'),
-    t('classrooms.library')
+  // Room keys (stored in DB) and their translated labels
+  const roomKeys = [
+    'room1',
+    'room2',
+    'room3',
+    'room4',
+    'room5',
+    'room6',
+    'classA',
+    'classB',
+    'lab1',
+    'labComputer',
+    'labScience',
+    'library'
   ];
 
-  return { daysOfWeek, availableSubjects, availableGrades, availableClassrooms };
+  const availableClassrooms = roomKeys.map(key => ({
+    key,
+    label: t(`classrooms.${key}`)
+  }));
+
+  // Helper function to get room label by key
+  const getRoomLabel = (key: string): string => {
+    const room = availableClassrooms.find(r => r.key === key);
+    return room?.label || key;
+  };
+
+  // Helper function to normalize room ID (convert translated string to key if possible)
+  const normalizeRoomId = (roomId: string): string => {
+    // If it's already a key, return it
+    if (roomKeys.includes(roomId)) {
+      return roomId;
+    }
+    // Try to find matching key by comparing with translated labels
+    const matchingRoom = availableClassrooms.find(r => r.label === roomId);
+    return matchingRoom?.key || roomId; // Return key if found, otherwise return original (might be custom room)
+  };
+
+  return { daysOfWeek, availableSubjects, availableGrades, availableClassrooms, getRoomLabel, roomKeys, normalizeRoomId };
 }
