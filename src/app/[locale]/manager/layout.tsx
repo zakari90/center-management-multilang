@@ -1,11 +1,11 @@
 "use client"
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/manager/layout.tsx
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
 import { ReactNode, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
@@ -54,7 +54,7 @@ export default function ManagerLayout({ children }: DashboardLayoutProps) {
     if (!isLoading) {
       if (!user) {
         router.push("/login");
-      } else if (user.role !== "MANAGER") {
+      } else if (user.role?.toUpperCase() !== "MANAGER") {
         router.push("/admin");
       }
     }
@@ -70,7 +70,7 @@ export default function ManagerLayout({ children }: DashboardLayoutProps) {
   }
 
   // Don't render if user is not authenticated or not manager (redirect will happen)
-  if (!user || user.role !== "MANAGER") {
+  if (!user || user.role?.toUpperCase() !== "MANAGER") {
     return null;
   }
 
