@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { getSession } from '@/lib/actionsClient';
 
 export interface User {
   id: string;
@@ -34,11 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      // ✅ Client-side only: Get session from cookie
+      const session = await getSession();
       
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
+      if (session?.user) {
+        const userData = session.user as User;
+        setUser(userData);
       } else {
         setUser(null);
       }
@@ -56,9 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // ✅ Clear session cookie (server-side)
-      await fetch('/api/auth/logout', { method: 'POST' });
-      
       // ✅ Clear client-side session cookie
       Cookies.remove('session', { path: '/' });
       
@@ -72,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
-      // Even if API call fails, clear cookies and local state
+      // Even if error occurs, clear cookies and local state
       Cookies.remove('session', { path: '/' });
       setUser(null);
       window.location.href = '/';

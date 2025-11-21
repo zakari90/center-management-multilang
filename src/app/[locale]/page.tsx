@@ -1,13 +1,11 @@
 "use client"
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useAuth } from "@/context/authContext"
-import { useTranslations } from "next-intl"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import LanguageSwitcher from "@/components/LanguageSwitcher"
 import { ModeToggle } from "@/components/ModeToggle"
+import { useAuth } from "@/context/authContext"
+import { useTranslations } from "next-intl"
+import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
 export default function HomePage() {
@@ -52,7 +50,7 @@ export default function HomePage() {
           {t("description")}
         </p>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+        {/* <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
           <Link href="/login" className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white hover:bg-blue-700">
               {t("ownerDashboard")}
@@ -64,7 +62,7 @@ export default function HomePage() {
               {t("managerDashboard")}
             </Button>
           </Link>
-        </div>
+        </div> */}
 
         <div className="mt-6 flex items-center justify-center gap-3">
           <ModeToggle />
