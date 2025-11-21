@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+// import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import EnrollmentChart from "@/components/enrollement-chart";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
@@ -21,7 +21,7 @@ function Page() {
 return (
    <>
 
-      <AutoSyncProvider />
+      {/* <AutoSyncProvider /> */}
       <div className="container mx-auto p-3 sm:p-6 space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>

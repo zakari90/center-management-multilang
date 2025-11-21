@@ -10,7 +10,7 @@ import { DeleteAllDataButton } from "@/components/masterDelete";
 import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 import { SyncHandler } from "@/components/syncHandler";
-import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+// import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
 import { useTranslations } from "next-intl";
@@ -21,7 +21,7 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <AutoSyncProvider />
+      {/* <AutoSyncProvider /> */}
       <div className="container mx-auto p-3 sm:p-6 space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
