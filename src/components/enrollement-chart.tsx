@@ -44,9 +44,12 @@ export default function EnrollmentChart() {
       ])
 
       // Filter by manager and status (exclude deleted items)
-      const managerStudents = students.filter(s => 
-        s.managerId === user.id && s.status !== '0'
-      )
+      // Admin sees all students, Manager sees only their own
+      const isAdmin = user.role?.toUpperCase() === 'ADMIN'
+      const managerStudents = students.filter(s => {
+        const matchesManager = isAdmin || s.managerId === user.id
+        return matchesManager && s.status !== '0'
+      })
       const activeSubjects = subjects.filter(s => s.status !== '0')
       const activeEnrollments = studentSubjects.filter(ss => 
         ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
