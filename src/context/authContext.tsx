@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // This allows users to login again offline without re-syncing
       
       // ✅ Clear in-memory user state
-      setUser(null);
+      setUser(null); 
       
       // ✅ Redirect to home
       window.location.href = '/';
