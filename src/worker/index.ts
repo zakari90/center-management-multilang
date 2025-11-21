@@ -18,32 +18,33 @@ const locales = ["en", "fr", "ar"] as const;
 
 // All STATIC page route fragments (NO dynamic segments like [id])
 const STATIC_PAGES = [
-  "/*",
-  // Shell
-  "/",
-  // Auth
-  "/login",
-  "/loginmanager", //this a url or 
-  "/register",
-  "/(auth)/login",
-  "/(auth)/loginmanager", //this a url or 
-  "/(auth)/register",
-  // Admin
-  "/admin",
-  "/admin/center",
-  "/admin/receipts",
-  "/admin/schedule",
-  "/admin/users",
-  // Manager
-  "/manager",
-  "/manager/receipts",
-  "/manager/receipts/create",
-  "/manager/receipts/create-teacher-payment",
-  "/manager/schedule",
-  "/manager/students",
-  "/manager/students/create",
-  "/manager/teachers",
-  "/manager/teachers/create",
+  // "/*",
+  // // Shell
+  // "/",
+  // // Auth
+  // "/login",
+  // "/loginmanager", //this a url or 
+  // "/register",
+  // "/(auth)/login",
+  // "/(auth)/loginmanager", //this a url or 
+  // "/(auth)/register",
+  // // Admin
+  // "/admin",
+  // "/admin/center",
+  // "/admin/receipts",
+  // "/admin/schedule",
+  // "/admin/users",
+  // // Manager
+  // "/manager",
+  // "/manager/receipts",
+  // "/manager/receipts/create",
+  // "/manager/receipts/create-teacher-payment",
+  // "/manager/schedule",
+  // "/manager/students",
+  // "/manager/students/create",
+  // "/manager/teachers",
+  // "/manager/teachers/create",
+"/"
 ];
 
 // Generate all static localized routes (no dynamic ones)
