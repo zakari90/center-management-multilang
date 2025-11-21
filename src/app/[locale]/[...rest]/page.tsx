@@ -5,6 +5,6 @@ export default function CatchAllPage() {
   notFound();
 }
 
-// Force static generation for this route
+// Force static generation for this route but not for the other routes
 export const dynamic = 'force-static';
 export const revalidate = false;
