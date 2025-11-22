@@ -8,7 +8,6 @@ import ManagerRevenueChart from "@/components/managerrevenue-chart";
 import ManagerStatsCards from "@/components/managerStateCards";
 import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
-import { SyncHandler } from "@/components/syncHandler";
 import TopSubjects from "@/components/top-subjects";
 import { useTranslations } from "next-intl";
 
@@ -41,7 +40,7 @@ return (
       </div>
 
       {/* Data Synchronization */}
-      <SyncHandler />
+      {/* <SyncHandler /> */}
 
       {/* Local DB Debugger (for mobile debugging) */}
       {isDevelopment && <LocalDBDebugger />}

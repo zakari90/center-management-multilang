@@ -47,8 +47,6 @@ export default function ManagerStatsCards() {
         setError('User not authenticated')
         return
       }
-      console.log('fetching stats ----------------------------------------------');
-      console.log('user', user);
       
       // ✅ Fetch from localDB instead of API
       const [students, teachers, subjects, receipts, studentSubjects] = await Promise.all([

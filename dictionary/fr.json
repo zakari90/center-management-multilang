@@ -1008,6 +1008,7 @@
     "totalRevenue": "Revenu total",
     "avgSubjectsPerStudent": "Moy. Matières/Élève",
     "student": "Élève",
+    "name": "Nom",
     "contact": "Contact",
     "parentGuardian": "Parent/Tuteur",
     "subjects": "Matières",
