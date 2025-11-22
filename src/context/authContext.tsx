@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       // ✅ Clear session cookie (server-side)
-      await fetch('/api/auth/logout', { method: 'POST' });
+      // await fetch('/api/auth/logout', { method: 'POST' });
       
       // ✅ Clear client-side session cookie
       Cookies.remove('session', { path: '/' });

@@ -28,18 +28,32 @@ export default async function middleware(request: NextRequest) {
     }
   }
   
-  // Protect admin routes
-  if (pathname.startsWith('/admin') && session?.user?.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // Protect admin routes - allow client-side authentication
+  // Only redirect if we have a session but it's not an admin (server-side check)
+  // If no session exists, let client-side auth handle it
+  if (pathname.startsWith('/admin')) {
+    // If we have a session but user is not an admin, redirect
+    if (session?.user?.role && session.user.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    // If no session, let it through - client-side auth will handle redirect
+    // Continue to intl middleware
   }
   
-  // Protect manager routes
-  if (pathname.startsWith('/manager') && session?.user?.role !== 'MANAGER') {
-    return NextResponse.redirect(new URL('/loginmanager', request.url));
+  // Protect manager routes - allow client-side authentication
+  // Only redirect if we have a session but it's not a manager (server-side check)
+  // If no session exists, let client-side auth handle it
+  if (pathname.startsWith('/manager')) {
+    // If we have a session but user is not a manager, redirect
+    if (session?.user?.role && session.user.role !== 'MANAGER') {
+      return NextResponse.redirect(new URL('/loginmanager', request.url));
+    }
+    // If no session, let it through - client-side auth will handle redirect
+    // Continue to intl middleware
   }
   
-  // Redirect unauthenticated users from protected routes
-  if (!session?.user && !isPublicRoute) {
+  // Redirect unauthenticated users from protected routes (except admin/manager routes which use client-side auth)
+  if (!session?.user && !isPublicRoute && !pathname.startsWith('/admin') && !pathname.startsWith('/manager')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   

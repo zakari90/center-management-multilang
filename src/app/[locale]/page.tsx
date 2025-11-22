@@ -1,22 +1,50 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { getSession } from "@/lib/authentication"
-import { getTranslations } from "next-intl/server"
-import Link from "next/link"
-import { redirect } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import LanguageSwitcher from "@/components/LanguageSwitcher"
-import { ModeToggle } from "@/components/ModeToggle"
+"use client";
 
-export default async function HomePage() {
-  const t = await getTranslations("homePage")
-  const session: any = await getSession()
+import { useAuth } from "@/context/authContext";
+import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { ModeToggle } from "@/components/ModeToggle";
 
-  if (session?.user?.role === "ADMIN") {
-    redirect("/admin")
-  }
+export default function HomePage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("homePage");
+  const [mounted, setMounted] = useState(false);
 
-  if (session?.user?.role === "MANAGER") {
-    redirect("/manager")
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Only redirect after component has mounted and auth is loaded
+    if (!mounted || isLoading) return;
+
+    if (user?.role === "ADMIN") {
+      router.push(`/${locale}/admin`);
+      return;
+    }
+
+    if (user?.role === "MANAGER") {
+      router.push(`/${locale}/manager`);
+      return;
+    }
+  }, [user, isLoading, mounted, router, locale]);
+
+  // Show loading state while checking authentication
+  if (!mounted || isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -31,13 +59,13 @@ export default async function HomePage() {
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-          <Link href="/login" className="w-full sm:w-auto">
+          <Link href={`/${locale}/login`} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white hover:bg-blue-700">
               {t("ownerDashboard")}
             </Button>
           </Link>
 
-          <Link href="/managerLogin" className="w-full sm:w-auto">
+          <Link href={`/${locale}/managerLogin`} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white hover:bg-green-700">
               {t("managerDashboard")}
             </Button>
@@ -50,5 +78,5 @@ export default async function HomePage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
