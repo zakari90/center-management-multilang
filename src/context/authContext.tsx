@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { getSession } from '@/lib/actionsClient';
 
 export interface User {
   id: string;
@@ -34,11 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me');
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
+      // getSession returns the decrypted session object or null
+      const session = await getSession();
+      if (session && session.user) {
+        setUser(session.user as User);
       } else {
         setUser(null);
       }
