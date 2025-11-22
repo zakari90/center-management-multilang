@@ -721,6 +721,7 @@
       "saturday": "Saturday",
       "sunday": "Sunday"
     },
+    "subjectsLabel": "Subjects",
     "subjects": {
       "arabic": "Arabic",
       "french": "French",

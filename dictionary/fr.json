@@ -687,6 +687,7 @@
       "saturday": "Samedi",
       "sunday": "Dimanche"
     },
+    "subjectsLabel": "Matières",
     "subjects": {
       "arabic": "Arabe",
       "french": "Français",
