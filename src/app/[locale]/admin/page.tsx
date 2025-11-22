@@ -9,7 +9,6 @@ import ManagersList from "@/components/managersList";
 import { DeleteAllDataButton } from "@/components/masterDelete";
 import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
-import { SyncHandler } from "@/components/syncHandler";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
@@ -48,7 +47,7 @@ export default function AdminDashboard() {
       </div>
       
       {/* Data Synchronization */}
-      <SyncHandler />
+      {/* <SyncHandler /> */}
       
       {/* Local DB Debugger (for mobile debugging) */}
       {isDevelopment && <LocalDBDebugger />}
