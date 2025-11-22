@@ -318,7 +318,9 @@
     "classroomsUpdated": "تم تحديث القاعات بنجاح",
     "classroomsUpdateFailed": "فشل تحديث القاعات",
     "workingDaysUpdated": "تم تحديث أيام العمل بنجاح",
-    "workingDaysUpdateFailed": "فشل تحديث أيام العمل"
+    "workingDaysUpdateFailed": "فشل تحديث أيام العمل",
+    "debugSync": "تصحيح مزامنة المركز",
+    "debugSyncing": "جاري تصحيح المزامنة..."
   },
   "NewCenterForm": {
     "basicInformation": "معلومات أساسية",
@@ -667,6 +669,7 @@
   },
   "Common": {
     "back": "رجوع",
+    "subjects": "المواد",
     "daysOfWeek": {
       "monday": "الاثنين",
       "tuesday": "الثلاثاء",

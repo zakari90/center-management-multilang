@@ -318,7 +318,9 @@
     "classroomsUpdated": "Salles mises à jour avec succès",
     "classroomsUpdateFailed": "Échec de la mise à jour des salles",
     "workingDaysUpdated": "Jours ouvrables mis à jour avec succès",
-    "workingDaysUpdateFailed": "Échec de la mise à jour des jours ouvrables"
+    "workingDaysUpdateFailed": "Échec de la mise à jour des jours ouvrables",
+    "debugSync": "Déboguer la synchronisation du centre",
+    "debugSyncing": "Synchronisation en cours de débogage..."
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",
@@ -676,6 +678,7 @@
     "MAD": "MAD"
   },
   "Common": {
+    "subjects": "Matières",
     "daysOfWeek": {
       "monday": "Lundi",
       "tuesday": "Mardi",

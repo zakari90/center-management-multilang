@@ -354,7 +354,9 @@
     "classroomsUpdated": "Classrooms updated successfully",
     "classroomsUpdateFailed": "Failed to update classrooms",
     "workingDaysUpdated": "Working days updated successfully",
-    "workingDaysUpdateFailed": "Failed to update working days"
+    "workingDaysUpdateFailed": "Failed to update working days",
+    "debugSync": "Debug Center Sync",
+    "debugSyncing": "Debug syncing..."
   },
   "NewCenterForm": {
     "basicInformation": "Basic Information",
@@ -710,6 +712,7 @@
     "MAD":"MAD"
   },
  "Common": {
+    "subjects": "Subjects",
     "daysOfWeek": {
       "monday": "Monday",
       "tuesday": "Tuesday",
