@@ -3,7 +3,6 @@
 
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import EnrollmentChart from "@/components/enrollement-chart";
-import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
 import ManagerStatsCards from "@/components/managerStateCards";
@@ -29,7 +28,7 @@ return (
         </div>
 
       {/* First Login Import Prompt */}
-      <FirstLoginImport />
+      {/* <FirstLoginImport /> */}
 
       <ManagerStatsCards />
       <ReceiptsSummary/>
