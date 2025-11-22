@@ -47,7 +47,9 @@ export default function ManagerStatsCards() {
         setError('User not authenticated')
         return
       }
-
+      console.log('fetching stats ----------------------------------------------');
+      console.log('user', user);
+      
       // ✅ Fetch from localDB instead of API
       const [students, teachers, subjects, receipts, studentSubjects] = await Promise.all([
         studentActions.getAll(),
@@ -188,7 +190,7 @@ export default function ManagerStatsCards() {
   }
   return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        this is the manager stats cards
+        
       {statsData.map((stat, index) => {
         const Icon = stat.icon
         return (
