@@ -27,11 +27,11 @@ export function CreateFakeCenterButton({
 
     setIsCreating(true);
     try {
-      const centerId = await createFakeCenter(user.id, {
+     await createFakeCenter(user.id, {
         syncToServer: true, // Try to sync if online
       });
 
-      toast.success("Fake center created successfully!");
+      toast("Fake center created successfully!");
       
       // Refresh parent component
       if (onCenterCreated) {
