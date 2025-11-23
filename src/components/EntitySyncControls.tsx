@@ -78,13 +78,13 @@ export function EntitySyncControls({ entity }: EntitySyncControlsProps) {
       
       // Show detailed result
       if (result?.message) {
-        const successCount = result.successCount || 0
+        // const successCount = result.successCount || 0
         const failCount = result.failCount || 0
         
         if (failCount === 0) {
-          toast.success(result.message || `${entityLabels[entity]} synced successfully`)
+          toast(result.message || `${entityLabels[entity]} synced successfully`)
         } else {
-          toast.warning(result.message || `${entityLabels[entity]} sync completed with ${failCount} error(s)`)
+          toast(result.message || `${entityLabels[entity]} sync completed with ${failCount} error(s)`)
         }
         
         // Log details for debugging
