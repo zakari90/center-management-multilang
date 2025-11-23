@@ -247,8 +247,8 @@ export function SyncHandler() {
           <Button
             onClick={handleSyncToServer}
             disabled={isSyncing || !online}
-            variant="default"
-            className="w-full"
+            variant="destructive"
+            className="w-full bg-red-600 hover:bg-red-700"
           >
             {isSyncing ? (
               <>

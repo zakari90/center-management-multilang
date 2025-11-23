@@ -1,5 +1,5 @@
-import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
-import PWATestingSuite from "@/components/pwa-testing-suite";
+// import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
+// import PWATestingSuite from "@/components/pwa-testing-suite";
 import PWAUpdateHandler from "@/components/pwa-update-handler";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
@@ -127,8 +127,8 @@ export default async function RootLayout({
               {/* <InstallPWA /> */}
               <PWAUpdateHandler />
               {/* <PagePrecacheHandler /> */}
-              <PWAPerformanceMonitor />
-              <PWATestingSuite />
+              {/* <PWAPerformanceMonitor /> */}
+              {/* <PWATestingSuite /> */}
               <Toaster />
             </AuthProvider>
           </NextIntlClientProvider>

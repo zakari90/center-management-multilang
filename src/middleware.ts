@@ -44,9 +44,9 @@ export default async function middleware(request: NextRequest) {
   // Only redirect if we have a session but it's not a manager (server-side check)
   // If no session exists, let client-side auth handle it
   if (pathname.startsWith('/manager')) {
-    // If we have a session but user is not a manager, redirect
+    // If we have a session but user is not a manager, redirect to login
     if (session?.user?.role && session.user.role !== 'MANAGER') {
-      return NextResponse.redirect(new URL('/loginmanager', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     }
     // If no session, let it through - client-side auth will handle redirect
     // Continue to intl middleware

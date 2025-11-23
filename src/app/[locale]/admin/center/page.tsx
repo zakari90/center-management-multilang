@@ -2,6 +2,7 @@
 
 import CenterPresentation from "@/components/centerPresentation";
 import { NewCenterForm } from "@/components/newCenterForm";
+import { CreateFakeCenterButton } from "@/components/CreateFakeCenterButton";
 import { centerActions } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Loader2 } from "lucide-react";
@@ -24,19 +25,21 @@ function Page() {
 
       const centers = await centerActions.getAll();
       
-      // Debug logging
-      console.log("🔍 Center Debug:", {
-        userId: user.id,
-        userRole: user.role,
-        totalCenters: centers.length,
-        centers: centers.map(c => ({
-          id: c.id,
-          name: c.name,
-          adminId: c.adminId,
-          status: c.status,
-          matches: c.adminId === user.id
-        }))
-      });
+      // Debug logging (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("🔍 Center Debug:", {
+          userId: user.id,
+          userRole: user.role,
+          totalCenters: centers.length,
+          centers: centers.map(c => ({
+            id: c.id,
+            name: c.name,
+            adminId: c.adminId,
+            status: c.status,
+            matches: c.adminId === user.id
+          }))
+        });
+      }
 
       // Filter: For admin users, show centers where adminId matches OR if no adminId, show first active center
       // This handles cases where adminId might not be set correctly during sync
@@ -53,10 +56,15 @@ function Page() {
           : null;
       
       if (centerToShow) {
-        console.log("✅ Using center:", centerToShow.id, centerToShow.name);
+        if (process.env.NODE_ENV === 'development') {
+          console.log("✅ Using center:", centerToShow.id, centerToShow.name);
+        }
         setCenterId(centerToShow.id);
       } else {
-        console.log("❌ No center found");
+        // Only log in development to reduce console noise
+        if (process.env.NODE_ENV === 'development') {
+          console.log("❌ No center found");
+        }
         setCenterId(null);
       }
     } catch (error) {
@@ -85,7 +93,12 @@ function Page() {
       ) : centerId ? (
         <CenterPresentation centerId={centerId} />
       ) : (
-        <NewCenterForm onCenterCreated={handleCenterCreated} />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <CreateFakeCenterButton onCenterCreated={handleCenterCreated} />
+          </div>
+          <NewCenterForm onCenterCreated={handleCenterCreated} />
+        </div>
       )}
     </div>
   );

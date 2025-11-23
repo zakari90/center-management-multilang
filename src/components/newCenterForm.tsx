@@ -19,6 +19,9 @@ import { toast } from "sonner"
 import { SubjectFormMultipleChoices } from "./subjectForm"
 import { useLocalizedConstants } from "./useLocalizedConstants"
 import { useAuth } from "@/context/authContext"
+import ServerActionCenters from "@/lib/dexie/centerServerAction"
+import ServerActionSubjects from "@/lib/dexie/subjectServerAction"
+import { isOnline } from "@/lib/utils/network"
 
 // ✅ Form-only subject data (before creating Subject entity)
 type SubjectFormData = {
@@ -148,6 +151,33 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
         await Promise.all(
           subjectEntities.map(subject => subjectActions.putLocal(subject))
         )
+      }
+
+      // ✅ Attempt to sync to server if online
+      if (isOnline()) {
+        try {
+          // Sync center first
+          await ServerActionCenters.SaveToServer(newCenter)
+          await centerActions.markSynced(centerId)
+          
+          // Sync all subjects
+          if (subjectEntities.length > 0) {
+            await Promise.all(
+              subjectEntities.map(async (subject) => {
+                await ServerActionSubjects.SaveToServer(subject)
+                await subjectActions.markSynced(subject.id)
+              })
+            )
+          }
+          
+          toast.success(t('syncedToServer') || 'Center synced to server successfully!')
+        } catch (syncError) {
+          // Sync failed, but local save succeeded - that's okay for offline-first
+          console.warn('Failed to sync center to server (will sync later):', syncError)
+          toast.info(t('savedLocally') || 'Center saved locally. Will sync when online.')
+        }
+      } else {
+        toast.info(t('savedLocally') || 'Center saved locally. Will sync when online.')
       }
 
       // ✅ Success feedback
