@@ -1,11 +1,11 @@
 "use client"
 
-import AdminReceiptsTable from "@/components/adminReceiptPresenation"
+import AdminReceiptsTable from '@/components/inUse/adminReceiptPresenation'
 
 function Page() {
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <AdminReceiptsTable />
+    <div>      
+      <AdminReceiptsTable/>
     </div>
   )
 }
