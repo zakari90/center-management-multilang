@@ -82,9 +82,9 @@ export default function TeachersTable() {
         subjectActions.getAll()
       ])
 
-      // ✅ Filter teachers by managerId and status
+      // ✅ Filter teachers by status only (managers see ALL teachers)
       const managerTeachers = allTeachers
-        .filter(t => t.managerId === user.id && t.status !== '0')
+        .filter(t => t.status !== '0')
 
       // ✅ Build teachers with subjects
       const teachersWithSubjects: Teacher[] = managerTeachers.map(teacher => {

@@ -43,13 +43,8 @@ export default function TopSubjects() {
         studentActions.getAll(),
       ])
 
-      // Filter by manager and status (exclude deleted items)
-      // Admin sees all students, Manager sees only their own
-      const isAdmin = user.role?.toUpperCase() === 'ADMIN'
-      const managerStudents = studentsData.filter(s => {
-        const matchesManager = isAdmin || s.managerId === user.id
-        return matchesManager && s.status !== '0'
-      })
+      // Filter by status only (managers see ALL students)
+      const managerStudents = studentsData.filter(s => s.status !== '0')
       const activeSubjects = subjectsData.filter(s => s.status !== '0')
       const activeEnrollments = studentSubjectsData.filter(ss => 
         ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)

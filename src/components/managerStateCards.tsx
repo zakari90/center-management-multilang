@@ -10,7 +10,7 @@ import {
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '@/context/authContext'
 import { studentActions, teacherActions, subjectActions, receiptActions, studentSubjectActions } from '@/lib/dexie/dexieActions'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
@@ -33,13 +33,7 @@ export default function ManagerStatsCards() {
   const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
 
-  useEffect(() => {
-    if (user) {
-      fetchStats()
-    }
-  }, [user])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setError(null)
     setIsLoading(true)
     try {
@@ -57,19 +51,20 @@ export default function ManagerStatsCards() {
         studentSubjectActions.getAll(),
       ])
 
-      // Filter by manager and status (exclude deleted items)
-      const managerStudents = students.filter(s => 
-        s.managerId === user.id && s.status !== '0'
-      )
-      const managerTeachers = teachers.filter(t => 
-        t.managerId === user.id && t.status !== '0'
-      )
+      // Filter by status (exclude deleted items)
+      // Managers see ALL students and teachers, but only their own revenue
+      const allActiveStudents = students.filter(s => s.status !== '0')
+      const allActiveTeachers = teachers.filter(t => t.status !== '0')
       const activeSubjects = subjects.filter(s => s.status !== '0')
+      
+      // Revenue is filtered by manager (each manager sees only their own revenue)
       const managerReceipts = receipts.filter(r => 
         r.managerId === user.id && r.status !== '0'
       )
+      
+      // Enrollments for all active students
       const activeEnrollments = studentSubjects.filter(ss => 
-        ss.status !== '0' && managerStudents.some(s => s.id === ss.studentId)
+        ss.status !== '0' && allActiveStudents.some(s => s.id === ss.studentId)
       )
 
       // Calculate date ranges
@@ -101,8 +96,8 @@ export default function ManagerStatsCards() {
         .reduce((sum, r) => sum + r.amount, 0)
 
       setStats({
-        totalStudents: managerStudents.length,
-        totalTeachers: managerTeachers.length,
+        totalStudents: allActiveStudents.length,
+        totalTeachers: allActiveTeachers.length,
         totalSubjects: activeSubjects.length,
         totalRevenue,
         monthlyRevenue,
@@ -120,7 +115,13 @@ export default function ManagerStatsCards() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      fetchStats()
+    }
+  }, [user, fetchStats])
 
   if (isLoading) {
     return (

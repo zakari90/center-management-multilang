@@ -80,9 +80,9 @@ export default function StudentsTable() {
         teacherActions.getAll()
       ])
 
-      // ✅ Filter students by managerId and status
+      // ✅ Filter students by status only (managers see ALL students)
       const managerStudents = allStudents
-        .filter(s => s.managerId === user.id && s.status !== '0')
+        .filter(s => s.status !== '0')
 
       // ✅ Build students with subjects
       const studentsWithSubjects: Student[] = managerStudents.map(student => {
