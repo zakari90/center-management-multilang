@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { centerActions, subjectActions } from "@/lib/dexie/dexieActions"
-import { ServerActionCenters } from "@/lib/dexie/serverActions"
+import { ServerActionCenters, ServerActionSubjects } from "@/lib/dexie/serverActions"
 import { Center, Subject } from "@/lib/dexie/dbSchema"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useLiveQuery } from "dexie-react-hooks"
@@ -20,6 +20,7 @@ import { BookOpen, Building2, CalendarDays, Loader2, Pencil, Plus } from "lucide
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { isOnline } from "@/lib/utils/network"
 import { EditDialog } from "./editDialog"
 import { EditSubjectCard } from "./editSubjectCard"
 import { SubjectForm } from "./subjectForm"
@@ -93,8 +94,20 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
 
       await subjectActions.putLocal(newSubject)
       
-      // ✅ No need to update local state - useLiveQuery auto-updates
-      toast(t('subjectAdded') || "Subject added successfully")
+      // ✅ Auto-sync to server if online
+      if (isOnline()) {
+        try {
+          await ServerActionSubjects.SaveToServer(newSubject)
+          await subjectActions.markSynced(subjectId)
+          toast(t('subjectAdded') || "Subject added and synced successfully")
+        } catch (syncError) {
+          console.error("Subject sync failed, will retry later:", syncError)
+          toast(t('subjectAdded') || "Subject added (will sync when online)")
+        }
+      } else {
+        toast(t('subjectAdded') || "Subject added (will sync when online)")
+      }
+      
       setIsAddDialogOpen(false)
     } catch (error) {
       console.error("Error adding subject:", error)
@@ -126,8 +139,19 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
 
       await subjectActions.putLocal(updatedSubject)
       
-      // ✅ No need to update local state - useLiveQuery auto-updates
-      toast(t('subjectUpdated') || "Subject updated successfully")
+      // ✅ Auto-sync to server if online
+      if (isOnline()) {
+        try {
+          await ServerActionSubjects.SaveToServer(updatedSubject)
+          await subjectActions.markSynced(subjectId)
+          toast(t('subjectUpdated') || "Subject updated and synced successfully")
+        } catch (syncError) {
+          console.error("Subject sync failed, will retry later:", syncError)
+          toast(t('subjectUpdated') || "Subject updated (will sync when online)")
+        }
+      } else {
+        toast(t('subjectUpdated') || "Subject updated (will sync when online)")
+      }
     } catch (error) {
       console.error("Error updating subject:", error)
       toast(t('subjectUpdateFailed') || "Failed to update subject")
@@ -161,8 +185,19 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
       
       await centerActions.putLocal(updatedCenter)
       
-      // ✅ No need to update local state - useLiveQuery auto-updates
-      toast(t('classroomsUpdated') || "Classrooms updated successfully")
+      // ✅ Auto-sync to server if online
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(updatedCenter)
+          await centerActions.markSynced(updatedCenter.id)
+          toast(t('classroomsUpdated') || "Classrooms updated and synced successfully")
+        } catch (syncError) {
+          console.error("Center sync failed, will retry later:", syncError)
+          toast(t('classroomsUpdated') || "Classrooms updated (will sync when online)")
+        }
+      } else {
+        toast(t('classroomsUpdated') || "Classrooms updated (will sync when online)")
+      }
     } catch (error) {
       console.error("Error updating classrooms:", error)
       toast(t('classroomsUpdateFailed') || "Failed to update classrooms")
@@ -183,8 +218,19 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
       
       await centerActions.putLocal(updatedCenter)
       
-      // ✅ No need to update local state - useLiveQuery auto-updates
-      toast(t('workingDaysUpdated') || "Working days updated successfully")
+      // ✅ Auto-sync to server if online
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(updatedCenter)
+          await centerActions.markSynced(updatedCenter.id)
+          toast(t('workingDaysUpdated') || "Working days updated and synced successfully")
+        } catch (syncError) {
+          console.error("Center sync failed, will retry later:", syncError)
+          toast(t('workingDaysUpdated') || "Working days updated (will sync when online)")
+        }
+      } else {
+        toast(t('workingDaysUpdated') || "Working days updated (will sync when online)")
+      }
     } catch (error) {
       console.error("Error updating working days:", error)
       toast(t('workingDaysUpdateFailed') || "Failed to update working days")
