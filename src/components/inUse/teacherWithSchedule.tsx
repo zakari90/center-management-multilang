@@ -459,15 +459,24 @@ export default function TeacherScheduleView({ centerId }: { centerId?: string })
       // ✅ Filter active entities (exclude deleted)
       let activeTeachers = allTeachers.filter(t => t.status !== '0')
       
-      // ✅ For admin, filter teachers by their center's managers
+      // ✅ For admin, show all teachers (no filter) or filter by centerId if provided
       if (isAdmin && user.id) {
-        const adminCenters = allCenters.filter(c => 
-          c.adminId === user.id && c.status !== '0'
-        )
-        const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
-        activeTeachers = activeTeachers.filter(t => 
-          adminManagerIds.includes(t.managerId)
-        )
+        if (centerId) {
+          const center = allCenters.find(c => c.id === centerId && c.status !== '0')
+          const managerIds = center?.managers || []
+          activeTeachers = activeTeachers.filter(t => 
+            managerIds.includes(t.managerId)
+          )
+        } else {
+          // Admin sees all teachers from their centers
+          const adminCenters = allCenters.filter(c => 
+            c.adminId === user.id && c.status !== '0'
+          )
+          const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
+          activeTeachers = activeTeachers.filter(t => 
+            adminManagerIds.includes(t.managerId)
+          )
+        }
       } else if (user.id) {
         // For manager, filter by managerId
         activeTeachers = activeTeachers.filter(t => t.managerId === user.id)
@@ -1328,3 +1337,4 @@ function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
     </div>
   )
 }
+

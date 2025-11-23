@@ -1,9 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -13,13 +19,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
   Table,
   TableBody,
   TableCell,
@@ -27,19 +26,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  Loader2, 
-  Search, 
-  TrendingUp,
-  TrendingDown,
-  Receipt as ReceiptIcon,
-  Coins
-} from 'lucide-react'
-import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
+import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
+import {
+  Coins,
+  Loader2,
+  Receipt as ReceiptIcon,
+  Search,
+  TrendingDown,
+  TrendingUp
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Receipt {
   id: string
@@ -67,7 +66,6 @@ interface Receipt {
 
 export default function AdminReceiptsTable() {
   const t = useTranslations('AdminReceiptsTable')
-  const router = useRouter()
   const { user } = useAuth()
   
   const [receipts, setReceipts] = useState<Receipt[]>([])
