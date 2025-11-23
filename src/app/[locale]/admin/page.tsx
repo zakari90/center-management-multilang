@@ -12,7 +12,6 @@ import TopSubjects from "@/components/top-subjects";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
-import { SyncHandler } from "@/components/syncHandler";
 import { useTranslations } from "next-intl";
 
 export default function AdminDashboard() {
@@ -48,9 +47,10 @@ export default function AdminDashboard() {
       </div>
       
       {/* Data Synchronization */}
-      <SyncHandler />
+      {/* <SyncHandler /> */}
       
       {/* Local DB Debugger (for mobile debugging) */}
+      <>s--------------------------------------------------</>
       {isDevelopment && <LocalDBDebugger />}
       
       <DeleteAllDataButton/>

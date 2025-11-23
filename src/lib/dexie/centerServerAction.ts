@@ -34,31 +34,45 @@ const ServerActionCenters = {
       const centerSubjects = allSubjects
         .filter(s => s.centerId === center.id && s.status !== '0')
         .map(s => ({
+          id: s.id, // ✅ Include subject ID
           centerId: s.centerId,
           name: s.name,
           grade: s.grade,
           price: s.price,
           duration: s.duration,
+          createdAt: new Date(s.createdAt).toISOString(),
+          updatedAt: new Date(s.updatedAt).toISOString(),
         }));
+
+      const requestBody = {
+        id: center.id,
+        name: center.name,
+        address: center.address || null,
+        phone: center.phone || null,
+        classrooms: center.classrooms || [],
+        workingDays: center.workingDays || [],
+        subjects: centerSubjects,
+        createdAt: new Date(center.createdAt).toISOString(),
+        updatedAt: new Date(center.updatedAt).toISOString(),
+      };
+
+      console.log("🔄 Syncing center to server:", {
+        centerId: center.id,
+        name: center.name,
+        subjectsCount: centerSubjects.length,
+        requestBody
+      });
 
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          id: center.id,
-          name: center.name,
-          address: center.address,
-          phone: center.phone,
-          classrooms: center.classrooms,
-          workingDays: center.workingDays,
-          subjects: centerSubjects, // ✅ Include actual subjects
-          createdAt: new Date(center.createdAt).toISOString(),
-          updatedAt: new Date(center.updatedAt).toISOString(),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok && response.status === 409) {
+        console.log("⚠️ Center exists, trying PATCH...");
+        // PATCH endpoint doesn't handle subjects, so we only update center fields
         response = await fetch(api_url, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -66,24 +80,78 @@ const ServerActionCenters = {
           body: JSON.stringify({
             centerId: center.id,
             name: center.name,
-            address: center.address,
-            phone: center.phone,
-            classrooms: center.classrooms,
-            workingDays: center.workingDays,
-            subjects: centerSubjects, // ✅ Include subjects in PATCH too
+            address: center.address || null,
+            phone: center.phone || null,
+            classrooms: center.classrooms || [],
+            workingDays: center.workingDays || [],
             updatedAt: new Date(center.updatedAt).toISOString(),
           }),
         });
+        
+        // After PATCH, we need to sync subjects separately via POST to /api/subjects
+        if (response.ok && centerSubjects.length > 0) {
+          console.log("🔄 Syncing subjects separately...");
+          try {
+            const subjectSyncResults = await Promise.allSettled(
+              centerSubjects.map(subject => 
+                fetch(`${baseUrl}/api/subjects`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({
+                    id: subject.id,
+                    centerId: center.id,
+                    name: subject.name,
+                    grade: subject.grade,
+                    price: subject.price,
+                    duration: subject.duration,
+                    createdAt: subject.createdAt,
+                    updatedAt: subject.updatedAt,
+                  }),
+                })
+              )
+            );
+            
+            const failedSubjects = subjectSyncResults
+              .map((result, index) => ({ result, subject: centerSubjects[index] }))
+              .filter(({ result }) => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value.ok));
+            
+            if (failedSubjects.length > 0) {
+              console.warn("⚠️ Some subjects failed to sync:", failedSubjects);
+            } else {
+              console.log("✅ All subjects synced successfully");
+            }
+          } catch (subjectError) {
+            console.error("❌ Error syncing subjects:", subjectError);
+            // Don't throw - center was updated successfully
+          }
+        }
       }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText };
+        }
+        const errorMessage = errorData.error?.message || errorData.error || `HTTP ${response.status}: ${errorText}`;
+        console.error("❌ Center sync failed:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorMessage,
+          centerId: center.id
+        });
+        throw new Error(`HTTP Error: ${response.status} - ${errorMessage}`);
       }
-      return response.json();
+      
+      const result = await response.json();
+      console.log("✅ Center synced successfully:", result);
+      return result;
     } catch (e) {
-      console.error("Error saving center to server:", e);
-      return null;
+      console.error("❌ Error saving center to server:", e);
+      throw e; // ✅ Re-throw to let sync handler know it failed
     }
   },
 
