@@ -14,26 +14,26 @@ export function useLocalizedConstants() {
   ];
 
   const availableSubjects = [
-    t('subjects.arabic'),
-    t('subjects.french'),
-    t('subjects.english'),
-    t('subjects.amazigh'),
-    t('subjects.math'),
-    t('subjects.lifeEarth'),
-    t('subjects.physicsChem'),
-    t('subjects.scienceActivities'),
-    t('subjects.historyGeo'),
-    t('subjects.philosophy'),
-    t('subjects.civic'),
-    t('subjects.islamic'),
-    t('subjects.computer'),
-    t('subjects.technology'),
-    t('subjects.economics'),
-    t('subjects.accounting'),
-    t('subjects.electrical'),
-    t('subjects.mechanical'),
-    t('subjects.art'),
-    t('subjects.physical')
+    t('subjectsObject.arabic'),
+    t('subjectsObject.french'),
+    t('subjectsObject.english'),
+    t('subjectsObject.amazigh'),
+    t('subjectsObject.math'),
+    t('subjectsObject.lifeEarth'),
+    t('subjectsObject.physicsChem'),
+    t('subjectsObject.scienceActivities'),
+    t('subjectsObject.historyGeo'),
+    t('subjectsObject.philosophy'),
+    t('subjectsObject.civic'),
+    t('subjectsObject.islamic'),
+    t('subjectsObject.computer'),
+    t('subjectsObject.technology'),
+    t('subjectsObject.economics'),
+    t('subjectsObject.accounting'),
+    t('subjectsObject.electrical'),
+    t('subjectsObject.mechanical'),
+    t('subjectsObject.art'),
+    t('subjectsObject.physical')
   ];
 
   const availableGrades = [

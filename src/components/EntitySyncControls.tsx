@@ -4,6 +4,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, Upload, Download } from 'lucide-react'
+import { toast } from 'sonner'
+import { isOnline } from '@/lib/utils/network'
 import {
   ServerActionUsers,
   ServerActionCenters,
@@ -42,70 +44,109 @@ export function EntitySyncControls({ entity }: EntitySyncControlsProps) {
   const [isImporting, setIsImporting] = useState(false)
 
   const handleSync = async () => {
+    if (!isOnline()) {
+      toast.error(`Cannot sync ${entityLabels[entity]}: You are offline`)
+      return
+    }
+
     setIsSyncing(true)
     try {
+      let result: any
       switch (entity) {
         case 'users':
-          await ServerActionUsers.Sync()
+          result = await ServerActionUsers.Sync()
           break
         case 'centers':
-          await ServerActionCenters.Sync()
+          result = await ServerActionCenters.Sync()
           break
         case 'teachers':
-          await ServerActionTeachers.Sync()
+          result = await ServerActionTeachers.Sync()
           break
         case 'students':
-          await ServerActionStudents.Sync()
+          result = await ServerActionStudents.Sync()
           break
         case 'subjects':
-          await ServerActionSubjects.Sync()
+          result = await ServerActionSubjects.Sync()
           break
         case 'receipts':
-          await ServerActionReceipts.Sync()
+          result = await ServerActionReceipts.Sync()
           break
         case 'schedules':
-          await ServerActionSchedules.Sync()
+          result = await ServerActionSchedules.Sync()
           break
       }
-      // Simple feedback; you can replace with toast
-      window.alert(`${entityLabels[entity]} synced with server.`)
+      
+      // Show detailed result
+      if (result?.message) {
+        const successCount = result.successCount || 0
+        const failCount = result.failCount || 0
+        
+        if (failCount === 0) {
+          toast.success(result.message || `${entityLabels[entity]} synced successfully`)
+        } else {
+          toast.warning(result.message || `${entityLabels[entity]} sync completed with ${failCount} error(s)`)
+        }
+        
+        // Log details for debugging
+        if (result.results && result.results.length > 0) {
+          console.log(`[${entityLabels[entity]} Sync] Results:`, result.results)
+          const failed = result.results.filter((r: any) => !r.success)
+          if (failed.length > 0) {
+            console.error(`[${entityLabels[entity]} Sync] Failed items:`, failed)
+          }
+        }
+      } else {
+        toast.success(`${entityLabels[entity]} synced with server`)
+      }
     } catch (e: any) {
-      window.alert(`Failed to sync ${entityLabels[entity]}: ${e?.message || 'Unknown error'}`)
+      console.error(`[${entityLabels[entity]} Sync] Error:`, e)
+      toast.error(`Failed to sync ${entityLabels[entity]}: ${e?.message || 'Unknown error'}`)
     } finally {
       setIsSyncing(false)
-      // Caller page should re-read Dexie data in its own logic (e.g. refetch)
     }
   }
 
   const handleImport = async () => {
+    if (!isOnline()) {
+      toast.error(`Cannot import ${entityLabels[entity]}: You are offline`)
+      return
+    }
+
     setIsImporting(true)
     try {
+      let result: any
       switch (entity) {
         case 'users':
-          await ServerActionUsers.ImportFromServer()
+          result = await ServerActionUsers.ImportFromServer()
           break
         case 'centers':
-          await ServerActionCenters.ImportFromServer()
+          result = await ServerActionCenters.ImportFromServer()
           break
         case 'teachers':
-          await ServerActionTeachers.ImportFromServer()
+          result = await ServerActionTeachers.ImportFromServer()
           break
         case 'students':
-          await ServerActionStudents.ImportFromServer()
+          result = await ServerActionStudents.ImportFromServer()
           break
         case 'subjects':
-          await ServerActionSubjects.ImportFromServer()
+          result = await ServerActionSubjects.ImportFromServer()
           break
         case 'receipts':
-          await ServerActionReceipts.ImportFromServer()
+          result = await ServerActionReceipts.ImportFromServer()
           break
         case 'schedules':
-          await ServerActionSchedules.ImportFromServer()
+          result = await ServerActionSchedules.ImportFromServer()
           break
       }
-      window.alert(`${entityLabels[entity]} imported from server.`)
+      
+      if (result?.message) {
+        toast.success(result.message || `${entityLabels[entity]} imported from server`)
+      } else {
+        toast.success(`${entityLabels[entity]} imported from server`)
+      }
     } catch (e: any) {
-      window.alert(`Failed to import ${entityLabels[entity]}: ${e?.message || 'Unknown error'}`)
+      console.error(`[${entityLabels[entity]} Import] Error:`, e)
+      toast.error(`Failed to import ${entityLabels[entity]}: ${e?.message || 'Unknown error'}`)
     } finally {
       setIsImporting(false)
     }

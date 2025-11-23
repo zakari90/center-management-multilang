@@ -711,7 +711,7 @@
     "buttonscreate": "Create Payment",
     "MAD":"MAD"
   },
- "Common": {
+  "Common": {
     "daysOfWeek": {
       "monday": "Monday",
       "tuesday": "Tuesday",
@@ -722,7 +722,8 @@
       "sunday": "Sunday"
     },
     "subjectsLabel": "Subjects",
-    "subjects": {
+    "subjects": "Subjects",
+    "subjectsObject": {
       "arabic": "Arabic",
       "french": "French",
       "english": "English",

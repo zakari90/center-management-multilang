@@ -688,7 +688,8 @@
       "sunday": "Dimanche"
     },
     "subjectsLabel": "Matières",
-    "subjects": {
+    "subjects": "Matières",
+    "subjectsObject": {
       "arabic": "Arabe",
       "french": "Français",
       "english": "Anglais",

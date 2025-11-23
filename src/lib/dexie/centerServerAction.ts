@@ -175,9 +175,18 @@ const ServerActionCenters = {
       throw new Error("Cannot sync: device is offline");
     }
 
+    console.log("🔄 [Center Sync] Starting sync...");
     const { waiting, pending } = await centerActions.getSyncTargets();
     
+    console.log("🔄 [Center Sync] Found:", {
+      waiting: waiting.length,
+      pending: pending.length,
+      waitingIds: waiting.map(c => c.id),
+      pendingIds: pending.map(c => c.id)
+    });
+    
     if (waiting.length === 0 && pending.length === 0) {
+      console.log("ℹ️ [Center Sync] No centers to sync");
       return { message: "No centers to sync.", results: [] };
     }
 
@@ -222,8 +231,15 @@ const ServerActionCenters = {
           successfulUpdates.push(center.id);
           results.push({ id: center.id, success: true });
         } else {
-          const error = result.status === 'rejected' ? result.reason : 'Server error';
-          results.push({ id: center.id, success: false, error });
+          let errorMessage = 'Server error';
+          if (result.status === 'rejected') {
+            errorMessage = result.reason?.message || result.reason?.toString() || 'Unknown error';
+            console.error(`[Center Sync] Failed to sync center ${center.id}:`, result.reason);
+          } else if (result.status === 'fulfilled' && !result.value) {
+            errorMessage = 'Server returned no data';
+            console.error(`[Center Sync] Server returned no data for center ${center.id}`);
+          }
+          results.push({ id: center.id, success: false, error: errorMessage });
         }
       });
 
@@ -253,6 +269,12 @@ const ServerActionCenters = {
 
     const successCount = results.filter(r => r.success).length;
     const failCount = results.filter(r => !r.success).length;
+
+    console.log("✅ [Center Sync] Completed:", {
+      successCount,
+      failCount,
+      results
+    });
 
     return {
       message: `Center sync completed. ${successCount} succeeded, ${failCount} failed.`,

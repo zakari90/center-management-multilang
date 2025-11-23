@@ -679,7 +679,8 @@
       "sunday": "الأحد"
     },
     "subjectsLabel": "المواد",
-    "subjects": {
+    "subjects": "المواد",
+    "subjectsObject": {
       "arabic": "اللغة العربية",
       "french": "اللغة الفرنسية",
       "english": "اللغة الإنجليزية",
