@@ -7,6 +7,7 @@ import { centerActions } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
+import ServerActionCenters from "@/lib/dexie/centerServerAction";
 
 function Page() {
   const [centerId, setCenterId] = useState<string | null>(null);
@@ -83,9 +84,36 @@ function Page() {
   const handleCenterCreated = useCallback(() => {
     fetchCenterId();
   }, [fetchCenterId]);
-  
+
+  // Manual sync with server
+  const syncTodos = async () => {
+    try {      
+      const msg = await ServerActionCenters.Sync();
+      alert(msg);
+    } catch (err) {
+      alert("Sync failed: " + err);
+    } 
+  };
+
+  // Import todos from server
+  // const importTodos = async () => {
+  //   setLoading(true);
+  //   try {
+  //     await ServerAction.ImportFromServer();
+  //     setTodos(await ServerActionCenters.());
+  //     alert("Imported todos from server.");
+  //   } catch (err) {
+  //     alert("Import failed: " + err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   return (
     <div className="max-w-3xl mx-auto p-6">
+      <button onClick={syncTodos}>
+        Sync Centers
+      </button>
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
