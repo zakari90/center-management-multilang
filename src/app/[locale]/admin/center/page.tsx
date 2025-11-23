@@ -92,6 +92,7 @@ function Page() {
       alert(msg);
     } catch (err) {
       alert("Sync failed: " + err);
+      console.error("Sync failed::::::::::::::::::::::::::::::::::::: " , err);
     } 
   };
 
