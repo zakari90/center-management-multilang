@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/context/authContext'
-import { subjectActions, studentSubjectActions, studentActions } from '@/lib/dexie/_dexieActions'
+import { subjectActions, studentSubjectActions, studentActions } from '@/lib/dexie/dexieActions'
 
 interface TopSubject {
   id: string
