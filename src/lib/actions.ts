@@ -194,8 +194,15 @@ export async function loginAdmin(
   try {
     const t = await getTranslations('auth');
 
+    // Always generate a valid ObjectId for new users
+    // If user exists, the API will return their existing ID
+    const providedId = formData.get("id") as string;
+    const validId = providedId && /^[0-9a-fA-F]{24}$/.test(providedId) 
+      ? providedId 
+      : generateObjectId();
+    
     const data = {
-      id: formData.get("id") || generateObjectId() || "1",
+      id: validId,
       email: formData.get("email"),
       password: formData.get("password"),
     };

@@ -89,6 +89,15 @@ console.log("Id received ---------------------------------------------", id);
       );
     }
 
+    // ✅ Validate ID format is a valid MongoDB ObjectId
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+      console.error(`[LOGIN] Invalid ObjectId format provided: ${id}`);
+      return NextResponse.json(
+        { error: { message: `Invalid ID format. Must be a valid MongoDB ObjectId (24 hex characters).` } },
+        { status: 400 }
+      );
+    }
+
     // Check for user by email
     let user = await db.user.findUnique({ where: { email } });
 
@@ -100,6 +109,12 @@ console.log("Id received ---------------------------------------------", id);
         return NextResponse.json({
           error: { message: "Invalid password." }
         }, { status: 401 });
+      }
+
+      // ✅ Validate user ID format - if invalid, log warning but allow login
+      // The ID validation in center creation will catch this later
+      if (!/^[0-9a-fA-F]{24}$/.test(user.id)) {
+        console.warn(`[LOGIN] User ${email} has invalid ObjectId format: ${user.id}`);
       }
 
       // Password is valid, return user!
