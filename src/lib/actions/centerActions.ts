@@ -40,6 +40,13 @@ export async function saveCenterToDatabase(centerData: {
   try {
     const session: any = await getSessionInServerAction();
 
+    console.log("[CENTER_SAVE] Session check:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id,
+      userRole: session?.user?.role
+    });
+
     if (!session || !session.user) {
       console.error("[CENTER_SAVE] No session found");
       throw new Error("Unauthorized: No session found. Please log in again.");
@@ -52,6 +59,12 @@ export async function saveCenterToDatabase(centerData: {
 
     if (userRole !== "ADMIN") {
       throw new Error(`Unauthorized: Admin access required. Current role: ${userRole}`);
+    }
+
+    // Validate adminId is a valid ObjectId format (24 hex characters)
+    if (!session.user.id || typeof session.user.id !== 'string' || !/^[0-9a-fA-F]{24}$/.test(session.user.id)) {
+      console.error("[CENTER_SAVE] Invalid adminId format:", session.user.id);
+      throw new Error("Invalid admin ID format");
     }
 
     const { 
@@ -71,10 +84,25 @@ export async function saveCenterToDatabase(centerData: {
       throw new Error("Missing or invalid fields. ID and name are required, classrooms and workingDays must be arrays");
     }
 
+    // Validate center ID is a valid ObjectId format (24 hex characters)
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+      console.error("[CENTER_SAVE] Invalid center ID format:", id);
+      throw new Error(`Invalid center ID format: ${id}. Must be a valid MongoDB ObjectId (24 hex characters)`);
+    }
+
     // Additional validation for subjects
     if (subjects && !Array.isArray(subjects)) {
       throw new Error("Subjects must be an array");
     }
+
+    console.log("[CENTER_SAVE] Validated data:", {
+      centerId: id,
+      name,
+      adminId: session.user.id,
+      classroomsCount: classrooms.length,
+      workingDaysCount: workingDays.length,
+      subjectsCount: subjects?.length || 0
+    });
 
     // ✅ Check if center already exists
     const existingCenter = await db.center.findUnique({

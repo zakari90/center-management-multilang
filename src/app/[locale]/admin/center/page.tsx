@@ -99,6 +99,24 @@ function Page() {
       const centerId = generateObjectId();
       const now = Date.now();
       
+      // Validate ObjectId format
+      if (!/^[0-9a-fA-F]{24}$/.test(centerId)) {
+        toast.error("Invalid center ID generated: " + centerId);
+        return;
+      }
+      
+      if (!user?.id || !/^[0-9a-fA-F]{24}$/.test(user.id)) {
+        toast.error("Invalid user ID: " + user?.id);
+        return;
+      }
+      
+      console.log("🧪 Creating test center:", {
+        centerId,
+        userId: user.id,
+        userName: user.name,
+        userRole: user.role
+      });
+      
       const testCenter = {
         id: centerId,
         name: 'Test Center ' + new Date().toLocaleTimeString(),

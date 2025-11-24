@@ -62,8 +62,18 @@ const ServerActionCenters = {
         centerId: center.id,
         name: center.name,
         subjectsCount: centerSubjects.length,
-        method: "server-action"
+        method: "server-action",
+        requestBody: {
+          ...requestBody,
+          // Log first 100 chars of each field to avoid huge logs
+          subjects: requestBody.subjects?.map((s: any) => ({ id: s.id, name: s.name }))
+        }
       });
+
+      // Validate ObjectId format before sending
+      if (!/^[0-9a-fA-F]{24}$/.test(center.id)) {
+        throw new Error(`Invalid center ID format: ${center.id}. Must be a valid MongoDB ObjectId (24 hex characters)`);
+      }
 
       // ✅ Try server action first (direct Prisma access - faster)
       try {

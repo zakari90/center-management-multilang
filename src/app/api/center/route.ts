@@ -48,12 +48,37 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
+    // Validate center ID is a valid ObjectId format (24 hex characters)
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+      console.error("[CENTER_POST] Invalid center ID format:", id);
+      return NextResponse.json({ 
+        error: `Invalid center ID format: ${id}. Must be a valid MongoDB ObjectId (24 hex characters)` 
+      }, { status: 400 });
+    }
+
+    // Validate adminId is a valid ObjectId format
+    if (!session.user.id || !/^[0-9a-fA-F]{24}$/.test(session.user.id)) {
+      console.error("[CENTER_POST] Invalid adminId format:", session.user.id);
+      return NextResponse.json({ 
+        error: "Invalid admin ID format" 
+      }, { status: 400 });
+    }
+
     // Additional validation for subjects
     if (subjects && !Array.isArray(subjects)) {
       return NextResponse.json({ 
         error: "Subjects must be an array" 
       }, { status: 400 });
     }
+
+    console.log("[CENTER_POST] Validated data:", {
+      centerId: id,
+      name,
+      adminId: session.user.id,
+      classroomsCount: classrooms.length,
+      workingDaysCount: workingDays.length,
+      subjectsCount: subjects?.length || 0
+    });
 
     // ✅ Check if center already exists
     const existingCenter = await db.center.findUnique({
