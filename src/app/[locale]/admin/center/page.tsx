@@ -7,8 +7,9 @@ import { centerActions } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-// import ServerActionCenters from "@/lib/dexie/centerServerAction";
-import db from "@/lib/db";
+import ServerActionCenters from "@/lib/dexie/centerServerAction";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { toast } from "sonner";
 
 function Page() {
   const [centerId, setCenterId] = useState<string | null>(null);
@@ -86,31 +87,56 @@ function Page() {
     fetchCenterId();
   }, [fetchCenterId]);
 
-  // Manual sync with server
+  // Manual sync with server - Test button
   const syncTodos = async () => {
-    const center = {
-      id: '1',
-      name: 'Fake Center',
-      address: '123 Fake Street',
-      phone: '1234567890',
-      classrooms: ['1', '2', '3'],
-      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      subjects: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      adminId: '1',
-      status: '1' as const,
+    try {
+      if (!user) {
+        toast.error("Please log in first");
+        return;
+      }
+
+      // Create a test center in local DB first
+      const centerId = generateObjectId();
+      const now = Date.now();
+      
+      const testCenter = {
+        id: centerId,
+        name: 'Test Center ' + new Date().toLocaleTimeString(),
+        address: '123 Test Street',
+        phone: '1234567890',
+        classrooms: ['Room 1', 'Room 2', 'Room 3'],
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        adminId: user.id,
+        status: 'w' as const, // Mark as waiting for sync
+        createdAt: now,
+        updatedAt: now,
+        managers: [],
+      };
+
+      // Save to local DB
+      await centerActions.putLocal(testCenter);
+      toast("Test center saved locally");
+
+      // Try to sync to server
+      try {
+        const result = await ServerActionCenters.SaveToServer(testCenter);
+        await centerActions.markSynced(centerId);
+        toast("Test center synced to server successfully!");
+        console.log("✅ Sync result:", result);
+        
+        // Refresh the page to show the new center
+        fetchCenterId();
+      } catch (syncError: unknown) {
+        const errorMessage = syncError instanceof Error ? syncError.message : "Unknown error";
+        console.error("❌ Sync failed:", syncError);
+        toast.error("Sync failed: " + errorMessage);
+        toast.info("Center saved locally, will sync when online");
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      console.error("❌ Error creating test center:", err);
+      toast.error("Failed to create test center: " + errorMessage);
     }
-    await db.center.create({
-      data: center,
-    });
-    // try {      
-    //   const msg = await ServerActionCenters.Sync();
-    //   alert(msg);
-    // } catch (err) {
-    //   alert("Sync failed: " + err);
-    //   console.error("Sync failed::::::::::::::::::::::::::::::::::::: " , err);
-    // } 
   };
 
   // Import todos from server
