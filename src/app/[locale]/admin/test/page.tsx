@@ -5,6 +5,9 @@ import React, { useState } from 'react';
 
 function getFakeCenter() {
   return {
+    id: faker.string.uuid(),
+    createdAt: faker.date.past(),
+    updatedAt: faker.date.recent(),
     name: faker.company.name(),
     address: faker.location.streetAddress(),
     phone: faker.phone.number(),
@@ -16,7 +19,7 @@ function getFakeCenter() {
 }
 
 // ⬇️ Move this above "Page"
-const CenterFakeButton = () => {
+export function CenterFakeButton (){
   const [result, setResult] = useState("");
 
   async function handleSend() {
