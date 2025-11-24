@@ -60,9 +60,24 @@ const ServerActionCenters = {
         centerId: center.id,
         name: center.name,
         subjectsCount: centerSubjects.length,
-        requestBody
+        method: "server-action"
       });
 
+      // ✅ Try server action first (direct Prisma access - faster)
+      try {
+        const { saveCenterToDatabase } = await import("@/lib/actions/centerActions");
+        const result = await saveCenterToDatabase(requestBody);
+        
+        if (result.success) {
+          console.log("✅ Center synced successfully via server action:", result.data);
+          return result.data;
+        }
+      } catch (serverActionError: any) {
+        console.warn("⚠️ Server action failed, falling back to API:", serverActionError?.message);
+        // Fall through to API route
+      }
+
+      // ✅ Fallback to API route
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,7 +162,7 @@ const ServerActionCenters = {
       }
       
       const result = await response.json();
-      console.log("✅ Center synced successfully:", result);
+      console.log("✅ Center synced successfully via API:", result);
       return result;
     } catch (e) {
       console.error("❌ Error saving center to server:", e);
@@ -157,6 +172,21 @@ const ServerActionCenters = {
 
   async DeleteFromServer(id: string) {
     try {
+      // ✅ Try server action first (direct Prisma access - faster)
+      try {
+        const { deleteCenterFromDatabase } = await import("@/lib/actions/centerActions");
+        const result = await deleteCenterFromDatabase(id);
+        
+        if (result.success) {
+          console.log("✅ Center deleted successfully via server action");
+          return { ok: true } as Response;
+        }
+      } catch (serverActionError: any) {
+        console.warn("⚠️ Server action failed, falling back to API:", serverActionError?.message);
+        // Fall through to API route
+      }
+
+      // ✅ Fallback to API route
       const response = await fetch(`${api_url}?id=${id}`, { 
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -169,7 +199,6 @@ const ServerActionCenters = {
     }
   },
 
-  // ✅ Optimized sync with bulk operations
   async Sync() {
     if (!isOnline()) {
       throw new Error("Cannot sync: device is offline");
@@ -286,6 +315,21 @@ const ServerActionCenters = {
 
   async ReadFromServer() {
     try {
+      // ✅ Try server action first (direct Prisma access - faster)
+      try {
+        const { getCentersFromDatabase } = await import("@/lib/actions/centerActions");
+        const result = await getCentersFromDatabase();
+        
+        if (result.success) {
+          console.log("✅ Centers fetched successfully via server action");
+          return result.data;
+        }
+      } catch (serverActionError: any) {
+        console.warn("⚠️ Server action failed, falling back to API:", serverActionError?.message);
+        // Fall through to API route
+      }
+
+      // ✅ Fallback to API route
       const res = await fetch(api_url, {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -298,7 +342,6 @@ const ServerActionCenters = {
     }
   },
 
-  // ✅ Optimized import with bulk operations and transaction
   async ImportFromServer() {
     if (!isOnline()) {
       throw new Error("Cannot import: device is offline");

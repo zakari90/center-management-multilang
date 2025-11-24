@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { 
-      id, // ✅ Accept client-provided ID for offline-first sync
+      id,
       name, 
       address, 
       phone, 
@@ -55,52 +55,132 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // ✅ Use upsert for idempotency - prevents duplicates on retry
-    const center = await db.center.upsert({
-      where: { id }, // Check if center with this ID already exists
-      update: {
-        // If exists, update it (makes request idempotent)
-        name,
-        address: address || null,
-        phone: phone || null,
-        classrooms,
-        workingDays,
-        updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
-      },
-      create: {
-        // If doesn't exist, create it
-        id, // Use client-provided ID
-        name,
-        address: address || null,
-        phone: phone || null,
-        classrooms,
-        workingDays,
-        adminId: session.user.id,
-        createdAt: createdAt ? new Date(createdAt) : new Date(),
-        updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
-        subjects: {
-          create: subjects?.map((subject: any) => ({
-            id: subject.id, // ✅ Accept subject IDs from client
-            name: subject.name,
-            grade: subject.grade,
-            price: subject.price,
-            duration: subject.duration || null,
-            createdAt: subject.createdAt ? new Date(subject.createdAt) : new Date(),
-            updatedAt: subject.updatedAt ? new Date(subject.updatedAt) : new Date(),
-          })) || []
-        }
-      },
-      include: {
-        subjects: true
-      }
+    // ✅ Check if center already exists
+    const existingCenter = await db.center.findUnique({
+      where: { id },
+      include: { subjects: true }
     });
 
-    return NextResponse.json(center, { status: 201 });
-  } catch (error) {
-    console.error("[CENTER_POST]", error);
+    let center: any;
+    
+    if (existingCenter) {
+      // ✅ Center exists - update it (idempotent)
+      center = await db.center.update({
+        where: { id },
+        data: {
+          name,
+          address: address || null,
+          phone: phone || null,
+          classrooms,
+          workingDays,
+          updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
+        },
+        include: {
+          subjects: true
+        }
+      });
+    } else {
+      // ✅ Center doesn't exist - create it
+      center = await db.center.create({
+        data: {
+          id, // Use client-provided ID
+          name,
+          address: address || null,
+          phone: phone || null,
+          classrooms,
+          workingDays,
+          adminId: session.user.id,
+          createdAt: createdAt ? new Date(createdAt) : new Date(),
+          updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
+        },
+        include: {
+          subjects: true
+        }
+      });
+
+      // ✅ Create subjects separately if provided
+      if (subjects && Array.isArray(subjects) && subjects.length > 0) {
+        try {
+          // Use Promise.allSettled to handle individual subject creation failures
+          const subjectResults = await Promise.allSettled(
+            subjects.map(async (subject: any) => {
+              // Check if subject already exists
+              const existingSubject = await db.subject.findUnique({
+                where: { id: subject.id }
+              });
+
+              if (existingSubject) {
+                // Update existing subject
+                return await db.subject.update({
+                  where: { id: subject.id },
+                  data: {
+                    name: subject.name,
+                    grade: subject.grade,
+                    price: subject.price,
+                    duration: subject.duration || null,
+                    updatedAt: subject.updatedAt ? new Date(subject.updatedAt) : new Date(),
+                  }
+                });
+              } else {
+                // Create new subject
+                return await db.subject.create({
+                  data: {
+                    id: subject.id,
+                    name: subject.name,
+                    grade: subject.grade,
+                    price: subject.price,
+                    duration: subject.duration || null,
+                    centerId: center!.id,
+                    createdAt: subject.createdAt ? new Date(subject.createdAt) : new Date(),
+                    updatedAt: subject.updatedAt ? new Date(subject.updatedAt) : new Date(),
+                  }
+                });
+              }
+            })
+          );
+
+          // Log any failed subject creations
+          const failedSubjects = subjectResults
+            .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+            .map((result, index) => ({ index, reason: result.reason }));
+          
+          if (failedSubjects.length > 0) {
+            console.warn("[CENTER_POST] Some subjects failed to create:", failedSubjects);
+          }
+
+          // Reload center with subjects
+          center = await db.center.findUnique({
+            where: { id },
+            include: { subjects: true }
+          });
+        } catch (subjectError) {
+          console.error("[CENTER_POST] Error creating subjects:", subjectError);
+          // Don't fail the entire request if subjects fail - center is created
+        }
+      }
+    }
+
+    return NextResponse.json(center, { status: existingCenter ? 200 : 201 });
+  } catch (error: any) {
+    console.error("[CENTER_POST] Error details:", {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+      stack: error?.stack
+    });
+    
+    // Return more detailed error in development
+    const errorMessage = process.env.NODE_ENV === 'development' 
+      ? error?.message || 'Unknown error'
+      : 'Failed to create center';
+    
     return NextResponse.json({ 
-      error: "Failed to create center",
-      details: process.env.NODE_ENV === 'development' ? error : undefined
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? {
+        message: error?.message,
+        code: error?.code,
+        meta: error?.meta
+      } : undefined
     }, { status: 500 });
   }
 }
