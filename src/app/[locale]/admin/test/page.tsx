@@ -19,32 +19,24 @@ function getFakeCenter() {
 }
 
 // ⬇️ Move this above "Page"
-export function CenterFakeButton (){
-  const [result, setResult] = useState("");
 
-  async function handleSend() {
-    const data = getFakeCenter();
-    try {
-      const res = await db.center.create({ data });
-      setResult("Success: " + JSON.stringify(res));
-    } catch (err) {
-      setResult("Error: " + (err instanceof Error ? err.message : "Unknown"));
+function Page() {
+    const [result, setResult] = useState("");
+
+    async function handleSend() {
+      const data = getFakeCenter();
+      try {
+        const res = await db.center.create({ data });
+        setResult("Success: " + JSON.stringify(res));
+      } catch (err) {
+        setResult("Error: " + (err instanceof Error ? err.message : "Unknown"));
+      }
     }
-  }
-
   return (
     <div>
       test
       <button onClick={handleSend}>Send Direct Fake Center</button>
       {result && <pre>{result}</pre>}
-    </div>
-  );
-};
-
-function Page() {
-  return (
-    <div>
-      <CenterFakeButton />
     </div>
   );
 }
