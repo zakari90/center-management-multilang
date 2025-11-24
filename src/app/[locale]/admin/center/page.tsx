@@ -1,16 +1,15 @@
 "use client";
 
 import CenterPresentation from "@/components/centerPresentation";
-import { NewCenterForm } from "@/components/newCenterForm";
 import { CreateFakeCenterButton } from "@/components/CreateFakeCenterButton";
-import { centerActions } from "@/lib/dexie/dexieActions";
+import { NewCenterForm } from "@/components/newCenterForm";
 import { useAuth } from "@/context/authContext";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
 import ServerActionCenters from "@/lib/dexie/centerServerAction";
+import { centerActions } from "@/lib/dexie/dexieActions";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { Loader2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import db from "@/lib/db";
 
 function Page() {
   const [centerId, setCenterId] = useState<string | null>(null);
@@ -92,7 +91,7 @@ function Page() {
   const syncTodos = async () => {
     try {
       if (!user) {
-        toast("Please log in first");
+        toast.error("Please log in first");
         return;
       }
 
@@ -130,13 +129,13 @@ function Page() {
       } catch (syncError: unknown) {
         const errorMessage = syncError instanceof Error ? syncError.message : "Unknown error";
         console.error("❌ Sync failed:", syncError);
-        toast("Sync failed: " + errorMessage);
-        toast("Center saved locally, will sync when online");
+        toast.error("Sync failed: " + errorMessage);
+        toast.info("Center saved locally, will sync when online");
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       console.error("❌ Error creating test center:", err);
-      toast("Failed to create test center: " + errorMessage);
+      toast.error("Failed to create test center: " + errorMessage);
     }
   };
 
@@ -178,40 +177,3 @@ function Page() {
 }
 
 export default Page;
-
-
-
-
-
-function getFakeCenter() {
-  return {
-    name: faker.company.name(),
-    address: faker.location.streetAddress(),
-    phone: faker.phone.number(),
-    classrooms: Array.from({ length: 5 }, () => faker.string.alpha(5)),
-    workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    managers: [faker.string.uuid()],
-    adminId: faker.string.uuid(), // Replace with real ObjectId if possible
-  };
-}
-
- const CenterFakeButton = () => {
-  const [result, setResult] = useState("");
-
-  async function handleSend() {
-    const data = getFakeCenter();
-    try {
-      const res = await db.center.create({ data });
-      setResult("Success: " + JSON.stringify(res));
-    } catch (err) {
-      setResult("Error: " + (err instanceof Error ? err.message : "Unknown"));
-    }
-  }
-
-  return (
-    <div>
-      <button onClick={handleSend}>Send Direct Fake Center</button>
-      {result && <pre>{result}</pre>}
-    </div>
-  );
-};
