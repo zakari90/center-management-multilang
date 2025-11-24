@@ -73,9 +73,19 @@ const ServerActionCenters = {
         if (result.success) {
           console.log("✅ Center synced successfully via server action:", result.data);
           return result.data;
+        } else {
+          throw new Error("Server action returned unsuccessful result");
         }
       } catch (serverActionError: any) {
-        console.warn("⚠️ Server action failed, falling back to API:", serverActionError?.message);
+        const errorMsg = serverActionError?.message || serverActionError?.toString() || "Unknown server action error";
+        console.warn("⚠️ Server action failed, falling back to API:", errorMsg);
+        console.warn("⚠️ Server action error details:", {
+          message: errorMsg,
+          name: serverActionError?.name,
+          code: serverActionError?.code,
+          // Only log stack in development
+          ...(process.env.NODE_ENV === 'development' && { stack: serverActionError?.stack })
+        });
         // Fall through to API route
       }
 

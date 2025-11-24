@@ -162,26 +162,44 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(center, { status: existingCenter ? 200 : 201 });
   } catch (error: any) {
+    // Log full error details for debugging
     console.error("[CENTER_POST] Error details:", {
       message: error?.message,
       code: error?.code,
       meta: error?.meta,
-      stack: error?.stack
+      name: error?.name,
+      // Include stack only in development
+      ...(process.env.NODE_ENV === 'development' && { stack: error?.stack })
     });
     
-    // Return more detailed error in development
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? error?.message || 'Unknown error'
-      : 'Failed to create center';
+    // Check for common MongoDB/Prisma errors
+    let errorMessage = 'Failed to create center';
+    let statusCode = 500;
+    
+    if (error?.code === 'P2002') {
+      errorMessage = 'Center with this ID already exists';
+      statusCode = 409;
+    } else if (error?.code === 'P2025') {
+      errorMessage = 'Center not found';
+      statusCode = 404;
+    } else if (error?.message?.includes('ObjectId')) {
+      errorMessage = 'Invalid center ID format';
+      statusCode = 400;
+    } else if (error?.message) {
+      errorMessage = process.env.NODE_ENV === 'development' 
+        ? error.message 
+        : 'Failed to create center';
+    }
     
     return NextResponse.json({ 
       error: errorMessage,
       details: process.env.NODE_ENV === 'development' ? {
         message: error?.message,
         code: error?.code,
-        meta: error?.meta
+        meta: error?.meta,
+        name: error?.name
       } : undefined
-    }, { status: 500 });
+    }, { status: statusCode });
   }
 }
 

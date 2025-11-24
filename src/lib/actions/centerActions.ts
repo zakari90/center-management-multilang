@@ -2,7 +2,21 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
-import { getSession } from "@/lib/authentication";
+import { cookies } from "next/headers";
+import { decrypt } from "@/lib/authentication";
+
+// Helper to get session in server actions
+async function getSessionInServerAction() {
+  try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session")?.value;
+    if (!sessionCookie) return null;
+    return await decrypt(sessionCookie);
+  } catch (error) {
+    console.error("[getSessionInServerAction] Error:", error);
+    return null;
+  }
+}
 
 export async function saveCenterToDatabase(centerData: {
   id: string;
@@ -24,9 +38,10 @@ export async function saveCenterToDatabase(centerData: {
   updatedAt: string;
 }) {
   try {
-    const session: any = await getSession();
+    const session: any = await getSessionInServerAction();
 
     if (!session || !session.user) {
+      console.error("[CENTER_SAVE] No session found");
       throw new Error("Unauthorized: No session found. Please log in again.");
     }
 
@@ -168,20 +183,30 @@ export async function saveCenterToDatabase(centerData: {
 
     return { success: true, data: center };
   } catch (error: any) {
-    console.error("[CENTER_SAVE] Error details:", {
-      message: error?.message,
+    const errorDetails = {
+      message: error?.message || "Unknown error",
       code: error?.code,
       meta: error?.meta,
-      stack: error?.stack
-    });
+      name: error?.name,
+      // Only include stack in development
+      ...(process.env.NODE_ENV === 'development' && { stack: error?.stack })
+    };
     
-    throw error; // Re-throw to let caller handle it
+    console.error("[CENTER_SAVE] Error details:", errorDetails);
+    
+    // Create a more user-friendly error message
+    const userMessage = error?.message || "Failed to save center to database";
+    const serverError = new Error(userMessage);
+    (serverError as any).code = error?.code;
+    (serverError as any).meta = error?.meta;
+    
+    throw serverError;
   }
 }
 
 export async function deleteCenterFromDatabase(centerId: string) {
   try {
-    const session: any = await getSession();
+    const session: any = await getSessionInServerAction();
 
     if (!session || session.user.role !== "ADMIN") {
       throw new Error("Unauthorized");
@@ -215,7 +240,7 @@ export async function deleteCenterFromDatabase(centerId: string) {
 
 export async function getCentersFromDatabase() {
   try {
-    const session: any = await getSession();
+    const session: any = await getSessionInServerAction();
 
     if (!session || !["ADMIN", "MANAGER"].includes(session.user.role)) {
       throw new Error("Unauthorized");
