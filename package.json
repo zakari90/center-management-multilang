@@ -35,6 +35,7 @@
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
+    "bson": "^7.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -70,6 +71,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.13",
+    "@types/bson": "^4.2.4",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.19.13",
     "@types/qrcode": "^1.5.6",
