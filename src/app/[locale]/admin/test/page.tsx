@@ -19,7 +19,9 @@ function getFakeCenter() {
 
 function Page() {
   return (
-    <div><CenterFakeButton/></div>
+    <div>
+        <CenterFakeButton/>
+    </div>
   )
 }
 
@@ -42,6 +44,7 @@ const CenterFakeButton= () => {
 
   return (
     <div>
+        test
       <button onClick={handleSend}>Send Direct Fake Center</button>
       {result && <pre>{result}</pre>}
     </div>
