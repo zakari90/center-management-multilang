@@ -27,6 +27,8 @@ function transformServerCenter(serverCenter: any): Center {
 }
 
 const ServerActionCenters = {
+  // create a fake center
+
   async SaveToServer(center: Center) {
     try {
       // ✅ Fetch all subjects for this center (exclude deleted)

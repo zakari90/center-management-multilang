@@ -7,7 +7,8 @@ import { centerActions } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
-import ServerActionCenters from "@/lib/dexie/centerServerAction";
+// import ServerActionCenters from "@/lib/dexie/centerServerAction";
+import db from "@/lib/db";
 
 function Page() {
   const [centerId, setCenterId] = useState<string | null>(null);
@@ -87,13 +88,29 @@ function Page() {
 
   // Manual sync with server
   const syncTodos = async () => {
-    try {      
-      const msg = await ServerActionCenters.Sync();
-      alert(msg);
-    } catch (err) {
-      alert("Sync failed: " + err);
-      console.error("Sync failed::::::::::::::::::::::::::::::::::::: " , err);
-    } 
+    const center = {
+      id: '1',
+      name: 'Fake Center',
+      address: '123 Fake Street',
+      phone: '1234567890',
+      classrooms: ['1', '2', '3'],
+      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      subjects: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      adminId: '1',
+      status: '1' as const,
+    }
+    await db.center.create({
+      data: center,
+    });
+    // try {      
+    //   const msg = await ServerActionCenters.Sync();
+    //   alert(msg);
+    // } catch (err) {
+    //   alert("Sync failed: " + err);
+    //   console.error("Sync failed::::::::::::::::::::::::::::::::::::: " , err);
+    // } 
   };
 
   // Import todos from server

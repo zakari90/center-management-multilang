@@ -2,7 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
-import { getSession } from "@/lib/authentication";
+import { getSession } from "../actionsClient";
 
 export async function saveCenterToDatabase(centerData: {
   id: string;
