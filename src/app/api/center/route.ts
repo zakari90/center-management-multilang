@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
 
     const body = await req.json();
-    const { name, address, phone, classrooms, workingDays, subjects, adminId } = body;
+    const { id, name, address, phone, classrooms, workingDays, subjects, adminId } = body;
 
     console.log("Data received:", {
       name, address, phone, classrooms, workingDays, subjects, adminId
@@ -28,12 +28,13 @@ export async function POST(req: NextRequest) {
 
     const center = await db.center.create({
       data: {
+        id,
         name,
         address: address || null,
         phone: phone || null,
         classrooms,
         workingDays,
-        adminId, // ✅ Use session.user.id instead of adminId from body
+        adminId, 
         subjects: {
           create: subjects?.map((subject: Subject) => ({
             name: subject.name,
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
     console.error("[CENTER_GET]", error);
     return NextResponse.json({ 
       error: "Failed to get center data",
-      details: process.env.NODE_ENV === 'development' ? error : undefined
+      details:  error
     }, { status: 500 });
   }
 }
