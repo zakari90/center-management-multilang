@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { getSession } from "@/lib/authentication";
+import { getSession } from "@/lib/authentication";
 import db from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    // const session :any = await getSession();
+    const session :any = await getSession();
 
-    // if (!session || session.user.role !== "ADMIN") {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   
     const body = await req.json();
     const { email, password, username, id } = body;
@@ -55,12 +55,12 @@ export async function POST(req: NextRequest) {
     });
 
 
-  //  await db.center.update({
-  //     where: { id: session.user.id },
-  //     data: {
-  //       managers: { push: user.id }
-  //     }
-  //   })    
+   await db.center.update({
+      where: { id: session.user.id },
+      data: {
+        managers: { push: user.id }
+      }
+    })    
     const response = NextResponse.json(
       {
         message: "User registered successfully.",

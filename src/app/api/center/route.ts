@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
-import { Subject } from "@prisma/client";
+// import { Subject } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
         workingDays,
         adminId, 
         subjects: {
-          create: subjects?.map((subject: Subject) => ({
+          create: subjects?.map((subject: any) => ({
             name: subject.name,
             grade: subject.grade,
             price: subject.price,
