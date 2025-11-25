@@ -2,64 +2,107 @@
 import db from "@/lib/db";
 // import { Subject } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+// app/api/centers/route.ts
 
 export async function POST(req: NextRequest) {
   try {
+    const body = await req.json()
 
-    const body = await req.json();
-    const { id, name, address, phone, classrooms, workingDays, subjects, adminId } = body;
+    const {
+      name,
+      address,
+      phone,
+      classrooms = [],
+      workingDays = [],
+      managers = [],
+      adminId, // required: this must be a valid User.id (ObjectId as string)
+    } = body
 
-    console.log("Data received:", {
-      name, address, phone, classrooms, workingDays, subjects, adminId
-    });
-
-    // Validation
-    if (!name || !Array.isArray(classrooms) || !Array.isArray(workingDays)) {
-      return NextResponse.json({ 
-        error: "Missing or invalid fields. Name is required, classrooms and workingDays must be arrays" 
-      }, { status: 400 });
-    }
-
-    // Additional validation for subjects
-    if (subjects && !Array.isArray(subjects)) {
-      return NextResponse.json({ 
-        error: "Subjects must be an array" 
-      }, { status: 400 });
+    if (!name || !adminId) {
+      return NextResponse.json(
+        { error: 'name and adminId are required' },
+        { status: 400 },
+      )
     }
 
     const center = await db.center.create({
       data: {
-        id,
         name,
-        address: address || null,
-        phone: phone || null,
+        address,
+        phone,
         classrooms,
         workingDays,
-        adminId, 
-        subjects: {
-          create: subjects?.map((subject: any) => ({
-            name: subject.name,
-            grade: subject.grade,
-            price: subject.price,
-            duration: subject.duration || null,
-          })) || []
-        }
+        managers,
+        adminId,
       },
-      include: {
-        subjects: true
-      }
-    });    
+    })
 
-    return NextResponse.json(center, { status: 201 });
+    return NextResponse.json(center, { status: 201 })
   } catch (error) {
-    console.error("[CENTER_POST]", error);
-    console.log("-------------------------------------------", error);
-    return NextResponse.json({ 
-      error: error,
-      details: process.env.NODE_ENV === 'development' ? error : undefined
-    }, { status: 500 });
+    console.error('[CENTERS_POST]', error)
+    return NextResponse.json(
+      { error: 'Failed to create center' },
+      { status: 500 },
+    )
   }
 }
+// export async function POST(req: NextRequest) {
+//   try {
+
+//     const body = await req.json();
+//     const { id, name, address, phone, classrooms, workingDays, subjects, adminId } = body;
+
+//     console.log("Data received:", {
+//       name, address, phone, classrooms, workingDays, subjects, adminId
+//     });
+
+//     // Validation
+//     if (!name || !Array.isArray(classrooms) || !Array.isArray(workingDays)) {
+//       return NextResponse.json({ 
+//         error: "Missing or invalid fields. Name is required, classrooms and workingDays must be arrays" 
+//       }, { status: 400 });
+//     }
+
+//     // Additional validation for subjects
+//     if (subjects && !Array.isArray(subjects)) {
+//       return NextResponse.json({ 
+//         error: "Subjects must be an array" 
+//       }, { status: 400 });
+//     }
+
+//     const center = await db.center.create({
+//       data: {
+//         id,
+//         name,
+//         address: address || null,
+//         phone: phone || null,
+//         classrooms,
+//         workingDays,
+//         adminId, 
+//         subjects: {
+//           create: subjects?.map((subject: any) => ({
+//             name: subject.name,
+//             grade: subject.grade,
+//             price: subject.price,
+//             duration: subject.duration || null,
+//           })) || []
+//         }
+//       },
+//       include: {
+//         subjects: true
+//       }
+//     });    
+
+//     return NextResponse.json(center, { status: 201 });
+//   } catch (error) {
+//     console.error("[CENTER_POST]", error);
+//     console.log("-------------------------------------------", error);
+//     return NextResponse.json({ 
+//       error: error,
+//       details: process.env.NODE_ENV === 'development' ? error : undefined
+//     }, { status: 500 });
+//   }
+// }
 
 export async function GET(req: NextRequest) {
   try {
