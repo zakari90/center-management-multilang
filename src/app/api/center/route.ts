@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(center, { status: 201 });
   } catch (error) {
     console.error("[CENTER_POST]", error);
+    console.log("-------------------------------------------", error);
     return NextResponse.json({ 
       error: "Failed to create center",
       details: process.env.NODE_ENV === 'development' ? error : undefined
