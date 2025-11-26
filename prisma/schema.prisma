@@ -18,8 +18,19 @@ enum ReceiptType {
 
 model Center {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
+  name          String
+  address       String?
+  phone         String?
+  classrooms    String[]
+  workingDays   String[]
+  managers      String[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
+  admin         User       @relation("AdminCenters", fields: [adminId], references: [id])
+  adminId       String     @db.ObjectId
+  schedules     Schedule[]
+  subjects      Subject[]
 }
 
 model User {
