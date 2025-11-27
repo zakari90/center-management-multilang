@@ -53,10 +53,24 @@ export async function POST(req: NextRequest) {
 
     for (const sub of subs) {
       try {
+        // Type guard to ensure keys are in the correct format
+        if (!sub.keys || typeof sub.keys !== 'object' || sub.keys === null) {
+          throw new Error('Invalid subscription keys format');
+        }
+
+        const keys = sub.keys as { p256dh?: string; auth?: string };
+        
+        if (!keys.p256dh || !keys.auth) {
+          throw new Error('Missing required keys (p256dh or auth)');
+        }
+
         await webpush.sendNotification(
           {
             endpoint: sub.endpoint,
-            keys: sub.keys,
+            keys: {
+              p256dh: keys.p256dh,
+              auth: keys.auth,
+            },
           },
           payload
         );

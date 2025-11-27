@@ -10,6 +10,8 @@ declare global {
 
 // Singleton: reuse global prisma in dev, create new in prod
 // This ensures we don't create multiple instances during hot reloading
+// For Prisma 7.x with MongoDB using binary engine, the connection string is automatically
+// read from DATABASE_URL environment variable when engineType = "binary" is set in schema
 const db: PrismaClient =
   global.prisma ??
   new PrismaClient({

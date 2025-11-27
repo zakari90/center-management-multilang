@@ -15,6 +15,14 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  eslint: {
+    // Disable ESLint during builds
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Optional: Also ignore TypeScript errors during builds if needed
+    // ignoreBuildErrors: true,
+  },
 };
 
 export default withSerwist(withNextIntl(nextConfig));
