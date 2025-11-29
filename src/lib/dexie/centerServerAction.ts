@@ -54,6 +54,7 @@ const ServerActionCenters = {
         classrooms: center.classrooms || [],
         workingDays: center.workingDays || [],
         subjects: centerSubjects,
+        adminId: center.adminId, // ✅ Include adminId for API route compatibility
         createdAt: new Date(center.createdAt).toISOString(),
         updatedAt: new Date(center.updatedAt).toISOString(),
       };
@@ -100,11 +101,22 @@ const ServerActionCenters = {
       }
 
       // ✅ Fallback to API route
+      // Ensure adminId is included for API route compatibility
+      const apiRequestBody = {
+        ...requestBody,
+        adminId: center.adminId, // ✅ Explicitly include adminId for API route
+      };
+
+      // Validate adminId exists
+      if (!apiRequestBody.adminId) {
+        throw new Error("Center adminId is required but missing. Cannot sync center without adminId.");
+      }
+
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(apiRequestBody),
       });
 
       if (!response.ok && response.status === 409) {
