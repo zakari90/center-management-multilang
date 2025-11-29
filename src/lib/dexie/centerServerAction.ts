@@ -39,6 +39,7 @@ const ServerActionCenters = {
           id: s.id, // ✅ Include subject ID
           centerId: s.centerId,
           name: s.name,
+          adminId: s.centerId,
           grade: s.grade,
           price: s.price,
           duration: s.duration,
