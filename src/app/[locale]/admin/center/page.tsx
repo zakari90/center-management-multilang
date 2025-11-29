@@ -124,7 +124,7 @@ function Page() {
         phone: '1234567890',
         classrooms: ['Room 1', 'Room 2', 'Room 3'],
         workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        adminId: user.id,
+        adminId: centerId,
         status: 'w' as const, // Mark as waiting for sync
         createdAt: now,
         updatedAt: now,
