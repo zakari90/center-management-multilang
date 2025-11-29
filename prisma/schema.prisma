@@ -30,7 +30,7 @@ model Center {
   updatedAt     DateTime   @updatedAt
 
   admin         User       @relation("AdminCenters", fields: [adminId], references: [id])
-  adminId       String     @db.ObjectId
+  adminId       String     
   schedules     Schedule[]
   subjects      Subject[]
 }
