@@ -13,7 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { centerActions, subjectActions } from "@/lib/dexie/dexieActions"
 import { ServerActionCenters, ServerActionSubjects } from "@/lib/dexie/serverActions"
-import { Center, Subject } from "@/lib/dexie/dbSchema"
+import { Center, Subject, localDb } from "@/lib/dexie/dbSchema"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useLiveQuery } from "dexie-react-hooks"
 import { BookOpen, Building2, CalendarDays, Loader2, Pencil, Plus } from "lucide-react"
@@ -38,10 +38,30 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
   // ✅ Use useLiveQuery for real-time updates from IndexedDB
   const center = useLiveQuery(() => centerActions.getLocal(centerId), [centerId])
   
-  // ✅ Optimized: Filter by centerId and status in the query
+  // ✅ Optimized: Use Dexie indexed query directly to prevent duplicates
   const subjects = useLiveQuery(async () => {
-    const allSubjects = await subjectActions.getAll()
-    return allSubjects.filter(s => s.centerId === centerId && s.status !== '0')
+    if (!centerId) return []
+    
+    // Query subjects by centerId and exclude deleted ones (status !== '0')
+    // Use indexed query for efficient filtering
+    const allSubjects = await localDb.subjects
+      .where('centerId')
+      .equals(centerId)
+      .filter(s => s.status !== '0')
+      .toArray()
+    
+    // Deduplicate by ID (in case of any duplicates in DB)
+    const uniqueSubjects = Array.from(
+      new Map(allSubjects.map(s => [s.id, s])).values()
+    )
+    
+    // Debug: Log if duplicates were found
+    if (allSubjects.length !== uniqueSubjects.length) {
+      console.warn(`[CenterPresentation] Found ${allSubjects.length - uniqueSubjects.length} duplicate subjects for center ${centerId}`)
+    }
+    
+    // Sort by updatedAt descending
+    return uniqueSubjects.sort((a, b) => b.updatedAt - a.updatedAt)
   }, [centerId])
 
   const [tempClassrooms, setTempClassrooms] = useState<string[]>([])
