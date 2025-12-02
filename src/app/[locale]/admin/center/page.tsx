@@ -1,15 +1,11 @@
 "use client";
 
 import CenterPresentation from "@/components/centerPresentation";
-import { CreateFakeCenterButton } from "@/components/CreateFakeCenterButton";
 import { NewCenterForm } from "@/components/newCenterForm";
 import { useAuth } from "@/context/authContext";
-import ServerActionCenters from "@/lib/dexie/centerServerAction";
 import { centerActions } from "@/lib/dexie/dexieActions";
-import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 function Page() {
   const [centerId, setCenterId] = useState<string | null>(null);
@@ -29,7 +25,7 @@ function Page() {
       const centers = await centerActions.getAll();
       
       // Debug logging (only in development)
-      if (process.env.NODE_ENV === 'development') {
+
         console.log("🔍 Center Debug:", {
           userId: user.id,
           userRole: user.role,
@@ -42,7 +38,7 @@ function Page() {
             matches: c.adminId === user.id
           }))
         });
-      }
+    
 
       // Filter: For admin users, show centers where adminId matches OR if no adminId, show first active center
       // This handles cases where adminId might not be set correctly during sync
@@ -87,95 +83,8 @@ function Page() {
     fetchCenterId();
   }, [fetchCenterId]);
 
-  // Manual sync with server - Test button
-  const syncTodos = async () => {
-    try {
-      if (!user) {
-        toast.error("Please log in first");
-        return;
-      }
-
-      // Create a test center in local DB first
-      const centerId = generateObjectId();
-      const now = Date.now();
-      
-      // Validate ObjectId format
-      if (!/^[0-9a-fA-F]{24}$/.test(centerId)) {
-        toast.error("Invalid center ID generated: " + centerId);
-        return;
-      }
-      
-      if (!user?.id || !/^[0-9a-fA-F]{24}$/.test(user.id)) {
-        toast.error("Invalid user ID: " + user?.id);
-        return;
-      }
-      
-      console.log("🧪 Creating test center:", {
-        centerId,
-        userId: user.id,
-        userName: user.name,
-        userRole: user.role
-      });
-      
-      const testCenter = {
-        id: centerId,
-        name: 'Test Center ' + new Date().toLocaleTimeString(),
-        address: '123 Test Street',
-        phone: '1234567890',
-        classrooms: ['Room 1', 'Room 2', 'Room 3'],
-        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        adminId: centerId,
-        status: 'w' as const, // Mark as waiting for sync
-        createdAt: now,
-        updatedAt: now,
-        managers: [],
-      };
-
-      // Save to local DB
-      await centerActions.putLocal(testCenter);
-      toast("Test center saved locally");
-
-      // Try to sync to server
-      try {
-        const result = await ServerActionCenters.SaveToServer(testCenter);
-        await centerActions.markSynced(centerId);
-        toast("Test center synced to server successfully!");
-        console.log("✅ Sync result:", result);
-        
-        // Refresh the page to show the new center
-        fetchCenterId();
-      } catch (syncError: unknown) {
-        const errorMessage = syncError instanceof Error ? syncError.message : "Unknown error";
-        console.error("❌ Sync failed:", syncError);
-        toast.error("Sync failed: " + errorMessage);
-        toast.info("Center saved locally, will sync when online");
-      }
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      console.error("❌ Error creating test center:", err);
-      toast.error("Failed to create test center: " + errorMessage);
-    }
-  };
-
-  // Import todos from server
-  // const importTodos = async () => {
-  //   setLoading(true);
-  //   try {
-  //     await ServerAction.ImportFromServer();
-  //     setTodos(await ServerActionCenters.());
-  //     alert("Imported todos from server.");
-  //   } catch (err) {
-  //     alert("Import failed: " + err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <button onClick={syncTodos}>
-        Sync Centers
-      </button>
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
@@ -184,9 +93,6 @@ function Page() {
         <CenterPresentation centerId={centerId} />
       ) : (
         <div className="space-y-4">
-          <div className="flex justify-end">
-            <CreateFakeCenterButton onCenterCreated={handleCenterCreated} />
-          </div>
           <NewCenterForm onCenterCreated={handleCenterCreated} />
         </div>
       )}

@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
 
     const {
+      id, // Optional: if provided, check if center exists for update
       name,
       address,
       phone,
@@ -25,8 +26,37 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // ✅ Check if center exists (for update scenario)
+    if (id) {
+      const existingCenter = await db.center.findUnique({
+        where: { id },
+        include: { subjects: true }
+      });
+
+      if (existingCenter) {
+        // ✅ Center exists - update it
+        const updatedCenter = await db.center.update({
+          where: { id },
+          data: {
+            name,
+            address: address || null,
+            phone: phone || null,
+            classrooms,
+            workingDays,
+            managers,
+            updatedAt: new Date(),
+          },
+          include: { subjects: true }
+        });
+
+        return NextResponse.json(updatedCenter, { status: 200 });
+      }
+    }
+
+    // ✅ Center doesn't exist - create it
     const center = await db.center.create({
       data: {
+        id: id || undefined, // Use provided ID or let MongoDB generate
         name,
         address,
         phone,
@@ -38,10 +68,19 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(center, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[CENTERS_POST]', error)
+    
+    // Handle duplicate key error (center already exists)
+    if (error?.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Center with this ID already exists' },
+        { status: 409 },
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to create center' },
+      { error: 'Failed to create center', details: process.env.NODE_ENV === 'development' ? error.message : undefined },
       { status: 500 },
     )
   }
