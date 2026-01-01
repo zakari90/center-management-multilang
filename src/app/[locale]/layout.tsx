@@ -49,6 +49,8 @@ export default async function RootLayout({
 
   setRequestLocale(locale);
 
+  const messages = (await import(`../../dictionary/${locale}.json`)).default;
+
   const isArabic = locale === "ar";
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
@@ -117,7 +119,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextIntlClientProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
             <AuthProvider>
                   <LoadWS/>
               {/* <ServiceWorkerRegister /> */}
