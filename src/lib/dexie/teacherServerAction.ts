@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // teacherServerAction.ts
 
-import { teacherActions } from "./dexieActions";
+import { teacherActions, teacherSubjectActions } from "./dexieActions";
 import { Teacher } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
@@ -32,18 +32,28 @@ const ServerActionTeachers = {
   // ✅ Save teacher to server (handles both create and update)
   async SaveToServer(teacher: Teacher) {
     try {
+      const teacherSubjects = await teacherSubjectActions.getAll();
+      const subjects = teacherSubjects
+        .filter(ts => ts.teacherId === teacher.id && ts.status !== '0')
+        .map(ts => ({
+          subjectId: ts.subjectId,
+          percentage: ts.percentage ?? null,
+          hourlyRate: ts.hourlyRate ?? null,
+        }));
+
       // Try POST first (create)
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          id: teacher.id,
           name: teacher.name,
           email: teacher.email,
           phone: teacher.phone,
           address: teacher.address,
           weeklySchedule: teacher.weeklySchedule ? (Array.isArray(teacher.weeklySchedule) ? teacher.weeklySchedule : Object.values(teacher.weeklySchedule)) : [],
-          subjects: [],
+          subjects,
         }),
       });
 
@@ -59,7 +69,7 @@ const ServerActionTeachers = {
             phone: teacher.phone,
             address: teacher.address,
             weeklySchedule: teacher.weeklySchedule ? (Array.isArray(teacher.weeklySchedule) ? teacher.weeklySchedule : Object.values(teacher.weeklySchedule)) : [],
-            subjects: [],
+            subjects,
           }),
         });
       }

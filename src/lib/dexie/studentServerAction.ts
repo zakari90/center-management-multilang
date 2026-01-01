@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // studentServerAction.ts
 
-import { studentActions } from "./dexieActions";
+import { studentActions, studentSubjectActions } from "./dexieActions";
 import { Student } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
@@ -34,12 +34,18 @@ const ServerActionStudents = {
   // ✅ Save student to server (handles both create and update)
   async SaveToServer(student: Student) {
     try {
+      const studentSubjects = await studentSubjectActions.getAll();
+      const enrollments = studentSubjects
+        .filter(ss => ss.studentId === student.id && ss.status !== '0')
+        .map(ss => ({ subjectId: ss.subjectId, teacherId: ss.teacherId }));
+
       // Try POST first (create)
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          id: student.id,
           name: student.name,
           email: student.email,
           phone: student.phone,
@@ -47,7 +53,7 @@ const ServerActionStudents = {
           parentPhone: student.parentPhone,
           parentEmail: student.parentEmail,
           grade: student.grade,
-          enrollments: [],
+          enrollments,
         }),
       });
 
@@ -65,7 +71,7 @@ const ServerActionStudents = {
             parentPhone: student.parentPhone,
             parentEmail: student.parentEmail,
             grade: student.grade,
-            enrollments: [],
+            enrollments: enrollments, // Include local enrollments
           }),
         });
       }

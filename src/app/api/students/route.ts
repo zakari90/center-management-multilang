@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const { 
+      id,
       name, 
       email, 
       phone, 
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
       // Create the student
       const newStudent = await tx.student.create({
         data: {
+          ...(id && { id }),
           name,
           email: email || null,
           phone: phone || null,

@@ -13,8 +13,10 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
 import { studentActions, studentSubjectActions, subjectActions, teacherSubjectActions, teacherActions } from "@/lib/dexie/dexieActions"
+import ServerActionStudents from "@/lib/dexie/studentServerAction"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
+import { isOnline } from "@/lib/utils/network"
 import { Badge } from "./ui/badge"
 
 interface Teacher {
@@ -260,6 +262,19 @@ export default function CreateStudentForm() {
       }))
 
       await studentSubjectActions.bulkPutLocal(studentSubjectEntities)
+
+      // ✅ Immediate sync to server if online
+      if (isOnline()) {
+        try {
+          const result = await ServerActionStudents.SaveToServer(newStudent as any)
+          if (result) {
+            await studentActions.markSynced(studentId)
+            await studentSubjectActions.bulkMarkSynced(studentSubjectEntities.map(e => e.id))
+          }
+        } catch (syncError) {
+          console.error("Student immediate sync failed, will retry later:", syncError)
+        }
+      }
 
       // ✅ Navigate to students page
       await router.push("/manager/students")

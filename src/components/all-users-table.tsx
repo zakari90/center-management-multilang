@@ -83,6 +83,10 @@ import {
   studentSubjectActions,
   receiptActions
 } from '@/lib/dexie/dexieActions'
+import ServerActionUsers from "@/lib/dexie/userServerAction"
+import ServerActionTeachers from "@/lib/dexie/teacherServerAction"
+import ServerActionStudents from "@/lib/dexie/studentServerAction"
+import { isOnline } from "@/lib/utils/network"
 import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { Role } from '@/lib/dexie/dbSchema'
 import { useAuth } from '@/context/authContext'
@@ -336,12 +340,33 @@ export default function AllUsersTable() {
       if (itemToDelete.type === 'user') {
         await userActions.markForDelete(itemToDelete.id)
         setUsers(prev => prev.filter(u => u.id !== itemToDelete.id))
+
+        if (isOnline()) {
+          const res = await ServerActionUsers.DeleteFromServer(itemToDelete.id)
+          if (res?.ok) {
+            await userActions.deleteLocal(itemToDelete.id)
+          }
+        }
       } else if (itemToDelete.type === 'teacher') {
         await teacherActions.markForDelete(itemToDelete.id)
         setTeachers(prev => prev.filter(t => t.id !== itemToDelete.id))
+
+        if (isOnline()) {
+          const res = await ServerActionTeachers.DeleteFromServer(itemToDelete.id)
+          if (res?.ok) {
+            await teacherActions.deleteLocal(itemToDelete.id)
+          }
+        }
       } else {
         await studentActions.markForDelete(itemToDelete.id)
         setStudents(prev => prev.filter(s => s.id !== itemToDelete.id))
+
+        if (isOnline()) {
+          const res = await ServerActionStudents.DeleteFromServer(itemToDelete.id)
+          if (res?.ok) {
+            await studentActions.deleteLocal(itemToDelete.id)
+          }
+        }
       }
       
       toast(`${t(itemToDelete.type)} ${t('deletedSuccess')}`)
@@ -398,6 +423,18 @@ export default function AllUsersTable() {
       }
 
       await userActions.putLocal(newManager)
+
+      // ✅ Immediate sync to server if online
+      if (isOnline()) {
+        try {
+          const result = await ServerActionUsers.SaveToServer(newManager as any)
+          if (result) {
+            await userActions.markSynced(managerId)
+          }
+        } catch (syncError) {
+          console.error('User immediate sync failed, will retry later:', syncError)
+        }
+      }
 
       // ✅ Update center to add manager to managers array
       const centers = await centerActions.getAll()
@@ -472,6 +509,18 @@ export default function AllUsersTable() {
       }
 
       await userActions.putLocal(updatedUser)
+
+      // ✅ Immediate sync to server if online
+      if (isOnline()) {
+        try {
+          const result = await ServerActionUsers.SaveToServer(updatedUser as any)
+          if (result) {
+            await userActions.markSynced(updatedUser.id)
+          }
+        } catch (syncError) {
+          console.error('User immediate sync failed, will retry later:', syncError)
+        }
+      }
 
       // ✅ Refresh data to show updated user
       await fetchAllData()

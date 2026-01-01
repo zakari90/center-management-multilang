@@ -7,6 +7,8 @@ import { teacherActions, teacherSubjectActions, studentSubjectActions, subjectAc
 import { useAuth } from '@/context/authContext'
 import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
+import ServerActionReceipts from '@/lib/dexie/receiptServerAction'
+import { isOnline } from '@/lib/utils/network'
 // import axios from 'axios' // ✅ Commented out - using local DB
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -292,6 +294,18 @@ export default function CreateTeacherPaymentForm() {
       }
 
       await receiptActions.putLocal(newReceipt)
+
+      // ✅ Immediate sync to server if online
+      if (isOnline()) {
+        try {
+          const result = await ServerActionReceipts.SaveToServer(newReceipt as any)
+          if (result) {
+            await receiptActions.markSynced(receiptId)
+          }
+        } catch (syncError) {
+          console.error('Receipt immediate sync failed, will retry later:', syncError)
+        }
+      }
 
       router.push('/manager/receipts')
       router.refresh()

@@ -65,11 +65,11 @@ export default function HomePage() {
             </Button>
           </Link>
 
-          <Link href={`/${locale}/managerLogin`} className="w-full sm:w-auto">
+          {/* <Link href={`/${locale}/managerLogin`} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white hover:bg-green-700">
               {t("managerDashboard")}
             </Button>
-          </Link>
+          </Link> */}
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-3">

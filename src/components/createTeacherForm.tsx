@@ -7,8 +7,10 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 import { teacherActions, teacherSubjectActions, subjectActions } from "@/lib/dexie/dexieActions"
+import ServerActionTeachers from "@/lib/dexie/teacherServerAction"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
+import { isOnline } from "@/lib/utils/network"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -482,6 +484,25 @@ export default function CreateTeacherForm() {
       }))
 
       await teacherSubjectActions.bulkPutLocal(teacherSubjectEntities)
+    }
+
+    // ✅ Immediate sync to server if online
+    if (isOnline()) {
+      try {
+        const result = await ServerActionTeachers.SaveToServer(newTeacher as any)
+        if (result) {
+          await teacherActions.markSynced(teacherId)
+          const teacherSubjectsToMark = await teacherSubjectActions.getAll()
+          const idsToMark = teacherSubjectsToMark
+            .filter(ts => ts.teacherId === teacherId)
+            .map(ts => ts.id)
+          if (idsToMark.length > 0) {
+            await teacherSubjectActions.bulkMarkSynced(idsToMark)
+          }
+        }
+      } catch (syncError) {
+        console.error("Teacher immediate sync failed, will retry later:", syncError)
+      }
     }
 
     // ✅ Navigate to teachers page

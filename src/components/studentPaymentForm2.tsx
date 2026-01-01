@@ -9,6 +9,8 @@ import { receiptActions, studentActions, studentSubjectActions, subjectActions }
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useAuth } from "@/context/authContext"
 import { ReceiptType } from "@/lib/dexie/dbSchema"
+import ServerActionReceipts from "@/lib/dexie/receiptServerAction"
+import { isOnline } from "@/lib/utils/network"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -575,6 +577,18 @@ export default function CreateStudentPaymentForm() {
         }
 
         await receiptActions.putLocal(newReceipt)
+
+        // ✅ Immediate sync to server if online
+        if (isOnline()) {
+          try {
+            const result = await ServerActionReceipts.SaveToServer(newReceipt as any)
+            if (result) {
+              await receiptActions.markSynced(receiptId)
+            }
+          } catch (syncError) {
+            console.error("Receipt immediate sync failed, will retry later:", syncError)
+          }
+        }
 
         // ✅ Navigate to receipts page
         await router.push(preSelectedStudentId ? `/manager/students/${preSelectedStudentId}` : "/manager/receipts")

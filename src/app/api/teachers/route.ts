@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { name, email, phone, address, weeklySchedule, subjects } = body
+    const { id, name, email, phone, address, weeklySchedule, subjects } = body
 
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       // Create the teacher
       const newTeacher = await tx.teacher.create({
         data: {
+          ...(id && { id }),
           name,
           email: email || null,
           phone: phone || null,
