@@ -8,7 +8,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Metadata, Viewport } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
@@ -49,7 +49,7 @@ export default async function RootLayout({
 
   setRequestLocale(locale);
 
-  const messages = (await import(`../../dictionary/${locale}.json`)).default;
+  const messages = await getMessages();
 
   const isArabic = locale === "ar";
   const t = await getTranslations({ locale, namespace: "Metadata" });
