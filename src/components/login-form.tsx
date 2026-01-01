@@ -183,7 +183,7 @@ export function LoginForm({
 
                   {state?.success && activeStateMatchesRole && (
                     <Alert className="border-green-200 bg-green-50" aria-live="polite">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
                       <AlertDescription className="text-xs sm:text-sm text-green-700 ml-2">
                         {successFallback}
                       </AlertDescription>
@@ -192,7 +192,7 @@ export function LoginForm({
 
                   {errorState?.error?.message && activeStateMatchesRole && (
                     <Alert variant="destructive" aria-live="assertive">
-                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                      <AlertCircle className="h-4 w-4 shrink-0" />
                       <AlertDescription className="text-xs sm:text-sm ml-2">
                         {errorState.error.message}
                       </AlertDescription>
@@ -204,7 +204,7 @@ export function LoginForm({
                       {t("email.label")}
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground shrink-0" />
                       <Input
                         id={`email-${role}`}
                         name="email"
@@ -222,7 +222,7 @@ export function LoginForm({
                     </div>
                     {errorState?.error?.field === "email" && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                        <AlertCircle className="h-3 w-3 shrink-0" />
                         <span>
                           {errorState.error.message}
                         </span>
@@ -235,7 +235,7 @@ export function LoginForm({
                       {t("password.label")}
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground shrink-0" />
                       <Input
                         id={`password-${role}`}
                         name="password"
@@ -252,7 +252,7 @@ export function LoginForm({
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors shrink-0"
                         disabled={isPending}
                         tabIndex={-1}
                       >
@@ -261,7 +261,7 @@ export function LoginForm({
                     </div>
                     {errorState?.error?.field === "password" && activeStateMatchesRole && (
                       <p className="text-xs text-red-500 flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                        <AlertCircle className="h-3 w-3 shrink-0" />
                         <span>
                           {errorState.error.message}
                         </span>
@@ -276,12 +276,12 @@ export function LoginForm({
                   >
                     {isPending ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin flex-shrink-0" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />
                         {t("submitting")}
                       </>
                     ) : role === "manager" ? (
                       <>
-                        <UserCog className="mr-2 h-4 w-4 flex-shrink-0" />
+                        <UserCog className="mr-2 h-4 w-4 shrink-0" />
                         {t("submit")}
                       </>
                     ) : (
@@ -320,11 +320,11 @@ export function LoginForm({
             <Card className="w-full max-w-md bg-muted/50 border-dashed">
               <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
                 <div className="flex items-start gap-3">
-                  <div className="rounded-full bg-primary/10 p-2 flex-shrink-0 mt-1">
+                  <div className="rounded-full bg-primary/10 p-2 shrink-0 mt-1">
                     <AlertCircle className="h-4 w-4 text-primary" />
                   </div>
                   <div className="space-y-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium break-words">
+                    <p className="text-xs sm:text-sm font-medium wrap-break-word">
                       {tManager("infoTitle")}
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">

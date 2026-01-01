@@ -21,7 +21,7 @@ export function AutoSyncProvider() {
     syncInterval: 5, // 5 minutes
     syncOnReconnect: true, // Sync when network reconnects
     syncBeforeUnload: true, // Sync before page closes
-    importOnMount: false, // Don't import on mount (only sync local changes)
+    importOnMount: true, // Don't import on mount (only sync local changes)
     debug: process.env.NODE_ENV === 'development', // Show logs in dev mode
     onSyncStart: () => {
       // Optional: Show loading indicator

@@ -54,6 +54,15 @@ export async function getSession() {
   return await decrypt(session);
 }
 
+async function openLocalDbWithTimeout(timeoutMs = 2500) {
+  await Promise.race([
+    localDb.open(),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("IndexedDB open timeout")), timeoutMs)
+    ),
+  ]);
+}
+
 // Consistent error type
 type LoginError = {
   error: { field: "email" | "password" | "role" | "db" | "general", message: string },
@@ -94,8 +103,44 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
       };
     }
 
+    // Online-first login: avoids hanging on IndexedDB open and enables first-time manager login
+    if (isOnline()) {
+      try {
+        const result = submittedRole === "manager"
+          ? await loginManager(state, formData)
+          : await loginAdmin(state, formData);
+
+        if (result?.success && (result as any)?.data?.user) {
+          const serverUser = (result as any).data.user;
+          try {
+            await openLocalDbWithTimeout();
+            await userActions.putLocal({
+              id: serverUser.id,
+              name: serverUser.name,
+              email: serverUser.email,
+              role: serverUser.role,
+              password,
+              status: '1' as const,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            });
+          } catch {
+            // Ignore local caching failures
+          }
+
+          return {
+            data: { user: serverUser },
+            success: true,
+            role: submittedRole,
+          };
+        }
+      } catch {
+        // If online login fails, fall back to local/offline flow
+      }
+    }
+
     try {
-      await localDb.open();
+      await openLocalDbWithTimeout();
     } catch {
       return {
         error: { field: "db", message: t('errors.unexpectedError') },

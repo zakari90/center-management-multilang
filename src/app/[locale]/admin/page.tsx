@@ -50,7 +50,6 @@ export default function AdminDashboard() {
       {/* <SyncHandler /> */}
       
       {/* Local DB Debugger (for mobile debugging) */}
-      <>s--------------------------------------------------</>
       {isDevelopment && <LocalDBDebugger />}
       
       <DeleteAllDataButton/>

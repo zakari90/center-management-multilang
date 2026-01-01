@@ -218,8 +218,14 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
     const handleOnline = async () => {
       log('Network reconnected, waiting for stable connection...');
       await waitForOnline();
-      log('Connection stable, performing sync...');
-      await performSync();
+      if (opts.importOnMount) {
+        log('Connection stable, importing then syncing...');
+        await performImport();
+        await performSync();
+      } else {
+        log('Connection stable, performing sync...');
+        await performSync();
+      }
     };
     
     window.addEventListener('online', handleOnline);
@@ -246,6 +252,12 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
       if (opts.importOnMount) {
         log('Importing data on mount...');
         await performImport();
+
+        // After importing server state into Dexie, push local pending changes
+        if (opts.syncOnMount) {
+          log('Syncing after import...');
+          await performSync();
+        }
       } else if (opts.syncOnMount) {
         log('Syncing on mount...');
         await performSync();
