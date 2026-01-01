@@ -40,8 +40,8 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     }
   }, [user, isLoading, mounted, router, locale]);
 
-  // Show loading state while checking authentication
-  if (!mounted || isLoading || !user || user.role !== "ADMIN") {
+  // Show loading state only while mounting / checking authentication
+  if (!mounted || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -50,6 +50,11 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
         </div>
       </div>
     );
+  }
+
+  // Auth resolved: if not authorized, let the redirect effect handle navigation
+  if (!user || user.role !== "ADMIN") {
+    return null;
   }
 
   const userData = {
