@@ -29,11 +29,11 @@ const nextConfig = {
         ],
       },
       {
-        source: '/workbox-:hash*.js',
+        source: '/workbox-:path*',
         headers: [{ key: 'Cache-Control', value: 'no-store' }],
       },
       {
-        source: '/swe-worker-:hash*.js',
+        source: '/swe-worker-:path*',
         headers: [{ key: 'Cache-Control', value: 'no-store' }],
       },
     ];
