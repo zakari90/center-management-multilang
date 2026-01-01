@@ -27,6 +27,8 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     // Only check authentication after component has mounted and auth is loaded
     if (!mounted || isLoading) return;
 
+    console.log('[AdminLayoutClient] auth resolved', { user, isLoading, locale });
+
     // Redirect if not authenticated
     if (!user) {
       router.push(`/${locale}/login`);
@@ -54,7 +56,13 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
 
   // Auth resolved: if not authorized, let the redirect effect handle navigation
   if (!user || user.role !== "ADMIN") {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="mt-4 text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    );
   }
 
   const userData = {
