@@ -121,7 +121,6 @@ export default async function RootLayout({
             <AuthProvider>
                   <LoadWS/>
               {/* <ServiceWorkerRegister /> */}
-
               {children}
                     {/* <PWADebug /> */}
               {/* <InstallPWA /> */}
