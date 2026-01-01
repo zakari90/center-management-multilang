@@ -11,9 +11,16 @@ export default function LoadWS(){
         
         if ('serviceWorker' in navigator) {
           hasRegistered.current = true;
-          navigator.serviceWorker.register('/sw.js')
-            .then(() => console.log('Service Worker registered'))
-            .catch(console.error);
+          navigator.serviceWorker
+            .register('/sw.js', { updateViaCache: 'none' })
+            .then((registration) => {
+              console.log('Service Worker registered');
+              // Ensure we fetch the latest SW after deployments
+              registration.update().catch(() => {});
+            })
+            .catch((error) => {
+              console.error('Service Worker registration failed:', error);
+            });
         }
       }, []);
 
