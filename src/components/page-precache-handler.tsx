@@ -108,9 +108,25 @@ export default function PagePrecacheHandler() {
     try {
       // Ensure service worker is ready
       if ('serviceWorker' in navigator) {
+        console.log('[Precache] service worker state', {
+          hasController: !!navigator.serviceWorker.controller,
+        })
         console.log('[Precache] waiting for service worker ready...')
-        await navigator.serviceWorker.ready
-        console.log('[Precache] service worker is ready')
+        const readyResult = await Promise.race([
+          navigator.serviceWorker.ready.then(() => 'ready' as const),
+          new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 4000)),
+        ])
+        console.log('[Precache] service worker ready result', { readyResult })
+        if (readyResult === 'timeout') {
+          const reg = await navigator.serviceWorker.getRegistration().catch(() => null)
+          console.log('[Precache] service worker registration (timeout fallback)', {
+            hasRegistration: !!reg,
+            scope: (reg as any)?.scope ?? null,
+            active: !!(reg as any)?.active,
+            installing: !!(reg as any)?.installing,
+            waiting: !!(reg as any)?.waiting,
+          })
+        }
       }
       
       // Use the same cache as the service worker
