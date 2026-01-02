@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { CheckCircle, Download, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Pages to precache for offline-first experience
 const PAGES_TO_PRECACHE = [
@@ -39,6 +39,7 @@ export default function PagePrecacheHandler() {
   const [progress, setProgress] = useState(0)
   const [isComplete, setIsComplete] = useState(false)
   const [showPrompt, setShowPrompt] = useState(false)
+  const hasAutoStarted = useRef(false)
 
   useEffect(() => {
     // Check if we've already precached
@@ -64,14 +65,24 @@ export default function PagePrecacheHandler() {
     )
     
     if (shouldShowPrompt && 'serviceWorker' in navigator && 'caches' in window) {
-      // Wait a bit before showing the prompt (to not overwhelm on first load)
       const timer = setTimeout(() => {
         setShowPrompt(true)
-      }, 5000) // 5 seconds to give user time to settle
+      }, 1000)
       
       return () => clearTimeout(timer)
     }
   }, [])
+
+  useEffect(() => {
+    if (!showPrompt) return
+    if (isPrecaching || isComplete) return
+    if (hasAutoStarted.current) return
+    if (!navigator.onLine) return
+    if (!('serviceWorker' in navigator) || !('caches' in window)) return
+
+    hasAutoStarted.current = true
+    precachePages()
+  }, [showPrompt, isPrecaching, isComplete])
 
   const precachePages = async () => {
     setIsPrecaching(true)

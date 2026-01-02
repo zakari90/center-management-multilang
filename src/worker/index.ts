@@ -28,6 +28,39 @@ const serwist = new Serwist({
   runtimeCaching: defaultCache, // Next.js dynamic/runtime caching handles all routes
 });
 
+const PAGES_CACHE = 'pages-v1';
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  if (request.mode !== 'navigate') return;
+
+  event.respondWith(
+    (async () => {
+      try {
+        const preload = await event.preloadResponse;
+        if (preload) return preload;
+        return await fetch(request);
+      } catch {
+        const url = new URL(request.url);
+        const cache = await caches.open(PAGES_CACHE);
+        const cached = await cache.match(url.pathname);
+        if (cached) return cached;
+        return new Response('Offline', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      }
+    })(),
+  );
+});
+
 // ---- CORE SW LISTENERS ----
 
 serwist.addEventListeners();

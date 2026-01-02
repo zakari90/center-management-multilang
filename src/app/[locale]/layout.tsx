@@ -15,6 +15,7 @@ import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
 import LoadWS from "./loadws";
+import PagePrecacheHandler from "@/components/page-precache-handler";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 
@@ -127,6 +128,7 @@ export default async function RootLayout({
                     {/* <PWADebug /> */}
               {/* <InstallPWA /> */}
               <PWAUpdateHandler />
+              <PagePrecacheHandler />
               {/* <PagePrecacheHandler /> */}
               {/* <PWAPerformanceMonitor /> */}
               {/* <PWATestingSuite /> */}
