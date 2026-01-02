@@ -46,6 +46,15 @@ export default function PagePrecacheHandler() {
     const hasPrecached = localStorage.getItem('pages-precached')
     const lastPrecacheDate = localStorage.getItem('precache-date')
     const dismissed = localStorage.getItem('precache-dismissed')
+    console.log('[Precache] boot', {
+      hasPrecached,
+      lastPrecacheDate,
+      dismissed,
+      onLine: navigator.onLine,
+      hasServiceWorker: 'serviceWorker' in navigator,
+      hasCaches: 'caches' in window,
+      pathname: typeof window !== 'undefined' ? window.location.pathname : null,
+    })
     
     // Show prompt if:
     // 1. Never precached, OR
@@ -63,9 +72,16 @@ export default function PagePrecacheHandler() {
       (!hasPrecached || daysSincePrecache > 7) && 
       (hoursSinceDismiss > 24 || !dismissed)
     )
+    console.log('[Precache] prompt decision', {
+      shouldShowPrompt,
+      hasPrecached,
+      daysSincePrecache,
+      hoursSinceDismiss,
+    })
     
     if (shouldShowPrompt && 'serviceWorker' in navigator && 'caches' in window) {
       const timer = setTimeout(() => {
+        console.log('[Precache] show prompt')
         setShowPrompt(true)
       }, 1000)
       
@@ -81,6 +97,7 @@ export default function PagePrecacheHandler() {
     if (!('serviceWorker' in navigator) || !('caches' in window)) return
 
     hasAutoStarted.current = true
+    console.log('[Precache] auto-starting precachePages()')
     precachePages()
   }, [showPrompt, isPrecaching, isComplete])
 
@@ -91,11 +108,15 @@ export default function PagePrecacheHandler() {
     try {
       // Ensure service worker is ready
       if ('serviceWorker' in navigator) {
+        console.log('[Precache] waiting for service worker ready...')
         await navigator.serviceWorker.ready
+        console.log('[Precache] service worker is ready')
       }
       
       // Use the same cache as the service worker
       const cache = await caches.open('pages-v1')
+      const beforeKeys = await cache.keys().catch(() => [])
+      console.log('[Precache] opened cache pages-v1', { beforeCount: beforeKeys.length })
       const totalPages = PAGES_TO_PRECACHE.length * LOCALES.length
       let cachedCount = 0
       let successCount = 0
@@ -109,6 +130,7 @@ export default function PagePrecacheHandler() {
       const sortedLocales = [currentLocale, ...LOCALES.filter(l => l !== currentLocale)]
 
       console.log(`[Precache] Starting to cache ${totalPages} pages...`)
+      console.log('[Precache] locales order', { currentLocale, sortedLocales })
 
       // Precache all pages for all locales
       for (const locale of sortedLocales) {
@@ -140,6 +162,16 @@ export default function PagePrecacheHandler() {
             })
             
             clearTimeout(timeoutId)
+
+            const contentType = response.headers.get('content-type')
+            console.log('[Precache] fetch result', {
+              url,
+              status: response.status,
+              ok: response.ok,
+              redirected: response.redirected,
+              finalUrl: response.url,
+              contentType,
+            })
             
             if (response.ok && response.status === 200) {
               // Clone the response before caching (responses can only be read once)
@@ -183,6 +215,7 @@ export default function PagePrecacheHandler() {
         const url = new URL(req.url)
         return sortedLocales.some(locale => url.pathname.startsWith(`/${locale}/`))
       }).length
+      console.log('[Precache] cache keys after', { afterCount: allCached.length })
 
       // Mark as complete
       localStorage.setItem('pages-precached', 'true')

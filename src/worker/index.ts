@@ -32,6 +32,7 @@ const PAGES_CACHE = 'pages-v1';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] received SKIP_WAITING')
     self.skipWaiting();
   }
 });
@@ -44,14 +45,25 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       try {
+        const url = new URL(request.url);
+        console.log('[SW] navigate fetch', { pathname: url.pathname });
         const preload = await event.preloadResponse;
-        if (preload) return preload;
-        return await fetch(request);
+        if (preload) {
+          console.log('[SW] using navigation preload', { pathname: url.pathname });
+          return preload;
+        }
+        const networkResponse = await fetch(request);
+        console.log('[SW] network ok', { pathname: url.pathname, status: networkResponse.status });
+        return networkResponse;
       } catch {
         const url = new URL(request.url);
         const cache = await caches.open(PAGES_CACHE);
         const cached = await cache.match(url.pathname);
-        if (cached) return cached;
+        if (cached) {
+          console.log('[SW] offline cache hit', { pathname: url.pathname });
+          return cached;
+        }
+        console.log('[SW] offline cache miss', { pathname: url.pathname });
         return new Response('Offline', {
           status: 503,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
