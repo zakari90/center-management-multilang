@@ -385,7 +385,8 @@ export default function PagePrecacheHandler() {
             </div>
             {isComplete && (
               <p className="text-xs text-green-600 dark:text-green-400 text-center mt-1">
-                ✓ Pages stored in cache and ready for offline use
+                {/* ✓ Pages stored in cache and ready for offline use */}
+                <CheckCircle className="h-5 w-5 text-green-500" />
               </p>
             )}
           </div>
@@ -397,7 +398,7 @@ export default function PagePrecacheHandler() {
               size="sm"
             >
               <Download className="h-4 w-4 mr-2" />
-              Download Now
+              {/* Download Now */}
             </Button>
             <Button 
               variant="outline" 
