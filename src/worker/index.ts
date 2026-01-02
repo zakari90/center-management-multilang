@@ -16,7 +16,10 @@ declare const self: ServiceWorkerGlobalScope;
 const serwist = new Serwist({
   // Only precache entries from the build manifest (which have revision info)
   // Dynamic routes like /en/, /fr/, /ar/ are handled by runtime caching
-  precacheEntries: self.__SW_MANIFEST ?? [],
+  // NOTE: We intentionally disable build precaching because a single 404 in
+  // the precache manifest will fail SW install with "bad-precaching-response".
+  // We rely on runtime caching + our manual pages cache (pages-v1) instead.
+  precacheEntries: [],
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
