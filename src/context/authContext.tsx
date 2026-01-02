@@ -2,8 +2,6 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { getSession } from '@/lib/actionsClient';
 
 export interface User {
   id: string;
@@ -36,14 +34,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = async () => {
     try {
       console.log('[AuthProvider] checkAuth start');
-      // getSession returns the decrypted session object or null
-      const session = await getSession();
-      console.log('[AuthProvider] checkAuth got session', { hasSession: !!session, hasUser: !!(session as any)?.user });
-      if (session && session.user) {
-        setUser(session.user as User);
-      } else {
+      const response = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!response.ok) {
         setUser(null);
+        console.log('[AuthProvider] checkAuth /api/auth/me not ok', { status: response.status });
+        return;
       }
+
+      const data = await response.json().catch(() => null);
+      const nextUser = (data as any)?.user ?? null;
+      console.log('[AuthProvider] checkAuth got user', { hasUser: !!nextUser });
+      setUser(nextUser);
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
@@ -59,24 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // ✅ Clear session cookie (server-side)
-      // await fetch('/api/auth/logout', { method: 'POST' });
-      
-      // ✅ Clear client-side session cookie
-      Cookies.remove('session', { path: '/' });
-      
-      // ✅ Note: User data remains in local DB for offline login capability
-      // This allows users to login again offline without re-syncing
-      
-      // ✅ Clear in-memory user state
+      await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
-      
-      // ✅ Redirect to home
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
-      // Even if API call fails, clear cookies and local state
-      Cookies.remove('session', { path: '/' });
       setUser(null);
       window.location.href = '/';
     }
