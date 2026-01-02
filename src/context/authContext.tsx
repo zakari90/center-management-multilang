@@ -35,8 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
+      console.log('[AuthProvider] checkAuth start');
       // getSession returns the decrypted session object or null
       const session = await getSession();
+      console.log('[AuthProvider] checkAuth got session', { hasSession: !!session, hasUser: !!(session as any)?.user });
       if (session && session.user) {
         setUser(session.user as User);
       } else {
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
     } finally {
       setIsLoading(false);
+      console.log('[AuthProvider] checkAuth end');
     }
   };
 
