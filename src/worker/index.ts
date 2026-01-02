@@ -29,6 +29,7 @@ const serwist = new Serwist({
 });
 
 const PAGES_CACHE = 'pages-v1';
+const ASSETS_CACHE = 'assets-v1';
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
@@ -40,23 +41,67 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+
+  // Automatically cache Next.js static assets (JS/CSS/fonts/etc) so the app can hydrate offline.
+  // We keep this independent from Serwist precache to avoid install failures.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(ASSETS_CACHE);
+        const cached = await cache.match(url.pathname);
+        if (cached) {
+          // Revalidate in background
+          event.waitUntil(
+            fetch(request)
+              .then((res) => {
+                if (res.ok) return cache.put(url.pathname, res.clone());
+              })
+              .catch(() => {}),
+          );
+          return cached;
+        }
+        try {
+          const res = await fetch(request);
+          if (res.ok) await cache.put(url.pathname, res.clone());
+          return res;
+        } catch {
+          return new Response('', { status: 504 });
+        }
+      })(),
+    );
+    return;
+  }
+
   if (request.mode !== 'navigate') return;
 
   event.respondWith(
     (async () => {
       try {
-        const url = new URL(request.url);
         console.log('[SW] navigate fetch', { pathname: url.pathname });
         const preload = await event.preloadResponse;
         if (preload) {
           console.log('[SW] using navigation preload', { pathname: url.pathname });
+          // Opportunistically cache preload HTML
+          try {
+            const cache = await caches.open(PAGES_CACHE);
+            await cache.put(url.pathname, preload.clone());
+          } catch {}
           return preload;
         }
         const networkResponse = await fetch(request);
         console.log('[SW] network ok', { pathname: url.pathname, status: networkResponse.status });
+
+        // Cache successful HTML navigations automatically on first visit.
+        try {
+          if (networkResponse.ok) {
+            const cache = await caches.open(PAGES_CACHE);
+            await cache.put(url.pathname, networkResponse.clone());
+          }
+        } catch {}
+
         return networkResponse;
       } catch {
-        const url = new URL(request.url);
         const cache = await caches.open(PAGES_CACHE);
         const cached = await cache.match(url.pathname);
         if (cached) {
