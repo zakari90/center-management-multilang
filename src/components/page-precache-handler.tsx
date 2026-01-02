@@ -131,8 +131,11 @@ export default function PagePrecacheHandler() {
       
       // Use the same cache as the service worker
       const cache = await caches.open('pages-v1')
+      const assetsCache = await caches.open('assets-v1')
       const beforeKeys = await cache.keys().catch(() => [])
       console.log('[Precache] opened cache pages-v1', { beforeCount: beforeKeys.length })
+      const beforeAssetKeys = await assetsCache.keys().catch(() => [])
+      console.log('[Precache] opened cache assets-v1', { beforeCount: beforeAssetKeys.length })
       const totalPages = PAGES_TO_PRECACHE.length * LOCALES.length
       let cachedCount = 0
       let successCount = 0
@@ -190,6 +193,59 @@ export default function PagePrecacheHandler() {
             })
             
             if (response.ok && response.status === 200) {
+              // Extract Next.js static assets from HTML and cache them too.
+              // Without these JS/CSS chunks, offline navigation will render HTML but the app won't hydrate.
+              if (contentType?.includes('text/html')) {
+                try {
+                  const html = await response.clone().text()
+                  const matches = Array.from(
+                    html.matchAll(/(?:src|href)=(?:"|')([^"']+)(?:"|')/g),
+                  )
+                    .map((m) => m[1])
+                    .filter((u) => u && typeof u === 'string')
+
+                  const assetUrls = Array.from(
+                    new Set(
+                      matches
+                        .filter((u) => u.startsWith('/_next/static/'))
+                        .map((u) => u.split('?')[0]),
+                    ),
+                  )
+
+                  if (assetUrls.length > 0) {
+                    console.log('[Precache] discovered assets', {
+                      page: url,
+                      count: assetUrls.length,
+                    })
+                  }
+
+                  for (const assetPath of assetUrls) {
+                    try {
+                      const already = await assetsCache.match(assetPath)
+                      if (already) continue
+
+                      const assetRes = await fetch(assetPath, {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        cache: 'no-cache',
+                      })
+                      if (assetRes.ok) {
+                        await assetsCache.put(assetPath, assetRes.clone())
+                      } else {
+                        console.warn('[Precache] asset fetch bad status', {
+                          assetPath,
+                          status: assetRes.status,
+                        })
+                      }
+                    } catch (assetErr) {
+                      console.warn('[Precache] asset fetch failed', { assetPath, assetErr })
+                    }
+                  }
+                } catch (parseErr) {
+                  console.warn('[Precache] failed to parse html for assets', { url, parseErr })
+                }
+              }
+
               // Clone the response before caching (responses can only be read once)
               const responseClone = response.clone()
               
@@ -232,6 +288,9 @@ export default function PagePrecacheHandler() {
         return sortedLocales.some(locale => url.pathname.startsWith(`/${locale}/`))
       }).length
       console.log('[Precache] cache keys after', { afterCount: allCached.length })
+
+      const allAssets = await assetsCache.keys().catch(() => [])
+      console.log('[Precache] assets cache keys after', { afterCount: allAssets.length })
 
       // Mark as complete
       localStorage.setItem('pages-precached', 'true')
