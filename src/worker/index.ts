@@ -31,6 +31,16 @@ const serwist = new Serwist({
 const PAGES_CACHE = 'pages-v1';
 const ASSETS_CACHE = 'assets-v1';
 
+function getCookieValue(cookieHeader: string | null, name: string): string | null {
+  if (!cookieHeader) return null;
+  const parts = cookieHeader.split(';');
+  for (const part of parts) {
+    const [k, ...rest] = part.trim().split('=');
+    if (k === name) return rest.join('=');
+  }
+  return null;
+}
+
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('[SW] received SKIP_WAITING')
@@ -79,13 +89,22 @@ self.addEventListener('fetch', (event) => {
     (async () => {
       try {
         console.log('[SW] navigate fetch', { pathname: url.pathname });
+
+        // Locale-aware caching (next-intl localePrefix: "never"):
+        // The same pathname can render different HTML depending on the selected locale.
+        // We key HTML cache by NEXT_LOCALE cookie to avoid serving the wrong language offline.
+        const cookieHeader = request.headers.get('cookie');
+        const locale = getCookieValue(cookieHeader, 'NEXT_LOCALE') ?? 'ar';
+        const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
+        const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
+
         const preload = await event.preloadResponse;
         if (preload) {
           console.log('[SW] using navigation preload', { pathname: url.pathname });
           // Opportunistically cache preload HTML
           try {
             const cache = await caches.open(PAGES_CACHE);
-            await cache.put(url.pathname, preload.clone());
+            await cache.put(cacheKey, preload.clone());
           } catch {}
           return preload;
         }
@@ -96,14 +115,18 @@ self.addEventListener('fetch', (event) => {
         try {
           if (networkResponse.ok) {
             const cache = await caches.open(PAGES_CACHE);
-            await cache.put(url.pathname, networkResponse.clone());
+            await cache.put(cacheKey, networkResponse.clone());
           }
         } catch {}
 
         return networkResponse;
       } catch {
+        const cookieHeader = request.headers.get('cookie');
+        const locale = getCookieValue(cookieHeader, 'NEXT_LOCALE') ?? 'ar';
+        const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
+        const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
         const cache = await caches.open(PAGES_CACHE);
-        const cached = await cache.match(url.pathname);
+        const cached = await cache.match(cacheKey);
         if (cached) {
           console.log('[SW] offline cache hit', { pathname: url.pathname });
           return cached;
