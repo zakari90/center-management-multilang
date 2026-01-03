@@ -11,6 +11,25 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
+self.addEventListener('install', (event) => {
+  console.log('[SW] install');
+  event.waitUntil(Promise.resolve());
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('[SW] activate');
+  event.waitUntil(
+    (async () => {
+      try {
+        await self.clients.claim();
+        console.log('[SW] clients claimed');
+      } catch (e) {
+        console.log('[SW] clients claim failed', e);
+      }
+    })(),
+  );
+});
+
 // ---- SERWIST CONFIG ----
 
 const serwist = new Serwist({

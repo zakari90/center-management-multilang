@@ -8,6 +8,10 @@ type CacheStatus = {
   hasSW: boolean
   hasController: boolean
   swScope: string | null
+  swActive: boolean
+  swWaiting: boolean
+  swInstalling: boolean
+  swScriptURL: string | null
   pagesCached: boolean
   pagesCacheKey: string | null
   pagesCacheError: string | null
@@ -39,6 +43,10 @@ export default function CacheDebugOverlay() {
     hasSW: typeof navigator !== 'undefined' ? 'serviceWorker' in navigator : false,
     hasController: typeof navigator !== 'undefined' ? !!navigator.serviceWorker?.controller : false,
     swScope: null,
+    swActive: false,
+    swWaiting: false,
+    swInstalling: false,
+    swScriptURL: null,
     pagesCached: false,
     pagesCacheKey: null,
     pagesCacheError: null,
@@ -73,9 +81,17 @@ export default function CacheDebugOverlay() {
       const hasController = !!navigator.serviceWorker?.controller
 
       let swScope: string | null = null
+      let swActive = false
+      let swWaiting = false
+      let swInstalling = false
+      let swScriptURL: string | null = null
       if (hasSW) {
         const reg = await navigator.serviceWorker.getRegistration().catch(() => null)
         swScope = reg?.scope ?? null
+        swActive = !!reg?.active
+        swWaiting = !!reg?.waiting
+        swInstalling = !!reg?.installing
+        swScriptURL = reg?.active?.scriptURL ?? reg?.waiting?.scriptURL ?? reg?.installing?.scriptURL ?? null
       }
 
       const next: CacheStatus = {
@@ -83,6 +99,10 @@ export default function CacheDebugOverlay() {
         hasSW,
         hasController,
         swScope,
+        swActive,
+        swWaiting,
+        swInstalling,
+        swScriptURL,
         pagesCached: false,
         pagesCacheKey: null,
         pagesCacheError: null,
@@ -144,6 +164,8 @@ export default function CacheDebugOverlay() {
       <div>online: {String(status.isOnline)}</div>
       <div>sw: {status.hasSW ? 'yes' : 'no'} | controller: {status.hasController ? 'yes' : 'no'}</div>
       <div>scope: {status.swScope ?? 'null'}</div>
+      <div>reg: active={String(status.swActive)} waiting={String(status.swWaiting)} installing={String(status.swInstalling)}</div>
+      <div>script: {status.swScriptURL ?? 'null'}</div>
       <div>locale(cookie): {status.localeCookie ?? 'null'}</div>
       <div>locale(nav): {status.localeNavigator ?? 'null'}</div>
       <div>pages-v1: {status.pagesCached ? 'HIT' : 'MISS'} | key: {status.pagesCacheKey ?? 'null'}</div>
