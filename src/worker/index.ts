@@ -16,7 +16,10 @@ declare const self: ServiceWorkerGlobalScope;
 const serwist = new Serwist({
   // Only precache entries from the build manifest (which have revision info)
   // Dynamic routes like /en/, /fr/, /ar/ are handled by runtime caching
-  precacheEntries: self.__SW_MANIFEST ?? [],
+  // Disable install-time precaching. On Vercel/Next.js, a single missing asset
+  // (404) in the precache list breaks SW install with "bad-precaching-response".
+  // We rely on runtime caching below instead.
+  precacheEntries: [],
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
@@ -31,14 +34,11 @@ const serwist = new Serwist({
 const PAGES_CACHE = 'pages-v1';
 const ASSETS_CACHE = 'assets-v1';
 
-function getCookieValue(cookieHeader: string | null, name: string): string | null {
-  if (!cookieHeader) return null;
-  const parts = cookieHeader.split(';');
-  for (const part of parts) {
-    const [k, ...rest] = part.trim().split('=');
-    if (k === name) return rest.join('=');
-  }
-  return null;
+function getPrimaryAcceptLanguage(header: string | null): string {
+  if (!header) return 'ar';
+  const first = header.split(',')[0]?.trim();
+  if (!first) return 'ar';
+  return first.split(';')[0]?.trim() || 'ar';
 }
 
 self.addEventListener('message', (event) => {
@@ -90,11 +90,13 @@ self.addEventListener('fetch', (event) => {
       try {
         console.log('[SW] navigate fetch', { pathname: url.pathname });
 
-        // Locale-aware caching (next-intl localePrefix: "never"):
-        // The same pathname can render different HTML depending on the selected locale.
-        // We key HTML cache by NEXT_LOCALE cookie to avoid serving the wrong language offline.
-        const cookieHeader = request.headers.get('cookie');
-        const locale = getCookieValue(cookieHeader, 'NEXT_LOCALE') ?? 'ar';
+        // Locale-aware caching:
+        // If you include a locale in the URL (recommended), caching is naturally separated.
+        // When localePrefix is "never", the URL doesn't change per language; SW cannot
+        // reliably read cookies, so we fallback to Accept-Language.
+        const urlLocale = url.searchParams.get('__sw_locale');
+        const acceptLanguage = getPrimaryAcceptLanguage(request.headers.get('accept-language'));
+        const locale = urlLocale ?? acceptLanguage;
         const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
         const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
         console.log('[SW] navigation cache key', { pathname: url.pathname, locale });
@@ -122,8 +124,9 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       } catch {
-        const cookieHeader = request.headers.get('cookie');
-        const locale = getCookieValue(cookieHeader, 'NEXT_LOCALE') ?? 'ar';
+        const urlLocale = url.searchParams.get('__sw_locale');
+        const acceptLanguage = getPrimaryAcceptLanguage(request.headers.get('accept-language'));
+        const locale = urlLocale ?? acceptLanguage;
         const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
         const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
         const cache = await caches.open(PAGES_CACHE);
