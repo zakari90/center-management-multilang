@@ -16,9 +16,8 @@ declare const self: ServiceWorkerGlobalScope;
 const serwist = new Serwist({
   // Only precache entries from the build manifest (which have revision info)
   // Dynamic routes like /en/, /fr/, /ar/ are handled by runtime caching
-  // Disable install-time precaching. On Vercel/Next.js, a single missing asset
-  // (404) in the precache list breaks SW install with "bad-precaching-response".
-  // We rely on runtime caching below instead.
+  // IMPORTANT: Disable build precaching. A single 404 entry causes SW install to fail
+  // with "bad-precaching-response", which means offline refresh won't be controlled.
   precacheEntries: [],
   skipWaiting: true,
   clientsClaim: true,
@@ -39,6 +38,21 @@ function getPrimaryAcceptLanguage(header: string | null): string {
   const first = header.split(',')[0]?.trim();
   if (!first) return 'ar';
   return first.split(';')[0]?.trim() || 'ar';
+}
+
+async function matchAnyLocalePage(cache: Cache, origin: string, pathname: string): Promise<Response | undefined> {
+  // Fallback: when localePrefix is "never", locale selection may not be reliably
+  // detectable in the SW on a hard refresh. If we have *any* cached HTML variant
+  // for this pathname, return it.
+  const keys = await cache.keys();
+  const prefix = `${origin}${pathname}?__sw_locale=`;
+  for (const req of keys) {
+    if (req.url.startsWith(prefix)) {
+      const res = await cache.match(req);
+      if (res) return res;
+    }
+  }
+  return undefined;
 }
 
 self.addEventListener('message', (event) => {
@@ -134,6 +148,11 @@ self.addEventListener('fetch', (event) => {
         if (cached) {
           console.log('[SW] offline cache hit', { pathname: url.pathname });
           return cached;
+        }
+        const anyLocale = await matchAnyLocalePage(cache, url.origin, url.pathname);
+        if (anyLocale) {
+          console.log('[SW] offline cache hit (any locale)', { pathname: url.pathname });
+          return anyLocale;
         }
         console.log('[SW] offline cache miss', { pathname: url.pathname });
         return new Response('Offline', {
