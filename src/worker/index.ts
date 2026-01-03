@@ -55,6 +55,19 @@ async function matchAnyLocalePage(cache: Cache, origin: string, pathname: string
   return undefined;
 }
 
+async function matchAppShell(cache: Cache, origin: string): Promise<Response | undefined> {
+  // As a last resort, serve a cached "app shell" so offline refresh doesn't crash.
+  // This requires the user to have visited / at least once online.
+  const shell = await matchAnyLocalePage(cache, origin, '/');
+  if (shell) return shell;
+
+  // Backward compatibility: if something cached '/' without the locale query.
+  const plain = await cache.match('/');
+  if (plain) return plain;
+
+  return undefined;
+}
+
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('[SW] received SKIP_WAITING')
@@ -154,6 +167,13 @@ self.addEventListener('fetch', (event) => {
           console.log('[SW] offline cache hit (any locale)', { pathname: url.pathname });
           return anyLocale;
         }
+
+        const shell = await matchAppShell(cache, url.origin);
+        if (shell) {
+          console.log('[SW] offline fallback to app shell', { pathname: url.pathname });
+          return shell;
+        }
+
         console.log('[SW] offline cache miss', { pathname: url.pathname });
         return new Response('Offline', {
           status: 503,
