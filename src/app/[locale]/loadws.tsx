@@ -23,6 +23,46 @@ export default function LoadWS(){
             .then((registration) => {
               console.log('Service Worker registered');
 
+              console.log('[SW] registration state', {
+                active: !!registration.active,
+                waiting: !!registration.waiting,
+                installing: !!registration.installing,
+                scope: registration.scope,
+                scriptURL:
+                  registration.active?.scriptURL ??
+                  registration.waiting?.scriptURL ??
+                  registration.installing?.scriptURL ??
+                  null,
+              });
+
+              fetch('/sw.js', { cache: 'no-store' })
+                .then(async (r) => {
+                  console.log('[SW] /sw.js fetched', {
+                    ok: r.ok,
+                    status: r.status,
+                    contentType: r.headers.get('content-type'),
+                  });
+                  if (!r.ok) return;
+                  const text = await r.text().catch(() => '');
+                  console.log('[SW] /sw.js first bytes', text.slice(0, 120));
+                })
+                .catch((e) => {
+                  console.log('[SW] /sw.js fetch failed', e);
+                });
+
+              const attachInstalling = (installing: ServiceWorker) => {
+                installing.addEventListener('statechange', () => {
+                  console.log('[SW] statechange', { state: installing.state });
+                  if (installing.state === 'redundant') {
+                    console.log('[SW] installing became redundant (likely install failure)');
+                  }
+                });
+              };
+
+              if (registration.installing) {
+                attachInstalling(registration.installing);
+              }
+
               const trySkipWaiting = () => {
                 if (registration.waiting) {
                   console.log('[SW] sending SKIP_WAITING to waiting worker');
@@ -37,13 +77,9 @@ export default function LoadWS(){
                 console.log('[SW] updatefound');
                 const installing = registration.installing;
                 if (!installing) return;
+                attachInstalling(installing);
                 installing.addEventListener('statechange', () => {
-                  console.log('[SW] statechange', { state: installing.state });
-                  if (installing.state === 'redundant') {
-                    console.log('[SW] installing became redundant (likely install failure)');
-                  }
                   if (installing.state === 'installed') {
-                    // New SW installed; if there's an existing controller, it will be waiting.
                     trySkipWaiting();
                   }
                 });
