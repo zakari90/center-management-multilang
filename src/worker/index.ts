@@ -114,54 +114,57 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     (async () => {
+      console.log('[SW] navigate fetch', { pathname: url.pathname });
+
+      // Locale-aware caching:
+      // If you include a locale in the URL (recommended), caching is naturally separated.
+      // When localePrefix is "never", the URL doesn't change per language; SW cannot
+      // reliably read cookies, so we fallback to Accept-Language.
+      const urlLocale = url.searchParams.get('__sw_locale');
+      const acceptLanguage = getPrimaryAcceptLanguage(request.headers.get('accept-language'));
+      const locale = urlLocale ?? acceptLanguage;
+      const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
+      const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
+      console.log('[SW] navigation cache key', { pathname: url.pathname, locale });
+
+      const cache = await caches.open(PAGES_CACHE);
+
+      // Option C: Cache-first IF cached exists, otherwise go network and cache.
+      const cached = await cache.match(cacheKey);
+      if (cached) {
+        // Revalidate in background
+        event.waitUntil(
+          (async () => {
+            try {
+              const res = await fetch(request);
+              if (res.ok) await cache.put(cacheKey, res.clone());
+            } catch {}
+          })(),
+        );
+        return cached;
+      }
+
+      // If no cached exact key, try navigation preload then network.
       try {
-        console.log('[SW] navigate fetch', { pathname: url.pathname });
-
-        // Locale-aware caching:
-        // If you include a locale in the URL (recommended), caching is naturally separated.
-        // When localePrefix is "never", the URL doesn't change per language; SW cannot
-        // reliably read cookies, so we fallback to Accept-Language.
-        const urlLocale = url.searchParams.get('__sw_locale');
-        const acceptLanguage = getPrimaryAcceptLanguage(request.headers.get('accept-language'));
-        const locale = urlLocale ?? acceptLanguage;
-        const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
-        const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
-        console.log('[SW] navigation cache key', { pathname: url.pathname, locale });
-
         const preload = await event.preloadResponse;
         if (preload) {
           console.log('[SW] using navigation preload', { pathname: url.pathname });
-          // Opportunistically cache preload HTML
           try {
-            const cache = await caches.open(PAGES_CACHE);
             await cache.put(cacheKey, preload.clone());
           } catch {}
           return preload;
         }
+
         const networkResponse = await fetch(request);
         console.log('[SW] network ok', { pathname: url.pathname, status: networkResponse.status });
-
-        // Cache successful HTML navigations automatically on first visit.
         try {
           if (networkResponse.ok) {
-            const cache = await caches.open(PAGES_CACHE);
             await cache.put(cacheKey, networkResponse.clone());
           }
         } catch {}
-
         return networkResponse;
       } catch {
-        const urlLocale = url.searchParams.get('__sw_locale');
-        const acceptLanguage = getPrimaryAcceptLanguage(request.headers.get('accept-language'));
-        const locale = urlLocale ?? acceptLanguage;
-        const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
-        const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
-        const cache = await caches.open(PAGES_CACHE);
-        const cached = await cache.match(cacheKey);
-        if (cached) {
-          console.log('[SW] offline cache hit', { pathname: url.pathname });
-          return cached;
-        }
+        // Offline fallback chain
         const anyLocale = await matchAnyLocalePage(cache, url.origin, url.pathname);
         if (anyLocale) {
           console.log('[SW] offline cache hit (any locale)', { pathname: url.pathname });
