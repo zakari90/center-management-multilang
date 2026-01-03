@@ -39,6 +39,9 @@ export default function LoadWS(){
                 if (!installing) return;
                 installing.addEventListener('statechange', () => {
                   console.log('[SW] statechange', { state: installing.state });
+                  if (installing.state === 'redundant') {
+                    console.log('[SW] installing became redundant (likely install failure)');
+                  }
                   if (installing.state === 'installed') {
                     // New SW installed; if there's an existing controller, it will be waiting.
                     trySkipWaiting();
@@ -47,7 +50,9 @@ export default function LoadWS(){
               });
 
               // Ensure we fetch the latest SW after deployments
-              registration.update().catch(() => {});
+              registration.update().catch((error) => {
+                console.error('Error updating Service Worker:', error);
+              });
             })
             .catch((error) => {
               console.error('Service Worker registration failed:', error);

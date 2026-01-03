@@ -2,6 +2,8 @@ import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist } from "serwist";
 
+console.log('[SW] boot', { href: self.location?.href });
+
 // Types for global config and manifest injection (for Serwist/Next.js)
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -10,6 +12,22 @@ declare global {
 }
 
 declare const self: ServiceWorkerGlobalScope;
+
+self.addEventListener('error', (event) => {
+  // Surface SW script errors that prevent install/activate.
+  console.log('[SW] error', {
+    message: (event as ErrorEvent).message,
+    filename: (event as ErrorEvent).filename,
+    lineno: (event as ErrorEvent).lineno,
+    colno: (event as ErrorEvent).colno,
+  });
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+  console.log('[SW] unhandledrejection', {
+    reason: (event as PromiseRejectionEvent).reason,
+  });
+});
 
 self.addEventListener('install', (event) => {
   console.log('[SW] install');
