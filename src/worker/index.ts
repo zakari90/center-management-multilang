@@ -97,6 +97,7 @@ self.addEventListener('fetch', (event) => {
         const locale = getCookieValue(cookieHeader, 'NEXT_LOCALE') ?? 'ar';
         const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
         const cacheKey = new Request(cacheKeyUrl, { method: 'GET' });
+        console.log('[SW] navigation cache key', { pathname: url.pathname, locale });
 
         const preload = await event.preloadResponse;
         if (preload) {
