@@ -6,6 +6,7 @@ export default function LoadWS(){
     const hasRegistered = useRef(false);
 
     useEffect(() => {
+
         // Prevent double registration (React Strict Mode in development)
         if (hasRegistered.current) return;
         
@@ -19,7 +20,7 @@ export default function LoadWS(){
           navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
 
           navigator.serviceWorker
-            .register('/sw.js', { updateViaCache: 'none' })
+            .register('/custom-sw.js', { updateViaCache: 'none' })
             .then((registration) => {
               console.log('Service Worker registered');
 
@@ -35,19 +36,19 @@ export default function LoadWS(){
                   null,
               });
 
-              fetch('/sw.js', { cache: 'no-store' })
+              fetch('/custom-sw.js', { cache: 'no-store' })
                 .then(async (r) => {
-                  console.log('[SW] /sw.js fetched', {
+                  console.log('[SW] /custom-sw.js fetched', {
                     ok: r.ok,
                     status: r.status,
                     contentType: r.headers.get('content-type'),
                   });
                   if (!r.ok) return;
                   const text = await r.text().catch(() => '');
-                  console.log('[SW] /sw.js first bytes', text.slice(0, 120));
+                  console.log('[SW] /custom-sw.js first bytes', text.slice(0, 120));
                 })
                 .catch((e) => {
-                  console.log('[SW] /sw.js fetch failed', e);
+                  console.log('[SW] /custom-sw.js fetch failed', e);
                 });
 
               const attachInstalling = (installing: ServiceWorker) => {

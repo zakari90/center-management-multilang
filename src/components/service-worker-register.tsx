@@ -19,7 +19,7 @@ export default function ServiceWorkerRegister() {
         if (!registration) {
           // Try to register the service worker manually as fallback
           navigator.serviceWorker
-            .register("/sw.js", { updateViaCache: 'none' }) // keep aligned with LoadWS
+            .register("/custom-sw.js", { updateViaCache: 'none' }) // keep aligned with LoadWS
             .then((reg) => {
               console.log("[SW] Service worker registered:", reg.scope);
               reg.update().catch(() => {});
