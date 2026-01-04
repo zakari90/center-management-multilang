@@ -114,9 +114,9 @@ export function LoginForm({
             {/* <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold text-primary">
               {t("welcomeBadge")}
             </span> */}
-            <h1 className="text-center mb-4  text-xl font-bold leading-tight text-foreground ">
+            {/* <h1 className="text-center mb-4  text-xl font-bold leading-tight text-foreground ">
               {tHome("title")}
-            </h1>
+            </h1> */}
             {/* <p className="text-base text-muted-foreground sm:text-lg">
               {tHome("description")}
             </p> */}
