@@ -51,12 +51,26 @@ export default function LoadWS(){
                 });
 
               const attachInstalling = (installing: ServiceWorker) => {
+                installing.addEventListener('error', (e) => {
+                  console.log('[SW] installing error event', e);
+                });
                 installing.addEventListener('statechange', () => {
                   console.log('[SW] statechange', { state: installing.state });
                   if (installing.state === 'redundant') {
                     console.log('[SW] installing became redundant (likely install failure)');
                   }
                 });
+
+                // Some failures do not trigger statechange logs reliably in the page console.
+                // Poll a few times to see if it gets stuck.
+                let tries = 0;
+                const id = window.setInterval(() => {
+                  tries += 1;
+                  console.log('[SW] installing poll', { state: installing.state });
+                  if (installing.state === 'activated' || installing.state === 'redundant' || tries >= 10) {
+                    window.clearInterval(id);
+                  }
+                }, 500);
               };
 
               if (registration.installing) {
