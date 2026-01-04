@@ -1,19 +1,13 @@
-import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+/// <reference lib="webworker" />
 
-console.log('[SW] boot', { href: self.location?.href });
+// Next.js/TS builds often include DOM libs, which can type `self` as `Window`.
+// To avoid build errors (and because this file is executed as a Service Worker),
+// we use a minimal `any` typing here.
+const sw: any = self as any;
 
-// Types for global config and manifest injection (for Serwist/Next.js)
-declare global {
-  interface WorkerGlobalScope extends SerwistGlobalConfig {
-    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
-  }
-}
+console.log('[SW] boot', { href: sw.location?.href });
 
-declare const self: ServiceWorkerGlobalScope;
-
-self.addEventListener('error', (event) => {
+sw.addEventListener('error', (event: any) => {
   // Surface SW script errors that prevent install/activate.
   console.log('[SW] error', {
     message: (event as ErrorEvent).message,
@@ -23,23 +17,28 @@ self.addEventListener('error', (event) => {
   });
 });
 
-self.addEventListener('unhandledrejection', (event) => {
+sw.addEventListener('unhandledrejection', (event: any) => {
   console.log('[SW] unhandledrejection', {
     reason: (event as PromiseRejectionEvent).reason,
   });
 });
 
-self.addEventListener('install', (event) => {
+const PAGES_CACHE = 'pages-v1';
+const ASSETS_CACHE = 'assets-v1';
+
+sw.addEventListener('install', (event: any) => {
   console.log('[SW] install');
+  // Activate new SW immediately.
+  sw.skipWaiting();
   event.waitUntil(Promise.resolve());
 });
 
-self.addEventListener('activate', (event) => {
+sw.addEventListener('activate', (event: any) => {
   console.log('[SW] activate');
   event.waitUntil(
     (async () => {
       try {
-        await self.clients.claim();
+        await sw.clients.claim();
         console.log('[SW] clients claimed');
       } catch (e) {
         console.log('[SW] clients claim failed', e);
@@ -47,28 +46,6 @@ self.addEventListener('activate', (event) => {
     })(),
   );
 });
-
-// ---- SERWIST CONFIG ----
-
-const serwist = new Serwist({
-  // Only precache entries from the build manifest (which have revision info)
-  // Dynamic routes like /en/, /fr/, /ar/ are handled by runtime caching
-  // IMPORTANT: Disable build precaching. A single 404 entry causes SW install to fail
-  // with "bad-precaching-response", which means offline refresh won't be controlled.
-  precacheEntries: [],
-  skipWaiting: true,
-  clientsClaim: true,
-  navigationPreload: true,
-  disableDevLogs: true,
-  precacheOptions: {
-    cleanupOutdatedCaches: true,
-    ignoreURLParametersMatching: [/.*/], // Ignore URL query for cached files
-  },
-  runtimeCaching: defaultCache, // Next.js dynamic/runtime caching handles all routes
-});
-
-const PAGES_CACHE = 'pages-v1';
-const ASSETS_CACHE = 'assets-v1';
 
 function getPrimaryAcceptLanguage(header: string | null): string {
   if (!header) return 'ar';
@@ -105,21 +82,21 @@ async function matchAppShell(cache: Cache, origin: string): Promise<Response | u
   return undefined;
 }
 
-self.addEventListener('message', (event) => {
+sw.addEventListener('message', (event: any) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('[SW] received SKIP_WAITING')
-    self.skipWaiting();
+    sw.skipWaiting();
   }
 });
 
-self.addEventListener('fetch', (event) => {
+sw.addEventListener('fetch', (event: any) => {
   const { request } = event;
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
 
   // Automatically cache Next.js static assets (JS/CSS/fonts/etc) so the app can hydrate offline.
   // We keep this independent from Serwist precache to avoid install failures.
-  if (url.origin === self.location.origin && url.pathname.startsWith('/_next/static/')) {
+  if (url.origin === sw.location.origin && url.pathname.startsWith('/_next/static/')) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(ASSETS_CACHE);
@@ -223,7 +200,3 @@ self.addEventListener('fetch', (event) => {
     })(),
   );
 });
-
-// ---- CORE SW LISTENERS ----
-
-serwist.addEventListeners();
