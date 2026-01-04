@@ -6,6 +6,76 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.app-shell {
+  container-type: inline-size;
+  container-name: app;
+}
+
+.app-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(in oklch, var(--background) 92%, transparent);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.app-bottom-nav__inner {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+
+.app-bottom-nav__item {
+  min-height: 48px;
+  min-width: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  outline: none;
+}
+
+.app-bottom-nav__item:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.app-bottom-nav__item--active {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.app-bottom-nav__label {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  margin-top: 0.125rem;
+  text-align: center;
+}
+
+.app-bottom-nav__icon {
+  display: grid;
+  place-items: center;
+}
+
+.app-content {
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+
+@container app (min-width: 768px) {
+  .app-bottom-nav {
+    display: none;
+  }
+
+  .app-content {
+    padding-bottom: 0;
+  }
+}
+
 :root {
   --background: oklch(0.9751 0.0127 244.2507);
   --foreground: oklch(0.3729 0.0306 259.7328);

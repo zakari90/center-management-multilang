@@ -2,6 +2,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import React, { ReactNode, Suspense, lazy, ComponentType, useEffect, useState, useMemo, useRef, ErrorInfo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
 import { Button } from './button'
@@ -476,11 +477,13 @@ export function LazyImage({
       )}
       
       {isInView && (
-        <img
-          src={isError ? fallback : src}
+        <Image
+          src={(isError ? (fallback || src) : src) as string}
           alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className={cn(
-            'w-full h-full object-cover transition-opacity duration-300',
+            'object-cover transition-opacity duration-300',
             isLoaded ? 'opacity-100' : 'opacity-0'
           )}
           onLoad={handleLoad}

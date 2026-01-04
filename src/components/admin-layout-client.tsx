@@ -3,6 +3,8 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
+import { CalendarDays, FileText, Home, LayoutGrid } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -100,27 +102,40 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
   ];
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar
-        side={isArabic ? "right" : "left"}
-        variant="inset"
-        items={navItems}
-        user={userData}
-      />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-        </header>
-        <main className="flex-1 overflow-auto">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="app-shell">
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar
+          side={isArabic ? "right" : "left"}
+          variant="inset"
+          items={navItems}
+          user={userData}
+        />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <main className="app-content flex-1 overflow-auto">{children}</main>
+        </SidebarInset>
+
+        <MobileBottomNav
+          ariaLabel={t("dashboard")}
+          items={[
+            { label: t("dashboard"), href: "/admin", icon: <Home className="size-5" /> },
+            { label: t("center"), href: "/admin/center", icon: <LayoutGrid className="size-5" /> },
+            { label: t("receipts"), href: "/admin/receipts", icon: <FileText className="size-5" /> },
+            { label: t("schedule"), href: "/admin/schedule", icon: <CalendarDays className="size-5" /> },
+          ]}
+          menu={<SidebarTrigger className="h-12 w-12" />}
+        />
+      </SidebarProvider>
+    </div>
   );
 }
 
