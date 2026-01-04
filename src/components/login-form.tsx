@@ -104,7 +104,7 @@ export function LoginForm({
 
   return (
     <div className={cn("bg-background", className)} {...props}>
-      <div className=" mx-auto flex-col w-full max-w-6xl flex-1 gap-12 px-4 py-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-1 flex-col items-stretch justify-center gap-10 px-4 py-10 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:py-12">
         <div className="flex flex-1 flex-col gap-8 text-center lg:text-left">
           {/* <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <ModeToggle />
@@ -144,7 +144,7 @@ export function LoginForm({
         </div>
 
         <div className="flex flex-1 flex-col items-center justify-center gap-6">
-          <div className="w-full max-w-md">
+          <div className="w-full sm:max-w-md">
             <Card className="border-0 shadow-xl">
               <CardHeader className="pb-4 sm:pb-6 px-4 sm:px-6">
                 <div className="flex flex-col items-center gap-4">
