@@ -106,7 +106,7 @@ export function LoginForm({
   return (
 <div className={cn("bg-background min-h-svh w-full", className)} {...props}>
   <div className="flex min-h-svh flex-1 items-center justify-center px-4 py-10 sm:px-6">
-    <div className="w-full max-w-[420px] space-y-6">
+    <div className="w-full w-[420px] space-y-1">
       
       {/* --- Main Card --- */}
       <Card className="border-border shadow-lg">
