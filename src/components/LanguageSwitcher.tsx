@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -27,6 +27,18 @@ const LanguageSwitcher = () => {
     return safe;
   };
 
+  const buildNextPath = (currentPathname: string, newLanguage: string) => {
+    const safe = currentPathname && currentPathname.startsWith("/") ? currentPathname : `/${currentPathname || ""}`;
+    const segments = safe.split("/");
+    if (["ar", "en", "fr"].includes(segments[1])) {
+      segments[1] = newLanguage;
+    } else {
+      segments.splice(1, 0, newLanguage);
+    }
+    const nextPath = segments.join("/");
+    return nextPath.startsWith("/") ? nextPath : `/${nextPath}`;
+  };
+
   useEffect(() => {
     setIsMounted(true);
     const savedLanguage =
@@ -47,8 +59,8 @@ const LanguageSwitcher = () => {
     setCurrentLanguage(newLanguage);
     document.cookie = `NEXT_LOCALE=${newLanguage}; path=/;`;
 
-    const basePath = normalizePathname(pathname);
-    router.push(basePath, { locale: newLanguage });
+    const nextPath = buildNextPath(pathname, newLanguage);
+    router.push(nextPath);
     router.refresh();
   };
 
