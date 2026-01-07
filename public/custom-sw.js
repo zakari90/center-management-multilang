@@ -5,6 +5,7 @@
 
 const PAGES_CACHE = 'pages-v1';
 const ASSETS_CACHE = 'assets-v1';
+const OFFLINE_URL = '/offline.html';
 
 const sw = self;
 
@@ -26,7 +27,17 @@ sw.addEventListener('unhandledrejection', (event) => {
 sw.addEventListener('install', (event) => {
   console.log('[SW] install');
   sw.skipWaiting();
-  event.waitUntil(Promise.resolve());
+  event.waitUntil(
+    (async () => {
+      try {
+        const cache = await caches.open(PAGES_CACHE);
+        await cache.add(OFFLINE_URL);
+        console.log('[SW] cached offline.html');
+      } catch (e) {
+        console.log('[SW] failed to cache offline.html', e);
+      }
+    })(),
+  );
 });
 
 sw.addEventListener('activate', (event) => {
@@ -154,6 +165,21 @@ sw.addEventListener('fetch', (event) => {
 
           const shell = await matchAppShell(cache, url.origin);
           if (shell) return shell;
+
+          try {
+            const offlineCached = await cache.match(OFFLINE_URL);
+            if (offlineCached) return offlineCached;
+          } catch {}
+
+          try {
+            const offlineRes = await fetch(OFFLINE_URL, { cache: 'no-store' });
+            if (offlineRes && offlineRes.ok) {
+              try {
+                await cache.put(OFFLINE_URL, offlineRes.clone());
+              } catch {}
+              return offlineRes;
+            }
+          } catch {}
 
           return new Response('Offline', {
             status: 503,

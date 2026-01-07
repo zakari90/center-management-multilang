@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 
 export default function LoadWS(){
     const hasRegistered = useRef(false);
+    const initialHadController = useRef(false);
+    const didReloadForControl = useRef(false);
 
     useEffect(() => {
 
@@ -12,8 +14,15 @@ export default function LoadWS(){
         
         if ('serviceWorker' in navigator) {
           hasRegistered.current = true;
+          initialHadController.current = !!navigator.serviceWorker.controller;
           const onControllerChange = () => {
-            console.log('[SW] controllerchange -> reloading to be controlled');
+            // Reload only once to pick up control on first install.
+            // Avoid infinite reloads / aborting navigations on updates.
+            if (initialHadController.current) return;
+            if (didReloadForControl.current) return;
+            if (!navigator.serviceWorker.controller) return;
+            didReloadForControl.current = true;
+            console.log('[SW] controllerchange -> reloading once to become controlled');
             window.location.reload();
           };
 
