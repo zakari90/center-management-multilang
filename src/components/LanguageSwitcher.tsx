@@ -26,7 +26,8 @@ const LanguageSwitcher = () => {
         ?.split("=")[1] || "ar";
     setCurrentLanguage(savedLanguage);
 
-    const urlLanguage = pathname.split("/")[1];
+    const safePathname = pathname.startsWith("/") ? pathname : `/${pathname}`;
+    const urlLanguage = safePathname.split("/")[1];
     if (["ar", "en", "fr"].includes(urlLanguage)) {
       setCurrentLanguage(urlLanguage);
     }
@@ -36,14 +37,16 @@ const LanguageSwitcher = () => {
     setCurrentLanguage(newLanguage);
     document.cookie = `NEXT_LOCALE=${newLanguage}; path=/;`;
 
-    const segments = pathname.split("/");
+    const safePathname = pathname.startsWith("/") ? pathname : `/${pathname}`;
+    const segments = safePathname.split("/");
     if (["en", "ar", "fr"].includes(segments[1])) {
       segments[1] = newLanguage;
     } else {
       segments.splice(1, 0, newLanguage);
     }
 
-    router.push(segments.join("/"));
+    const nextPath = segments.join("/") || `/${newLanguage}`;
+    router.push(nextPath);
     router.refresh();
   };
 
