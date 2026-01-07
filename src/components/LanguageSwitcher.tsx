@@ -17,6 +17,16 @@ const LanguageSwitcher = () => {
   const [currentLanguage, setCurrentLanguage] = useState("ar");
   const [isMounted, setIsMounted] = useState(false);
 
+  const normalizePathname = (value: string) => {
+    const safe = value.startsWith("/") ? value : `/${value}`;
+    const segments = safe.split("/");
+    if (["ar", "en", "fr"].includes(segments[1])) {
+      const rest = segments.slice(2).join("/");
+      return rest ? `/${rest}` : "/";
+    }
+    return safe;
+  };
+
   useEffect(() => {
     setIsMounted(true);
     const savedLanguage =
@@ -37,16 +47,8 @@ const LanguageSwitcher = () => {
     setCurrentLanguage(newLanguage);
     document.cookie = `NEXT_LOCALE=${newLanguage}; path=/;`;
 
-    const safePathname = pathname.startsWith("/") ? pathname : `/${pathname}`;
-    const segments = safePathname.split("/");
-    if (["en", "ar", "fr"].includes(segments[1])) {
-      segments[1] = newLanguage;
-    } else {
-      segments.splice(1, 0, newLanguage);
-    }
-
-    const nextPath = segments.join("/") || `/${newLanguage}`;
-    router.push(nextPath);
+    const basePath = normalizePathname(pathname);
+    router.push(basePath, { locale: newLanguage });
     router.refresh();
   };
 
