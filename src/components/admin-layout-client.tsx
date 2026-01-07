@@ -73,30 +73,32 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     avatar: "/school.svg",
   };
 
+  const base = `/${locale}`;
+
   const navItems = [
     {
       title: t("dashboard"),
-      url: "/admin",
+      url: `${base}/admin`,
       icon: "/dashboard.svg",
     },
     {
       title: t("center"),
-      url: "/admin/center",
+      url: `${base}/admin/center`,
       icon: "/school.svg",
     },
     {
       title: t("users"),
-      url: "/admin/users",
+      url: `${base}/admin/users`,
       icon: "/manager.svg",
     },
     {
       title: t("receipts"),
-      url: "/admin/receipts",
+      url: `${base}/admin/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: "/admin/schedule",
+      url: `${base}/admin/schedule`,
       icon: "/calendar.svg",
     },
   ];
@@ -127,10 +129,10 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
         <MobileBottomNav
           ariaLabel={t("dashboard")}
           items={[
-            { label: t("dashboard"), href: "/admin", icon: <Home className="size-5" /> },
-            { label: t("center"), href: "/admin/center", icon: <LayoutGrid className="size-5" /> },
-            { label: t("receipts"), href: "/admin/receipts", icon: <FileText className="size-5" /> },
-            { label: t("schedule"), href: "/admin/schedule", icon: <CalendarDays className="size-5" /> },
+            { label: t("dashboard"), href: `${base}/admin`, icon: <Home className="size-5" /> },
+            { label: t("center"), href: `${base}/admin/center`, icon: <LayoutGrid className="size-5" /> },
+            { label: t("receipts"), href: `${base}/admin/receipts`, icon: <FileText className="size-5" /> },
+            { label: t("schedule"), href: `${base}/admin/schedule`, icon: <CalendarDays className="size-5" /> },
           ]}
           menu={<SidebarTrigger className="h-12 w-12" />}
         />

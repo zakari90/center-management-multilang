@@ -25,7 +25,7 @@ import {
   Mail,
   UserCog
 } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useActionState, useEffect, useState } from "react"
 import {
@@ -58,6 +58,7 @@ export function LoginForm({
   const t = useTranslations("login")
   const tManager = useTranslations("loginManager")
   const tHome = useTranslations("homePage")
+  const locale = useLocale()
   const { login } = useAuth()
   const router = useRouter()
 
@@ -79,13 +80,14 @@ export function LoginForm({
       // <AutoSyncProvider />
       login(state.data.user)
       const userRole = state.data.user.role
+      const base = `/${locale}`
       const destination = userRole === "MANAGER"
-        ? "/manager"
+        ? `${base}/manager`
         : userRole === "ADMIN"
-          ? "/admin"
+          ? `${base}/admin`
           : role === "manager"
-            ? "/manager"
-            : "/admin"
+            ? `${base}/manager`
+            : `${base}/admin`
 
       const timeout = setTimeout(() => {
         router.push(destination)
@@ -93,7 +95,7 @@ export function LoginForm({
 
       return () => clearTimeout(timeout)
     }
-  }, [state, activeStateMatchesRole, login, router, role])
+  }, [state, activeStateMatchesRole, login, router, role, locale])
 
   const successFallback = role === "manager" ? tManager("successMessage") : "Login successful! Redirecting..."
 

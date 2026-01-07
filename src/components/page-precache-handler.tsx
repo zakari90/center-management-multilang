@@ -7,7 +7,7 @@ import { CheckCircle, Download, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 // Pages to precache for offline-first experience
-const PAGES_TO_PRECACHE = [
+const BASE_PAGES_TO_PRECACHE = [
   // Auth pages
   '/login',
   '/loginmanager',
@@ -33,6 +33,10 @@ const PAGES_TO_PRECACHE = [
 ]
 
 const LOCALES = ['en', 'ar', 'fr']
+
+const PAGES_TO_PRECACHE = LOCALES.flatMap((locale) =>
+  BASE_PAGES_TO_PRECACHE.map((path) => `/${locale}${path}`)
+)
 
 export default function PagePrecacheHandler() {
   const [isPrecaching, setIsPrecaching] = useState(false)

@@ -73,30 +73,32 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
     avatar: "/school.svg",
   };
 
+  const base = `/${locale}`;
+
   const navItems = [
     {
       title: t("dashboard"),
-      url: "/manager",
+      url: `${base}/manager`,
       icon: "/dashboard.svg",
     },
     {
       title: t("teachers"),
-      url: "/manager/teachers",
+      url: `${base}/manager/teachers`,
       icon: "/teacher.svg",
     },
     {
       title: t("students"),
-      url: "/manager/students",
+      url: `${base}/manager/students`,
       icon: "/students.svg",
     },
     {
       title: t("receipts"),
-      url: "/manager/receipts",
+      url: `${base}/manager/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: "/manager/schedule",
+      url: `${base}/manager/schedule`,
       icon: "/calendar.svg",
     }
   ];
@@ -122,11 +124,11 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
         <MobileBottomNav
           ariaLabel={t("dashboard")}
           items={[
-            { label: t("dashboard"), href: "/manager", icon: <Home className="size-5" /> },
-            { label: t("teachers"), href: "/manager/teachers", icon: <Users className="size-5" /> },
-            { label: t("students"), href: "/manager/students", icon: <Users className="size-5" /> },
-            { label: t("receipts"), href: "/manager/receipts", icon: <FileText className="size-5" /> },
-            { label: t("schedule"), href: "/manager/schedule", icon: <CalendarDays className="size-5" /> },
+            { label: t("dashboard"), href: `${base}/manager`, icon: <Home className="size-5" /> },
+            { label: t("teachers"), href: `${base}/manager/teachers`, icon: <Users className="size-5" /> },
+            { label: t("students"), href: `${base}/manager/students`, icon: <Users className="size-5" /> },
+            { label: t("receipts"), href: `${base}/manager/receipts`, icon: <FileText className="size-5" /> },
+            { label: t("schedule"), href: `${base}/manager/schedule`, icon: <CalendarDays className="size-5" /> },
           ]}
           menu={<SidebarTrigger className="h-12 w-12" />}
         />
