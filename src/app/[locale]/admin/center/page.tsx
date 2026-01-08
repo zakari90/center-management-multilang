@@ -3,13 +3,19 @@
 import CenterPresentation from "@/components/centerPresentation";
 import { NewCenterForm } from "@/components/newCenterForm";
 import { useAuth } from "@/context/authContext";
+import { Button } from "@/components/ui/button";
 import { centerActions } from "@/lib/dexie/dexieActions";
+import ServerActionCenters from "@/lib/dexie/centerServerAction";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { isOnline } from "@/lib/utils/network";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 function Page() {
   const [centerId, setCenterId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreatingDefaultCenter, setIsCreatingDefaultCenter] = useState(false);
   const { user } = useAuth();
 
   const fetchCenterId = useCallback(async () => {
@@ -83,6 +89,55 @@ function Page() {
     fetchCenterId();
   }, [fetchCenterId]);
 
+  const handleCreateDefaultCenter = useCallback(async () => {
+    if (!user) {
+      toast.error("Unauthorized: Please log in again");
+      return;
+    }
+    if (user.role?.toUpperCase() !== "ADMIN") {
+      toast.error("Only admins can create a center");
+      return;
+    }
+
+    setIsCreatingDefaultCenter(true);
+    try {
+      const now = Date.now();
+      const id = generateObjectId();
+      const nextCenter = {
+        id,
+        name: `Center ${new Date(now).toLocaleDateString()}`,
+        address: "",
+        phone: "",
+        classrooms: [],
+        workingDays: [],
+        managers: [],
+        adminId: user.id,
+        status: "w" as const,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await centerActions.putLocal(nextCenter as any);
+
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(nextCenter as any);
+          await centerActions.markSynced(id);
+        } catch (e) {
+          console.warn("[CreateDefaultCenter] sync failed (will sync later)", e);
+        }
+      }
+
+      await fetchCenterId();
+      toast.success("Center created");
+    } catch (e) {
+      console.error("[CreateDefaultCenter] failed", e);
+      toast.error("Failed to create center");
+    } finally {
+      setIsCreatingDefaultCenter(false);
+    }
+  }, [fetchCenterId, user]);
+
   return (
     <div className="max-w-3xl mx-auto p-6">
       {isLoading ? (
@@ -93,6 +148,13 @@ function Page() {
         <CenterPresentation centerId={centerId} />
       ) : (
         <div className="space-y-4">
+          <Button
+            onClick={handleCreateDefaultCenter}
+            disabled={isCreatingDefaultCenter}
+            className="w-full"
+          >
+            {isCreatingDefaultCenter ? "Creating..." : "Create center automatically"}
+          </Button>
           <NewCenterForm onCenterCreated={handleCenterCreated} />
         </div>
       )}

@@ -146,21 +146,19 @@ export default function PWAUpdateHandler() {
     <>
       {/* Install Prompt */}
       {deferredPrompt && !isInstalled && (
-        <Card className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 border-primary bg-background shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Download className="h-5 w-5" />
+        <Card className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-72 z-50 border-primary bg-background shadow-lg">
+          <CardHeader className="pb-2 pt-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Download className="h-4 w-4" />
               {t('installTitle')}
             </CardTitle>
-            <CardDescription>
-              {t('installDescription')}
-            </CardDescription>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleInstall} 
+          <CardContent className="pt-0 pb-3">
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleInstall}
                 disabled={isUpdating}
+                size="sm"
                 className="flex-1"
               >
                 {isUpdating ? (
@@ -170,15 +168,15 @@ export default function PWAUpdateHandler() {
                   </>
                 ) : (
                   <>
-                    <Download className="h-4 w-4 mr-2" />
                     {t('install')}
                   </>
                 )}
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="ghost"
                 size="icon"
                 onClick={() => setDeferredPrompt(null)}
+                className="h-8 w-8"
               >
                 <X className="h-4 w-4" />
               </Button>
