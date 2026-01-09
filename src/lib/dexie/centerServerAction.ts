@@ -4,7 +4,18 @@ import { Center, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-const api_url = `${baseUrl}/api/center`;
+
+function getApiUrl(pathname: string) {
+  // In the browser, prefer relative URLs so we always hit the current origin.
+  // This avoids broken sync when NEXT_PUBLIC_BASE_URL is not set or is incorrect.
+  if (typeof window !== "undefined") {
+    return pathname;
+  }
+  return `${baseUrl}${pathname}`;
+}
+
+const api_url = getApiUrl("/api/center");
+const subjects_api_url = getApiUrl("/api/subjects");
 
 function transformServerCenter(serverCenter: any): Center {
   return {
@@ -141,7 +152,7 @@ const ServerActionCenters = {
           try {
             const subjectSyncResults = await Promise.allSettled(
               centerSubjects.map(subject => 
-                fetch(`${baseUrl}/api/subjects`, {
+                fetch(subjects_api_url, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   credentials: "include",
