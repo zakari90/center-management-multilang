@@ -6,7 +6,15 @@ import { Subject } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-const api_url = `${baseUrl}/api/subjects`;
+
+function getApiUrl(pathname: string) {
+  if (typeof window !== "undefined") {
+    return pathname;
+  }
+  return `${baseUrl}${pathname}`;
+}
+
+const api_url = getApiUrl("/api/subjects");
 
 // ✅ Transform server subject data to match local Subject interface
 function transformServerSubject(serverSubject: any): Subject {
@@ -37,11 +45,14 @@ const ServerActionSubjects = {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          id: subject.id,
           centerId: subject.centerId,
           name: subject.name,
           grade: subject.grade,
           price: subject.price,
           duration: subject.duration,
+          createdAt: new Date(subject.createdAt).toISOString(),
+          updatedAt: new Date(subject.updatedAt).toISOString(),
         }),
       });
 

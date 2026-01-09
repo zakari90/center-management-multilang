@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { centerId, name, grade, price, duration } = body
+    const { id, centerId, name, grade, price, duration, createdAt, updatedAt } = body
 
     if (!centerId) {
       return NextResponse.json(
@@ -58,13 +58,37 @@ export async function POST(request: Request) {
       )
     }
 
+    if (id) {
+      const existingSubject = await db.subject.findUnique({
+        where: { id },
+      })
+
+      if (existingSubject) {
+        const updatedSubject = await db.subject.update({
+          where: { id },
+          data: {
+            name,
+            grade,
+            price,
+            duration,
+            centerId,
+            ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
+          },
+        })
+        return NextResponse.json(updatedSubject)
+      }
+    }
+
     const subject = await db.subject.create({
       data: {
+        id: id || undefined,
         name,
         grade,
         price,
         duration,
-        centerId
+        centerId,
+        ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+        ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       }
     })
 
