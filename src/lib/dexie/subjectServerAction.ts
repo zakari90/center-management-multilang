@@ -79,7 +79,7 @@ const ServerActionSubjects = {
       return response.json();
     } catch (e) {
       console.error("Error saving subject to server:", e);
-      return null;
+      throw e;
     }
   },
 
