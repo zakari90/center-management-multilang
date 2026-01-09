@@ -74,6 +74,95 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
   const hasSyncedOnOnline = useRef(false)
   const previousOnlineStatus = useRef<boolean | null>(null)
 
+  // ✅ Auto-sync function when online
+  const syncWhenOnline = useCallback(async () => {
+    if (!isOnline() || isAutoSyncing) {
+      return
+    }
+
+    setIsAutoSyncing(true)
+    try {
+      console.log("[AutoSync] Starting automatic sync when online...")
+
+      // Sync centers and subjects (relevant to this component)
+      const [centerResult, subjectResult] = await Promise.allSettled([
+        ServerActionCenters.Sync(),
+        ServerActionSubjects.Sync(),
+      ])
+
+      const centerSuccess = centerResult.status === 'fulfilled'
+      const subjectSuccess = subjectResult.status === 'fulfilled'
+
+      if (centerSuccess && subjectSuccess) {
+        const centerData = centerResult.status === 'fulfilled' ? centerResult.value : null
+        const subjectData = subjectResult.status === 'fulfilled' ? subjectResult.value : null
+
+        const totalSuccess = (centerData as any)?.successCount || 0
+        const totalFail = (centerData as any)?.failCount || 0
+        const subjectSuccessCount = (subjectData as any)?.successCount || 0
+        const subjectFailCount = (subjectData as any)?.failCount || 0
+
+        const totalSynced = totalSuccess + subjectSuccessCount
+        const totalFailed = totalFail + subjectFailCount
+
+        if (totalSynced > 0 || totalFailed > 0) {
+          toast.success(
+            `Synced ${totalSynced} item(s)${totalFailed > 0 ? `, ${totalFailed} failed` : ''}`,
+            { duration: 3000 }
+          )
+        }
+        console.log("[AutoSync] Sync completed successfully")
+      } else {
+        const errors = [
+          centerResult.status === 'rejected' ? centerResult.reason : null,
+          subjectResult.status === 'rejected' ? subjectResult.reason : null,
+        ].filter(Boolean)
+
+        console.error("[AutoSync] Sync failed:", errors)
+        toast.error("Auto-sync failed. You can sync manually.", { duration: 4000 })
+      }
+    } catch (error) {
+      console.error("[AutoSync] Error during sync:", error)
+      toast.error("Auto-sync error. You can sync manually.", { duration: 4000 })
+    } finally {
+      setIsAutoSyncing(false)
+    }
+  }, [isAutoSyncing])
+
+  // ✅ Listen for online status and auto-sync
+  useEffect(() => {
+    // Skip on initial mount
+    if (previousOnlineStatus.current === null) {
+      previousOnlineStatus.current = onlineStatus
+      return
+    }
+
+    // Only sync when transitioning from offline to online
+    const wasOffline = previousOnlineStatus.current === false
+    const isNowOnline = onlineStatus === true
+
+    if (isNowOnline && wasOffline && !hasSyncedOnOnline.current) {
+      // Small delay to ensure network is stable
+      const timeoutId = setTimeout(() => {
+        if (isOnline()) {
+          syncWhenOnline()
+          hasSyncedOnOnline.current = true
+        }
+      }, 1500) // Increased delay for network stability
+
+      previousOnlineStatus.current = onlineStatus
+      return () => clearTimeout(timeoutId)
+    }
+
+    // Reset flag when going offline
+    if (!onlineStatus) {
+      hasSyncedOnOnline.current = false
+    }
+
+    // Update previous status
+    previousOnlineStatus.current = onlineStatus
+  }, [onlineStatus, syncWhenOnline])
+
   // ✅ Sync temp states when center loads
   useEffect(() => {
     if (center) {
@@ -261,95 +350,6 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
       toast(t('workingDaysUpdateFailed') || "Failed to update working days")
     }
   }
-
-  // ✅ Auto-sync function when online
-  const syncWhenOnline = useCallback(async () => {
-    if (!isOnline() || isAutoSyncing) {
-      return
-    }
-
-    setIsAutoSyncing(true)
-    try {
-      console.log("[AutoSync] Starting automatic sync when online...")
-      
-      // Sync centers and subjects (relevant to this component)
-      const [centerResult, subjectResult] = await Promise.allSettled([
-        ServerActionCenters.Sync(),
-        ServerActionSubjects.Sync(),
-      ])
-
-      const centerSuccess = centerResult.status === 'fulfilled'
-      const subjectSuccess = subjectResult.status === 'fulfilled'
-
-      if (centerSuccess && subjectSuccess) {
-        const centerData = centerResult.status === 'fulfilled' ? centerResult.value : null
-        const subjectData = subjectResult.status === 'fulfilled' ? subjectResult.value : null
-        
-        const totalSuccess = (centerData as any)?.successCount || 0
-        const totalFail = (centerData as any)?.failCount || 0
-        const subjectSuccessCount = (subjectData as any)?.successCount || 0
-        const subjectFailCount = (subjectData as any)?.failCount || 0
-
-        const totalSynced = totalSuccess + subjectSuccessCount
-        const totalFailed = totalFail + subjectFailCount
-
-        if (totalSynced > 0 || totalFailed > 0) {
-          toast.success(
-            `Synced ${totalSynced} item(s)${totalFailed > 0 ? `, ${totalFailed} failed` : ''}`,
-            { duration: 3000 }
-          )
-        }
-        console.log("[AutoSync] Sync completed successfully")
-      } else {
-        const errors = [
-          centerResult.status === 'rejected' ? centerResult.reason : null,
-          subjectResult.status === 'rejected' ? subjectResult.reason : null,
-        ].filter(Boolean)
-        
-        console.error("[AutoSync] Sync failed:", errors)
-        toast.error("Auto-sync failed. You can sync manually.", { duration: 4000 })
-      }
-    } catch (error) {
-      console.error("[AutoSync] Error during sync:", error)
-      toast.error("Auto-sync error. You can sync manually.", { duration: 4000 })
-    } finally {
-      setIsAutoSyncing(false)
-    }
-  }, [isAutoSyncing])
-
-  // ✅ Listen for online status and auto-sync
-  useEffect(() => {
-    // Skip on initial mount
-    if (previousOnlineStatus.current === null) {
-      previousOnlineStatus.current = onlineStatus
-      return
-    }
-
-    // Only sync when transitioning from offline to online
-    const wasOffline = previousOnlineStatus.current === false
-    const isNowOnline = onlineStatus === true
-
-    if (isNowOnline && wasOffline && !hasSyncedOnOnline.current) {
-      // Small delay to ensure network is stable
-      const timeoutId = setTimeout(() => {
-        if (isOnline()) {
-          syncWhenOnline()
-          hasSyncedOnOnline.current = true
-        }
-      }, 1500) // Increased delay for network stability
-
-      previousOnlineStatus.current = onlineStatus
-      return () => clearTimeout(timeoutId)
-    }
-
-    // Reset flag when going offline
-    if (!onlineStatus) {
-      hasSyncedOnOnline.current = false
-    }
-
-    // Update previous status
-    previousOnlineStatus.current = onlineStatus
-  }, [onlineStatus, syncWhenOnline])
 
   // 🔍 Debug sync button for center entity
   const handleDebugCenterSync = async () => {
