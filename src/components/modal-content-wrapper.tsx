@@ -3,6 +3,8 @@
 import { ReactNode, useEffect, useState } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { useTranslations } from 'next-intl'
 
 interface ModalContentWrapperProps {
   children: ReactNode
@@ -15,11 +17,56 @@ export function ModalContentWrapper({ children, onClose, className }: ModalConte
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isOpen, setIsOpen] = useState(true)
+  const [isOfflineBlocked, setIsOfflineBlocked] = useState(false)
+  const t = useTranslations()
 
   useEffect(() => {
     // Open modal when route changes to a modal route
     const isModalRoute = searchParams.get("modal") === "true"
     setIsOpen(isModalRoute)
+  }, [pathname, searchParams])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        if (!pathname) return
+        const isModalRoute = searchParams.get('modal') === 'true'
+        if (!isModalRoute) {
+          if (!cancelled) setIsOfflineBlocked(false)
+          return
+        }
+
+        // Only block dynamic detail pages (contains an id segment after manager)
+        const parts = pathname.split('/').filter(Boolean)
+        const managerIndex = parts.indexOf('manager')
+        const looksDynamic = managerIndex >= 0 && parts.length > managerIndex + 2
+        if (!looksDynamic) {
+          if (!cancelled) setIsOfflineBlocked(false)
+          return
+        }
+
+        if (navigator.onLine) {
+          if (!cancelled) setIsOfflineBlocked(false)
+          return
+        }
+
+        if (!('caches' in window)) {
+          if (!cancelled) setIsOfflineBlocked(true)
+          return
+        }
+
+        const cache = await caches.open('pages-v1')
+        const cached = await cache.match(pathname)
+        if (!cancelled) setIsOfflineBlocked(!cached)
+      } catch {
+        if (!cancelled) setIsOfflineBlocked(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
   }, [pathname, searchParams])
 
   // Handle browser back/forward buttons
@@ -76,7 +123,22 @@ export function ModalContentWrapper({ children, onClose, className }: ModalConte
         onPointerDownOutside={handleClose}
         onInteractOutside={handleClose}
       >
-        {children}
+        {isOfflineBlocked ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-lg font-semibold">{t('offlineTitle')}</div>
+              <div className="text-sm text-muted-foreground">{t('offlineMessageShort')}</div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleClose}>
+                {t('offlineActionRetry')}
+              </Button>
+              <Button onClick={handleClose}>{t('backToHome')}</Button>
+            </div>
+          </div>
+        ) : (
+          children
+        )}
       </DialogContent>
     </Dialog>
   )

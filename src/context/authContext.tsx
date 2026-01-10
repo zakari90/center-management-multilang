@@ -10,6 +10,8 @@ export interface User {
   role: string;
 }
 
+const LAST_USER_KEY = 'last-auth-user'
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -36,6 +38,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AuthProvider] checkAuth start');
       const response = await fetch('/api/auth/me', { credentials: 'include' });
       if (!response.ok) {
+        // Offline fallback: allow previously logged-in users to use the app offline.
+        try {
+          const raw = localStorage.getItem(LAST_USER_KEY)
+          const parsed = raw ? (JSON.parse(raw) as unknown) : null
+          if (parsed && typeof parsed === 'object') {
+            const maybeUser = parsed as User
+            if (maybeUser?.id && maybeUser?.role) {
+              setUser(maybeUser)
+              console.log('[AuthProvider] offline fallback user restored')
+              return
+            }
+          }
+        } catch {}
+
         setUser(null);
         console.log('[AuthProvider] checkAuth /api/auth/me not ok', { status: response.status });
         return;
@@ -45,8 +61,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const nextUser = (data as any)?.user ?? null;
       console.log('[AuthProvider] checkAuth got user', { hasUser: !!nextUser });
       setUser(nextUser);
+
+      // Persist for offline usage
+      try {
+        if (nextUser) {
+          localStorage.setItem(LAST_USER_KEY, JSON.stringify(nextUser))
+        } else {
+          localStorage.removeItem(LAST_USER_KEY)
+        }
+      } catch {}
     } catch (error) {
       console.error('Auth check failed:', error);
+
+      // Offline fallback when fetch throws.
+      try {
+        const raw = localStorage.getItem(LAST_USER_KEY)
+        const parsed = raw ? (JSON.parse(raw) as unknown) : null
+        if (parsed && typeof parsed === 'object') {
+          const maybeUser = parsed as User
+          if (maybeUser?.id && maybeUser?.role) {
+            setUser(maybeUser)
+            return
+          }
+        }
+      } catch {}
+
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -56,16 +95,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = (userData: User) => {
     setUser(userData);
+    try {
+      localStorage.setItem(LAST_USER_KEY, JSON.stringify(userData))
+    } catch {}
   };
 
   const logout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
+      try {
+        localStorage.removeItem(LAST_USER_KEY)
+      } catch {}
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
       setUser(null);
+      try {
+        localStorage.removeItem(LAST_USER_KEY)
+      } catch {}
       window.location.href = '/';
     }
   };

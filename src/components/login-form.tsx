@@ -79,6 +79,9 @@ export function LoginForm({
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
       // <AutoSyncProvider />
       login(state.data.user)
+      try {
+        localStorage.setItem('last-auth-user', JSON.stringify(state.data.user))
+      } catch {}
       const userRole = state.data.user.role
       const base = `/${locale}`
       const destination = userRole === "MANAGER"
