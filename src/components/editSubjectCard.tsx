@@ -39,7 +39,7 @@ export function EditSubjectCard({
   availableSubjects,
   availableGrades
 }: SubjectCardProps) {
-  const t = useTranslations('subjects')
+  const t = useTranslations('StudentCard.subjects')
   
   const [tempSubject, setTempSubject] = useState({
     selectedSubject: subject.name,
