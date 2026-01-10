@@ -13,7 +13,7 @@ interface ItemInputListProps {
   placeholder?: string
   items: string[]
   onChange: (items: string[]) => void
-  suggestions?: string[]
+  suggestions?: Array<string | { value: string; label: string }>
 }
 
 export const ItemInputList: React.FC<ItemInputListProps> = ({
@@ -25,6 +25,14 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState("")
   const [showSuggestions, setShowSuggestions] = useState(false)
+
+  const normalizedSuggestions = suggestions.map((s) =>
+    typeof s === "string" ? { value: s, label: s } : s
+  )
+
+  const labelByValue = new Map(normalizedSuggestions.map((s) => [s.value, s.label]))
+
+  const displayItem = (value: string) => labelByValue.get(value) ?? value
 
   const handleAdd = () => {
     const trimmed = inputValue.trim()
@@ -88,20 +96,20 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
 
         {showSuggestions && (
           <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border p-2 rounded">
-            {suggestions.map((suggestion) => {
-              const isChecked = items.includes(suggestion)
+            {normalizedSuggestions.map((suggestion) => {
+              const isChecked = items.includes(suggestion.value)
               return (
                 <label
-                  key={suggestion}
+                  key={suggestion.value}
                   className="flex items-center space-x-2 cursor-pointer"
                 >
                   <Checkbox
                     checked={isChecked}
                     onCheckedChange={(checked) =>
-                      handleSuggestionToggle(suggestion, !!checked)
+                      handleSuggestionToggle(suggestion.value, !!checked)
                     }
                   />
-                  <span className="text-sm">{suggestion}</span>
+                  <span className="text-sm">{suggestion.label}</span>
                 </label>
               )
             })}
@@ -116,7 +124,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
               key={index}
               className="p-2 bg-muted rounded-md text-sm flex justify-between items-center"
             >
-              <span>{item}</span>
+              <span>{displayItem(item)}</span>
               <Button
                 variant="ghost"
                 size="sm"

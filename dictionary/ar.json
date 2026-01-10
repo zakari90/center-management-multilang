@@ -21,6 +21,8 @@
     "offlineLoginError": "حدث خطأ أثناء تسجيل الدخول بدون اتصال."
   },
 
+  "subjects": "المواد",
+
   "deleteALL": {
   "allDataDeletedSuccessfully": "تم الحذف",
   "failedToDeleteData": "فشل الحذف",

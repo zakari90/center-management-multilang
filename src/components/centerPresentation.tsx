@@ -486,6 +486,7 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
             title={t('workingDays')}
             icon={<CalendarDays className="h-4 w-4 text-muted-foreground" />}
             items={center.workingDays}
+            getItemLabel={(value) => daysOfWeek.find((d) => d.key === value)?.label ?? value}
             onEditButton={
               <EditDialog
                 title={t('editWorkingDays')}
@@ -501,7 +502,7 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
                   placeholder={t('dayPlaceholder')}
                   items={tempWorkingDays}
                   onChange={setTempWorkingDays}
-                  suggestions={daysOfWeek.map(day => day.key)}
+                  suggestions={daysOfWeek.map((day) => ({ value: day.key, label: day.label }))}
                 />
               </EditDialog>
             }
@@ -536,9 +537,10 @@ type SectionProps = {
   items: string[]
   onEditButton?: React.ReactNode
   noDataText?: string
+  getItemLabel?: (value: string) => string
 }
 
-function Section({ title, icon, items, onEditButton, noDataText = "No data" }: SectionProps) {
+function Section({ title, icon, items, onEditButton, noDataText = "No data", getItemLabel }: SectionProps) {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap justify-between items-center">
@@ -551,9 +553,9 @@ function Section({ title, icon, items, onEditButton, noDataText = "No data" }: S
 
       <div className="flex flex-wrap gap-2">
         {items.length > 0 ? (
-          items.map(item => (
+          items.map((item) => (
             <Badge key={item} variant="secondary" className="text-sm truncate max-w-xs">
-              {item}
+              {getItemLabel ? getItemLabel(item) : item}
             </Badge>
           ))
         ) : (
