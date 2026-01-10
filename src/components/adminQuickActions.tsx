@@ -7,34 +7,32 @@ import {
   Calendar,
   Users
 } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 
 export default function AdminQuickActions() {
   const t = useTranslations('adminQuickActions')
-  const locale = useLocale()
-  const base = `/${locale}`
   
   const actions = [
     {
       title: t('myCenter.title'),
       description: t('myCenter.description'),
       icon: Building2,
-      href: `${base}/admin/center`,
+      href: '/admin/center',
       color: 'text-blue-600 bg-blue-100'
     },
     {
       title: t('allUsers.title'),
       description: t('allUsers.description'),
       icon: Users,
-      href: `${base}/admin/users`,
+      href: '/admin/users',
       color: 'text-orange-600 bg-orange-100'
     },    
     {
       title: t('schedule.title'),
       description: t('schedule.description'),
       icon: Calendar,
-      href: `${base}/admin/schedule`,
+      href: '/admin/schedule',
       color: 'text-pink-600 bg-pink-100'
     },
   ]
