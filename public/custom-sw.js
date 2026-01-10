@@ -121,6 +121,13 @@ sw.addEventListener('fetch', (event) => {
           return cached;
         }
 
+        // Fallback: if pages were precached under the plain pathname (e.g. /ar/admin)
+        // return that when offline/refreshing.
+        const plainCached = await cache.match(url.pathname);
+        if (plainCached) {
+          return plainCached;
+        }
+
         try {
           const res = await fetch(request);
           if (res && res.ok) await cache.put(url.pathname, res.clone());
@@ -156,7 +163,11 @@ sw.addEventListener('fetch', (event) => {
         try {
           const res = await fetch(request);
           if (res && res.ok) {
+            // Store under both keys to stay compatible with precache + locale-aware runtime caching.
             await cache.put(cacheKey, res.clone());
+            try {
+              await cache.put(url.pathname, res.clone());
+            } catch {}
           }
           return res;
         } catch {

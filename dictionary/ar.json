@@ -138,6 +138,7 @@
   "adminOption": "مسؤول",
   "welcomeBadge": "منصة إدارة المراكز",
   "adminOptionDescription": "تتبع المراكز والمالية والفرق في مكان واحد.",
+  "successMessage": "تم تسجيل الدخول بنجاح! جارٍ إعادة التوجيه...",
   "email": {
     "label": "البريد الإلكتروني",
     "placeholder": "you@example.com"

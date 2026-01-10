@@ -97,7 +97,7 @@ export function LoginForm({
     }
   }, [state, activeStateMatchesRole, login, router, role, locale])
 
-  const successFallback = role === "manager" ? tManager("successMessage") : "Login successful! Redirecting..."
+  const successFallback = role === "manager" ? tManager("successMessage") : t("successMessage")
 
   const handleRoleChange = (nextRole: Role) => {
     if (nextRole !== role) {
