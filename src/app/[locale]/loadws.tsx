@@ -1,11 +1,27 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from "react";
 
 export default function LoadWS(){
     const hasRegistered = useRef(false);
     const initialHadController = useRef(false);
     const didReloadForControl = useRef(false);
+    const pathname = usePathname()
+
+    useEffect(() => {
+        try {
+          if (typeof pathname !== 'string' || pathname.length === 0) return
+          const key = 'visited-pages'
+          const raw = localStorage.getItem(key)
+          const parsed = raw ? (JSON.parse(raw) as unknown) : []
+          const current = Array.isArray(parsed) ? (parsed.filter((p) => typeof p === 'string') as string[]) : []
+          const next = [pathname, ...current.filter((p) => p !== pathname)].slice(0, 50)
+          localStorage.setItem(key, JSON.stringify(next))
+        } catch {
+          // ignore
+        }
+    }, [pathname])
 
     useEffect(() => {
 

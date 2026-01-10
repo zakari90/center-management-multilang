@@ -34,9 +34,16 @@ const BASE_PAGES_TO_PRECACHE = [
 
 const LOCALES = ['en', 'ar', 'fr']
 
-const PAGES_TO_PRECACHE = LOCALES.flatMap((locale) =>
-  BASE_PAGES_TO_PRECACHE.map((path) => `/${locale}${path}`)
-)
+function readVisitedPages(): string[] {
+  try {
+    const raw = localStorage.getItem('visited-pages')
+    const parsed = raw ? (JSON.parse(raw) as unknown) : []
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((p) => typeof p === 'string') as string[]
+  } catch {
+    return []
+  }
+}
 
 export default function PagePrecacheHandler() {
   const [isPrecaching, setIsPrecaching] = useState(false)
@@ -44,6 +51,9 @@ export default function PagePrecacheHandler() {
   const [isComplete, setIsComplete] = useState(false)
   const [showPrompt, setShowPrompt] = useState(false)
   const hasAutoStarted = useRef(false)
+
+  const basePagesCount = BASE_PAGES_TO_PRECACHE.length
+  const totalPageCount = basePagesCount * LOCALES.length
 
   useEffect(() => {
     // Check if we've already precached
@@ -140,7 +150,18 @@ export default function PagePrecacheHandler() {
       console.log('[Precache] opened cache pages-v1', { beforeCount: beforeKeys.length })
       const beforeAssetKeys = await assetsCache.keys().catch(() => [])
       console.log('[Precache] opened cache assets-v1', { beforeCount: beforeAssetKeys.length })
-      const totalPages = PAGES_TO_PRECACHE.length * LOCALES.length
+      const visitedPages = readVisitedPages()
+      const visitedBasePages = visitedPages
+        .map((p) => {
+          // Store base (locale-agnostic) paths for caching across locales
+          const match = p.match(/^\/(en|ar|fr)(\/.*)?$/)
+          return match ? (match[2] || '/') : p
+        })
+        .filter((p) => typeof p === 'string' && p.startsWith('/'))
+
+      const uniqueBasePages = Array.from(new Set([...BASE_PAGES_TO_PRECACHE, ...visitedBasePages]))
+
+      const totalPages = uniqueBasePages.length * LOCALES.length
       let cachedCount = 0
       let successCount = 0
       const failedPages: string[] = []
@@ -154,12 +175,23 @@ export default function PagePrecacheHandler() {
 
       console.log(`[Precache] Starting to cache ${totalPages} pages...`)
       console.log('[Precache] locales order', { currentLocale, sortedLocales })
+      console.log('[Precache] visited pages', { count: visitedPages.length })
+      console.log('[Precache] base pages to cache', { count: uniqueBasePages.length })
 
       // Precache all pages for all locales
       for (const locale of sortedLocales) {
-        for (const page of PAGES_TO_PRECACHE) {
+        for (const basePath of uniqueBasePages) {
           try {
-            const url = `/${locale}${page}`
+            const url = `/${locale}${basePath}`
+
+            // Safety: never request non-locale routes when localePrefix is "always"
+            const hasLocalePrefix = LOCALES.some((loc) => url === `/${loc}` || url.startsWith(`/${loc}/`))
+            if (!hasLocalePrefix) {
+              console.warn('[Precache] Skipping non-locale page:', url)
+              cachedCount++
+              setProgress(Math.round((cachedCount / totalPages) * 100))
+              continue
+            }
             
             // Check if already cached
             const existing = await cache.match(url)
@@ -276,7 +308,7 @@ export default function PagePrecacheHandler() {
             // Small delay to prevent overwhelming the browser/network
             await new Promise(resolve => setTimeout(resolve, 200))
           } catch (error) {
-            const url = `/${locale}${page}`
+            const url = `/${locale}${basePath}`
             console.warn(`[Precache] ✗ Failed to cache ${url}:`, error)
             failedPages.push(url)
             cachedCount++
@@ -383,7 +415,7 @@ export default function PagePrecacheHandler() {
               <span>{progress}% complete</span>
               {isPrecaching && (
                 <span>
-                  {Math.round((PAGES_TO_PRECACHE.length * LOCALES.length * progress) / 100)} / {PAGES_TO_PRECACHE.length * LOCALES.length}
+                  {Math.round((totalPageCount * progress) / 100)} / {totalPageCount}
                 </span>
               )}
             </div>

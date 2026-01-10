@@ -15,8 +15,6 @@ import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
 import LoadWS from "./loadws";
-import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
-import PWATestingSuite from "@/components/pwa-testing-suite";
 // import CacheDebugOverlay from "@/components/cache-debug-overlay";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -131,8 +129,8 @@ export default async function RootLayout({
               {/* <InstallPWA /> */}
               <PWAUpdateHandler />
               {/* <CacheDebugOverlay /> */}
-              <PWAPerformanceMonitor />
-              <PWATestingSuite />
+              {/* <PWAPerformanceMonitor /> */}
+              {/* <PWATestingSuite /> */}
               <Toaster />
             </AuthProvider>
           </NextIntlClientProvider>
