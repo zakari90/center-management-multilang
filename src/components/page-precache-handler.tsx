@@ -134,7 +134,7 @@ export default function PagePrecacheHandler() {
       }
       
       // Use the same cache as the service worker
-      const cache = await caches.open('pages-v1')
+      const cache = await caches.open('pages-cache-v1')
       const assetsCache = await caches.open('assets-v1')
       const beforeKeys = await cache.keys().catch(() => [])
       console.log('[Precache] opened cache pages-v1', { beforeCount: beforeKeys.length })
