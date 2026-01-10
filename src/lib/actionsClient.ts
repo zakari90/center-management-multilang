@@ -90,11 +90,11 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const ADMIN_EMAIL = "admin@admin.com";
-  // const ADMIN_PASSWORD = "admin"; // Replace with your strong password
   const hashedAdminPassword = "$2b$10$08j0woT3eQ021kqX3w4R2.RLntSwjIuPDVVsUVwtqNc546.Bjkemq"
+
   try {
     const t = await getClientTranslations('auth');
-    
+
     // Validate inputs
     if (!email || !password) {
       return {
@@ -114,7 +114,7 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
       };
     }
 
-    // Online-first login: avoids hanging on IndexedDB open and enables first-time manager login
+    // 100% client-side: try online login first to cache user, then fall back to local
     if (isOnline()) {
       try {
         const result = submittedRole === "manager"
@@ -123,6 +123,7 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
 
         if (result?.success && (result as any)?.data?.user) {
           const serverUser = (result as any).data.user;
+          // Cache to Dexie for future offline use
           try {
             await openLocalDbWithTimeout();
             await userActions.putLocal({
@@ -139,6 +140,7 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
             // Ignore local caching failures
           }
 
+          // No session cookie; just return user
           return {
             data: { user: serverUser },
             success: true,
@@ -150,6 +152,7 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
       }
     }
 
+    // Local/offline flow
     try {
       await openLocalDbWithTimeout();
     } catch {
@@ -161,10 +164,8 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
       };
     }
 
-    // First, check if user exists locally
     let localUser: any = await userActions.getLocalByEmail(email);
 
-    // If user found locally, authenticate and return
     if (localUser) {
       if (localUser.password !== password) {
         return {
@@ -185,51 +186,14 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
         };
       }
 
-      // Set session
       const userForSession = {
         id: localUser.id,
         name: localUser.name,
         email: localUser.email,
         role: localUser.role,
       };
-      const session = await encrypt({ user: userForSession });
-      Cookies.set("session", session, {
-        expires: 7,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production"
-      });
 
-      // Try online login if online
-      if (isOnline()) {
-        try {
-          const result = submittedRole === "manager"
-            ? await loginManager(state, formData)
-            : await loginAdmin(state, formData);
-          if (result.success) {
-            try {
-              await userActions.putLocal({
-                ...localUser,
-                ...(result.data?.user && {
-                  ...result.data.user
-                }),
-                status: '1' as const,
-                updatedAt: Date.now(),
-              });
-            } catch {
-              // Ignore sync update error
-            }
-            return {
-              data: { user: result.data.user },
-              success: true,
-              role: submittedRole,
-            };
-          }
-        } catch {
-          // Ignore online login error, fallback to offline
-        }
-      }
-      // Local user success
+      // No session cookie; just return user
       return {
         data: { user: userForSession },
         success: true,
@@ -237,9 +201,8 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
       };
     }
 
-    // User not found locally — only admin fallback allowed
-    const checkPassword =  await bcrypt.compare(password, hashedAdminPassword);
-    
+    // Admin fallback (hardcoded)
+    const checkPassword = await bcrypt.compare(password, hashedAdminPassword);
     if (submittedRole === "admin" && email === ADMIN_EMAIL && checkPassword) {
       const adminUser = {
         id: "admin",
@@ -247,13 +210,7 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
         email: ADMIN_EMAIL,
         role: Role.ADMIN,
       };
-      const session = await encrypt({ user: adminUser });
-      Cookies.set("session", session, {
-        expires: 7,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production"
-      });
+      // No session cookie
       return {
         data: { user: adminUser },
         success: true,
@@ -261,7 +218,6 @@ export async function loginWithRole(state: unknown, formData: FormData): Promise
       };
     }
 
-    // If not admin, return not found
     const tNotFound = await getClientTranslations('auth');
     return {
       error: { field: "email", message: tNotFound('errors.loginFailed') },

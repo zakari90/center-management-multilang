@@ -35,45 +35,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      console.log('[AuthProvider] checkAuth start');
-      const response = await fetch('/api/auth/me', { credentials: 'include' });
-      if (!response.ok) {
-        // Offline fallback: allow previously logged-in users to use the app offline.
-        try {
-          const raw = localStorage.getItem(LAST_USER_KEY)
-          const parsed = raw ? (JSON.parse(raw) as unknown) : null
-          if (parsed && typeof parsed === 'object') {
-            const maybeUser = parsed as User
-            if (maybeUser?.id && maybeUser?.role) {
-              setUser(maybeUser)
-              console.log('[AuthProvider] offline fallback user restored')
-              return
-            }
-          }
-        } catch {}
+      console.log('[AuthProvider] checkAuth start (client-side only)');
 
-        setUser(null);
-        console.log('[AuthProvider] checkAuth /api/auth/me not ok', { status: response.status });
-        return;
-      }
-
-      const data = await response.json().catch(() => null);
-      const nextUser = (data as any)?.user ?? null;
-      console.log('[AuthProvider] checkAuth got user', { hasUser: !!nextUser });
-      setUser(nextUser);
-
-      // Persist for offline usage
-      try {
-        if (nextUser) {
-          localStorage.setItem(LAST_USER_KEY, JSON.stringify(nextUser))
-        } else {
-          localStorage.removeItem(LAST_USER_KEY)
-        }
-      } catch {}
-    } catch (error) {
-      console.error('Auth check failed:', error);
-
-      // Offline fallback when fetch throws.
+      // 100% client-side: read from localStorage/Dexie only
       try {
         const raw = localStorage.getItem(LAST_USER_KEY)
         const parsed = raw ? (JSON.parse(raw) as unknown) : null
@@ -81,11 +45,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const maybeUser = parsed as User
           if (maybeUser?.id && maybeUser?.role) {
             setUser(maybeUser)
+            console.log('[AuthProvider] user restored from localStorage')
             return
           }
         }
       } catch {}
 
+      setUser(null);
+      console.log('[AuthProvider] no stored user');
+      return;
+    } catch (error) {
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -101,21 +71,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    // 100% client-side: no server call
+    setUser(null);
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      setUser(null);
-      try {
-        localStorage.removeItem(LAST_USER_KEY)
-      } catch {}
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Logout failed:', error);
-      setUser(null);
-      try {
-        localStorage.removeItem(LAST_USER_KEY)
-      } catch {}
-      window.location.href = '/';
-    }
+      localStorage.removeItem(LAST_USER_KEY)
+    } catch {}
+    window.location.href = '/';
   };
 
   const updateUser = (userData: User) => {
