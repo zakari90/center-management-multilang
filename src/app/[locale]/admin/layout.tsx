@@ -2,6 +2,8 @@
 import AdminLayoutClient from "@/components/admin-layout-client";
 import { ReactNode } from "react";
 
+export const dynamic = 'force-dynamic';
+
 interface DashboardLayoutProps {
   children: ReactNode;
   params: Promise<{ locale: string }>;

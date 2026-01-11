@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-
 import { SignJWT, jwtVerify } from "jose";
-import Cookies from 'js-cookie';
+import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 const secretKey = "secret";
 const key = new TextEncoder().encode(secretKey);
@@ -22,36 +21,32 @@ export async function decrypt(input: string) {
 }
 
 export async function getSession() {
-  const session = Cookies.get("session");
+  const session = (await cookies()).get("session")?.value;
   if (!session) return null;
   try {
     return await decrypt(session);
   } catch (error) {
     console.error('[getSession] failed to decrypt session cookie', error);
-    Cookies.remove("session", { path: "/" });
     return null;
   }
 }
 
-export async function updateSession() {
-  const session = Cookies.get("session");
+export async function updateSession(request: NextRequest) {
+  const session = request.cookies.get("session")?.value;
   if (!session) return;
 
   try {
     const parsed = await decrypt(session);
-    Cookies.set("session", await encrypt(parsed), {
-      expires: 7,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env.NODE_ENV === "production"
+    const res = NextResponse.next();
+    res.cookies.set({
+      name: "session",
+      value: await encrypt(parsed),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     });
+    return res;
   } catch (error) {
     console.error('[updateSession] failed to update session', error);
-    Cookies.remove("session", { path: "/" });
+    return NextResponse.next();
   }
-}
-
-// Optional: helper to clear session (logout)
-export function clearSession() {
-  Cookies.remove("session", { path: "/" });
 }
