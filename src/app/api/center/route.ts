@@ -144,39 +144,57 @@ export async function POST(req: NextRequest) {
 // }
 
 export async function GET(req: NextRequest) {
+  console.log("[CENTER_GET] 🔄 Starting GET request...");
+  
   try {
+    console.log("[CENTER_GET] 📋 Getting session...");
     const session: any = await getSession();
     
+    console.log("[CENTER_GET] 📋 Session result:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id || 'N/A',
+      userRole: session?.user?.role || 'N/A',
+    });
+    
     if (!session?.user) {
+      console.log("[CENTER_GET] ❌ No session/user - returning 401");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const adminId = session.user.id;
+    const userRole = session.user.role;
     
-    // Check if user is admin (optional but good practice)
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
-       // If standard user logic differs, handle here. For now assume admin/manager access their own centers.
-       // Actually only Admins own centers. Managers belong to centers. 
-       // If manager, we might want to find centers where they are managers?
-       // Leaving as-is for admin matching behavior based on current code intent.
-    }
+    console.log("[CENTER_GET] 🔍 Querying centers for:", { adminId, userRole });
 
     const centers = await db.center.findMany({
       where: { 
         OR: [
           { adminId: adminId },
-          { managers: { has: adminId } } // Also include centers where user is manager
+          { managers: { has: adminId } }
         ]
       },
       include: { subjects: true }
     });
 
+    console.log("[CENTER_GET] ✅ Found centers:", {
+      count: centers.length,
+      ids: centers.map(c => c.id),
+    });
+
     return NextResponse.json(centers, { status: 200 });
-  } catch (error) {
-    console.error("[CENTER_GET]", error);
+  } catch (error: any) {
+    console.error("[CENTER_GET] ❌ ERROR:", {
+      message: error?.message || 'Unknown error',
+      name: error?.name || 'Unknown',
+      code: error?.code || 'N/A',
+      stack: error?.stack?.split('\n').slice(0, 5).join('\n') || 'No stack',
+    });
+    
     return NextResponse.json({ 
       error: "Failed to get center data",
-      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+      message: error?.message || 'Unknown error',
+      code: error?.code || undefined,
     }, { status: 500 });
   }
 }

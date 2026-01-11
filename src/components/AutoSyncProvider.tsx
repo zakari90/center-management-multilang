@@ -38,18 +38,27 @@ export function AutoSyncProvider() {
          if (results) {
            Object.entries(results).forEach(([key, result]: [string, any]) => {
              if (result.status === 'rejected') {
-               failures.push(`${key} (Network/Server Error)`);
+               // Extract actual error message from rejection
+               const errorMsg = result.reason?.message || result.reason?.toString() || 'Network/Server Error';
+               failures.push(`${key}: ${errorMsg}`);
+               console.error(`❌ ${key} sync rejected:`, result.reason);
              } else if (result.value?.failCount > 0) {
-               failures.push(`${key} (${result.value.failCount} failed)`);
+               // Extract error from the result value if available
+               const errorDetail = result.value?.error || result.value?.results?.find((r: any) => !r.success)?.error || 'Unknown';
+               failures.push(`${key}: ${result.value.failCount} failed (${errorDetail})`);
+               console.error(`⚠️ ${key} partial failure:`, result.value);
              }
            });
          }
          
          const errorMessage = failures.length > 0 
-           ? `Sync incomplete: ${failures.join(', ')}`
+           ? `Sync issues:\n${failures.join('\n')}`
            : 'Sync completed with errors';
+         
+         // Log full details to console for debugging
+         console.error('📋 Full sync results:', results);
            
-         toast.error(errorMessage, { duration: 5000 });
+         toast.error(errorMessage, { duration: 8000 });
       }
     },
     onSyncError: (error) => {
