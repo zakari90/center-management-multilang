@@ -213,12 +213,11 @@ const ServerActionReceipts = {
   },
 
   async ImportFromServer() {
-    try {
-      if (!isOnline()) {
-        console.warn("Device is offline, skipping import");
-        return { message: "Cannot import: offline", count: 0, failCount: 0 };
-      }
+    if (!isOnline()) {
+      throw new Error("Cannot import: device is offline");
+    }
 
+    try {
       const data = await ServerActionReceipts.ReadFromServer();
       const syncedReceipts = await receiptActions.getByStatus(["1"]);
       const backup = [...syncedReceipts];
@@ -239,32 +238,17 @@ const ServerActionReceipts = {
           await receiptActions.putLocal(receipt);
         }
         
-        return { 
-          message: `Imported ${transformedReceipts.length} receipts from server.`, 
-          count: transformedReceipts.length,
-          failCount: 0
-        };
+        return { message: `Imported ${transformedReceipts.length} receipts from server.`, count: transformedReceipts.length };
       } catch (error) {
         console.error("Error during import, restoring backup:", error);
         for (const receipt of backup) {
           await receiptActions.putLocal(receipt);
         }
-        // Instead of throwing, we return a failure result
-        return { 
-          message: "Import failed, data restored", 
-          count: 0, 
-          failCount: 1, 
-          error: error instanceof Error ? error.message : "Unknown error" 
-        };
+        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
       }
     } catch (error) {
       console.error("Error importing from server:", error);
-      return { 
-         message: "Import failed", 
-         count: 0, 
-         failCount: 1, 
-         error: error instanceof Error ? error.message : "Unknown error" 
-      };
+      throw error;
     }
   }
 };

@@ -185,12 +185,11 @@ const ServerActionSubjects = {
   },
 
   async ImportFromServer() {
-    try {
-      if (!isOnline()) {
-        console.warn("Device is offline, skipping import");
-        return { message: "Cannot import: offline", count: 0, failCount: 0 };
-      }
+    if (!isOnline()) {
+      throw new Error("Cannot import: device is offline");
+    }
 
+    try {
       const data = await ServerActionSubjects.ReadFromServer();
       const syncedSubjects = await subjectActions.getByStatus(["1"]);
       const backup = [...syncedSubjects];
@@ -211,31 +210,17 @@ const ServerActionSubjects = {
           await subjectActions.putLocal(subject);
         }
         
-        return { 
-          message: `Imported ${transformedSubjects.length} subjects from server.`, 
-          count: transformedSubjects.length,
-          failCount: 0
-        };
+        return { message: `Imported ${transformedSubjects.length} subjects from server.`, count: transformedSubjects.length };
       } catch (error) {
         console.error("Error during import, restoring backup:", error);
         for (const subject of backup) {
           await subjectActions.putLocal(subject);
         }
-        return { 
-          message: "Import failed, data restored", 
-          count: 0, 
-          failCount: 1, 
-          error: error instanceof Error ? error.message : "Unknown error" 
-        };
+        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
       }
     } catch (error) {
       console.error("Error importing from server:", error);
-      return { 
-         message: "Import failed", 
-         count: 0, 
-         failCount: 1, 
-         error: error instanceof Error ? error.message : "Unknown error" 
-      };
+      throw error;
     }
   }
 };

@@ -195,12 +195,11 @@ const ServerActionTeachers = {
   },
 
   async ImportFromServer() {
-    try {
-      if (!isOnline()) {
-        console.warn("Device is offline, skipping import");
-        return { message: "Cannot import: offline", count: 0, failCount: 0 };
-      }
+    if (!isOnline()) {
+      throw new Error("Cannot import: device is offline");
+    }
 
+    try {
       const data = await ServerActionTeachers.ReadFromServer();
       const syncedTeachers = await teacherActions.getByStatus(["1"]);
       const backup = [...syncedTeachers];
@@ -221,31 +220,17 @@ const ServerActionTeachers = {
           await teacherActions.putLocal(teacher);
         }
         
-        return { 
-          message: `Imported ${transformedTeachers.length} teachers from server.`, 
-          count: transformedTeachers.length,
-          failCount: 0
-        };
+        return { message: `Imported ${transformedTeachers.length} teachers from server.`, count: transformedTeachers.length };
       } catch (error) {
         console.error("Error during import, restoring backup:", error);
         for (const teacher of backup) {
           await teacherActions.putLocal(teacher);
         }
-        return { 
-          message: "Import failed, data restored", 
-          count: 0, 
-          failCount: 1, 
-          error: error instanceof Error ? error.message : "Unknown error" 
-        };
+        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
       }
     } catch (error) {
       console.error("Error importing from server:", error);
-      return { 
-         message: "Import failed", 
-         count: 0, 
-         failCount: 1, 
-         error: error instanceof Error ? error.message : "Unknown error" 
-      };
+      throw error;
     }
   }
 };

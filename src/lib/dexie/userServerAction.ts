@@ -2,7 +2,7 @@
 // userServerAction.ts
 
 import { userActions } from "./dexieActions";
-import { User, Role } from "./dbSchema";
+import { User, Role, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -233,8 +233,9 @@ const ServerActionUsers = {
       // We don't delete everything blindly if we might have local pending changes? 
       // The original logic deleted sync'd users. We should preserve that behavior but be careful.
       const syncedUsers = await userActions.getByStatus(["1"]);
+
       
-      await db.transaction('rw', db.user, async () => {
+      await localDb.transaction('rw', localDb.users, async () => {
         // Delete only synced users to avoid losing local work
         for (const user of syncedUsers) {
            await userActions.deleteLocal(user.id);
