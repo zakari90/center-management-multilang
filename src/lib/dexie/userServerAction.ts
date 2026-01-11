@@ -217,42 +217,53 @@ const ServerActionUsers = {
   },
 
   async ImportFromServer() {
-    if (!isOnline()) {
-      throw new Error("Cannot import: device is offline");
-    }
-
     try {
+      if (!isOnline()) {
+        console.warn("Device is offline, skipping import");
+        return { message: "Cannot import: offline", count: 0, failCount: 0 };
+      }
+
       const data = await ServerActionUsers.ReadFromServer();
-      const syncedUsers = await userActions.getByStatus(["1"]);
-      const backup = [...syncedUsers];
       
-      try {
+      // Transform and save data
+      const transformedUsers = Array.isArray(data) 
+        ? data.map((user: any) => transformServerUser(user))
+        : [];
+        
+      // We don't delete everything blindly if we might have local pending changes? 
+      // The original logic deleted sync'd users. We should preserve that behavior but be careful.
+      const syncedUsers = await userActions.getByStatus(["1"]);
+      
+      await db.transaction('rw', db.user, async () => {
+        // Delete only synced users to avoid losing local work
         for (const user of syncedUsers) {
-          await userActions.deleteLocal(user.id);
+           await userActions.deleteLocal(user.id);
         }
         
-        const transformedUsers = Array.isArray(data) 
-          ? data.map((user: any) => transformServerUser(user))
-          : [];
         for (const user of transformedUsers) {
           const existing = await userActions.getLocal(user.id);
-          if (existing && existing.status === 'w') {
-            continue; // Don't overwrite local pending changes
+          // Don't overwrite pending changes
+          if (existing && (existing.status === 'w' || existing.status === '0')) {
+            continue; 
           }
           await userActions.putLocal(user);
         }
-        
-        return { message: `Imported ${transformedUsers.length} users from server.`, count: transformedUsers.length };
-      } catch (error) {
-        console.error("Error during import, restoring backup:", error);
-        for (const user of backup) {
-          await userActions.putLocal(user);
-        }
-        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
-      }
-    } catch (error) {
-      console.error("Error importing from server:", error);
-      throw error;
+      });
+
+      return { 
+        message: `Imported ${transformedUsers.length} users from server.`, 
+        count: transformedUsers.length,
+        failCount: 0 
+      };
+
+    } catch (error: any) {
+      console.error("Error importing users from server:", error);
+      return { 
+        message: "Import failed", 
+        count: 0, 
+        failCount: 1, 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      };
     }
   }
 };
