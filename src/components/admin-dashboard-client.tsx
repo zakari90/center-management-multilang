@@ -12,6 +12,7 @@ import TopSubjects from "@/components/top-subjects";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { LocalDBDebugger } from "@/components/LocalDBDebugger";
+import CacheDebugBanner from "@/components/cache-debug-banner";
 import { useTranslations } from "next-intl";
 
 export default function AdminDashboardClient() {
@@ -54,6 +55,7 @@ export default function AdminDashboardClient() {
       
       <DeleteAllDataButton/>
       </div>
+      <CacheDebugBanner />
     </>
   )
 }

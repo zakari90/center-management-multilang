@@ -9,6 +9,7 @@ import ManagerStatsCards from "@/components/managerStateCards";
 import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
 import TopSubjects from "@/components/top-subjects";
+import CacheDebugBanner from "@/components/cache-debug-banner";
 import { useTranslations } from "next-intl";
 
 
@@ -49,6 +50,7 @@ return (
         <RecentActivities />
       </div> */}
       </div>
+      <CacheDebugBanner />
     </>
   );
 }
