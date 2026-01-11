@@ -4,7 +4,7 @@ import axios from "axios";
 import { getTranslations } from "next-intl/server"; // Import for server-side translations
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { encrypt } from "./authentication";
+import { encrypt } from "./server-auth";
 import { generateObjectId } from "./utils/generateObjectId";
 
 
