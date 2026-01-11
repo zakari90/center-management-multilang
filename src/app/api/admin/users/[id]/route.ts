@@ -30,6 +30,8 @@ export async function DELETE(
   }
 }
 
+import bcrypt from "bcryptjs";
+
 export async function PUT(req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -41,21 +43,25 @@ export async function PUT(req: NextRequest,
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const body = await req.json();
-    console.log("Request body:", body.body);
-
-    const {  name, email, role, password } = body;
+    
+    const { name, email, role, password } = body;
     
     if (!id) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const dataToUpdate: any = { name, email, role };
+    
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      dataToUpdate.password = hashedPassword;
+    }
+
     const updatedManager = await db.user.update({
       where: { id },
-      data: { name, email, role , password},
+      data: dataToUpdate,
     });
-    console.log("Updated manager:", updatedManager);
     
-
     return NextResponse.json(updatedManager, { status: 200 });
   } catch (error) {
     console.error("[UPDATE_MANAGER]", error);

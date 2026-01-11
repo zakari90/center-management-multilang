@@ -55,12 +55,22 @@ export async function POST(req: NextRequest) {
     });
 
 
-   await db.center.update({
-      where: { id: session.user.id },
-      data: {
-        managers: { push: user.id }
-      }
-    })    
+    // ✅ Link manager to the Admin's center
+    // Find the center where this admin is the owner
+    const center = await db.center.findFirst({
+      where: { adminId: session.user.id }
+    });
+
+    if (center) {
+      await db.center.update({
+        where: { id: center.id },
+        data: {
+          managers: { push: user.id }
+        }
+      });
+    } else {
+      console.warn(`[REGISTER] Admin ${session.user.id} created manager ${user.id} but has no center to assign them to.`);
+    }
     const response = NextResponse.json(
       {
         message: "User registered successfully.",

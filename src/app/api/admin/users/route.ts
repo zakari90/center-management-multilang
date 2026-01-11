@@ -69,119 +69,90 @@ const adminUsername = "admin";
 const adminPassword = "admin";
 const adminEmail = "admin@admin.com";
 
-// This function assumes req is a POST request with JSON containing email and password
+// ✅ Create a new user (Manager or Admin)
 export async function POST(req: NextRequest) {
-  console.log("POST request received ---------------------------------------------");
-  
   try {
+    const session : any = await getSession();
+    
+    // Check if user is authenticated and is an ADMIN
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Unauthorized' }, 
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
-    const { email, password, id } = body;
-console.log("Body received ---------------------------------------------", body);
-console.log("Email received ---------------------------------------------", email);
-console.log("Password received ---------------------------------------------", password);
-console.log("Id received ---------------------------------------------", id);
+    const { name, email, password, role, id } = body;
 
     // Validate required fields
-    if (!email || !password || !id) {
+    if (!name || !email || !password || !role) {
       return NextResponse.json(
-        { error: { message: "Email, password, and id are required." } },
+        { error: 'Name, email, password, and role are required' }, 
+        { status: 400 }
+      );
+    }
+    
+    // Validate ID if provided
+    if (id && !/^[0-9a-fA-F]{24}$/.test(id)) {
+      return NextResponse.json(
+        { error: 'Invalid ID format' }, 
         { status: 400 }
       );
     }
 
-    // ✅ Validate ID format is a valid MongoDB ObjectId
-    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-      console.error(`[LOGIN] Invalid ObjectId format provided: ${id}`);
+    // Check if user already exists
+    const existingUser = await db.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
       return NextResponse.json(
-        { error: { message: `Invalid ID format. Must be a valid MongoDB ObjectId (24 hex characters).` } },
-        { status: 400 }
+        { error: 'User with this email already exists' }, 
+        { status: 409 }
       );
     }
 
-    // Check for user by email
-    let user = await db.user.findUnique({ where: { email } });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (user) {
-      // User exists, verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      
-      if (!isPasswordValid) {
-        return NextResponse.json({
-          error: { message: "Invalid password." }
-        }, { status: 401 });
+    // Create user
+    const newUser = await db.user.create({
+      data: {
+        ...(id && { id }), // Use provided ID or auto-generate
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
+    });
 
-      // ✅ Validate user ID format - if invalid, log warning but allow login
-      // The ID validation in center creation will catch this later
-      if (!/^[0-9a-fA-F]{24}$/.test(user.id)) {
-        console.warn(`[LOGIN] User ${email} has invalid ObjectId format: ${user.id}`);
+    return NextResponse.json({
+      message: "User created successfully",
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        createdAt: newUser.createdAt
       }
+    }, { status: 201 });
 
-      // Password is valid, return user!
-      return NextResponse.json({
-        message: "User exists.",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        }
-      }, { status: 200 });
-    }
-
-    // If not, check for admin credentials
-   try {
-    if (email === adminEmail && password === adminPassword) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      user = await db.user.create({
-        data: {
-          id,
-          email: adminEmail,
-          password: hashedPassword,
-          name: adminUsername,
-          role: "ADMIN",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
-      });
-
-      return NextResponse.json({
-        message: "Admin user created.",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        }
-      }, { status: 201 });
-    }
-   } catch (error: any) {
-    console.log("Error creating admin user::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::", error);
+  } catch (error: any) {
+    console.error('Error creating user:', error);
     
-    // Check if it's a MongoDB replica set error
-    if (error?.code === 'P2031' || error?.message?.includes('replica set')) {
-      return NextResponse.json({
-        error: { 
-          message: "MongoDB replica set is required. Please run: mongosh --eval \"rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] })\"",
-          code: "REPLICA_SET_REQUIRED"
-        }
-      }, { status: 500 });
+    // Check for MongoDB duplicate key error (code 11000)
+    if (error.code === 11000 || error.codeName === 'DuplicateKey') {
+       return NextResponse.json(
+        { error: 'User with this ID or Email already exists' }, 
+        { status: 409 }
+      );
     }
-    
-    return NextResponse.json({
-      error: { message: "Internal server error" }
-    }, { status: 500 });
-   }
 
-
-    // No user found, and not admin creation case
-    return NextResponse.json({
-      error: { message: "User not found." }
-    }, { status: 404 });
-  } catch (error) {
-    console.error("Error checking user:", error);
     return NextResponse.json(
-      { error: { message: "Internal server error" } },
+      { error: 'Failed to create user' }, 
       { status: 500 }
     );
   }
