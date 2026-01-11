@@ -28,12 +28,28 @@ export function AutoSyncProvider() {
       // Optional: Show loading indicator
       console.log('🔄 Syncing...');
     },
-    onSyncComplete: (success) => {
+    onSyncComplete: (success, results) => {
       // Optional: Show success/error notification
       if (success) {
          console.log('Data synced successfully');
       } else {
-         toast.error('Sync completed with errors');
+         // Parse results to find what failed
+         const failures: string[] = [];
+         if (results) {
+           Object.entries(results).forEach(([key, result]: [string, any]) => {
+             if (result.status === 'rejected') {
+               failures.push(`${key} (Network/Server Error)`);
+             } else if (result.value?.failCount > 0) {
+               failures.push(`${key} (${result.value.failCount} failed)`);
+             }
+           });
+         }
+         
+         const errorMessage = failures.length > 0 
+           ? `Sync incomplete: ${failures.join(', ')}`
+           : 'Sync completed with errors';
+           
+         toast.error(errorMessage, { duration: 5000 });
       }
     },
     onSyncError: (error) => {
