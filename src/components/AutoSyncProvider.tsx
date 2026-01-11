@@ -1,6 +1,7 @@
 "use client";
 
 import { useAutoSync } from '@/hooks/useAutoSync';
+import { toast } from 'sonner';
 
 /**
  * Provider component that enables auto-sync for the entire app
@@ -25,19 +26,20 @@ export function AutoSyncProvider() {
     debug: process.env.NODE_ENV === 'development', // Show logs in dev mode
     onSyncStart: () => {
       // Optional: Show loading indicator
-      // console.log('🔄 Syncing...');
+      console.log('🔄 Syncing...');
     },
     onSyncComplete: (success) => {
       // Optional: Show success/error notification
       if (success) {
-        // toast.success('Data synced successfully');
+         console.log('Data synced successfully');
       } else {
-        // toast.error('Sync completed with errors');
+         toast.error('Sync completed with errors');
       }
     },
     onSyncError: (error) => {
       // Optional: Log or show error
       console.error('Auto-sync error:', error);
+      toast.error(`Sync error: ${error.message}`);
     },
   });
   

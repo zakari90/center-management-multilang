@@ -1,6 +1,7 @@
 // import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
 // import PWATestingSuite from "@/components/pwa-testing-suite";
 import AutoImportFromServer from "@/components/auto-import-from-server";
+import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import PWAUpdateHandler from "@/components/pwa-update-handler";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
@@ -131,6 +132,7 @@ export default async function RootLayout({
             <AuthProvider>
                   <LoadWS/>
                   <AutoImportFromServer />
+                  <AutoSyncProvider />
               {/* <ServiceWorkerRegister /> */}
               {children}
                     {/* <PWADebug /> */}

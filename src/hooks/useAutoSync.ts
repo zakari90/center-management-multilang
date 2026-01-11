@@ -140,10 +140,13 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
       let success = true;
       const resultEntries = Object.entries(results);
       
-      for (const [, result] of resultEntries) {
+      for (const [key, result] of resultEntries) {
         if (result.status === 'rejected') {
           success = false;
-          log('Sync failed for some entities:', result.reason);
+          log(`Sync failed for ${key}:`, result.reason);
+        } else if (result.status === 'fulfilled' && (result.value as any)?.failCount > 0) {
+          success = false;
+          log(`Sync completed with failures for ${key}:`, (result.value as any).failCount, 'failed');
         }
       }
       
