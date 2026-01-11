@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/admin/users/[id]/toggle-status/route.ts
-import { getSession } from '@/lib/authentication'
+import { getSession } from '@/lib/server-auth'
 import db from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 

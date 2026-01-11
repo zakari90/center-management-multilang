@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
-import { getSession } from '@/lib/authentication';
+import { getSession } from '@/lib/server-auth';
 
 export async function POST() {
   const session:any = await getSession();

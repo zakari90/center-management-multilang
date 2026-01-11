@@ -1,7 +1,7 @@
 //api/admin/centers/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { getSession } from "@/lib/authentication";
+import { getSession } from "@/lib/server-auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
 

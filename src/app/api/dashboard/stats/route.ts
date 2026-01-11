@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/dashboard/stats/route.ts
-import { getSession } from '@/lib/authentication'
+import { getSession } from '@/lib/server-auth'
 import db from '@/lib/db'
 import { NextResponse } from 'next/server'
 
