@@ -21,12 +21,31 @@ export async function decrypt(input: string) {
 }
 
 export async function getSession() {
-  const session = (await cookies()).get("session")?.value;
-  if (!session) return null;
   try {
-    return await decrypt(session);
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+    
+    console.log("[getSession] 🔍 Cookie check:", {
+      hasSessionCookie: !!sessionCookie,
+      cookieValueLength: sessionCookie?.value?.length || 0,
+      allCookieNames: cookieStore.getAll().map(c => c.name),
+    });
+    
+    if (!sessionCookie?.value) {
+      console.log("[getSession] ❌ No session cookie found");
+      return null;
+    }
+    
+    const decrypted = await decrypt(sessionCookie.value);
+    console.log("[getSession] ✅ Session decrypted:", {
+      hasUser: !!(decrypted as any)?.user,
+      userId: (decrypted as any)?.user?.id || 'N/A',
+      role: (decrypted as any)?.user?.role || 'N/A',
+    });
+    
+    return decrypted;
   } catch (error) {
-    console.error('[getSession] failed to decrypt session cookie', error);
+    console.error('[getSession] ❌ Failed to get/decrypt session:', error);
     return null;
   }
 }
