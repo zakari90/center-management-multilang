@@ -108,6 +108,28 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
       console.log(`[AutoSync] ${message}`, ...args);
     }
   }, [opts.debug]);
+
+  /**
+   * Validate that server session is valid before attempting sync
+   */
+  const validateServerSession = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        log('Server session invalid or expired (status: ' + response.status + ')');
+        return false;
+      }
+      
+      log('Server session validated successfully');
+      return true;
+    } catch (error) {
+      log('Failed to validate server session:', error);
+      return false;
+    }
+  }, [log]);
   
   /**
    * Perform sync operation (push local changes to server)
@@ -125,7 +147,14 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
     }
     
     if (!user) {
-      log('User not authenticated, skipping sync');
+      log('User not authenticated (client), skipping sync');
+      return false;
+    }
+
+    // Validate server session before attempting sync
+    const serverSessionValid = await validateServerSession();
+    if (!serverSessionValid) {
+      log('Server session not valid, skipping sync (user may need to re-login)');
       return false;
     }
     
@@ -179,7 +208,14 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
     }
     
     if (!user) {
-      log('User not authenticated, skipping import');
+      log('User not authenticated (client), skipping import');
+      return false;
+    }
+
+    // Validate server session before attempting import
+    const serverSessionValid = await validateServerSession();
+    if (!serverSessionValid) {
+      log('Server session not valid, skipping import (user may need to re-login)');
       return false;
     }
     
