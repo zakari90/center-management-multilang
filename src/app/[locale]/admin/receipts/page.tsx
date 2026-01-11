@@ -1,13 +1,12 @@
-"use client"
-
 import AdminReceiptsTable from '@/components/inUse/adminReceiptPresenation'
 
-function Page() {
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
+  console.log('[AdminReceiptsPage] Server render', { timestamp: new Date().toISOString() });
   return (
     <div>      
       <AdminReceiptsTable/>
     </div>
   )
 }
-
-export default Page

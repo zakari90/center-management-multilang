@@ -1,16 +1,8 @@
-"use client"
+import ManagerStudentsClient from "@/components/manager-students-client";
 
-// /manager/students/page.tsx
-import StudentReceiptTable from '@/components/studentReceiptTable'
-import StudentsTable from '@/components/studentsPresentation'
+export const dynamic = 'force-dynamic';
 
-function Page() {
-  return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      <StudentsTable/>
-      <StudentReceiptTable/>
-    </div>
-  )
+export default function Page() {
+  console.log('[ManagerStudentsPage] Server render', { timestamp: new Date().toISOString() });
+  return <ManagerStudentsClient />;
 }
-
-export default Page

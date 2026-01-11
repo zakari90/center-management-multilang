@@ -1,11 +1,8 @@
-"use client"
+import ManagerTeachersClient from "@/components/manager-teachers-client";
 
-import TeachersTable from "@/components/teachersPresentation";
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
-  return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <TeachersTable/>
-    </div>
-  )
+  console.log('[ManagerTeachersPage] Server render', { timestamp: new Date().toISOString() });
+  return <ManagerTeachersClient />;
 }

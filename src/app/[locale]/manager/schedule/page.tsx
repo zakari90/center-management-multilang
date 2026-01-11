@@ -1,13 +1,8 @@
-"use client"
+import ManagerScheduleClient from "@/components/manager-schedule-client";
 
-import TimetableManagement from "@/components/TimeTableManagementRead"
+export const dynamic = 'force-dynamic';
 
-function Page() {
-  return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <TimetableManagement />
-    </div>
-  )
+export default function Page() {
+  console.log('[ManagerSchedulePage] Server render', { timestamp: new Date().toISOString() });
+  return <ManagerScheduleClient />;
 }
-
-export default Page
