@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { getSession } from "@/lib/authentication";
 import db from "@/lib/db";
 // import { Subject } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -145,20 +145,38 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
+    const session: any = await getSession();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const { adminId } = body;
-    const center = await db.center.findMany({
-      where: { adminId},
+    const adminId = session.user.id;
+    
+    // Check if user is admin (optional but good practice)
+    if (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER') {
+       // If standard user logic differs, handle here. For now assume admin/manager access their own centers.
+       // Actually only Admins own centers. Managers belong to centers. 
+       // If manager, we might want to find centers where they are managers?
+       // Leaving as-is for admin matching behavior based on current code intent.
+    }
+
+    const centers = await db.center.findMany({
+      where: { 
+        OR: [
+          { adminId: adminId },
+          { managers: { has: adminId } } // Also include centers where user is manager
+        ]
+      },
       include: { subjects: true }
     });
 
-    return NextResponse.json(center, { status: 201 });
+    return NextResponse.json(centers, { status: 200 });
   } catch (error) {
     console.error("[CENTER_GET]", error);
     return NextResponse.json({ 
       error: "Failed to get center data",
-      details:  error
+      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
     }, { status: 500 });
   }
 }
