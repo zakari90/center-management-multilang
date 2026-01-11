@@ -6,8 +6,17 @@ import { Receipt, ReceiptType } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-const studentPaymentUrl = `${baseUrl}/api/receipts/student-payment`;
-const teacherPaymentUrl = `${baseUrl}/api/receipts/teacher-payment`;
+
+function getApiUrl(pathname: string) {
+  if (typeof window !== "undefined") {
+    return pathname;
+  }
+  return `${baseUrl}${pathname}`;
+}
+
+const api_url = getApiUrl("/api/receipts");
+const studentPaymentUrl = getApiUrl("/api/receipts/student-payment");
+const teacherPaymentUrl = getApiUrl("/api/receipts/teacher-payment");
 
 // ✅ Transform server receipt data to match local Receipt interface
 function transformServerReceipt(serverReceipt: any): Receipt {
@@ -120,61 +129,73 @@ const ServerActionReceipts = {
   },
 
   async Sync() {
-    if (!isOnline()) {
-      throw new Error("Cannot sync: device is offline");
-    }
-
-    const waitingData = await receiptActions.getByStatus(["0", "w"]);
-    if (waitingData.length === 0) return { message: "No receipts to sync.", results: [] };
-
-    const results: Array<{ id: string; success: boolean; error?: string }> = [];
-
-    for (const receipt of waitingData) {
-      try {
-        if (receipt.status === "0") {
-          // Pending deletion
-          const result = await ServerActionReceipts.DeleteFromServer(receipt.id);
-          if (result && result.ok) {
-            await receiptActions.deleteLocal(receipt.id);
-            results.push({ id: receipt.id, success: true });
-          } else {
-            const errorMsg = result ? `Server returned ${result.status}` : "Network error";
-            results.push({ id: receipt.id, success: false, error: errorMsg });
-          }
-        } else if (receipt.status === "w") {
-          // Waiting to sync
-          const result = await ServerActionReceipts.SaveToServer(receipt);
-          if (result) {
-            receipt.status = "1"; // Mark as synced
-            await receiptActions.putLocal({
-              ...receipt,
-              ...(result.id && { id: result.id }),
-              ...(result.receiptNumber && { receiptNumber: result.receiptNumber }),
-              ...(result.amount !== undefined && { amount: result.amount }),
-              status: '1' as const,
-              updatedAt: Date.now(),
-            });
-            results.push({ id: receipt.id, success: true });
-          } else {
-            results.push({ id: receipt.id, success: false, error: "Server request failed" });
-          }
-        }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error syncing receipt ${receipt.id}:`, error);
-        results.push({ id: receipt.id, success: false, error: errorMsg });
+    try {
+      if (!isOnline()) {
+        console.warn("Device is offline, skipping receipt sync");
+        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
       }
+
+      const waitingData = await receiptActions.getByStatus(["0", "w"]);
+      if (waitingData.length === 0) return { message: "No receipts to sync.", results: [], successCount: 0, failCount: 0 };
+
+      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+
+      for (const receipt of waitingData) {
+        try {
+          if (receipt.status === "0") {
+            // Pending deletion
+            const result = await ServerActionReceipts.DeleteFromServer(receipt.id);
+            if (result && result.ok) {
+              await receiptActions.deleteLocal(receipt.id);
+              results.push({ id: receipt.id, success: true });
+            } else {
+              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              results.push({ id: receipt.id, success: false, error: errorMsg });
+            }
+          } else if (receipt.status === "w") {
+            // Waiting to sync
+            const result = await ServerActionReceipts.SaveToServer(receipt);
+            if (result) {
+              receipt.status = "1"; // Mark as synced
+              await receiptActions.putLocal({
+                ...receipt,
+                ...(result.id && { id: result.id }),
+                ...(result.receiptNumber && { receiptNumber: result.receiptNumber }),
+                ...(result.amount !== undefined && { amount: result.amount }),
+                status: '1' as const,
+                updatedAt: Date.now(),
+              });
+              results.push({ id: receipt.id, success: true });
+            } else {
+              results.push({ id: receipt.id, success: false, error: "Server request failed" });
+            }
+          }
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          console.error(`Error syncing receipt ${receipt.id}:`, error);
+          results.push({ id: receipt.id, success: false, error: errorMsg });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => !r.success).length;
+
+      return {
+        message: `Receipt sync completed. ${successCount} succeeded, ${failCount} failed.`,
+        results,
+        successCount,
+        failCount,
+      };
+    } catch (globalError: any) {
+       console.error("Critical error in ServerActionReceipts.Sync:", globalError);
+       return { 
+         message: "Sync failed completely", 
+         results: [], 
+         successCount: 0, 
+         failCount: 1, 
+         error: globalError.message 
+       };
     }
-
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
-
-    return {
-      message: `Receipt sync completed. ${successCount} succeeded, ${failCount} failed.`,
-      results,
-      successCount,
-      failCount,
-    };
   },
 
   async ReadFromServer() {

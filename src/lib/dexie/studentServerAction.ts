@@ -6,7 +6,15 @@ import { Student } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-const api_url = `${baseUrl}/api/students`;
+
+function getApiUrl(pathname: string) {
+  if (typeof window !== "undefined") {
+    return pathname;
+  }
+  return `${baseUrl}${pathname}`;
+}
+
+const api_url = getApiUrl("/api/students");
 
 // ✅ Transform server student data to match local Student interface
 function transformServerStudent(serverStudent: any): Student {
@@ -102,66 +110,78 @@ const ServerActionStudents = {
   },
 
   async Sync() {
-    if (!isOnline()) {
-      throw new Error("Cannot sync: device is offline");
-    }
-
-    const waitingData = await studentActions.getByStatus(["0", "w"]);
-    if (waitingData.length === 0) return { message: "No students to sync.", results: [] };
-
-    const results: Array<{ id: string; success: boolean; error?: string }> = [];
-
-    for (const student of waitingData) {
-      try {
-        if (student.status === "0") {
-          // Pending deletion
-          const result = await ServerActionStudents.DeleteFromServer(student.id);
-          if (result && result.ok) {
-            await studentActions.deleteLocal(student.id);
-            results.push({ id: student.id, success: true });
-          } else {
-            const errorMsg = result ? `Server returned ${result.status}` : "Network error";
-            results.push({ id: student.id, success: false, error: errorMsg });
-          }
-        } else if (student.status === "w") {
-          // Waiting to sync
-          const result = await ServerActionStudents.SaveToServer(student);
-          if (result) {
-            student.status = "1"; // Mark as synced
-            await studentActions.putLocal({
-              ...student,
-              ...(result.id && { id: result.id }),
-              ...(result.name && { name: result.name }),
-              ...(result.email !== undefined && { email: result.email }),
-              ...(result.phone !== undefined && { phone: result.phone }),
-              ...(result.parentName !== undefined && { parentName: result.parentName }),
-              ...(result.parentPhone !== undefined && { parentPhone: result.parentPhone }),
-              ...(result.parentEmail !== undefined && { parentEmail: result.parentEmail }),
-              ...(result.grade !== undefined && { grade: result.grade }),
-              status: '1' as const,
-              updatedAt: Date.now(),
-            });
-            results.push({ id: student.id, success: true });
-          } else {
-            results.push({ id: student.id, success: false, error: "Server request failed" });
-          }
-        }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error syncing student ${student.id}:`, error);
-        results.push({ id: student.id, success: false, error: errorMsg });
+    try {
+      if (!isOnline()) {
+        console.warn("Device is offline, skipping student sync");
+        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
       }
+
+      const waitingData = await studentActions.getByStatus(["0", "w"]);
+      if (waitingData.length === 0) return { message: "No students to sync.", results: [], successCount: 0, failCount: 0 };
+
+      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+
+      for (const student of waitingData) {
+        try {
+          if (student.status === "0") {
+            // Pending deletion
+            const result = await ServerActionStudents.DeleteFromServer(student.id);
+            if (result && result.ok) {
+              await studentActions.deleteLocal(student.id);
+              results.push({ id: student.id, success: true });
+            } else {
+              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              results.push({ id: student.id, success: false, error: errorMsg });
+            }
+          } else if (student.status === "w") {
+            // Waiting to sync
+            const result = await ServerActionStudents.SaveToServer(student);
+            if (result) {
+              student.status = "1"; // Mark as synced
+              await studentActions.putLocal({
+                ...student,
+                ...(result.id && { id: result.id }),
+                ...(result.name && { name: result.name }),
+                ...(result.email !== undefined && { email: result.email }),
+                ...(result.phone !== undefined && { phone: result.phone }),
+                ...(result.parentName !== undefined && { parentName: result.parentName }),
+                ...(result.parentPhone !== undefined && { parentPhone: result.parentPhone }),
+                ...(result.parentEmail !== undefined && { parentEmail: result.parentEmail }),
+                ...(result.grade !== undefined && { grade: result.grade }),
+                status: '1' as const,
+                updatedAt: Date.now(),
+              });
+              results.push({ id: student.id, success: true });
+            } else {
+              results.push({ id: student.id, success: false, error: "Server request failed" });
+            }
+          }
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          console.error(`Error syncing student ${student.id}:`, error);
+          results.push({ id: student.id, success: false, error: errorMsg });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => !r.success).length;
+
+      return {
+        message: `Student sync completed. ${successCount} succeeded, ${failCount} failed.`,
+        results,
+        successCount,
+        failCount,
+      };
+    } catch (globalError: any) {
+       console.error("Critical error in ServerActionStudents.Sync:", globalError);
+       return { 
+         message: "Sync failed completely", 
+         results: [], 
+         successCount: 0, 
+         failCount: 1, 
+         error: globalError.message 
+       };
     }
-
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
-
-    return {
-      message: `Student sync completed. ${successCount} succeeded, ${failCount} failed.`,
-      results,
-      successCount,
-      failCount,
-    };
   },
 
   async ReadFromServer() {

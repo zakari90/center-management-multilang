@@ -99,63 +99,75 @@ const ServerActionSubjects = {
   },
 
   async Sync() {
-    if (!isOnline()) {
-      throw new Error("Cannot sync: device is offline");
-    }
-
-    const waitingData = await subjectActions.getByStatus(["0", "w"]);
-    if (waitingData.length === 0) return { message: "No subjects to sync.", results: [] };
-
-    const results: Array<{ id: string; success: boolean; error?: string }> = [];
-
-    for (const subject of waitingData) {
-      try {
-        if (subject.status === "0") {
-          // Pending deletion
-          const result = await ServerActionSubjects.DeleteFromServer(subject.id);
-          if (result && result.ok) {
-            await subjectActions.deleteLocal(subject.id);
-            results.push({ id: subject.id, success: true });
-          } else {
-            const errorMsg = result ? `Server returned ${result.status}` : "Network error";
-            results.push({ id: subject.id, success: false, error: errorMsg });
-          }
-        } else if (subject.status === "w") {
-          // Waiting to sync
-          const result = await ServerActionSubjects.SaveToServer(subject);
-          if (result) {
-            subject.status = "1"; // Mark as synced
-            await subjectActions.putLocal({
-              ...subject,
-              ...(result.id && { id: result.id }),
-              ...(result.name && { name: result.name }),
-              ...(result.grade && { grade: result.grade }),
-              ...(result.price !== undefined && { price: result.price }),
-              ...(result.duration !== undefined && { duration: result.duration }),
-              status: '1' as const,
-              updatedAt: Date.now(),
-            });
-            results.push({ id: subject.id, success: true });
-          } else {
-            results.push({ id: subject.id, success: false, error: "Server request failed" });
-          }
-        }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error syncing subject ${subject.id}:`, error);
-        results.push({ id: subject.id, success: false, error: errorMsg });
+    try {
+      if (!isOnline()) {
+        console.warn("Device is offline, skipping subject sync");
+        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
       }
+
+      const waitingData = await subjectActions.getByStatus(["0", "w"]);
+      if (waitingData.length === 0) return { message: "No subjects to sync.", results: [], successCount: 0, failCount: 0 };
+
+      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+
+      for (const subject of waitingData) {
+        try {
+          if (subject.status === "0") {
+            // Pending deletion
+            const result = await ServerActionSubjects.DeleteFromServer(subject.id);
+            if (result && result.ok) {
+              await subjectActions.deleteLocal(subject.id);
+              results.push({ id: subject.id, success: true });
+            } else {
+              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              results.push({ id: subject.id, success: false, error: errorMsg });
+            }
+          } else if (subject.status === "w") {
+            // Waiting to sync
+            const result = await ServerActionSubjects.SaveToServer(subject);
+            if (result) {
+              subject.status = "1"; // Mark as synced
+              await subjectActions.putLocal({
+                ...subject,
+                ...(result.id && { id: result.id }),
+                ...(result.name && { name: result.name }),
+                ...(result.grade && { grade: result.grade }),
+                ...(result.price !== undefined && { price: result.price }),
+                ...(result.duration !== undefined && { duration: result.duration }),
+                status: '1' as const,
+                updatedAt: Date.now(),
+              });
+              results.push({ id: subject.id, success: true });
+            } else {
+              results.push({ id: subject.id, success: false, error: "Server request failed" });
+            }
+          }
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          console.error(`Error syncing subject ${subject.id}:`, error);
+          results.push({ id: subject.id, success: false, error: errorMsg });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => !r.success).length;
+
+      return {
+        message: `Subject sync completed. ${successCount} succeeded, ${failCount} failed.`,
+        results,
+        successCount,
+        failCount,
+      };
+    } catch (globalError: any) {
+       console.error("Critical error in ServerActionSubjects.Sync:", globalError);
+       return { 
+         message: "Sync failed completely", 
+         results: [], 
+         successCount: 0, 
+         failCount: 1, 
+         error: globalError.message 
+       };
     }
-
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
-
-    return {
-      message: `Subject sync completed. ${successCount} succeeded, ${failCount} failed.`,
-      results,
-      successCount,
-      failCount,
-    };
   },
 
   async ReadFromServer() {

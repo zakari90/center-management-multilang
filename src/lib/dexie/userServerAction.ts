@@ -6,8 +6,16 @@ import { User, Role } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
-const api_url = `${baseUrl}/api/admin/users`;
-const managerRegisterUrl = `${baseUrl}/api/manager/register`;
+
+function getApiUrl(pathname: string) {
+  if (typeof window !== "undefined") {
+    return pathname;
+  }
+  return `${baseUrl}${pathname}`;
+}
+
+const api_url = getApiUrl("/api/admin/users");
+const managerRegisterUrl = getApiUrl("/api/manager/register");
 
 // ✅ Transform server user data to match local User interface
 function transformServerUser(serverUser: any): User {
@@ -125,61 +133,73 @@ const ServerActionUsers = {
   },
 
   async Sync() {
-    if (!isOnline()) {
-      throw new Error("Cannot sync: device is offline");
-    }
-
-    const waitingData = await userActions.getByStatus(["0", "w"]);
-    if (waitingData.length === 0) return { message: "No users to sync.", results: [] };
-
-    const results: Array<{ id: string; success: boolean; error?: string }> = [];
-
-    for (const user of waitingData) {
-      try {
-        if (user.status === "0") {
-          // Pending deletion
-          const result = await ServerActionUsers.DeleteFromServer(user.id);
-          if (result && result.ok) {
-            await userActions.deleteLocal(user.id);
-            results.push({ id: user.id, success: true });
-          } else {
-            const errorMsg = result ? `Server returned ${result.status}` : "Network error";
-            results.push({ id: user.id, success: false, error: errorMsg });
-          }
-        } else if (user.status === "w") {
-          // Waiting to sync
-          const result = await ServerActionUsers.SaveToServer(user);
-          if (result) {
-            user.status = "1"; // Mark as synced
-            await userActions.putLocal({
-              ...user,
-              ...(result.id && { id: result.id }),
-              ...(result.name && { name: result.name }),
-              ...(result.email && { email: result.email }),
-              status: '1' as const,
-              updatedAt: Date.now(),
-            });
-            results.push({ id: user.id, success: true });
-          } else {
-            results.push({ id: user.id, success: false, error: "Server request failed" });
-          }
-        }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error syncing user ${user.id}:`, error);
-        results.push({ id: user.id, success: false, error: errorMsg });
+    try {
+      if (!isOnline()) {
+        console.warn("Device is offline, skipping user sync");
+        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
       }
+
+      const waitingData = await userActions.getByStatus(["0", "w"]);
+      if (waitingData.length === 0) return { message: "No users to sync.", results: [], successCount: 0, failCount: 0 };
+
+      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+
+      for (const user of waitingData) {
+        try {
+          if (user.status === "0") {
+            // Pending deletion
+            const result = await ServerActionUsers.DeleteFromServer(user.id);
+            if (result && result.ok) {
+              await userActions.deleteLocal(user.id);
+              results.push({ id: user.id, success: true });
+            } else {
+              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              results.push({ id: user.id, success: false, error: errorMsg });
+            }
+          } else if (user.status === "w") {
+            // Waiting to sync
+            const result = await ServerActionUsers.SaveToServer(user);
+            if (result) {
+              user.status = "1"; // Mark as synced
+              await userActions.putLocal({
+                ...user,
+                ...(result.id && { id: result.id }),
+                ...(result.name && { name: result.name }),
+                ...(result.email && { email: result.email }),
+                status: '1' as const,
+                updatedAt: Date.now(),
+              });
+              results.push({ id: user.id, success: true });
+            } else {
+              results.push({ id: user.id, success: false, error: "Server request failed" });
+            }
+          }
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          console.error(`Error syncing user ${user.id}:`, error);
+          results.push({ id: user.id, success: false, error: errorMsg });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => !r.success).length;
+
+      return {
+        message: `User sync completed. ${successCount} succeeded, ${failCount} failed.`,
+        results,
+        successCount,
+        failCount,
+      };
+    } catch (globalError: any) {
+       console.error("Critical error in ServerActionUsers.Sync:", globalError);
+       return { 
+         message: "Sync failed completely", 
+         results: [], 
+         successCount: 0, 
+         failCount: 1, // Treat as 1 failure to ensure it's logged
+         error: globalError.message 
+       };
     }
-
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
-
-    return {
-      message: `User sync completed. ${successCount} succeeded, ${failCount} failed.`,
-      results,
-      successCount,
-      failCount,
-    };
   },
 
   async ReadFromServer() {
