@@ -506,7 +506,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
                     htmlFor={`day-${schedule.day}`}
                     className="text-xs cursor-pointer truncate"
                   >
-                    {schedule.day.slice(0, 3)}
+                    {schedule.day}
                   </Label>
                 </div>
               ))}
