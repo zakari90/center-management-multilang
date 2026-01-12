@@ -29,9 +29,9 @@ import {
 import { useAuth } from '@/context/authContext'
 import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
 import { ModalLink } from '@/components/modal-link'
+import ViewReceiptDialog from '@/components/ViewReceiptDialog'
 import {
   DollarSign,
-  Eye,
   Loader2,
   Plus,
   Printer,
@@ -395,11 +395,7 @@ export default function ReceiptsTable() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" asChild>
-                          <ModalLink href={`/manager/receipts/${receipt.id}`}>
-                            <Eye className="h-4 w-4" />
-                          </ModalLink>
-                        </Button>
+                        <ViewReceiptDialog receiptId={receipt.id} />
                         <Button variant="ghost" size="sm" onClick={() => window.print()}>
                           <Printer className="h-4 w-4" />
                         </Button>
