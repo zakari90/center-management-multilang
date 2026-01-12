@@ -5,7 +5,8 @@ import type React from "react"
 
 // import axios from "axios" // ✅ Commented out - using local DB
 import { useTranslations } from "next-intl"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
+import { ModalContentWrapper } from "@/components/modal-content-wrapper"
 import { useEffect, useState, useCallback } from "react"
 import { Loader2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -81,6 +82,8 @@ export default function EditStudentForm() {
   const t = useTranslations("editStudent")
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isModal = searchParams.get("modal") === "true"
   const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
   const [isLoading, setIsLoading] = useState(false)
   const [isFetching, setIsFetching] = useState(true)
@@ -461,8 +464,8 @@ export default function EditStudentForm() {
     )
   }
 
-  return (
-    <div className="max-w-5xl mx-auto p-6">
+  const content = (
+    <div className={isModal ? "p-2" : "max-w-5xl mx-auto p-6"}>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-3xl">{t("title")}</CardTitle>
@@ -776,4 +779,10 @@ export default function EditStudentForm() {
       </Card>
     </div>
   )
+
+  if (isModal) {
+    return <ModalContentWrapper className="max-w-5xl">{content}</ModalContentWrapper>
+  }
+
+  return content
 }

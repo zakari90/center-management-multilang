@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Link from "next/link"
+import { ModalLink } from "@/components/modal-link"
 // import axios from "axios" // ✅ Commented out - using local DB
 import { useTranslations } from "next-intl"
 import { Spinner } from "@/components/ui/spinner"
@@ -180,7 +180,7 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
             </p>
           </div>
           <Button asChild size={isModal ? "sm" : "default"} className="shrink-0">
-            <Link href={`/manager/students/${student.id}/edit`}>{t("editStudent")}</Link>
+            <ModalLink href={`/manager/students/${student.id}/edit`}>{t("editStudent")}</ModalLink>
           </Button>
         </div>
       </div>
@@ -319,7 +319,7 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
               )}
 
               <Button asChild className="mt-4 w-full" variant="default">
-                <Link href={`/receipts/create?studentId=${student.id}`}>{t("addPayment")}</Link>
+                <ModalLink href={`/manager/receipts/create?studentId=${student.id}`}>{t("addPayment")}</ModalLink>
               </Button>
             </CardContent>
           </Card>
