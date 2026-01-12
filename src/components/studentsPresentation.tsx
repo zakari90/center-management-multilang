@@ -16,6 +16,7 @@ import { studentActions, studentSubjectActions, subjectActions, teacherActions }
 import { useAuth } from "@/context/authContext"
 // import axios from "axios" // ✅ Commented out - using local DB
 import { EntitySyncControls } from "@/components/EntitySyncControls"
+import AddStudentDialog from "@/components/AddStudentDialog"
 
 export interface StudentSubject {
   id: string
@@ -193,9 +194,7 @@ export default function StudentsTable() {
             <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <Button asChild>
-              <Link href="/manager/students/create">{t("addStudent")}</Link>
-            </Button>
+            <AddStudentDialog onStudentAdded={fetchStudents} />
             <EntitySyncControls entity="students" />
           </div>
         </div>

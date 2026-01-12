@@ -24,10 +24,11 @@ import { Eye, Loader2, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { ModalLink } from '@/components/modal-link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/_dexieActions'
 import { useAuth } from '@/context/authContext'
 import { EntitySyncControls } from '@/components/EntitySyncControls'
+import AddTeacherDialog from '@/components/AddTeacherDialog'
 
 interface TeacherSubject {
   id: string
@@ -60,11 +61,7 @@ export default function TeachersTable() {
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    fetchTeachers()
-  }, [user])
-
-  const fetchTeachers = async () => {
+  const fetchTeachers = useCallback(async () => {
     try {
       setIsLoading(true)
       setError('')
@@ -149,7 +146,11 @@ export default function TeachersTable() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, t])
+
+  useEffect(() => {
+    fetchTeachers()
+  }, [fetchTeachers])
 
   const filteredTeachers = teachers.filter(teacher =>
     teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -179,9 +180,7 @@ export default function TeachersTable() {
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex flex-col items-stretch gap-2 md:items-end">
-          <Button asChild>
-            <Link href="/manager/teachers/create">{t('addTeacher')}</Link>
-          </Button>
+          <AddTeacherDialog onTeacherAdded={fetchTeachers} />
           {/* Per-entity sync controls for teachers */}
           <EntitySyncControls entity="teachers" />
         </div>
@@ -248,10 +247,7 @@ export default function TeachersTable() {
         <CardContent>
           {filteredTeachers.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              {t('noTeachersFound')}{' '}
-              <Link href="/manager/teachers/create" className="text-primary underline">
-                {t('addYourFirstTeacher')}
-              </Link>
+              {t('noTeachersFound')}
             </div>
           ) : (
             <Table>

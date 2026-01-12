@@ -43,7 +43,8 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import AddReceiptDialog from '@/components/AddReceiptDialog'
 
 interface Receipt {
   manager?: {
@@ -80,11 +81,7 @@ export default function ReceiptsTable() {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [methodFilter, setMethodFilter] = useState<string>('all')
 
-  useEffect(() => {
-    fetchReceipts()
-  }, [user])
-
-  const fetchReceipts = async () => {
+  const fetchReceipts = useCallback(async () => {
     try {
       if (!user) {
         setError("Unauthorized: Please log in again")
@@ -150,7 +147,11 @@ export default function ReceiptsTable() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user, t])
+
+  useEffect(() => {
+    fetchReceipts()
+  }, [fetchReceipts])
 
   const filteredReceipts = receipts.filter(receipt => {
     const matchesSearch = 
@@ -195,12 +196,7 @@ export default function ReceiptsTable() {
               {t('teacherPayment')}
             </Link>
           </Button>
-          <Button asChild variant="secondary">
-            <Link href="/manager/receipts/create">
-              <Plus className="mr-2 h-4 w-4" />
-              {t('studentPayment')}
-            </Link>
-          </Button>
+          <AddReceiptDialog onReceiptAdded={fetchReceipts} />
         </div>
       </div>
 
