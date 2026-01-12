@@ -7,7 +7,6 @@ import { ComponentProps } from "react"
 
 // Routes that should NOT open in modals (forms, create pages, etc.)
 const EXCLUDE_ROUTES = [
-  /\/edit$/,
   /\/create$/,
   /\/create-/,
   /\/new$/,

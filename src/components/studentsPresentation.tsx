@@ -2,7 +2,6 @@
 
 import { Loader2, Eye, Pencil, Search, Users, GraduationCap, DollarSign } from "lucide-react"
 import { useTranslations } from "next-intl"
-import Link from "next/link"
 import { ModalLink } from "@/components/modal-link"
 import { useEffect, useState, useCallback } from "react"
 import { Input } from "@/components/ui/input"
@@ -341,9 +340,9 @@ export default function StudentsTable() {
                           </ModalLink>
                         </Button>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/manager/students/${student.id}/edit`}>
+                          <ModalLink href={`/manager/students/${student.id}/edit`}>
                             <Pencil className="h-4 w-4" />
-                          </Link>
+                          </ModalLink>
                         </Button>
                       </div>
                     </td>
