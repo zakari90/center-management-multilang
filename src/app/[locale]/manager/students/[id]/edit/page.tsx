@@ -3,7 +3,6 @@
 
 import type React from "react"
 
-// import axios from "axios" // ✅ Commented out - using local DB
 import { useTranslations } from "next-intl"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { ModalContentWrapper } from "@/components/modal-content-wrapper"
@@ -465,13 +464,15 @@ export default function EditStudentForm() {
   }
 
   const content = (
-    <div className={isModal ? "p-2" : "max-w-5xl mx-auto p-6"}>
-      <Card>
+    <div className={isModal ? "" : "max-w-5xl mx-auto p-6"}>
+      <Card className={isModal ? "border-0 shadow-none" : ""}>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-3xl">{t("title")}</CardTitle>
-          <Button type="button" variant="ghost" size="icon" onClick={() => router.back()}>
-            <X className="w-6 h-6" />
-          </Button>
+          <CardTitle className={isModal ? "text-2xl" : "text-3xl"}>{t("title")}</CardTitle>
+          {!isModal && (
+            <Button type="button" variant="ghost" size="icon" onClick={() => router.back()}>
+              <X className="w-6 h-6" />
+            </Button>
+          )}
         </CardHeader>
 
         <CardContent>

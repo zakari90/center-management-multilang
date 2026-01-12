@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/dexieActions"
 import { useAuth } from "@/context/authContext"
-// import axios from "axios" // ✅ Commented out - using local DB
 import { EntitySyncControls } from "@/components/EntitySyncControls"
 import AddStudentDialog from "@/components/AddStudentDialog"
 

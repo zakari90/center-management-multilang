@@ -20,13 +20,12 @@ function shouldOpenInModal(href: string): boolean {
     return false
   }
   
-  // Match any route with dynamic segments (like [id], [slug])
-  // Pattern: /manager/.../[something]/...
-  // This will match:
+  // Match any manager route with at least 2 path segments after /manager/
+  // This matches dynamic routes and create routes:
   // - /manager/students/[id]
   // - /manager/students/[id]/card
-  // - /manager/receipts/[id]
-  // - Any other [id] route
+  // - /manager/receipts/create
+  // - /manager/receipts/create-teacher-payment
   const dynamicRoutePattern = /\/manager\/[^\/]+\/[^\/]+(\/[^\/]+)*$/
   
   return dynamicRoutePattern.test(href)
@@ -45,10 +44,10 @@ interface ModalLinkProps extends ComponentProps<typeof Link> {
  */
 export function ModalLink({ href, forceFullPage = false, ...props }: ModalLinkProps) {
   const pathname = usePathname()
-  // Check if we're on a manager list page (any resource type)
-  const isListPage = pathname.match(/\/manager\/[^\/]+$/)
+  // Check if we're on a manager page (dashboard or list page)
+  const isManagerPage = pathname.match(/\/manager(\/[^\/]+)?$/)
   const hrefStr = href.toString()
-  const shouldModal = !forceFullPage && isListPage && shouldOpenInModal(hrefStr)
+  const shouldModal = !forceFullPage && isManagerPage && shouldOpenInModal(hrefStr)
 
   // Construct the href with modal query param if needed
   // Note: next-intl Link will handle locale automatically

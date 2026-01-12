@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-// import axios from "axios" // ✅ Commented out - using local DB
 import { useRouter, useSearchParams } from "next/navigation"
 import { receiptActions, studentActions, studentSubjectActions, subjectActions } from "@/lib/dexie/dexieActions"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
@@ -399,12 +398,12 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
         return
       }
 
-      // ✅ Filter students by managerId and status
-      const managerStudents = allStudents
-        .filter(s => s.managerId === user.id && s.status !== '0')
+      // ✅ Filter students by status only (show all active students)
+      const activeStudents = allStudents
+        .filter(s => s.status !== '0')
 
       // ✅ Build students with subjects
-      const studentsWithSubjects: Student[] = managerStudents.map(student => {
+      const studentsWithSubjects: Student[] = activeStudents.map(student => {
         const studentSubjectsForStudent = allStudentSubjects
           .filter(ss => ss.studentId === student.id && ss.status !== '0')
           .map(ss => {
@@ -626,10 +625,10 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
   })
 
   return (
-    <div className={isModal ? "p-2" : "max-w-4xl mx-auto p-3 sm:p-6"}>
-      <Card>
+    <div className={isModal ? "" : "max-w-4xl mx-auto p-3 sm:p-6"}>
+      <Card className={isModal ? "border-0 shadow-none" : ""}>
         <CardHeader>
-          <CardTitle className="text-lg sm:text-2xl">{t("title")}</CardTitle>
+          <CardTitle className={isModal ? "text-xl" : "text-lg sm:text-2xl"}>{t("title")}</CardTitle>
           <CardDescription className="text-xs sm:text-sm">{t("subtitle")}</CardDescription>
         </CardHeader>
 

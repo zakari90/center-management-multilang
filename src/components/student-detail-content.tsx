@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { ModalLink } from "@/components/modal-link"
-// import axios from "axios" // ✅ Commented out - using local DB
 import { useTranslations } from "next-intl"
 import { Spinner } from "@/components/ui/spinner"
 import { Button } from "@/components/ui/button"

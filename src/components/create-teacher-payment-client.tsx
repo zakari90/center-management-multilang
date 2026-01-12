@@ -9,7 +9,6 @@ import { generateObjectId } from '@/lib/utils/generateObjectId'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
 import ServerActionReceipts from '@/lib/dexie/receiptServerAction'
 import { isOnline } from '@/lib/utils/network'
-// import axios from 'axios' // ✅ Commented out - using local DB
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -330,10 +329,10 @@ export default function CreateTeacherPaymentFormClient({ isModal = false }: { is
   }
 
   return (
-    <div className={isModal ? "p-2" : "max-w-4xl mx-auto p-6"}>
-      <Card>
+    <div className={isModal ? "" : "max-w-4xl mx-auto p-6"}>
+      <Card className={isModal ? "border-0 shadow-none" : ""}>
         <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
+          <CardTitle className={isModal ? "text-xl" : ""}>{t('title')}</CardTitle>
           <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
 
