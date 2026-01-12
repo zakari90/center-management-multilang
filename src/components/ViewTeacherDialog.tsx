@@ -151,7 +151,7 @@ export default function ViewTeacherDialog({ teacherId, trigger }: ViewTeacherDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] h-auto">
         <DialogHeader>
           <DialogTitle>{teacher?.name || t("teacherDetails")}</DialogTitle>
         </DialogHeader>

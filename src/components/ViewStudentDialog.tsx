@@ -163,7 +163,7 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[650px] h-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             {student && (
