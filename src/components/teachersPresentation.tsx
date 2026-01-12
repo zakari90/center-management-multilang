@@ -23,7 +23,7 @@ import {
 import { Eye, Loader2, Pencil } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { ModalLink } from '@/components/modal-link'
+import ViewTeacherDialog from '@/components/ViewTeacherDialog'
 import { useEffect, useState, useCallback } from 'react'
 import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
@@ -315,11 +315,7 @@ export default function TeachersTable() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <ModalLink href={`/manager/teachers/${teacher.id}`}>
-                          <Button variant="ghost" size="icon" title="View">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </ModalLink>
+                        <ViewTeacherDialog teacherId={teacher.id} />
                         <EditTeacherDialog 
                           teacherId={teacher.id} 
                           onTeacherUpdated={fetchTeachers} 
