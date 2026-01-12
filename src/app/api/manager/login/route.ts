@@ -1,4 +1,5 @@
 import db from "@/lib/db";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -22,30 +23,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
-    if (! (password === user.password) ) {
+    // Use bcrypt to compare passwords securely
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return NextResponse.json(
         { error: { password: "Incorrect password." } },
         { status: 401 }
       );
     }
 
-
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         message: "Login successful.",
-         user: {
+        user: {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
         },
+        // Include hash for offline login capability (PWA feature)
+        passwordHash: user.password,
       },
       { status: 200 }
     );
-
-
-    return response;
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

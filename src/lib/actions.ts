@@ -216,14 +216,15 @@ export async function loginAdmin(
       }
     }
 
-    // Use relative URL for server actions (runs on same server)
+    // Use the auth/login endpoint for proper login flow
     const response = await axios.post(
-      `${apiUrl}/admin/users`,
+      `${apiUrl}/auth/login`,
       data,
       { headers: { "Content-Type": "application/json" } }
     )
     
     const user = response.data.user
+    const passwordHash = response.data.passwordHash  // For offline auth
     const session = await encrypt({ user })
     ;(await cookies()).set("session", session, { 
       httpOnly: true,
@@ -235,7 +236,10 @@ export async function loginAdmin(
     
     return {
       success: true,
-      data: response.data,
+      data: {
+        ...response.data,
+        passwordHash,  // Include hash for offline storage on client
+      },
     }
   } catch (error) {
     console.error("Admin login error:", error)
@@ -278,6 +282,7 @@ export async function loginManager(state: unknown, formData: FormData) {
     )
     
     const user = response.data.user
+    const passwordHash = response.data.passwordHash  // For offline auth
     const session = await encrypt({ user })
     ;(await cookies()).set("session", session, { 
       httpOnly: true,
@@ -289,7 +294,10 @@ export async function loginManager(state: unknown, formData: FormData) {
     
     return {
       success: true,
-      data: response.data,
+      data: {
+        ...response.data,
+        passwordHash,  // Include hash for offline storage on client
+      },
     }
   } catch (error) {
     console.error("Manager login error:", error)

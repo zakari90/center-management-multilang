@@ -117,6 +117,18 @@ export interface PushSubscription extends SyncEntity {
   role?: Role;
 }
 
+// Local authentication storage for offline login
+export interface LocalAuthUser {
+  id: string;           // MongoDB ObjectId from server
+  email: string;        // Unique email
+  passwordHash: string; // bcrypt hash (same as server)
+  name: string;
+  role: Role;
+  lastOnlineLogin: number;  // Timestamp of last successful online login
+  createdAt: number;
+  updatedAt: number;
+}
+
 // Main Database Class
 export class AppDatabase extends Dexie {
   centers!: Table<Center>;
@@ -129,6 +141,7 @@ export class AppDatabase extends Dexie {
   receipts!: Table<Receipt>;
   schedules!: Table<Schedule>;
   pushSubscriptions!: Table<PushSubscription>;
+  localAuthUsers!: Table<LocalAuthUser>;  // For offline authentication
 
   constructor() {
     super('EducationAppDatabase');
@@ -155,8 +168,35 @@ export class AppDatabase extends Dexie {
       pushSubscriptions: 
         'id, &endpoint, status, userId, role, [status+updatedAt], updatedAt',
     });
+
+    // Version 2: Add localAuthUsers table for offline authentication
+    this.version(2).stores({
+      centers: 
+        'id, status, adminId, [status+updatedAt], updatedAt',
+      users: 
+        'id, &email, status, role, [status+updatedAt], updatedAt',
+      teachers: 
+        'id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt',
+      students: 
+        'id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt',
+      subjects: 
+        'id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt',
+      teacherSubjects: 
+        'id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt',
+      studentSubjects: 
+        'id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt',
+      receipts: 
+        'id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt',
+      schedules: 
+        'id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt',
+      pushSubscriptions: 
+        'id, &endpoint, status, userId, role, [status+updatedAt], updatedAt',
+      localAuthUsers:
+        'id, &email, role, lastOnlineLogin, updatedAt',
+    });
   }
 }
 
 // Export singleton instance
 export const localDb = new AppDatabase();
+

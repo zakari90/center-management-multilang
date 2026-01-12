@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
           { status: 401 }
         );
       }
-      // SUCCESS: return user data
+      // SUCCESS: return user data with passwordHash for offline storage
       return NextResponse.json(
         {
           message: "User logged in successfully.",
@@ -38,7 +38,9 @@ export async function POST(req: NextRequest) {
             name: user.name,
             email: user.email,
             role: user.role,
-          }
+          },
+          // Include hash for offline login capability (PWA feature)
+          passwordHash: user.password,
         },
         { status: 200 }
       );
@@ -65,7 +67,9 @@ export async function POST(req: NextRequest) {
             name: user.name,
             email: user.email,
             role: user.role,
-          }
+          },
+          // Include hash for offline login capability (PWA feature)
+          passwordHash: hashedPassword,
         },
         { status: 201 }
       );
