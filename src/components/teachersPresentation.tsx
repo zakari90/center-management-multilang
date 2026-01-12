@@ -29,6 +29,7 @@ import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dex
 import { useAuth } from '@/context/authContext'
 import { EntitySyncControls } from '@/components/EntitySyncControls'
 import AddTeacherDialog from '@/components/AddTeacherDialog'
+import EditTeacherDialog from '@/components/EditTeacherDialog'
 
 interface TeacherSubject {
   id: string
@@ -319,11 +320,10 @@ export default function TeachersTable() {
                             <Eye className="w-4 h-4" />
                           </Button>
                         </ModalLink>
-                        <Link href={`/manager/teachers/${teacher.id}/edit`}>
-                          <Button variant="ghost" size="icon" title="Edit">
-                            <Pencil className="w-4 h-4 text-green-600" />
-                          </Button>
-                        </Link>
+                        <EditTeacherDialog 
+                          teacherId={teacher.id} 
+                          onTeacherUpdated={fetchTeachers} 
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
