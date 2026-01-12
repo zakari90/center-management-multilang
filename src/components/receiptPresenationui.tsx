@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/table'
 import { useAuth } from '@/context/authContext'
 import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
-// import axios from 'axios' // ✅ Commented out - using local DB
 import { ModalLink } from '@/components/modal-link'
 import {
   DollarSign,
@@ -42,9 +41,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { useEffect, useState, useCallback } from 'react'
-import AddReceiptDialog from '@/components/AddReceiptDialog'
 
 interface Receipt {
   manager?: {
@@ -190,13 +187,18 @@ export default function ReceiptsTable() {
           <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link href="/manager/receipts/create-teacher-payment">
+          <Button asChild className="bg-primary hover:bg-primary/80">
+            <ModalLink href="/manager/receipts/create">
+              <Plus className="mr-2 h-4 w-4" />
+              {t('studentPayment')}
+            </ModalLink>
+          </Button>
+          <Button asChild variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
+            <ModalLink href="/manager/receipts/create-teacher-payment">
               <Plus className="mr-2 h-4 w-4" />
               {t('teacherPayment')}
-            </Link>
+            </ModalLink>
           </Button>
-          <AddReceiptDialog onReceiptAdded={fetchReceipts} />
         </div>
       </div>
 
@@ -322,9 +324,9 @@ export default function ReceiptsTable() {
               </p>
               {!searchTerm && typeFilter === 'all' && methodFilter === 'all' && (
                 <Button asChild className="mt-4">
-                  <Link href="/receipts/create">
+                  <ModalLink href="/manager/receipts/create">
                     {t('createFirstReceipt')}
-                  </Link>
+                  </ModalLink>
                 </Button>
               )}
             </div>

@@ -100,16 +100,16 @@ export default function CreateTeacherPaymentFormClient({ isModal = false }: { is
       // ✅ Fetch from local DB
       const allTeachers = await teacherActions.getAll()
       
-      // ✅ Filter teachers by managerId and status
-      const managerTeachers = allTeachers
-        .filter(t => t.managerId === user.id && t.status !== '0')
+      // ✅ Filter teachers by status only (show all active teachers)
+      const activeTeachers = allTeachers
+        .filter(t => t.status !== '0')
         .map(t => ({
           id: t.id,
           name: t.name,
           email: t.email ?? null,
         }))
 
-      setTeachers(managerTeachers)
+      setTeachers(activeTeachers)
 
       // ✅ Commented out online fetch
       // const { data } = await axios.get('/api/teachers')

@@ -30,6 +30,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ✅ Check manager limit (max 3 managers per center)
+    const center = await db.center.findFirst({
+      where: { adminId: session.user.id }
+    });
+
+    if (center && center.managers && center.managers.length >= 3) {
+      return NextResponse.json(
+        { error: { message: "Maximum number of managers (3) reached for this center." } },
+        { status: 400 }
+      );
+    }
+
     // Check if ID is provided and if it already exists
     if (id) {
       const existingById = await db.user.findUnique({
@@ -55,12 +67,7 @@ export async function POST(req: NextRequest) {
     });
 
 
-    // ✅ Link manager to the Admin's center
-    // Find the center where this admin is the owner
-    const center = await db.center.findFirst({
-      where: { adminId: session.user.id }
-    });
-
+    // ✅ Link manager to the Admin's center (reuse center from limit check)
     if (center) {
       await db.center.update({
         where: { id: center.id },
