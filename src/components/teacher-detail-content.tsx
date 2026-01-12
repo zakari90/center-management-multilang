@@ -15,6 +15,7 @@ import {
   teacherSubjectActions, 
   subjectActions 
 } from "@/lib/dexie/dexieActions"
+import EditTeacherDialog from "@/components/EditTeacherDialog"
 
 interface Subject {
   id: string
@@ -273,10 +274,16 @@ export function TeacherDetailContent({ teacherId, isModal = false }: TeacherDeta
       </PdfExporter>
       {!isModal && (
         <div className="mt-6">
-          <Button onClick={() => router.push(`/manager/teachers/${teacher.id}/edit`)}>
-            <Edit className="mr-2 h-4 w-4" />
-            {t("edit")}
-          </Button>
+          <EditTeacherDialog 
+            teacherId={teacher.id} 
+            onTeacherUpdated={fetchTeacher}
+            trigger={
+              <Button>
+                <Edit className="mr-2 h-4 w-4" />
+                {t("edit")}
+              </Button>
+            }
+          />
         </div>
       )}
     </>
