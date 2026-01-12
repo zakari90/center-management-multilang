@@ -5,10 +5,9 @@ import { usePathname } from "next/navigation"
 import { Link } from "@/i18n/navigation"
 import { ComponentProps } from "react"
 
-// Routes that should NOT open in modals (forms, create pages, etc.)
+// Routes that should NOT open in modals
+// Note: Most routes now support modal mode, exclude only if truly incompatible
 const EXCLUDE_ROUTES = [
-  /\/create$/,
-  /\/create-/,
   /\/new$/,
 ]
 

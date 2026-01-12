@@ -1,8 +1,18 @@
-import CreateTeacherPaymentFormClient from "@/components/create-teacher-payment-client";
+"use client"
 
-export const dynamic = 'force-dynamic';
+import { useSearchParams } from "next/navigation"
+import CreateTeacherPaymentFormClient from "@/components/create-teacher-payment-client"
+import { ModalContentWrapper } from "@/components/modal-content-wrapper"
 
 export default function CreateTeacherPaymentPage() {
-  console.log('[CreateTeacherPaymentPage] Server render', { timestamp: new Date().toISOString() });
-  return <CreateTeacherPaymentFormClient />;
+  const searchParams = useSearchParams()
+  const isModal = searchParams.get("modal") === "true"
+
+  const content = <CreateTeacherPaymentFormClient isModal={isModal} />
+
+  if (isModal) {
+    return <ModalContentWrapper className="max-w-4xl">{content}</ModalContentWrapper>
+  }
+
+  return content
 }

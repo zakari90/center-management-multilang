@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, GraduationCap, Receipt, UserPlus } from 'lucide-react'
-import Link from 'next/link'
+import { ModalLink } from '@/components/modal-link'
 import { useTranslations } from 'next-intl'
 
 export default function QuickActions() {
@@ -48,7 +48,7 @@ export default function QuickActions() {
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {actions.map((action) => (
-            <Link key={action.href} href={action.href}>
+            <ModalLink key={action.href} href={action.href}>
               <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
                 <div className={`h-12 w-12 rounded-full ${action.color} flex items-center justify-center`}>
                   <action.icon className="h-6 w-6" />
@@ -58,7 +58,7 @@ export default function QuickActions() {
                   <p className="text-xs text-muted-foreground">{action.description}</p>
                 </div>
               </div>
-            </Link>
+            </ModalLink>
           ))}
         </div>
       </CardContent>

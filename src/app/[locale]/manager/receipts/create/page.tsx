@@ -1,14 +1,18 @@
+"use client"
+
+import { useSearchParams } from "next/navigation"
 import CreateStudentPaymentForm from "@/components/studentPaymentForm2"
+import { ModalContentWrapper } from "@/components/modal-content-wrapper"
 
-export const dynamic = 'force-dynamic';
+export default function CreateReceiptPage() {
+  const searchParams = useSearchParams()
+  const isModal = searchParams.get("modal") === "true"
 
-function Page() {
-  console.log('[CreateReceiptPage] Server render', { timestamp: new Date().toISOString() });
-  return (
-    <>
-    <CreateStudentPaymentForm/>
-    </>
-  )
+  const content = <CreateStudentPaymentForm isModal={isModal} />
+
+  if (isModal) {
+    return <ModalContentWrapper className="max-w-4xl">{content}</ModalContentWrapper>
+  }
+
+  return content
 }
-
-export default Page

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/authContext'
 import { receiptActions } from '@/lib/dexie/dexieActions'
@@ -120,10 +120,10 @@ export default function ReceiptsSummary() {
 
       <CardFooter className="flex flex-col md:flex-row gap-3 border-t pt-4">
         <Button asChild className="flex-1 bg-primary hover:bg-primary/45">
-          <Link href="/manager/receipts/create">{t('studentPayment')}</Link>
+          <ModalLink href="/manager/receipts/create">{t('studentPayment')}</ModalLink>
         </Button>
         <Button asChild className="flex-1 bg-orange-600 hover:bg-orange-700">
-          <Link href="/manager/receipts/create-teacher-payment">{t('teacherPayment')}</Link>
+          <ModalLink href="/manager/receipts/create-teacher-payment">{t('teacherPayment')}</ModalLink>
         </Button>
       </CardFooter>
     </Card>
