@@ -257,13 +257,15 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
     const handleOnline = async () => {
       log('Network reconnected, waiting for stable connection...');
       await waitForOnline();
+      
+      // ✅ CRITICAL: Always sync local changes FIRST to push pending modifications to server
+      log('Connection stable, syncing local changes first...');
+      await performSync();
+      
+      // Then import new data from server (only if importOnMount is enabled)
       if (opts.importOnMount) {
-        log('Connection stable, importing then syncing...');
+        log('Local changes synced, now importing from server...');
         await performImport();
-        await performSync();
-      } else {
-        log('Connection stable, performing sync...');
-        await performSync();
       }
     };
     
@@ -272,7 +274,7 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [opts.syncOnReconnect, performSync, log]);
+  }, [opts.syncOnReconnect, opts.importOnMount, performSync, performImport, log]);
   
   /**
    * Sync on mount (startup)

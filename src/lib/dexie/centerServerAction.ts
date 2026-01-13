@@ -398,6 +398,10 @@ const ServerActionCenters = {
       
       // ✅ Use transaction for atomicity
       await localDb.transaction('rw', localDb.centers, async () => {
+        // ✅ Get pending local changes that should NOT be overwritten
+        const pendingCenters = await centerActions.getByStatus(['w', '0']);
+        const pendingIds = new Set(pendingCenters.map(c => c.id));
+        
         // Get existing synced centers
         const syncedCenters = await centerActions.getByStatus(["1"]);
         const syncedIds = syncedCenters.map(c => c.id);
@@ -407,9 +411,16 @@ const ServerActionCenters = {
           await centerActions.bulkDeleteLocal(syncedIds);
         }
         
-        // Bulk insert new records
-        if (transformedCenters.length > 0) {
-          await centerActions.bulkPutLocal(transformedCenters);
+        // ✅ Filter out centers that have pending local changes to preserve them
+        const safeToImport = transformedCenters.filter(c => !pendingIds.has(c.id));
+        
+        // Bulk insert only non-conflicting records
+        if (safeToImport.length > 0) {
+          await centerActions.bulkPutLocal(safeToImport);
+        }
+        
+        if (pendingIds.size > 0) {
+          console.log(`[ImportFromServer] Preserved ${pendingIds.size} center(s) with pending local changes`);
         }
       });
       

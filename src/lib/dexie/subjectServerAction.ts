@@ -191,6 +191,11 @@ const ServerActionSubjects = {
 
     try {
       const data = await ServerActionSubjects.ReadFromServer();
+      
+      // ✅ Get pending local changes that should NOT be overwritten
+      const pendingSubjects = await subjectActions.getByStatus(['w', '0']);
+      const pendingIds = new Set(pendingSubjects.map(s => s.id));
+      
       const syncedSubjects = await subjectActions.getByStatus(["1"]);
       const backup = [...syncedSubjects];
       
@@ -202,12 +207,23 @@ const ServerActionSubjects = {
         const transformedSubjects = Array.isArray(data) 
           ? data.map((subject: any) => transformServerSubject(subject))
           : [];
+        
         for (const subject of transformedSubjects) {
+          // ✅ Skip if there are pending local changes for this subject
+          if (pendingIds.has(subject.id)) {
+            console.log(`[ImportFromServer] Preserved subject ${subject.id} with pending local changes`);
+            continue;
+          }
+          
           const existing = await subjectActions.getLocal(subject.id);
           if (existing && existing.status === 'w') {
             continue; // Don't overwrite local pending changes
           }
           await subjectActions.putLocal(subject);
+        }
+        
+        if (pendingIds.size > 0) {
+          console.log(`[ImportFromServer] Preserved ${pendingIds.size} subject(s) with pending local changes`);
         }
         
         return { message: `Imported ${transformedSubjects.length} subjects from server.`, count: transformedSubjects.length };

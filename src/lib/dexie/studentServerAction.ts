@@ -205,6 +205,11 @@ const ServerActionStudents = {
 
     try {
       const data = await ServerActionStudents.ReadFromServer();
+      
+      // ✅ Get pending local changes that should NOT be overwritten
+      const pendingStudents = await studentActions.getByStatus(['w', '0']);
+      const pendingIds = new Set(pendingStudents.map(s => s.id));
+      
       const syncedStudents = await studentActions.getByStatus(["1"]);
       const backup = [...syncedStudents];
       
@@ -216,12 +221,23 @@ const ServerActionStudents = {
         const transformedStudents = Array.isArray(data) 
           ? data.map((student: any) => transformServerStudent(student))
           : [];
+        
         for (const student of transformedStudents) {
+          // ✅ Skip if there are pending local changes for this student
+          if (pendingIds.has(student.id)) {
+            console.log(`[ImportFromServer] Preserved student ${student.id} with pending local changes`);
+            continue;
+          }
+          
           const existing = await studentActions.getLocal(student.id);
           if (existing && existing.status === 'w') {
             continue; // Don't overwrite local pending changes
           }
           await studentActions.putLocal(student);
+        }
+        
+        if (pendingIds.size > 0) {
+          console.log(`[ImportFromServer] Preserved ${pendingIds.size} student(s) with pending local changes`);
         }
         
         return { message: `Imported ${transformedStudents.length} students from server.`, count: transformedStudents.length };
