@@ -141,7 +141,7 @@ export default function EditStudentForm() {
       ])
 
       // ✅ Find student by ID
-      const studentData = allStudents.find(s => s.id === params['id-toremove'] && s.status !== '0')
+      const studentData = allStudents.find(s => s.id === params.id && s.status !== '0')
       
       if (!studentData) {
         throw new Error("Student not found")
@@ -149,7 +149,7 @@ export default function EditStudentForm() {
 
       // ✅ Get student subjects with related data
       const studentSubjectsData = allStudentSubjects
-        .filter(ss => ss.studentId === params['id-toremove'] && ss.status !== '0')
+        .filter(ss => ss.studentId === params.id && ss.status !== '0')
         .map(ss => {
           const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
           const teacher = allTeachers.find(t => t.id === ss.teacherId && t.status !== '0')
@@ -267,7 +267,7 @@ export default function EditStudentForm() {
       setIsFetching(false)
       setLoadingSubjects(false)
     }
-  }, [params['id-toremove'], user, authLoading, t])
+  }, [params.id, user, authLoading, t])
 
   // Fetch student data and subjects
   useEffect(() => {
@@ -353,7 +353,7 @@ export default function EditStudentForm() {
       }
 
       // ✅ Get existing student
-      const existingStudent = await studentActions.getLocal(params['id-toremove'] as string)
+      const existingStudent = await studentActions.getLocal(params.id as string)
       if (!existingStudent) {
         throw new Error("Student not found")
       }
@@ -379,7 +379,7 @@ export default function EditStudentForm() {
       // First, get existing enrollments
       const existingEnrollments = await studentSubjectActions.getAll()
       const currentEnrollments = existingEnrollments.filter(
-        ss => ss.studentId === params['id-toremove'] && ss.status !== '0'
+        ss => ss.studentId === params.id && ss.status !== '0'
       )
 
       // Remove enrollments that are no longer in the list
@@ -406,7 +406,7 @@ export default function EditStudentForm() {
         await studentSubjectActions.putLocal({
           id: enrollmentId,
           enrolledAt: now,
-          studentId: params['id-toremove'] as string,
+          studentId: params.id as string,
           subjectId: enrollment.subjectId,
           teacherId: enrollment.teacherId,
           managerId: user.id,
@@ -416,7 +416,7 @@ export default function EditStudentForm() {
         })
       }
 
-      router.push(`/manager/students/${params['id-toremove']}`)
+      router.push(`/manager/students/${params.id}`)
       router.refresh()
 
       // ✅ Commented out API call
