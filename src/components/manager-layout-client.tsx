@@ -4,10 +4,11 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { CalendarDays, FileText, Home, LogOut, MoreVertical, RefreshCw, Users, Settings } from "lucide-react";
+import { CalendarDays, FileText, Home, LogOut, MoreVertical, RefreshCw, Users, Settings, Globe, Moon, Sun } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +32,7 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -146,6 +148,30 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
         <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
           <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
           {isSyncing ? t("syncing") : t("syncData")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {/* Language Options */}
+        <DropdownMenuItem onClick={() => router.push(`/ar${window.location.pathname.substring(3)}`)}>
+          <Globe className="mr-2 h-4 w-4" />
+          العربية
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push(`/en${window.location.pathname.substring(3)}`)}>
+          <Globe className="mr-2 h-4 w-4" />
+          English
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push(`/fr${window.location.pathname.substring(3)}`)}>
+          <Globe className="mr-2 h-4 w-4" />
+          Français
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {/* Theme Toggle */}
+        <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+          {theme === 'dark' ? (
+            <Sun className="mr-2 h-4 w-4" />
+          ) : (
+            <Moon className="mr-2 h-4 w-4" />
+          )}
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">

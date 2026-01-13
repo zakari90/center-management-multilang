@@ -48,8 +48,8 @@ export default function AuthLayout({
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-        <div className="flex w-full max-w-sm flex-col md:gap-6">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-2 p-2 md:p-10">
+        <div className="flex w-full flex-col md:gap-6">
           {children}
         </div>
       </div>
