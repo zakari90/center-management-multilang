@@ -19,7 +19,8 @@
   "offlineInvalidCredentials": "We couldn't verify those credentials offline. Please try again when you're online.",
   "offlineLoginError": "There was an error with offline login."
 }
-  , "deleteALL": {
+  , "subjects": "Subjects",
+  "deleteALL": {
   "allDataDeletedSuccessfully": "All data deleted successfully!",
   "failedToDeleteData": "Failed to delete data!",
   "areYouSureDeleteAllData": "Are you sure you want to",
@@ -199,7 +200,8 @@
     "termsDialogOwnership": "This software is licensed for use by your center only; you retain ownership of your data.",
     "termsDialogRestrictions": "You may not resell, sub-license, or deploy this application for other centers without prior authorization.",
     "termsDialogConsent": "Continued use of the platform confirms your acceptance of these terms.",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "successMessage": "Login successful! Redirecting..."
   },
    "loginManager": {
     "title": "Manager Login",
@@ -712,6 +714,7 @@
     "MAD":"MAD"
   },
   "Common": {
+    "back": "Back",
     "daysOfWeek": {
       "monday": "Monday",
       "tuesday": "Tuesday",
@@ -1083,7 +1086,10 @@
     "parent": "Parent",
     "monthlyFee": "Monthly Fee",
     "noStudents": "No students",
-    "unauthorized": "Unauthorized: Please log in again"
+    "unauthorized": "Unauthorized: Please log in again",
+    "pendingChanges": "Change pending sync",
+    "syncing": "Syncing...",
+    "sync": "Sync"
   },
   "StudentReceiptTable": {
     "MAD":"MAD",

@@ -165,14 +165,14 @@ export function LoginForm({
                 {t("email.label")}
               </Label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
+                <Mail className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors pointer-events-none" />
                 <Input
                   id={`email-${role}`}
                   name="email"
                   type="email"
                   placeholder={t("email.placeholder")}
                   className={cn(
-                    "pl-9 h-11 w-full transition-colors",
+                    "ps-9 h-11 w-full transition-colors",
                     errorState?.error?.field === "email" && activeStateMatchesRole && "border-destructive focus-visible:ring-destructive"
                   )}
                   required
@@ -198,14 +198,14 @@ export function LoginForm({
                 {/* Optional: Add Forgot Password link here if needed */}
               </div>
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
+                <Lock className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors pointer-events-none" />
                 <Input
                   id={`password-${role}`}
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder={t("password.placeholder")}
                   className={cn(
-                    "pl-9 h-11 w-full transition-colors",
+                    "ps-9 pe-10 h-11 w-full transition-colors",
                     errorState?.error?.field === "password" && activeStateMatchesRole && "border-destructive focus-visible:ring-destructive"
                   )}
                   required
@@ -215,7 +215,7 @@ export function LoginForm({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none z-10"
                   disabled={isPending}
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
