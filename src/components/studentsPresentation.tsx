@@ -1,10 +1,10 @@
 "use client"
 
-import { Loader2, Pencil, Search, Users, GraduationCap, DollarSign } from "lucide-react"
+import { Loader2, Search, Users, GraduationCap, DollarSign } from "lucide-react"
 import { useTranslations } from "next-intl"
 import ViewStudentDialog from "@/components/ViewStudentDialog"
 import ViewStudentCardDialog from "@/components/ViewStudentCardDialog"
-import { ModalLink } from "@/components/modal-link"
+import EditStudentDialog from "@/components/EditStudentDialog"
 import { useEffect, useState, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -337,11 +337,7 @@ export default function StudentsTable() {
                       <div className="flex gap-1 justify-end">
                         <ViewStudentDialog studentId={student.id} />
                         <ViewStudentCardDialog studentId={student.id} />
-                        <Button variant="ghost" size="sm" asChild title={t("editStudent")}>
-                          <ModalLink href={`/manager/students/${student.id}/edit`}>
-                            <Pencil className="h-4 w-4" />
-                          </ModalLink>
-                        </Button>
+                        <EditStudentDialog studentId={student.id} onStudentUpdated={fetchStudents} />
                       </div>
                     </td>
                   </tr>
