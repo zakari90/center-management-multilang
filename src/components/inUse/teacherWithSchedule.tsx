@@ -646,11 +646,11 @@ export default function TeacherScheduleView({ centerId }: { centerId?: string })
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-3xl font-bold">{t('title')}</h2>
-          <p className="text-muted-foreground">{t('subtitle')}</p>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Select value={viewMode} onValueChange={(value: 'grid' | 'list' | 'timeline') => setViewMode(value)}>
@@ -674,10 +674,10 @@ export default function TeacherScheduleView({ centerId }: { centerId?: string })
 
       {teachers.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">{t('noTeachersFound')}</h3>
-            <p className="text-muted-foreground">{t('noTeachersDescription')}</p>
+          <CardContent className="py-6 text-center">
+            <User className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+            <h3 className="text-base font-semibold mb-1">{t('noTeachersFound')}</h3>
+            <p className="text-sm text-muted-foreground">{t('noTeachersDescription')}</p>
           </CardContent>
         </Card>
       ) : (

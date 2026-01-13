@@ -4,22 +4,33 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { CalendarDays, FileText, Home, Users } from "lucide-react";
+import { CalendarDays, FileText, Home, LogOut, MoreVertical, RefreshCw, Users, Settings } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { syncAllEntitiesForRole, importAllFromServerForRole } from "@/lib/dexie/serverActions";
 
 interface ManagerLayoutClientProps {
   children: React.ReactNode;
 }
 
 export default function ManagerLayoutClient({ children }: ManagerLayoutClientProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("ManagerLayout");
+  const tNav = useTranslations("NavUser");
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -43,6 +54,25 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push(`/${locale}/login`);
+  };
+
+  const handleSync = async () => {
+    if (!user?.id) return;
+    setIsSyncing(true);
+    try {
+      const isAdmin = user.role === "ADMIN";
+      await syncAllEntitiesForRole(isAdmin);
+      await importAllFromServerForRole(isAdmin);
+    } catch (error) {
+      console.error("Sync error:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Show loading state only while mounting / checking authentication
   if (!mounted || isLoading) {
@@ -103,6 +133,29 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
     }
   ];
 
+  // Three-dot menu for mobile
+  const ThreeDotsMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-12 w-12">
+          <MoreVertical className="h-5 w-5" />
+          <span className="sr-only">Menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={isArabic ? "start" : "end"} className="w-48">
+        <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+          {isSyncing ? t("syncing") : t("syncData")}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+          <LogOut className="mr-2 h-4 w-4" />
+          {tNav("logout")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div className="app-shell">
       <SidebarProvider
@@ -115,7 +168,7 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
       >
         <AppSidebar side={isArabic ? "right" : "left"} variant="inset" items={navItems} user={userData} />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <header className="hidden md:flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
           </header>
           <main className="app-content flex-1 overflow-auto">{children}</main>
@@ -130,10 +183,9 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
             { label: t("receipts"), href: `${base}/manager/receipts`, icon: <FileText className="size-5" /> },
             { label: t("schedule"), href: `${base}/manager/schedule`, icon: <CalendarDays className="size-5" /> },
           ]}
-          menu={<SidebarTrigger className="h-12 w-12" />}
+          menu={<ThreeDotsMenu />}
         />
       </SidebarProvider>
     </div>
   );
 }
-

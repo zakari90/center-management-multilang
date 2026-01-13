@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ReactNode, useState } from "react"
+import { useTranslations } from "next-intl"
 
 type EditDialogProps = {
   title: string
@@ -20,6 +21,7 @@ type EditDialogProps = {
 
 export function EditDialog({ title, trigger, children, onSave }: EditDialogProps) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('EditDialog')
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -40,10 +42,11 @@ export function EditDialog({ title, trigger, children, onSave }: EditDialogProps
               setOpen(false)
             }}
           >
-            Save Changes
+            {t('saveChanges')}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
+

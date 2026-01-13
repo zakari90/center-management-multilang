@@ -826,7 +826,9 @@
     "teachers": "Enseignants",
     "students": "Élèves",
     "receipts": "Reçus",
-    "schedule": "Calendrier"
+    "schedule": "Calendrier",
+    "syncData": "Synchroniser",
+    "syncing": "Synchronisation..."
   },
   "AdminLayout": {
     "dashboard": "Tableau de bord",
@@ -1293,7 +1295,7 @@
   "subjectForm": {
     "instructions": "Veuillez sélectionner une matière et un niveau. La durée est optionnelle.",
     "selectSubject": "Sélectionnez la matière *",
-    "selected": "Sélectionné : {{value}}",
+    "selected": "Sélectionné : {value}",
     "selectGrade": "Sélectionnez le niveau *",
     "price": "Prix (MAD) *",
     "duration": "Durée (heures)",
@@ -1357,5 +1359,8 @@
 "NavUser": {
   "logout": "Déconnexion",
   "userAvatar": "Avatar utilisateur"
+},
+"EditDialog": {
+  "saveChanges": "Enregistrer les modifications"
 }
 }

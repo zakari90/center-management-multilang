@@ -864,7 +864,9 @@
     "teachers": "Teachers",
     "students": "Students",
     "receipts": "Receipts",
-    "schedule": "Schedule"
+    "schedule": "Schedule",
+    "syncData": "Sync Data",
+    "syncing": "Syncing..."
   },  
   "AdminLayout": {
     "dashboard": "Dashboard",
@@ -1461,7 +1463,7 @@
   },
 "subjectForm":{  "instructions": "Please select one subject and one grade. Duration is optional.",
   "selectSubject": "Select Subject *",
-  "selected": "Selected: {{value}}",
+  "selected": "Selected: {value}",
   "selectGrade": "Select Grade *",
   "price": "Price (MAD) *",
   "duration": "Duration (hours)",
@@ -1521,6 +1523,9 @@
   "syncToServerHelp": "Uploads your local changes to the server. This will sync all pending local data.",
   "importFromServerHelp": "Downloads all data from the server to your local database. This will replace synced data but preserve pending local changes.",
   "deleteLocalDBHelp": "Permanently deletes all local data. This action cannot be undone. You will need to import data again to use the app."
+},
+"EditDialog": {
+  "saveChanges": "Save Changes"
 }
 
 }

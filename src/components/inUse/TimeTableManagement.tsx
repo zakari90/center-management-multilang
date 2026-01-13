@@ -437,12 +437,12 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div>
-          <h2 className="text-3xl font-bold">{t('title')}</h2>
-          <p className="text-muted-foreground">{t('subtitle')}</p>
+          <h2 className="text-2xl font-bold">{t('title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
         {/* Per-entity sync controls for schedules */}
         <EntitySyncControls entity="schedules" />

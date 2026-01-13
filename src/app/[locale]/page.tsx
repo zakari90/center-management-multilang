@@ -38,45 +38,40 @@ export default function HomePage() {
   // Show loading state while checking authentication
   if (!mounted || isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-400 to-blue-600">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-white/80">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md sm:max-w-lg md:max-w-2xl text-center">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-800">
+    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-8 bg-gradient-to-b from-blue-400 to-blue-600">
+      <div className="w-[85%] sm:w-full max-w-md md:max-w-lg text-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
           {t("title")}
         </h1>
 
-        <p className="mt-3 text-base sm:text-lg text-blue-800/70">
+        <p className="mt-3 text-sm sm:text-base text-white/80 px-2">
           {t("description")}
         </p>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
           <Link href={`/${locale}/login`} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white hover:bg-blue-700">
+            <Button className="w-full sm:w-auto px-8 py-3 bg-blue-800 text-white hover:bg-blue-900 text-base font-medium">
               {t("ownerDashboard")}
             </Button>
           </Link>
-
-          {/* <Link href={`/${locale}/managerLogin`} className="w-full sm:w-auto">
-            <Button className="w-full sm:w-auto px-6 py-3 bg-green-600 text-white hover:bg-green-700">
-              {t("managerDashboard")}
-            </Button>
-          </Link> */}
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <ModeToggle />
+        <div className="mt-8 flex items-center justify-center gap-3">
           <LanguageSwitcher />
+          <ModeToggle />
         </div>
       </div>
     </main>
   );
 }
+
