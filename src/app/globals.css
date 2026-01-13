@@ -33,8 +33,10 @@
 .app-bottom-nav__item {
   min-height: 40px;
   min-width: 40px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
   border-radius: 0.5rem;
   color: var(--muted-foreground);
   text-decoration: none;
@@ -54,7 +56,6 @@
 .app-bottom-nav__label {
   font-size: 0.625rem;
   line-height: 0.875rem;
-  margin-top: 0.0625rem;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
