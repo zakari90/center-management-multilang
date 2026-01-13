@@ -69,6 +69,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
+    // Check if student with same ID already exists (for sync conflict handling)
+    if (id) {
+      const existingStudentById = await db.student.findUnique({
+        where: { id }
+      })
+      
+      if (existingStudentById) {
+        return NextResponse.json({ error: 'Student with this ID already exists' }, { status: 409 })
+      }
+    }
+
     // Check if email already exists
     if (email) {
       const existingStudent = await db.student.findUnique({
