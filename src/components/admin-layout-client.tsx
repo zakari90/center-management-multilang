@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { CalendarDays, FileText, Home, LayoutGrid } from "lucide-react";
+import { CalendarDays, FileText, Home, LayoutGrid, Users } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -131,6 +131,7 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
           items={[
             { label: t("dashboard"), href: `${base}/admin`, icon: <Home className="size-5" /> },
             { label: t("center"), href: `${base}/admin/center`, icon: <LayoutGrid className="size-5" /> },
+            { label: t("users"), href: `${base}/admin/users`, icon: <Users className="size-5" /> },
             { label: t("receipts"), href: `${base}/admin/receipts`, icon: <FileText className="size-5" /> },
             { label: t("schedule"), href: `${base}/admin/schedule`, icon: <CalendarDays className="size-5" /> },
           ]}
