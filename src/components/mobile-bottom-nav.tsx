@@ -49,7 +49,7 @@ export default function MobileBottomNav({
             </Link>
           );
         })}
-        <div className="app-bottom-nav__item app-bottom-nav__item--menu">{menu}</div>
+        <div className="app-bottom-nav__item app-bottom-nav__item--menu max-w-[12px]">{menu}</div>
       </div>
     </nav>
   );

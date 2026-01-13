@@ -187,7 +187,7 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
       <SidebarProvider
         style={
           {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--sidebar-width": "calc(var(--spacing) * 56)",
             "--header-height": "calc(var(--spacing) * 12)",
           } as React.CSSProperties
         }
