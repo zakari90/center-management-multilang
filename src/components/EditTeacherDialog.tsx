@@ -173,8 +173,8 @@ export default function EditTeacherDialog({ teacherId, onTeacherUpdated, trigger
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
     DAYS.map((day) => ({
       day,
-      startTime: "09:00",
-      endTime: "17:00",
+      startTime: "19:00",
+      endTime: "21:00",
       isAvailable: false,
     }))
   )

@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -20,16 +19,15 @@ import {
   TableRow,
 } from '@/components/ui/table'
 // import axios from 'axios' // ✅ Commented out - using local DB
-import { Eye, Loader2, Pencil } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import ViewTeacherDialog from '@/components/ViewTeacherDialog'
-import { useEffect, useState, useCallback } from 'react'
-import { teacherActions, teacherSubjectActions, subjectActions } from '@/lib/dexie/dexieActions'
-import { useAuth } from '@/context/authContext'
-import { EntitySyncControls } from '@/components/EntitySyncControls'
 import AddTeacherDialog from '@/components/AddTeacherDialog'
 import EditTeacherDialog from '@/components/EditTeacherDialog'
+import { EntitySyncControls } from '@/components/EntitySyncControls'
+import ViewTeacherDialog from '@/components/ViewTeacherDialog'
+import { useAuth } from '@/context/authContext'
+import { subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dexie/dexieActions'
+import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useCallback, useEffect, useState } from 'react'
 
 interface TeacherSubject {
   id: string

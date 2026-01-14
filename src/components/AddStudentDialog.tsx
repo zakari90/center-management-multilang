@@ -308,7 +308,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <UserPlus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" />
           {tTable("addStudent")}
         </Button>
       </DialogTrigger>
@@ -432,9 +432,12 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                           className="h-auto py-2 px-3 justify-start text-left text-xs"
                           size="sm"
                         >
-                          <div>
+                          <div className="w-full">
                             <div className="font-medium">{subject.name}</div>
                             <div className="text-xs opacity-70">MAD {subject.price}</div>
+                            {subject.teacherSubjects.length === 0 && (
+                              <div className="text-xs text-destructive mt-1">{t("enrollmentnoTeachersAssigned")}</div>
+                            )}
                           </div>
                         </Button>
                       ))}
