@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { saveCredentialsLocally, validateOfflineLogin, hasLocalCredentials } from '@/lib/offlineAuth';
+import { useTranslations } from 'next-intl';
 import { isOnline } from '@/lib/utils/network';
 
 export interface User {
@@ -39,6 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const t = useTranslations('auth'); // Use 'auth' namespace
+  const tOffline = useTranslations('offline');
 
   // Check if user is authenticated on mount
   useEffect(() => {
@@ -126,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return true;
         }
 
-        const errorMsg = result.error?.message || result.error?.email || result.error?.password || 'Login failed';
+        const errorMsg = result.error?.message || result.error?.email || result.error?.password || t('errors.loginFailed');
         options.onError?.(errorMsg, false);
         return false;
 
@@ -139,13 +142,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return attemptOfflineLogin(email, password, options);
         }
 
-        options.onError?.(error?.message || 'Login failed', false);
+        options.onError?.(error?.message || t('errors.loginFailed'), false);
         return false;
       }
     } else {
       // ===== OFFLINE LOGIN =====
       return attemptOfflineLogin(email, password, options);
     }
+    
+    return false;
   }, [login]);
 
   const attemptOfflineLogin = async (
@@ -153,10 +158,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     options: LoginWithServerOptions
   ): Promise<boolean> => {
+    // We need to get translations here too, but this function is in a hook, so we can't easily use async getClientTranslations inside it
+    // if it wasn't already passed down. 
+    // However, this is inside AuthContext, so we can use useTranslations?
+    // Wait, AuthContext is a client component ('use client').
+    // But getClientTranslations is for async actions.
+    // Inside a component we should use useTranslations from next-intl.
+    
+    // Let's check imports in AuthContext.
+    // It doesn't import useTranslations. Let's add it.
+    
     const hasCredentials = await hasLocalCredentials(email);
     
     if (!hasCredentials) {
-      options.onError?.('First login requires internet connection', true);
+      options.onError?.(tOffline('offlineLoginIncorrect'), true);
       return false;
     }
 
@@ -175,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return true;
     }
 
-    options.onError?.(result.error || 'Invalid credentials', true);
+    options.onError?.(result.error || tOffline('offlineInvalidCredentials'), true);
     return false;
   };
 

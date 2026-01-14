@@ -116,7 +116,7 @@ export default function AllUsersTable() {
         password: userFormData.password,
         role: userFormData.role as Role,
         id: generateObjectId(),
-        status: '1',
+        status: '1' as SyncStatus,
         createdAt: Date.now(),
         updatedAt: Date.now()
       }
