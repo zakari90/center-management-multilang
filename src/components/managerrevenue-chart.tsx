@@ -128,7 +128,7 @@ export default function ManagerRevenueChart() {
   }
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
           <div>
@@ -144,50 +144,52 @@ export default function ManagerRevenueChart() {
           </Tabs>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="w-full p-2 sm:p-6">
         {isLoading ? (
           <div className="flex justify-center items-center h-[350px]">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={350}>
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip 
-                formatter={(value: number) => `MAD ${value.toFixed(2)}`}
-                contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '8px' }}
-              />
-              <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="income" 
-                stroke="#22c55e" 
-                fillOpacity={1} 
-                fill="url(#colorIncome)" 
-                name={t('chart.income')}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="expense" 
-                stroke="#ef4444" 
-                fillOpacity={1} 
-                fill="url(#colorExpense)" 
-                name={t('chart.expense')}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="w-full -mx-2 sm:mx-0">
+            <ResponsiveContainer width="100%" height={350}>
+              <AreaChart data={data}>
+                <defs>
+                  <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value: number) => `MAD ${value.toFixed(2)}`}
+                  contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '8px' }}
+                />
+                <Legend />
+                <Area 
+                  type="monotone" 
+                  dataKey="income" 
+                  stroke="#22c55e" 
+                  fillOpacity={1} 
+                  fill="url(#colorIncome)" 
+                  name={t('chart.income')}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="expense" 
+                  stroke="#ef4444" 
+                  fillOpacity={1} 
+                  fill="url(#colorExpense)" 
+                  name={t('chart.expense')}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </CardContent>
     </Card>
