@@ -19,6 +19,10 @@
   "offlineInvalidCredentials": "We couldn't verify those credentials offline. Please try again when you're online.",
   "offlineLoginError": "There was an error with offline login."
 }
+, "OfflineBanner": {
+  "title": "You're offline",
+  "message": "Data is saved locally, and you can keep working. Do not clear your browser cache."
+}
   , "subjects": "Subjects",
   "deleteALL": {
   "allDataDeletedSuccessfully": "All data deleted successfully!",

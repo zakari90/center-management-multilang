@@ -20,6 +20,10 @@
     "offlineInvalidCredentials": "Nous n'avons pas pu vérifier ces identifiants hors ligne. Veuillez réessayer lorsque vous serez en ligne.",
     "offlineLoginError": "Une erreur est survenue lors de la connexion hors ligne."
   }
+, "OfflineBanner": {
+  "title": "Vous êtes hors ligne",
+  "message": "Les données sont enregistrées localement et vous pouvez continuer à travailler. Ne videz pas le cache de votre navigateur."
+}
 ,
 "deleteALL": {
   "allDataDeletedSuccessfully": "Supprimé",
