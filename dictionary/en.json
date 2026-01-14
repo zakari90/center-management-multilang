@@ -396,7 +396,9 @@
     "creatingCenter": "Creating Center...",
     "successMessage": "Center created successfully!",
     "centerCreatedSuccess": "Center created successfully!",
-    "errorMessage": "Error creating center. Please try again."
+    "errorMessage": "Error creating center. Please try again.",
+    "syncedToServer": "Center synced to server successfully!",
+    "savedLocally": "Center saved locally. Will sync when online."
   },
   "SubjectForm": {
     "selectMultipleInfo": "You can select multiple subjects and grades. Each combination will create a separate course.",
@@ -493,6 +495,9 @@
   },
   "AllUsersTable": {
     "errorLoadData": "Failed to load data",
+    "allUsersTitle": "All Users",
+    "allUsersDescription": "View and manage all system users",
+    "unknownManager": "Unknown Manager",
     "systemUsers": "System Users",
     "teachers": "Teachers",
     "students": "Students",
@@ -560,7 +565,17 @@
     "deletedError": "Failed to delete",
     "userNotFound": "User not found",
     "unauthorized": "Unauthorized: Please log in again",
-    "emailAlreadyInUse": "Email is already in use"
+    "emailAlreadyInUse": "Email is already in use",
+    "orphanedRecordsFound": "Orphaned Records Found",
+    "orphanedRecordsDescription": "Found {count} records with invalid manager assignments",
+    "fixNow": "Fix Now",
+    "reassignTo": "Reassign To",
+    "reassignAll": "Reassign All",
+    "selectManager": "Select a manager",
+    "selectManagerFirst": "Please select a manager first",
+    "orphanedRecordsFixed": "Successfully reassigned {count} records",
+    "reassignFailed": "Failed to reassign records",
+    "reassignWarning": "This will reassign all {count} orphaned records to the selected manager."
   },
   "TimetableManagement": {
     "title": "Schedule Management",
@@ -605,6 +620,7 @@
   "ReceiptDetailPage": {
     "loading": "Loading receipt...",
     "receiptNotFound": "Receipt not found",
+    "unknownManager": "Unknown Manager",
     "errorFetchReceipt": "Failed to fetch receipt",
     "somethingWentWrong": "Something went wrong",
     "receiptDetails": "Receipt Details",
@@ -907,6 +923,7 @@
   },
   "CreateTeacherForm": {
     "title": "Create New Teacher",
+    "subtitle": "Add a new teacher to your center",
     "basicInfo": "Basic Information",
     "subjectsCompensation": "Subjects & Compensation",
     "assignSubjects": "Assign subjects and set payment terms",

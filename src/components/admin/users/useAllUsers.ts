@@ -12,7 +12,7 @@ import { Role } from '@/lib/dexie/dbSchema'
 import { useAuth } from '@/context/authContext'
 import { UserData, TeacherData, StudentData } from './types'
 
-export function useAllUsers() {
+export function useAllUsers(unknownManagerText: string = 'Unknown Manager') {
   const { user } = useAuth()
   
   const [users, setUsers] = useState<UserData[]>([])
@@ -92,7 +92,7 @@ export function useAllUsers() {
             name: manager.name
           } : {
             id: teacher.managerId,
-            name: 'Unknown Manager'
+            name: unknownManagerText
           },
           stats: {
             subjects: teacherSubs.length,
@@ -123,7 +123,7 @@ export function useAllUsers() {
             name: manager.name
           } : {
             id: student.managerId,
-            name: 'Unknown Manager'
+            name: unknownManagerText
           },
           stats: {
             subjects: studentSubs.length,

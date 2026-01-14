@@ -359,7 +359,9 @@
     "creatingCenter": "Création du centre en cours...",
     "successMessage": "Centre créé avec succès!",
     "centerCreatedSuccess": "Centre créé avec succès!",
-    "errorMessage": "Erreur lors de la création du centre. Veuillez réessayer"
+    "errorMessage": "Erreur lors de la création du centre. Veuillez réessayer",
+    "syncedToServer": "Centre synchronisé avec le serveur avec succès!",
+    "savedLocally": "Centre enregistré localement. Sera synchronisé lorsque vous serez en ligne."
   },
   "SubjectForm": {
     "selectMultipleInfo": "Vous pouvez sélectionner plusieurs matières et niveaux. Chaque combinaison créera un cours distinct",
@@ -465,6 +467,9 @@
   },
   "AllUsersTable": {
     "errorLoadData": "Impossible de charger les données",
+    "allUsersTitle": "Tous les utilisateurs",
+    "allUsersDescription": "Voir et gérer tous les utilisateurs du système",
+    "unknownManager": "Gestionnaire inconnu",
     "systemUsers": "Utilisateurs du système",
     "teachers": "Enseignants",
     "students": "Élèves",
@@ -532,7 +537,17 @@
     "deletedError": "Erreur lors de la suppression",
     "userNotFound": "Utilisateur introuvable",
     "unauthorized": "Non autorisé : Veuillez vous reconnecter",
-    "emailAlreadyInUse": "L'email est déjà utilisé"
+    "emailAlreadyInUse": "L'email est déjà utilisé",
+    "orphanedRecordsFound": "Enregistrements orphelins trouvés",
+    "orphanedRecordsDescription": "{count} enregistrements avec des affectations de gestionnaire invalides",
+    "fixNow": "Réparer maintenant",
+    "reassignTo": "Réassigner à",
+    "reassignAll": "Réassigner tout",
+    "selectManager": "Sélectionner un gestionnaire",
+    "selectManagerFirst": "Veuillez d'abord sélectionner un gestionnaire",
+    "orphanedRecordsFixed": "{count} enregistrements réassignés avec succès",
+    "reassignFailed": "Échec de la réassignation des enregistrements",
+    "reassignWarning": "Cela réassignera tous les {count} enregistrements orphelins au gestionnaire sélectionné."
   },
   "TimetableManagement": {
     "title": "Gestion des horaires",
@@ -577,6 +592,7 @@
   "ReceiptDetailPage": {
     "loading": "Chargement du reçu...",
     "receiptNotFound": "Reçu introuvable",
+    "unknownManager": "Gestionnaire inconnu",
     "errorFetchReceipt": "Impossible de récupérer le reçu",
     "somethingWentWrong": "Quelque chose s'est mal passé",
     "receiptDetails": "Détails du reçu",
@@ -869,6 +885,7 @@
   },
   "CreateTeacherForm": {
     "title": "Créer un nouvel enseignant",
+    "subtitle": "Ajouter un nouvel enseignant à votre centre",
     "basicInfo": "Informations de base",
     "subjectsCompensation": "Matières et rémunération",
     "assignSubjects": "Assignez les matières et définissez les conditions de paiement",

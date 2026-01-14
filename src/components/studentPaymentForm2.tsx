@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertCircle, CheckCircle2, Loader2, QrCode, X } from "lucide-react"
+import { AlertCircle, CheckCircle2, Loader2, QrCode, X, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import jsQR from "jsqr"
 
@@ -187,7 +187,7 @@ function QRScanner({
           className="w-full rounded-lg aspect-video object-cover"
           aria-label="Camera feed"
         />
-        <canvas ref={canvasRef} className="hiddenden" />
+        <canvas ref={canvasRef} className="hidden" />
         {!isScanning && !cameraError && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -204,166 +204,12 @@ function QRScanner({
   )
 }
 
-function StudentSelector({
-  selectedStudent,
-  searchTerm,
-  filteredStudents,
-  loadingStudents,
-  showQrScanner,
-  qrError,
-  onSearchChange,
-  onStudentSelect,
-  onStudentChange,
-  onQrToggle,
-  onQrScan,
-  t,
-}: {
-  selectedStudent: Student | null
-  searchTerm: string
-  filteredStudents: Student[]
-  loadingStudents: boolean
-  showQrScanner: boolean
-  qrError: string | null
-  onSearchChange: (value: string) => void
-  onStudentSelect: (student: Student) => void
-  onStudentChange: () => void
-  onQrToggle: () => void
-  onQrScan: (data: string) => void
-  t: (key: string) => string
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor="student-search">
-        {t("findStudent")} <span className="text-red-500">*</span>
-      </Label>
-      {loadingStudents ? (
-        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          {t("loadingStudents")}
-        </div>
-      ) : (
-        <>
-          <div className="flex gap-2">
-            <Input
-              id="student-search"
-              placeholder={t("searchPlaceholder")}
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              disabled={!!selectedStudent}
-              className="text-sm"
-              aria-label="Search for student"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onQrToggle}
-              disabled={!!selectedStudent}
-              className="flex-shrink-0"
-              aria-label={t("qrScan")}
-            >
-              <QrCode className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="hidden sm:inline ml-2">{t("qrScan")}</span>
-            </Button>
-          </div>
-
-          {showQrScanner && <QRScanner qrError={qrError} onClose={onQrToggle} onScan={onQrScan} t={t} />}
-
-          {!selectedStudent && !showQrScanner && (
-            <div className="max-h-64 overflow-y-auto border rounded-lg">
-              {filteredStudents.length === 0 ? (
-                <p className="text-sm text-center text-muted-foreground p-4">{t("noStudentsFound")}</p>
-              ) : (
-                <ul className="divide-y">
-                  {filteredStudents.map((student) => (
-                    <li key={student.id}>
-                      <button
-                        type="button"
-                        className="w-full p-3 text-left hover:bg-gray-50 transition-colors text-sm sm:text-base"
-                        onClick={() => onStudentSelect(student)}
-                        aria-label={`Select ${student.name}`}
-                      >
-                        <p className="font-medium">{student.name}</p>
-                        <p className="text-xs text-muted-foreground">{student.email || student.phone || ""}</p>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-
-          {selectedStudent && (
-            <div className="p-3 sm:p-4 border rounded-lg">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                <div>
-                  <p className="font-semibold text-sm sm:text-base">{selectedStudent.name}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    {selectedStudent.email || selectedStudent.phone}
-                  </p>
-                </div>
-                <Button type="button" variant="secondary" size="sm" onClick={onStudentChange} className="w-full sm:w-auto">
-                  {t("change")}
-                </Button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
-
-function PaymentSummary({
-  selectedStudent,
-  selectedSubjectsCount,
-  paymentMethod,
-  date,
-  totalAmount,
-  t,
-}: {
-  selectedStudent: Student | null
-  selectedSubjectsCount: number
-  paymentMethod: string
-  date: string
-  totalAmount: number
-  t: (key: string) => string
-}) {
-  return (
-    <Card className=" border-primary">
-      <CardHeader>
-        <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
-          {t("paymentSummary")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-1 text-sm">
-        <p>
-          <strong>{t("student")}:</strong> {selectedStudent?.name}
-        </p>
-        <p>
-          <strong>{t("subjects")}:</strong> {selectedSubjectsCount}
-        </p>
-        <p>
-          <strong>{t("method")}:</strong> {paymentMethod}
-        </p>
-        <p>
-          <strong>{t("date")}:</strong> {new Date(date).toLocaleDateString()}
-        </p>
-        <Separator className="my-2" />
-        <p className="text-base sm:text-lg font-bold text-primary">
-          {t("total")}: MAD {totalAmount.toFixed(2)}
-        </p>
-      </CardContent>
-    </Card>
-  )
-}
-
 export default function CreateStudentPaymentForm({ isModal = false }: { isModal?: boolean }) {
   const t = useTranslations("CreateStudentPaymentForm")
   const router = useRouter()
   const searchParams = useSearchParams()
   const preSelectedStudentId = searchParams.get("studentId")
-  const { user } = useAuth() // ✅ Get current user from AuthContext
+  const { user } = useAuth()
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -381,11 +227,8 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
     selectedSubjects: [],
   })
 
-  const subjectsRef = useRef<HTMLDivElement>(null)
-
   const fetchStudents = useCallback(async () => {
     try {
-      // ✅ Fetch from local DB and join with subjects
       const [allStudents, allStudentSubjects, allSubjects] = await Promise.all([
         studentActions.getAll(),
         studentSubjectActions.getAll(),
@@ -398,11 +241,9 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
         return
       }
 
-      // ✅ Filter students by status only (show all active students)
       const activeStudents = allStudents
         .filter(s => s.status !== '0')
 
-      // ✅ Build students with subjects
       const studentsWithSubjects: Student[] = activeStudents.map(student => {
         const studentSubjectsForStudent = allStudentSubjects
           .filter(ss => ss.studentId === student.id && ss.status !== '0')
@@ -433,10 +274,6 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
       })
 
       setStudents(studentsWithSubjects)
-
-      // ✅ Commented out online fetch
-      // const { data } = await axios.get("/api/students")
-      // setStudents(data)
     } catch (err) {
       setError("Failed to load students")
       console.error("Error fetching students:", err)
@@ -482,16 +319,15 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
 
   const handleStudentSelect = useCallback((student: Student) => {
     setSelectedStudent(student)
-    setTimeout(() => {
-      subjectsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-    }, 100)
+    setSearchTerm("")
+    // Auto-select all subjects
+    const allIds = student.studentSubjects.map((ss) => ss.subject.id)
+    setFormData((prev) => ({ ...prev, selectedSubjects: allIds }))
   }, [])
 
   const handleQrScan = useCallback(
     (data: string) => {
       console.log("Processing scanned data:", data)
-
-      // Find student by ID (the QR code contains the student ID)
       const student = students.find((s) => s.id === data)
 
       if (student) {
@@ -499,9 +335,9 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
         setShowQrScanner(false)
         setQrError(null)
         setSearchTerm("")
-        setTimeout(() => {
-          subjectsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-        }, 100)
+        // Auto-select all subjects
+        const allIds = student.studentSubjects.map((ss) => ss.subject.id)
+        setFormData((prev) => ({ ...prev, selectedSubjects: allIds }))
       } else {
         setQrError(`Student not found for ID: ${data.slice(0, 8)}...`)
       }
@@ -525,7 +361,6 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
         if (!selectedStudent) throw new Error("Please select a student")
         if (formData.selectedSubjects.length === 0) throw new Error("Please select at least one subject")
 
-        // ✅ Get student subjects from local DB
         const allStudentSubjects = await studentSubjectActions.getAll()
         const allSubjects = await subjectActions.getAll()
 
@@ -539,13 +374,11 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
           throw new Error("No valid subjects found")
         }
 
-        // ✅ Calculate total amount
         const totalAmount = studentSubjects.reduce((sum, ss) => {
           const subject = allSubjects.find(s => s.id === ss.subjectId)
           return sum + (subject?.price || 0)
         }, 0)
 
-        // ✅ Create description if not provided
         const subjectNames = studentSubjects
           .map(ss => {
             const subject = allSubjects.find(s => s.id === ss.subjectId)
@@ -555,7 +388,6 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
           .join(', ')
         const finalDescription = formData.description || `Payment for: ${subjectNames}`
 
-        // ✅ Create receipt in local DB
         const now = Date.now()
         const receiptId = generateObjectId()
         const receiptDate = formData.date ? new Date(formData.date).getTime() : now
@@ -570,14 +402,13 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
           date: receiptDate,
           studentId: selectedStudent.id,
           managerId: user.id,
-          status: 'w' as const, // Waiting for sync
+          status: 'w' as const,
           createdAt: now,
           updatedAt: now,
         }
 
         await receiptActions.putLocal(newReceipt)
 
-        // ✅ Immediate sync to server if online
         if (isOnline()) {
           try {
             const result = await ServerActionReceipts.SaveToServer(newReceipt as any)
@@ -589,18 +420,8 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
           }
         }
 
-        // ✅ Navigate to receipts page
         await router.push(preSelectedStudentId ? `/manager/students/${preSelectedStudentId}` : "/manager/receipts")
         router.refresh()
-
-        // ✅ Commented out online creation
-        // await axios.post("/api/receipts/student-payment", {
-        //   studentId: selectedStudent.id,
-        //   subjectIds: formData.selectedSubjects,
-        //   paymentMethod: formData.paymentMethod,
-        //   description: formData.description,
-        //   date: formData.date,
-        // })
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message)
@@ -624,153 +445,233 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
     )
   })
 
+  if (loadingStudents) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin" />
+      </div>
+    )
+  }
+
   return (
-    <div className={isModal ? "" : "max-w-4xl mx-auto p-3 sm:p-6"}>
-      <Card className={isModal ? "border-0 shadow-none" : ""}>
-        <CardHeader>
-          <CardTitle className={isModal ? "text-xl" : "text-lg sm:text-2xl"}>{t("title")}</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">{t("subtitle")}</CardDescription>
-        </CardHeader>
+    <div className={isModal ? "p-2" : "max-w-6xl mx-auto p-6"}>
+      {/* Header */}
+      <div className={isModal ? "mb-4" : "mb-6"}>
+        <h1 className={isModal ? "text-2xl font-bold" : "text-3xl font-bold"}>{t("title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6">
-            {error && (
-              <Alert variant="destructive" role="alert">
-                <AlertCircle className="h-4 w-4" aria-hidden="true" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <Alert variant="destructive" className={isModal ? "mb-4" : "mb-6"}>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-            <StudentSelector
-              selectedStudent={selectedStudent}
-              searchTerm={searchTerm}
-              filteredStudents={filteredStudents}
-              loadingStudents={loadingStudents}
-              showQrScanner={showQrScanner}
-              qrError={qrError}
-              onSearchChange={setSearchTerm}
-              onStudentSelect={handleStudentSelect}
-              onStudentChange={() =>{
-                setSelectedStudent(null)
-                router.refresh()}}
-              onQrToggle={() => setShowQrScanner(!showQrScanner)}
-              onQrScan={handleQrScan}
-              t={t}
-            />
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isModal ? "mb-4" : "mb-6"}`}>
+          {/* Left Column - Student Selection */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Student Selection Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  {t("findStudent")}
+                </CardTitle>
+                <CardDescription>{t("searchOrScanStudent")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!selectedStudent && (
+                  <>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder={t("searchPlaceholder")}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowQrScanner(!showQrScanner)}
+                      >
+                        <QrCode className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{t("qrScan")}</span>
+                      </Button>
+                    </div>
 
-            {selectedStudent && (
-              <>
-                <Separator />
-                <div className="space-y-4" ref={subjectsRef}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                    <Label htmlFor="subjects-list">
-                      {t("selectSubjects")} <span className="text-red-500">*</span>
-                    </Label>
+                    {showQrScanner && <QRScanner qrError={qrError} onClose={() => setShowQrScanner(false)} onScan={handleQrScan} t={t} />}
+
+                    {!showQrScanner && (
+                      <div className="max-h-64 overflow-y-auto border rounded-lg">
+                        {filteredStudents.length === 0 ? (
+                          <p className="text-sm text-center text-muted-foreground p-4">{t("noStudentsFound")}</p>
+                        ) : (
+                          <div className="divide-y">
+                            {filteredStudents.map((student) => (
+                              <button
+                                key={student.id}
+                                type="button"
+                                className="w-full p-3 text-left hover:bg-muted transition-colors"
+                                onClick={() => handleStudentSelect(student)}
+                              >
+                                <p className="font-medium">{student.name}</p>
+                                <p className="text-xs text-muted-foreground">{student.email || student.phone || ""}</p>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {selectedStudent && (
+                  <div className="p-4 border rounded-lg bg-muted/50">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1">
+                        <p className="font-semibold text-lg">{selectedStudent.name}</p>
+                        <p className="text-sm text-muted-foreground">{selectedStudent.email || selectedStudent.phone}</p>
+                        {selectedStudent.grade && (
+                          <p className="text-xs text-muted-foreground mt-1">Grade: {selectedStudent.grade}</p>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedStudent(null)
+                          setFormData((prev) => ({ ...prev, selectedSubjects: [] }))
+                        }}
+                      >
+                        {t("change")}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Subject Selection Card */}
+            <Card className={!selectedStudent ? "opacity-60 pointer-events-none" : ""}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle>{t("selectSubjects")}</CardTitle>
+                    {!selectedStudent && (
+                      <CardDescription className="text-xs text-muted-foreground mt-1">
+                        {t("selectStudentFirst")}
+                      </CardDescription>
+                    )}
+                  </div>
+                  {selectedStudent && (
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleSelectAllSubjects}
-                      className="w-full sm:w-auto"
                     >
                       {t("selectAll")}
                     </Button>
-                  </div>
-
-                  {selectedStudent.studentSubjects.length === 0 ? (
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" aria-hidden="true" />
-                      <AlertDescription>{t("noSubjects")}</AlertDescription>
-                    </Alert>
-                  ) : (
-                    <div className="space-y-2" id="subjects-list" role="group" aria-label="Available subjects">
-                      {selectedStudent.studentSubjects.map((ss) => (
-                        <Card
-                          key={ss.id}
-                          onClick={() => handleSubjectToggle(ss.subject.id)}
-                          className={`cursor-pointer transition-colors ${
-                            formData.selectedSubjects.includes(ss.subject.id)
-                              ? "border-primary"
-                              : "hover:border-gray-400"
-                          }`}
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault()
-                              handleSubjectToggle(ss.subject.id)
-                            }
-                          }}
-                          aria-pressed={formData.selectedSubjects.includes(ss.subject.id)}
-                          aria-label={`${ss.subject.name}, ${ss.subject.grade}, ${ss.subject.price} MAD`}
-                        >
-                          <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                            <div>
-                              <p className="font-semibold text-sm sm:text-base">{ss.subject.name}</p>
-                              <p className="text-xs sm:text-sm text-muted-foreground">{ss.subject.grade}</p>
-                            </div>
-                            <p className="font-bold text-primary text-sm sm:text-base">
-                              MAD {ss.subject.price.toFixed(2)}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
                   )}
                 </div>
-              </>
-            )}
+              </CardHeader>
+              <CardContent>
+                {selectedStudent?.studentSubjects.length === 0 ? (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{t("noSubjects")}</AlertDescription>
+                  </Alert>
+                ) : selectedStudent ? (
+                  <div className="space-y-2">
+                    {selectedStudent.studentSubjects.map((ss) => (
+                      <Card
+                        key={ss.id}
+                        onClick={() => handleSubjectToggle(ss.subject.id)}
+                        className={`cursor-pointer transition-colors ${
+                          formData.selectedSubjects.includes(ss.subject.id)
+                            ? "border-primary bg-primary/5"
+                            : "hover:border-gray-400"
+                        }`}
+                      >
+                        <CardContent className="p-4 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={formData.selectedSubjects.includes(ss.subject.id)}
+                              onChange={() => { }}
+                              className="h-4 w-4 rounded"
+                            />
+                            <div>
+                              <p className="font-semibold">{ss.subject.name}</p>
+                              <p className="text-sm text-muted-foreground">{ss.subject.grade}</p>
+                            </div>
+                          </div>
+                          <p className="font-bold text-primary">MAD {ss.subject.price.toFixed(2)}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>{t("selectStudentFirst")}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-            {formData.selectedSubjects.length > 0 && (
-              <>
-                <Separator />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="payment-method" className="text-sm">
-                      {t("paymentMethod")} <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      value={formData.paymentMethod}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          paymentMethod: value as FormData["paymentMethod"],
-                        }))
-                      }
-                    >
-                      <SelectTrigger id="payment-method" className="text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CASH">{t("cash")}</SelectItem>
-                        <SelectItem value="CARD">{t("card")}</SelectItem>
-                        <SelectItem value="BANK_TRANSFER">{t("bankTransfer")}</SelectItem>
-                        <SelectItem value="CHECK">{t("check")}</SelectItem>
-                        <SelectItem value="MOBILE_PAYMENT">{t("mobilePayment")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="payment-date" className="text-sm">
-                      {t("date")} <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="payment-date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-                      className="text-sm"
-                      aria-label={t("date")}
-                    />
-                  </div>
+          {/* Right Column - Payment Details */}
+          <div className="space-y-6">
+            {/* Payment Details Card */}
+            <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}>
+              <CardHeader>
+                <CardTitle>{t("paymentDetails")}</CardTitle>
+                {formData.selectedSubjects.length === 0 && (
+                  <CardDescription className="text-xs">{t("selectSubjectsFirst")}</CardDescription>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="paymentMethod">{t("paymentMethod")}</Label>
+                  <Select
+                    value={formData.paymentMethod}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        paymentMethod: value as FormData["paymentMethod"],
+                      }))
+                    }
+                  >
+                    <SelectTrigger id="paymentMethod">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CASH">{t("cash")}</SelectItem>
+                      <SelectItem value="CARD">{t("card")}</SelectItem>
+                      <SelectItem value="BANK_TRANSFER">{t("bankTransfer")}</SelectItem>
+                      <SelectItem value="CHECK">{t("check")}</SelectItem>
+                      <SelectItem value="MOBILE_PAYMENT">{t("mobilePayment")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div>
-                  <Label htmlFor="payment-description" className="text-sm">
-                    {t("description")}
-                  </Label>
+                <div className="space-y-2">
+                  <Label htmlFor="date">{t("date")}</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">{t("description")}</Label>
                   <Textarea
-                    id="payment-description"
+                    id="description"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData((prev) => ({
@@ -779,38 +680,65 @@ export default function CreateStudentPaymentForm({ isModal = false }: { isModal?
                       }))
                     }
                     placeholder={t("descriptionPlaceholder")}
-                    className="text-sm"
-                    aria-label={t("description")}
+                    rows={3}
                   />
                 </div>
+              </CardContent>
+            </Card>
 
-                <PaymentSummary
-                  selectedStudent={selectedStudent}
-                  selectedSubjectsCount={formData.selectedSubjects.length}
-                  paymentMethod={formData.paymentMethod}
-                  date={formData.date}
-                  totalAmount={totalAmount}
-                  t={t}
-                />
-              </>
+            {/* Payment Summary Card */}
+            {formData.selectedSubjects.length > 0 && selectedStudent && (
+              <Card className="border-primary">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    {t("paymentSummary")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t("student")}:</span>
+                    <span className="font-medium">{selectedStudent.name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t("subjects")}:</span>
+                    <span className="font-medium">{formData.selectedSubjects.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t("method")}:</span>
+                    <span className="font-medium">{formData.paymentMethod}</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-lg font-semibold">{t("total")}:</span>
+                    <span className="text-2xl font-bold text-primary">MAD {totalAmount.toFixed(2)}</span>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
+          </div>
+        </div>
 
-          <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 mt-4">
-            <Button type="button" variant="outline" onClick={() => router.back()} className="w-full sm:w-auto">
-              {t("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || !selectedStudent || formData.selectedSubjects.length === 0}
-              className="w-full sm:w-auto"
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-              {t("createReceipt")}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+        {/* Footer Buttons */}
+        <div className="flex justify-end gap-4 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isLoading}
+          >
+            {t("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            disabled={isLoading || !selectedStudent || formData.selectedSubjects.length === 0}
+            className="bg-primary"
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t("createPayment")}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Loader2 } from 'lucide-react'
+import React, { useState } from 'react'
+import { Plus, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,7 +20,9 @@ import { ManagersTab } from './ManagersTab'
 import { TeachersTab } from './TeachersTab'
 import { StudentsTab } from './StudentsTab'
 import { UserDialogs } from './UserDialogs'
+import { OrphanedRecordsDialog } from './OrphanedRecordsDialog'
 import { UserData, UserFormData, ItemToDelete, TeacherData, StudentData } from './types'
+import { findOrphanedTeachers, findOrphanedStudents, getOrphanedRecordsCount } from '@/utils/orphanedRecords'
 
 export default function AllUsersTable() {
   const t = useTranslations('AllUsersTable')
@@ -31,7 +33,7 @@ export default function AllUsersTable() {
     students, 
     isLoading, 
     refreshData 
-  } = useAllUsers()
+  } = useAllUsers(t('unknownManager'))
 
   const [activeTab, setActiveTab] = useState('users')
   
@@ -48,6 +50,36 @@ export default function AllUsersTable() {
     password: '',
     role: 'MANAGER'
   })
+
+  // Orphaned Records State
+  const [orphanedRecordsDialogOpen, setOrphanedRecordsDialogOpen] = useState(false)
+  const [orphanedTeachers, setOrphanedTeachers] = useState<ReturnType<typeof findOrphanedTeachers>>([])
+  const [orphanedStudents, setOrphanedStudents] = useState<ReturnType<typeof findOrphanedStudents>>([])
+  const [allUsers, setAllUsers] = useState<User[]>([])
+
+  // Detect orphaned records when data loads
+  const detectOrphanedRecords = async () => {
+    try {
+      const fetchedUsers = await userActions.getAll()
+      const activeUsers = fetchedUsers.filter(u => u.status !== '0')
+      setAllUsers(activeUsers)
+
+      const orphanedT = findOrphanedTeachers(teachers, activeUsers)
+      const orphanedS = findOrphanedStudents(students, activeUsers)
+      
+      setOrphanedTeachers(orphanedT)
+      setOrphanedStudents(orphanedS)
+    } catch (error) {
+      console.error('Failed to detect orphaned records:', error)
+    }
+  }
+
+  // Run detection when teachers or students change
+  React.useEffect(() => {
+    if (!isLoading && (teachers.length > 0 || students.length > 0)) {
+      detectOrphanedRecords()
+    }
+  }, [teachers, students, isLoading])
 
   // Delete Handler
   const handleDelete = async () => {
@@ -215,6 +247,39 @@ export default function AllUsersTable() {
             {t('addManager')}
           </Button>
         </div>
+        
+        {/* Orphaned Records Alert */}
+        {(orphanedTeachers.length > 0 || orphanedStudents.length > 0) && (
+          <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-sm text-orange-800 dark:text-orange-200">
+                    {t('orphanedRecordsFound')}
+                  </p>
+                  <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                    {orphanedTeachers.length > 0 && (
+                      <span>{orphanedTeachers.length} {t('teachers').toLowerCase()}</span>
+                    )}
+                    {orphanedTeachers.length > 0 && orphanedStudents.length > 0 && <span> + </span>}
+                    {orphanedStudents.length > 0 && (
+                      <span>{orphanedStudents.length} {t('students').toLowerCase()}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setOrphanedRecordsDialogOpen(true)}
+                className="flex-shrink-0"
+              >
+                {t('fixNow')}
+              </Button>
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -275,6 +340,18 @@ export default function AllUsersTable() {
         handleDelete={handleDelete}
         
         isProcessing={isProcessing}
+      />
+
+      <OrphanedRecordsDialog
+        open={orphanedRecordsDialogOpen}
+        onOpenChange={setOrphanedRecordsDialogOpen}
+        orphanedTeachers={orphanedTeachers}
+        orphanedStudents={orphanedStudents}
+        availableManagers={users}
+        onRecordsFixed={() => {
+          refreshData()
+          detectOrphanedRecords()
+        }}
       />
     </Card>
   )

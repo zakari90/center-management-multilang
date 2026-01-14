@@ -358,7 +358,9 @@
     "creatingCenter": "جاري إنشاء المركز...",
     "successMessage": "تم إنشاء المركز بنجاح!",
     "centerCreatedSuccess": "تم إنشاء المركز بنجاح!",
-    "errorMessage": "خطأ في إنشاء المركز. يرجى المحاولة مجددا"
+    "errorMessage": "خطأ في إنشاء المركز. يرجى المحاولة مجددا",
+    "syncedToServer": "تمت مزامنة المركز مع الخادم بنجاح!",
+    "savedLocally": "تم حفظ المركز محلياً. سيتم المزامنة عند الاتصال بالإنترنت."
   },
   "SubjectForm": {
     "selectMultipleInfo": "يمكنك اختيار عدة مواد وفئات. كل مجموعة ستنشئ دورة منفصلة",
@@ -455,6 +457,9 @@
   },
   "AllUsersTable": {
     "errorLoadData": "فشل تحميل البيانات",
+    "allUsersTitle": "جميع المستخدمين",
+    "allUsersDescription": "عرض وإدارة جميع مستخدمي النظام",
+    "unknownManager": "مشرف غير معروف",
     "systemUsers": "مستخدمو النظام",
     "teachers": "المعلمون",
     "students": "الطلاب",
@@ -522,7 +527,17 @@
     "deletedError": "فشل الحذف",
     "userNotFound": "لم يتم العثور على المستخدم",
     "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى",
-    "emailAlreadyInUse": "البريد الإلكتروني مستخدم بالفعل"
+    "emailAlreadyInUse": "البريد الإلكتروني مستخدم بالفعل",
+    "orphanedRecordsFound": "تم العثور على سجلات يتيمة",
+    "orphanedRecordsDescription": "تم العثور على {count} سجل مع تعيينات مشرف غير صالحة",
+    "fixNow": "إصلاح الآن",
+    "reassignTo": "إعادة التعيين إلى",
+    "reassignAll": "إعادة تعيين الكل",
+    "selectManager": "اختر مشرفا",
+    "selectManagerFirst": "يرجى اختيار مشرف أولاً",
+    "orphanedRecordsFixed": "تم إعادة تعيين {count} سجل بنجاح",
+    "reassignFailed": "فشل في إعادة تعيين السجلات",
+    "reassignWarning": "سيؤدي هذا إلى إعادة تعيين جميع السجلات اليتيمة الـ {count} إلى المشرف المحدد."
   },
   "TimetableManagement": {
     "title": "إدارة الجدول الزمني",
@@ -567,6 +582,7 @@
   "ReceiptDetailPage": {
     "loading": "جاري تحميل الإيصال...",
     "receiptNotFound": "الإيصال غير موجود",
+    "unknownManager": "مشرف غير معروف",
     "errorFetchReceipt": "فشل جلب الإيصال",
     "somethingWentWrong": "حدث خطأ ما",
     "receiptDetails": "تفاصيل الإيصال",
@@ -859,6 +875,7 @@
   },
   "CreateTeacherForm": {
     "title": "إنشاء معلم جديد",
+    "subtitle": "إضافة معلم جديد إلى مركزك",
     "basicInfo": "معلومات أساسية",
     "subjectsCompensation": "المواد والتعويض",
     "assignSubjects": "تعيين المواد وتحديد شروط الدفع",

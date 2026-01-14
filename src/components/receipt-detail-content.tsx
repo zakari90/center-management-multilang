@@ -123,7 +123,7 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
           name: manager.name,
           email: manager.email,
         } : {
-          name: 'Unknown Manager',
+          name: t('unknownManager'),
           email: ''
         },
         center: center ? {
