@@ -1,5 +1,3 @@
-// import PWAPerformanceMonitor from "@/components/pwa-performance-monitor";
-// import PWATestingSuite from "@/components/pwa-testing-suite";
 import AutoImportFromServer from "@/components/auto-import-from-server";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import PWAUpdateHandler from "@/components/pwa-update-handler";
@@ -17,7 +15,6 @@ import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
 import LoadWS from "./loadws";
-// import CacheDebugOverlay from "@/components/cache-debug-overlay";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 

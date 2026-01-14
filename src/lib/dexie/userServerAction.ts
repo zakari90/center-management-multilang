@@ -118,6 +118,10 @@ const ServerActionUsers = {
     }
   },
 
+  async createOrUpdateUser(user: any) {
+    return this.SaveToServer(user);
+  },
+
   async DeleteFromServer(id: string) {
     try {
       const response = await fetch(`${api_url}/${id}`, { 
@@ -130,6 +134,10 @@ const ServerActionUsers = {
       console.error("Error deleting user from server:", e);
       return null;
     }
+  },
+
+  async softDeleteUser(id: string) {
+    return this.DeleteFromServer(id);
   },
 
   async Sync() {

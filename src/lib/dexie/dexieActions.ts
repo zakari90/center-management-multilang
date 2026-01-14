@@ -10,6 +10,8 @@ export interface SyncTargets<T> {
 export interface DexieActions<T extends SyncEntity> {
   putLocal: (item: T) => Promise<string>;
   bulkPutLocal: (items: T[]) => Promise<string[]>;
+  create: (item: T) => Promise<string>;
+  update: (id: string, changes: Partial<T>) => Promise<number>;
   getAll: () => Promise<T[]>;
   getByStatus: (statuses: string[]) => Promise<T[]>;
   getLocal: (id: string) => Promise<T | undefined>;
@@ -30,6 +32,15 @@ export function generateDexieActions<T extends SyncEntity>(
     putLocal: async (item: T): Promise<string> => {
       const key = await table.put(item);
       return key as string;
+    },
+
+    create: async (item: T): Promise<string> => {
+      const key = await table.add(item);
+      return key as string;
+    },
+
+    update: async (id: string, changes: Partial<T>): Promise<number> => {
+      return await table.update(id, changes as any);
     },
     
     // ✅ Optimized bulk insert - 10-100x faster than individual puts

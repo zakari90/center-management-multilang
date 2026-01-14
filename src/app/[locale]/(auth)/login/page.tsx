@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-1 md:p-10">
+    <div className="flex min-h-svh w-full items-center justify-center p-1 md:p-4">
       <OfflineNotificationBanner />
       <div className="w-full lg:max-w-sm">
         <LoginForm />

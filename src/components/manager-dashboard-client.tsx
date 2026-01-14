@@ -3,19 +3,16 @@
 
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import EnrollmentChart from "@/components/enrollement-chart";
-import { LocalDBDebugger } from "@/components/LocalDBDebugger";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
 import ManagerStatsCards from "@/components/managerStateCards";
 import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
 import TopSubjects from "@/components/top-subjects";
-import CacheDebugBanner from "@/components/cache-debug-banner";
 import { useTranslations } from "next-intl";
 
 
 export default function ManagerDashboardClient() {
   const t = useTranslations('Dashboard')
-  const isDevelopment = process.env.NODE_ENV === 'development';
 
 return (
    <>
@@ -43,14 +40,10 @@ return (
       {/* Data Synchronization */}
       {/* <SyncHandler /> */}
 
-      {/* Local DB Debugger (for mobile debugging) */}
-      {isDevelopment && <LocalDBDebugger />}
-
       {/* <div className="grid gap-4 grid-cols-4">
         <RecentActivities />
       </div> */}
       </div>
-      <CacheDebugBanner />
     </>
   );
 }

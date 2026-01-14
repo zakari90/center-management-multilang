@@ -11,13 +11,10 @@ import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { FirstLoginImport } from "@/components/FirstLoginImport";
-import { LocalDBDebugger } from "@/components/LocalDBDebugger";
-import CacheDebugBanner from "@/components/cache-debug-banner";
 import { useTranslations } from "next-intl";
 
 export default function AdminDashboardClient() {
   const t = useTranslations('Dashboard')
-  const isDevelopment = process.env.NODE_ENV === 'development';
 
   return (
     <>
@@ -50,12 +47,8 @@ export default function AdminDashboardClient() {
       {/* Data Synchronization */}
       {/* <SyncHandler /> */}
       
-      {/* Local DB Debugger (for mobile debugging) */}
-      {isDevelopment && <LocalDBDebugger />}
-      
       <DeleteAllDataButton/>
       </div>
-      <CacheDebugBanner />
     </>
   )
 }

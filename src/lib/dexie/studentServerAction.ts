@@ -109,6 +109,10 @@ const ServerActionStudents = {
     }
   },
 
+  async softDeleteStudent(id: string) {
+    return this.DeleteFromServer(id);
+  },
+
   async Sync() {
     try {
       if (!isOnline()) {
