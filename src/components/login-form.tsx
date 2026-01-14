@@ -92,13 +92,10 @@ export function LoginForm({
             ? `${base}/manager`
             : `${base}/admin`
 
-      const timeout = setTimeout(() => {
-        router.push(destination)
-      }, 10)
-
-      return () => clearTimeout(timeout)
+      // Use window.location.href for reliable redirect in both online and offline modes
+      window.location.href = destination
     }
-  }, [state, activeStateMatchesRole, login, router, role, locale])
+  }, [state, activeStateMatchesRole, login, role, locale])
 
   const successFallback = role === "manager" ? tManager("successMessage") : t("successMessage")
 
