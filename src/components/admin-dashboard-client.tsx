@@ -22,7 +22,7 @@ export default function AdminDashboardClient() {
   return (
     <>
       {/* <AutoSyncProvider /> */}
-      <div className="container mx-auto p-3 sm:p-6 space-y-6">
+      <div className="container mx-auto p-4 sm:p-6 space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">{t('subtitle')}</p>

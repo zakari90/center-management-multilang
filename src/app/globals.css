@@ -24,8 +24,8 @@
 }
 
 .app-bottom-nav__inner {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: flex;
+  justify-content: space-between;
   gap: 0.125rem;
   padding: 0.25rem;
 }

@@ -183,7 +183,7 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
   );
 
   return (
-    <div className="app-shell max-w-[28px]">
+    <div className="app-shell">
       <SidebarProvider
         style={
           {
