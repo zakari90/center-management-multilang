@@ -185,6 +185,11 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
       })
 
       setSubjects(subjectsWithTeachers)
+      
+      // Debug logging
+      console.log('Available subjects:', subjectsWithTeachers)
+      console.log('Manager centers:', managerCenters)
+      console.log('All subjects:', allSubjects.filter(s => s.status !== '0'))
 
       // Set form data
       setFormData({
@@ -550,23 +555,31 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                   {/* Grade Selection */}
                   <div>
                     <Label className="text-sm mb-2 block">{t("step1SelectGrade")}</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {availableGrades.map((grade) => (
-                        <Button
-                          key={grade}
-                          type="button"
-                          variant={selectedGrade === grade ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            setSelectedGrade(grade)
-                            setSelectedSubject(null)
-                            setSelectedTeacher("")
-                          }}
-                        >
-                          {grade}
-                        </Button>
-                      ))}
-                    </div>
+                    {availableGrades.length === 0 ? (
+                      <Alert>
+                        <AlertDescription>
+                          {t("noSubjectsAvailable") || "No subjects available. Please add subjects to your center first."}
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {availableGrades.map((grade) => (
+                          <Button
+                            key={grade}
+                            type="button"
+                            variant={selectedGrade === grade ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedGrade(grade)
+                              setSelectedSubject(null)
+                              setSelectedTeacher("")
+                            }}
+                          >
+                            {grade}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Subject Selection */}
