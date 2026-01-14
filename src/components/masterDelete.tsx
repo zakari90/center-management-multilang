@@ -15,13 +15,37 @@ export function DeleteAllDataButton() {
   const t = useTranslations("deleteALL");
   const router = useRouter();
 
-  // ✅ Delete all local DB data (not server data)
+  // ✅ Delete all data from both server and local DB
   const handleDelete = async () => {
     setStatus(null);
     setIsDeleting(true);
     
     try {
-      // Delete all local tables
+      // ✅ Try to delete from server first if online
+      if (typeof window !== 'undefined' && window.navigator.onLine) {
+        try {
+          const response = await fetch('/api/admin/delete-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Server error: ${response.status}`);
+          }
+
+          setStatus(t("allDataDeletedSuccessfully") || "All data deleted from server and local storage");
+        } catch (serverError) {
+          console.error("Server deletion failed:", serverError);
+          setStatus(t("serverDeleteFailed") || `Server deletion failed: ${serverError instanceof Error ? serverError.message : "Unknown error"}. Local data will still be cleared.`);
+          // Continue to clear local data even if server fails
+        }
+      } else {
+        setStatus(t("offlineDeleteWarning") || "Offline: Only local data will be deleted. Server data will remain.");
+      }
+
+      // ✅ Clear all local tables regardless of server result
       await Promise.all([
         localDb.users.clear(),
         localDb.centers.clear(),
@@ -36,7 +60,6 @@ export function DeleteAllDataButton() {
         // localDb.pushSubscriptions.clear(),
       ]);
 
-      setStatus(t("allDataDeletedSuccessfully") || "All local data deleted successfully");
       setConfirm(false);
       router.refresh();
     } catch (error) {
