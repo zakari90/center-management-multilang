@@ -134,7 +134,7 @@
   },
 "login": {
     "title": "Bon retour",
-    "adminOption": "Administrateur",
+    "adminOption": "Admin",
     "welcomeBadge": "Plateforme de gestion des centres",
     "adminOptionDescription": "Suivez centres, finances et équipes en un seul endroit.",
     "email": {

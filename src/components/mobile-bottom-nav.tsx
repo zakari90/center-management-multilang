@@ -45,11 +45,11 @@ export default function MobileBottomNav({
               <span className="app-bottom-nav__icon" aria-hidden="true">
                 {item.icon}
               </span>
-              <span className="app-bottom-nav__label">{item.label}</span>
+              <span className="app-bottom-nav__label sr-only">{item.label}</span>
             </Link>
           );
         })}
-        <div className="app-bottom-nav__item app-bottom-nav__item--menu max-w-[12px]">{menu}</div>
+        <div className="app-bottom-nav__item app-bottom-nav__item--menu">{menu}</div>
       </div>
     </nav>
   );
