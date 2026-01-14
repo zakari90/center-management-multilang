@@ -24,9 +24,6 @@
     "title": "أنت غير متصل بالإنترنت",
     "message": "يتم حفظ البيانات محلياً ويمكنك متابعة العمل. لا تقم بمسح ذاكرة التخزين المؤقت للمتصفح."
   },
-
-  "subjects": "المواد",
-
   "deleteALL": {
   "allDataDeletedSuccessfully": "تم الحذف",
   "failedToDeleteData": "فشل الحذف",

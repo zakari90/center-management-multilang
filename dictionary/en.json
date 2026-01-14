@@ -23,7 +23,7 @@
   "title": "You're offline",
   "message": "Data is saved locally, and you can keep working. Do not clear your browser cache."
 }
-  , "subjects": "Subjects",
+  ,
   "deleteALL": {
   "allDataDeletedSuccessfully": "All data deleted successfully!",
   "failedToDeleteData": "Failed to delete data!",
