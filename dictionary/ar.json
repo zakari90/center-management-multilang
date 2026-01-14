@@ -31,6 +31,7 @@
   "deleteAllData": "حذف كل البيانات",
   "cannotBeUndone": "هذا لا يمكن التراجع عنه",
   "yesDeleteEverything": "نعم، احذف",
+  "deleting": "جاري الحذف...",
   "cancel": "إلغاء"
   },
   "InstallPWA": {

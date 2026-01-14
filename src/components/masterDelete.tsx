@@ -5,11 +5,19 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Trash, Loader2 } from "lucide-react";
+import { Trash, Loader2, AlertTriangle } from "lucide-react";
 import { localDb } from "@/lib/dexie/dbSchema";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function DeleteAllDataButton() {
-  const [confirm, setConfirm] = useState(false);
+  const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const t = useTranslations("deleteALL");
@@ -60,11 +68,11 @@ export function DeleteAllDataButton() {
         // localDb.pushSubscriptions.clear(),
       ]);
 
-      setConfirm(false);
+      setOpen(false);
       router.refresh();
     } catch (error) {
       setStatus(t("failedToDeleteData") || `Failed to delete data: ${error instanceof Error ? error.message : "Unknown error"}`);
-      setConfirm(false);
+      setOpen(false);
     } finally {
       setIsDeleting(false);
     }
@@ -77,43 +85,53 @@ export function DeleteAllDataButton() {
           <AlertDescription>{status}</AlertDescription>
         </Alert>
       )}
-      {confirm ? (
-        <div>
-          <p className="mb-2">
-            {t("areYouSureDeleteAllData")} <strong>{t("deleteAllData")}</strong>? {t("cannotBeUndone")}
-          </p>
-          <Button 
-            onClick={handleDelete} 
-            variant="destructive" 
-            className="mr-2"
-            disabled={isDeleting}
-          >
-            {isDeleting ? (
-              <>
-                <Loader2 className="inline w-4 h-4 mr-1 animate-spin" />
-                {t("deleting") || "Deleting..."}
-              </>
-            ) : (
-              <>
-                <Trash className="inline w-4 h-4 mr-1" />
-                {t("yesDeleteEverything")}
-              </>
-            )}
-          </Button>
-          <Button 
-            onClick={() => setConfirm(false)} 
-            variant="outline"
-            disabled={isDeleting}
-          >
-            {t("cancel")}
-          </Button>
-        </div>
-      ) : (
-        <Button onClick={() => setConfirm(true)} variant="destructive">
-          <Trash className="inline w-4 h-4 mr-1" />
-          {t("deleteAllData")}
-        </Button>
-      )}
+      
+      <Button onClick={() => setOpen(true)} variant="destructive">
+        <Trash className="inline w-4 h-4 mr-2" />
+        {t("deleteAllData")}
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              {t("deleteAllData")}
+            </DialogTitle>
+            <DialogDescription className="pt-4">
+              {t("areYouSureDeleteAllData")} <strong>{t("deleteAllData")}</strong>?
+              <br />
+              <span className="text-destructive font-semibold">{t("cannotBeUndone")}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button 
+              onClick={() => setOpen(false)} 
+              variant="outline"
+              disabled={isDeleting}
+            >
+              {t("cancel")}
+            </Button>
+            <Button 
+              onClick={handleDelete} 
+              variant="destructive"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t("deleting")}
+                </>
+              ) : (
+                <>
+                  <Trash className="w-4 h-4 mr-2" />
+                  {t("yesDeleteEverything")}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,11 +1,10 @@
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import ExcelJS from 'exceljs'
 import { Download, FileSpreadsheet, FileText } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { TeacherWithSchedule, Schedule, WeeklyScheduleSlot } from './types'
-import { isWithinAvailability, calculateHoursDifference, timeToPosition } from './utils'
-import ExcelJS from 'exceljs'
-import { DAYS } from '@/lib/constants' // Assuming DAYS is imported from somewhere or I should define it.
+import { useState } from 'react'
+import { Schedule, TeacherWithSchedule } from './types'
+import { calculateHoursDifference, isWithinAvailability } from './utils'
 // DAYS is often just an array, let's define it here or import it if I find it.
 // In the original file it was locally defined. Let's define it in utils or consts. 
 // For now, I'll define it locally to be safe, or move it to utils.
