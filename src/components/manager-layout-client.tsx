@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { CalendarDays, FileText, Home, LogOut, MoreVertical, RefreshCw, Users, Settings, Globe, Moon, Sun } from "lucide-react";
+import { CalendarDays, FileText, Home, LogOut, MoreVertical, RefreshCw, Users, Settings, Globe, Moon, Sun, GraduationCap } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -205,7 +205,7 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
           items={[
             { label: t("dashboard"), href: `${base}/manager`, icon: <Home className="size-5" /> },
             { label: t("teachers"), href: `${base}/manager/teachers`, icon: <Users className="size-5" /> },
-            { label: t("students"), href: `${base}/manager/students`, icon: <Users className="size-5" /> },
+            { label: t("students"), href: `${base}/manager/students`, icon: <GraduationCap className="size-5" /> },
             { label: t("receipts"), href: `${base}/manager/receipts`, icon: <FileText className="size-5" /> },
             { label: t("schedule"), href: `${base}/manager/schedule`, icon: <CalendarDays className="size-5" /> },
           ]}

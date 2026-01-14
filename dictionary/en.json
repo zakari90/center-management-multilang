@@ -242,9 +242,9 @@
     "privacyPolicy": "Privacy Policy"
   },  
   "homePage": {
-    "title": "Welcome to Center Management",
-    "description": "Manage your school easily with our dashboard.",
-    "ownerDashboard": "Owner Dashboard",
+    "title": "Welcome to your Center Management System",
+    "description": "",
+    "ownerDashboard": "Dashboard",
     "managerDashboard": "Manager Dashboard"
   },
   "adminStats": {

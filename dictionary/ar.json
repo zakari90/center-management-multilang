@@ -207,9 +207,9 @@
     "keywords": "إدارة المركز، تدبير مراجعتي"
   },
   "homePage": {
-    "title": "أهلا بك في إدارة المركز",
-    "description": "إدارة مدرستك بسهولة من خلال لوحة التحكم الخاصة بنا",
-    "ownerDashboard": "لوحة تحكم المالك",
+    "title": "أهلا بك في إدارة مركزك",
+    "description": "",
+    "ownerDashboard": "لوحة التحكم ",
     "managerDashboard": "لوحة تحكم المشرف"
   },
   "adminStats": {

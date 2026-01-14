@@ -206,9 +206,9 @@
     "keywords": "Gestion du centre"
   },
   "homePage": {
-    "title": "Bienvenue à la gestion du centre",
-    "description": "Gérez votre école facilement avec notre tableau de bord",
-    "ownerDashboard": "Tableau de bord du propriétaire",
+    "title": "Bienvenue à la gestion de votre centre",
+    "description": "",
+    "ownerDashboard": "Tableau de bord",
     "managerDashboard": "Tableau de bord du gestionnaire"
   },
   "adminStats": {

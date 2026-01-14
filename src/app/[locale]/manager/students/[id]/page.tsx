@@ -9,7 +9,7 @@ export default function StudentDetailPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const isModal = searchParams.get("modal") === "true"
-  const studentId = params['id-toremove'] as string
+  const studentId = params.id as string
 
   const content = <StudentDetailContent studentId={studentId} isModal={isModal} />
 
