@@ -771,178 +771,178 @@
   /* Card grid - using Tailwind's responsive prefixes */
   .card-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1rem;
   }
   
   @media (min-width: 640px) {
     .card-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 1.5rem;
     }
   }
   
   @media (min-width: 1024px) {
     .card-grid-responsive {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-: repeat(3, minmax(0, 1fr));
     }
   }
 
   .card-grid-responsive-2 {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1rem;
   }
   
   @media (min-width: 640px) {
     .card-grid-responsive-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 1.5rem;
     }
   }
 
   .card-grid-responsive-4 {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1rem;
   }
   
   @media (min-width: 640px) {
     .card-grid-responsive-4 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 1.5rem;
     }
   }
   
   @media (min-width: 1024px) {
     .card-grid-responsive-4 {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-: repeat(4, minmax(0, 1fr));
     }
   }
 
   /* Feature grid - using Tailwind's responsive prefixes */
   .feature-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1.5rem;
   }
   
   @media (min-width: 768px) {
     .feature-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 2rem;
     }
   }
   
   @media (min-width: 1024px) {
     .feature-grid-responsive {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-: repeat(3, minmax(0, 1fr));
     }
   }
 
   /* Stats grid - using Tailwind's responsive prefixes */
   .stats-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1rem;
   }
   
   @media (min-width: 640px) {
     .stats-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 1.5rem;
     }
   }
   
   @media (min-width: 1024px) {
     .stats-grid-responsive {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-: repeat(4, minmax(0, 1fr));
     }
   }
 
   /* Testimonial grid - using Tailwind's responsive prefixes */
   .testimonial-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1.5rem;
   }
   
   @media (min-width: 768px) {
     .testimonial-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 2rem;
     }
   }
   
   @media (min-width: 1024px) {
     .testimonial-grid-responsive {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-: repeat(3, minmax(0, 1fr));
     }
   }
 
   /* Pricing grid - using Tailwind's responsive prefixes */
   .pricing-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1.5rem;
   }
   
   @media (min-width: 768px) {
     .pricing-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 2rem;
     }
   }
   
   @media (min-width: 1024px) {
     .pricing-grid-responsive {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-: repeat(3, minmax(0, 1fr));
     }
   }
 
   /* Team grid - using Tailwind's responsive prefixes */
   .team-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1.5rem;
   }
   
   @media (min-width: 640px) {
     .team-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 2rem;
     }
   }
   
   @media (min-width: 768px) {
     .team-grid-responsive {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-: repeat(3, minmax(0, 1fr));
     }
   }
   
   @media (min-width: 1024px) {
     .team-grid-responsive {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-: repeat(4, minmax(0, 1fr));
     }
   }
 
   /* Blog grid - using Tailwind's responsive prefixes */
   .blog-grid-responsive {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-: repeat(1, minmax(0, 1fr));
     gap: 1.5rem;
   }
   
   @media (min-width: 768px) {
     .blog-grid-responsive {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-: repeat(2, minmax(0, 1fr));
       gap: 2rem;
     }
   }
   
   @media (min-width: 1024px) {
     .blog-grid-responsive {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-: repeat(3, minmax(0, 1fr));
     }
   }
 }

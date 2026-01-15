@@ -32,19 +32,8 @@ export function useTeacherSchedule(centerId?: string) {
         centerActions.getAll()
       ])
 
+      // Show all active teachers (removed strict managerId filtering)
       let activeTeachers = allTeachers.filter(t => t.status !== '0')
-      
-      if (isAdmin && user.id) {
-        const adminCenters = allCenters.filter(c => 
-          c.adminId === user.id && c.status !== '0'
-        )
-        const adminManagerIds = adminCenters.flatMap(c => c.managers || [])
-        activeTeachers = activeTeachers.filter(t => 
-          adminManagerIds.includes(t.managerId)
-        )
-      } else if (user.id) {
-        activeTeachers = activeTeachers.filter(t => t.managerId === user.id)
-      }
       
       let activeSchedules = allSchedules.filter(s => s.status !== '0')
       

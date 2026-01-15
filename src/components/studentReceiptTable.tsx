@@ -493,7 +493,7 @@ export default function StudentReceiptTable() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="default">
-            Columns <ChevronDown className="ml-2 h-4 w-4" />
+             <ChevronDown className="ml-2 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

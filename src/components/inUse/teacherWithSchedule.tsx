@@ -202,7 +202,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: Ret
   // ==================== Sheet 1: Teacher Info ====================
   const infoSheet = workbook.addWorksheet('Teacher Info')
   
-  infoSheet.columns = [
+  infoSheet. = [
     { header: 'Field', key: 'field', width: 25 },
     { header: 'Value', key: 'value', width: 30 }
   ]
@@ -230,7 +230,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: Ret
   // ==================== Sheet 2: Availability ====================
   const availabilitySheet = workbook.addWorksheet(t('availableHours'))
   
-  availabilitySheet.columns = [
+  availabilitySheet. = [
     { header: 'Day', key: 'day', width: 15 },
     { header: 'Start Time', key: 'startTime', width: 12 },
     { header: 'End Time', key: 'endTime', width: 12 },
@@ -261,7 +261,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: Ret
   // ==================== Sheet 3: Scheduled Classes ====================
   const schedulesSheet = workbook.addWorksheet(t('classes'))
   
-  schedulesSheet.columns = [
+  schedulesSheet. = [
     { header: 'Day', key: 'day', width: 12 },
     { header: 'Start Time', key: 'startTime', width: 12 },
     { header: 'End Time', key: 'endTime', width: 12 },
@@ -327,7 +327,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: Ret
   if (teacher.conflicts.length > 0) {
     const conflictsSheet = workbook.addWorksheet(t('conflict'))
     
-    conflictsSheet.columns = [
+    conflictsSheet. = [
       { header: 'Day', key: 'day', width: 12 },
       { header: 'Scheduled Time', key: 'scheduledTime', width: 18 },
       { header: 'Subject', key: 'subject', width: 20 },
@@ -376,7 +376,7 @@ const exportTeacherScheduleToExcel = async (teacher: TeacherWithSchedule, t: Ret
     '18:00', '19:00', '20:00'
   ]
 
-  weeklySheet.columns = [
+  weeklySheet. = [
     { header: 'Time', key: 'time', width: 8 },
     ...DAYS.map(day => ({ header: day, key: day, width: 18 }))
   ]

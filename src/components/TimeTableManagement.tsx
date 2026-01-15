@@ -573,7 +573,7 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                       {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
-                    {/* Day Columns */}
+                    {/* Day  */}
                     {daysOfWeek.map(day => {
                       const slots = getSlotsByDayAndTime(day.label, time)
                       const hasConflict = slots.length > 1

@@ -107,8 +107,9 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
         .filter(s => s.managerId === user.id && s.status !== '0')
         .filter(s => !centerId || s.centerId === centerId)
 
+      // Show all active teachers (removed strict managerId filtering)
       const managerTeachers = allTeachers
-        .filter(t => t.managerId === user.id && t.status !== '0')
+        .filter(t => t.status !== '0')
         .map(t => ({
           id: t.id,
           name: t.name,

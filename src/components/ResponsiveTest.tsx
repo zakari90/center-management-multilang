@@ -27,7 +27,7 @@ export default function ResponsiveTest() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">2</p>
-            <p className="text-xs text-muted-foreground">Columns on sm+</p>
+            <p className="text-xs text-muted-foreground"> on sm+</p>
           </CardContent>
         </Card>
         
@@ -37,7 +37,7 @@ export default function ResponsiveTest() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">4</p>
-            <p className="text-xs text-muted-foreground">Columns on lg+</p>
+            <p className="text-xs text-muted-foreground"> on lg+</p>
           </CardContent>
         </Card>
         
