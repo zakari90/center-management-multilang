@@ -965,6 +965,8 @@
   },
   "TeacherProfile": {
     "edit": "Edit",
+    "viewDetails": "View Details",
+    "teacherDetails": "Teacher Details",
     "overview": "Teacher Profile Overview",
     "email": "Email",
     "phone": "Phone",

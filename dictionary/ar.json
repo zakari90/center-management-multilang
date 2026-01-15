@@ -917,6 +917,8 @@
   },
   "TeacherProfile": {
     "edit": "تعديل",
+    "viewDetails": "عرض التفاصيل",
+    "teacherDetails": "تفاصيل المعلم",
     "overview": "نظرة عامة على ملف المعلم",
     "email": "البريد الإلكتروني",
     "phone": "الهاتف",
