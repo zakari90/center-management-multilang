@@ -95,6 +95,17 @@ export default function StudentsTable() {
         teacherActions.getAll()
       ])
 
+      // 🔍 DEBUG: Log fetched data
+      console.log('=== STUDENTS DEBUG ===')
+      console.log('Total students:', allStudents.length)
+      console.log('Total studentSubjects:', allStudentSubjects.length)
+      console.log('Total subjects:', allSubjects.length)
+      console.log('Total teachers:', allTeachers.length)
+      console.log('Active studentSubjects:', allStudentSubjects.filter(ss => ss.status !== '0').length)
+      console.log('Active subjects:', allSubjects.filter(s => s.status !== '0').length)
+      console.log('Sample studentSubject:', allStudentSubjects[0])
+      console.log('Sample subject:', allSubjects[0])
+
       // ✅ Filter students by status only (managers see ALL students)
       const managerStudents = allStudents
         .filter(s => s.status !== '0')
