@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AlertCircle, CheckCircle2, Loader2, QrCode, X, User, DollarSign } from "lucide-react"
+import { AlertCircle, CheckCircle2, Loader2, QrCode, X, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import jsQR from "jsqr"
 import {
@@ -113,7 +113,6 @@ function QRScanner({
     })
 
     if (code) {
-      console.log("QR Code detected:", code.data)
       onScan(code.data)
       return
     }
@@ -242,13 +241,13 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
       setSearchTerm("")
       setShowQrScanner(false)
       setQrError(null)
+      setError("")
       setFormData({
         paymentMethod: "CASH",
         description: "",
         date: new Date().toISOString().split("T")[0],
         selectedSubjects: [],
       })
-      setError("")
     }
   }, [open])
 
@@ -346,7 +345,6 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
 
   const handleQrScan = useCallback(
     (data: string) => {
-      console.log("Processing scanned data:", data)
       const student = students.find((s) => s.id === data)
 
       if (student) {
@@ -469,42 +467,42 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="flex-1 bg-primary hover:bg-primary/45">
-          <DollarSign className="h-4 w-4 mr-2" />
-          {t("title")}
+          {t("studentPayment") || "Student Payment"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[90vw] md:max-w-6xl max-h-[85dvh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("subtitle")}</DialogDescription>
         </DialogHeader>
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+        <div className="flex-1 overflow-y-auto px-1">
+          {loadingStudents ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-12 w-12 animate-spin" />
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="h-full flex flex-col">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-        {loadingStudents ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-12 w-12 animate-spin" />
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-4 flex-1 overflow-y-auto">
               {/* Left Column - Student Selection */}
-              <div className="lg:col-span-2 space-y-4">
+              <div className="lg:col-span-2 space-y-6">
                 {/* Student Selection Card */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <User className="h-4 w-4" />
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="h-5 w-5" />
                       {t("findStudent")}
                     </CardTitle>
-                    <CardDescription className="text-xs">{t("searchOrScanStudent")}</CardDescription>
+                    <CardDescription>{t("searchOrScanStudent")}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-3">
+                  <CardContent className="space-y-4">
                     {!selectedStudent && (
                       <>
                         <div className="flex gap-2">
@@ -512,12 +510,11 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                             placeholder={t("searchPlaceholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="flex-1 h-9"
+                            className="flex-1"
                           />
                           <Button
                             type="button"
                             variant="outline"
-                            size="sm"
                             onClick={() => setShowQrScanner(!showQrScanner)}
                           >
                             <QrCode className="h-4 w-4 sm:mr-2" />
@@ -528,7 +525,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                         {showQrScanner && <QRScanner qrError={qrError} onClose={() => setShowQrScanner(false)} onScan={handleQrScan} t={t} />}
 
                         {!showQrScanner && (
-                          <div className="max-h-48 overflow-y-auto border rounded-lg">
+                          <div className="max-h-64 overflow-y-auto border rounded-lg">
                             {filteredStudents.length === 0 ? (
                               <p className="text-sm text-center text-muted-foreground p-4">{t("noStudentsFound")}</p>
                             ) : (
@@ -537,10 +534,10 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                                   <button
                                     key={student.id}
                                     type="button"
-                                    className="w-full p-2 text-left hover:bg-muted transition-colors"
+                                    className="w-full p-3 text-left hover:bg-muted transition-colors"
                                     onClick={() => handleStudentSelect(student)}
                                   >
-                                    <p className="font-medium text-sm">{student.name}</p>
+                                    <p className="font-medium">{student.name}</p>
                                     <p className="text-xs text-muted-foreground">{student.email || student.phone || ""}</p>
                                   </button>
                                 ))}
@@ -552,11 +549,11 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                     )}
 
                     {selectedStudent && (
-                      <div className="p-3 border rounded-lg bg-muted/50">
+                      <div className="p-4 border rounded-lg bg-muted/50">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex-1">
-                            <p className="font-semibold">{selectedStudent.name}</p>
-                            <p className="text-xs text-muted-foreground">{selectedStudent.email || selectedStudent.phone}</p>
+                            <p className="font-semibold text-lg">{selectedStudent.name}</p>
+                            <p className="text-sm text-muted-foreground">{selectedStudent.email || selectedStudent.phone}</p>
                             {selectedStudent.grade && (
                               <p className="text-xs text-muted-foreground mt-1">Grade: {selectedStudent.grade}</p>
                             )}
@@ -583,9 +580,9 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-base">{t("selectSubjects")}</CardTitle>
+                        <CardTitle>{t("selectSubjects")}</CardTitle>
                         {!selectedStudent && (
-                          <CardDescription className="text-xs">
+                          <CardDescription className="text-xs text-muted-foreground mt-1">
                             {t("selectStudentFirst")}
                           </CardDescription>
                         )}
@@ -606,10 +603,10 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                     {selectedStudent?.studentSubjects.length === 0 ? (
                       <Alert>
                         <AlertCircle className="h-4 w-4" />
-                        <AlertDescription className="text-sm">{t("noSubjects")}</AlertDescription>
+                        <AlertDescription>{t("noSubjects")}</AlertDescription>
                       </Alert>
                     ) : selectedStudent ? (
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                      <div className="space-y-2">
                         {selectedStudent.studentSubjects.map((ss) => (
                           <Card
                             key={ss.id}
@@ -620,7 +617,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                                 : "hover:border-gray-400"
                             }`}
                           >
-                            <CardContent className="p-3 flex justify-between items-center">
+                            <CardContent className="p-4 flex justify-between items-center">
                               <div className="flex items-center gap-3">
                                 <input
                                   type="checkbox"
@@ -629,18 +626,18 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                                   className="h-4 w-4 rounded"
                                 />
                                 <div>
-                                  <p className="font-semibold text-sm">{ss.subject.name}</p>
-                                  <p className="text-xs text-muted-foreground">{ss.subject.grade}</p>
+                                  <p className="font-semibold">{ss.subject.name}</p>
+                                  <p className="text-sm text-muted-foreground">{ss.subject.grade}</p>
                                 </div>
                               </div>
-                              <p className="font-bold text-primary text-sm">MAD {ss.subject.price.toFixed(2)}</p>
+                              <p className="font-bold text-primary">MAD {ss.subject.price.toFixed(2)}</p>
                             </CardContent>
                           </Card>
                         ))}
                       </div>
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">
-                        <p className="text-sm">{t("selectStudentFirst")}</p>
+                        <p>{t("selectStudentFirst")}</p>
                       </div>
                     )}
                   </CardContent>
@@ -648,18 +645,18 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
               </div>
 
               {/* Right Column - Payment Details */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Payment Details Card */}
                 <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}>
                   <CardHeader>
-                    <CardTitle className="text-base">{t("paymentDetails")}</CardTitle>
+                    <CardTitle>{t("paymentDetails")}</CardTitle>
                     {formData.selectedSubjects.length === 0 && (
                       <CardDescription className="text-xs">{t("selectSubjectsFirst")}</CardDescription>
                     )}
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="paymentMethod" className="text-sm">{t("paymentMethod")}</Label>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="paymentMethod">{t("paymentMethod")}</Label>
                       <Select
                         value={formData.paymentMethod}
                         onValueChange={(value) =>
@@ -669,7 +666,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                           }))
                         }
                       >
-                        <SelectTrigger id="paymentMethod" className="h-9">
+                        <SelectTrigger id="paymentMethod">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -682,19 +679,18 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                       </Select>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <Label htmlFor="date" className="text-sm">{t("date")}</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="date">{t("date")}</Label>
                       <Input
                         id="date"
                         type="date"
                         value={formData.date}
                         onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-                        className="h-9"
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <Label htmlFor="description" className="text-sm">{t("description")}</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">{t("description")}</Label>
                       <Textarea
                         id="description"
                         value={formData.description}
@@ -706,7 +702,6 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                         }
                         placeholder={t("descriptionPlaceholder")}
                         rows={3}
-                        className="text-sm"
                       />
                     </div>
                   </CardContent>
@@ -716,8 +711,8 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                 {formData.selectedSubjects.length > 0 && selectedStudent && (
                   <Card className="border-primary">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-base">
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      <CardTitle className="flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
                         {t("paymentSummary")}
                       </CardTitle>
                     </CardHeader>
@@ -736,8 +731,8 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                       </div>
                       <Separator className="my-2" />
                       <div className="flex justify-between items-center pt-2">
-                        <span className="font-semibold">{t("total")}:</span>
-                        <span className="text-xl font-bold text-primary">MAD {totalAmount.toFixed(2)}</span>
+                        <span className="text-lg font-semibold">{t("total")}:</span>
+                        <span className="text-2xl font-bold text-primary">MAD {totalAmount.toFixed(2)}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -746,7 +741,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-4 mt-4 border-t pt-4 sticky bottom-0 bg-background">
               <Button
                 type="button"
                 variant="outline"
@@ -764,8 +759,9 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                 {t("createPayment")}
               </Button>
             </div>
-          </form>
-        )}
+            </form>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

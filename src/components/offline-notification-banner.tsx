@@ -14,9 +14,9 @@ export default function OfflineNotificationBanner() {
   const t = useTranslations("OfflineBanner");
 
   // Don't render anything if online
-  // if (isOnline) {
-  //   return null;
-  // }
+  if (isOnline) {
+    return null;
+  }
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top duration-300">
