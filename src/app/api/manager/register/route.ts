@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getSession } from "@/lib/server-auth";
 import db from "@/lib/db";
+import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
       data: {
         ...(id && { id }), // Use client-provided ID if available
         email,
-        password,
+        password: await bcrypt.hash(password, 10), // ✅ Hash password before saving
         name: username,
         role: "MANAGER",
       },
