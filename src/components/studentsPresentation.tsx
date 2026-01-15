@@ -342,32 +342,32 @@ export default function StudentsTable() {
             <thead className="bg-muted/50">
               <tr>
                 {columnVisibility.name && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                     {t("name")}
                   </th>
                 )}
                 {columnVisibility.contact && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                     {t("contact")}
                   </th>
                 )}
                 {columnVisibility.parent && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                     {t("parent")}
                   </th>
                 )}
                 {columnVisibility.subjects && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                     {t("subjects")}
                   </th>
                 )}
                 {columnVisibility.monthlyFee && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                     {t("monthlyFee")}
                   </th>
                 )}
                 {columnVisibility.actions && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                     {t("actions")}
                   </th>
                 )}
@@ -384,7 +384,7 @@ export default function StudentsTable() {
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-muted/50 transition-colors">
                     {columnVisibility.name && (
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap border-x">
                         <div className="flex items-center gap-4">
                           <Avatar>
                             <AvatarFallback className="bg-green-100 text-green-600">
@@ -401,13 +401,13 @@ export default function StudentsTable() {
                       </td>
                     )}
                     {columnVisibility.contact && (
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 border-x">
                         <div className="text-sm">{student.email || "-"}</div>
                         <div className="text-sm text-muted-foreground">{student.phone || "-"}</div>
                       </td>
                     )}
                     {columnVisibility.parent && (
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 border-x">
                         <div className="text-sm">{student.parentName || "-"}</div>
                         <div className="text-sm text-muted-foreground">
                           {student.parentPhone || "-"}
@@ -415,19 +415,19 @@ export default function StudentsTable() {
                       </td>
                     )}
                     {columnVisibility.subjects && (
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 border-x">
                         <Badge variant="secondary">
                           {student.studentSubjects?.length || 0} {t("subjects")}
                         </Badge>
                       </td>
                     )}
                     {columnVisibility.monthlyFee && (
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap border-x">
                         <div className="text-sm font-medium">MAD {getTotalRevenue(student).toFixed(2)}</div>
                       </td>
                     )}
                     {columnVisibility.actions && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-6 py-4 whitespace-nowrap text-right border-x">
                         <div className="flex gap-1 justify-end">
                           <ViewStudentDialog studentId={student.id} />
                           <ViewStudentCardDialog studentId={student.id} />

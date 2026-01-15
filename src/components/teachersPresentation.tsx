@@ -327,19 +327,19 @@ export default function TeachersTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {columnVisibility.teacher && <TableHead className="text-center">{t('teacher')}</TableHead>}
-                  {columnVisibility.contact && <TableHead className="text-center">{t('contact')}</TableHead>}
-                  {columnVisibility.subjects && <TableHead className="text-center">{t('subjects')}</TableHead>}
-                  {columnVisibility.schedule && <TableHead className="text-center">{t('schedule')}</TableHead>}
-                  {columnVisibility.joined && <TableHead className="text-center">{t('joined')}</TableHead>}
-                  {columnVisibility.actions && <TableHead className="text-center">{t('actions')}</TableHead>}
+                  {columnVisibility.teacher && <TableHead className="text-center border-x">{t('teacher')}</TableHead>}
+                  {columnVisibility.contact && <TableHead className="text-center border-x">{t('contact')}</TableHead>}
+                  {columnVisibility.subjects && <TableHead className="text-center border-x">{t('subjects')}</TableHead>}
+                  {columnVisibility.schedule && <TableHead className="text-center border-x">{t('schedule')}</TableHead>}
+                  {columnVisibility.joined && <TableHead className="text-center border-x">{t('joined')}</TableHead>}
+                  {columnVisibility.actions && <TableHead className="text-center border-x">{t('actions')}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTeachers.map((teacher) => (
                   <TableRow key={teacher.id}>
                     {columnVisibility.teacher && (
-                      <TableCell>
+                      <TableCell className="border-x">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
                             {teacher.name.charAt(0).toUpperCase()}
@@ -354,13 +354,13 @@ export default function TeachersTable() {
                       </TableCell>
                     )}
                     {columnVisibility.contact && (
-                      <TableCell>
+                      <TableCell className="border-x">
                         <p>{teacher.email || '-'}</p>
                         <p className="text-sm text-muted-foreground">{teacher.phone || '-'}</p>
                       </TableCell>
                     )}
                     {columnVisibility.subjects && (
-                      <TableCell>
+                      <TableCell className="border-x">
                         {teacher.teacherSubjects.length === 0 ? (
                           <span className="text-sm text-muted-foreground italic">
                             {t('noSubjectsAssigned')}
@@ -389,15 +389,15 @@ export default function TeachersTable() {
                       </TableCell>
                     )}
                     {columnVisibility.schedule && (
-                      <TableCell>{getAvailableDays(teacher.weeklySchedule)}</TableCell>
+                      <TableCell className="border-x">{getAvailableDays(teacher.weeklySchedule)}</TableCell>
                     )}
                     {columnVisibility.joined && (
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground border-x">
                         {new Date(teacher.createdAt).toLocaleDateString()}
                       </TableCell>
                     )}
                     {columnVisibility.actions && (
-                      <TableCell className="text-right">
+                      <TableCell className="text-right border-x">
                         <div className="flex justify-end gap-2">
                           <ViewTeacherDialog teacherId={teacher.id} />
                           <EditTeacherDialog 

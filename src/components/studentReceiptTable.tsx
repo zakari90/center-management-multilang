@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -52,7 +53,8 @@ import {
   Calendar,
   User,
   TrendingUp,
-  Receipt as ReceiptIcon
+  Receipt as ReceiptIcon,
+  ChevronDown
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
@@ -94,6 +96,16 @@ export default function StudentReceiptTable() {
   const [studentFilter, setStudentFilter] = useState<string>('all')
   const [methodFilter, setMethodFilter] = useState<string>('all')
   const [dateFilter, setDateFilter] = useState<string>('all') // all, today, week, month
+  const [columnVisibility, setColumnVisibility] = useState({
+    receiptNumber: true,
+    student: true,
+    grade: true,
+    amount: true,
+    method: true,
+    date: true,
+    description: true,
+    actions: true,
+  })
 
   const fetchData = useCallback(async () => {
     try {
@@ -475,6 +487,83 @@ export default function StudentReceiptTable() {
         </Button>
       </div>
     )}
+    
+    {/* Column Visibility Dropdown */}
+    <div className="mt-4 flex justify-end">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="default">
+            Columns <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.receiptNumber}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, receiptNumber: !!value }))
+            }
+          >
+            {t("receiptNumber")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.student}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, student: !!value }))
+            }
+          >
+            {t("student")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.grade}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, grade: !!value }))
+            }
+          >
+            {t("grade")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.amount}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, amount: !!value }))
+            }
+          >
+            {t("amount")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.method}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, method: !!value }))
+            }
+          >
+            {t("method")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.date}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, date: !!value }))
+            }
+          >
+            {t("date")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.description}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, description: !!value }))
+            }
+          >
+            {t("description")}
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={columnVisibility.actions}
+            onCheckedChange={(value) =>
+              setColumnVisibility(prev => ({ ...prev, actions: !!value }))
+            }
+          >
+            {t("actions")}
+          </DropdownMenuCheckboxItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   </CardContent>
 </Card>
 
@@ -508,14 +597,14 @@ export default function StudentReceiptTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-center">{t("receiptNumber")}</TableHead>
-              <TableHead className="text-center">{t("student")}</TableHead>
-              <TableHead className="text-center">{t("grade")}</TableHead>
-              <TableHead className="text-center">{t("amount")}</TableHead>
-              <TableHead className="text-center">{t("method")}</TableHead>
-              <TableHead className="text-center">{t("date")}</TableHead>
-              <TableHead className="text-center">{t("description")}</TableHead>
-              <TableHead className="text-center">{t("actions")}</TableHead>
+              {columnVisibility.receiptNumber && <TableHead className="text-center border-x">{t("receiptNumber")}</TableHead>}
+              {columnVisibility.student && <TableHead className="text-center border-x">{t("student")}</TableHead>}
+              {columnVisibility.grade && <TableHead className="text-center border-x">{t("grade")}</TableHead>}
+              {columnVisibility.amount && <TableHead className="text-center border-x">{t("amount")}</TableHead>}
+              {columnVisibility.method && <TableHead className="text-center border-x">{t("method")}</TableHead>}
+              {columnVisibility.date && <TableHead className="text-center border-x">{t("date")}</TableHead>}
+              {columnVisibility.description && <TableHead className="text-center border-x">{t("description")}</TableHead>}
+              {columnVisibility.actions && <TableHead className="text-center border-x">{t("actions")}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
