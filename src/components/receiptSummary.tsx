@@ -1,15 +1,15 @@
 // components/ReceiptsSummary.tsx
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslations } from 'next-intl'
-import { ModalLink } from '@/components/modal-link'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/authContext'
 import { receiptActions } from '@/lib/dexie/dexieActions'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
+import AddStudentPaymentDialog from '@/components/AddStudentPaymentDialog'
+import AddTeacherPaymentDialog from '@/components/AddTeacherPaymentDialog'
 
 interface ReceiptStats {
   totalReceipts: number
@@ -118,13 +118,9 @@ export default function ReceiptsSummary() {
         </div>
       </CardContent>
 
-      <CardFooter className="flex flex-col md:flex-row gap-3 border-t pt-4">
-        <Button asChild className="flex-1 bg-primary hover:bg-primary/45">
-          <ModalLink href="/manager/receipts/create">{t('studentPayment')}</ModalLink>
-        </Button>
-        <Button asChild className="flex-1 bg-orange-600 hover:bg-orange-700">
-          <ModalLink href="/manager/receipts/create-teacher-payment">{t('teacherPayment')}</ModalLink>
-        </Button>
+      <CardFooter className="flex flex-row gap-1 border-t pt-2">
+        <AddStudentPaymentDialog onPaymentCreated={fetchStats} />
+        <AddTeacherPaymentDialog onPaymentCreated={fetchStats} />
       </CardFooter>
     </Card>
   )
