@@ -1,6 +1,6 @@
 "use client"
 
-import { Loader2, Search, Users, GraduationCap, DollarSign } from "lucide-react"
+import { Loader2, Search, Users, GraduationCap, DollarSign, ChevronDown } from "lucide-react"
 import { useTranslations } from "next-intl"
 import ViewStudentDialog from "@/components/ViewStudentDialog"
 import ViewStudentCardDialog from "@/components/ViewStudentCardDialog"
@@ -8,6 +8,12 @@ import EditStudentDialog from "@/components/EditStudentDialog"
 import { useEffect, useState, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -54,6 +60,14 @@ export default function StudentsTable() {
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
+  const [columnVisibility, setColumnVisibility] = useState({
+    name: true,
+    contact: true,
+    parent: true,
+    subjects: true,
+    monthlyFee: true,
+    actions: true,
+  })
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -223,6 +237,63 @@ export default function StudentsTable() {
               ))}
             </SelectContent>
           </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="default">
+                Columns <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.name}
+                onCheckedChange={(value) =>
+                  setColumnVisibility(prev => ({ ...prev, name: !!value }))
+                }
+              >
+                {t("name")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.contact}
+                onCheckedChange={(value) =>
+                  setColumnVisibility(prev => ({ ...prev, contact: !!value }))
+                }
+              >
+                {t("contact")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.parent}
+                onCheckedChange={(value) =>
+                  setColumnVisibility(prev => ({ ...prev, parent: !!value }))
+                }
+              >
+                {t("parent")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.subjects}
+                onCheckedChange={(value) =>
+                  setColumnVisibility(prev => ({ ...prev, subjects: !!value }))
+                }
+              >
+                {t("subjects")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.monthlyFee}
+                onCheckedChange={(value) =>
+                  setColumnVisibility(prev => ({ ...prev, monthlyFee: !!value }))
+                }
+              >
+                {t("monthlyFee")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.actions}
+                onCheckedChange={(value) =>
+                  setColumnVisibility(prev => ({ ...prev, actions: !!value }))
+                }
+              >
+                {t("actions")}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -270,24 +341,36 @@ export default function StudentsTable() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  {t("name")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  {t("contact")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  {t("parent")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  {t("subjects")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                  {t("monthlyFee")}
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">
-                  {t("actions")}
-                </th>
+                {columnVisibility.name && (
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    {t("name")}
+                  </th>
+                )}
+                {columnVisibility.contact && (
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    {t("contact")}
+                  </th>
+                )}
+                {columnVisibility.parent && (
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    {t("parent")}
+                  </th>
+                )}
+                {columnVisibility.subjects && (
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    {t("subjects")}
+                  </th>
+                )}
+                {columnVisibility.monthlyFee && (
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    {t("monthlyFee")}
+                  </th>
+                )}
+                {columnVisibility.actions && (
+                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    {t("actions")}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -300,46 +383,58 @@ export default function StudentsTable() {
               ) : (
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarFallback className="bg-green-100 text-green-600">
-                            {student.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="text-sm font-medium">{student.name}</div>
-                          {student.grade && (
-                            <div className="text-sm text-muted-foreground">{student.grade}</div>
-                          )}
+                    {columnVisibility.name && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-4">
+                          <Avatar>
+                            <AvatarFallback className="bg-green-100 text-green-600">
+                              {student.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="text-sm font-medium">{student.name}</div>
+                            {student.grade && (
+                              <div className="text-sm text-muted-foreground">{student.grade}</div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">{student.email || "-"}</div>
-                      <div className="text-sm text-muted-foreground">{student.phone || "-"}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">{student.parentName || "-"}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {student.parentPhone || "-"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="secondary">
-                        {student.studentSubjects?.length || 0} {t("subjects")}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium">MAD {getTotalRevenue(student).toFixed(2)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex gap-1 justify-end">
-                        <ViewStudentDialog studentId={student.id} />
-                        <ViewStudentCardDialog studentId={student.id} />
-                        <EditStudentDialog studentId={student.id} onStudentUpdated={fetchStudents} />
-                      </div>
-                    </td>
+                      </td>
+                    )}
+                    {columnVisibility.contact && (
+                      <td className="px-6 py-4">
+                        <div className="text-sm">{student.email || "-"}</div>
+                        <div className="text-sm text-muted-foreground">{student.phone || "-"}</div>
+                      </td>
+                    )}
+                    {columnVisibility.parent && (
+                      <td className="px-6 py-4">
+                        <div className="text-sm">{student.parentName || "-"}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {student.parentPhone || "-"}
+                        </div>
+                      </td>
+                    )}
+                    {columnVisibility.subjects && (
+                      <td className="px-6 py-4">
+                        <Badge variant="secondary">
+                          {student.studentSubjects?.length || 0} {t("subjects")}
+                        </Badge>
+                      </td>
+                    )}
+                    {columnVisibility.monthlyFee && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium">MAD {getTotalRevenue(student).toFixed(2)}</div>
+                      </td>
+                    )}
+                    {columnVisibility.actions && (
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex gap-1 justify-end">
+                          <ViewStudentDialog studentId={student.id} />
+                          <ViewStudentCardDialog studentId={student.id} />
+                          <EditStudentDialog studentId={student.id} onStudentUpdated={fetchStudents} />
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

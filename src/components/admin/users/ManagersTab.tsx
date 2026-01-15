@@ -30,13 +30,13 @@ export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('user')}</TableHead>
-            <TableHead>{t('role')}</TableHead>
-            <TableHead>{t('managedCenters')}</TableHead>
-            <TableHead>{t('students')}</TableHead>
-            <TableHead>{t('teachers')}</TableHead>
-            <TableHead>{t('created')}</TableHead>
-            <TableHead className="text-right">{t('actions')}</TableHead>
+            <TableHead className="text-center">{t('user')}</TableHead>
+            <TableHead className="text-center">{t('role')}</TableHead>
+            <TableHead className="text-center">{t('managedCenters')}</TableHead>
+            <TableHead className="text-center">{t('students')}</TableHead>
+            <TableHead className="text-center">{t('teachers')}</TableHead>
+            <TableHead className="text-center">{t('created')}</TableHead>
+            <TableHead className="text-center">{t('actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

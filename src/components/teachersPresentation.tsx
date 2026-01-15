@@ -10,6 +10,13 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Table,
   TableBody,
@@ -25,7 +32,7 @@ import { EntitySyncControls } from '@/components/EntitySyncControls'
 import ViewTeacherDialog from '@/components/ViewTeacherDialog'
 import { useAuth } from '@/context/authContext'
 import { subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dexie/dexieActions'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -59,6 +66,14 @@ export default function TeachersTable() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [columnVisibility, setColumnVisibility] = useState({
+    teacher: true,
+    contact: true,
+    subjects: true,
+    schedule: true,
+    joined: true,
+    actions: true,
+  })
 
   const fetchTeachers = useCallback(async () => {
     try {
@@ -235,12 +250,72 @@ export default function TeachersTable() {
             </CardDescription>
           </div>
 
-          {/* Search Input */}
-          <Input
-            placeholder={t('searchPlaceholder')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          {/* Search Input & Column Visibility */}
+          <div className="flex gap-2 lg:w-2/3">
+            <Input
+              placeholder={t('searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="default">
+                  Columns <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuCheckboxItem
+                  checked={columnVisibility.teacher}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({ ...prev, teacher: !!value }))
+                  }
+                >
+                  {t('teacher')}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={columnVisibility.contact}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({ ...prev, contact: !!value }))
+                  }
+                >
+                  {t('contact')}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={columnVisibility.subjects}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({ ...prev, subjects: !!value }))
+                  }
+                >
+                  {t('subjects')}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={columnVisibility.schedule}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({ ...prev, schedule: !!value }))
+                  }
+                >
+                  {t('schedule')}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={columnVisibility.joined}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({ ...prev, joined: !!value }))
+                  }
+                >
+                  {t('joined')}
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={columnVisibility.actions}
+                  onCheckedChange={(value) =>
+                    setColumnVisibility(prev => ({ ...prev, actions: !!value }))
+                  }
+                >
+                  {t('actions')}
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -252,76 +327,89 @@ export default function TeachersTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('teacher')}</TableHead>
-                  <TableHead>{t('contact')}</TableHead>
-                  <TableHead>{t('subjects')}</TableHead>
-                  <TableHead>{t('schedule')}</TableHead>
-                  <TableHead>{t('joined')}</TableHead>
-                  <TableHead className="text-right">{t('actions')}</TableHead>
+                  {columnVisibility.teacher && <TableHead className="text-center">{t('teacher')}</TableHead>}
+                  {columnVisibility.contact && <TableHead className="text-center">{t('contact')}</TableHead>}
+                  {columnVisibility.subjects && <TableHead className="text-center">{t('subjects')}</TableHead>}
+                  {columnVisibility.schedule && <TableHead className="text-center">{t('schedule')}</TableHead>}
+                  {columnVisibility.joined && <TableHead className="text-center">{t('joined')}</TableHead>}
+                  {columnVisibility.actions && <TableHead className="text-center">{t('actions')}</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTeachers.map((teacher) => (
                   <TableRow key={teacher.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
-                          {teacher.name.charAt(0).toUpperCase()}
+                    {columnVisibility.teacher && (
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
+                            {teacher.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium">{teacher.name}</p>
+                            {teacher.address && (
+                              <p className="text-sm text-muted-foreground">{teacher.address}</p>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{teacher.name}</p>
-                          {teacher.address && (
-                            <p className="text-sm text-muted-foreground">{teacher.address}</p>
-                          )}
+                      </TableCell>
+                    )}
+                    {columnVisibility.contact && (
+                      <TableCell>
+                        <p>{teacher.email || '-'}</p>
+                        <p className="text-sm text-muted-foreground">{teacher.phone || '-'}</p>
+                      </TableCell>
+                    )}
+                    {columnVisibility.subjects && (
+                      <TableCell>
+                        {teacher.teacherSubjects.length === 0 ? (
+                          <span className="text-sm text-muted-foreground italic">
+                            {t('noSubjectsAssigned')}
+                          </span>
+                        ) : (
+                          <div className="space-y-1">
+                            {teacher.teacherSubjects.slice(0, 2).map(ts => (
+                              <div key={ts.id} className="flex items-center gap-2">
+                                <span className="inline-flex px-2 py-1 rounded-md bg-primary/10 text-xs text-primary">
+                                  {ts.subject.name} ({ts.subject.grade})
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {ts.percentage ? `${ts.percentage}%` : `$${ts.hourlyRate}/hr`}
+                                </span>
+                              </div>
+                            ))}
+                            {teacher.teacherSubjects.length > 2 && (
+                              <p className="text-xs text-muted-foreground">
+                                {t('moreSubjects', {
+                                  count: teacher.teacherSubjects.length - 2,
+                                })}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </TableCell>
+                    )}
+                    {columnVisibility.schedule && (
+                      <TableCell>{getAvailableDays(teacher.weeklySchedule)}</TableCell>
+                    )}
+                    {columnVisibility.joined && (
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(teacher.createdAt).toLocaleDateString()}
+                      </TableCell>
+                    )}
+                    {columnVisibility.actions && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <ViewTeacherDialog teacherId={teacher.id} />
+                          <EditTeacherDialog 
+                            teacherId={teacher.id} 
+                            onTeacherUpdated={fetchTeachers} 
+                          />
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p>{teacher.email || '-'}</p>
-                      <p className="text-sm text-muted-foreground">{teacher.phone || '-'}</p>
-                    </TableCell>
-                    <TableCell>
-                      {teacher.teacherSubjects.length === 0 ? (
-                        <span className="text-sm text-muted-foreground italic">
-                          {t('noSubjectsAssigned')}
-                        </span>
-                      ) : (
-                        <div className="space-y-1">
-                          {teacher.teacherSubjects.slice(0, 2).map(ts => (
-                            <div key={ts.id} className="flex items-center gap-2">
-                              <span className="inline-flex px-2 py-1 rounded-md bg-primary/10 text-xs text-primary">
-                                {ts.subject.name} ({ts.subject.grade})
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {ts.percentage ? `${ts.percentage}%` : `$${ts.hourlyRate}/hr`}
-                              </span>
-                            </div>
-                          ))}
-                          {teacher.teacherSubjects.length > 2 && (
-                            <p className="text-xs text-muted-foreground">
-                              {t('moreSubjects', {
-                                count: teacher.teacherSubjects.length - 2,
-                              })}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>{getAvailableDays(teacher.weeklySchedule)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(teacher.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <ViewTeacherDialog teacherId={teacher.id} />
-                        <EditTeacherDialog 
-                          teacherId={teacher.id} 
-                          onTeacherUpdated={fetchTeachers} 
-                        />
-                      </div>
-                    </TableCell>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
           )}

@@ -68,15 +68,15 @@ export function StudentsTab({ students, onDelete }: StudentsTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('student')}</TableHead>
-                <TableHead>{t('contact')}</TableHead>
-                <TableHead>{t('parent')}</TableHead>
-                <TableHead>{t('grade')}</TableHead>
-                <TableHead>{t('manager')}</TableHead>
-                <TableHead>{t('subjects')}</TableHead>
-                <TableHead>{t('receipts')}</TableHead>
-                <TableHead>{t('enrolled')}</TableHead>
-                <TableHead className="text-right">{t('actions')}</TableHead>
+                <TableHead className="text-center">{t('student')}</TableHead>
+                <TableHead className="text-center">{t('contact')}</TableHead>
+                <TableHead className="text-center">{t('parent')}</TableHead>
+                <TableHead className="text-center">{t('grade')}</TableHead>
+                <TableHead className="text-center">{t('manager')}</TableHead>
+                <TableHead className="text-center">{t('subjects')}</TableHead>
+                <TableHead className="text-center">{t('receipts')}</TableHead>
+                <TableHead className="text-center">{t('enrolled')}</TableHead>
+                <TableHead className="text-center">{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

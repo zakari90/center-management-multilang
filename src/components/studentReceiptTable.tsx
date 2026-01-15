@@ -508,14 +508,14 @@ export default function StudentReceiptTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("receiptNumber")}</TableHead>
-              <TableHead>{t("student")}</TableHead>
-              <TableHead>{t("grade")}</TableHead>
-              <TableHead>{t("amount")}</TableHead>
-              <TableHead>{t("method")}</TableHead>
-              <TableHead>{t("date")}</TableHead>
-              <TableHead>{t("description")}</TableHead>
-              <TableHead className="text-right">{t("actions")}</TableHead>
+              <TableHead className="text-center">{t("receiptNumber")}</TableHead>
+              <TableHead className="text-center">{t("student")}</TableHead>
+              <TableHead className="text-center">{t("grade")}</TableHead>
+              <TableHead className="text-center">{t("amount")}</TableHead>
+              <TableHead className="text-center">{t("method")}</TableHead>
+              <TableHead className="text-center">{t("date")}</TableHead>
+              <TableHead className="text-center">{t("description")}</TableHead>
+              <TableHead className="text-center">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
