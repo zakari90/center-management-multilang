@@ -470,7 +470,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
           {t("studentPayment") || "Student Payment"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[90vw] md:max-w-6xl max-h-[85dvh] flex flex-col">
+      <DialogContent className="w-[95vw] max-w-6xl max-h-[85dvh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("subtitle")}</DialogDescription>
@@ -741,7 +741,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex justify-end gap-4 mt-4 border-t pt-4 sticky bottom-0 bg-background">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-4 mt-4 border-t pt-4 sticky bottom-0 bg-background">
               <Button
                 type="button"
                 variant="outline"

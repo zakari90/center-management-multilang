@@ -334,7 +334,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
           {t('teacherPayment') || 'Teacher Payment'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[90vw] md:max-w-4xl max-h-[85dvh] flex flex-col">
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[85dvh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>
@@ -489,7 +489,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
               <>
                 <Separator />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="paymentMethod">{t('paymentmethod')}</Label>
                     <Select
@@ -574,7 +574,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
             )}
             </div>
 
-            <div className="flex justify-end gap-4 mt-4 border-t pt-4 sticky bottom-0 bg-background">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-4 mt-4 border-t pt-4 sticky bottom-0 bg-background">
             <Button
               type="button"
               variant="outline"

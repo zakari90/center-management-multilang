@@ -52,7 +52,7 @@ export function UserDialogs({
     <>
       {/* Add Manager Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('addNewManager')}</DialogTitle>
           </DialogHeader>
@@ -111,7 +111,7 @@ export function UserDialogs({
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t('editUser')}</DialogTitle>
             <DialogDescription>

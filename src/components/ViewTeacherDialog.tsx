@@ -151,7 +151,7 @@ export default function ViewTeacherDialog({ teacherId, trigger }: ViewTeacherDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{teacher?.name || t("teacherDetails")}</DialogTitle>
         </DialogHeader>
@@ -172,7 +172,7 @@ export default function ViewTeacherDialog({ teacherId, trigger }: ViewTeacherDia
                 <CardTitle className="text-lg">{t("overview")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">{t("email")}</p>
                     <p className="font-medium">{teacher.email || "—"}</p>

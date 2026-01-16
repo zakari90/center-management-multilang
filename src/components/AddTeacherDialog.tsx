@@ -91,7 +91,7 @@ const SubjectCompensationCard = ({
               <SelectContent position="popper" sideOffset={5}>
                 {availableSubjects.map((subject) => (
                   <SelectItem key={subject.id} value={subject.id} className="text-sm">
-                    <span className="truncate">{subject.name} ({subject.grade}) - MAD {subject.price}</span>
+                    <span className="truncate max-w-[200px] sm:max-w-[300px] inline-block">{subject.name} ({subject.grade}) - MAD {subject.price}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -373,7 +373,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           {tTable("addTeacher")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("subtitle") || tTable("subtitle")}</DialogDescription>
@@ -550,7 +550,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"

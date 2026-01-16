@@ -112,7 +112,7 @@ export function OrphanedRecordsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-orange-500" />
@@ -197,7 +197,7 @@ export function OrphanedRecordsDialog({
           </Alert>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}

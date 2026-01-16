@@ -163,7 +163,7 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[650px] h-auto">
+      <DialogContent className="w-[95vw] max-w-[650px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             {student && (
@@ -199,7 +199,7 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">{t("contactInfo")}</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4 text-sm">
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <span>{student.email || "—"}</span>
@@ -220,7 +220,7 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
                     {t("parentInfo")}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4 text-sm">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">{t("name")}</p>
                     <p className="font-medium">{student.parentName || "—"}</p>

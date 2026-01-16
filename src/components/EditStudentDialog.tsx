@@ -381,7 +381,7 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             {formData.name && (
@@ -415,7 +415,7 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{t("studentInfo")}</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="name" className="text-sm">{t("fullName")}</Label>
                     <Input
@@ -469,7 +469,7 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{t("parentInfo")}</CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="parentName" className="text-sm">{t("parentName")}</Label>
                     <Input

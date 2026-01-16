@@ -312,7 +312,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           {tTable("addStudent")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{tTable("subtitle")}</DialogDescription>
@@ -328,7 +328,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           {/* Student Info */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-muted-foreground">{t("studentInfotitle")}</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="name" className="text-sm">
                   {t("studentInfofullName")} <span className="text-destructive">*</span>
@@ -418,7 +418,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                 {selectedGrade && (
                   <div>
                     <Label className="text-xs mb-2 block">{t("enrollmentstep2title")}</Label>
-                    <div className="grid grid-cols-2 gap-2 max-h-[120px] overflow-y-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
                       {subjectsForGrade.map((subject) => (
                         <Button
                           key={subject.id}
@@ -432,8 +432,8 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                           className="h-auto py-2 px-3 justify-start text-left text-xs"
                           size="sm"
                         >
-                          <div className="w-full">
-                            <div className="font-medium">{subject.name}</div>
+                          <div className="w-full min-w-0">
+                            <div className="font-medium truncate">{subject.name}</div>
                             <div className="text-xs opacity-70">MAD {subject.price}</div>
                             {subject.teacherSubjects.length === 0 && (
                               <div className="text-xs text-destructive mt-1">{t("enrollmentnoTeachersAssigned")}</div>
@@ -518,7 +518,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"

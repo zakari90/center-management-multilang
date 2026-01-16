@@ -290,7 +290,7 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
           {tReceipts("studentPayment")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("subtitle")}</DialogDescription>
@@ -424,7 +424,7 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
           {/* Payment Details */}
           {formData.selectedSubjects.length > 0 && (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-sm">{t("paymentMethod")}</Label>
                   <Select
@@ -494,7 +494,7 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"

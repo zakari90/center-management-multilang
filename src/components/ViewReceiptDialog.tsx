@@ -160,7 +160,7 @@ export default function ViewReceiptDialog({ receiptId, trigger }: ViewReceiptDia
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] h-auto">
+      <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>{t("receiptDetails")}</span>
