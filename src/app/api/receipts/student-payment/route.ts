@@ -22,10 +22,7 @@ export async function POST(req: NextRequest) {
     const studentSubjects = await db.studentSubject.findMany({
       where: {
         studentId,
-        subjectId: { in: subjectIds },
-        student: {
-          managerId: session.user.id
-        }
+        subjectId: { in: subjectIds }
       },
       include: {
         subject: true

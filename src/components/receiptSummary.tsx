@@ -38,17 +38,15 @@ export default function ReceiptsSummary() {
       // ✅ Fetch from localDB instead of API
       const receipts = await receiptActions.getAll()
 
-      // Filter by manager and status (exclude deleted items)
-      const managerReceipts = receipts.filter(r => 
-        r.managerId === user.id && r.status !== '0'
-      )
+      // Filter by status only (exclude deleted items) - all users see all data
+      const activeReceipts = receipts.filter(r => r.status !== '0')
 
       // Calculate date range for this month
       const now = new Date()
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
       // Calculate stats
-      const stats = managerReceipts.reduce((acc, receipt) => {
+      const stats = activeReceipts.reduce((acc, receipt) => {
         acc.totalReceipts++
         acc.totalRevenue += receipt.amount
 

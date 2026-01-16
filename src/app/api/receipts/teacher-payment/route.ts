@@ -28,10 +28,7 @@ export async function POST(req: NextRequest) {
     const teacherSubjects = await db.teacherSubject.findMany({
       where: {
         teacherId,
-        subjectId: { in: subjectIds },
-        teacher: {
-          managerId: session.user.id
-        }
+        subjectId: { in: subjectIds }
       },
       include: {
         subject: {

@@ -126,21 +126,20 @@ export default function StudentReceiptTable() {
         studentActions.getAll()
       ])
 
-      // ✅ Filter receipts by managerId, type, and status
-      const managerStudentReceipts = allReceipts
+      // ✅ Filter receipts by type and status (all users can see all data)
+      const studentReceipts = allReceipts
         .filter(r => 
-          r.managerId === user.id && 
           r.type === ReceiptType.STUDENT_PAYMENT && 
           r.status !== '0'
         )
 
-      // ✅ Filter students by managerId and status
-      const managerStudents = allStudents
-        .filter(s => s.managerId === user.id && s.status !== '0')
+      // ✅ Filter students by status only (all users can see all data)
+      const activeStudents = allStudents
+        .filter(s => s.status !== '0')
 
       // ✅ Build receipts with student data
-      const receiptsWithStudents: Receipt[] = managerStudentReceipts.map(receipt => {
-        const student = managerStudents.find(s => s.id === receipt.studentId)
+      const receiptsWithStudents: Receipt[] = studentReceipts.map(receipt => {
+        const student = activeStudents.find(s => s.id === receipt.studentId)
         return {
           id: receipt.id,
           receiptNumber: receipt.receiptNumber,
@@ -164,7 +163,7 @@ export default function StudentReceiptTable() {
       })
 
       // ✅ Build students list for filter
-      const studentsList: Student[] = managerStudents.map(s => ({
+      const studentsList: Student[] = activeStudents.map(s => ({
         id: s.id,
         name: s.name,
         grade: s.grade ?? null,

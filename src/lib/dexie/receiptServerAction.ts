@@ -44,70 +44,29 @@ function transformServerReceipt(serverReceipt: any): Receipt {
 }
 
 const ServerActionReceipts = {
-  // ✅ Save receipt to server
+  // ✅ Save receipt to server using direct amount (no subjectIds lookup needed)
   async SaveToServer(receipt: Receipt) {
     try {
-      if (receipt.type === ReceiptType.STUDENT_PAYMENT && receipt.studentId) {
-        // Fetch subjectIds from studentSubjects
-        const studentSubjects = await studentSubjectActions.getAll();
-        const relevantSubjects = studentSubjects.filter(
-          ss => ss.studentId === receipt.studentId && ss.status !== '0'
-        );
-        const subjectIds = relevantSubjects.map(ss => ss.subjectId);
+      const response = await fetch(api_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          studentId: receipt.studentId || null,
+          teacherId: receipt.teacherId || null,
+          amount: receipt.amount,
+          type: receipt.type,
+          paymentMethod: receipt.paymentMethod,
+          description: receipt.description,
+          date: new Date(receipt.date).toISOString().split('T')[0],
+        }),
+      });
 
-        if (subjectIds.length === 0) {
-          throw new Error("No subjects found for student payment");
-        }
-
-        const response = await fetch(studentPaymentUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            studentId: receipt.studentId,
-            subjectIds: subjectIds,
-            paymentMethod: receipt.paymentMethod,
-            description: receipt.description,
-            date: new Date(receipt.date).toISOString().split('T')[0],
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
-        }
-        return response.json();
-      } else if (receipt.type === ReceiptType.TEACHER_PAYMENT && receipt.teacherId) {
-        // Fetch subjectIds from teacherSubjects
-        const teacherSubjects = await teacherSubjectActions.getAll();
-        const relevantSubjects = teacherSubjects.filter(
-          ts => ts.teacherId === receipt.teacherId && ts.status !== '0'
-        );
-        const subjectIds = relevantSubjects.map(ts => ts.subjectId);
-
-        if (subjectIds.length === 0) {
-          throw new Error("No subjects found for teacher payment");
-        }
-
-        const response = await fetch(teacherPaymentUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            teacherId: receipt.teacherId,
-            subjectIds: subjectIds,
-            paymentMethod: receipt.paymentMethod,
-            description: receipt.description,
-            date: new Date(receipt.date).toISOString().split('T')[0],
-          }),
-        });
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
-        }
-        return response.json();
-      } else {
-        throw new Error("Invalid receipt type or missing required fields");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
       }
+      return response.json();
     } catch (e) {
       console.error("Error saving receipt to server:", e);
       return null;
