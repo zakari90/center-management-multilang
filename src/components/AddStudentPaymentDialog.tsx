@@ -470,7 +470,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
           {t("studentPayment") || "Student Payment"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] lg:w-[80vw] lg:h-[80dvh] max-w-7xl max-h-[90dvh] flex flex-col">
+      <DialogContent className="bg-red-500 w-[95vw] lg:w-[80vw] lg:h-[80dvh] max-w-7xl max-h-[90dvh] flex flex-col ">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("subtitle")}</DialogDescription>
