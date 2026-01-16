@@ -430,7 +430,7 @@ export function ResponsiveFormActions({
 interface ResponsiveFormGroupProps {
   children: ReactNode
   className?: string
-  ?: 1 | 2 | 3 | 4
+  columns?: 1 | 2 | 3 | 4
   gap?: 'sm' | 'md' | 'lg'
   responsive?: boolean
 }
@@ -451,7 +451,7 @@ const groupGapClasses = {
 export function ResponsiveFormGroup({
   children,
   className,
-   = 1,
+  columns = 1,
   gap = 'md',
   responsive = true
 }: ResponsiveFormGroupProps) {
@@ -459,7 +459,7 @@ export function ResponsiveFormGroup({
     <div
       className={cn(
         'grid',
-        responsive ? groupClasses[] : `grid-cols-${}`,
+        responsive ? groupClasses[columns] : `grid-cols-${columns}`,
         groupGapClasses[gap],
         className
       )}
