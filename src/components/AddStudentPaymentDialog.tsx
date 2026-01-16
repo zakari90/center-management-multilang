@@ -606,7 +606,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                         <AlertDescription>{t("noSubjects")}</AlertDescription>
                       </Alert>
                     ) : selectedStudent ? (
-                      <div className="space-y-2">
+                      <div className="space-y-2 max-h-48 sm:max-h-64 lg:max-h-96 overflow-y-auto">
                         {selectedStudent.studentSubjects.map((ss) => (
                           <Card
                             key={ss.id}
@@ -617,7 +617,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                                 : "hover:border-gray-400"
                             }`}
                           >
-                            <CardContent className="p-4 flex justify-between items-center">
+                            <CardContent className="p-3 sm:p-4 flex justify-between items-center">
                               <div className="flex items-center gap-3">
                                 <input
                                   type="checkbox"
