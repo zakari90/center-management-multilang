@@ -146,36 +146,31 @@ export default function PWAUpdateHandler() {
     <>
       {/* Install Prompt */}
       {deferredPrompt && !isInstalled && (
-        <Card className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-72 z-50 border-primary bg-background shadow-lg">
-          <CardContent className="pt-0 pb-3">
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleInstall}
-                disabled={isUpdating}
-                size="sm"
-                className="flex-1"
-              >
-                {isUpdating ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  </>
-                ) : (
-                  <>
-              <Download className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setDeferredPrompt(null)}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-1.5 bg-background/95 backdrop-blur border rounded-full shadow-lg px-1.5 py-1">
+          <Button
+            onClick={handleInstall}
+            disabled={isUpdating}
+            size="sm"
+            className="rounded-full h-8 px-3 text-xs"
+          >
+            {isUpdating ? (
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                {t('installApp')}
+              </>
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setDeferredPrompt(null)}
+            className="h-7 w-7 rounded-full"
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       )}
 
       {/* Update Available */}
