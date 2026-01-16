@@ -25,7 +25,7 @@ interface ResponsiveTableColumn<T> {
 
 interface ResponsiveTableProps<T> {
   data: T[]
-  : ResponsiveTableColumn<T>[]
+  columns: ResponsiveTableColumn<T>[]
   className?: string
   loading?: boolean
   emptyMessage?: string
@@ -48,7 +48,7 @@ type SortDirection = 'asc' | 'desc' | null
 
 export function ResponsiveTable<T extends Record<string, any>>({
   data,
-  ,
+  columns,
   className,
   loading = false,
   emptyMessage = 'No data available',
@@ -80,7 +80,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
     // Apply search filter
     if (searchTerm) {
       result = result.filter(row =>
-        .some(column => {
+        columns.some(column => {
           const value = getNestedValue(row, column.key as string)
           return String(value).toLowerCase().includes(searchTerm.toLowerCase())
         })
@@ -98,7 +98,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
     })
 
     return result
-  }, [data, searchTerm, filters, ])
+  }, [data, searchTerm, filters, columns])
 
   // Sort data
   const sortedData = useMemo(() => {
@@ -144,8 +144,8 @@ export function ResponsiveTable<T extends Record<string, any>>({
     return path.split('.').reduce((current, key) => current?.[key], obj)
   }
 
-  const getVisible = () => {
-    return 
+  const getVisibleColumns = () => {
+    return columns
       .filter(column => column.responsive !== false)
       .sort((a, b) => (a.priority || 0) - (b.priority || 0))
   }
@@ -161,13 +161,13 @@ export function ResponsiveTable<T extends Record<string, any>>({
   }
 
   const renderMobileCard = (row: T, index: number) => {
-    const visible = getVisible().slice(0, 3) // Show only first 3  on mobile
+    const visibleColumns = getVisibleColumns().slice(0, 3) // Show only first 3 columns on mobile
 
     return (
       <Card key={index} className="mb-4">
         <CardContent className="p-4">
           <div className="space-y-2">
-            {visible.map((column) => (
+            {visibleColumns.map((column) => (
               <div key={String(column.key)} className="flex justify-between">
                 <span className="font-medium text-muted-foreground">{column.title}:</span>
                 <span className="text-right">{renderCell(column, row, index)}</span>
@@ -185,12 +185,12 @@ export function ResponsiveTable<T extends Record<string, any>>({
   }
 
   const renderMobileList = (row: T, index: number) => {
-    const visible = getVisible().slice(0, 2) // Show only first 2  on mobile
+    const visibleColumns = getVisibleColumns().slice(0, 2) // Show only first 2 columns on mobile
 
     return (
       <div key={index} className="border-b border-border py-3">
         <div className="space-y-1">
-          {visible.map((column) => (
+          {visibleColumns.map((column) => (
             <div key={String(column.key)} className="flex justify-between text-sm">
               <span className="font-medium text-muted-foreground">{column.title}:</span>
               <span className="text-right">{renderCell(column, row, index)}</span>
@@ -233,7 +233,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
             )}
             {filterable && (
               <div className="flex gap-2">
-                {
+                {columns
                   .filter(col => col.filterable)
                   .map((column) => (
                     <Select
@@ -278,7 +278,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
             <Table>
               <TableHeader>
                 <TableRow>
-                  {getVisible().map((column) => (
+                  {getVisibleColumns().map((column) => (
                     <TableHead key={String(column.key)} className="whitespace-nowrap">
                       {column.title}
                     </TableHead>
@@ -293,7 +293,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
                     className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
                     onClick={() => onRowClick?.(row, index)}
                   >
-                    {getVisible().map((column) => (
+                    {getVisibleColumns().map((column) => (
                       <TableCell key={String(column.key)} className="whitespace-nowrap">
                         {renderCell(column, row, index)}
                       </TableCell>
@@ -326,7 +326,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
           <Table>
             <TableHeader>
               <TableRow>
-                {getVisible().map((column) => (
+                {getVisibleColumns().map((column) => (
                   <TableHead
                     key={String(column.key)}
                     className={cn(
@@ -369,7 +369,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={getVisible().length + (actions ? 1 : 0)} className="text-center py-8">
+                  <TableCell colSpan={getVisibleColumns().length + (actions ? 1 : 0)} className="text-center py-8">
                     {emptyMessage}
                   </TableCell>
                 </TableRow>
@@ -380,7 +380,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
                     className={onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}
                     onClick={() => onRowClick?.(row, index)}
                   >
-                    {getVisible().map((column) => (
+                    {getVisibleColumns().map((column) => (
                       <TableCell
                         key={String(column.key)}
                         className={cn(
