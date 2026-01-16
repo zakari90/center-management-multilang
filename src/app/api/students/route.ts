@@ -12,11 +12,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get students managed by this user
+    // Get all students (managers can see all data)
     const students = await db.student.findMany({
-      where: {
-        managerId: session.user.id
-      },
       include: {
         studentSubjects: {
           include: {

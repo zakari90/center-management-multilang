@@ -10,62 +10,33 @@ export async function GET() {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    let receipts
-    
-    if (session.user.role === 'MANAGER') {
-      // Manager sees only their own receipts
-      receipts = await db.receipt.findMany({
-        where: {
-          managerId: session.user.id
-        },
-        include: {
-          student: {
-            select: {
-              id: true,
-              name: true,
-              grade: true
-            }
-          },
-          teacher: {
-            select: {
-              id: true,
-              name: true
-            }
+    // All users (admin and manager) can see all receipts
+    const receipts = await db.receipt.findMany({
+      include: {
+        student: {
+          select: {
+            id: true,
+            name: true,
+            grade: true
           }
         },
-        orderBy: {
-          date: 'desc'
-        }
-      })
-    } else {
-      // Admin sees all receipts
-      receipts = await db.receipt.findMany({
-        include: {
-          student: {
-            select: {
-              id: true,
-              name: true,
-              grade: true
-            }
-          },
-          teacher: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
-          manager: {
-            select: {
-              id: true,
-              name: true
-            }
-          },
+        teacher: {
+          select: {
+            id: true,
+            name: true
+          }
         },
-        orderBy: {
-          date: 'desc'
-        }
-      })
-    }
+        manager: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+      },
+      orderBy: {
+        date: 'desc'
+      }
+    })
 
     return NextResponse.json(receipts)
   } catch (error) {

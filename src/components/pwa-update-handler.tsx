@@ -158,7 +158,6 @@ export default function PWAUpdateHandler() {
             ) : (
               <>
                 <Download className="h-3.5 w-3.5 mr-1.5" />
-                {t('installApp')}
               </>
             )}
           </Button>
