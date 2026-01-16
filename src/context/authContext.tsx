@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { saveCredentialsLocally, validateOfflineLogin, hasLocalCredentials } from '@/lib/offlineAuth';
 import { useTranslations } from 'next-intl';
 import { isOnline } from '@/lib/utils/network';
+import { localDb } from '@/lib/dexie/dbSchema';
 
 export interface User {
   id: string;
@@ -201,6 +202,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem(LAST_USER_KEY)
     } catch {}
+    
+    // Clear local Dexie database to prevent data leakage between users
+    try {
+      await Promise.all([
+        localDb.centers.clear(),
+        localDb.teachers.clear(),
+        localDb.students.clear(),
+        localDb.subjects.clear(),
+        localDb.teacherSubjects.clear(),
+        localDb.studentSubjects.clear(),
+        localDb.receipts.clear(),
+        localDb.schedules.clear(),
+        // Note: Keep localAuthUsers for offline login capability
+        // Note: Keep pushSubscriptions as they're device-specific
+      ]);
+      console.log('[AuthProvider] Local database cleared on logout');
+    } catch (e) {
+      console.warn('[AuthProvider] Failed to clear local database:', e);
+    }
+    
     window.location.href = '/';
   };
 

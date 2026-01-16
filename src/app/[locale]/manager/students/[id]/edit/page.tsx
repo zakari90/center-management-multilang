@@ -553,7 +553,7 @@ export default function EditStudentForm() {
                     name="parentName"
                     value={formData.parentName}
                     onChange={handleInputChange}
-                    placeholder="Jane Doe"
+                    placeholder="zakaria zine"
                   />
                 </div>
 
@@ -565,7 +565,7 @@ export default function EditStudentForm() {
                     name="parentPhone"
                     value={formData.parentPhone}
                     onChange={handleInputChange}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+212 6586963"
                   />
                 </div>
 

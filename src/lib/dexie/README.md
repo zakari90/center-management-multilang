@@ -67,7 +67,7 @@ import { syncPendingEntities } from '@/lib/dexie/syncWorker';
 // Save student locally (status 'w')
 const student = await saveStudentToLocalDb({
   id:"2asa5s75as4a"
-  name: 'John Doe',
+  name: 'zakaria zine',
   email: 'john@example.com',
   managerId: 'manager-id',
 });

@@ -80,7 +80,7 @@ export default function ResponsiveTest() {
           </thead>
           <tbody>
             <tr>
-              <td className="border border-gray-300 p-2">John Doe</td>
+              <td className="border border-gray-300 p-2">zakaria zine</td>
               <td className="border border-gray-300 p-2 hidden sm:table-cell">john@example.com</td>
               <td className="border border-gray-300 p-2">Admin</td>
               <td className="border border-gray-300 p-2 hidden lg:table-cell">Active</td>
