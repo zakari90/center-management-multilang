@@ -214,6 +214,10 @@ const ServerActionStudents = {
       const pendingStudents = await studentActions.getByStatus(['w', '0']);
       const pendingIds = new Set(pendingStudents.map(s => s.id));
       
+      // ✅ Also get pending studentSubjects
+      const pendingStudentSubjects = await studentSubjectActions.getByStatus(['w', '0']);
+      const pendingStudentSubjectIds = new Set(pendingStudentSubjects.map(ss => ss.id));
+      
       const syncedStudents = await studentActions.getByStatus(["1"]);
       const backup = [...syncedStudents];
       
@@ -225,6 +229,40 @@ const ServerActionStudents = {
         const transformedStudents = Array.isArray(data) 
           ? data.map((student: any) => transformServerStudent(student))
           : [];
+        
+        // ✅ Collect all studentSubjects from server response
+        const allStudentSubjects: any[] = [];
+        if (Array.isArray(data)) {
+          for (const student of data) {
+            if (student.studentSubjects && Array.isArray(student.studentSubjects)) {
+              for (const ss of student.studentSubjects) {
+                // Skip if there are pending local changes for this studentSubject
+                if (pendingStudentSubjectIds.has(ss.id)) {
+                  console.log(`[ImportFromServer] Preserved studentSubject ${ss.id} with pending local changes`);
+                  continue;
+                }
+                
+                allStudentSubjects.push({
+                  id: ss.id,
+                  studentId: ss.studentId,
+                  subjectId: ss.subjectId,
+                  teacherId: ss.teacherId,
+                  managerId: ss.managerId || student.managerId,
+                  enrolledAt: typeof ss.enrolledAt === 'string' 
+                    ? new Date(ss.enrolledAt).getTime() 
+                    : ss.enrolledAt || Date.now(),
+                  status: '1' as const,
+                  createdAt: typeof ss.createdAt === 'string'
+                    ? new Date(ss.createdAt).getTime()
+                    : ss.createdAt || Date.now(),
+                  updatedAt: typeof ss.updatedAt === 'string'
+                    ? new Date(ss.updatedAt).getTime()
+                    : ss.updatedAt || Date.now(),
+                });
+              }
+            }
+          }
+        }
         
         for (const student of transformedStudents) {
           // ✅ Skip if there are pending local changes for this student
@@ -240,9 +278,27 @@ const ServerActionStudents = {
           await studentActions.putLocal(student);
         }
         
+        // ✅ Clear synced studentSubjects for the imported students and save new ones
+        const syncedStudentSubjects = await studentSubjectActions.getByStatus(["1"]);
+        const studentIdsToImport = new Set(transformedStudents.filter(s => !pendingIds.has(s.id)).map(s => s.id));
+        
+        for (const ss of syncedStudentSubjects) {
+          // Only delete studentSubjects for students we're importing
+          if (studentIdsToImport.has(ss.studentId)) {
+            await studentSubjectActions.deleteLocal(ss.id);
+          }
+        }
+        
+        // ✅ Save all studentSubjects from server
+        for (const ss of allStudentSubjects) {
+          await studentSubjectActions.putLocal(ss);
+        }
+        
         if (pendingIds.size > 0) {
           console.log(`[ImportFromServer] Preserved ${pendingIds.size} student(s) with pending local changes`);
         }
+        
+        console.log(`[ImportFromServer] Imported ${allStudentSubjects.length} studentSubjects from server`);
         
         return { message: `Imported ${transformedStudents.length} students from server.`, count: transformedStudents.length };
       } catch (error) {
@@ -260,3 +316,4 @@ const ServerActionStudents = {
 };
 
 export default ServerActionStudents;
+

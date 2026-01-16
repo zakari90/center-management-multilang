@@ -210,6 +210,10 @@ const ServerActionTeachers = {
       const pendingTeachers = await teacherActions.getByStatus(['w', '0']);
       const pendingIds = new Set(pendingTeachers.map(t => t.id));
       
+      // ✅ Also get pending teacherSubjects
+      const pendingTeacherSubjects = await teacherSubjectActions.getByStatus(['w', '0']);
+      const pendingTeacherSubjectIds = new Set(pendingTeacherSubjects.map(ts => ts.id));
+      
       const syncedTeachers = await teacherActions.getByStatus(["1"]);
       const backup = [...syncedTeachers];
       
@@ -221,6 +225,40 @@ const ServerActionTeachers = {
         const transformedTeachers = Array.isArray(data) 
           ? data.map((teacher: any) => transformServerTeacher(teacher))
           : [];
+        
+        // ✅ Collect all teacherSubjects from server response
+        const allTeacherSubjects: any[] = [];
+        if (Array.isArray(data)) {
+          for (const teacher of data) {
+            if (teacher.teacherSubjects && Array.isArray(teacher.teacherSubjects)) {
+              for (const ts of teacher.teacherSubjects) {
+                // Skip if there are pending local changes for this teacherSubject
+                if (pendingTeacherSubjectIds.has(ts.id)) {
+                  console.log(`[ImportFromServer] Preserved teacherSubject ${ts.id} with pending local changes`);
+                  continue;
+                }
+                
+                allTeacherSubjects.push({
+                  id: ts.id,
+                  teacherId: ts.teacherId,
+                  subjectId: ts.subjectId,
+                  percentage: ts.percentage ?? null,
+                  hourlyRate: ts.hourlyRate ?? null,
+                  assignedAt: typeof ts.assignedAt === 'string' 
+                    ? new Date(ts.assignedAt).getTime() 
+                    : ts.assignedAt || Date.now(),
+                  status: '1' as const,
+                  createdAt: typeof ts.createdAt === 'string'
+                    ? new Date(ts.createdAt).getTime()
+                    : ts.createdAt || Date.now(),
+                  updatedAt: typeof ts.updatedAt === 'string'
+                    ? new Date(ts.updatedAt).getTime()
+                    : ts.updatedAt || Date.now(),
+                });
+              }
+            }
+          }
+        }
         
         for (const teacher of transformedTeachers) {
           // ✅ Skip if there are pending local changes for this teacher
@@ -236,9 +274,27 @@ const ServerActionTeachers = {
           await teacherActions.putLocal(teacher);
         }
         
+        // ✅ Clear synced teacherSubjects for the imported teachers and save new ones
+        const syncedTeacherSubjects = await teacherSubjectActions.getByStatus(["1"]);
+        const teacherIdsToImport = new Set(transformedTeachers.filter(t => !pendingIds.has(t.id)).map(t => t.id));
+        
+        for (const ts of syncedTeacherSubjects) {
+          // Only delete teacherSubjects for teachers we're importing
+          if (teacherIdsToImport.has(ts.teacherId)) {
+            await teacherSubjectActions.deleteLocal(ts.id);
+          }
+        }
+        
+        // ✅ Save all teacherSubjects from server
+        for (const ts of allTeacherSubjects) {
+          await teacherSubjectActions.putLocal(ts);
+        }
+        
         if (pendingIds.size > 0) {
           console.log(`[ImportFromServer] Preserved ${pendingIds.size} teacher(s) with pending local changes`);
         }
+        
+        console.log(`[ImportFromServer] Imported ${allTeacherSubjects.length} teacherSubjects from server`);
         
         return { message: `Imported ${transformedTeachers.length} teachers from server.`, count: transformedTeachers.length };
       } catch (error) {
@@ -256,3 +312,4 @@ const ServerActionTeachers = {
 };
 
 export default ServerActionTeachers;
+
