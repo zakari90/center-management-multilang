@@ -24,6 +24,23 @@ sw.addEventListener('unhandledrejection', (event) => {
   console.log('[SW] unhandledrejection', { reason: event && event.reason });
 });
 
+// Critical routes to pre-cache for offline support
+const PRECACHE_ROUTES = [
+  '/',
+  '/ar',
+  '/en',
+  '/ar/manager',
+  '/ar/admin',
+  '/en/manager',
+  '/ar/manager/teachers',
+  '/en/manager/teachers',
+  '/ar/manager/students',
+  '/en/manager/students',
+  '/ar/manager/receipts',
+  '/en/manager/receipts',
+  // Add more routes as needed
+];
+
 sw.addEventListener('install', (event) => {
   console.log('[SW] install');
   sw.skipWaiting();
@@ -33,8 +50,21 @@ sw.addEventListener('install', (event) => {
         const cache = await caches.open(PAGES_CACHE);
         await cache.add(OFFLINE_URL);
         console.log('[SW] cached offline.html');
+        
+        // Pre-cache critical routes
+        for (const route of PRECACHE_ROUTES) {
+          try {
+            const response = await fetch(route, { credentials: 'same-origin' });
+            if (response.ok) {
+              await cache.put(route, response.clone());
+              console.log('[SW] pre-cached:', route);
+            }
+          } catch (e) {
+            console.log('[SW] failed to pre-cache:', route, e);
+          }
+        }
       } catch (e) {
-        console.log('[SW] failed to cache offline.html', e);
+        console.log('[SW] install failed', e);
       }
     })(),
   );
