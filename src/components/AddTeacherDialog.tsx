@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { X, Plus, Loader2 } from "lucide-react"
+import { X, Plus, Loader2, ChevronLeft, ChevronRight, User, BookOpen, Calendar } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,48 @@ interface AddTeacherDialogProps {
 }
 
 // ==================== SUB-COMPONENTS ====================
+
+// Step Indicator for mobile
+const StepIndicator = ({ 
+  currentStep, 
+  totalSteps,
+  stepLabels 
+}: { 
+  currentStep: number
+  totalSteps: number
+  stepLabels: string[]
+}) => {
+  const icons = [User, BookOpen, Calendar]
+  
+  return (
+    <div className="flex items-center justify-center gap-2 py-3 md:hidden">
+      {Array.from({ length: totalSteps }, (_, i) => {
+        const Icon = icons[i]
+        const isActive = i + 1 === currentStep
+        const isCompleted = i + 1 < currentStep
+        
+        return (
+          <div key={i} className="flex items-center">
+            <div className={`
+              flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-all
+              ${isActive 
+                ? 'bg-primary text-primary-foreground scale-110' 
+                : isCompleted 
+                  ? 'bg-primary/20 text-primary' 
+                  : 'bg-muted text-muted-foreground'
+              }
+            `}>
+              <Icon className="h-4 w-4" />
+            </div>
+            {i < totalSteps - 1 && (
+              <div className={`w-8 h-0.5 mx-1 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 // Subject Compensation Card (simplified for dialog)
 const SubjectCompensationCard = ({
@@ -160,6 +202,8 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
+  const [currentStep, setCurrentStep] = useState(1)
+  const totalSteps = 3
 
   const DAYS = [
     t("monday"),
@@ -169,6 +213,12 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
     t("friday"),
     t("saturday"),
     t("sunday")
+  ]
+
+  const stepLabels = [
+    t("basicInfo"),
+    t("subjectsCompensation"),
+    t("weeklySchedule")
   ]
 
   const [formData, setFormData] = useState({
@@ -201,6 +251,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
       })))
       setTeacherSubjects([])
       setError("")
+      setCurrentStep(1)
     }
   }, [open])
 
@@ -258,6 +309,24 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
       updated[index] = { ...updated[index], [field]: value }
       return updated
     })
+  }
+
+  const nextStep = () => {
+    if (currentStep === 1 && !formData.name.trim()) {
+      setError(t("nameRequired") || "Name is required")
+      return
+    }
+    setError("")
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const prevStep = () => {
+    setError("")
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -365,6 +434,176 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
     }
   }
 
+  // Step 1: Basic Information
+  const renderStep1 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("basicInfo")}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="name" className="text-sm sr-only md:not-sr-only">
+            {t("name")} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder={t("name") + " *"}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm sr-only md:not-sr-only">{t("email")}</Label>
+          <Input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder={t("email")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">{t("phone")}</Label>
+          <Input
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder={t("phone")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="address" className="text-sm sr-only md:not-sr-only">{t("address")}</Label>
+          <Input
+            id="address"
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            placeholder={t("address")}
+            className="h-10 md:h-9"
+          />
+        </div>
+      </div>
+    </div>
+  )
+
+  // Step 2: Subjects & Compensation
+  const renderStep2 = () => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("subjectsCompensation")}</h3>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addSubject}
+          disabled={loadingSubjects || subjects.length === 0}
+          className="md:ml-auto"
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          {t("addSubject")}
+        </Button>
+      </div>
+
+      {loadingSubjects ? (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : subjects.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
+          {t("noSubjects")}
+        </p>
+      ) : teacherSubjects.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
+          {t("noSubjectsAssigned")}
+        </p>
+      ) : (
+        <div className="space-y-2 max-h-[250px] md:max-h-[200px] overflow-y-auto">
+          {teacherSubjects.map((ts, index) => (
+            <SubjectCompensationCard
+              key={index}
+              teacherSubject={ts}
+              index={index}
+              subjects={subjects}
+              assignedSubjects={teacherSubjects}
+              onUpdate={updateSubject}
+              onRemove={removeSubject}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  // Step 3: Weekly Schedule
+  const renderStep3 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("weeklySchedule")}</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {weeklySchedule.map((schedule, index) => (
+          <div
+            key={schedule.day}
+            className={`flex items-center gap-2 p-2.5 md:p-2 rounded-md border ${
+              schedule.isAvailable ? 'bg-primary/5 border-primary/20' : 'bg-muted/50'
+            }`}
+          >
+            <Checkbox
+              id={`day-${schedule.day}`}
+              checked={schedule.isAvailable}
+              onCheckedChange={(checked) => handleScheduleChange(index, "isAvailable", checked as boolean)}
+            />
+            <Label
+              htmlFor={`day-${schedule.day}`}
+              className="text-xs cursor-pointer truncate"
+            >
+              {schedule.day}
+            </Label>
+          </div>
+        ))}
+      </div>
+      
+      {/* Time inputs for selected days */}
+      {weeklySchedule.some(s => s.isAvailable) && (
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("from")}</Label>
+            <Input
+              type="time"
+              value={weeklySchedule.find(s => s.isAvailable)?.startTime || "09:00"}
+              onChange={(e) => {
+                weeklySchedule.forEach((s, i) => {
+                  if (s.isAvailable) {
+                    handleScheduleChange(i, "startTime", e.target.value)
+                  }
+                })
+              }}
+              className="h-10 md:h-9"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("to")}</Label>
+            <Input
+              type="time"
+              value={weeklySchedule.find(s => s.isAvailable)?.endTime || "17:00"}
+              onChange={(e) => {
+                weeklySchedule.forEach((s, i) => {
+                  if (s.isAvailable) {
+                    handleScheduleChange(i, "endTime", e.target.value)
+                  }
+                })
+              }}
+              className="h-10 md:h-9"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -376,8 +615,15 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
       <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle") || tTable("subtitle")}</DialogDescription>
+          <DialogDescription className="hidden md:block">{t("subtitle") || tTable("subtitle")}</DialogDescription>
         </DialogHeader>
+
+        {/* Mobile Step Indicator */}
+        <StepIndicator 
+          currentStep={currentStep} 
+          totalSteps={totalSteps} 
+          stepLabels={stepLabels}
+        />
 
         {error && (
           <Alert variant="destructive">
@@ -386,171 +632,65 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Basic Information */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">{t("basicInfo")}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-sm">
-                  {t("name")} <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder={t("name")}
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm">{t("email")}</Label>
-                <Input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder={t("email")}
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone" className="text-sm">{t("phone")}</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder={t("phone")}
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="address" className="text-sm">{t("address")}</Label>
-                <Input
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  placeholder={t("address")}
-                  className="h-9"
-                />
-              </div>
-            </div>
+          {/* Mobile: Show only current step */}
+          <div className="md:hidden">
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
           </div>
 
-          {/* Subjects & Compensation */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-muted-foreground">{t("subjectsCompensation")}</h3>
+          {/* Desktop: Show all sections */}
+          <div className="hidden md:block space-y-4">
+            {renderStep1()}
+            {renderStep2()}
+            {renderStep3()}
+          </div>
+
+          {/* Mobile Navigation Buttons */}
+          <div className="flex justify-between gap-3 pt-4 border-t md:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
+              disabled={isLoading}
+              className="flex-1"
+            >
+              {currentStep === 1 ? (
+                t("cancel")
+              ) : (
+                <>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t("previous") || "Previous"}
+                </>
+              )}
+            </Button>
+            
+            {currentStep < totalSteps ? (
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                onClick={addSubject}
-                disabled={loadingSubjects || subjects.length === 0}
+                onClick={nextStep}
+                disabled={isLoading}
+                className="flex-1"
               >
-                <Plus className="h-3 w-3 mr-1" />
-                {t("addSubject")}
+                {t("next") || "Next"}
+                <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
-            </div>
-
-            {loadingSubjects ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : subjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
-                {t("noSubjects")}
-              </p>
-            ) : teacherSubjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
-                {t("noSubjectsAssigned")}
-              </p>
             ) : (
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                {teacherSubjects.map((ts, index) => (
-                  <SubjectCompensationCard
-                    key={index}
-                    teacherSubject={ts}
-                    index={index}
-                    subjects={subjects}
-                    assignedSubjects={teacherSubjects}
-                    onUpdate={updateSubject}
-                    onRemove={removeSubject}
-                  />
-                ))}
-              </div>
+              <Button type="submit" disabled={isLoading} className="flex-1">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t("creating")}
+                  </>
+                ) : (
+                  t("createTeacher")
+                )}
+              </Button>
             )}
           </div>
 
-          {/* Weekly Schedule (Compact) */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">{t("weeklySchedule")}</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {weeklySchedule.map((schedule, index) => (
-                <div
-                  key={schedule.day}
-                  className={`flex items-center gap-2 p-2 rounded-md border ${
-                    schedule.isAvailable ? 'bg-primary/5 border-primary/20' : 'bg-muted/50'
-                  }`}
-                >
-                  <Checkbox
-                    id={`day-${schedule.day}`}
-                    checked={schedule.isAvailable}
-                    onCheckedChange={(checked) => handleScheduleChange(index, "isAvailable", checked as boolean)}
-                  />
-                  <Label
-                    htmlFor={`day-${schedule.day}`}
-                    className="text-xs cursor-pointer truncate"
-                  >
-                    {schedule.day}
-                  </Label>
-                </div>
-              ))}
-            </div>
-            
-            {/* Time inputs for selected days */}
-            {weeklySchedule.some(s => s.isAvailable) && (
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">{t("from")}</Label>
-                  <Input
-                    type="time"
-                    value={weeklySchedule.find(s => s.isAvailable)?.startTime || "09:00"}
-                    onChange={(e) => {
-                      weeklySchedule.forEach((s, i) => {
-                        if (s.isAvailable) {
-                          handleScheduleChange(i, "startTime", e.target.value)
-                        }
-                      })
-                    }}
-                    className="h-9"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">{t("to")}</Label>
-                  <Input
-                    type="time"
-                    value={weeklySchedule.find(s => s.isAvailable)?.endTime || "17:00"}
-                    onChange={(e) => {
-                      weeklySchedule.forEach((s, i) => {
-                        if (s.isAvailable) {
-                          handleScheduleChange(i, "endTime", e.target.value)
-                        }
-                      })
-                    }}
-                    className="h-9"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
+          {/* Desktop Action Buttons */}
+          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"

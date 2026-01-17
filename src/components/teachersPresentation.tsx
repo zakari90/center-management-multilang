@@ -32,7 +32,7 @@ import { EntitySyncControls } from '@/components/EntitySyncControls'
 import ViewTeacherDialog from '@/components/ViewTeacherDialog'
 import { useAuth } from '@/context/authContext'
 import { subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dexie/dexieActions'
-import { Loader2, ChevronDown } from 'lucide-react'
+import { Loader2, ChevronDown, Users, UserCheck, BookOpen } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -210,27 +210,57 @@ export default function TeachersTable() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">{t('totalTeachers')}</p>
-            <p className="text-3xl font-bold">{teachers.length}</p>
+          <CardContent className="p-3 md:pt-6 md:p-6">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                <Users className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('totalTeachers')}</p>
+                <p className="text-xl md:text-3xl font-bold">{teachers.length}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">{t('activeTeachers')}</p>
-            <p className="text-3xl font-bold text-green-600">
-              {teachers.filter(t => t.teacherSubjects.length > 0).length}
-            </p>
+          <CardContent className="p-3 md:pt-6 md:p-6">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                <UserCheck className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-green-100 shrink-0">
+                <UserCheck className="h-4 w-4 text-green-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('activeTeachers')}</p>
+                <p className="text-xl md:text-3xl font-bold text-green-600">
+                  {teachers.filter(t => t.teacherSubjects.length > 0).length}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">{t('subjectsCovered')}</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {new Set(teachers.flatMap(t => t.teacherSubjects.map(ts => ts.subject.id))).size}
-            </p>
+          <CardContent className="p-3 md:pt-6 md:p-6">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                <BookOpen className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-blue-100 shrink-0">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('subjectsCovered')}</p>
+                <p className="text-xl md:text-3xl font-bold text-blue-600">
+                  {new Set(teachers.flatMap(t => t.teacherSubjects.map(ts => ts.subject.id))).size}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

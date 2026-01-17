@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { X, Plus, Loader2, UserPlus } from "lucide-react"
+import { X, Plus, Loader2, ChevronLeft, ChevronRight, User, BookOpen, CheckCircle } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -63,6 +63,48 @@ interface AddStudentDialogProps {
   onStudentAdded?: () => void
 }
 
+// ==================== SUB-COMPONENTS ====================
+
+// Step Indicator for mobile
+const StepIndicator = ({ 
+  currentStep, 
+  totalSteps 
+}: { 
+  currentStep: number
+  totalSteps: number
+}) => {
+  const icons = [User, BookOpen, CheckCircle]
+  
+  return (
+    <div className="flex items-center justify-center gap-2 py-3 md:hidden">
+      {Array.from({ length: totalSteps }, (_, i) => {
+        const Icon = icons[i]
+        const isActive = i + 1 === currentStep
+        const isCompleted = i + 1 < currentStep
+        
+        return (
+          <div key={i} className="flex items-center">
+            <div className={`
+              flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-all
+              ${isActive 
+                ? 'bg-primary text-primary-foreground scale-110' 
+                : isCompleted 
+                  ? 'bg-primary/20 text-primary' 
+                  : 'bg-muted text-muted-foreground'
+              }
+            `}>
+              <Icon className="h-4 w-4" />
+            </div>
+            {i < totalSteps - 1 && (
+              <div className={`w-8 h-0.5 mx-1 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // ==================== MAIN COMPONENT ====================
 export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
   const t = useTranslations("CreateStudentForm")
@@ -73,6 +115,8 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
   const [error, setError] = useState("")
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
+  const [currentStep, setCurrentStep] = useState(1)
+  const totalSteps = 3
 
   // Form state
   const [formData, setFormData] = useState({
@@ -108,6 +152,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
       setSelectedTeacher("")
       setEnrolledSubjects([])
       setError("")
+      setCurrentStep(1)
     }
   }, [open])
 
@@ -215,6 +260,28 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
     setEnrolledSubjects((prev) => prev.filter((es) => !(es.subjectId === subjectId && es.teacherId === teacherId)))
   }
 
+  const nextStep = () => {
+    if (currentStep === 1 && !formData.name.trim()) {
+      setError(t("errorsrequiredName") || "Name is required")
+      return
+    }
+    if (currentStep === 2 && enrolledSubjects.length === 0) {
+      setError(t("errorsnoSubjects") || "Please add at least one subject")
+      return
+    }
+    setError("")
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1)
+    }
+  }
+
+  const prevStep = () => {
+    setError("")
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -304,6 +371,222 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
 
   const totalPrice = enrolledSubjects.reduce((total, es) => total + es.price, 0)
 
+  // Step 1: Student Info
+  const renderStep1 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("studentInfotitle")}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="name" className="text-sm sr-only md:not-sr-only">
+            {t("studentInfofullName")} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder={t("studentInfofullNamePlaceholder") + " *"}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">{t("studentInfophone")}</Label>
+          <Input
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder={t("studentInfophonePlaceholder")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="parentName" className="text-sm sr-only md:not-sr-only">{t("parentInfoname")}</Label>
+          <Input
+            id="parentName"
+            name="parentName"
+            value={formData.parentName}
+            onChange={handleInputChange}
+            placeholder={t("parentInfonamePlaceholder")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="parentPhone" className="text-sm sr-only md:not-sr-only">{t("parentInfophone")}</Label>
+          <Input
+            id="parentPhone"
+            name="parentPhone"
+            value={formData.parentPhone}
+            onChange={handleInputChange}
+            placeholder={t("parentInfophonePlaceholder")}
+            className="h-10 md:h-9"
+          />
+        </div>
+      </div>
+    </div>
+  )
+
+  // Step 2: Enrollment Flow
+  const renderStep2 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("enrollmenttitle")}</h3>
+      
+      {loadingSubjects ? (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      ) : subjects.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
+          {t("enrollmentnoSubjects")}
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {/* Select Grade */}
+          <div>
+            <Label className="text-xs mb-2 block">{t("enrollmentstep1title")}</Label>
+            <div className="flex flex-wrap gap-2">
+              {availableGrades.map((grade) => (
+                <Badge
+                  key={grade}
+                  onClick={() => {
+                    setSelectedGrade(grade)
+                    setSelectedSubject(null)
+                    setSelectedTeacher("")
+                  }}
+                  variant={selectedGrade === grade ? "default" : "outline"}
+                  className="cursor-pointer"
+                >
+                  {grade}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Select Subject */}
+          {selectedGrade && (
+            <div>
+              <Label className="text-xs mb-2 block">{t("enrollmentstep2title")}</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
+                {subjectsForGrade.map((subject) => (
+                  <Button
+                    key={subject.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSubject(subject)
+                      setSelectedTeacher("")
+                    }}
+                    disabled={subject.teacherSubjects.length === 0}
+                    variant={selectedSubject?.id === subject.id ? "default" : "outline"}
+                    className="h-auto py-2 px-3 justify-start text-left text-xs"
+                    size="sm"
+                  >
+                    <div className="w-full min-w-0">
+                      <div className="font-medium truncate">{subject.name}</div>
+                      <div className="text-xs opacity-70">MAD {subject.price}</div>
+                      {subject.teacherSubjects.length === 0 && (
+                        <div className="text-xs text-destructive mt-1">{t("enrollmentnoTeachersAssigned")}</div>
+                      )}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Select Teacher */}
+          {selectedSubject && (
+            <div>
+              <Label className="text-xs mb-2 block">
+                {t("enrollmentstep3title", { subject: selectedSubject.name })}
+              </Label>
+              <div className="space-y-2 max-h-[100px] overflow-y-auto">
+                {teachersForSubject.map((ts) => (
+                  <Button
+                    key={ts.id}
+                    type="button"
+                    onClick={() => setSelectedTeacher(ts.teacherId)}
+                    variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
+                    className="w-full h-auto py-2 justify-start text-left text-xs"
+                    size="sm"
+                  >
+                    {ts.teacher.name}
+                  </Button>
+                ))}
+              </div>
+
+              {selectedTeacher && (
+                <Button
+                  type="button"
+                  onClick={handleAddEnrollment}
+                  className="mt-2 w-full"
+                  size="sm"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  {t("enrollmentaddButton")}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Show enrolled subjects in step 2 for mobile */}
+      {enrolledSubjects.length > 0 && (
+        <div className="space-y-2 pt-3 border-t md:hidden">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">{enrolledSubjects.length} {t("enrolledSubjectstitle")}</span>
+            <span className="text-sm font-bold text-primary">MAD {totalPrice.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  // Step 3: Summary
+  const renderStep3 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("enrolledSubjectstitle")}</h3>
+      
+      {enrolledSubjects.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
+          {t("errorsnoSubjects")}
+        </p>
+      ) : (
+        <>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">{enrolledSubjects.length} subject(s)</span>
+            <span className="text-lg font-bold text-primary">MAD {totalPrice.toFixed(2)}</span>
+          </div>
+          <div className="space-y-2 max-h-[200px] md:max-h-[100px] overflow-y-auto">
+            {enrolledSubjects.map((es, index) => (
+              <Card key={index} className="bg-muted/50">
+                <CardContent className="py-2 px-3 flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium">{es.subjectName}</span>
+                    <span className="text-xs text-muted-foreground ml-2">({es.teacherName})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">MAD {es.price}</span>
+                    <Button
+                      type="button"
+                      onClick={() => handleRemoveEnrollment(es.subjectId, es.teacherId)}
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -315,8 +598,14 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
       <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{tTable("subtitle")}</DialogDescription>
+          <DialogDescription className="hidden md:block">{tTable("subtitle")}</DialogDescription>
         </DialogHeader>
+
+        {/* Mobile Step Indicator */}
+        <StepIndicator 
+          currentStep={currentStep} 
+          totalSteps={totalSteps}
+        />
 
         {error && (
           <Alert variant="destructive">
@@ -325,200 +614,65 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Student Info */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">{t("studentInfotitle")}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-sm">
-                  {t("studentInfofullName")} <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder={t("studentInfofullNamePlaceholder")}
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone" className="text-sm">{t("studentInfophone")}</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder={t("studentInfophonePlaceholder")}
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="parentName" className="text-sm">{t("parentInfoname")}</Label>
-                <Input
-                  id="parentName"
-                  name="parentName"
-                  value={formData.parentName}
-                  onChange={handleInputChange}
-                  placeholder={t("parentInfonamePlaceholder")}
-                  className="h-9"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="parentPhone" className="text-sm">{t("parentInfophone")}</Label>
-                <Input
-                  id="parentPhone"
-                  name="parentPhone"
-                  value={formData.parentPhone}
-                  onChange={handleInputChange}
-                  placeholder={t("parentInfophonePlaceholder")}
-                  className="h-9"
-                />
-              </div>
-            </div>
+          {/* Mobile: Show only current step */}
+          <div className="md:hidden">
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
           </div>
 
-          {/* Enrollment Flow */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-muted-foreground">{t("enrollmenttitle")}</h3>
+          {/* Desktop: Show all sections */}
+          <div className="hidden md:block space-y-4">
+            {renderStep1()}
+            {renderStep2()}
+            {enrolledSubjects.length > 0 && renderStep3()}
+          </div>
+
+          {/* Mobile Navigation Buttons */}
+          <div className="flex justify-between gap-3 pt-4 border-t md:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
+              disabled={isLoading}
+              className="flex-1"
+            >
+              {currentStep === 1 ? (
+                t("actionscancel")
+              ) : (
+                <>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t("previous") || "Previous"}
+                </>
+              )}
+            </Button>
             
-            {loadingSubjects ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : subjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
-                {t("enrollmentnoSubjects")}
-              </p>
+            {currentStep < totalSteps ? (
+              <Button
+                type="button"
+                onClick={nextStep}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {t("next") || "Next"}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
             ) : (
-              <div className="space-y-3">
-                {/* Step 1: Select Grade */}
-                <div>
-                  <Label className="text-xs mb-2 block">{t("enrollmentstep1title")}</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {availableGrades.map((grade) => (
-                      <Badge
-                        key={grade}
-                        onClick={() => {
-                          setSelectedGrade(grade)
-                          setSelectedSubject(null)
-                          setSelectedTeacher("")
-                        }}
-                        variant={selectedGrade === grade ? "default" : "outline"}
-                        className="cursor-pointer"
-                      >
-                        {grade}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Step 2: Select Subject */}
-                {selectedGrade && (
-                  <div>
-                    <Label className="text-xs mb-2 block">{t("enrollmentstep2title")}</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
-                      {subjectsForGrade.map((subject) => (
-                        <Button
-                          key={subject.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedSubject(subject)
-                            setSelectedTeacher("")
-                          }}
-                          disabled={subject.teacherSubjects.length === 0}
-                          variant={selectedSubject?.id === subject.id ? "default" : "outline"}
-                          className="h-auto py-2 px-3 justify-start text-left text-xs"
-                          size="sm"
-                        >
-                          <div className="w-full min-w-0">
-                            <div className="font-medium truncate">{subject.name}</div>
-                            <div className="text-xs opacity-70">MAD {subject.price}</div>
-                            {subject.teacherSubjects.length === 0 && (
-                              <div className="text-xs text-destructive mt-1">{t("enrollmentnoTeachersAssigned")}</div>
-                            )}
-                          </div>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+              <Button type="submit" disabled={isLoading || enrolledSubjects.length === 0} className="flex-1">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t("actionscreating")}
+                  </>
+                ) : (
+                  t("actionssubmit")
                 )}
-
-                {/* Step 3: Select Teacher */}
-                {selectedSubject && (
-                  <div>
-                    <Label className="text-xs mb-2 block">
-                      {t("enrollmentstep3title", { subject: selectedSubject.name })}
-                    </Label>
-                    <div className="space-y-2 max-h-[100px] overflow-y-auto">
-                      {teachersForSubject.map((ts) => (
-                        <Button
-                          key={ts.id}
-                          type="button"
-                          onClick={() => setSelectedTeacher(ts.teacherId)}
-                          variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
-                          className="w-full h-auto py-2 justify-start text-left text-xs"
-                          size="sm"
-                        >
-                          {ts.teacher.name}
-                        </Button>
-                      ))}
-                    </div>
-
-                    {selectedTeacher && (
-                      <Button
-                        type="button"
-                        onClick={handleAddEnrollment}
-                        className="mt-2 w-full"
-                        size="sm"
-                      >
-                        <Plus className="h-3 w-3 mr-1" />
-                        {t("enrollmentaddButton")}
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
+              </Button>
             )}
           </div>
 
-          {/* Enrolled Subjects List */}
-          {enrolledSubjects.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-semibold text-muted-foreground">{t("enrolledSubjectstitle")}</h3>
-                <span className="text-sm font-bold text-primary">MAD {totalPrice.toFixed(2)}</span>
-              </div>
-              <div className="space-y-1 max-h-[100px] overflow-y-auto">
-                {enrolledSubjects.map((es, index) => (
-                  <Card key={index} className="bg-muted/50">
-                    <CardContent className="py-2 px-3 flex justify-between items-center">
-                      <div>
-                        <span className="text-sm font-medium">{es.subjectName}</span>
-                        <span className="text-xs text-muted-foreground ml-2">({es.teacherName})</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">MAD {es.price}</span>
-                        <Button
-                          type="button"
-                          onClick={() => handleRemoveEnrollment(es.subjectId, es.teacherId)}
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 text-destructive hover:text-destructive"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
+          {/* Desktop Action Buttons */}
+          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
               variant="outline"
