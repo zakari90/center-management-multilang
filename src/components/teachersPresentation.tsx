@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -9,14 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -26,13 +26,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 // import axios from 'axios' // ✅ Commented out - using local DB
-import AddTeacherDialog from '@/components/AddTeacherDialog'
 import EditTeacherDialog from '@/components/EditTeacherDialog'
 import { EntitySyncControls } from '@/components/EntitySyncControls'
+import { StatCard } from '@/components/ui/stat-card'
 import ViewTeacherDialog from '@/components/ViewTeacherDialog'
 import { useAuth } from '@/context/authContext'
 import { subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dexie/dexieActions'
-import { Loader2, ChevronDown, Users, UserCheck, BookOpen } from 'lucide-react'
+import { BookOpen, ChevronDown, Loader2, UserCheck, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import AddStudentPaymentDialog from './AddStudentPaymentDialog'
@@ -188,8 +188,8 @@ export default function TeachersTable() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Header Section */}
+    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+  {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
@@ -211,59 +211,27 @@ export default function TeachersTable() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 md:gap-4">
-        <Card>
-          <CardContent className="p-3 md:pt-6 md:p-6">
-                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('totalTeachers')}</p>
-
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                <Users className="h-4 w-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xl md:text-3xl font-bold">{teachers.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 md:pt-6 md:p-6">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                <UserCheck className="h-5 w-5 text-green-600" />
-              </div>
-              <div className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-green-100 shrink-0">
-                <UserCheck className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('activeTeachers')}</p>
-                <p className="text-xl md:text-3xl font-bold text-green-600">
-                  {teachers.filter(t => t.teacherSubjects.length > 0).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 md:pt-6 md:p-6">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                <BookOpen className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="flex md:hidden h-8 w-8 items-center justify-center rounded-full bg-blue-100 shrink-0">
-                <BookOpen className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('subjectsCovered')}</p>
-                <p className="text-xl md:text-3xl font-bold text-blue-600">
-                  {new Set(teachers.flatMap(t => t.teacherSubjects.map(ts => ts.subject.id))).size}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={t('totalTeachers')}
+          value={teachers.length}
+          icon={Users}
+        />
+        <StatCard
+          title={t('activeTeachers')}
+          value={teachers.filter(t => t.teacherSubjects.length > 0).length}
+          icon={UserCheck}
+          iconBgColor="bg-green-100"
+          iconColor="text-green-600"
+          valueColor="text-green-600"
+        />
+        <StatCard
+          title={t('subjectsCovered')}
+          value={new Set(teachers.flatMap(t => t.teacherSubjects.map(ts => ts.subject.id))).size}
+          icon={BookOpen}
+          iconBgColor="bg-blue-100"
+          iconColor="text-blue-600"
+          valueColor="text-blue-600"
+        />
       </div>
 
       {/* Table Section */}
