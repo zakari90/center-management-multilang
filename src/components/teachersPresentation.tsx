@@ -35,6 +35,7 @@ import { subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dex
 import { Loader2, ChevronDown, Users, UserCheck, BookOpen } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
+import AddStudentPaymentDialog from './AddStudentPaymentDialog'
 
 interface TeacherSubject {
   id: string
@@ -194,7 +195,8 @@ export default function TeachersTable() {
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <div className="flex flex-col items-stretch gap-2 md:items-end">
-          <AddTeacherDialog onTeacherAdded={fetchTeachers} />
+          {/* <AddTeacherDialog onTeacherAdded={fetchTeachers} /> */}
+        <AddStudentPaymentDialog onPaymentCreated={fetchTeachers} />          
           {/* Per-entity sync controls for teachers */}
           <EntitySyncControls entity="teachers" />
         </div>
