@@ -66,23 +66,18 @@ export default function QuickActions() {
                 <AddStudentDialog/>
               </div>
             </div>
-
-                        <div >
+            <div >
               <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center`}>
-                <div>
-                  +
-                  <ReceiptText className="h-6 w-6" />
-                  </div>  
+                  +<ReceiptText className="h-6 w-6" />
                 </div>
                 <AddStudentPaymentDialog/>
               </div>
             </div>
-              <div >
+            <div >
               <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center`}>
-                -
-                  <ReceiptText className="h-6 w-6" />
+                - <ReceiptText className="h-6 w-6" />
                 </div>
                 <AddTeacherPaymentDialog/>
               </div>

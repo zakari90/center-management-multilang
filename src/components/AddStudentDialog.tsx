@@ -1,21 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import type React from "react"
-import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
-import { studentActions, studentSubjectActions, subjectActions, teacherSubjectActions, teacherActions } from "@/lib/dexie/dexieActions"
-import ServerActionStudents from "@/lib/dexie/studentServerAction"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
-import { useAuth } from "@/context/authContext"
-import { isOnline } from "@/lib/utils/network"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { X, Plus, Loader2, ChevronLeft, ChevronRight, User, BookOpen, CheckCircle } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -24,6 +13,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useAuth } from "@/context/authContext"
+import { studentActions, studentSubjectActions, subjectActions, teacherActions, teacherSubjectActions } from "@/lib/dexie/dexieActions"
+import ServerActionStudents from "@/lib/dexie/studentServerAction"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { isOnline } from "@/lib/utils/network"
+import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, Loader2, User, X } from "lucide-react"
+import { useTranslations } from "next-intl"
+import type React from "react"
+import { useEffect, useState } from "react"
 
 // ==================== INTERFACES ====================
 interface Teacher {
@@ -522,7 +522,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                   className="mt-2 w-full"
                   size="sm"
                 >
-                  <Plus className="h-3 w-3 mr-1" />
+                  {/* <Plus className="h-3 w-3 mr-1" /> */}
                   {t("enrollmentaddButton")}
                 </Button>
               )}
@@ -591,7 +591,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          {/* <Plus className="h-4 w-4 mr-2" /> */}
           {tTable("addStudent")}
         </Button>
       </DialogTrigger>
