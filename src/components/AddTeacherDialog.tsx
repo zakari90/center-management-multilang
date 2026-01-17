@@ -1,22 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import type React from "react"
-import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
-import { teacherActions, teacherSubjectActions, subjectActions } from "@/lib/dexie/dexieActions"
-import ServerActionTeachers from "@/lib/dexie/teacherServerAction"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
-import { useAuth } from "@/context/authContext"
-import { isOnline } from "@/lib/utils/network"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { X, Plus, Loader2, ChevronLeft, ChevronRight, User, BookOpen, Calendar } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -25,6 +13,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuth } from "@/context/authContext"
+import { subjectActions, teacherActions, teacherSubjectActions } from "@/lib/dexie/dexieActions"
+import ServerActionTeachers from "@/lib/dexie/teacherServerAction"
+import { generateObjectId } from "@/lib/utils/generateObjectId"
+import { isOnline } from "@/lib/utils/network"
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, Loader2, User, X } from "lucide-react"
+import { useTranslations } from "next-intl"
+import type React from "react"
+import { useEffect, useState } from "react"
 
 // ==================== INTERFACES ====================
 interface DaySchedule {
@@ -504,7 +504,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           disabled={loadingSubjects || subjects.length === 0}
           className="md:ml-auto"
         >
-          <Plus className="h-3 w-3 mr-1" />
+          {/* <Plus className="h-3 w-3 mr-1" /> */}
           {t("addSubject")}
         </Button>
       </div>
@@ -608,7 +608,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          {/* <Plus className="h-4 w-4 mr-2" /> */}
           {tTable("addTeacher")}
         </Button>
       </DialogTrigger>
