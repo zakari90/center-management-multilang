@@ -2,45 +2,97 @@
 
 import { useIsOnline } from "@/hooks/useOnlineStatus";
 import { useTranslations } from "next-intl";
-import { AlertCircle, WifiOff } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { WifiOff, X, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect } from "react";
 
 /**
- * Persistent offline notification banner
- * Displays at the top of the page when user is offline
+ * Compact dropdown-style offline notification
+ * Appears in the top-right corner with expandable details
  */
 export default function OfflineNotificationBanner() {
   const isOnline = useIsOnline();
   const t = useTranslations("OfflineBanner");
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Don't render anything if online
-  if (isOnline) {
+  // Reset dismissed state when coming back online then going offline again
+  useEffect(() => {
+    if (isOnline) {
+      setIsDismissed(false);
+      setIsExpanded(false);
+    }
+  }, [isOnline]);
+
+  // Auto-show again after 30 seconds if still offline
+  useEffect(() => {
+    if (isDismissed && !isOnline) {
+      const timer = setTimeout(() => {
+        setIsDismissed(false);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [isDismissed, isOnline]);
+
+  // Don't render anything if online or dismissed
+  if (isOnline || isDismissed) {
     return null;
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top duration-300">
-      <Alert 
-        variant="destructive" 
-        className="rounded-none border-x-0 border-t-0 bg-orange-600 dark:bg-orange-700 text-white border-orange-700 dark:border-orange-800"
-      >
-        <div className="flex items-start gap-3 px-2 sm:px-4">
-          <WifiOff className="h-5 w-5 mt-0.5 flex-shrink-0" />
+    <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
+      <div className="bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/25 dark:shadow-orange-700/30 backdrop-blur-sm border border-orange-400/20 overflow-hidden min-w-[280px] max-w-[320px]">
+        {/* Header - Always visible */}
+        <div className="flex items-center gap-3 p-3">
+          <div className="flex items-center justify-center w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm">
+            <WifiOff className="h-5 w-5" />
+          </div>
           <div className="flex-1 min-w-0">
-            <AlertDescription className="text-white font-medium text-sm sm:text-base">
-              <span className="flex items-center gap-2 mb-1">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span className="font-semibold">
-                  {t("title") || "You're offline"}
-                </span>
-              </span>
-              <p className="text-xs sm:text-sm text-white/90 leading-relaxed">
-                {t("message") || "Data is saved locally, and you can keep working. Do not clear your browser cache."}
+            <p className="font-semibold text-sm">
+              {t("title") || "You're offline"}
+            </p>
+            {!isExpanded && (
+              <p className="text-xs text-white/80 truncate">
+                {t("shortMessage") || "Working in offline mode"}
               </p>
-            </AlertDescription>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </button>
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+              aria-label="Dismiss"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
-      </Alert>
+
+        {/* Expanded content */}
+        {isExpanded && (
+          <div className="px-3 pb-3 animate-in slide-in-from-top-1 duration-200">
+            <div className="bg-white/10 rounded-lg p-3 text-xs text-white/90 leading-relaxed">
+              {t("message") || "Your data is saved locally and you can keep working. Changes will sync when you're back online. Do not clear your browser cache."}
+            </div>
+            <div className="flex items-center gap-2 mt-2 text-xs text-white/70">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-orange-300 animate-pulse" />
+                {t("waitingForConnection") || "Waiting for connection..."}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

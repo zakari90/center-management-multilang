@@ -36,6 +36,7 @@ import { Loader2, ChevronDown, Users, UserCheck, BookOpen } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import AddStudentPaymentDialog from './AddStudentPaymentDialog'
+import PageHeader from './page-header'
 
 interface TeacherSubject {
   id: string
@@ -190,10 +191,7 @@ export default function TeachersTable() {
     <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-muted-foreground">{t('subtitle')}</p>
-        </div>
+        <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
           {/* <AddTeacherDialog onTeacherAdded={fetchTeachers} /> */}
         <AddStudentPaymentDialog onPaymentCreated={fetchTeachers} />          
@@ -215,6 +213,8 @@ export default function TeachersTable() {
       <div className="grid grid-cols-3 gap-2 md:gap-4">
         <Card>
           <CardContent className="p-3 md:pt-6 md:p-6">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('totalTeachers')}</p>
+
             <div className="flex items-center gap-2 md:gap-3">
               <div className="hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />
@@ -223,7 +223,6 @@ export default function TeachersTable() {
                 <Users className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs md:text-sm text-muted-foreground truncate">{t('totalTeachers')}</p>
                 <p className="text-xl md:text-3xl font-bold">{teachers.length}</p>
               </div>
             </div>
