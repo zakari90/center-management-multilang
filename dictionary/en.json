@@ -21,7 +21,8 @@
 }
 , "OfflineBanner": {
   "title": "You're offline",
-  "message": "Data is saved locally, and you can keep working. Do not clear your browser cache."
+  "message": "Data is saved locally, and you can keep working. Do not clear your browser cache.",
+  "waitingForConnection": "Waiting for connection..."
 }
   ,
   "deleteALL": {

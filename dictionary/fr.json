@@ -22,7 +22,8 @@
   }
 , "OfflineBanner": {
   "title": "Vous êtes hors ligne",
-  "message": "Les données sont enregistrées localement et vous pouvez continuer à travailler. Ne videz pas le cache de votre navigateur."
+  "message": "Les données sont enregistrées localement et vous pouvez continuer à travailler. Ne videz pas le cache de votre navigateur.",
+  "waitingForConnection": "En attente de connexion..."
 }
 ,
 "deleteALL": {
