@@ -386,7 +386,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button className="flex-1 bg-primary hover:bg-primary/45">{t("studentPayment") || "Student Payment"}</Button></DialogTrigger>
-      <DialogContent className=" flex flex-col">
+      <DialogContent className="w-auto flex flex-col overflow-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">{t("subtitle")}</DialogDescription>
@@ -404,7 +404,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                   {currentStep === 3 && renderStep3()}
                 </div>
                 {/* Desktop: Show all sections */}
-                <div className="hidden md:grid md:grid-cols-3 gap-3">
+                <div className="hidden md:flex gap-3">
                   <div className="flex space-y-6">
                     <Card>
                       <CardHeader>
