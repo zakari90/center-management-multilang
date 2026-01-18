@@ -23,6 +23,7 @@ import { studentActions, studentSubjectActions, subjectActions, teacherActions }
 import { useAuth } from "@/context/authContext"
 import { EntitySyncControls } from "@/components/EntitySyncControls"
 import AddStudentDialog from "@/components/AddStudentDialog"
+import PageHeader from "./page-header"
 
 export interface StudentSubject {
   id: string
@@ -201,12 +202,10 @@ export default function StudentsTable() {
       )}
 
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-3xl font-bold">{t("title")}</h1>
-            <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
-          </div>
+      <div >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <PageHeader title={t('title')} subtitle={t('subtitle')} />
+
           <div className="flex flex-col items-end gap-2">
             <AddStudentDialog onStudentAdded={fetchStudents} />
             <EntitySyncControls entity="students" />

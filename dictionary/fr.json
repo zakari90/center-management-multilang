@@ -406,8 +406,8 @@
     "filters": "Filtres",
     "searchPlaceholder": "Recherche par numéro de reçu, personne ou description...",
     "allTypes": "Tous les types",
-    "studentPayments": "Paiements des élèves",
-    "teacherPayments": "Paiements des enseignants",
+    "studentPayments": "Paiements élèves",
+    "teacherPayments": "Paiements enseignants",
     "allMethods": "Toutes les méthodes",
     "allReceipts": "Tous les reçus",
     "showing": "Affichage",
@@ -806,11 +806,11 @@
     "description": "Tâches courantes et raccourcis",
     "actions": {
       "addStudent": {
-        "title": "Ajouter un élève",
+        "title": "Ajout d'élève ",
         "description": "Inscrire un nouvel élève"
       },
       "addTeacher": {
-        "title": "Ajouter un enseignant",
+        "title": "Ajout d'enseignant ",
         "description": "Enregistrer un nouvel enseignant"
       },
       "newReceipt": {
@@ -1188,8 +1188,8 @@
     "filters": "Filtres",
     "searchPlaceholder": "Rechercher par numéro de reçu, personne ou description...",
     "allTypes": "Tous les types",
-    "studentPayments": "Paiements des élèves",
-    "teacherPayments": "Paiements des enseignants",
+    "studentPayments": "Paiements élèves",
+    "teacherPayments": "Paiements enseignants",
     "allMethods": "Toutes les méthodes",
     "allReceipts": "Tous les reçus",
     "showing": "Affichage",

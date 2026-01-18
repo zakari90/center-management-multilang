@@ -22,7 +22,6 @@ return (
       {/* First Login Import Prompt */}
       {/* <FirstLoginImport /> */}
       <ReceiptsSummary/>
-
       <ManagerStatsCards />
       <QuickActions />
       <ManagerRevenueChart />
