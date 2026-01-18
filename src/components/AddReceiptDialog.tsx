@@ -71,6 +71,7 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
   const [loadingStudents, setLoadingStudents] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+  const isSubmittingRef = useRef(false)
 
   const [formData, setFormData] = useState<FormData>({
     paymentMethod: "CASH",
@@ -185,12 +186,21 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
+      
+      // Immediate guard - prevents double submission
+      if (isSubmittingRef.current) {
+        console.warn('Receipt submission already in progress')
+        return
+      }
+      
+      isSubmittingRef.current = true
       setIsLoading(true)
       setError("")
 
       if (!user) {
         setError("Unauthorized: Please log in again")
         setIsLoading(false)
+        isSubmittingRef.current = false
         return
       }
 
@@ -266,6 +276,7 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
           setError("Something went wrong")
         }
       } finally {
+        isSubmittingRef.current = false
         setIsLoading(false)
       }
     },

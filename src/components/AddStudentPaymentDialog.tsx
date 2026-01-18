@@ -161,6 +161,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
   const [qrError, setQrError] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 3
+  const isSubmittingRef = useRef(false)
 
   const [formData, setFormData] = useState<FormData>({
     paymentMethod: "CASH",
@@ -231,8 +232,18 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
   const prevStep = () => { setError(""); if (currentStep > 1) setCurrentStep(currentStep - 1) }
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault(); setIsLoading(true); setError("")
-    if (!user) { setError("Unauthorized"); setIsLoading(false); return }
+    e.preventDefault(); 
+    
+    // Immediate guard - prevents double submission
+    if (isSubmittingRef.current) {
+      console.warn('Student payment submission already in progress')
+      return
+    }
+    
+    isSubmittingRef.current = true
+    setIsLoading(true); 
+    setError("")
+    if (!user) { setError("Unauthorized"); setIsLoading(false); isSubmittingRef.current = false; return }
     try {
       if (!selectedStudent) throw new Error("Please select a student")
       if (formData.selectedSubjects.length === 0) throw new Error("Please select at least one subject")
@@ -247,7 +258,10 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
       await receiptActions.putLocal(newReceipt)
       if (isOnline()) { try { const result = await ServerActionReceipts.SaveToServer(newReceipt as any); if (result) await receiptActions.markSynced(receiptId) } catch (syncError) { console.error("Sync failed:", syncError) } }
       setOpen(false); onPaymentCreated?.()
-    } catch (err) { if (err instanceof Error) setError(err.message); else setError("Something went wrong") } finally { setIsLoading(false) }
+    } catch (err) { if (err instanceof Error) setError(err.message); else setError("Something went wrong") } finally { 
+      isSubmittingRef.current = false
+      setIsLoading(false) 
+    }
   }, [selectedStudent, formData, user, onPaymentCreated])
 
   const filteredStudents = students.filter((student) => {
