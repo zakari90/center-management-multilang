@@ -44,3 +44,25 @@ export function getChartColorArray(): string[] {
   ]
 }
 
+/**
+ * Get semantic colors from theme (success, warning, info, destructive)
+ */
+export function getSemanticColors() {
+  return {
+    success: getThemeColor('--success'),
+    warning: getThemeColor('--warning'),
+    info: getThemeColor('--info'),
+    destructive: getThemeColor('--destructive'),
+  }
+}
+
+/**
+ * Get entity-specific colors from theme (student, teacher, payment)
+ */
+export function getEntityColors() {
+  return {
+    student: getThemeColor('--student'),
+    teacher: getThemeColor('--teacher'),
+    payment: getThemeColor('--payment'),
+  }
+}
