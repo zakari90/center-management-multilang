@@ -16,13 +16,34 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Check if user exists first
+    const existingUser = await db.user.findUnique({
+      where: { id }
+    })
+
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: 'User not found' }, 
+        { status: 404 }
+      )
+    }
+
     await db.user.delete({
       where: { id }
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting user:', error)
+    
+    // Handle Prisma P2025 error (record not found)
+    if (error?.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'User not found or already deleted' }, 
+        { status: 404 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Failed to delete user' }, 
       { status: 500 }

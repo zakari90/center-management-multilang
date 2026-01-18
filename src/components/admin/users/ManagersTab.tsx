@@ -32,10 +32,10 @@ export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
           <TableRow>
             <TableHead className="text-center">{t('user')}</TableHead>
             <TableHead className="text-center">{t('role')}</TableHead>
-            <TableHead className="text-center">{t('managedCenters')}</TableHead>
+            <TableHead className="text-center">{t('managedCentersHeader')}</TableHead>
             <TableHead className="text-center">{t('students')}</TableHead>
             <TableHead className="text-center">{t('teachers')}</TableHead>
-            <TableHead className="text-center">{t('created')}</TableHead>
+            <TableHead className="text-center">{t('createdDate')}</TableHead>
             <TableHead className="text-center">{t('actions')}</TableHead>
           </TableRow>
         </TableHeader>
