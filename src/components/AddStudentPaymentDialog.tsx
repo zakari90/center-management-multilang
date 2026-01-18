@@ -386,7 +386,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button className="flex-1 bg-primary hover:bg-primary/45">{t("studentPayment") || "Student Payment"}</Button></DialogTrigger>
-      <DialogContent className="w-auto flex flex-col overflow-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-[900px] lg:max-w-[1000px] w-full flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">{t("subtitle")}</DialogDescription>
@@ -403,48 +403,52 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                   {currentStep === 2 && renderStep2()}
                   {currentStep === 3 && renderStep3()}
                 </div>
-                {/* Desktop: Show all sections */}
-                <div className="hidden md:flex gap-3">
-                  <div className="flex space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <User className="h-5 w-5" />{t("findStudent")}
-                          </CardTitle>
-                          <CardDescription>
-                            {t("searchOrScanStudent")}
-                            </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              {renderStep1()}
-                            </CardContent>
-                    </Card>
-                    <Card className={!selectedStudent ? "opacity-60 pointer-events-none" : ""}>
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle>
-                              {t("selectSubjects")}
-                            </CardTitle>
-                            {!selectedStudent && <CardDescription className="text-xs mt-1">
-                              {t("selectStudentFirst")}</CardDescription>}
-                              </div>
-                              </div>
-                            </CardHeader>
-                            <CardContent>
-                                {renderStep2()}
-                      </CardContent></Card>
-                  </div>
-                  <div className="space-y-6">
-                    <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}><CardHeader><CardTitle>{t("paymentDetails")}</CardTitle>{formData.selectedSubjects.length === 0 && 
-                    <CardDescription className="text-xs">{t("selectSubjectsFirst")}
-                      </CardDescription>}
+                {/* Desktop: Show all sections in grid */}
+                <div className="hidden md:grid md:grid-cols-3 gap-4">
+                  {/* Column 1: Find Student */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="h-5 w-5" />{t("findStudent")}
+                      </CardTitle>
+                      <CardDescription>
+                        {t("searchOrScanStudent")}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {renderStep1()}
+                    </CardContent>
+                  </Card>
+
+                  {/* Column 2: Select Subjects */}
+                  <Card className={!selectedStudent ? "opacity-60 pointer-events-none" : ""}>
+                    <CardHeader>
+                      <CardTitle>{t("selectSubjects")}</CardTitle>
+                      {!selectedStudent && (
+                        <CardDescription className="text-xs mt-1">
+                          {t("selectStudentFirst")}
+                        </CardDescription>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      {renderStep2()}
+                    </CardContent>
+                  </Card>
+
+                  {/* Column 3: Payment Details */}
+                  <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}>
+                    <CardHeader>
+                      <CardTitle>{t("paymentDetails")}</CardTitle>
+                      {formData.selectedSubjects.length === 0 && (
+                        <CardDescription className="text-xs">
+                          {t("selectSubjectsFirst")}
+                        </CardDescription>
+                      )}
                     </CardHeader>
                     <CardContent>
                       {renderStep3()}
                     </CardContent>
-                    </Card>
-                  </div>
+                  </Card>
                 </div>
               </div>
               {/* Mobile Navigation */}

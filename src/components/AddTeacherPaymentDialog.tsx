@@ -406,7 +406,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button className="flex-1 bg-orange-600 hover:bg-orange-700">{t('teacherPayment') || 'Teacher Payment'}</Button></DialogTrigger>
 
-        <DialogContent className="max-w-[1200px] w-[95vw] bg-orange-600 h-auto flex flex-col">
+        <DialogContent className="max-w-[95vw] md:max-w-[700px] lg:max-w-[800px] w-full h-auto flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription className="hidden md:block">{t('description')}</DialogDescription>
