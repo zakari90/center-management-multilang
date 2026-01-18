@@ -386,7 +386,7 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
           )}
           
           {/* Center sync controls */}
-          <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center sm:justify-end">
+          {/* <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center sm:justify-end">
             <EntitySyncControls entity="centers" />
             <Button
               variant="outline"
@@ -406,7 +406,7 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
                 </>
               )}
             </Button>
-          </div>
+          </div> */}
         </CardHeader>
 
         <Separator className="my-2" />
