@@ -890,6 +890,8 @@
     "addYourFirstTeacher": "Ajoutez votre premier enseignant"
   },
   "CreateTeacherForm": {
+    "next": "Suivant",
+    "previous": "Précédent",
     "title": "Créer un nouvel enseignant",
     "subtitle": "Ajouter un nouvel enseignant à votre centre",
     "basicInfo": "Informations de base",
@@ -1125,7 +1127,9 @@
     "na": "S/O"
   },
   "CreateStudentForm": {
-        "hours":"heures",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "hours":"heures",
 
     "title": "Ajouter un nouvel élève",
     "errorsrequiredName": "Le nom de l'élève est obligatoire",

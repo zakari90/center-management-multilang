@@ -930,6 +930,8 @@
     "addYourFirstTeacher": "Add your first teacher"
   },
   "CreateTeacherForm": {
+    "next": "Next",
+    "previous": "Previous",
     "title": "Create New Teacher",
     "subtitle": "Add a new teacher to your center",
     "basicInfo": "Basic Information",
@@ -1174,6 +1176,8 @@
     "na": "N/A"
   },
   "CreateStudentForm": {
+    "next": "Next",
+    "previous": "Previous",
     "title": "Add New Student",
     "hours":"hours",
 
@@ -1577,6 +1581,5 @@
 "EditDialog": {
   "saveChanges": "Save Changes"
 }
-
 }
 

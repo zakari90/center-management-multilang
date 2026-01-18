@@ -882,6 +882,8 @@
     "addYourFirstTeacher": "أضف معلمك الأول"
   },
   "CreateTeacherForm": {
+    "next": "التالي",
+    "previous": "السابق",
     "title": "إنشاء معلم جديد",
     "subtitle": "إضافة معلم جديد إلى مركزك",
     "basicInfo": "معلومات أساسية",
@@ -1122,7 +1124,9 @@
     "na": "غير متاح"
   },
   "CreateStudentForm": {
-        "hours":"ساعة",
+    "next": "التالي",
+    "previous": "السابق",
+    "hours":"ساعة",
 
     "title": "إضافة طالب جديد",
     "errorsrequiredName": "اسم الطالب مطلوب",
