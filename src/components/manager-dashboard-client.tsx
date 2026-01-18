@@ -4,7 +4,7 @@
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import EnrollmentChart from "@/components/enrollement-chart";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
-import ManagerStatsCards from "@/components/managerStateCards";
+import ManagerStatsCards from "@/components/managerStateCards copy";
 import PageHeader from "@/components/page-header";
 import QuickActions from "@/components/quickActions copy";
 import ReceiptsSummary from "@/components/receiptSummary";
