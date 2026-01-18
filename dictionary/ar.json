@@ -460,6 +460,8 @@
     "errorLoadData": "فشل تحميل البيانات",
     "allUsersTitle": "جميع المستخدمين",
     "allUsersDescription": "عرض وإدارة جميع مستخدمي النظام",
+    "managedCenters": "المراكز المسيرة",
+    "created": "تاريخ الإنشاء",
     "unknownManager": "مشرف غير معروف",
     "systemUsers": "مستخدمو النظام",
     "teachers": "المعلمون",

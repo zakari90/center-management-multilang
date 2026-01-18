@@ -498,6 +498,8 @@
     "errorLoadData": "Failed to load data",
     "allUsersTitle": "All Users",
     "allUsersDescription": "View and manage all system users",
+    "managedCenters": "Managed Centers",
+    "created": "Created",
     "unknownManager": "Unknown Manager",
     "systemUsers": "System Users",
     "teachers": "Teachers",

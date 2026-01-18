@@ -470,6 +470,8 @@
     "errorLoadData": "Impossible de charger les données",
     "allUsersTitle": "Tous les utilisateurs",
     "allUsersDescription": "Voir et gérer tous les utilisateurs du système",
+    "managedCenters": "Centres Gérés",
+    "created": "Créé le",
     "unknownManager": "Gestionnaire inconnu",
     "systemUsers": "Utilisateurs du système",
     "teachers": "Enseignants",
