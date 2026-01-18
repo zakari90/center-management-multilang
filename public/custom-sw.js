@@ -29,8 +29,11 @@ const PRECACHE_ROUTES = [
   '/',
   '/ar',
   '/en',
+  '/fr',
   '/ar/manager',
   '/ar/admin',
+  '/fr/manager',
+  '/fr/admin',
   '/en/manager',
   '/ar/manager/teachers',
   '/en/manager/teachers',
@@ -38,7 +41,12 @@ const PRECACHE_ROUTES = [
   '/en/manager/students',
   '/ar/manager/receipts',
   '/en/manager/receipts',
+ '/en/admin/center',
+ '/en/admin/users',
+ '/en/admin/receipts',
+ '/en/admin/schedule'
   // Add more routes as needed
+
 ];
 
 sw.addEventListener('install', (event) => {
