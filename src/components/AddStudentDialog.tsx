@@ -595,7 +595,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           {tTable("addStudent")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-auto max-w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">{tTable("subtitle")}</DialogDescription>
