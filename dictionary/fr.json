@@ -869,7 +869,7 @@
   "TeachersTable": {
     "title": "Enseignants",
     "subtitle": "Gérer votre personnel enseignant",
-    "addTeacher": "+ Ajouter un enseignant",
+    "addTeacher": "+ Ajout enseignant",
     "error": "Quelque chose s'est mal passé",
     "totalTeachers": "Enseignants totaux",
     "activeTeachers": "Enseignants actifs",
@@ -1169,14 +1169,14 @@
     "enrolledSubjectsteacherLabel": "Enseignant",
     "enrolledSubjectsremoveTooltip": "Supprimer l'inscription",
     "actionscancel": "Annuler",
-    "actionssubmit": "Ajouter un élève",
+    "actionssubmit": "Ajout élève",
     "actionscreating": "Création en cours..."
   },
   "ReceiptsTable": {
     "title": "Reçus",
     "subtitle": "Suivi de tous les paiements et transactions",
-    "teacherPayment": "Paiement de l'enseignant",
-    "studentPayment": "Paiement de l'élève",
+    "teacherPayment": "Paiement enseignant",
+    "studentPayment": "Paiement élève",
     "errorFetchReceipts": "Impossible de récupérer les reçus",
     "totalReceipts": "Reçus totaux",
     "totalIncome": "Revenu total",

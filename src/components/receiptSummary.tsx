@@ -116,7 +116,7 @@ export default function ReceiptsSummary() {
         </div>
       </CardContent>
 
-      <CardFooter className="flex flex-row gap-1 border-t pt-2">
+      <CardFooter className="flex flex-col justify-center items-center md:flex-row gap-1 border-t pt-2">
         <AddStudentPaymentDialog onPaymentCreated={fetchStats} />
         <AddTeacherPaymentDialog onPaymentCreated={fetchStats} />
       </CardFooter>
