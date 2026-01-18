@@ -308,7 +308,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
         <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /></div>
       ) : (
         <div className="space-y-2">
-          <Label htmlFor="teacherId" className="sr-only md:not-sr-only">{t('teacherlabel')}</Label>
+          <Label htmlFor="teacherId" className="sr-only">{t('teacherlabel')}</Label>
           <Select value={formData.teacherId} onValueChange={(value) => { setFormData(prev => ({ ...prev, teacherId: value, selectedSubjects: [] })); setPaymentData(null) }}>
             <SelectTrigger className="h-10 md:h-9"><SelectValue placeholder={t('teacherplaceholder')} /></SelectTrigger>
             <SelectContent>{teachers.map(teacher => (<SelectItem key={teacher.id} value={teacher.id}>{teacher.name}</SelectItem>))}</SelectContent>
@@ -432,7 +432,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
                 {currentStep === 1 ? t('buttonscancel') : <><ChevronLeft className="h-4 w-4 mr-1" />Previous</>}
               </Button>
               {currentStep < totalSteps ? (
-                <Button type="button" onClick={nextStep} disabled={isLoading || (currentStep === 1 && !formData.teacherId) || loadingCalculation} className="flex-1 bg-orange-600 hover:bg-orange-700">Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                <Button type="button" onClick={nextStep} disabled={isLoading || (currentStep === 1 && !formData.teacherId) || loadingCalculation} className="flex-1 bg-orange-600 hover:bg-orange-700"><ChevronRight className="h-4 w-4 ml-1" /></Button>
               ) : (
                 <Button type="submit" disabled={isLoading || formData.selectedSubjects.length === 0} className="flex-1 bg-orange-600 hover:bg-orange-700">{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t('buttonscreate')}</Button>
               )}
