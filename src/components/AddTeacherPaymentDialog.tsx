@@ -2,35 +2,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { teacherActions, teacherSubjectActions, studentSubjectActions, subjectActions, receiptActions } from '@/lib/dexie/dexieActions'
-import { useAuth } from '@/context/authContext'
-import { generateObjectId } from '@/lib/utils/generateObjectId'
-import { ReceiptType } from '@/lib/dexie/dbSchema'
-import ServerActionReceipts from '@/lib/dexie/receiptServerAction'
-import { isOnline } from '@/lib/utils/network'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, AlertCircle, CheckCircle2, Users, ChevronLeft, ChevronRight, User, BookOpen, CreditCard } from 'lucide-react'
-import { useTranslations } from 'next-intl'
 import {
   Dialog,
   DialogContent,
@@ -39,6 +19,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { useAuth } from '@/context/authContext'
+import { ReceiptType } from '@/lib/dexie/dbSchema'
+import { receiptActions, studentSubjectActions, subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dexie/dexieActions'
+import ServerActionReceipts from '@/lib/dexie/receiptServerAction'
+import { generateObjectId } from '@/lib/utils/generateObjectId'
+import { isOnline } from '@/lib/utils/network'
+import { AlertCircle, BookOpen, CheckCircle2, ChevronLeft, ChevronRight, CreditCard, Loader2, User, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 interface SubjectStats {
   subjectId: string
@@ -395,7 +395,7 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button className="flex-1 bg-orange-600 hover:bg-orange-700">{t('teacherPayment') || 'Teacher Payment'}</Button></DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-4xl max-h-[85dvh] flex flex-col">
+      <DialogContent className="w-[95vw] max-w-[950px] max-h-[85dvh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription className="hidden md:block">{t('description')}</DialogDescription>

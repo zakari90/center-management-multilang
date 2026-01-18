@@ -612,7 +612,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           {tTable("addTeacher")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-[950px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">{t("subtitle") || tTable("subtitle")}</DialogDescription>
