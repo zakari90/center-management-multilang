@@ -301,7 +301,7 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
           {tReceipts("studentPayment")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[1200px] w-[95vw] max-h-[90dvh] flex flex-col">
+      <DialogContent className="bg-red-500 flex flex-col">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("subtitle")}</DialogDescription>
