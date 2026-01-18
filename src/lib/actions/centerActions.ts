@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
 import { cookies } from "next/headers";
-import { decrypt } from "@/lib/authentication";
+import { decryptServer } from "@/lib/authenticationServer";
 
 // Helper to get session in server actions
 async function getSessionInServerAction() {
@@ -11,7 +11,7 @@ async function getSessionInServerAction() {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session")?.value;
     if (!sessionCookie) return null;
-    return await decrypt(sessionCookie);
+    return await decryptServer(sessionCookie);
   } catch (error) {
     console.error("[getSessionInServerAction] Error:", error);
     return null;
