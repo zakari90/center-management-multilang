@@ -6,7 +6,7 @@ import EnrollmentChart from "@/components/enrollement-chart";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
 import ManagerStatsCards from "@/components/managerStateCards";
 import PageHeader from "@/components/page-header";
-import QuickActions from "@/components/quickActions copy";
+import QuickActions from "@/components/quickActions";
 import ReceiptsSummary from "@/components/receiptSummary";
 import TopSubjects from "@/components/top-subjects";
 import { useTranslations } from "next-intl";
