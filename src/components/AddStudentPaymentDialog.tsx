@@ -386,9 +386,9 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button className="flex-1 bg-primary hover:bg-primary/45">{t("studentPayment") || "Student Payment"}</Button></DialogTrigger>
-      <DialogContent className="flex flex-col">
+      <DialogContent className=" flex flex-col">
         <DialogHeader>
-          <DialogTitle>{t("title")}----------------------------------</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">{t("subtitle")}</DialogDescription>
         </DialogHeader>
         <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
@@ -404,13 +404,46 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                   {currentStep === 3 && renderStep3()}
                 </div>
                 {/* Desktop: Show all sections */}
-                <div className="hidden md:grid md:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 space-y-6">
-                    <Card><CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />{t("findStudent")}</CardTitle><CardDescription>{t("searchOrScanStudent")}</CardDescription></CardHeader><CardContent>{renderStep1()}</CardContent></Card>
-                    <Card className={!selectedStudent ? "opacity-60 pointer-events-none" : ""}><CardHeader><div className="flex justify-between items-start"><div><CardTitle>{t("selectSubjects")}</CardTitle>{!selectedStudent && <CardDescription className="text-xs mt-1">{t("selectStudentFirst")}</CardDescription>}</div></div></CardHeader><CardContent>{renderStep2()}</CardContent></Card>
+                <div className="hidden md:grid md:grid-cols-3 gap-3">
+                  <div className="flex space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <User className="h-5 w-5" />{t("findStudent")}
+                          </CardTitle>
+                          <CardDescription>
+                            {t("searchOrScanStudent")}
+                            </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              {renderStep1()}
+                            </CardContent>
+                    </Card>
+                    <Card className={!selectedStudent ? "opacity-60 pointer-events-none" : ""}>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle>
+                              {t("selectSubjects")}
+                            </CardTitle>
+                            {!selectedStudent && <CardDescription className="text-xs mt-1">
+                              {t("selectStudentFirst")}</CardDescription>}
+                              </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                                {renderStep2()}
+                      </CardContent></Card>
                   </div>
                   <div className="space-y-6">
-                    <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}><CardHeader><CardTitle>{t("paymentDetails")}</CardTitle>{formData.selectedSubjects.length === 0 && <CardDescription className="text-xs">{t("selectSubjectsFirst")}</CardDescription>}</CardHeader><CardContent>{renderStep3()}</CardContent></Card>
+                    <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}><CardHeader><CardTitle>{t("paymentDetails")}</CardTitle>{formData.selectedSubjects.length === 0 && 
+                    <CardDescription className="text-xs">{t("selectSubjectsFirst")}
+                      </CardDescription>}
+                    </CardHeader>
+                    <CardContent>
+                      {renderStep3()}
+                    </CardContent>
+                    </Card>
                   </div>
                 </div>
               </div>
