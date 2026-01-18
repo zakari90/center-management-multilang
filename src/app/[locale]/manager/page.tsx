@@ -6,5 +6,8 @@ export const dynamic = 'force-dynamic';
 
 export default function ManagerPage() {
   console.log('[ManagerPage] Server render', { timestamp: new Date().toISOString() });
-  return (<div><OfflineNotificationBanner/> <ManagerDashboardClient /></div>);
+  return (<div>
+    <OfflineNotificationBanner/> 
+  <ManagerDashboardClient />
+  </div>);
 }

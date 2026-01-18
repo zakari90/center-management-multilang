@@ -4,7 +4,7 @@
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import EnrollmentChart from "@/components/enrollement-chart";
 import ManagerRevenueChart from "@/components/managerrevenue-chart";
-import ManagerStatsCards from "@/components/managerStateCards copy";
+import ManagerStatsCards from "@/components/managerStateCards";
 import PageHeader from "@/components/page-header";
 import QuickActions from "@/components/quickActions copy";
 import ReceiptsSummary from "@/components/receiptSummary";
@@ -18,8 +18,7 @@ export default function ManagerDashboardClient() {
 return (
    <>
       <div className="container mx-auto p-4 sm:p-6 space-y-6">
-        <PageHeader title={t('title')} subtitle={t('subtitle')} />
-
+      <PageHeader title={t('title')} subtitle={t('subtitle')} />
       {/* First Login Import Prompt */}
       {/* <FirstLoginImport /> */}
       <ReceiptsSummary/>

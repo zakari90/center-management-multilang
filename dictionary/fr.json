@@ -620,6 +620,11 @@
   },
   "CreateStudentPaymentForm": {
     "hours":"heures",
+    "studentPayment": "Paiement de l'élève",
+    "paymentDetails": "Détails du paiement",
+    "searchOrScanStudent": "Rechercher ou scanner un élève",
+    "selectStudentFirst": "Sélectionnez d'abord un élève",
+    "selectSubjectsFirst": "Sélectionnez d'abord les matières",
     "title": "Créer un reçu de paiement d'élève",
     "subtitle": "Sélectionner un élève via la recherche ou le code QR",
     "findStudent": "Trouver un élève",
@@ -661,6 +666,7 @@
     "subtitle": "Aperçu du système"
   },
   "TeacherPayment": {
+    "teacherPayment": "Paiement de l'enseignant",
     "title": "Créer un reçu de paiement d'enseignant",
     "description": "Le paiement est calculé sur la base du prix de la matière × pourcentage × élèves inscrits",
     "errorloadTeachers": "Impossible de charger les enseignants",
