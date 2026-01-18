@@ -270,8 +270,16 @@ export async function getCentersFromDatabase() {
   try {
     const session: any = await getSessionInServerAction();
 
-    if (!session || !["ADMIN", "MANAGER"].includes(session.user.role)) {
-      throw new Error("Unauthorized");
+    // ✅ Return empty array instead of throwing error when no session
+    // This prevents SSR errors while still being secure
+    if (!session || !session.user) {
+      console.log("[CENTER_GET] No session found, returning empty array");
+      return { success: true, data: [] };
+    }
+
+    if (!["ADMIN", "MANAGER"].includes(session.user.role)) {
+      console.log("[CENTER_GET] Unauthorized role:", session.user.role);
+      return { success: true, data: [] };
     }
     
     // ✅ Filter by role - admins see their centers, managers see assigned centers
@@ -288,7 +296,8 @@ export async function getCentersFromDatabase() {
     return { success: true, data: centers };
   } catch (error: any) {
     console.error("[CENTER_GET] Error:", error);
-    throw error;
+    // Return empty array instead of throwing to prevent SSR crashes
+    return { success: false, data: [], error: error.message };
   }
 }
 
