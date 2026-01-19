@@ -331,6 +331,14 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // On mobile, if not on the final step, move to next step instead of submitting
+    // (This handles the "Enter" key on mobile keyboard)
+    if (window.innerWidth < 768 && currentStep < totalSteps) {
+      nextStep()
+      return
+    }
+
     setIsLoading(true)
     setError("")
 

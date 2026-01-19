@@ -3,13 +3,14 @@
 // Minimal custom Service Worker (no Serwist/Workbox precache)
 // Runtime caching only.
 
-const PAGES_CACHE = 'pages-v1';
-const ASSETS_CACHE = 'assets-v1';
+const SW_VERSION = 'v1.0.0'; // Increment this to force an update
+const PAGES_CACHE = `pages-${SW_VERSION}`;
+const ASSETS_CACHE = `assets-${SW_VERSION}`;
 const OFFLINE_URL = '/offline.html';
 
 const sw = self;
 
-console.log('[SW] boot', { href: sw.location && sw.location.href });
+console.log(`[SW] boot ${SW_VERSION}`, { href: sw.location && sw.location.href });
 
 sw.addEventListener('error', (event) => {
   console.log('[SW] error', {
@@ -50,7 +51,7 @@ const PRECACHE_ROUTES = [
 ];
 
 sw.addEventListener('install', (event) => {
-  console.log('[SW] install');
+  console.log('[SW] install', SW_VERSION);
   sw.skipWaiting();
   event.waitUntil(
     (async () => {
@@ -79,14 +80,29 @@ sw.addEventListener('install', (event) => {
 });
 
 sw.addEventListener('activate', (event) => {
-  console.log('[SW] activate');
+  console.log('[SW] activate', SW_VERSION);
   event.waitUntil(
     (async () => {
       try {
+        // Cache purging: Delete old caches that don't match the current version
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames
+            .filter((name) => {
+              return (name.startsWith('pages-') || name.startsWith('assets-')) && 
+                     name !== PAGES_CACHE && 
+                     name !== ASSETS_CACHE;
+            })
+            .map((name) => {
+              console.log('[SW] deleting old cache:', name);
+              return caches.delete(name);
+            })
+        );
+
         await sw.clients.claim();
         console.log('[SW] clients claimed');
       } catch (e) {
-        console.log('[SW] clients claim failed', e);
+        console.log('[SW] activation failed', e);
       }
     })(),
   );
