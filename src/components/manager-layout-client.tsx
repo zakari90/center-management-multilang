@@ -93,7 +93,7 @@ export default function ManagerLayoutClient({ children }: ManagerLayoutClientPro
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <p className="mt-4 text-muted-foreground">Redirecting...</p>
+          <p className="mt-4 text-muted-foreground">...</p>
         </div>
       </div>
     );

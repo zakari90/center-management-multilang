@@ -132,9 +132,9 @@ export default function CenterOverview() {
           <div className="text-center py-12 text-muted-foreground">
             <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>{t('noCenters')}</p>
-            <Button asChild className="mt-4">
+            {/* <Button asChild className="mt-4">
               <Link href="/admin/center">{t('createFirstCenter')}</Link>
-            </Button>
+            </Button> */}
           </div>
         ) : (
           <div className="space-y-4">

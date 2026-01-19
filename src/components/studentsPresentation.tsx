@@ -193,7 +193,7 @@ export default function StudentsTable() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-6">
       {/* Error Alert */}
       {error && (
         <Alert variant="destructive" className="mb-4">
@@ -202,15 +202,13 @@ export default function StudentsTable() {
       )}
 
       {/* Header */}
-      <div >
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <PageHeader title={t('title')} subtitle={t('subtitle')} />
-
           <div className="flex flex-col items-end gap-2">
             <AddStudentDialog onStudentAdded={fetchStudents} />
             <EntitySyncControls entity="students" />
           </div>
-        </div>
 
         {/* Search and Filter */}
         <div className="flex gap-4">
