@@ -37,6 +37,7 @@ import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 import AddStudentPaymentDialog from './AddStudentPaymentDialog'
 import PageHeader from './page-header'
+import { Alert, AlertDescription } from './ui/alert'
 
 interface TeacherSubject {
   id: string
@@ -189,6 +190,11 @@ export default function TeachersTable() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
+            {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
   {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t('title')} subtitle={t('subtitle')} />
