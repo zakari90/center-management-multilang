@@ -35,7 +35,7 @@ import { subjectActions, teacherActions, teacherSubjectActions } from '@/lib/dex
 import { BookOpen, ChevronDown, Loader2, UserCheck, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
-import AddStudentPaymentDialog from './AddStudentPaymentDialog'
+import AddTeacherDialog from './AddTeacherDialog'
 import PageHeader from './page-header'
 import { Alert, AlertDescription } from './ui/alert'
 
@@ -200,7 +200,7 @@ export default function TeachersTable() {
         <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
           {/* <AddTeacherDialog onTeacherAdded={fetchTeachers} /> */}
-        <AddStudentPaymentDialog onPaymentCreated={fetchTeachers} />          
+        <AddTeacherDialog/>        
           {/* Per-entity sync controls for teachers */}
           <EntitySyncControls entity="teachers" />
         </div>
