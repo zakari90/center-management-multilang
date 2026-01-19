@@ -200,17 +200,13 @@ export default function StudentsTable() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
-      {/* Header */}
-
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <PageHeader title={t('title')} subtitle={t('subtitle')} />
-          <div className="flex flex-col items-end gap-2">
-            <AddStudentDialog onStudentAdded={fetchStudents} />
+        <div className="flex flex-col items-stretch gap-2 md:items-end">
+            <AddStudentDialog />
             <EntitySyncControls entity="students" />
           </div>
 
-        {/* Search and Filter */}
         <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />

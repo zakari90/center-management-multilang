@@ -195,26 +195,13 @@ export default function TeachersTable() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-  {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
-          {/* <AddTeacherDialog onTeacherAdded={fetchTeachers} /> */}
         <AddTeacherDialog/>        
-          {/* Per-entity sync controls for teachers */}
           <EntitySyncControls entity="teachers" />
         </div>
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <Card className="border-destructive/40 bg-destructive/10">
-          <CardContent className="text-destructive pt-4">
-            {error}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 md:gap-4">
         <StatCard
