@@ -225,9 +225,9 @@ export const SubjectFormMultipleChoices = ({
         {/* Price and Duration */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="subjectPrice">{t('priceRequired')}</Label>
+            <Label htmlFor="multi-subjectPrice">{t('priceRequired')}</Label>
             <Input
-              id="subjectPrice"
+              id="multi-subjectPrice"
               type="number"
               step="0.01"
               value={subjectData.price}
@@ -237,9 +237,9 @@ export const SubjectFormMultipleChoices = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="subjectDuration">{t('duration')}</Label>
+            <Label htmlFor="multi-subjectDuration">{t('duration')}</Label>
             <Input
-              id="subjectDuration"
+              id="multi-subjectDuration"
               type="number"
               value={subjectData.duration}
               onChange={(e) => setSubjectData(prev => ({ ...prev, duration: e.target.value }))}

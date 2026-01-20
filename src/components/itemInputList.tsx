@@ -99,7 +99,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
             {normalizedSuggestions.map((suggestion) => {
               const isChecked = items.includes(suggestion.value)
               return (
-                <label
+                <div
                   key={suggestion.value}
                   className="flex items-center space-x-2 cursor-pointer"
                 >
@@ -110,7 +110,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
                     }
                   />
                   <span className="text-sm">{suggestion.label}</span>
-                </label>
+                </div>
               )
             })}
           </div>
