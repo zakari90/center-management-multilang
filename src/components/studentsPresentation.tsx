@@ -228,7 +228,18 @@ export default function StudentsTable() {
               ))}
             </SelectContent>
           </Select>
-          <DropdownMenu>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <StudentsStats 
+        totalStudents={totalStudents}
+        filteredCount={filteredStudents.length}
+        totalRevenue={totalRevenue}
+        averageSubjects={averageSubjects}
+      />
+<div>
+            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="default">
                  <ChevronDown className="ml-2 h-4 w-4" />
@@ -285,17 +296,7 @@ export default function StudentsTable() {
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <StudentsStats 
-        totalStudents={totalStudents}
-        filteredCount={filteredStudents.length}
-        totalRevenue={totalRevenue}
-        averageSubjects={averageSubjects}
-      />
-
+</div>
       {/* Students List - Responsive View */}
       <StudentsTableView 
         students={filteredStudents}
