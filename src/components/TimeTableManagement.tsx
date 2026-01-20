@@ -597,11 +597,11 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                               return (
                                 <div
                                   key={slot.id || idx}
-                                  className="p-2 bg-amber-200 border rounded text-xs space-y-1 group relative overflow-auto bg"
+                                  className="p-2 bg-card border-2 border-primary/20 rounded-lg text-xs space-y-2 group relative shadow-sm"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <div className="flex justify-between items-start">
-                                    <Badge variant="outline" className="text-xs ">
+                                    <Badge variant="secondary" className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary border-0">
                                       {subject?.name}
                                     </Badge>
                                     <Button
@@ -613,13 +613,13 @@ export default function TimetableManagement({ centerId }: { centerId?: string })
                                       <Trash2 className="h-3 w-3 text-destructive" />
                                     </Button>
                                   </div>
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <User className="h-3 w-3" />
-                                    <span>{teacher?.name}</span>
+                                  <div className="flex items-center gap-1.5 text-foreground">
+                                    <User className="h-3 w-3 text-muted-foreground" />
+                                    <span className="font-medium">{teacher?.name}</span>
                                   </div>
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <MapPin className="h-3 w-3" />
-                                    <span>{slot.roomId}</span>
+                                  <div className="flex items-center gap-1.5 text-foreground">
+                                    <MapPin className="h-3 w-3 text-muted-foreground" />
+                                    <span className="font-medium">{slot.roomId}</span>
                                   </div>
                                   {subject?.grade && (
                                     <Badge variant="secondary" className="text-xs">

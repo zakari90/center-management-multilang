@@ -58,12 +58,18 @@ const ServerActionSchedules = {
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        const errorMessage = errorData.error?.message || errorData.error || 'Unknown error';
+        console.error(`❌ Schedule save failed [${response.status}]:`, errorMessage, errorData);
+        throw new Error(`HTTP ${response.status}: ${errorMessage}`);
       }
-      return response.json();
+      const result = await response.json();
+      console.log('✅ Schedule saved to server:', result.id);
+      return result;
     } catch (e) {
-      console.error("Error saving schedule to server:", e);
-      return null;
+      const errorMsg = e instanceof Error ? e.message : 'Network error';
+      console.error("❌ Error saving schedule to server:", errorMsg, e);
+      // Re-throw with more context instead of returning null
+      throw new Error(`Failed to save schedule: ${errorMsg}`);
     }
   },
 
@@ -73,15 +79,21 @@ const ServerActionSchedules = {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          // Add body if needed, currently DeleteFromServer implementation assumed URL params? 
-          // Previous impl used URL param.
-        })
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || 'Unknown error';
+        console.error(`❌ Schedule delete failed [${response.status}]:`, errorMessage);
+        throw new Error(`HTTP ${response.status}: ${errorMessage}`);
+      }
+      
+      console.log('✅ Schedule deleted from server:', id);
       return response;
     } catch (e) {
-      console.error("Error deleting schedule from server:", e);
-      return null;
+      const errorMsg = e instanceof Error ? e.message : 'Network error';
+      console.error("❌ Error deleting schedule from server:", errorMsg, e);
+      throw new Error(`Failed to delete schedule: ${errorMsg}`);
     }
   },
 
@@ -101,19 +113,20 @@ const ServerActionSchedules = {
         try {
           if (schedule.status === "0") {
             // Pending deletion
-            const result = await ServerActionSchedules.DeleteFromServer(schedule.id);
-            if (result && result.ok) {
+            try {
+              await ServerActionSchedules.DeleteFromServer(schedule.id);
               await scheduleActions.deleteLocal(schedule.id);
               results.push({ id: schedule.id, success: true });
-            } else {
-              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+            } catch (deleteError) {
+              const errorMsg = deleteError instanceof Error ? deleteError.message : "Delete failed";
+              console.error(`❌ Failed to delete schedule ${schedule.id}:`, deleteError);
               results.push({ id: schedule.id, success: false, error: errorMsg });
             }
           } else if (schedule.status === "w") {
             // Waiting to sync
-            const result = await ServerActionSchedules.SaveToServer(schedule);
-            if (result) {
-              schedule.status = "1"; // Mark as synced
+            try {
+              const result = await ServerActionSchedules.SaveToServer(schedule);
+              // Mark as synced
               await scheduleActions.putLocal({
                 ...schedule,
                 ...(result.id && { id: result.id }),
@@ -121,13 +134,15 @@ const ServerActionSchedules = {
                 updatedAt: Date.now(),
               });
               results.push({ id: schedule.id, success: true });
-            } else {
-              results.push({ id: schedule.id, success: false, error: "Server request failed" });
+            } catch (saveError) {
+              const errorMsg = saveError instanceof Error ? saveError.message : "Save failed";
+              console.error(`❌ Failed to save schedule ${schedule.id}:`, saveError);
+              results.push({ id: schedule.id, success: false, error: errorMsg });
             }
           }
         } catch (error) {
           const errorMsg = error instanceof Error ? error.message : "Unknown error";
-          console.error(`Error syncing schedule ${schedule.id}:`, error);
+          console.error(`❌ Error syncing schedule ${schedule.id}:`, error);
           results.push({ id: schedule.id, success: false, error: errorMsg });
         }
       }

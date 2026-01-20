@@ -24,8 +24,14 @@ export async function DELETE(
       where: { id }
     })
 
-    if (!schedule || schedule.managerId !== session.user.id) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!schedule) {
+      return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
+    }
+
+    // Allow admin to delete any schedule, or manager to delete their own
+    const isAdmin = session.user.role === 'ADMIN'
+    if (!isAdmin && schedule.managerId !== session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized to delete this schedule' }, { status: 403 })
     }
 
     await db.schedule.delete({

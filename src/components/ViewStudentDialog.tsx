@@ -158,7 +158,7 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="sm" title={t("viewDetails")}>
+          <Button variant="ghost" size="sm" title={t("viewDetails")} className="hover:bg-blue-50 hover:text-blue-600">
             <Eye className="h-4 w-4" />
           </Button>
         )}

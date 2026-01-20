@@ -29,7 +29,11 @@ export async function POST(req: NextRequest) {
 
     if (teacherConflict) {
       return NextResponse.json({ 
-        error: 'Teacher already has a class at this time' 
+        error: {
+          message: 'Teacher already has a class at this time',
+          code: 'TEACHER_CONFLICT',
+          details: { day, startTime, teacherId }
+        }
       }, { status: 409 })
     }
 
@@ -45,7 +49,11 @@ export async function POST(req: NextRequest) {
 
     if (roomConflict) {
       return NextResponse.json({ 
-        error: 'Room is already booked at this time' 
+        error: {
+          message: 'Room is already booked at this time',
+          code: 'ROOM_CONFLICT',
+          details: { day, startTime, roomId, centerId }
+        }
       }, { status: 409 })
     }
 
@@ -70,7 +78,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(schedule, { status: 201 })
   } catch (error) {
     console.error('Schedule creation error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const errorMsg = error instanceof Error ? error.message : 'Internal server error'
+    return NextResponse.json({ 
+      error: {
+        message: errorMsg,
+        code: 'INTERNAL_ERROR'
+      }
+    }, { status: 500 })
   }
 }
 
