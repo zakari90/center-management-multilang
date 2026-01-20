@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter, Link } from '@/i18n/navigation'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ModalLink } from '@/components/modal-link'
 import { receiptActions, studentActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'

@@ -2,7 +2,8 @@
 
 import { useAuth } from "@/context/authContext";
 import { useTranslations, useLocale } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -24,15 +25,15 @@ export default function HomePage() {
     if (!mounted || isLoading) return;
 
     if (user?.role === "ADMIN") {
-      router.push(`/admin`);
+      router.push(`/${locale}/admin`);
       return;
     }
 
     if (user?.role === "MANAGER") {
-      router.push(`/manager`);
+      router.push(`/${locale}/manager`);
       return;
     }
-  }, [user, isLoading, mounted, router]);
+  }, [user, isLoading, mounted, router, locale]);
 
   // Show loading state while checking authentication
   if (!mounted || isLoading) {
@@ -58,7 +59,7 @@ export default function HomePage() {
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-          <Link href={`/login`} className="w-full sm:w-auto">
+          <Link href={`/${locale}/login`} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto px-8 py-3 bg-blue-800 text-white hover:bg-blue-900 text-base font-medium">
               {t("ownerDashboard")}
             </Button>

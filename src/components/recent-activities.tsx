@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Link } from '@/i18n/navigation'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
