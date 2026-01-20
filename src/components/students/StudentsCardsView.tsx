@@ -4,11 +4,12 @@ import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import ViewStudentDialog from "@/components/ViewStudentDialog"
 import ViewStudentCardDialog from "@/components/ViewStudentCardDialog"
 import EditStudentDialog from "@/components/EditStudentDialog"
 import { Student } from "../studentsPresentation"
-import { Phone, Mail, User } from "lucide-react"
+import { Phone, Mail, User, Eye } from "lucide-react"
 
 interface StudentsCardsViewProps {
   students: Student[]
@@ -92,7 +93,19 @@ export function StudentsCardsView({
                   </p>
                 </div>
                 <div className="flex gap-1">
-                  <ViewStudentDialog studentId={student.id} />
+                  <ViewStudentDialog 
+                    studentId={student.id}
+                    trigger={
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                        title="View Details"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                   <ViewStudentCardDialog studentId={student.id} />
                   <EditStudentDialog studentId={student.id} onStudentUpdated={onUpdate} />
                 </div>
