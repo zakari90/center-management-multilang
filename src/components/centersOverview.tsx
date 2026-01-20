@@ -14,7 +14,7 @@ import {
   Users
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { 
   centerActions, 
