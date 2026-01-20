@@ -205,7 +205,25 @@ export default function StudentsTable() {
           <EntitySyncControls entity="students" />
         </div>
       </div>
-        <div className="flex gap-4">
+
+      {/* Stats Cards */}
+      <StudentsStats 
+        totalStudents={totalStudents}
+        filteredCount={filteredStudents.length}
+        totalRevenue={totalRevenue}
+        averageSubjects={averageSubjects}
+      />
+
+      {/* Students List - Responsive View */}
+
+      
+      <StudentsCardsView 
+        students={filteredStudents}
+        getTotalRevenue={getTotalRevenue}
+        onUpdate={fetchStudents}
+      />
+
+              <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
             <Input
@@ -286,24 +304,9 @@ export default function StudentsTable() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      {/* Stats Cards */}
-      <StudentsStats 
-        totalStudents={totalStudents}
-        filteredCount={filteredStudents.length}
-        totalRevenue={totalRevenue}
-        averageSubjects={averageSubjects}
-      />
-
-      {/* Students List - Responsive View */}
       <StudentsTableView 
         students={filteredStudents}
         columnVisibility={columnVisibility}
-        getTotalRevenue={getTotalRevenue}
-        onUpdate={fetchStudents}
-      />
-      
-      <StudentsCardsView 
-        students={filteredStudents}
         getTotalRevenue={getTotalRevenue}
         onUpdate={fetchStudents}
       />
