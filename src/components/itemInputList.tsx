@@ -14,6 +14,7 @@ interface ItemInputListProps {
   items: string[]
   onChange: (items: string[]) => void
   suggestions?: Array<string | { value: string; label: string }>
+  id?: string
 }
 
 export const ItemInputList: React.FC<ItemInputListProps> = ({
@@ -22,6 +23,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
   items,
   onChange,
   suggestions = [],
+  id,
 }) => {
   const [inputValue, setInputValue] = useState("")
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -70,6 +72,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
     <div className="space-y-3">
       <div className="flex gap-2">
         <Input
+          id={id}
           type="text"
           placeholder={placeholder}
           value={inputValue}
@@ -83,8 +86,7 @@ export const ItemInputList: React.FC<ItemInputListProps> = ({
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label></Label>
+        <div className="flex items-center justify-end">
           <Button
             type="button"
             variant="secondary"

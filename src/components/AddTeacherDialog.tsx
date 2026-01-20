@@ -578,8 +578,9 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
       {weeklySchedule.some(s => s.isAvailable) && (
         <div className="grid grid-cols-2 gap-3 pt-2">
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("from")}</Label>
+            <Label htmlFor="bulk-start-time" className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("from")}</Label>
             <Input
+              id="bulk-start-time"
               type="time"
               value={weeklySchedule.find(s => s.isAvailable)?.startTime || "09:00"}
               onChange={(e) => {
@@ -593,8 +594,9 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("to")}</Label>
+            <Label htmlFor="bulk-end-time" className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("to")}</Label>
             <Input
+              id="bulk-end-time"
               type="time"
               value={weeklySchedule.find(s => s.isAvailable)?.endTime || "17:00"}
               onChange={(e) => {
@@ -640,18 +642,16 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Mobile: Show only current step */}
-          <div className="md:hidden">
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-          </div>
-
-          {/* Desktop: Show all sections */}
-          <div className="hidden md:block space-y-4">
-            {renderStep1()}
-            {renderStep2()}
-            {renderStep3()}
+          <div className="space-y-4">
+            <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
+              {renderStep1()}
+            </div>
+            <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
+              {renderStep2()}
+            </div>
+            <div className={currentStep !== 3 ? "hidden md:block" : "block"}>
+              {renderStep3()}
+            </div>
           </div>
 
           {/* Mobile Navigation Buttons */}

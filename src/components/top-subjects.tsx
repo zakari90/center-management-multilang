@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Loader2 } from 'lucide-react'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/context/authContext'
@@ -106,12 +105,9 @@ export default function TopSubjects() {
                     >
                       {index + 1}
                     </Badge>
-                    <Link 
-                      href={`/subjects/${subject.id}`}
-                      className="font-medium hover:underline truncate text-sm sm:text-base"
-                    >
+                    <span className="font-medium truncate text-sm sm:text-base">
                       {subject.name}
-                    </Link>
+                    </span>
                     <Badge variant="secondary" className="text-xs flex-shrink-0">
                       {subject.grade}
                     </Badge>

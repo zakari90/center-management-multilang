@@ -416,15 +416,26 @@ export default function AddTeacherPaymentDialog({ onPaymentCreated }: AddTeacher
           <form onSubmit={handleSubmit} className="h-full flex flex-col">
             <div className="space-y-4 flex-1">
               {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-              <div className="md:hidden">
-                {currentStep === 1 && renderStep1()}
-                {currentStep === 2 && renderStep2()}
-                {currentStep === 3 && renderStep3()}
-              </div>
-              <div className="hidden md:block space-y-6">
-                {renderStep1()}
-                {paymentData && !loadingCalculation && (<><Separator />{renderStep2()}</>)}
-                {formData.selectedSubjects.length > 0 && paymentData && (<><Separator />{renderStep3()}</>)}
+              <div className="space-y-4 md:space-y-6">
+                <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
+                  {renderStep1()}
+                </div>
+                <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
+                  {paymentData && !loadingCalculation && (
+                    <div className="space-y-6">
+                      <Separator className="hidden md:block" />
+                      {renderStep2()}
+                    </div>
+                  )}
+                </div>
+                <div className={currentStep !== 3 ? "hidden md:block" : "block"}>
+                  {formData.selectedSubjects.length > 0 && paymentData && (
+                    <div className="space-y-6">
+                      <Separator className="hidden md:block" />
+                      {renderStep3()}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex justify-between gap-3 pt-4 border-t mt-4 md:hidden">

@@ -215,7 +215,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                 <div className="relative my-4 flex items-center justify-center overflow-hidden">
                   <Separator className="flex-1 h-px bg-border" />
                   <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                    <Label>{t('basicInformation')}</Label>
+                    <span className="font-medium text-foreground">{t('basicInformation')}</span>
                   </div>
                   <Separator className="flex-1 h-px bg-border" />
                 </div>
@@ -260,7 +260,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <Label>{t('classrooms')}</Label>
+                  <span className="font-medium text-foreground">{t('classrooms')}</span>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
@@ -275,7 +275,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <Label>{t('workingDays')}</Label>
+                  <span className="font-medium text-foreground">{t('workingDays')}</span>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
@@ -320,7 +320,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <Label>{t('subjectsPricing')}</Label>
+                  <span className="font-medium text-foreground">{t('subjectsPricing')}</span>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
@@ -333,7 +333,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
 
               {formData.subjects.length > 0 && (
                 <div className="space-y-2">
-                  <Label>{t('addedSubjects')} ({formData.subjects.length}):</Label>
+                  <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('addedSubjects')} ({formData.subjects.length}):</span>
                   <div className="max-h-60 overflow-y-auto space-y-2">
                     {formData.subjects.map((subject) => (
                       <div key={subject.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">

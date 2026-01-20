@@ -320,9 +320,9 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Column 1: Student Selection */}
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">
+                <span className="text-sm font-semibold">
                   {t("findStudent")} <span className="text-destructive">*</span>
-                </Label>
+                </span>
                 {loadingStudents ? (
                   <div className="flex items-center gap-2 text-muted-foreground text-sm">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -389,9 +389,9 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
               {/* Column 2: Subject Selection */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label className="text-sm font-semibold">
+                  <span className="text-sm font-semibold">
                     {t("selectSubjects")} <span className="text-destructive">*</span>
-                  </Label>
+                  </span>
                   {selectedStudent && (
                     <Button
                       type="button"
@@ -441,11 +441,11 @@ export default function AddReceiptDialog({ onReceiptAdded, variant = "secondary"
 
               {/* Column 3: Payment Details */}
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">{t("paymentDetails")}</Label>
+                <span className="text-sm font-semibold">{t("paymentDetails")}</span>
                 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <Label className="text-sm">{t("paymentMethod")}</Label>
+                    <span className="text-sm font-medium">{t("paymentMethod")}</span>
                     <Select
                       value={formData.paymentMethod}
                       onValueChange={(value) =>

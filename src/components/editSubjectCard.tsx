@@ -97,10 +97,12 @@ export function EditSubjectCard({
               <div className="space-y-4">
                 {/* Subject Selection */}
                 <div className="space-y-2">
-                  <Label className="text-xs sm:text-sm">
+                <div className="space-y-2">
+                  <Label className="text-xs sm:text-sm" htmlFor="edit-select-subject">
                     {t('selectSubject')} {t('requiredField')}
                   </Label>
                   <ItemInputList
+                    id="edit-select-subject"
                     label={t('labels.subject')}
                     placeholder={t('placeholders.subject')}
                     items={tempSubject.selectedSubject ? [tempSubject.selectedSubject] : []}
@@ -111,13 +113,16 @@ export function EditSubjectCard({
                     suggestions={availableSubjects}
                   />
                 </div>
+                </div>
 
                 {/* Grade Selection */}
                 <div className="space-y-2">
-                  <Label className="text-xs sm:text-sm">
+                <div className="space-y-2">
+                  <Label className="text-xs sm:text-sm" htmlFor="edit-select-grade">
                     {t('selectGrade')} {t('requiredField')}
                   </Label>
                   <ItemInputList
+                    id="edit-select-grade"
                     label={t('labels.grade')}
                     placeholder={t('placeholders.grade')}
                     items={tempSubject.selectedGrade ? [tempSubject.selectedGrade] : []}
@@ -127,6 +132,7 @@ export function EditSubjectCard({
                     }}
                     suggestions={availableGrades}
                   />
+                </div>
                 </div>
 
                 {/* Price and Duration */}

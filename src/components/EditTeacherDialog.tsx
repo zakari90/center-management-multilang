@@ -581,7 +581,7 @@ export default function EditTeacherDialog({ teacherId, onTeacherUpdated, trigger
                 {weeklySchedule.some(s => s.isAvailable) && (
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">{t("from")}</Label>
+                      <span className="text-xs font-medium text-muted-foreground block mb-1">{t("from")}</span>
                       <Input
                         type="time"
                         value={weeklySchedule.find(s => s.isAvailable)?.startTime || "09:00"}
@@ -596,7 +596,7 @@ export default function EditTeacherDialog({ teacherId, onTeacherUpdated, trigger
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">{t("to")}</Label>
+                      <span className="text-xs font-medium text-muted-foreground block mb-1">{t("to")}</span>
                       <Input
                         type="time"
                         value={weeklySchedule.find(s => s.isAvailable)?.endTime || "17:00"}

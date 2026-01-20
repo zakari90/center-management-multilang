@@ -554,7 +554,7 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                 <CardContent className="space-y-3">
                   {/* Grade Selection */}
                   <div>
-                    <Label className="text-sm mb-2 block">{t("step1SelectGrade")}</Label>
+                    <span className="text-sm font-medium mb-2 block">{t("step1SelectGrade")}</span>
                     {availableGrades.length === 0 ? (
                       <Alert>
                         <AlertDescription>
@@ -585,7 +585,7 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                   {/* Subject Selection */}
                   {selectedGrade && (
                     <div>
-                      <Label className="text-sm mb-2 block">{t("step2SelectSubject")}</Label>
+                      <span className="text-sm font-medium mb-2 block">{t("step2SelectSubject")}</span>
                       <div className="flex flex-wrap gap-2">
                         {subjectsForGrade.length === 0 ? (
                           <p className="text-sm text-muted-foreground">{t("noSubjectsForGrade")}</p>
@@ -612,9 +612,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                   {/* Teacher Selection */}
                   {selectedSubject && (
                     <div>
-                      <Label className="text-sm mb-2 block">
+                      <span className="text-sm font-medium mb-2 block">
                         {t("step3SelectTeacher")} {selectedSubject.name}
-                      </Label>
+                      </span>
                       <div className="flex flex-wrap gap-2">
                         {teachersForSubject.length === 0 ? (
                           <p className="text-sm text-muted-foreground">{t("noTeachersAvailable")}</p>

@@ -50,8 +50,9 @@ export const SubjectForm = ({
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label>{t('selectSubject')}</Label>
+          <Label htmlFor="single-select-subject">{t('selectSubject')}</Label>
           <ItemInputList
+            id="single-select-subject"
             label={t('selectSubject')}
             placeholder={t('selectSubjectPlaceholder')}
             items={subjectData.selectedSubject ? [subjectData.selectedSubject] : []}
@@ -69,8 +70,9 @@ export const SubjectForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label>{t('selectGrade')}</Label>
+          <Label htmlFor="single-select-grade">{t('selectGrade')}</Label>
           <ItemInputList
+            id="single-select-grade"
             label={t('selectGrade')}
             placeholder={t('selectGradePlaceholder')}
             items={subjectData.selectedGrade ? [subjectData.selectedGrade] : []}
@@ -190,8 +192,9 @@ export const SubjectFormMultipleChoices = ({
       <div className="space-y-4">
         {/* Subject Selection */}
         <div className="space-y-2">
-          <Label>{t('selectSubjectsRequired')}</Label>
+          <Label htmlFor="multi-select-subjects">{t('selectSubjectsRequired')}</Label>
           <ItemInputList
+            id="multi-select-subjects"
             label={t('selectSubjects')}
             placeholder={t('subjectsPlaceholder')}
             items={subjectData.selectedSubjects}
@@ -207,8 +210,9 @@ export const SubjectFormMultipleChoices = ({
 
         {/* Grade Selection */}
         <div className="space-y-2">
-          <Label>{t('selectGradesRequired')}</Label>
+          <Label htmlFor="multi-select-grades">{t('selectGradesRequired')}</Label>
           <ItemInputList
+            id="multi-select-grades"
             label={t('selectGrades')}
             placeholder={t('gradesPlaceholder')}
             items={subjectData.selectedGrades}

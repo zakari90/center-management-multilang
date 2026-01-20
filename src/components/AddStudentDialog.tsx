@@ -452,7 +452,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         <div className="space-y-3">
           {/* Select Grade */}
           <div>
-            <Label className="text-xs mb-2 block">{t("enrollmentstep1title")}</Label>
+            <span className="text-xs font-medium mb-2 block">{t("enrollmentstep1title")}</span>
             <div className="flex flex-wrap gap-2">
               {availableGrades.map((grade) => (
                 <Badge
@@ -474,7 +474,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           {/* Select Subject */}
           {selectedGrade && (
             <div>
-              <Label className="text-xs mb-2 block">{t("enrollmentstep2title")}</Label>
+              <span className="text-xs font-medium mb-2 block">{t("enrollmentstep2title")}</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
                 {subjectsForGrade.map((subject) => (
                   <Button
@@ -505,9 +505,9 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           {/* Select Teacher */}
           {selectedSubject && (
             <div>
-              <Label className="text-xs mb-2 block">
+              <span className="text-xs font-medium mb-2 block">
                 {t("enrollmentstep3title", { subject: selectedSubject.name })}
-              </Label>
+              </span>
               <div className="space-y-2 max-h-[100px] overflow-y-auto">
                 {teachersForSubject.map((ts) => (
                   <Button
@@ -622,18 +622,22 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Mobile: Show only current step */}
-          <div className="md:hidden">
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-          </div>
-
-          {/* Desktop: Show all sections */}
-          <div className="hidden md:block space-y-4">
-            {renderStep1()}
-            {renderStep2()}
-            {enrolledSubjects.length > 0 && renderStep3()}
+          <div className="space-y-4">
+            <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
+              {renderStep1()}
+            </div>
+            <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
+              {renderStep2()}
+            </div>
+            <div className={
+              currentStep === 3 
+                ? "block" 
+                : enrolledSubjects.length > 0 
+                  ? "hidden md:block" 
+                  : "hidden"
+            }>
+              {renderStep3()}
+            </div>
           </div>
 
           {/* Mobile Navigation Buttons */}

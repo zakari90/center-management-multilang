@@ -397,17 +397,11 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
             <form onSubmit={handleSubmit} className="h-full flex flex-col">
               {error && <Alert variant="destructive" className="mb-4"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
               <div className="flex-1 space-y-4">
-                {/* Mobile: Show only current step */}
-                <div className="md:hidden">
-                  {currentStep === 1 && renderStep1()}
-                  {currentStep === 2 && renderStep2()}
-                  {currentStep === 3 && renderStep3()}
-                </div>
-                {/* Desktop: Show all sections in grid */}
-                <div className="hidden md:grid md:grid-cols-3 gap-4">
+                {/* Unified Responsive Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Column 1: Find Student */}
-                  <Card>
-                    <CardHeader>
+                  <Card className={`border-0 shadow-none md:border md:shadow-sm ${currentStep !== 1 ? 'hidden md:block' : ''}`}>
+                    <CardHeader className="hidden md:flex">
                       <CardTitle className="flex items-center gap-2">
                         <User className="h-5 w-5" />{t("findStudent")}
                       </CardTitle>
@@ -415,14 +409,14 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                         {t("searchOrScanStudent")}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0 md:p-6">
                       {renderStep1()}
                     </CardContent>
                   </Card>
 
                   {/* Column 2: Select Subjects */}
-                  <Card className={!selectedStudent ? "opacity-60 pointer-events-none" : ""}>
-                    <CardHeader>
+                  <Card className={`border-0 shadow-none md:border md:shadow-sm ${!selectedStudent ? "opacity-60 pointer-events-none" : ""} ${currentStep !== 2 ? 'hidden md:block' : ''}`}>
+                    <CardHeader className="hidden md:flex">
                       <CardTitle>{t("selectSubjects")}</CardTitle>
                       {!selectedStudent && (
                         <CardDescription className="text-xs mt-1">
@@ -430,14 +424,14 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                         </CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0 md:p-6">
                       {renderStep2()}
                     </CardContent>
                   </Card>
 
                   {/* Column 3: Payment Details */}
-                  <Card className={formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""}>
-                    <CardHeader>
+                  <Card className={`border-0 shadow-none md:border md:shadow-sm ${formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""} ${currentStep !== 3 ? 'hidden md:block' : ''}`}>
+                    <CardHeader className="hidden md:flex">
                       <CardTitle>{t("paymentDetails")}</CardTitle>
                       {formData.selectedSubjects.length === 0 && (
                         <CardDescription className="text-xs">
@@ -445,7 +439,7 @@ export default function AddStudentPaymentDialog({ onPaymentCreated }: AddStudent
                         </CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0 md:p-6">
                       {renderStep3()}
                     </CardContent>
                   </Card>
