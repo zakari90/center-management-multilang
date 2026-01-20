@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { ModalLink } from '@/components/modal-link'
 import { receiptActions, studentActions } from '@/lib/dexie/dexieActions'
 import { useAuth } from '@/context/authContext'
