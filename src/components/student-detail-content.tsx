@@ -317,9 +317,7 @@ export function StudentDetailContent({ studentId, isModal = false }: StudentDeta
                 </div>
               )}
 
-              <Button asChild className="mt-4 w-full" variant="default">
-                <ModalLink href={`/manager/receipts/create?studentId=${student.id}`}>{t("addPayment")}</ModalLink>
-              </Button>
+
             </CardContent>
           </Card>
         </div>

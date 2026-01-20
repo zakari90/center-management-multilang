@@ -27,13 +27,9 @@ const BASE_PAGES_TO_PRECACHE = [
   // Manager pages
   '/manager',
   '/manager/receipts',
-  '/manager/receipts/create',
-  '/manager/receipts/create-teacher-payment',
   '/manager/schedule',
   '/manager/students',
-  '/manager/students/create',
   '/manager/teachers',
-  '/manager/teachers/create',
 ]
 
 const LOCALES = ['en', 'ar', 'fr']

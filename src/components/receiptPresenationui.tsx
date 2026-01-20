@@ -186,20 +186,7 @@ export default function ReceiptsTable() {
           <h1 className="text-3xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild className="bg-primary hover:bg-primary/80">
-            <ModalLink href="/manager/receipts/create">
-              <Plus className="mr-2 h-4 w-4" />
-              {t('studentPayment')}
-            </ModalLink>
-          </Button>
-          <Button asChild variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50">
-            <ModalLink href="/manager/receipts/create-teacher-payment">
-              <Plus className="mr-2 h-4 w-4" />
-              {t('teacherPayment')}
-            </ModalLink>
-          </Button>
-        </div>
+
       </div>
 
       {error && (
@@ -322,13 +309,7 @@ export default function ReceiptsTable() {
                   ? t('noReceiptsFound')
                   : t('noReceiptsYet')}
               </p>
-              {!searchTerm && typeFilter === 'all' && methodFilter === 'all' && (
-                <Button asChild className="mt-4">
-                  <ModalLink href="/manager/receipts/create">
-                    {t('createFirstReceipt')}
-                  </ModalLink>
-                </Button>
-              )}
+
             </div>
           ) : (
             <Table>

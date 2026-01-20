@@ -299,12 +299,7 @@ export default function StudentReceiptTable() {
               <Download className="mr-2 h-4 w-4" />
               {t("exportCSV")}
             </Button>
-            <Button asChild>
-              <Link href="/manager/receipts/create">
-                <Plus className="mr-2 h-4 w-4" />
-                {t("newPayment")}
-              </Link>
-            </Button>
+
           </div>
           {/* Per-entity sync controls for receipts */}
           <EntitySyncControls entity="receipts" />
