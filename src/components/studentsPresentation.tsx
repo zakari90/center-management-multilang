@@ -1,12 +1,8 @@
 "use client"
 
-import { Loader2, Search, Users, GraduationCap, DollarSign, ChevronDown } from "lucide-react"
-import { useTranslations } from "next-intl"
-import ViewStudentDialog from "@/components/ViewStudentDialog"
-import ViewStudentCardDialog from "@/components/ViewStudentCardDialog"
-import EditStudentDialog from "@/components/EditStudentDialog"
-import { useEffect, useState, useCallback } from "react"
-import { Input } from "@/components/ui/input"
+import AddStudentDialog from "@/components/AddStudentDialog"
+import { EntitySyncControls } from "@/components/EntitySyncControls"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,16 +10,18 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/dexieActions"
 import { useAuth } from "@/context/authContext"
-import { EntitySyncControls } from "@/components/EntitySyncControls"
-import AddStudentDialog from "@/components/AddStudentDialog"
+import { studentActions, studentSubjectActions, subjectActions, teacherActions } from "@/lib/dexie/dexieActions"
+import { ChevronDown, Loader2, Search } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { useCallback, useEffect, useState } from "react"
 import PageHeader from "./page-header"
+
+import { StudentsCardsView } from "./students/StudentsCardsView"
+import { StudentsStats } from "./students/StudentsStats"
+import { StudentsTableView } from "./students/StudentsTableView"
 
 export interface StudentSubject {
   id: string
@@ -200,12 +198,12 @@ export default function StudentsTable() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <PageHeader title={t('title')} subtitle={t('subtitle')} />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <PageHeader title={t('title')} subtitle={t('subtitle')} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
-            <AddStudentDialog />
-            <EntitySyncControls entity="students" />
-          </div>
+          <AddStudentDialog />
+          <EntitySyncControls entity="students" />
+        </div>
 
         <div className="flex gap-4">
           <div className="relative flex-1">
@@ -291,150 +289,26 @@ export default function StudentsTable() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalStudents")}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStudents}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {filteredStudents.length} {t("filtered")}
-            </p>
-          </CardContent>
-        </Card>
+      <StudentsStats 
+        totalStudents={totalStudents}
+        filteredCount={filteredStudents.length}
+        totalRevenue={totalRevenue}
+        averageSubjects={averageSubjects}
+      />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalRevenue")}</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">MAD {totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t("monthlyRevenue")}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("avgSubjects")}</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{averageSubjects.toFixed(1)}</div>
-            <p className="text-xs text-muted-foreground mt-1">{t("perStudent")}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Students Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50">
-              <tr>
-                {columnVisibility.name && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                    {t("name")}
-                  </th>
-                )}
-                {columnVisibility.contact && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                    {t("contact")}
-                  </th>
-                )}
-                {columnVisibility.parent && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                    {t("parent")}
-                  </th>
-                )}
-                {columnVisibility.subjects && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                    {t("subjects")}
-                  </th>
-                )}
-                {columnVisibility.monthlyFee && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                    {t("monthlyFee")}
-                  </th>
-                )}
-                {columnVisibility.actions && (
-                  <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                    {t("actions")}
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {filteredStudents.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
-                    {t("noStudents")}
-                  </td>
-                </tr>
-              ) : (
-                filteredStudents.map((student) => (
-                  <tr key={student.id} className="hover:bg-muted/50 transition-colors">
-                    {columnVisibility.name && (
-                      <td className="px-6 py-4 whitespace-nowrap border-x">
-                        <div className="flex items-center gap-4">
-                          <Avatar>
-                            <AvatarFallback className="bg-green-100 text-green-600">
-                              {student.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="text-sm font-medium">{student.name}</div>
-                            {student.grade && (
-                              <div className="text-sm text-muted-foreground">{student.grade}</div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                    )}
-                    {columnVisibility.contact && (
-                      <td className="px-6 py-4 border-x">
-                        <div className="text-sm">{student.email || "-"}</div>
-                        <div className="text-sm text-muted-foreground">{student.phone || "-"}</div>
-                      </td>
-                    )}
-                    {columnVisibility.parent && (
-                      <td className="px-6 py-4 border-x">
-                        <div className="text-sm">{student.parentName || "-"}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {student.parentPhone || "-"}
-                        </div>
-                      </td>
-                    )}
-                    {columnVisibility.subjects && (
-                      <td className="px-6 py-4 border-x">
-                        <Badge variant="secondary">
-                          {student.studentSubjects?.length || 0} {t("subjects")}
-                        </Badge>
-                      </td>
-                    )}
-                    {columnVisibility.monthlyFee && (
-                      <td className="px-6 py-4 whitespace-nowrap border-x">
-                        <div className="text-sm font-medium">MAD {getTotalRevenue(student).toFixed(2)}</div>
-                      </td>
-                    )}
-                    {columnVisibility.actions && (
-                      <td className="px-6 py-4 whitespace-nowrap text-right border-x">
-                        <div className="flex gap-1 justify-end">
-                          <ViewStudentDialog studentId={student.id} />
-                          <ViewStudentCardDialog studentId={student.id} />
-                          <EditStudentDialog studentId={student.id} onStudentUpdated={fetchStudents} />
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      {/* Students List - Responsive View */}
+      <StudentsTableView 
+        students={filteredStudents}
+        columnVisibility={columnVisibility}
+        getTotalRevenue={getTotalRevenue}
+        onUpdate={fetchStudents}
+      />
+      
+      <StudentsCardsView 
+        students={filteredStudents}
+        getTotalRevenue={getTotalRevenue}
+        onUpdate={fetchStudents}
+      />
     </div>
   )
 }
