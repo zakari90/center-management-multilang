@@ -585,14 +585,14 @@ export default function StudentReceiptTable() {
             ? t("noReceiptsFilters")
             : t("noReceiptsYet")}
         </p>
-        {!searchTerm && studentFilter === "all" && methodFilter === "all" && dateFilter === "all" && (
+        {/* {!searchTerm && studentFilter === "all" && methodFilter === "all" && dateFilter === "all" && (
           <Button asChild className="mt-4">
             <Link href="/receipts/create">
               <Plus className="mr-2 h-4 w-4" />
               {t("createFirstReceipt")}
             </Link>
           </Button>
-        )}
+        )} */}
       </div>
     ) : (
       <div className="rounded-md border">
