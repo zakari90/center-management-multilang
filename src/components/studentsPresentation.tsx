@@ -204,7 +204,7 @@ export default function StudentsTable() {
           <AddStudentDialog />
           <EntitySyncControls entity="students" />
         </div>
-
+      </div>
         <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
@@ -228,18 +228,7 @@ export default function StudentsTable() {
               ))}
             </SelectContent>
           </Select>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <StudentsStats 
-        totalStudents={totalStudents}
-        filteredCount={filteredStudents.length}
-        totalRevenue={totalRevenue}
-        averageSubjects={averageSubjects}
-      />
-<div>
-            <DropdownMenu>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="default">
                  <ChevronDown className="ml-2 h-4 w-4" />
@@ -296,7 +285,15 @@ export default function StudentsTable() {
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
-</div>
+        </div>
+      {/* Stats Cards */}
+      <StudentsStats 
+        totalStudents={totalStudents}
+        filteredCount={filteredStudents.length}
+        totalRevenue={totalRevenue}
+        averageSubjects={averageSubjects}
+      />
+
       {/* Students List - Responsive View */}
       <StudentsTableView 
         students={filteredStudents}

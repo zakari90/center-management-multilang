@@ -488,7 +488,20 @@ export default function StudentReceiptTable() {
     )}
     
     {/* Column Visibility Dropdown */}
-    <div className="mt-4 flex justify-end">
+
+  </CardContent>
+</Card>
+
+
+      {/* Table */}
+<Card>
+  <CardHeader className='flex justify-between items-center'>
+    <div>
+
+    <CardTitle>{t("paymentRecords")}</CardTitle>
+    <CardDescription>{t("completeList")}</CardDescription>
+    </div>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="default">
@@ -562,16 +575,6 @@ export default function StudentReceiptTable() {
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
-  </CardContent>
-</Card>
-
-
-      {/* Table */}
-<Card>
-  <CardHeader>
-    <CardTitle>{t("paymentRecords")}</CardTitle>
-    <CardDescription>{t("completeList")}</CardDescription>
   </CardHeader>
   <CardContent>
     {filteredReceipts.length === 0 ? (
