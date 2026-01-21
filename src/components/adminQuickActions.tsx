@@ -16,21 +16,18 @@ export default function AdminQuickActions() {
   const actions = [
     {
       title: t('myCenter.title'),
-      description: t('myCenter.description'),
       icon: Building2,
       href: '/admin/center',
       color: 'text-blue-600 bg-blue-100'
     },
     {
       title: t('allUsers.title'),
-      description: t('allUsers.description'),
       icon: Users,
       href: '/admin/users',
       color: 'text-orange-600 bg-orange-100'
     },    
     {
       title: t('schedule.title'),
-      description: t('schedule.description'),
       icon: Calendar,
       href: '/admin/schedule',
       color: 'text-pink-600 bg-pink-100'
@@ -53,7 +50,6 @@ export default function AdminQuickActions() {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium">{action.title}</p>
-                  <p className="text-xs text-muted-foreground">{action.description}</p>
                 </div>
               </div>
             </Link>

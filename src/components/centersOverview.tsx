@@ -156,12 +156,9 @@ export default function CenterOverview() {
           <div className="flex flex-col xs:flex-row xs:items-center xs:flex-wrap gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <Building2 className="h-5 w-5 text-primary flex-shrink-0" />
-              <Link 
-                href={`/admin/centers/${center.id}`}
-                className="text-base sm:text-lg font-semibold hover:underline truncate"
-              >
+              <span className="text-base sm:text-lg font-semibold truncate">
                 {center.name}
-              </Link>
+              </span>
             </div>
             <Badge variant="secondary" className="w-fit text-xs">
               {center.managersCount} {t('managers')}
