@@ -85,7 +85,7 @@ interface TeacherWithSchedule extends Teacher {
   totalHours: number;
   subjectsCount: number;
   availableHours: number;
-  utilizationRate: number;
+  costPerSubject: number;
   conflicts: Schedule[];
 }
 
@@ -189,7 +189,7 @@ const exportTeacherSchedule = (
   text += `${t("phone")}: ${teacher.phone || "N/A"}\n`;
   text += `${t("available")} ${t("hours")}/Week: ${teacher.availableHours.toFixed(1)}${t("hours")}\n`;
   text += `${t("scheduled")} ${t("hours")}/Week: ${teacher.totalHours.toFixed(1)}${t("hours")}\n`;
-  text += `${t("utilization")}: ${teacher.utilizationRate}%\n\n`;
+  text += `${t("costPerSubject") || "Cost/Subject"}: ${teacher.costPerSubject.toFixed(2)} MAD\n\n`;
 
   text += `${t("availableHours").toUpperCase()}:\n`;
   text += `${"-".repeat(50)}\n`;
@@ -506,6 +506,15 @@ const exportTeacherScheduleToExcel = async (
     "18:00",
     "19:00",
     "20:00",
+    "21:00",
+    "22:00",
+    "23:00",
+    "00:00",
+    "01:00",
+    "02:00",
+    "03:00",
+    "04:00",
+    "05:00",
   ];
 
   weeklySheet.columns = [
@@ -586,9 +595,7 @@ export default function TeacherScheduleView({
   const [viewMode, setViewMode] = useState<"grid" | "list" | "timeline">(
     "grid",
   );
-  const [filterMode, setFilterMode] = useState<
-    "all" | "high-util" | "medium-util" | "low-util" | "conflicts"
-  >("all");
+  const [filterMode, setFilterMode] = useState<"all" | "conflicts">("all");
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -762,9 +769,20 @@ export default function TeacherScheduleView({
             );
           }, 0);
 
-          const utilizationRate =
-            availableHours > 0
-              ? Math.round((totalHours / availableHours) * 100)
+          // Calculate cost per subject (average price of subjects taught)
+          const subjectPrices = teacherSchedules
+            .map((s) => {
+              const subject = activeSubjects.find(
+                (sub) => sub.id === s.subjectId,
+              );
+              return subject?.price || 0;
+            })
+            .filter((price) => price > 0);
+
+          const costPerSubject =
+            subjectPrices.length > 0
+              ? subjectPrices.reduce((sum, price) => sum + price, 0) /
+                subjectPrices.length
               : 0;
 
           const uniqueSubjects = new Set(
@@ -781,7 +799,7 @@ export default function TeacherScheduleView({
             schedules: teacherSchedules,
             totalHours,
             availableHours,
-            utilizationRate,
+            costPerSubject,
             subjectsCount: uniqueSubjects.size,
             conflicts,
           };
@@ -816,12 +834,6 @@ export default function TeacherScheduleView({
   // Filter teachers based on selected filter mode
   const filteredTeachers = teachers.filter((teacher) => {
     switch (filterMode) {
-      case "high-util":
-        return teacher.utilizationRate >= 80;
-      case "medium-util":
-        return teacher.utilizationRate >= 60 && teacher.utilizationRate < 80;
-      case "low-util":
-        return teacher.utilizationRate < 60;
       case "conflicts":
         return teacher.conflicts.length > 0;
       case "all":
@@ -869,15 +881,6 @@ export default function TeacherScheduleView({
             <SelectContent>
               <SelectItem value="all">
                 {t("allTeachers") || "All Teachers"}
-              </SelectItem>
-              <SelectItem value="high-util">
-                {t("highUtilization") || "High Utilization (≥80%)"}
-              </SelectItem>
-              <SelectItem value="medium-util">
-                {t("mediumUtilization") || "Medium Utilization (60-79%)"}
-              </SelectItem>
-              <SelectItem value="low-util">
-                {t("lowUtilization") || "Low Utilization (<60%)"}
               </SelectItem>
               <SelectItem value="conflicts">
                 {t("withConflicts") || "With Conflicts"}
@@ -975,7 +978,7 @@ export default function TeacherScheduleView({
                     <span className="text-xs opacity-80">
                       {teacher.totalHours.toFixed(1)}
                       {t("hours")}/{teacher.availableHours.toFixed(1)}
-                      {t("hours")} • {teacher.utilizationRate}%
+                      {t("hours")} • {teacher.costPerSubject.toFixed(2)} MAD
                     </span>
                   </TabsTrigger>
                 ))}
@@ -1057,30 +1060,12 @@ function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
               {t("scheduled")}
             </div>
           </div>
-          <div
-            className={cn(
-              "text-center p-4 rounded-lg",
-              teacher.utilizationRate >= 80
-                ? "bg-red-50"
-                : teacher.utilizationRate >= 60
-                  ? "bg-yellow-50"
-                  : "bg-green-50",
-            )}
-          >
-            <div
-              className={cn(
-                "text-2xl font-bold",
-                teacher.utilizationRate >= 80
-                  ? "text-red-600"
-                  : teacher.utilizationRate >= 60
-                    ? "text-yellow-600"
-                    : "text-green-600",
-              )}
-            >
-              {teacher.utilizationRate}%
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600">
+              {teacher.costPerSubject.toFixed(2)} MAD
             </div>
             <div className="text-xs text-muted-foreground">
-              {t("utilization")}
+              {t("costPerSubject") || "Cost/Subject"}
             </div>
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
