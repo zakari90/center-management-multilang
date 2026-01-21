@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -182,6 +183,9 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
               </>
             )}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("viewDetails")}
+          </DialogDescription>
         </DialogHeader>
 
         {isLoading ? (

@@ -21,17 +21,18 @@ export default function AdminQuickActions() {
       color: 'text-blue-600 bg-blue-100'
     },
     {
-      title: t('allUsers.title'),
-      icon: Users,
-      href: '/admin/users',
-      color: 'text-orange-600 bg-orange-100'
-    },    
-    {
       title: t('schedule.title'),
       icon: Calendar,
       href: '/admin/schedule',
       color: 'text-pink-600 bg-pink-100'
     },
+    {
+      title: t('allUsers.title'),
+      icon: Users,
+      href: '/admin/users',
+      color: 'text-orange-600 bg-orange-100'
+    },    
+
   ]
 
   return (

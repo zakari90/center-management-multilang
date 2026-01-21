@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -154,6 +155,9 @@ export default function ViewTeacherDialog({ teacherId, trigger }: ViewTeacherDia
       <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{teacher?.name || t("teacherDetails")}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("viewDetails")}
+          </DialogDescription>
         </DialogHeader>
 
         {isLoading ? (

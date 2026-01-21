@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -171,6 +172,9 @@ export default function ViewReceiptDialog({ receiptId, trigger }: ViewReceiptDia
               </Button>
             )}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("receiptDetails")}
+          </DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
