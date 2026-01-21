@@ -90,6 +90,29 @@ export function DeleteAllDataButton() {
           console.error("Logout failed:", error);
         }
 
+        // Clear all cookies
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(
+              /=.*/,
+              "=;expires=" + new Date().toUTCString() + ";path=/",
+            );
+        });
+
+        // Clear all storage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Clear service worker cache if available
+        if ("caches" in window) {
+          caches.keys().then((names) => {
+            names.forEach((name) => {
+              caches.delete(name);
+            });
+          });
+        }
+
         // Redirect to login page
         window.location.href = `/${locale}/login`;
       }, 1000);
