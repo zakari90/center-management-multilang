@@ -1,42 +1,41 @@
-{"offline":{
-  "statusDisconnected": "You are offline",
-  "statusReconnected": "Connection restored! Reloading...",
-  "statusChecking": "Checking connection...",
-  "statusSynced": "All synced",
-  "offlineInfoSafe": "Your data is safe and stored locally.",
-  "offlineInfoSync": "Changes will sync automatically when you're back online.",
-  "offlineInfoContinue": "You can continue working without an internet connection.",
-  "offlineActionRetry": "Retry",
-  "offlineTitle": "You are offline",
-  "offlineMessageShort": "It looks like you've lost your internet connection.",
-  "offlineMessageLong": "Please check your connection and try again.",
-  "offlineSuccessMessage": "Logged in using offline data.",
-  "offlineMode": "Offline Mode - Using cached credentials",
-  "offlineLoggingIn": "Logging in offline...",
-  "offlineInfoTitle": "Offline Login",
-  "offlineLoginInfo": "You're offline. Logging in using locally stored information.",
-  "offlineLoginIncorrect": "Email or password is incorrect for offline login.",
-  "offlineInvalidCredentials": "We couldn't verify those credentials offline. Please try again when you're online.",
-  "offlineLoginError": "There was an error with offline login."
-}
-, "OfflineBanner": {
-  "title": "You're offline",
-  "message": "Data is saved locally, and you can keep working. Do not clear your browser cache.",
-  "waitingForConnection": "Waiting for connection..."
-}
-  ,
+{
+  "offline": {
+    "statusDisconnected": "You are offline",
+    "statusReconnected": "Connection restored! Reloading...",
+    "statusChecking": "Checking connection...",
+    "statusSynced": "All synced",
+    "offlineInfoSafe": "Your data is safe and stored locally.",
+    "offlineInfoSync": "Changes will sync automatically when you're back online.",
+    "offlineInfoContinue": "You can continue working without an internet connection.",
+    "offlineActionRetry": "Retry",
+    "offlineTitle": "You are offline",
+    "offlineMessageShort": "It looks like you've lost your internet connection.",
+    "offlineMessageLong": "Please check your connection and try again.",
+    "offlineSuccessMessage": "Logged in using offline data.",
+    "offlineMode": "Offline Mode - Using cached credentials",
+    "offlineLoggingIn": "Logging in offline...",
+    "offlineInfoTitle": "Offline Login",
+    "offlineLoginInfo": "You're offline. Logging in using locally stored information.",
+    "offlineLoginIncorrect": "Email or password is incorrect for offline login.",
+    "offlineInvalidCredentials": "We couldn't verify those credentials offline. Please try again when you're online.",
+    "offlineLoginError": "There was an error with offline login."
+  },
+  "OfflineBanner": {
+    "title": "You're offline",
+    "message": "Data is saved locally, and you can keep working. Do not clear your browser cache.",
+    "waitingForConnection": "Waiting for connection..."
+  },
   "deleteALL": {
-  "allDataDeletedSuccessfully": "All data deleted successfully!",
-  "failedToDeleteData": "Failed to delete data!",
-  "areYouSureDeleteAllData": "Are you sure you want to",
-  "deleteAllData": "delete ALL data",
-  "cannotBeUndone": "This cannot be undone.",
-  "yesDeleteEverything": "Yes, delete everything",
-  "deleting": "Deleting...",
-  "cancel": "Cancel"
-}
+    "allDataDeletedSuccessfully": "All data deleted successfully!",
+    "failedToDeleteData": "Failed to delete data!",
+    "areYouSureDeleteAllData": "Are you sure you want to",
+    "deleteAllData": "delete ALL data",
+    "cannotBeUndone": "This cannot be undone.",
+    "yesDeleteEverything": "Yes, delete everything",
+    "deleting": "Deleting...",
+    "cancel": "Cancel"
+  },
 
-, 
   "InstallPWA": {
     "installMessage": "Install app for a better experience",
     "iosInstructions": "To install: tap Share button then 'Add to Home Screen'",
@@ -176,10 +175,8 @@
       "createFailed": "Failed to create center",
       "unexpectedError": "An unexpected error occurred"
     }
-  }
-,
- 
-"login": {
+  },
+  "login": {
     "title": "Welcome back",
     "adminOption": "Administrator",
     "welcomeBadge": "Center Management Platform",
@@ -209,7 +206,7 @@
     "backToHome": "Back to Home",
     "successMessage": "Login successful! Redirecting..."
   },
-   "loginManager": {
+  "loginManager": {
     "title": "Manager Login",
     "managerOption": "Manager",
     "subtitle": "Access your manager dashboard",
@@ -219,10 +216,9 @@
     "backToHome": "Back to Home",
     "infoTitle": "Manager Access Only",
     "infoDescription": "This login is for center managers. If you're an administrator, please use the admin login."
-  }
-  , 
+  },
   "register": {
-    "successMessage":  "Account created successfully! Redirecting...",
+    "successMessage": "Account created successfully! Redirecting...",
     "title": "Create an Account",
     "username": {
       "label": "User name",
@@ -246,7 +242,7 @@
     "termsOfService": "Terms of Service",
     "and": "and",
     "privacyPolicy": "Privacy Policy"
-  },  
+  },
   "homePage": {
     "title": "Welcome to your Center Management System",
     "description": "",
@@ -320,13 +316,13 @@
     "description": "Recent platform events",
     "noActivity": "No recent activity"
   },
-    "error": {
-      "server": "Internal Server Error",
-      "sorry": "Sorry, we encountered an unexpected issue on our server.",
-      "tryAgain": " Try again later.",
-      "returnHome": "Return home"
-    },
-    "notFound": {
+  "error": {
+    "server": "Internal Server Error",
+    "sorry": "Sorry, we encountered an unexpected issue on our server.",
+    "tryAgain": " Try again later.",
+    "returnHome": "Return home"
+  },
+  "notFound": {
     "title": "Oops! Something went wrong.",
     "description": "We're sorry, but we couldn't find the page you were looking for. Please check the URL or go back to the homepage.",
     "goHome": "Go Back Home"
@@ -461,14 +457,18 @@
     "gridView": "Grid View",
     "listView": "List View",
     "timeline": "Timeline",
+    "searchTeachers": "Search teachers...",
     "noTeachersFound": "No Teachers Found",
     "noTeachersDescription": "Add teachers to start managing schedules",
+    "noSearchResults": "No teachers found",
+    "tryDifferentSearch": "Try a different search term",
     "export": "Export",
     "exportToExcel": "Export to Excel",
     "exportToText": "Export to Text",
     "available": "Available",
     "scheduled": "Scheduled",
     "utilization": "Utilization",
+    "costPerSubject": "Cost/Subject",
     "classes": "Classes",
     "subjects": "Subjects",
     "conflictsAlert": "class(es) scheduled outside available hours:",
@@ -650,7 +650,7 @@
     "na": "N/A"
   },
   "CreateStudentPaymentForm": {
-        "hours":"hours",
+    "hours": "hours",
     "studentPayment": "Student Payment",
     "title": "Create Student Payment Receipt",
     "subtitle": "Select student via search or QR code",
@@ -693,7 +693,7 @@
     "errorSomethingWrong": "Something went wrong",
     "errorCamera": "Unable to access camera.",
     "studentNotFound": "Student not found"
-  }, 
+  },
   "Dashboard": {
     "title": "Dashboard",
     "subtitle": "System-wide overview "
@@ -743,7 +743,7 @@
 
     "buttonscancel": "Cancel",
     "buttonscreate": "Create Payment",
-    "MAD":"MAD"
+    "MAD": "MAD"
   },
   "Common": {
     "back": "Back",
@@ -830,8 +830,8 @@
     "studentPayment": "+ Student Payment",
     "teacherPayment": "+ Teacher Payment",
     "errorFetchStats": "Failed to fetch stats"
-  }
-,  "ManagerStatsCards": {
+  },
+  "ManagerStatsCards": {
     "studentstitle": "Total Students",
     "studentsactive": "{count} active enrollments",
 
@@ -843,7 +843,8 @@
 
     "totalRevenuetitle": "Total Revenue",
     "totalRevenuesubtitle": "{count} receipts issued"
-  }, "QuickActions": {
+  },
+  "QuickActions": {
     "title": "Quick Actions",
     "description": "Common tasks and shortcuts",
 
@@ -866,7 +867,7 @@
       }
     }
   },
-    "ManagerRevenueChart": {
+  "ManagerRevenueChart": {
     "title": "Revenue Overview",
     "description": "Income vs Expenses over time",
 
@@ -880,7 +881,7 @@
       "income": "Income",
       "expense": "Expenses"
     }
-  }, 
+  },
   "EnrollmentChart": {
     "title": "Subject Enrollments",
     "description": "Students enrolled per subject",
@@ -888,7 +889,8 @@
     "chart": {
       "students": "Students"
     }
-  },"TopSubjects": {
+  },
+  "TopSubjects": {
     "title": "Top Performing Subjects",
     "description": "By enrollment and revenue",
     "noData": "No subjects available",
@@ -902,14 +904,15 @@
     "schedule": "Schedule",
     "syncData": "Sync Data",
     "syncing": "Syncing..."
-  },  
+  },
   "AdminLayout": {
     "dashboard": "Dashboard",
     "center": "Center",
     "users": "Users",
     "receipts": "Receipts",
     "schedule": "Schedule"
-  },"TeachersTable": {
+  },
+  "TeachersTable": {
     "title": "Teachers",
     "subtitle": "Manage your teaching staff",
     "addTeacher": "+ Add Teacher",
@@ -1130,7 +1133,7 @@
     "sync": "Sync"
   },
   "StudentReceiptTable": {
-    "MAD":"MAD",
+    "MAD": "MAD",
     "studentReceipts": "Student-Receipts",
     "title": "Student Receipts",
     "subtitle": "Track student payments and tuition fees",
@@ -1182,7 +1185,7 @@
     "next": "Next",
     "previous": "Previous",
     "title": "Add New Student",
-    "hours":"hours",
+    "hours": "hours",
 
     "errorsrequiredName": "Student name is required",
     "errorsnoSubjects": "Please enroll the student in at least one subject",
@@ -1297,7 +1300,7 @@
     "unknownTeacher": "Unknown Teacher",
     "grade": "Grade",
     "unauthorized": "Unauthorized: Please log in again"
-  }, 
+  },
   "StudentCard": {
     "title": "Student ID Card",
     "idLabel": "ID",
@@ -1311,26 +1314,26 @@
       "noSubjects": "No subjects enrolled",
       "gradePrefix": "Grade",
       "teacherLabel": "Teacher",
-          "editSubject": "Edit Subject",
-    "deleteSubject": "Delete Subject?",
-    "deleteConfirmation": "This will permanently delete {subjectName} from the center. This action cannot be undone.",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "selectSubject": "Select Subject",
-    "selectGrade": "Select Grade",
-    "price": "Price (MAD)",
-    "duration": "Duration (minutes)",
-    "placeholders": {
-      "subject": "Type or select a subject",
-      "grade": "Type or select a grade",
-      "price": "0.00",
-      "duration": "60"
-    },
-    "labels": {
-      "subject": "Subject",
-      "grade": "Grade"
-    },
-    "requiredField": "*"
+      "editSubject": "Edit Subject",
+      "deleteSubject": "Delete Subject?",
+      "deleteConfirmation": "This will permanently delete {subjectName} from the center. This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "selectSubject": "Select Subject",
+      "selectGrade": "Select Grade",
+      "price": "Price (MAD)",
+      "duration": "Duration (minutes)",
+      "placeholders": {
+        "subject": "Type or select a subject",
+        "grade": "Type or select a grade",
+        "price": "0.00",
+        "duration": "60"
+      },
+      "labels": {
+        "subject": "Subject",
+        "grade": "Grade"
+      },
+      "requiredField": "*"
     },
     "qrCode": {
       "description": "QR Code"
@@ -1507,82 +1510,81 @@
     "nameRequired": "Student name is required",
     "atLeastOneSubject": "Please enroll the student in at least one subject",
     "unauthorized": "Unauthorized: Please log in again"
-  },    
+  },
   "NavUser": {
     "logout": "Log out",
     "userAvatar": "User avatar"
   },
   "Metadata": {
     "title": "center management, تدبير مراجعتي",
-    "description":"Expense tracker is a tool designed to help track financial transactions",
+    "description": "Expense tracker is a tool designed to help track financial transactions",
     "keywords": "center management, تدبير مراجعتي"
-    
   },
-"subjectForm":{  "instructions": "Please select one subject and one grade. Duration is optional.",
-  "selectSubject": "Select Subject *",
-  "selected": "Selected: {value}",
-  "selectGrade": "Select Grade *",
-  "price": "Price (MAD) *",
-  "duration": "Duration (hours)",
-  "addButton": "Add Subject to Center",
-  "required": "required",
-  "selectTeacherPlaceholder": "Type or select a subject",
-  "selectSubjectPlaceholder": "Type or select a subject",
-  "selectGradePlaceholder": "Type or select a grade",
-  "selectRoomPlaceholder": "Type or select a room"
-},
-"FirstLoginImport": {
-  "title": "Import Data from Server",
-  "description": "Your local database is empty. Import data from the server to get started.",
-  "importNow": "Import Now",
-  "dismiss": "Dismiss",
-  "importing": "Importing...",
-  "offlineError": "You are offline. Please connect to the internet to import data.",
-  "offlineMessage": "Connect to the internet to import data from the server.",
-  "importSuccess": "Successfully imported {count} data types",
-  "importPartial": "Import completed with {success} successful and {failed} failed",
-  "importError": "Import failed: {error}"
-},
-"LocalDBDebugger": {
-  "title": "Local Database Debugger",
-  "description": "View and inspect local database contents",
-  "totalItems": "Total Items",
-  "adminView": "Admin View",
-  "managerView": "Manager View",
-  "noData": "No data in this table",
-  "showingFirst": "Showing first {count} of {total} items",
-  "helpText1": "This debugger shows the contents of your local IndexedDB.",
-  "helpText2": "Tap on a table name to expand and view its data."
-},
-"SyncHandler": {
-  "title": "Data Synchronization",
-  "description": "Manage data synchronization between local storage and server",
-  "online": "Online",
-  "offline": "Offline",
-  "syncToServer": "Sync to Server",
-  "syncing": "Syncing...",
-  "importFromServer": "Import from Server",
-  "importing": "Importing...",
-  "deleteLocalDB": "Delete Local DB",
-  "confirmDelete": "Are you sure you want to delete all local data? This cannot be undone.",
-  "deleting": "Deleting...",
-  "confirm": "Confirm",
-  "cancel": "Cancel",
-  "syncSuccess": "Successfully synced {count} data types",
-  "syncPartial": "Sync completed with {success} successful and {failed} failed",
-  "syncError": "Sync failed: {error}",
-  "importSuccess": "Successfully imported {count} data types",
-  "importPartial": "Import completed with {success} successful and {failed} failed",
-  "importError": "Import failed: {error}",
-  "deleteSuccess": "All local data deleted successfully",
-  "deleteError": "Delete failed: {error}",
-  "offlineError": "You are offline. Please connect to the internet to sync or import data.",
-  "syncToServerHelp": "Uploads your local changes to the server. This will sync all pending local data.",
-  "importFromServerHelp": "Downloads all data from the server to your local database. This will replace synced data but preserve pending local changes.",
-  "deleteLocalDBHelp": "Permanently deletes all local data. This action cannot be undone. You will need to import data again to use the app."
-},
-"EditDialog": {
-  "saveChanges": "Save Changes"
+  "subjectForm": {
+    "instructions": "Please select one subject and one grade. Duration is optional.",
+    "selectSubject": "Select Subject *",
+    "selected": "Selected: {value}",
+    "selectGrade": "Select Grade *",
+    "price": "Price (MAD) *",
+    "duration": "Duration (hours)",
+    "addButton": "Add Subject to Center",
+    "required": "required",
+    "selectTeacherPlaceholder": "Type or select a subject",
+    "selectSubjectPlaceholder": "Type or select a subject",
+    "selectGradePlaceholder": "Type or select a grade",
+    "selectRoomPlaceholder": "Type or select a room"
+  },
+  "FirstLoginImport": {
+    "title": "Import Data from Server",
+    "description": "Your local database is empty. Import data from the server to get started.",
+    "importNow": "Import Now",
+    "dismiss": "Dismiss",
+    "importing": "Importing...",
+    "offlineError": "You are offline. Please connect to the internet to import data.",
+    "offlineMessage": "Connect to the internet to import data from the server.",
+    "importSuccess": "Successfully imported {count} data types",
+    "importPartial": "Import completed with {success} successful and {failed} failed",
+    "importError": "Import failed: {error}"
+  },
+  "LocalDBDebugger": {
+    "title": "Local Database Debugger",
+    "description": "View and inspect local database contents",
+    "totalItems": "Total Items",
+    "adminView": "Admin View",
+    "managerView": "Manager View",
+    "noData": "No data in this table",
+    "showingFirst": "Showing first {count} of {total} items",
+    "helpText1": "This debugger shows the contents of your local IndexedDB.",
+    "helpText2": "Tap on a table name to expand and view its data."
+  },
+  "SyncHandler": {
+    "title": "Data Synchronization",
+    "description": "Manage data synchronization between local storage and server",
+    "online": "Online",
+    "offline": "Offline",
+    "syncToServer": "Sync to Server",
+    "syncing": "Syncing...",
+    "importFromServer": "Import from Server",
+    "importing": "Importing...",
+    "deleteLocalDB": "Delete Local DB",
+    "confirmDelete": "Are you sure you want to delete all local data? This cannot be undone.",
+    "deleting": "Deleting...",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "syncSuccess": "Successfully synced {count} data types",
+    "syncPartial": "Sync completed with {success} successful and {failed} failed",
+    "syncError": "Sync failed: {error}",
+    "importSuccess": "Successfully imported {count} data types",
+    "importPartial": "Import completed with {success} successful and {failed} failed",
+    "importError": "Import failed: {error}",
+    "deleteSuccess": "All local data deleted successfully",
+    "deleteError": "Delete failed: {error}",
+    "offlineError": "You are offline. Please connect to the internet to sync or import data.",
+    "syncToServerHelp": "Uploads your local changes to the server. This will sync all pending local data.",
+    "importFromServerHelp": "Downloads all data from the server to your local database. This will replace synced data but preserve pending local changes.",
+    "deleteLocalDBHelp": "Permanently deletes all local data. This action cannot be undone. You will need to import data again to use the app."
+  },
+  "EditDialog": {
+    "saveChanges": "Save Changes"
+  }
 }
-}
-
