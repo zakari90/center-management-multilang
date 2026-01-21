@@ -10,6 +10,7 @@ import {
 } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -294,7 +296,6 @@ const exportTeacherScheduleToExcel = async (
       field: `${t("scheduled")} ${t("hours")}/Week`,
       value: `${teacher.totalHours.toFixed(1)} ${t("hours")}`,
     },
-    { field: t("utilization"), value: `${teacher.utilizationRate}%` },
     { field: t("classes"), value: teacher.schedules.length },
     { field: t("subjects"), value: teacher.subjectsCount },
     { field: t("conflict"), value: teacher.conflicts.length },
@@ -595,7 +596,7 @@ export default function TeacherScheduleView({
   const [viewMode, setViewMode] = useState<"grid" | "list" | "timeline">(
     "grid",
   );
-  const [filterMode, setFilterMode] = useState<"all" | "conflicts">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -831,16 +832,10 @@ export default function TeacherScheduleView({
     fetchTeacherSchedules();
   }, [fetchTeacherSchedules]);
 
-  // Filter teachers based on selected filter mode
-  const filteredTeachers = teachers.filter((teacher) => {
-    switch (filterMode) {
-      case "conflicts":
-        return teacher.conflicts.length > 0;
-      case "all":
-      default:
-        return true;
-    }
-  });
+  // Filter teachers based on search query
+  const filteredTeachers = teachers.filter((teacher) =>
+    teacher.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   // Carousel navigation functions
   const scrollToNext = () => {
@@ -871,22 +866,16 @@ export default function TeacherScheduleView({
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Select
-            value={filterMode}
-            onValueChange={(value: typeof filterMode) => setFilterMode(value)}
-          >
-            <SelectTrigger className="w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                {t("allTeachers") || "All Teachers"}
-              </SelectItem>
-              <SelectItem value="conflicts">
-                {t("withConflicts") || "With Conflicts"}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t("searchTeachers") || "Search teachers..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-[200px]"
+            />
+          </div>
           <Select
             value={viewMode}
             onValueChange={(value: "grid" | "list" | "timeline") =>
@@ -916,12 +905,13 @@ export default function TeacherScheduleView({
           <CardContent className="py-6 text-center">
             <User className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
             <h3 className="text-base font-semibold mb-1">
-              {t("noTeachersFound")}
+              {searchQuery
+                ? t("noSearchResults") || "No teachers found"
+                : t("noTeachersFound")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {filterMode !== "all"
-                ? t("noTeachersMatchFilter") ||
-                  "No teachers match the selected filter"
+              {searchQuery
+                ? t("tryDifferentSearch") || "Try a different search term"
                 : t("noTeachersDescription")}
             </p>
           </CardContent>
