@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Trash, Loader2, AlertTriangle } from "lucide-react";
 import { localDb } from "@/lib/dexie/dbSchema";
@@ -20,6 +20,7 @@ export function DeleteAllDataButton() {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const t = useTranslations("deleteALL");
+  const locale = useLocale();
   const router = useRouter();
 
   // ✅ Delete all data from both server and local DB
@@ -77,10 +78,20 @@ export function DeleteAllDataButton() {
       );
       setOpen(false);
 
-      // Refresh the page after a short delay to allow toast to be visible
-      setTimeout(() => {
-        router.refresh();
-        window.location.reload();
+      // Logout and redirect to login page after a short delay to allow toast to be visible
+      setTimeout(async () => {
+        try {
+          // Call logout API to clear session
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+        } catch (error) {
+          console.error("Logout failed:", error);
+        }
+
+        // Redirect to login page
+        window.location.href = `/${locale}/login`;
       }, 1000);
     } catch (error) {
       console.error("Failed to delete data:", error);
