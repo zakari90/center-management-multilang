@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import {
   Building2,
   Coins,
+  Eye,
   Loader2,
   MapPin,
   Users
@@ -240,7 +241,7 @@ export default function CenterOverview() {
         className="w-full sm:w-auto sm:flex-shrink-0 order-first sm:order-last"
       >
         <Link href={`/admin/center`}>
-          {t('viewDetails')}
+          <Eye className="h-4 w-4" />
         </Link>
       </Button>
     </div>
