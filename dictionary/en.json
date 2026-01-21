@@ -618,7 +618,9 @@
     "sunday": "Sunday",
     "unauthorized": "Unauthorized: Please log in again",
     "teacherConflict": "Teacher already has a class at this time",
-    "roomConflict": "Room is already booked at this time"
+    "roomConflict": "Room is already booked at this time",
+    "scheduleDetails": "Schedule Details",
+    "close": "Close"
   },
   "ReceiptDetailPage": {
     "loading": "Loading receipt...",

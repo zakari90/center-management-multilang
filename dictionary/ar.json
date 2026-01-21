@@ -1,4 +1,4 @@
-{ 
+{
   "offline": {
     "statusDisconnected": "أنت غير متصل بالإنترنت",
     "statusReconnected": "تم استعادة الاتصال! جارٍ إعادة التحميل...",
@@ -26,14 +26,14 @@
     "waitingForConnection": "في انتظار الاتصال..."
   },
   "deleteALL": {
-  "allDataDeletedSuccessfully": "تم الحذف",
-  "failedToDeleteData": "فشل الحذف",
-  "areYouSureDeleteAllData": "هل تريد حقًا",
-  "deleteAllData": "حذف كل البيانات",
-  "cannotBeUndone": "هذا لا يمكن التراجع عنه",
-  "yesDeleteEverything": "نعم، احذف",
-  "deleting": "جاري الحذف...",
-  "cancel": "إلغاء"
+    "allDataDeletedSuccessfully": "تم الحذف",
+    "failedToDeleteData": "فشل الحذف",
+    "areYouSureDeleteAllData": "هل تريد حقًا",
+    "deleteAllData": "حذف كل البيانات",
+    "cannotBeUndone": "هذا لا يمكن التراجع عنه",
+    "yesDeleteEverything": "نعم، احذف",
+    "deleting": "جاري الحذف...",
+    "cancel": "إلغاء"
   },
   "InstallPWA": {
     "installMessage": "تثبيت التطبيق للحصول على تجربة أفضل",
@@ -109,25 +109,25 @@
       "gradePrefix": "الفئة",
       "teacherLabel": "المعلم",
       "editSubject": "تعديل المادة",
-    "deleteSubject": "حذف المادة؟",
-    "deleteConfirmation": "سيؤدي هذا إلى حذف {subjectName} نهائياً من المركز. لا يمكن التراجع عن هذا الإجراء.",
-    "cancel": "إلغاء",
-    "delete": "حذف",
-    "selectSubject": "اختر المادة",
-    "selectGrade": "اختر المستوى",
-    "price": "السعر (درهم)",
-    "duration": "المدة (دقائق)",
-    "placeholders": {
-      "subject": "اكتب أو اختر مادة",
-      "grade": "اكتب أو اختر مستوى",
-      "price": "0.00",
-      "duration": "60"
-    },
-    "labels": {
-      "subject": "المادة",
-      "grade": "المستوى"
-    },
-    "requiredField": "*"
+      "deleteSubject": "حذف المادة؟",
+      "deleteConfirmation": "سيؤدي هذا إلى حذف {subjectName} نهائياً من المركز. لا يمكن التراجع عن هذا الإجراء.",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "selectSubject": "اختر المادة",
+      "selectGrade": "اختر المستوى",
+      "price": "السعر (درهم)",
+      "duration": "المدة (دقائق)",
+      "placeholders": {
+        "subject": "اكتب أو اختر مادة",
+        "grade": "اكتب أو اختر مستوى",
+        "price": "0.00",
+        "duration": "60"
+      },
+      "labels": {
+        "subject": "المادة",
+        "grade": "المستوى"
+      },
+      "requiredField": "*"
     },
     "qrCode": {
       "description": "رمز الاستجابة السريعة"
@@ -136,37 +136,37 @@
       "downloadPdf": "تحميل PDF"
     }
   },
-"login": {
-  "title": "مرحباً بعودتك",
-  "adminOption": "مسؤول",
-  "welcomeBadge": "منصة إدارة المراكز",
-  "adminOptionDescription": "تتبع المراكز والمالية والفرق في مكان واحد.",
-  "successMessage": "تم تسجيل الدخول بنجاح! جارٍ إعادة التوجيه...",
-  "email": {
-    "label": "البريد الإلكتروني",
-    "placeholder": "you@example.com"
-  },
-  "password": {
-    "label": "كلمة المرور",
-    "placeholder": "أدخل كلمة المرور"
-  },
-  "submit": "تسجيل الدخول",
-  "submitting": "جاري تسجيل الدخول...",
-  "noAccount": "ليس لديك حساب؟",
-  "signUp": "إنشاء حساب",
-  "terms": "بالنقر على متابعة، فإنك توافق على",
-  "termsOfService": "شروط الخدمة",
-  "and": "و",
-  "privacyPolicy": "سياسة الخصوصية",
-  "privacyDialogTitle": "سياسة الخصوصية",
+  "login": {
+    "title": "مرحباً بعودتك",
+    "adminOption": "مسؤول",
+    "welcomeBadge": "منصة إدارة المراكز",
+    "adminOptionDescription": "تتبع المراكز والمالية والفرق في مكان واحد.",
+    "successMessage": "تم تسجيل الدخول بنجاح! جارٍ إعادة التوجيه...",
+    "email": {
+      "label": "البريد الإلكتروني",
+      "placeholder": "you@example.com"
+    },
+    "password": {
+      "label": "كلمة المرور",
+      "placeholder": "أدخل كلمة المرور"
+    },
+    "submit": "تسجيل الدخول",
+    "submitting": "جاري تسجيل الدخول...",
+    "noAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب",
+    "terms": "بالنقر على متابعة، فإنك توافق على",
+    "termsOfService": "شروط الخدمة",
+    "and": "و",
+    "privacyPolicy": "سياسة الخصوصية",
+    "privacyDialogTitle": "سياسة الخصوصية",
     "privacyDialogContent": "أنت تملك جميع البيانات المخزنة في هذا النظام.",
     "termsDialogTitle": "شروط الاستخدام",
     "termsDialogOwnership": "هذا البرنامج مرخَّص للاستخدام في مركزك فقط، وتبقى ملكية بياناتك لك.",
     "termsDialogRestrictions": "لا يجوز لك إعادة بيع التطبيق أو منحه ترخيصًا فرعيًا أو استخدامه لمراكز أخرى دون تصريح مسبق.",
     "termsDialogConsent": "يعد استمرارك في استخدام المنصة قبولاً بهذه الشروط.",
-  "backToHome": "العودة إلى الصفحة الرئيسية"
-},
-   "loginManager": {
+    "backToHome": "العودة إلى الصفحة الرئيسية"
+  },
+  "loginManager": {
     "title": "تسجيل دخول المشرف",
     "managerOption": "مشرف",
     "subtitle": "الوصول إلى لوحة تحكم المشرف",
@@ -580,7 +580,9 @@
     "sunday": "الأحد",
     "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى",
     "teacherConflict": "المعلم لديه بالفعل فئة في هذا الوقت",
-    "roomConflict": "القاعة محجوزة بالفعل في هذا الوقت"
+    "roomConflict": "القاعة محجوزة بالفعل في هذا الوقت",
+    "scheduleDetails": "تفاصيل الجدول",
+    "close": "إغلاق"
   },
   "ReceiptDetailPage": {
     "loading": "جاري تحميل الإيصال...",
@@ -1129,7 +1131,7 @@
   "CreateStudentForm": {
     "next": "التالي",
     "previous": "السابق",
-    "hours":"ساعة",
+    "hours": "ساعة",
 
     "title": "إضافة طالب جديد",
     "errorsrequiredName": "اسم الطالب مطلوب",
@@ -1410,77 +1412,77 @@
     "atLeastOneSubject": "يرجى تسجيل الطالب في مادة واحدة على الأقل",
     "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى"
   },
-"subjectForm": {
-  "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
-  "selectSubject": "اختر المادة *",
-  "selected": "مختار: {value}",
-  "selectGrade": "اختر الدرجة *",
-  "price": "السعر (درهم) *",
-  "duration": "المدة (ساعات/شهر)",
-  "addButton": "إضافة المادة إلى المركز",
-  "required": "مطلوب",
-  "selectTeacherPlaceholder": "اكتب أو اختر مادة",
-  "selectSubjectPlaceholder": "اكتب أو اختر مادة",
-  "selectGradePlaceholder": "اكتب أو اختر درجة",
-  "selectRoomPlaceholder": "اكتب أو اختر غرفة"
-},
-"FirstLoginImport": {
-  "title": "استيراد البيانات من الخادم",
-  "description": "قاعدة البيانات المحلية فارغة. قم باستيراد البيانات من الخادم للبدء.",
-  "importNow": "استيراد الآن",
-  "dismiss": "إلغاء",
-  "importing": "جاري الاستيراد...",
-  "offlineError": "أنت غير متصل بالإنترنت. يرجى الاتصال بالإنترنت لاستيراد البيانات.",
-  "offlineMessage": "اتصل بالإنترنت لاستيراد البيانات من الخادم.",
-  "importSuccess": "تم استيراد {count} أنواع بيانات بنجاح",
-  "importPartial": "اكتمل الاستيراد مع {success} نجح و {failed} فشل",
-  "importError": "فشل الاستيراد: {error}"
-},
-"LocalDBDebugger": {
-  "title": "مصحح قاعدة البيانات المحلية",
-  "description": "عرض وفحص محتويات قاعدة البيانات المحلية",
-  "totalItems": "إجمالي العناصر",
-  "adminView": "عرض المشرف",
-  "managerView": "عرض المدير",
-  "noData": "لا توجد بيانات في هذا الجدول",
-  "showingFirst": "عرض أول {count} من {total} عنصر",
-  "helpText1": "يعرض هذا المصحح محتويات IndexedDB المحلي الخاص بك.",
-  "helpText2": "اضغط على اسم الجدول للتوسيع وعرض بياناته."
-},
-"NavUser": {
-  "logout": "تسجيل الخروج",
-  "userAvatar": "صورة المستخدم"
-},
-"SyncHandler": {
-  "title": "مزامنة البيانات",
-  "description": "إدارة مزامنة البيانات بين التخزين المحلي والخادم",
-  "online": "متصل",
-  "offline": "غير متصل",
-  "syncToServer": "مزامنة مع الخادم",
-  "syncing": "جاري المزامنة...",
-  "importFromServer": "استيراد من الخادم",
-  "importing": "جاري الاستيراد...",
-  "deleteLocalDB": "حذف قاعدة البيانات المحلية",
-  "confirmDelete": "هل أنت متأكد من حذف جميع البيانات المحلية؟ لا يمكن التراجع عن هذا الإجراء.",
-  "deleting": "جاري الحذف...",
-  "confirm": "تأكيد",
-  "cancel": "إلغاء",
-  "syncSuccess": "تمت مزامنة {count} أنواع بيانات بنجاح",
-  "syncPartial": "اكتملت المزامنة مع {success} نجح و {failed} فشل",
-  "syncError": "فشلت المزامنة: {error}",
-  "importSuccess": "تم استيراد {count} أنواع بيانات بنجاح",
-  "importPartial": "اكتمل الاستيراد مع {success} نجح و {failed} فشل",
-  "importError": "فشل الاستيراد: {error}",
-  "deleteSuccess": "تم حذف جميع البيانات المحلية بنجاح",
-  "deleteError": "فشل الحذف: {error}",
-  "offlineError": "أنت غير متصل بالإنترنت. يرجى الاتصال بالإنترنت لمزامنة أو استيراد البيانات.",
-  "syncToServerHelp": "يرفع التغييرات المحلية إلى الخادم. سيتم مزامنة جميع البيانات المحلية المعلقة.",
-  "importFromServerHelp": "ينزل جميع البيانات من الخادم إلى قاعدة البيانات المحلية. سيستبدل البيانات المتزامنة ولكن يحافظ على التغييرات المحلية المعلقة.",
-  "deleteLocalDBHelp": "يحذف جميع البيانات المحلية بشكل دائم. لا يمكن التراجع عن هذا الإجراء. ستحتاج إلى استيراد البيانات مرة أخرى لاستخدام التطبيق."
-},
-"EditDialog": {
-  "saveChanges": "حفظ التغييرات"
-},
+  "subjectForm": {
+    "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
+    "selectSubject": "اختر المادة *",
+    "selected": "مختار: {value}",
+    "selectGrade": "اختر الدرجة *",
+    "price": "السعر (درهم) *",
+    "duration": "المدة (ساعات/شهر)",
+    "addButton": "إضافة المادة إلى المركز",
+    "required": "مطلوب",
+    "selectTeacherPlaceholder": "اكتب أو اختر مادة",
+    "selectSubjectPlaceholder": "اكتب أو اختر مادة",
+    "selectGradePlaceholder": "اكتب أو اختر درجة",
+    "selectRoomPlaceholder": "اكتب أو اختر غرفة"
+  },
+  "FirstLoginImport": {
+    "title": "استيراد البيانات من الخادم",
+    "description": "قاعدة البيانات المحلية فارغة. قم باستيراد البيانات من الخادم للبدء.",
+    "importNow": "استيراد الآن",
+    "dismiss": "إلغاء",
+    "importing": "جاري الاستيراد...",
+    "offlineError": "أنت غير متصل بالإنترنت. يرجى الاتصال بالإنترنت لاستيراد البيانات.",
+    "offlineMessage": "اتصل بالإنترنت لاستيراد البيانات من الخادم.",
+    "importSuccess": "تم استيراد {count} أنواع بيانات بنجاح",
+    "importPartial": "اكتمل الاستيراد مع {success} نجح و {failed} فشل",
+    "importError": "فشل الاستيراد: {error}"
+  },
+  "LocalDBDebugger": {
+    "title": "مصحح قاعدة البيانات المحلية",
+    "description": "عرض وفحص محتويات قاعدة البيانات المحلية",
+    "totalItems": "إجمالي العناصر",
+    "adminView": "عرض المشرف",
+    "managerView": "عرض المدير",
+    "noData": "لا توجد بيانات في هذا الجدول",
+    "showingFirst": "عرض أول {count} من {total} عنصر",
+    "helpText1": "يعرض هذا المصحح محتويات IndexedDB المحلي الخاص بك.",
+    "helpText2": "اضغط على اسم الجدول للتوسيع وعرض بياناته."
+  },
+  "NavUser": {
+    "logout": "تسجيل الخروج",
+    "userAvatar": "صورة المستخدم"
+  },
+  "SyncHandler": {
+    "title": "مزامنة البيانات",
+    "description": "إدارة مزامنة البيانات بين التخزين المحلي والخادم",
+    "online": "متصل",
+    "offline": "غير متصل",
+    "syncToServer": "مزامنة مع الخادم",
+    "syncing": "جاري المزامنة...",
+    "importFromServer": "استيراد من الخادم",
+    "importing": "جاري الاستيراد...",
+    "deleteLocalDB": "حذف قاعدة البيانات المحلية",
+    "confirmDelete": "هل أنت متأكد من حذف جميع البيانات المحلية؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleting": "جاري الحذف...",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "syncSuccess": "تمت مزامنة {count} أنواع بيانات بنجاح",
+    "syncPartial": "اكتملت المزامنة مع {success} نجح و {failed} فشل",
+    "syncError": "فشلت المزامنة: {error}",
+    "importSuccess": "تم استيراد {count} أنواع بيانات بنجاح",
+    "importPartial": "اكتمل الاستيراد مع {success} نجح و {failed} فشل",
+    "importError": "فشل الاستيراد: {error}",
+    "deleteSuccess": "تم حذف جميع البيانات المحلية بنجاح",
+    "deleteError": "فشل الحذف: {error}",
+    "offlineError": "أنت غير متصل بالإنترنت. يرجى الاتصال بالإنترنت لمزامنة أو استيراد البيانات.",
+    "syncToServerHelp": "يرفع التغييرات المحلية إلى الخادم. سيتم مزامنة جميع البيانات المحلية المعلقة.",
+    "importFromServerHelp": "ينزل جميع البيانات من الخادم إلى قاعدة البيانات المحلية. سيستبدل البيانات المتزامنة ولكن يحافظ على التغييرات المحلية المعلقة.",
+    "deleteLocalDBHelp": "يحذف جميع البيانات المحلية بشكل دائم. لا يمكن التراجع عن هذا الإجراء. ستحتاج إلى استيراد البيانات مرة أخرى لاستخدام التطبيق."
+  },
+  "EditDialog": {
+    "saveChanges": "حفظ التغييرات"
+  },
   "PWAInstallation": {
     "title": "دليل التثبيت",
     "description": "اتبع هذه الخطوات لتثبيت التطبيق على جهازك",

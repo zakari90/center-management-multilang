@@ -1,4 +1,4 @@
-{ 
+{
   "offline": {
     "statusDisconnected": "Vous êtes hors ligne",
     "statusReconnected": "Connexion rétablie ! Rechargement en cours...",
@@ -19,23 +19,21 @@
     "offlineLoginIncorrect": "L'e-mail ou le mot de passe est incorrect pour une connexion hors ligne.",
     "offlineInvalidCredentials": "Nous n'avons pas pu vérifier ces identifiants hors ligne. Veuillez réessayer lorsque vous serez en ligne.",
     "offlineLoginError": "Une erreur est survenue lors de la connexion hors ligne."
-  }
-, "OfflineBanner": {
-  "title": "Vous êtes hors ligne",
-  "message": "Les données sont enregistrées localement et vous pouvez continuer à travailler. Ne videz pas le cache de votre navigateur.",
-  "waitingForConnection": "En attente de connexion..."
-}
-,
-"deleteALL": {
-  "allDataDeletedSuccessfully": "Supprimé",
-  "failedToDeleteData": "Échec de la suppression",
-  "areYouSureDeleteAllData": "Voulez-vous vraiment",
-  "deleteAllData": "Supprimer toutes les données",
-  "cannotBeUndone": "Ceci est irréversible",
-  "yesDeleteEverything": "Oui, supprimer",
-  "cancel": "Annuler"
-}
-,  
+  },
+  "OfflineBanner": {
+    "title": "Vous êtes hors ligne",
+    "message": "Les données sont enregistrées localement et vous pouvez continuer à travailler. Ne videz pas le cache de votre navigateur.",
+    "waitingForConnection": "En attente de connexion..."
+  },
+  "deleteALL": {
+    "allDataDeletedSuccessfully": "Supprimé",
+    "failedToDeleteData": "Échec de la suppression",
+    "areYouSureDeleteAllData": "Voulez-vous vraiment",
+    "deleteAllData": "Supprimer toutes les données",
+    "cannotBeUndone": "Ceci est irréversible",
+    "yesDeleteEverything": "Oui, supprimer",
+    "cancel": "Annuler"
+  },
   "InstallPWA": {
     "installMessage": "Installer l'application pour une meilleure expérience",
     "iosInstructions": "Pour installer: appuyez sur Partager puis 'Ajouter à l'écran d'accueil'",
@@ -94,8 +92,7 @@
       "createFailed": "Impossible de créer le centre",
       "unexpectedError": "Une erreur inattendue s'est produite"
     }
-  }
-,
+  },
   "StudentCard": {
     "title": "Carte d'identité de l'élève",
     "idLabel": "Numéro d'identification",
@@ -137,7 +134,7 @@
       "downloadPdf": "Télécharger PDF"
     }
   },
-"login": {
+  "login": {
     "title": "Bon retour",
     "adminOption": "Admin",
     "welcomeBadge": "Plateforme de gestion des centres",
@@ -177,8 +174,7 @@
     "backToHome": "Retour à l'accueil",
     "infoTitle": "Accès Gestionnaire Uniquement",
     "infoDescription": "Cette connexion est réservée aux gestionnaires de centres. Si vous êtes administrateur, veuillez utiliser la connexion administrateur."
-  }
-  ,
+  },
   "register": {
     "successMessage": "Compte créé avec succès ! Redirection en cours...",
     "title": "Créer un compte",
@@ -590,7 +586,9 @@
     "sunday": "Dimanche",
     "unauthorized": "Non autorisé : Veuillez vous reconnecter",
     "teacherConflict": "L'enseignant a déjà une classe à ce moment-là",
-    "roomConflict": "La salle est déjà réservée à ce moment-là"
+    "roomConflict": "La salle est déjà réservée à ce moment-là",
+    "scheduleDetails": "Détails de l'horaire",
+    "close": "Fermer"
   },
   "ReceiptDetailPage": {
     "loading": "Chargement du reçu...",
@@ -622,7 +620,7 @@
     "na": "S/O"
   },
   "CreateStudentPaymentForm": {
-    "hours":"heures",
+    "hours": "heures",
     "studentPayment": "Paiement de l'élève",
     "paymentDetails": "Détails du paiement",
     "searchOrScanStudent": "Rechercher ou scanner un élève",
@@ -1132,7 +1130,7 @@
   "CreateStudentForm": {
     "next": "Suivant",
     "previous": "Précédent",
-    "hours":"heures",
+    "hours": "heures",
 
     "title": "Ajouter un nouvel élève",
     "errorsrequiredName": "Le nom de l'élève est obligatoire",
@@ -1355,63 +1353,63 @@
     "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
     "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
   },
-"FirstLoginImport": {
-  "title": "Importer les données du serveur",
-  "description": "Votre base de données locale est vide. Importez les données du serveur pour commencer.",
-  "importNow": "Importer maintenant",
-  "dismiss": "Ignorer",
-  "importing": "Importation en cours...",
-  "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour importer les données.",
-  "offlineMessage": "Connectez-vous à Internet pour importer les données du serveur.",
-  "importSuccess": "Importation réussie de {count} types de données",
-  "importPartial": "Importation terminée avec {success} réussies et {failed} échouées",
-  "importError": "Échec de l'importation: {error}"
-},
-"LocalDBDebugger": {
-  "title": "Débogueur de base de données locale",
-  "description": "Afficher et inspecter le contenu de la base de données locale",
-  "totalItems": "Total des éléments",
-  "adminView": "Vue administrateur",
-  "managerView": "Vue gestionnaire",
-  "noData": "Aucune donnée dans ce tableau",
-  "showingFirst": "Affichage des {count} premiers éléments sur {total}",
-  "helpText1": "Ce débogueur affiche le contenu de votre IndexedDB local.",
-  "helpText2": "Appuyez sur un nom de tableau pour l'étendre et afficher ses données."
-},
-"SyncHandler": {
-  "title": "Synchronisation des données",
-  "description": "Gérer la synchronisation des données entre le stockage local et le serveur",
-  "online": "En ligne",
-  "offline": "Hors ligne",
-  "syncToServer": "Synchroniser avec le serveur",
-  "syncing": "Synchronisation...",
-  "importFromServer": "Importer depuis le serveur",
-  "importing": "Importation...",
-  "deleteLocalDB": "Supprimer la base de données locale",
-  "confirmDelete": "Êtes-vous sûr de vouloir supprimer toutes les données locales ? Cette action ne peut pas être annulée.",
-  "deleting": "Suppression...",
-  "confirm": "Confirmer",
-  "cancel": "Annuler",
-  "syncSuccess": "Synchronisation réussie de {count} types de données",
-  "syncPartial": "Synchronisation terminée avec {success} réussies et {failed} échouées",
-  "syncError": "Échec de la synchronisation : {error}",
-  "importSuccess": "Importation réussie de {count} types de données",
-  "importPartial": "Importation terminée avec {success} réussies et {failed} échouées",
-  "importError": "Échec de l'importation : {error}",
-  "deleteSuccess": "Toutes les données locales ont été supprimées avec succès",
-  "deleteError": "Échec de la suppression : {error}",
-  "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour synchroniser ou importer des données.",
-  "syncToServerHelp": "Télécharge vos modifications locales vers le serveur. Cela synchronisera toutes les données locales en attente.",
-  "importFromServerHelp": "Télécharge toutes les données du serveur vers votre base de données locale. Cela remplacera les données synchronisées mais préservera les modifications locales en attente.",
-  "deleteLocalDBHelp": "Supprime définitivement toutes les données locales. Cette action ne peut pas être annulée. Vous devrez réimporter les données pour utiliser l'application."
-},
-"NavUser": {
-  "logout": "Déconnexion",
-  "userAvatar": "Avatar utilisateur"
-},
-"EditDialog": {
-  "saveChanges": "Enregistrer les modifications"
-},
+  "FirstLoginImport": {
+    "title": "Importer les données du serveur",
+    "description": "Votre base de données locale est vide. Importez les données du serveur pour commencer.",
+    "importNow": "Importer maintenant",
+    "dismiss": "Ignorer",
+    "importing": "Importation en cours...",
+    "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour importer les données.",
+    "offlineMessage": "Connectez-vous à Internet pour importer les données du serveur.",
+    "importSuccess": "Importation réussie de {count} types de données",
+    "importPartial": "Importation terminée avec {success} réussies et {failed} échouées",
+    "importError": "Échec de l'importation: {error}"
+  },
+  "LocalDBDebugger": {
+    "title": "Débogueur de base de données locale",
+    "description": "Afficher et inspecter le contenu de la base de données locale",
+    "totalItems": "Total des éléments",
+    "adminView": "Vue administrateur",
+    "managerView": "Vue gestionnaire",
+    "noData": "Aucune donnée dans ce tableau",
+    "showingFirst": "Affichage des {count} premiers éléments sur {total}",
+    "helpText1": "Ce débogueur affiche le contenu de votre IndexedDB local.",
+    "helpText2": "Appuyez sur un nom de tableau pour l'étendre et afficher ses données."
+  },
+  "SyncHandler": {
+    "title": "Synchronisation des données",
+    "description": "Gérer la synchronisation des données entre le stockage local et le serveur",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "syncToServer": "Synchroniser avec le serveur",
+    "syncing": "Synchronisation...",
+    "importFromServer": "Importer depuis le serveur",
+    "importing": "Importation...",
+    "deleteLocalDB": "Supprimer la base de données locale",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer toutes les données locales ? Cette action ne peut pas être annulée.",
+    "deleting": "Suppression...",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "syncSuccess": "Synchronisation réussie de {count} types de données",
+    "syncPartial": "Synchronisation terminée avec {success} réussies et {failed} échouées",
+    "syncError": "Échec de la synchronisation : {error}",
+    "importSuccess": "Importation réussie de {count} types de données",
+    "importPartial": "Importation terminée avec {success} réussies et {failed} échouées",
+    "importError": "Échec de l'importation : {error}",
+    "deleteSuccess": "Toutes les données locales ont été supprimées avec succès",
+    "deleteError": "Échec de la suppression : {error}",
+    "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour synchroniser ou importer des données.",
+    "syncToServerHelp": "Télécharge vos modifications locales vers le serveur. Cela synchronisera toutes les données locales en attente.",
+    "importFromServerHelp": "Télécharge toutes les données du serveur vers votre base de données locale. Cela remplacera les données synchronisées mais préservera les modifications locales en attente.",
+    "deleteLocalDBHelp": "Supprime définitivement toutes les données locales. Cette action ne peut pas être annulée. Vous devrez réimporter les données pour utiliser l'application."
+  },
+  "NavUser": {
+    "logout": "Déconnexion",
+    "userAvatar": "Avatar utilisateur"
+  },
+  "EditDialog": {
+    "saveChanges": "Enregistrer les modifications"
+  },
   "PWAInstallation": {
     "title": "Guide d'installation",
     "description": "Suivez ces étapes pour installer l'application sur votre appareil",
