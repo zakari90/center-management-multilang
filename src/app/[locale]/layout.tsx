@@ -8,7 +8,11 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Metadata, Viewport } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getMessages,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
@@ -22,12 +26,12 @@ const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
 // Note: themeColor needs a static value, but we'll use primary color from theme
 // The actual theme color is set in the meta tag below
 export const viewport: Viewport = {
-  themeColor: 'oklch(0.6209 0.1801 348.1385)', // Primary color from theme
-  width: 'device-width',
+  themeColor: "oklch(0.4549 0.1543 264.05)", // Blue primary color from theme
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover',
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
@@ -37,7 +41,6 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  
   if (!params) {
     notFound();
   }
@@ -54,7 +57,7 @@ export default async function RootLayout({
   const isArabic = locale === "ar";
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
-  console.log('[RootLayout] Server render', {
+  console.log("[RootLayout] Server render", {
     timestamp: new Date().toISOString(),
     locale,
     isArabic,
@@ -67,13 +70,19 @@ export default async function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <meta name="theme-color" content="oklch(0.6209 0.1801 348.1385)" />
-        <meta name="msapplication-TileColor" content="oklch(0.6209 0.1801 348.1385)" />
+        <meta name="theme-color" content="oklch(0.4549 0.1543 264.05)" />
+        <meta
+          name="msapplication-TileColor"
+          content="oklch(0.4549 0.1543 264.05)"
+        />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        
+
         {/* ✅ PWA Apple Specific */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <meta name="apple-mobile-web-app-title" content="إدارة المركز" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icon-192x192.png" />
@@ -84,21 +93,30 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="72x72" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" sizes="60x60" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/icon-192x192.png" />
-        
+
         {/* ✅ PWA Microsoft Specific */}
         <meta name="msapplication-TileImage" content="/icon-192x192.png" />
         {/* <meta name="msapplication-square70x70logo" content="/icon-72x72.png" /> */}
-        <meta name="msapplication-square150x150logo" content="/icon-192x192.png" />
-        <meta name="msapplication-wide310x150logo" content="/icon-192x192.png" />
-        <meta name="msapplication-square310x310logo" content="/icon512_maskable.png" />
-        
+        <meta
+          name="msapplication-square150x150logo"
+          content="/icon-192x192.png"
+        />
+        <meta
+          name="msapplication-wide310x150logo"
+          content="/icon-192x192.png"
+        />
+        <meta
+          name="msapplication-square310x310logo"
+          content="/icon512_maskable.png"
+        />
+
         {/* ✅ PWA Additional Meta Tags */}
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="application-name" content="إدارة المركز" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="format-detection" content="address=no" />
         <meta name="format-detection" content="email=no" />
-        
+
         {/* Original Meta Tags */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -106,7 +124,7 @@ export default async function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        
+
         <script
           {...jsonLdScriptProps<WebSite>({
             "@context": "https://schema.org",
@@ -128,12 +146,12 @@ export default async function RootLayout({
           {/* <OfflineNotificationBanner /> */}
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AuthProvider>
-                  <LoadWS/>
-                  <AutoImportFromServer />
-                  <AutoSyncProvider />
+              <LoadWS />
+              <AutoImportFromServer />
+              <AutoSyncProvider />
               {/* <ServiceWorkerRegister /> */}
               {children}
-                    {/* <PWADebug /> */}
+              {/* <PWADebug /> */}
               {/* <InstallPWA /> */}
               <PWAUpdateHandler />
               {/* <CacheDebugOverlay /> */}
@@ -168,22 +186,22 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     keywords: t("keywords"),
-    
+
     // ✅ PWA Manifest
-    manifest: '/manifest.json',
-    
+    manifest: "/manifest.json",
+
     // ✅ PWA Apple Web App
     appleWebApp: {
       capable: true,
-      statusBarStyle: 'default',
-      title: 'ECMS',
+      statusBarStyle: "default",
+      title: "ECMS",
     },
-    
+
     // ✅ Format Detection
     formatDetection: {
       telephone: false,
     },
-    
+
     openGraph: {
       title: t("title"),
       description: t("description"),
@@ -229,7 +247,7 @@ export async function generateMetadata({
     authors: [{ name: "zakaria zinedine" }],
     icons: [
       { rel: "icon", url: "/icon-192x192.png" },
-      { rel: "apple-touch-icon", url: "/icon-192x192.png" }
+      { rel: "apple-touch-icon", url: "/icon-192x192.png" },
     ],
   };
 }
