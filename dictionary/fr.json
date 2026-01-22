@@ -430,6 +430,7 @@
     "listView": "Affichage en liste",
     "timeline": "Chronologie",
     "searchTeachers": "Rechercher les enseignants...",
+    "costPerSubject": "Coût/Matière",
     "noTeachersFound": "Aucun enseignant trouvé",
     "noSearchResults": "Aucun enseignant trouvé",
     "tryDifferentSearch": "Essayez un autre terme de recherche",
@@ -1582,5 +1583,20 @@
     "nameRequired": "Nom requis",
     "atLeastOneSubject": "Au moins une matière requise",
     "unauthorized": "Non autorisé"
+  },
+  "sync": {
+    "epochMismatch": {
+      "title": "Conflit de synchronisation des données",
+      "description": "Les données du serveur ont été réinitialisées depuis votre dernière connexion. Vos données locales en cache sont obsolètes.",
+      "pendingWarning": "Attention :",
+      "pendingChanges": "Vous avez {count} modification(s) locale(s) non enregistrée(s) qui seront perdues.",
+      "recommendation": "Nous vous recommandons d'effacer votre cache local pour synchroniser avec les dernières données du serveur.",
+      "cancel": "Annuler la connexion",
+      "confirm": "Effacer les données locales et continuer",
+      "exportOnly": "Télécharger une sauvegarde",
+      "exportAndClear": "Exporter et effacer",
+      "exporting": "Exportation en cours...",
+      "exported": "Exporté"
+    }
   }
 }

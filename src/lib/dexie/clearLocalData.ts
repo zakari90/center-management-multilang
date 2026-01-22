@@ -168,3 +168,92 @@ export async function checkEpochMismatch(
     return false;
   }
 }
+
+/**
+ * Export all local data as JSON for backup before clearing
+ * Returns a JSON object with all entity data
+ */
+export async function exportLocalDataAsJson(): Promise<{
+  exportedAt: string;
+  data: {
+    centers: unknown[];
+    teachers: unknown[];
+    students: unknown[];
+    subjects: unknown[];
+    teacherSubjects: unknown[];
+    studentSubjects: unknown[];
+    receipts: unknown[];
+    schedules: unknown[];
+  };
+}> {
+  try {
+    const [
+      centers,
+      teachers,
+      students,
+      subjects,
+      teacherSubjects,
+      studentSubjects,
+      receipts,
+      schedules,
+    ] = await Promise.all([
+      localDb.centers.toArray(),
+      localDb.teachers.toArray(),
+      localDb.students.toArray(),
+      localDb.subjects.toArray(),
+      localDb.teacherSubjects.toArray(),
+      localDb.studentSubjects.toArray(),
+      localDb.receipts.toArray(),
+      localDb.schedules.toArray(),
+    ]);
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      data: {
+        centers,
+        teachers,
+        students,
+        subjects,
+        teacherSubjects,
+        studentSubjects,
+        receipts,
+        schedules,
+      },
+    };
+
+    console.log("[clearLocalData] Data exported:", {
+      centers: centers.length,
+      teachers: teachers.length,
+      students: students.length,
+      subjects: subjects.length,
+      receipts: receipts.length,
+      schedules: schedules.length,
+    });
+
+    return exportData;
+  } catch (error) {
+    console.error("[clearLocalData] Error exporting local data:", error);
+    throw error;
+  }
+}
+
+/**
+ * Download the exported data as a JSON file
+ */
+export function downloadExportAsFile(data: object, filename?: string): void {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download =
+    filename ||
+    `local-data-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  console.log("[clearLocalData] Data downloaded as file");
+}

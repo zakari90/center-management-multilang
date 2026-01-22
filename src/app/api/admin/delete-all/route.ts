@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from 'next/server';
-import db from '@/lib/db';
-import { getSession } from '@/lib/server-auth';
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+import { getSession } from "@/lib/server-auth";
 
 export async function POST() {
-  const session:any = await getSession();
-  if (!session?.user || session.user.role !== 'ADMIN')
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const session: any = await getSession();
+  if (!session?.user || session.user.role !== "ADMIN")
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
     // Delete join tables first
@@ -30,13 +30,22 @@ export async function POST() {
     // Optionally delete users except current admin
     await db.user.deleteMany({
       where: {
-        id: { not: session.user.id }
-      }
+        id: { not: session.user.id },
+      },
     });
 
-    return NextResponse.json({ success: true, message: 'All data deleted.' });
+    // Increment admin's dataEpoch to invalidate any cached data
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { dataEpoch: crypto.randomUUID().slice(0, 8) },
+    });
+
+    return NextResponse.json({ success: true, message: "All data deleted." });
   } catch (error) {
-    console.error('Failed to delete all data:', error);
-    return NextResponse.json({ error: 'Failed to delete all data.' }, { status: 500 });
+    console.error("Failed to delete all data:", error);
+    return NextResponse.json(
+      { error: "Failed to delete all data." },
+      { status: 500 },
+    );
   }
 }

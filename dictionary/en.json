@@ -1614,7 +1614,11 @@
       "pendingChanges": "You have {count} unsaved local change(s) that will be lost.",
       "recommendation": "We recommend clearing your local cache to sync with the latest server data.",
       "cancel": "Cancel Login",
-      "confirm": "Clear Local Data & Continue"
+      "confirm": "Clear Local Data & Continue",
+      "exportOnly": "Download Backup",
+      "exportAndClear": "Export & Clear",
+      "exporting": "Exporting...",
+      "exported": "Exported"
     }
   }
 }

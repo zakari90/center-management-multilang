@@ -1,23 +1,10 @@
 "use client";
 import { FileSpreadsheet, FileText } from "lucide-react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 // import axios from 'axios' // ✅ Commented out - using local DB instead
-import {
-  teacherActions,
-  scheduleActions,
-  subjectActions,
-  centerActions,
-} from "@/lib/dexie/dexieActions";
-import { useAuth } from "@/context/authContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -25,28 +12,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/authContext";
 import {
-  Loader2,
-  Clock,
-  MapPin,
-  BookOpen,
-  User,
-  Calendar,
-  Download,
-  Mail,
-  Phone,
-  CheckCircle,
+  centerActions,
+  scheduleActions,
+  subjectActions,
+  teacherActions,
+} from "@/lib/dexie/dexieActions";
+import { cn } from "@/lib/utils";
+import ExcelJS from "exceljs";
+import {
   AlertCircle,
+  BookOpen,
+  Calendar,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Download,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
   Search,
+  User,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import ExcelJS from "exceljs";
 
 // ==================== TYPES & INTERFACES ====================
 
@@ -593,9 +586,7 @@ export default function TeacherScheduleView({
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "timeline">(
-    "grid",
-  );
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -876,21 +867,6 @@ export default function TeacherScheduleView({
               className="pl-9 w-[200px]"
             />
           </div>
-          <Select
-            value={viewMode}
-            onValueChange={(value: "grid" | "list" | "timeline") =>
-              setViewMode(value)
-            }
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="grid">{t("gridView")}</SelectItem>
-              <SelectItem value="list">{t("listView")}</SelectItem>
-              <SelectItem value="timeline">{t("timeline")}</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -954,7 +930,7 @@ export default function TeacherScheduleView({
                     value={teacher.id}
                     className="flex flex-col items-start px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-fit">
                       <span className="font-medium">{teacher.name}</span>
                       {teacher.conflicts.length > 0 && (
                         <Badge
@@ -985,11 +961,7 @@ export default function TeacherScheduleView({
               <TeacherInfoCard teacher={teacher} />
               <AvailabilityCard teacher={teacher} />
 
-              {viewMode === "grid" && <GridScheduleView teacher={teacher} />}
-              {viewMode === "list" && <ListScheduleView teacher={teacher} />}
-              {viewMode === "timeline" && (
-                <TimelineScheduleView teacher={teacher} />
-              )}
+              <GridScheduleView teacher={teacher} />
             </TabsContent>
           ))}
         </Tabs>
