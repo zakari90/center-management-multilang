@@ -138,7 +138,7 @@ export function PendingSchedulesDialog({
           className="relative"
         >
           <AlertCircle className="h-4 w-4 mr-2" />
-          Pending Schedules
+          {t("buttonText")}
           {pendingCount > 0 && (
             <Badge
               variant="secondary"
@@ -153,23 +153,20 @@ export function PendingSchedulesDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            Pending & Conflicting Schedules
+            {t("title")}
           </DialogTitle>
-          <DialogDescription>
-            These schedules are waiting to sync or have conflicts. Review and
-            resolve them to ensure proper synchronization.
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">
-            Loading pending schedules...
+            {t("loading")}
           </div>
         ) : pendingSchedules.length === 0 ? (
           <Alert>
             <AlertDescription className="flex items-center gap-2">
               <span className="text-green-600">✓</span>
-              No pending schedules. All schedules are synced!
+              {t("noSchedules")}
             </AlertDescription>
           </Alert>
         ) : (
@@ -201,8 +198,8 @@ export function PendingSchedulesDialog({
                       }
                     >
                       {schedule.status === "0"
-                        ? "Pending Deletion"
-                        : "Waiting to Sync"}
+                        ? t("statusPendingDeletion")
+                        : t("statusWaitingSync")}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -225,7 +222,8 @@ export function PendingSchedulesDialog({
                   {schedule.conflictError && (
                     <Alert variant="destructive" className="py-2">
                       <AlertDescription className="text-xs">
-                        <strong>Conflict:</strong> {schedule.conflictError}
+                        <strong>{t("conflict")}:</strong>{" "}
+                        {schedule.conflictError}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -238,7 +236,7 @@ export function PendingSchedulesDialog({
                       disabled={deleting === schedule.id}
                     >
                       <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                      {deleting === schedule.id ? "Deleting..." : "Delete"}
+                      {deleting === schedule.id ? t("deleting") : t("delete")}
                     </Button>
                   </div>
                 </CardContent>

@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Dexie, { Table } from 'dexie';
+import Dexie, { Table } from "dexie";
 
 // Enums
 export enum Role {
-  ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
+  ADMIN = "ADMIN",
+  MANAGER = "MANAGER",
 }
 
 export enum ReceiptType {
-  STUDENT_PAYMENT = 'STUDENT_PAYMENT',
-  TEACHER_PAYMENT = 'TEACHER_PAYMENT',
+  STUDENT_PAYMENT = "STUDENT_PAYMENT",
+  TEACHER_PAYMENT = "TEACHER_PAYMENT",
 }
 
-export type SyncStatus = '1' | 'w' | '0'; 
+export type SyncStatus = "1" | "w" | "0";
 // '1' = synced with server
 // 'w' = waiting/pending sync
 // '0' = marked for deletion (soft delete, pending server sync)
@@ -119,14 +119,22 @@ export interface PushSubscription extends SyncEntity {
 
 // Local authentication storage for offline login
 export interface LocalAuthUser {
-  id: string;           // MongoDB ObjectId from server
-  email: string;        // Unique email
+  id: string; // MongoDB ObjectId from server
+  email: string; // Unique email
   passwordHash: string; // bcrypt hash (same as server)
   name: string;
   role: Role;
-  lastOnlineLogin: number;  // Timestamp of last successful online login
+  lastOnlineLogin: number; // Timestamp of last successful online login
   createdAt: number;
   updatedAt: number;
+}
+
+// Sync metadata for tracking data epochs and detecting server resets
+export interface SyncMeta {
+  id: string; // Always 'current' (singleton per user)
+  userId: string; // Current logged-in user ID
+  dataEpoch: string; // Last known epoch from server
+  lastSyncAt: number; // Timestamp of last successful sync
 }
 
 // Main Database Class
@@ -141,62 +149,81 @@ export class AppDatabase extends Dexie {
   receipts!: Table<Receipt>;
   schedules!: Table<Schedule>;
   pushSubscriptions!: Table<PushSubscription>;
-  localAuthUsers!: Table<LocalAuthUser>;  // For offline authentication
+  localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
+  syncMeta!: Table<SyncMeta>; // For tracking data epochs
 
   constructor() {
-    super('EducationAppDatabase');
+    super("EducationAppDatabase");
 
     this.version(1).stores({
-      centers: 
-        'id, status, adminId, [status+updatedAt], updatedAt',
-      users: 
-        'id, &email, status, role, [status+updatedAt], updatedAt',
-      teachers: 
-        'id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt',
-      students: 
-        'id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt',
-      subjects: 
-        'id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt',
-      teacherSubjects: 
-        'id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt',
-      studentSubjects: 
-        'id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt',
-      receipts: 
-        'id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt',
-      schedules: 
-        'id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt',
-      pushSubscriptions: 
-        'id, &endpoint, status, userId, role, [status+updatedAt], updatedAt',
+      centers: "id, status, adminId, [status+updatedAt], updatedAt",
+      users: "id, &email, status, role, [status+updatedAt], updatedAt",
+      teachers:
+        "id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt",
+      students:
+        "id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt",
+      subjects:
+        "id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt",
+      teacherSubjects:
+        "id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt",
+      studentSubjects:
+        "id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt",
+      receipts:
+        "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
+      schedules:
+        "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
+      pushSubscriptions:
+        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
     });
 
     // Version 2: Add localAuthUsers table for offline authentication
     this.version(2).stores({
-      centers: 
-        'id, status, adminId, [status+updatedAt], updatedAt',
-      users: 
-        'id, &email, status, role, [status+updatedAt], updatedAt',
-      teachers: 
-        'id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt',
-      students: 
-        'id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt',
-      subjects: 
-        'id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt',
-      teacherSubjects: 
-        'id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt',
-      studentSubjects: 
-        'id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt',
-      receipts: 
-        'id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt',
-      schedules: 
-        'id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt',
-      pushSubscriptions: 
-        'id, &endpoint, status, userId, role, [status+updatedAt], updatedAt',
-      localAuthUsers:
-        'id, &email, role, lastOnlineLogin, updatedAt',
+      centers: "id, status, adminId, [status+updatedAt], updatedAt",
+      users: "id, &email, status, role, [status+updatedAt], updatedAt",
+      teachers:
+        "id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt",
+      students:
+        "id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt",
+      subjects:
+        "id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt",
+      teacherSubjects:
+        "id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt",
+      studentSubjects:
+        "id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt",
+      receipts:
+        "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
+      schedules:
+        "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
+      pushSubscriptions:
+        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+      localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
+    });
+
+    // Version 3: Add syncMeta table for tracking data epochs
+    this.version(3).stores({
+      centers: "id, status, adminId, [status+updatedAt], updatedAt",
+      users: "id, &email, status, role, [status+updatedAt], updatedAt",
+      teachers:
+        "id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt",
+      students:
+        "id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt",
+      subjects:
+        "id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt",
+      teacherSubjects:
+        "id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt",
+      studentSubjects:
+        "id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt",
+      receipts:
+        "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
+      schedules:
+        "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
+      pushSubscriptions:
+        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+      localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
+      syncMeta: "id, userId, dataEpoch",
     });
   }
 }
 
 // Export singleton instance
 export const localDb = new AppDatabase();
-

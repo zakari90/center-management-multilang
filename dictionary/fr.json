@@ -373,7 +373,7 @@
     "priceRequired": "Prix (MAD) *",
     "pricePlaceholder": "0.00",
     "duration": "Durée",
-    "durationOptional": "Durée (minutes)",
+    "durationOptional": "Durée (heures/mois)",
     "durationPlaceholder": "60",
     "willCreate": "Créera",
     "courses": "cours",
@@ -429,7 +429,10 @@
     "gridView": "Affichage en grille",
     "listView": "Affichage en liste",
     "timeline": "Chronologie",
+    "searchTeachers": "Rechercher les enseignants...",
     "noTeachersFound": "Aucun enseignant trouvé",
+    "noSearchResults": "Aucun enseignant trouvé",
+    "tryDifferentSearch": "Essayez un autre terme de recherche",
     "noTeachersDescription": "Ajoutez des enseignants pour commencer à gérer les horaires",
     "export": "Exporter",
     "exportToExcel": "Exporter en Excel",
@@ -1401,11 +1404,28 @@
     "offlineError": "Vous êtes hors ligne. Veuillez vous connecter à Internet pour synchroniser ou importer des données.",
     "syncToServerHelp": "Télécharge vos modifications locales vers le serveur. Cela synchronisera toutes les données locales en attente.",
     "importFromServerHelp": "Télécharge toutes les données du serveur vers votre base de données locale. Cela remplacera les données synchronisées mais préservera les modifications locales en attente.",
-    "deleteLocalDBHelp": "Supprime définitivement toutes les données locales. Cette action ne peut pas être annulée. Vous devrez réimporter les données pour utiliser l'application."
+    "deleteLocalDBHelp": "Supprime définitivement toutes les données locales. Cette action ne peut pas être annulée. Vous devrez réimporter les données pour utiliser l'application.",
+    "networkError": "Erreur réseau/serveur",
+    "unknownError": "Inconnu",
+    "failed": "échoué",
+    "syncIssues": "Problèmes de synchronisation",
+    "syncCompletedWithErrors": "Synchronisation terminée avec des erreurs"
   },
   "NavUser": {
     "logout": "Déconnexion",
     "userAvatar": "Avatar utilisateur"
+  },
+  "ScheduleConflict": {
+    "title": "Horaires en attente et en conflit",
+    "description": "Ces horaires sont en attente de synchronisation ou présentent des conflits. Examinez-les et résolvez-les pour assurer une synchronisation correcte.",
+    "buttonText": "Horaires en attente",
+    "loading": "Chargement des horaires en attente...",
+    "noSchedules": "Aucun horaire en attente. Tous les horaires sont synchronisés !",
+    "statusPendingDeletion": "En attente de suppression",
+    "statusWaitingSync": "En attente de synchronisation",
+    "conflict": "Conflit",
+    "delete": "Supprimer",
+    "deleting": "Suppression..."
   },
   "EditDialog": {
     "saveChanges": "Enregistrer les modifications"

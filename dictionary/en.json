@@ -410,7 +410,7 @@
     "priceRequired": "Price (MAD) *",
     "pricePlaceholder": "0.00",
     "duration": "Duration",
-    "durationOptional": "Duration (minutes)",
+    "durationOptional": "Duration (hours/month)",
     "durationPlaceholder": "60",
     "willCreate": "Will create",
     "courses": "course(s)",
@@ -1584,9 +1584,37 @@
     "offlineError": "You are offline. Please connect to the internet to sync or import data.",
     "syncToServerHelp": "Uploads your local changes to the server. This will sync all pending local data.",
     "importFromServerHelp": "Downloads all data from the server to your local database. This will replace synced data but preserve pending local changes.",
-    "deleteLocalDBHelp": "Permanently deletes all local data. This action cannot be undone. You will need to import data again to use the app."
+    "deleteLocalDBHelp": "Permanently deletes all local data. This action cannot be undone. You will need to import data again to use the app.",
+    "networkError": "Network/Server Error",
+    "unknownError": "Unknown",
+    "failed": "failed",
+    "syncIssues": "Sync issues",
+    "syncCompletedWithErrors": "Sync completed with errors"
+  },
+  "ScheduleConflict": {
+    "title": "Pending & Conflicting Schedules",
+    "description": "These schedules are waiting to sync or have conflicts. Review and resolve them to ensure proper synchronization.",
+    "buttonText": "Pending Schedules",
+    "loading": "Loading pending schedules...",
+    "noSchedules": "No pending schedules. All schedules are synced!",
+    "statusPendingDeletion": "Pending Deletion",
+    "statusWaitingSync": "Waiting to Sync",
+    "conflict": "Conflict",
+    "delete": "Delete",
+    "deleting": "Deleting..."
   },
   "EditDialog": {
     "saveChanges": "Save Changes"
+  },
+  "sync": {
+    "epochMismatch": {
+      "title": "Data Sync Conflict",
+      "description": "Server data has been reset since your last login. Your local cached data is outdated.",
+      "pendingWarning": "Warning:",
+      "pendingChanges": "You have {count} unsaved local change(s) that will be lost.",
+      "recommendation": "We recommend clearing your local cache to sync with the latest server data.",
+      "cancel": "Cancel Login",
+      "confirm": "Clear Local Data & Continue"
+    }
   }
 }

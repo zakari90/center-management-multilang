@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json(
         { error: { message: "Email and password are required." } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { error: { email: "User not found." } },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     if (!isValidPassword) {
       return NextResponse.json(
         { error: { password: "Incorrect password." } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -43,14 +43,16 @@ export async function POST(req: NextRequest) {
         },
         // Include hash for offline login capability (PWA feature)
         passwordHash: user.password,
+        // Include dataEpoch for detecting server data resets
+        dataEpoch: user.dataEpoch || "1",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
       { error: { message: "Internal server error" } },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

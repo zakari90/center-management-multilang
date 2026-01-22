@@ -1,5 +1,6 @@
 import AutoImportFromServer from "@/components/auto-import-from-server";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+import { EpochMismatchDialog } from "@/components/epoch-mismatch-dialog";
 import PWAUpdateHandler from "@/components/pwa-update-handler";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/authContext";
@@ -154,6 +155,7 @@ export default async function RootLayout({
               {/* <PWADebug /> */}
               {/* <InstallPWA /> */}
               <PWAUpdateHandler />
+              <EpochMismatchDialog />
               {/* <CacheDebugOverlay /> */}
               {/* <PWAPerformanceMonitor /> */}
               {/* <PWATestingSuite /> */}

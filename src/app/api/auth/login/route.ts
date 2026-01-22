@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!email || !password || !id) {
       return NextResponse.json(
         { error: { message: "Email, password, and id are required." } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       if (!valid) {
         return NextResponse.json(
           { error: { message: "Invalid credentials" } },
-          { status: 401 }
+          { status: 401 },
         );
       }
       // SUCCESS: return user data with passwordHash for offline storage
@@ -41,8 +41,10 @@ export async function POST(req: NextRequest) {
           },
           // Include hash for offline login capability (PWA feature)
           passwordHash: user.password,
+          // Include dataEpoch for detecting server data resets
+          dataEpoch: user.dataEpoch || "1",
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
           password: hashedPassword,
           name: adminUsername,
           role: "ADMIN",
-        }
+        },
       });
 
       return NextResponse.json(
@@ -70,22 +72,23 @@ export async function POST(req: NextRequest) {
           },
           // Include hash for offline login capability (PWA feature)
           passwordHash: hashedPassword,
+          // Include dataEpoch for detecting server data resets
+          dataEpoch: user.dataEpoch || "1",
         },
-        { status: 201 }
+        { status: 201 },
       );
     }
 
     // Else: user doesn't exist and not default admin credentials
     return NextResponse.json(
       { error: { message: "Invalid credentials" } },
-      { status: 401 }
+      { status: 401 },
     );
-
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(
       { error: { message: "Internal server error" } },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

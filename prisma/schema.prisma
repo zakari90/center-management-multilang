@@ -41,6 +41,7 @@ model User {
   password            String
   name                String
   role                Role
+  dataEpoch           String             @default("1")  // Incremented on data reset by admin
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
