@@ -30,6 +30,7 @@ import { ManagersTab } from "./ManagersTab";
 import { TeachersTab } from "./TeachersTab";
 import { StudentsTab } from "./StudentsTab";
 import { UserDialogs } from "./UserDialogs";
+import AddStudentDialog from "@/components/AddStudentDialog";
 import { OrphanedRecordsDialog } from "./OrphanedRecordsDialog";
 import {
   UserData,
@@ -275,10 +276,14 @@ export default function AllUsersTable() {
             <CardTitle>{t("allUsersTitle")}</CardTitle>
             <CardDescription>{t("allUsersDescription")}</CardDescription>
           </div>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t("addManager")}
-          </Button>
+          {activeTab === "students" ? (
+            <AddStudentDialog adminMode onStudentAdded={refreshData} />
+          ) : (
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("addManager")}
+            </Button>
+          )}
         </div>
 
         {/* Orphaned Records Alert */}

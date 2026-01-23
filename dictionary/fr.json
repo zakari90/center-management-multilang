@@ -1199,6 +1199,8 @@
     "next": "Suivant",
     "previous": "Précédent",
     "hours": "heures",
+    "selectManagertitle": "Sélectionner le gestionnaire",
+    "errorsselectManager": "Veuillez sélectionner un gestionnaire",
 
     "title": "Ajouter un nouvel élève",
     "errorsrequiredName": "Le nom de l'élève est obligatoire",
