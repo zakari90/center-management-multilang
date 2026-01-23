@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import db from "@/lib/db";
@@ -25,6 +25,8 @@ export async function saveCenterToDatabase(centerData: {
   phone?: string | null;
   classrooms: string[];
   workingDays: string[];
+  workingMonths: string[];
+  workingYears: string[];
   subjects?: Array<{
     id: string;
     name: string;
@@ -44,7 +46,7 @@ export async function saveCenterToDatabase(centerData: {
       hasSession: !!session,
       hasUser: !!session?.user,
       userId: session?.user?.id,
-      userRole: session?.user?.role
+      userRole: session?.user?.role,
     });
 
     if (!session || !session.user) {
@@ -53,41 +55,61 @@ export async function saveCenterToDatabase(centerData: {
     }
 
     // ✅ Normalize role to uppercase for comparison
-    const userRole = typeof session.user.role === 'string' 
-      ? session.user.role.toUpperCase() 
-      : session.user.role;
+    const userRole =
+      typeof session.user.role === "string"
+        ? session.user.role.toUpperCase()
+        : session.user.role;
 
     if (userRole !== "ADMIN") {
-      throw new Error(`Unauthorized: Admin access required. Current role: ${userRole}`);
+      throw new Error(
+        `Unauthorized: Admin access required. Current role: ${userRole}`,
+      );
     }
 
     // Validate adminId is a valid ObjectId format (24 hex characters)
-    if (!session.user.id || typeof session.user.id !== 'string' || !/^[0-9a-fA-F]{24}$/.test(session.user.id)) {
+    if (
+      !session.user.id ||
+      typeof session.user.id !== "string" ||
+      !/^[0-9a-fA-F]{24}$/.test(session.user.id)
+    ) {
       console.error("[CENTER_SAVE] Invalid adminId format:", session.user.id);
       throw new Error("Invalid admin ID format");
     }
 
-    const { 
+    const {
       id,
-      name, 
-      address, 
-      phone, 
-      classrooms, 
-      workingDays, 
+      name,
+      address,
+      phone,
+      classrooms,
+      workingDays,
+      workingMonths,
+      workingYears,
       subjects,
       createdAt,
-      updatedAt
+      updatedAt,
     } = centerData;
 
     // Validation
-    if (!id || !name || !Array.isArray(classrooms) || !Array.isArray(workingDays)) {
-      throw new Error("Missing or invalid fields. ID and name are required, classrooms and workingDays must be arrays");
+    if (
+      !id ||
+      !name ||
+      !Array.isArray(classrooms) ||
+      !Array.isArray(workingDays) ||
+      !Array.isArray(workingMonths) ||
+      !Array.isArray(workingYears)
+    ) {
+      throw new Error(
+        "Missing or invalid fields. ID and name are required, classrooms, workingDays, workingMonths and workingYears must be arrays",
+      );
     }
 
     // Validate center ID is a valid ObjectId format (24 hex characters)
     if (!/^[0-9a-fA-F]{24}$/.test(id)) {
       console.error("[CENTER_SAVE] Invalid center ID format:", id);
-      throw new Error(`Invalid center ID format: ${id}. Must be a valid MongoDB ObjectId (24 hex characters)`);
+      throw new Error(
+        `Invalid center ID format: ${id}. Must be a valid MongoDB ObjectId (24 hex characters)`,
+      );
     }
 
     // Additional validation for subjects
@@ -101,17 +123,17 @@ export async function saveCenterToDatabase(centerData: {
       adminId: session.user.id,
       classroomsCount: classrooms.length,
       workingDaysCount: workingDays.length,
-      subjectsCount: subjects?.length || 0
+      subjectsCount: subjects?.length || 0,
     });
 
     // ✅ Check if center already exists
     const existingCenter = await db.center.findUnique({
       where: { id },
-      include: { subjects: true }
+      include: { subjects: true },
     });
 
     let center: any;
-    
+
     if (existingCenter) {
       // ✅ Center exists - update it (idempotent)
       center = await db.center.update({
@@ -122,11 +144,13 @@ export async function saveCenterToDatabase(centerData: {
           phone: phone || null,
           classrooms,
           workingDays,
+          workingMonths,
+          workingYears,
           updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
         },
         include: {
-          subjects: true
-        }
+          subjects: true,
+        },
       });
     } else {
       // ✅ Center doesn't exist - create it
@@ -138,13 +162,15 @@ export async function saveCenterToDatabase(centerData: {
           phone: phone || null,
           classrooms,
           workingDays,
+          workingMonths,
+          workingYears,
           adminId: session.user.id,
           createdAt: createdAt ? new Date(createdAt) : new Date(),
           updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
         },
         include: {
-          subjects: true
-        }
+          subjects: true,
+        },
       });
 
       // ✅ Create subjects separately if provided
@@ -155,7 +181,7 @@ export async function saveCenterToDatabase(centerData: {
             subjects.map(async (subject: any) => {
               // Check if subject already exists
               const existingSubject = await db.subject.findUnique({
-                where: { id: subject.id }
+                where: { id: subject.id },
               });
 
               if (existingSubject) {
@@ -167,8 +193,10 @@ export async function saveCenterToDatabase(centerData: {
                     grade: subject.grade,
                     price: subject.price,
                     duration: subject.duration || null,
-                    updatedAt: subject.updatedAt ? new Date(subject.updatedAt) : new Date(),
-                  }
+                    updatedAt: subject.updatedAt
+                      ? new Date(subject.updatedAt)
+                      : new Date(),
+                  },
                 });
               } else {
                 // Create new subject
@@ -180,27 +208,37 @@ export async function saveCenterToDatabase(centerData: {
                     price: subject.price,
                     duration: subject.duration || null,
                     centerId: center.id,
-                    createdAt: subject.createdAt ? new Date(subject.createdAt) : new Date(),
-                    updatedAt: subject.updatedAt ? new Date(subject.updatedAt) : new Date(),
-                  }
+                    createdAt: subject.createdAt
+                      ? new Date(subject.createdAt)
+                      : new Date(),
+                    updatedAt: subject.updatedAt
+                      ? new Date(subject.updatedAt)
+                      : new Date(),
+                  },
                 });
               }
-            })
+            }),
           );
 
           // Log any failed subject creations
           const failedSubjects = subjectResults
-            .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+            .filter(
+              (result): result is PromiseRejectedResult =>
+                result.status === "rejected",
+            )
             .map((result, index) => ({ index, reason: result.reason }));
-          
+
           if (failedSubjects.length > 0) {
-            console.warn("[CENTER_SAVE] Some subjects failed to create:", failedSubjects);
+            console.warn(
+              "[CENTER_SAVE] Some subjects failed to create:",
+              failedSubjects,
+            );
           }
 
           // Reload center with subjects
           center = await db.center.findUnique({
             where: { id },
-            include: { subjects: true }
+            include: { subjects: true },
           });
         } catch (subjectError) {
           console.error("[CENTER_SAVE] Error creating subjects:", subjectError);
@@ -217,17 +255,17 @@ export async function saveCenterToDatabase(centerData: {
       meta: error?.meta,
       name: error?.name,
       // Only include stack in development
-      ...(process.env.NODE_ENV === 'development' && { stack: error?.stack })
+      ...(process.env.NODE_ENV === "development" && { stack: error?.stack }),
     };
-    
+
     console.error("[CENTER_SAVE] Error details:", errorDetails);
-    
+
     // Create a more user-friendly error message
     const userMessage = error?.message || "Failed to save center to database";
     const serverError = new Error(userMessage);
     (serverError as any).code = error?.code;
     (serverError as any).meta = error?.meta;
-    
+
     throw serverError;
   }
 }
@@ -243,20 +281,20 @@ export async function deleteCenterFromDatabase(centerId: string) {
     // Verify ownership
     const existingCenter = await db.center.findUnique({
       where: { id: centerId },
-      select: { adminId: true }
+      select: { adminId: true },
     });
 
     if (!existingCenter) {
-      throw new Error('Center not found');
+      throw new Error("Center not found");
     }
 
     if (existingCenter.adminId !== session.user.id) {
-      throw new Error('Forbidden: You do not own this center');
+      throw new Error("Forbidden: You do not own this center");
     }
 
     // Delete center (cascade will delete related subjects)
     await db.center.delete({
-      where: { id: centerId }
+      where: { id: centerId },
     });
 
     return { success: true };
@@ -281,16 +319,17 @@ export async function getCentersFromDatabase() {
       console.log("[CENTER_GET] Unauthorized role:", session.user.role);
       return { success: true, data: [] };
     }
-    
+
     // ✅ Filter by role - admins see their centers, managers see assigned centers
-    const whereClause = session.user.role === "ADMIN" 
-      ? { adminId: session.user.id }
-      : { managers: { has: session.user.id } }; // For managers
+    const whereClause =
+      session.user.role === "ADMIN"
+        ? { adminId: session.user.id }
+        : { managers: { has: session.user.id } }; // For managers
 
     const centers = await db.center.findMany({
       where: whereClause,
       include: { subjects: true },
-      orderBy: { createdAt: 'desc' } // ✅ Most recent first
+      orderBy: { createdAt: "desc" }, // ✅ Most recent first
     });
 
     return { success: true, data: centers };
@@ -300,4 +339,3 @@ export async function getCentersFromDatabase() {
     return { success: false, data: [], error: error.message };
   }
 }
-

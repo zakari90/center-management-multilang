@@ -24,7 +24,10 @@ model Center {
   address       String?
   phone         String?
   classrooms    String[]
+  classrooms    String[]
   workingDays   String[]
+  workingMonths String[]
+  workingYears  String[]
   managers      String[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

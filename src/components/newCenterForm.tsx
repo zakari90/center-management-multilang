@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { ItemInputList } from "@/components/itemInputList"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { centerActions, subjectActions } from "@/lib/dexie/dexieActions"
-import { Center, Subject } from "@/lib/dexie/dbSchema"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
-import { Separator } from "@radix-ui/react-separator"
-import { useTranslations } from "next-intl"
-import type React from "react"
-import { useState } from "react"
-import { toast } from "sonner"
-import { SubjectFormMultipleChoices } from "./subjectForm"
-import { useLocalizedConstants } from "./useLocalizedConstants"
-import { useAuth } from "@/context/authContext"
-import ServerActionCenters from "@/lib/dexie/centerServerAction"
-import ServerActionSubjects from "@/lib/dexie/subjectServerAction"
-import { isOnline } from "@/lib/utils/network"
+import { ItemInputList } from "@/components/itemInputList";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { centerActions, subjectActions } from "@/lib/dexie/dexieActions";
+import { Center, Subject } from "@/lib/dexie/dbSchema";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { Separator } from "@radix-ui/react-separator";
+import { useTranslations } from "next-intl";
+import type React from "react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { SubjectFormMultipleChoices } from "./subjectForm";
+import { useLocalizedConstants } from "./useLocalizedConstants";
+import { useAuth } from "@/context/authContext";
+import ServerActionCenters from "@/lib/dexie/centerServerAction";
+import ServerActionSubjects from "@/lib/dexie/subjectServerAction";
+import { isOnline } from "@/lib/utils/network";
 
 // ✅ Form-only subject data (before creating Subject entity)
 type SubjectFormData = {
@@ -30,30 +30,41 @@ type SubjectFormData = {
   grade: string;
   price: number;
   duration?: number;
-}
+};
 
 interface NewCenterFormProps {
   onCenterCreated?: () => void; // ✅ Callback to refresh parent component
 }
 
 export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
-  const t = useTranslations('NewCenterForm')
-  const { daysOfWeek, availableSubjects, availableGrades, availableClassrooms } = useLocalizedConstants();
+  const t = useTranslations("NewCenterForm");
+  const {
+    daysOfWeek,
+    monthsOfYear,
+    availableSubjects,
+    availableGrades,
+    availableClassrooms,
+  } = useLocalizedConstants();
   // const router = useRouter() // ✅ Commented out - not used
-  const { user } = useAuth() // ✅ Use AuthContext instead of getSession()
-  
+  const { user } = useAuth(); // ✅ Use AuthContext instead of getSession()
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
     phone: "",
     workingDays: [] as string[],
+    workingMonths: [] as string[],
+    workingYears: [] as string[],
     classrooms: [] as string[],
     subjects: [] as SubjectFormData[],
-  })
+  });
 
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null)
-  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "error" | "success";
+  } | null>(null);
+  const [step, setStep] = useState(1);
 
   // ✅ Reset form to initial state
   const resetForm = () => {
@@ -64,57 +75,73 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
       subjects: [],
       classrooms: [],
       workingDays: [],
-    })
-    setStep(1)
-    setMessage(null)
-  }
+      workingMonths: [],
+      workingYears: [],
+    });
+    setStep(1);
+    setMessage(null);
+  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const updateClassrooms = (newClassrooms: string[]) => {
-    setFormData(prev => ({ ...prev, classrooms: newClassrooms }))
-  }
+    setFormData((prev) => ({ ...prev, classrooms: newClassrooms }));
+  };
 
-  const addSubject = (subjectName: string, grade: string, price: number, duration?: number) => {
-    setFormData(prev => ({
+  const updateWorkingYears = (newYears: string[]) => {
+    setFormData((prev) => ({ ...prev, workingYears: newYears }));
+  };
+
+  const addSubject = (
+    subjectName: string,
+    grade: string,
+    price: number,
+    duration?: number,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      subjects: [...prev.subjects, { 
-        id: generateObjectId(), // ✅ Unique ID for React key
-        name: subjectName, 
-        grade, 
-        price, 
-        duration 
-      }]
-    }))
-  }
+      subjects: [
+        ...prev.subjects,
+        {
+          id: generateObjectId(), // ✅ Unique ID for React key
+          name: subjectName,
+          grade,
+          price,
+          duration,
+        },
+      ],
+    }));
+  };
 
   const removeSubject = (subjectId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      subjects: prev.subjects.filter(s => s.id !== subjectId)
-    }))
-  }
+      subjects: prev.subjects.filter((s) => s.id !== subjectId),
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage(null)
-    
-    const centerId = generateObjectId()
-    const now = Date.now()
-  
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    const centerId = generateObjectId();
+    const now = Date.now();
+
     try {
       if (!user) {
-        const errorMsg = 'Unauthorized: Please log in again'
-        setMessage({ text: errorMsg, type: 'error' })
-        toast.error(errorMsg)
-        setLoading(false)
-        return
+        const errorMsg = "Unauthorized: Please log in again";
+        setMessage({ text: errorMsg, type: "error" });
+        toast.error(errorMsg);
+        setLoading(false);
+        return;
       }
 
       // ✅ Step 1: Save center (normalized storage)
@@ -125,83 +152,95 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
         phone: formData.phone || "",
         classrooms: formData.classrooms,
         workingDays: formData.workingDays,
+        workingMonths: formData.workingMonths,
+        workingYears: formData.workingYears,
         managers: [],
         adminId: user.id,
-        status: 'w',
+        status: "w",
         createdAt: now,
         updatedAt: now,
-      }
-      await centerActions.putLocal(newCenter)
+      };
+      await centerActions.putLocal(newCenter);
 
       // ✅ Step 2: Create subject entities separately (normalized)
-      const subjectEntities: Subject[] = formData.subjects.map(subject => ({
+      const subjectEntities: Subject[] = formData.subjects.map((subject) => ({
         id: generateObjectId(),
         name: subject.name,
         grade: subject.grade,
         price: subject.price,
         duration: subject.duration,
         centerId: centerId,
-        status: 'w',
+        status: "w",
         createdAt: now,
         updatedAt: now,
-      }))
+      }));
 
       // Save all subjects in parallel
       if (subjectEntities.length > 0) {
         await Promise.all(
-          subjectEntities.map(subject => subjectActions.putLocal(subject))
-        )
+          subjectEntities.map((subject) => subjectActions.putLocal(subject)),
+        );
       }
 
       // ✅ Attempt to sync to server if online
       if (isOnline()) {
         try {
           // Sync center first
-          await ServerActionCenters.SaveToServer(newCenter)
-          await centerActions.markSynced(centerId)
-          
+          await ServerActionCenters.SaveToServer(newCenter);
+          await centerActions.markSynced(centerId);
+
           // Sync all subjects
           if (subjectEntities.length > 0) {
             await Promise.all(
               subjectEntities.map(async (subject) => {
-                await ServerActionSubjects.SaveToServer(subject)
-                await subjectActions.markSynced(subject.id)
-              })
-            )
+                await ServerActionSubjects.SaveToServer(subject);
+                await subjectActions.markSynced(subject.id);
+              }),
+            );
           }
-          
-          toast.success(t('syncedToServer') || 'Center synced to server successfully!')
+
+          toast.success(
+            t("syncedToServer") || "Center synced to server successfully!",
+          );
         } catch (syncError) {
           // Sync failed, but local save succeeded - that's okay for offline-first
-          console.warn('Failed to sync center to server (will sync later):', syncError)
-          toast.info(t('savedLocally') || 'Center saved locally. Will sync when online.')
+          console.warn(
+            "Failed to sync center to server (will sync later):",
+            syncError,
+          );
+          toast.info(
+            t("savedLocally") || "Center saved locally. Will sync when online.",
+          );
         }
       } else {
-        toast.info(t('savedLocally') || 'Center saved locally. Will sync when online.')
+        toast.info(
+          t("savedLocally") || "Center saved locally. Will sync when online.",
+        );
       }
 
       // ✅ Success feedback
-      const successMsg = t('centerCreatedSuccess') || 'Center created successfully!'
-      toast.success(successMsg)
-      setMessage({ text: successMsg, type: 'success' })
-      
+      const successMsg =
+        t("centerCreatedSuccess") || "Center created successfully!";
+      toast.success(successMsg);
+      setMessage({ text: successMsg, type: "success" });
+
       // Reset form
-      resetForm()
-      
+      resetForm();
+
       // ✅ Trigger refresh in parent component
       if (onCenterCreated) {
-        onCenterCreated()
+        onCenterCreated();
       }
-      
     } catch (error) {
-      console.error('Form submission error:', error)
-      const errorMsg = t('errorMessage') || 'Failed to create center. Please try again.'
-      setMessage({ text: errorMsg, type: 'error' })
-      toast.error(errorMsg)
+      console.error("Form submission error:", error);
+      const errorMsg =
+        t("errorMessage") || "Failed to create center. Please try again.";
+      setMessage({ text: errorMsg, type: "error" });
+      toast.error(errorMsg);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // ... rest of your component remains the same
   return (
@@ -215,13 +254,15 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                 <div className="relative my-4 flex items-center justify-center overflow-hidden">
                   <Separator className="flex-1 h-px bg-border" />
                   <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                    <span className="font-medium text-foreground">{t('basicInformation')}</span>
+                    <span className="font-medium text-foreground">
+                      {t("basicInformation")}
+                    </span>
                   </div>
                   <Separator className="flex-1 h-px bg-border" />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">{t('centerNameRequired')}</Label>
+                  <Label htmlFor="name">{t("centerNameRequired")}</Label>
                   <Input
                     id="name"
                     type="text"
@@ -229,30 +270,30 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    placeholder={t('centerNamePlaceholder')}
+                    placeholder={t("centerNamePlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">{t('address')}</Label>
+                  <Label htmlFor="address">{t("address")}</Label>
                   <Textarea
                     id="address"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    placeholder={t('addressPlaceholder')}
+                    placeholder={t("addressPlaceholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">{t('phone')}</Label>
+                  <Label htmlFor="phone">{t("phone")}</Label>
                   <Input
                     id="phone"
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder={t('phonePlaceholder')}
+                    placeholder={t("phonePlaceholder")}
                   />
                 </div>
               </div>
@@ -260,13 +301,15 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <span className="font-medium text-foreground">{t('classrooms')}</span>
+                  <span className="font-medium text-foreground">
+                    {t("classrooms")}
+                  </span>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
               <ItemInputList
-                label={t('classrooms')}
-                placeholder={t('classroomPlaceholder')}
+                label={t("classrooms")}
+                placeholder={t("classroomPlaceholder")}
                 items={formData.classrooms}
                 onChange={updateClassrooms}
                 suggestions={availableClassrooms}
@@ -275,7 +318,9 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <span className="font-medium text-foreground">{t('workingDays')}</span>
+                  <span className="font-medium text-foreground">
+                    {t("workingDays")}
+                  </span>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
@@ -292,7 +337,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                             workingDays: checked
                               ? [...prev.workingDays, day.label]
                               : prev.workingDays.filter((d) => d !== day.label),
-                          }))
+                          }));
                         }}
                       />
                       <Label htmlFor={day.key} className="font-medium">
@@ -303,13 +348,76 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                 ))}
               </div>
 
-              <Button 
-                type="button" 
-                onClick={() => setStep(2)} 
+              <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                <Separator className="flex-1 h-px bg-border" />
+                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                  <span className="font-medium text-foreground">
+                    {t("workingMonths")}
+                  </span>
+                </div>
+                <Separator className="flex-1 h-px bg-border" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {monthsOfYear.map((month) => (
+                  <div key={month.key} className="border rounded-lg p-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`month-${month.key}`}
+                        checked={formData.workingMonths.includes(month.label)}
+                        onCheckedChange={(checked) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            workingMonths: checked
+                              ? [...prev.workingMonths, month.label]
+                              : prev.workingMonths.filter(
+                                  (m) => m !== month.label,
+                                ),
+                          }));
+                        }}
+                      />
+                      <Label
+                        htmlFor={`month-${month.key}`}
+                        className="font-medium"
+                      >
+                        {month.label}
+                      </Label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                <Separator className="flex-1 h-px bg-border" />
+                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                  <span className="font-medium text-foreground">
+                    {t("workingYears")}
+                  </span>
+                </div>
+                <Separator className="flex-1 h-px bg-border" />
+              </div>
+              <ItemInputList
+                label={t("workingYears")}
+                placeholder={t("workingYearsPlaceholder")}
+                items={formData.workingYears}
+                onChange={updateWorkingYears}
+                suggestions={[
+                  "2023",
+                  "2024",
+                  "2025",
+                  "2026",
+                  "2023-2024",
+                  "2024-2025",
+                  "2025-2026",
+                ]}
+              />
+
+              <Button
+                type="button"
+                onClick={() => setStep(2)}
                 className="w-full"
                 disabled={!formData.name.trim()}
               >
-                {t('nextAddSubjects')}
+                {t("nextAddSubjects")}
               </Button>
             </>
           )}
@@ -320,23 +428,30 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />
                 <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <span className="font-medium text-foreground">{t('subjectsPricing')}</span>
+                  <span className="font-medium text-foreground">
+                    {t("subjectsPricing")}
+                  </span>
                 </div>
                 <Separator className="flex-1 h-px bg-border" />
               </div>
 
               <SubjectFormMultipleChoices
-                onAddSubject={addSubject} 
+                onAddSubject={addSubject}
                 availableSubjects={availableSubjects}
                 availableGrades={availableGrades}
               />
 
               {formData.subjects.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t('addedSubjects')} ({formData.subjects.length}):</span>
+                  <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {t("addedSubjects")} ({formData.subjects.length}):
+                  </span>
                   <div className="max-h-60 overflow-y-auto space-y-2">
                     {formData.subjects.map((subject) => (
-                      <div key={subject.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                      <div
+                        key={subject.id}
+                        className="flex items-center justify-between p-3 border rounded-lg bg-muted/20"
+                      >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{subject.name}</span>
@@ -345,8 +460,9 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                             </span>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            {t('price')}: ${subject.price}
-                            {subject.duration && ` • ${t('duration')}: ${subject.duration} ${t('minutes')}`}
+                            {t("price")}: ${subject.price}
+                            {subject.duration &&
+                              ` • ${t("duration")}: ${subject.duration} ${t("minutes")}`}
                           </div>
                         </div>
                         <Button
@@ -356,7 +472,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                           onClick={() => removeSubject(subject.id)}
                           className="ml-2"
                         >
-                          {t('remove')}
+                          {t("remove")}
                         </Button>
                       </div>
                     ))}
@@ -365,23 +481,34 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
               )}
 
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  {t('back')}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep(1)}
+                  className="flex-1"
+                >
+                  {t("back")}
                 </Button>
                 <Button type="submit" disabled={loading} className="flex-1">
-                  {loading ? t('creatingCenter') : t('createCenter')}
+                  {loading ? t("creatingCenter") : t("createCenter")}
                 </Button>
               </div>
             </>
           )}
 
           {message && (
-            <Alert className={message.type === 'error' ? "border-destructive" : "border-green-500"}>
+            <Alert
+              className={
+                message.type === "error"
+                  ? "border-destructive"
+                  : "border-green-500"
+              }
+            >
               <AlertDescription>{message.text}</AlertDescription>
             </Alert>
           )}
         </form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

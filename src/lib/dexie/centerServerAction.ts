@@ -23,17 +23,29 @@ function transformServerCenter(serverCenter: any): Center {
     name: serverCenter.name,
     address: serverCenter.address || undefined,
     phone: serverCenter.phone || undefined,
-    classrooms: Array.isArray(serverCenter.classrooms) ? serverCenter.classrooms : [],
-    workingDays: Array.isArray(serverCenter.workingDays) ? serverCenter.workingDays : [],
+    classrooms: Array.isArray(serverCenter.classrooms)
+      ? serverCenter.classrooms
+      : [],
+    workingDays: Array.isArray(serverCenter.workingDays)
+      ? serverCenter.workingDays
+      : [],
+    workingMonths: Array.isArray(serverCenter.workingMonths)
+      ? serverCenter.workingMonths
+      : [],
+    workingYears: Array.isArray(serverCenter.workingYears)
+      ? serverCenter.workingYears
+      : [],
     managers: Array.isArray(serverCenter.managers) ? serverCenter.managers : [],
     adminId: serverCenter.adminId,
-    status: '1' as const,
-    createdAt: typeof serverCenter.createdAt === 'string'
-      ? new Date(serverCenter.createdAt).getTime()
-      : serverCenter.createdAt || Date.now(),
-    updatedAt: typeof serverCenter.updatedAt === 'string'
-      ? new Date(serverCenter.updatedAt).getTime()
-      : serverCenter.updatedAt || Date.now(),
+    status: "1" as const,
+    createdAt:
+      typeof serverCenter.createdAt === "string"
+        ? new Date(serverCenter.createdAt).getTime()
+        : serverCenter.createdAt || Date.now(),
+    updatedAt:
+      typeof serverCenter.updatedAt === "string"
+        ? new Date(serverCenter.updatedAt).getTime()
+        : serverCenter.updatedAt || Date.now(),
   };
 }
 
@@ -43,8 +55,8 @@ const ServerActionCenters = {
       // ✅ Fetch all subjects for this center (exclude deleted)
       const allSubjects = await subjectActions.getAll();
       const centerSubjects = allSubjects
-        .filter(s => s.centerId === center.id && s.status !== '0')
-        .map(s => ({
+        .filter((s) => s.centerId === center.id && s.status !== "0")
+        .map((s) => ({
           id: s.id, // ✅ Include subject ID
           centerId: s.centerId,
           name: s.name,
@@ -62,6 +74,8 @@ const ServerActionCenters = {
         phone: center.phone || null,
         classrooms: center.classrooms || [],
         workingDays: center.workingDays || [],
+        workingMonths: center.workingMonths || [],
+        workingYears: center.workingYears || [],
         subjects: centerSubjects,
         adminId: center.adminId, // ✅ Include adminId for API route compatibility
         createdAt: new Date(center.createdAt).toISOString(),
@@ -76,35 +90,49 @@ const ServerActionCenters = {
         requestBody: {
           ...requestBody,
           // Log first 100 chars of each field to avoid huge logs
-          subjects: requestBody.subjects?.map((s: any) => ({ id: s.id, name: s.name }))
-        }
+          subjects: requestBody.subjects?.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+          })),
+        },
       });
 
       // Validate ObjectId format before sending
       if (!/^[0-9a-fA-F]{24}$/.test(center.id)) {
-        throw new Error(`Invalid center ID format: ${center.id}. Must be a valid MongoDB ObjectId (24 hex characters)`);
+        throw new Error(
+          `Invalid center ID format: ${center.id}. Must be a valid MongoDB ObjectId (24 hex characters)`,
+        );
       }
 
       // ✅ Try server action first (direct Prisma access - faster)
       try {
-        const { saveCenterToDatabase } = await import("@/lib/actions/centerActions");
+        const { saveCenterToDatabase } =
+          await import("@/lib/actions/centerActions");
         const result = await saveCenterToDatabase(requestBody);
-        
+
         if (result.success) {
-          console.log("✅ Center synced successfully via server action:", result.data);
+          console.log(
+            "✅ Center synced successfully via server action:",
+            result.data,
+          );
           return result.data;
         } else {
           throw new Error("Server action returned unsuccessful result");
         }
       } catch (serverActionError: any) {
-        const errorMsg = serverActionError?.message || serverActionError?.toString() || "Unknown server action error";
+        const errorMsg =
+          serverActionError?.message ||
+          serverActionError?.toString() ||
+          "Unknown server action error";
         console.warn("⚠️ Server action failed, falling back to API:", errorMsg);
         console.warn("⚠️ Server action error details:", {
           message: errorMsg,
           name: serverActionError?.name,
           code: serverActionError?.code,
           // Only log stack in development
-          ...(process.env.NODE_ENV === 'development' && { stack: serverActionError?.stack })
+          ...(process.env.NODE_ENV === "development" && {
+            stack: serverActionError?.stack,
+          }),
         });
         // Fall through to API route
       }
@@ -118,7 +146,9 @@ const ServerActionCenters = {
 
       // Validate adminId exists
       if (!apiRequestBody.adminId) {
-        throw new Error("Center adminId is required but missing. Cannot sync center without adminId.");
+        throw new Error(
+          "Center adminId is required but missing. Cannot sync center without adminId.",
+        );
       }
 
       let response = await fetch(api_url, {
@@ -142,16 +172,18 @@ const ServerActionCenters = {
             phone: center.phone || null,
             classrooms: center.classrooms || [],
             workingDays: center.workingDays || [],
+            workingMonths: center.workingMonths || [],
+            workingYears: center.workingYears || [],
             updatedAt: new Date(center.updatedAt).toISOString(),
           }),
         });
-        
+
         // After PATCH, we need to sync subjects separately via POST to /api/subjects
         if (response.ok && centerSubjects.length > 0) {
           console.log("🔄 Syncing subjects separately...");
           try {
             const subjectSyncResults = await Promise.allSettled(
-              centerSubjects.map(subject => 
+              centerSubjects.map((subject) =>
                 fetch(subjects_api_url, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -166,14 +198,21 @@ const ServerActionCenters = {
                     createdAt: subject.createdAt,
                     updatedAt: subject.updatedAt,
                   }),
-                })
-              )
+                }),
+              ),
             );
-            
+
             const failedSubjects = subjectSyncResults
-              .map((result, index) => ({ result, subject: centerSubjects[index] }))
-              .filter(({ result }) => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value.ok));
-            
+              .map((result, index) => ({
+                result,
+                subject: centerSubjects[index],
+              }))
+              .filter(
+                ({ result }) =>
+                  result.status === "rejected" ||
+                  (result.status === "fulfilled" && !result.value.ok),
+              );
+
             if (failedSubjects.length > 0) {
               console.warn("⚠️ Some subjects failed to sync:", failedSubjects);
             } else {
@@ -194,16 +233,19 @@ const ServerActionCenters = {
         } catch {
           errorData = { error: errorText };
         }
-        const errorMessage = errorData.error?.message || errorData.error || `HTTP ${response.status}: ${errorText}`;
+        const errorMessage =
+          errorData.error?.message ||
+          errorData.error ||
+          `HTTP ${response.status}: ${errorText}`;
         console.error("❌ Center sync failed:", {
           status: response.status,
           statusText: response.statusText,
           error: errorMessage,
-          centerId: center.id
+          centerId: center.id,
         });
         throw new Error(`HTTP Error: ${response.status} - ${errorMessage}`);
       }
-      
+
       const result = await response.json();
       console.log("✅ Center synced successfully via API:", result);
       return result;
@@ -217,20 +259,24 @@ const ServerActionCenters = {
     try {
       // ✅ Try server action first (direct Prisma access - faster)
       try {
-        const { deleteCenterFromDatabase } = await import("@/lib/actions/centerActions");
+        const { deleteCenterFromDatabase } =
+          await import("@/lib/actions/centerActions");
         const result = await deleteCenterFromDatabase(id);
-        
+
         if (result.success) {
           console.log("✅ Center deleted successfully via server action");
           return { ok: true } as Response;
         }
       } catch (serverActionError: any) {
-        console.warn("⚠️ Server action failed, falling back to API:", serverActionError?.message);
+        console.warn(
+          "⚠️ Server action failed, falling back to API:",
+          serverActionError?.message,
+        );
         // Fall through to API route
       }
 
       // ✅ Fallback to API route
-      const response = await fetch(`${api_url}?id=${id}`, { 
+      const response = await fetch(`${api_url}?id=${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -249,14 +295,14 @@ const ServerActionCenters = {
 
     console.log("🔄 [Center Sync] Starting sync...");
     const { waiting, pending } = await centerActions.getSyncTargets();
-    
+
     console.log("🔄 [Center Sync] Found:", {
       waiting: waiting.length,
       pending: pending.length,
-      waitingIds: waiting.map(c => c.id),
-      pendingIds: pending.map(c => c.id)
+      waitingIds: waiting.map((c) => c.id),
+      pendingIds: pending.map((c) => c.id),
     });
-    
+
     if (waiting.length === 0 && pending.length === 0) {
       console.log("ℹ️ [Center Sync] No centers to sync");
       return { message: "No centers to sync.", results: [] };
@@ -267,18 +313,21 @@ const ServerActionCenters = {
     // ✅ Process deletions in parallel
     if (pending.length > 0) {
       const deleteResults = await Promise.allSettled(
-        pending.map(center => ServerActionCenters.DeleteFromServer(center.id))
+        pending.map((center) =>
+          ServerActionCenters.DeleteFromServer(center.id),
+        ),
       );
 
       const successfulDeletes: string[] = [];
-      
+
       deleteResults.forEach((result, index) => {
         const center = pending[index];
-        if (result.status === 'fulfilled' && result.value?.ok) {
+        if (result.status === "fulfilled" && result.value?.ok) {
           successfulDeletes.push(center.id);
           results.push({ id: center.id, success: true });
         } else {
-          const error = result.status === 'rejected' ? result.reason : 'Server error';
+          const error =
+            result.status === "rejected" ? result.reason : "Server error";
           results.push({ id: center.id, success: false, error });
         }
       });
@@ -292,24 +341,32 @@ const ServerActionCenters = {
     // ✅ Process updates in parallel
     if (waiting.length > 0) {
       const updateResults = await Promise.allSettled(
-        waiting.map(center => ServerActionCenters.SaveToServer(center))
+        waiting.map((center) => ServerActionCenters.SaveToServer(center)),
       );
 
       const successfulUpdates: string[] = [];
-      
+
       updateResults.forEach((result, index) => {
         const center = waiting[index];
-        if (result.status === 'fulfilled' && result.value) {
+        if (result.status === "fulfilled" && result.value) {
           successfulUpdates.push(center.id);
           results.push({ id: center.id, success: true });
         } else {
-          let errorMessage = 'Server error';
-          if (result.status === 'rejected') {
-            errorMessage = result.reason?.message || result.reason?.toString() || 'Unknown error';
-            console.error(`[Center Sync] Failed to sync center ${center.id}:`, result.reason);
-          } else if (result.status === 'fulfilled' && !result.value) {
-            errorMessage = 'Server returned no data';
-            console.error(`[Center Sync] Server returned no data for center ${center.id}`);
+          let errorMessage = "Server error";
+          if (result.status === "rejected") {
+            errorMessage =
+              result.reason?.message ||
+              result.reason?.toString() ||
+              "Unknown error";
+            console.error(
+              `[Center Sync] Failed to sync center ${center.id}:`,
+              result.reason,
+            );
+          } else if (result.status === "fulfilled" && !result.value) {
+            errorMessage = "Server returned no data";
+            console.error(
+              `[Center Sync] Server returned no data for center ${center.id}`,
+            );
           }
           results.push({ id: center.id, success: false, error: errorMessage });
         }
@@ -318,34 +375,34 @@ const ServerActionCenters = {
       // ✅ Bulk mark as synced
       if (successfulUpdates.length > 0) {
         await centerActions.bulkMarkSynced(successfulUpdates);
-        
+
         // ✅ Also mark subjects as synced for successfully synced centers
         const allSubjects = await subjectActions.getAll();
-        const subjectsToMarkSynced = allSubjects.filter(s => 
-          successfulUpdates.includes(s.centerId) && s.status === 'w'
+        const subjectsToMarkSynced = allSubjects.filter(
+          (s) => successfulUpdates.includes(s.centerId) && s.status === "w",
         );
-        
+
         if (subjectsToMarkSynced.length > 0) {
           await Promise.all(
-            subjectsToMarkSynced.map(subject => 
+            subjectsToMarkSynced.map((subject) =>
               subjectActions.putLocal({
                 ...subject,
-                status: '1' as const,
+                status: "1" as const,
                 updatedAt: Date.now(),
-              })
-            )
+              }),
+            ),
           );
         }
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    const failCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failCount = results.filter((r) => !r.success).length;
 
     console.log("✅ [Center Sync] Completed:", {
       successCount,
       failCount,
-      results
+      results,
     });
 
     return {
@@ -360,15 +417,19 @@ const ServerActionCenters = {
     try {
       // ✅ Try server action first (direct Prisma access - faster)
       try {
-        const { getCentersFromDatabase } = await import("@/lib/actions/centerActions");
+        const { getCentersFromDatabase } =
+          await import("@/lib/actions/centerActions");
         const result = await getCentersFromDatabase();
-        
+
         if (result.success) {
           console.log("✅ Centers fetched successfully via server action");
           return result.data;
         }
       } catch (serverActionError: any) {
-        console.warn("⚠️ Server action failed, falling back to API:", serverActionError?.message);
+        console.warn(
+          "⚠️ Server action failed, falling back to API:",
+          serverActionError?.message,
+        );
         // Fall through to API route
       }
 
@@ -392,47 +453,51 @@ const ServerActionCenters = {
 
     try {
       const data = await ServerActionCenters.ReadFromServer();
-      const transformedCenters = Array.isArray(data) 
+      const transformedCenters = Array.isArray(data)
         ? data.map((center: any) => transformServerCenter(center))
         : [];
-      
+
       // ✅ Use transaction for atomicity
-      await localDb.transaction('rw', localDb.centers, async () => {
+      await localDb.transaction("rw", localDb.centers, async () => {
         // ✅ Get pending local changes that should NOT be overwritten
-        const pendingCenters = await centerActions.getByStatus(['w', '0']);
-        const pendingIds = new Set(pendingCenters.map(c => c.id));
-        
+        const pendingCenters = await centerActions.getByStatus(["w", "0"]);
+        const pendingIds = new Set(pendingCenters.map((c) => c.id));
+
         // Get existing synced centers
         const syncedCenters = await centerActions.getByStatus(["1"]);
-        const syncedIds = syncedCenters.map(c => c.id);
-        
+        const syncedIds = syncedCenters.map((c) => c.id);
+
         // Delete old synced records
         if (syncedIds.length > 0) {
           await centerActions.bulkDeleteLocal(syncedIds);
         }
-        
+
         // ✅ Filter out centers that have pending local changes to preserve them
-        const safeToImport = transformedCenters.filter(c => !pendingIds.has(c.id));
-        
+        const safeToImport = transformedCenters.filter(
+          (c) => !pendingIds.has(c.id),
+        );
+
         // Bulk insert only non-conflicting records
         if (safeToImport.length > 0) {
           await centerActions.bulkPutLocal(safeToImport);
         }
-        
+
         if (pendingIds.size > 0) {
-          console.log(`[ImportFromServer] Preserved ${pendingIds.size} center(s) with pending local changes`);
+          console.log(
+            `[ImportFromServer] Preserved ${pendingIds.size} center(s) with pending local changes`,
+          );
         }
       });
-      
-      return { 
-        message: `Imported ${transformedCenters.length} centers from server.`, 
-        count: transformedCenters.length 
+
+      return {
+        message: `Imported ${transformedCenters.length} centers from server.`,
+        count: transformedCenters.length,
       };
     } catch (error) {
       console.error("Error importing from server:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default ServerActionCenters;
