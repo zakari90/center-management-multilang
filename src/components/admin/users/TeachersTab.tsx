@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { TeacherData } from "./types";
 import { useState } from "react";
 import AddTeacherDialog from "@/components/AddTeacherDialog";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface TeachersTabProps {
   teachers: TeacherData[];
@@ -30,12 +31,20 @@ export function TeachersTab({
 }: TeachersTabProps) {
   const t = useTranslations("AllUsersTable");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const filteredTeachers = teachers.filter(
     (teacher) =>
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (teacher.email &&
         teacher.email.toLowerCase().includes(searchTerm.toLowerCase())),
+  );
+
+  const totalPages = Math.ceil(filteredTeachers.length / ITEMS_PER_PAGE);
+  const paginatedTeachers = filteredTeachers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
   );
 
   return (
@@ -46,7 +55,10 @@ export function TeachersTab({
           <Input
             placeholder={t("searchTeachers")}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1); // Reset page on search
+            }}
             className="pl-10"
           />
         </div>
@@ -74,7 +86,7 @@ export function TeachersTab({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTeachers.map((teacher) => (
+              {paginatedTeachers.map((teacher) => (
                 <TableRow key={teacher.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -133,6 +145,15 @@ export function TeachersTab({
               ))}
             </TableBody>
           </Table>
+
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalCount={filteredTeachers.length}
+            pageSize={ITEMS_PER_PAGE}
+            entityName={t("teachers").toLowerCase()}
+          />
         </div>
       )}
     </div>

@@ -1,29 +1,29 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { Link } from '@/i18n/navigation'
-import { ModalLink } from '@/components/modal-link'
-import { receiptActions, studentActions } from '@/lib/dexie/dexieActions'
-import { useAuth } from '@/context/authContext'
-import { ReceiptType } from '@/lib/dexie/dbSchema'
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { ModalLink } from "@/components/modal-link";
+import { receiptActions, studentActions } from "@/lib/dexie/dexieActions";
+import { useAuth } from "@/context/authContext";
+import { ReceiptType } from "@/lib/dexie/dbSchema";
 // import axios from 'axios' // ✅ Commented out - using local DB
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -31,21 +31,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { 
-  Loader2, 
-  Search, 
-  Plus, 
-  Eye, 
+} from "@/components/ui/dropdown-menu";
+import {
+  Loader2,
+  Search,
+  Plus,
+  Eye,
   Printer,
   Download,
   MoreVertical,
@@ -54,48 +54,49 @@ import {
   User,
   TrendingUp,
   Receipt as ReceiptIcon,
-  ChevronDown
-} from 'lucide-react'
-import { format } from 'date-fns'
-import { useTranslations } from 'next-intl'
-import { EntitySyncControls } from '@/components/EntitySyncControls'
+  ChevronDown,
+} from "lucide-react";
+import { format } from "date-fns";
+import { useTranslations } from "next-intl";
+import { EntitySyncControls } from "@/components/EntitySyncControls";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface Receipt {
-  id: string
-  receiptNumber: string
-  amount: number
-  paymentMethod: string | null
-  description: string | null
-  date: string
-  createdAt: string
+  id: string;
+  receiptNumber: string;
+  amount: number;
+  paymentMethod: string | null;
+  description: string | null;
+  date: string;
+  createdAt: string;
   student: {
-    id: string
-    name: string
-    grade: string | null
-    email: string | null
-  }
+    id: string;
+    name: string;
+    grade: string | null;
+    email: string | null;
+  };
 }
 
 interface Student {
-  id: string
-  name: string
-  grade: string | null
+  id: string;
+  name: string;
+  grade: string | null;
 }
 
 export default function StudentReceiptTable() {
-  const t = useTranslations("StudentReceiptTable")
-  const router = useRouter()
-  const { user, isLoading: authLoading } = useAuth() // ✅ Get current user and loading state from AuthContext
-  const [receipts, setReceipts] = useState<Receipt[]>([])
-  const [students, setStudents] = useState<Student[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  
+  const t = useTranslations("StudentReceiptTable");
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth(); // ✅ Get current user and loading state from AuthContext
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
   // Filters
-  const [searchTerm, setSearchTerm] = useState('')
-  const [studentFilter, setStudentFilter] = useState<string>('all')
-  const [methodFilter, setMethodFilter] = useState<string>('all')
-  const [dateFilter, setDateFilter] = useState<string>('all') // all, today, week, month
+  const [searchTerm, setSearchTerm] = useState("");
+  const [studentFilter, setStudentFilter] = useState<string>("all");
+  const [methodFilter, setMethodFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all"); // all, today, week, month
   const [columnVisibility, setColumnVisibility] = useState({
     receiptNumber: true,
     student: true,
@@ -105,41 +106,41 @@ export default function StudentReceiptTable() {
     date: true,
     description: true,
     actions: true,
-  })
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const fetchData = useCallback(async () => {
     try {
       // Wait for auth to finish loading
       if (authLoading) {
-        return
+        return;
       }
 
       if (!user) {
-        setError("Unauthorized: Please log in again")
-        setIsLoading(false)
-        return
+        setError("Unauthorized: Please log in again");
+        setIsLoading(false);
+        return;
       }
 
       // ✅ Fetch from local DB
       const [allReceipts, allStudents] = await Promise.all([
         receiptActions.getAll(),
-        studentActions.getAll()
-      ])
+        studentActions.getAll(),
+      ]);
 
       // ✅ Filter receipts by type and status (all users can see all data)
-      const studentReceipts = allReceipts
-        .filter(r => 
-          r.type === ReceiptType.STUDENT_PAYMENT && 
-          r.status !== '0'
-        )
+      const studentReceipts = allReceipts.filter(
+        (r) => r.type === ReceiptType.STUDENT_PAYMENT && r.status !== "0",
+      );
 
       // ✅ Filter students by status only (all users can see all data)
-      const activeStudents = allStudents
-        .filter(s => s.status !== '0')
+      const activeStudents = allStudents.filter((s) => s.status !== "0");
 
       // ✅ Build receipts with student data
-      const receiptsWithStudents: Receipt[] = studentReceipts.map(receipt => {
-        const student = activeStudents.find(s => s.id === receipt.studentId)
+      const receiptsWithStudents: Receipt[] = studentReceipts.map((receipt) => {
+        const student = activeStudents.find((s) => s.id === receipt.studentId);
         return {
           id: receipt.id,
           receiptNumber: receipt.receiptNumber,
@@ -148,29 +149,31 @@ export default function StudentReceiptTable() {
           description: receipt.description ?? null,
           date: new Date(receipt.date).toISOString(),
           createdAt: new Date(receipt.createdAt).toISOString(),
-          student: student ? {
-            id: student.id,
-            name: student.name,
-            grade: student.grade ?? null,
-            email: student.email ?? null,
-          } : {
-            id: receipt.studentId || '',
-            name: 'Unknown',
-            grade: null,
-            email: null,
-          },
-        }
-      })
+          student: student
+            ? {
+                id: student.id,
+                name: student.name,
+                grade: student.grade ?? null,
+                email: student.email ?? null,
+              }
+            : {
+                id: receipt.studentId || "",
+                name: "Unknown",
+                grade: null,
+                email: null,
+              },
+        };
+      });
 
       // ✅ Build students list for filter
-      const studentsList: Student[] = activeStudents.map(s => ({
+      const studentsList: Student[] = activeStudents.map((s) => ({
         id: s.id,
         name: s.name,
         grade: s.grade ?? null,
-      }))
+      }));
 
-      setReceipts(receiptsWithStudents)
-      setStudents(studentsList)
+      setReceipts(receiptsWithStudents);
+      setStudents(studentsList);
 
       // ✅ Commented out online fetch
       // const [receiptsRes, studentsRes] = await Promise.all([
@@ -180,101 +183,130 @@ export default function StudentReceiptTable() {
       // setReceipts(receiptsRes.data)
       // setStudents(studentsRes.data)
     } catch (err) {
-      console.error('Failed to fetch data:', err)
-      setError(t("errorLoadReceipts"))
+      console.error("Failed to fetch data:", err);
+      setError(t("errorLoadReceipts"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [user, authLoading, t])
+  }, [user, authLoading, t]);
 
   useEffect(() => {
     // Wait for auth to finish loading before fetching data
     if (!authLoading) {
-      fetchData()
+      fetchData();
     }
-  }, [authLoading, fetchData])
+  }, [authLoading, fetchData]);
 
   // Filter receipts
-  const filteredReceipts = receipts.filter(receipt => {
+  const filteredReceipts = receipts.filter((receipt) => {
     // Search filter
-    const matchesSearch = 
+    const matchesSearch =
       receipt.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       receipt.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      receipt.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    
+      receipt.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
     // Student filter
-    const matchesStudent = studentFilter === 'all' || receipt.student.id === studentFilter
-    
+    const matchesStudent =
+      studentFilter === "all" || receipt.student.id === studentFilter;
+
     // Payment method filter
-    const matchesMethod = methodFilter === 'all' || receipt.paymentMethod === methodFilter
-    
+    const matchesMethod =
+      methodFilter === "all" || receipt.paymentMethod === methodFilter;
+
     // Date filter
-    let matchesDate = true
-    if (dateFilter !== 'all') {
-      const receiptDate = new Date(receipt.date)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      
+    let matchesDate = true;
+    if (dateFilter !== "all") {
+      const receiptDate = new Date(receipt.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       switch (dateFilter) {
-        case 'today':
-          matchesDate = receiptDate >= today
-          break
-        case 'week':
-          const weekAgo = new Date(today)
-          weekAgo.setDate(weekAgo.getDate() - 7)
-          matchesDate = receiptDate >= weekAgo
-          break
-        case 'month':
-          const monthAgo = new Date(today)
-          monthAgo.setMonth(monthAgo.getMonth() - 1)
-          matchesDate = receiptDate >= monthAgo
-          break
+        case "today":
+          matchesDate = receiptDate >= today;
+          break;
+        case "week":
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          matchesDate = receiptDate >= weekAgo;
+          break;
+        case "month":
+          const monthAgo = new Date(today);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          matchesDate = receiptDate >= monthAgo;
+          break;
       }
     }
 
-    return matchesSearch && matchesStudent && matchesMethod && matchesDate
-  })
+    return matchesSearch && matchesStudent && matchesMethod && matchesDate;
+  });
+
+  const totalPages = Math.ceil(filteredReceipts.length / ITEMS_PER_PAGE);
+  const paginatedReceipts = filteredReceipts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   // Calculate statistics
-  const totalAmount = filteredReceipts.reduce((sum, r) => sum + r.amount, 0)
-  const avgAmount = filteredReceipts.length > 0 ? totalAmount / filteredReceipts.length : 0
-  
+  const totalAmount = filteredReceipts.reduce((sum, r) => sum + r.amount, 0);
+  const avgAmount =
+    filteredReceipts.length > 0 ? totalAmount / filteredReceipts.length : 0;
+
   // Get this month's receipts
-  const thisMonth = new Date()
-  thisMonth.setDate(1)
-  thisMonth.setHours(0, 0, 0, 0)
-  const thisMonthReceipts = receipts.filter(r => new Date(r.date) >= thisMonth)
-  const thisMonthAmount = thisMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
+  const thisMonth = new Date();
+  thisMonth.setDate(1);
+  thisMonth.setHours(0, 0, 0, 0);
+  const thisMonthReceipts = receipts.filter(
+    (r) => new Date(r.date) >= thisMonth,
+  );
+  const thisMonthAmount = thisMonthReceipts.reduce(
+    (sum, r) => sum + r.amount,
+    0,
+  );
 
   // Get unique payment methods
-  const paymentMethods = ['all', ...new Set(receipts.map(r => r.paymentMethod).filter(Boolean) as string[])]
+  const paymentMethods = [
+    "all",
+    ...new Set(
+      receipts.map((r) => r.paymentMethod).filter(Boolean) as string[],
+    ),
+  ];
 
   const handlePrint = (receiptId: string) => {
-    router.push(`/receipts/${receiptId}`)
-  }
+    router.push(`/receipts/${receiptId}`);
+  };
 
   const handleExportCSV = () => {
     const csvContent = [
-      [t("receiptNumber"), t('student'), t('grade'), t('amount'), t('method'), t('date'), t('description')],
-      ...filteredReceipts.map(r => [
+      [
+        t("receiptNumber"),
+        t("student"),
+        t("grade"),
+        t("amount"),
+        t("method"),
+        t("date"),
+        t("description"),
+      ],
+      ...filteredReceipts.map((r) => [
         r.receiptNumber,
         r.student.name,
-        r.student.grade || 'N/A',
+        r.student.grade || "N/A",
         r.amount.toFixed(2),
-        r.paymentMethod || 'N/A',
-        format(new Date(r.date), 'yyyy-MM-dd'),
-        r.description || ''
-      ])
-    ].map(row => row.join(',')).join('\n')
+        r.paymentMethod || "N/A",
+        format(new Date(r.date), "yyyy-MM-dd"),
+        r.description || "",
+      ]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${t("studentReceipts")}-${format(new Date(), 'yyyy-MM-dd')}.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${t("studentReceipts")}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   // Show loading while auth is checking or data is loading
   if (authLoading || isLoading) {
@@ -282,7 +314,7 @@ export default function StudentReceiptTable() {
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   return (
@@ -299,7 +331,6 @@ export default function StudentReceiptTable() {
               <Download className="mr-2 h-4 w-4" />
               {t("exportCSV")}
             </Button>
-
           </div>
           {/* Per-entity sync controls for receipts */}
           <EntitySyncControls entity="receipts" />
@@ -316,7 +347,9 @@ export default function StudentReceiptTable() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalReceipts")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalReceipts")}
+            </CardTitle>
             <ReceiptIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -329,7 +362,9 @@ export default function StudentReceiptTable() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("totalAmount")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalAmount")}
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -344,7 +379,9 @@ export default function StudentReceiptTable() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("thisMonth")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("thisMonth")}
+            </CardTitle>
             <Calendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -359,7 +396,9 @@ export default function StudentReceiptTable() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t("averagePayment")}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("averagePayment")}
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
@@ -374,213 +413,242 @@ export default function StudentReceiptTable() {
       </div>
 
       {/* Filters */}
-<Card>
-  <CardHeader>
-    <CardTitle>{t("filters")}</CardTitle>
-    <CardDescription>{t("refineSearch")}</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder={t("searchReceipts")}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("filters")}</CardTitle>
+          <CardDescription>{t("refineSearch")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("searchReceipts")}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10"
+              />
+            </div>
 
-      {/* Student Filter */}
-      <Select value={studentFilter} onValueChange={setStudentFilter}>
-        <SelectTrigger>
-          <SelectValue placeholder={t("allStudents")} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t("allStudents")}</SelectItem>
-          {students.map((student) => (
-            <SelectItem key={student.id} value={student.id}>
-              {student.name} {student.grade ? `(${student.grade})` : ""}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+            {/* Student Filter */}
+            <Select
+              value={studentFilter}
+              onValueChange={(val) => {
+                setStudentFilter(val);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("allStudents")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("allStudents")}</SelectItem>
+                {students.map((student) => (
+                  <SelectItem key={student.id} value={student.id}>
+                    {student.name} {student.grade ? `(${student.grade})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-      {/* Payment Method Filter */}
-      <Select value={methodFilter} onValueChange={setMethodFilter}>
-        <SelectTrigger>
-          <SelectValue placeholder={t("allMethods")} />
-        </SelectTrigger>
-        <SelectContent>
-          {paymentMethods.map((method) => (
-            <SelectItem key={method} value={method}>
-              {method === "all" ? t("allMethods") : method}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+            {/* Payment Method Filter */}
+            <Select
+              value={methodFilter}
+              onValueChange={(val) => {
+                setMethodFilter(val);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("allMethods")} />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentMethods.map((method) => (
+                  <SelectItem key={method} value={method}>
+                    {method === "all" ? t("allMethods") : method}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-      {/* Date Filter */}
-      <Select value={dateFilter} onValueChange={setDateFilter}>
-        <SelectTrigger>
-          <SelectValue placeholder={t("allTime")} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t("allTime")}</SelectItem>
-          <SelectItem value="today">{t("today")}</SelectItem>
-          <SelectItem value="week">{t("last7Days")}</SelectItem>
-          <SelectItem value="month">{t("last30Days")}</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+            {/* Date Filter */}
+            <Select
+              value={dateFilter}
+              onValueChange={(val) => {
+                setDateFilter(val);
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("allTime")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("allTime")}</SelectItem>
+                <SelectItem value="today">{t("today")}</SelectItem>
+                <SelectItem value="week">{t("last7Days")}</SelectItem>
+                <SelectItem value="month">{t("last30Days")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-    {/* Active Filters Summary */}
-    {(searchTerm ||
-      studentFilter !== "all" ||
-      methodFilter !== "all" ||
-      dateFilter !== "all") && (
-      <div className="flex gap-2 mt-4 flex-wrap">
-        <Badge variant="secondary" className="text-xs">
-          {t("showing")} {filteredReceipts.length} {t("of")} {receipts.length}{" "}
-          {t("receipts")}
-        </Badge>
+          {/* Active Filters Summary */}
+          {(searchTerm ||
+            studentFilter !== "all" ||
+            methodFilter !== "all" ||
+            dateFilter !== "all") && (
+            <div className="flex gap-2 mt-4 flex-wrap">
+              <Badge variant="secondary" className="text-xs">
+                {t("showing")} {filteredReceipts.length} {t("of")}{" "}
+                {receipts.length} {t("receipts")}
+              </Badge>
 
-        {searchTerm && (
-          <Badge variant="outline" className="text-xs">
-            {t("search")}: {searchTerm}
-          </Badge>
-        )}
-        {studentFilter !== "all" && (
-          <Badge variant="outline" className="text-xs">
-            {t("student")}: {students.find((s) => s.id === studentFilter)?.name}
-          </Badge>
-        )}
-        {methodFilter !== "all" && (
-          <Badge variant="outline" className="text-xs">
-            {t("method")}: {methodFilter}
-          </Badge>
-        )}
-        {dateFilter !== "all" && (
-          <Badge variant="outline" className="text-xs">
-            {t("period")}: {dateFilter}
-          </Badge>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSearchTerm("")
-            setStudentFilter("all")
-            setMethodFilter("all")
-            setDateFilter("all")
-          }}
-          className="h-6 text-xs"
-        >
-          {t("clearAll")}
-        </Button>
-      </div>
-    )}
-    
-    {/* Column Visibility Dropdown */}
+              {searchTerm && (
+                <Badge variant="outline" className="text-xs">
+                  {t("search")}: {searchTerm}
+                </Badge>
+              )}
+              {studentFilter !== "all" && (
+                <Badge variant="outline" className="text-xs">
+                  {t("student")}:{" "}
+                  {students.find((s) => s.id === studentFilter)?.name}
+                </Badge>
+              )}
+              {methodFilter !== "all" && (
+                <Badge variant="outline" className="text-xs">
+                  {t("method")}: {methodFilter}
+                </Badge>
+              )}
+              {dateFilter !== "all" && (
+                <Badge variant="outline" className="text-xs">
+                  {t("period")}: {dateFilter}
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStudentFilter("all");
+                  setMethodFilter("all");
+                  setDateFilter("all");
+                  setCurrentPage(1);
+                }}
+                className="h-6 text-xs"
+              >
+                {t("clearAll")}
+              </Button>
+            </div>
+          )}
 
-  </CardContent>
-</Card>
-
+          {/* Column Visibility Dropdown */}
+        </CardContent>
+      </Card>
 
       {/* Table */}
-<Card>
-  <CardHeader className='flex justify-between items-center'>
-    <div>
+      <Card>
+        <CardHeader className="flex justify-between items-center">
+          <div>
+            <CardTitle>{t("paymentRecords")}</CardTitle>
+            <CardDescription>{t("completeList")}</CardDescription>
+          </div>
 
-    <CardTitle>{t("paymentRecords")}</CardTitle>
-    <CardDescription>{t("completeList")}</CardDescription>
-    </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="default">
-             <ChevronDown className="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.receiptNumber}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, receiptNumber: !!value }))
-            }
-          >
-            {t("receiptNumber")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.student}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, student: !!value }))
-            }
-          >
-            {t("student")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.grade}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, grade: !!value }))
-            }
-          >
-            {t("grade")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.amount}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, amount: !!value }))
-            }
-          >
-            {t("amount")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.method}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, method: !!value }))
-            }
-          >
-            {t("method")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.date}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, date: !!value }))
-            }
-          >
-            {t("date")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.description}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, description: !!value }))
-            }
-          >
-            {t("description")}
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={columnVisibility.actions}
-            onCheckedChange={(value) =>
-              setColumnVisibility(prev => ({ ...prev, actions: !!value }))
-            }
-          >
-            {t("actions")}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-  </CardHeader>
-  <CardContent>
-    {filteredReceipts.length === 0 ? (
-      <div className="text-center py-12">
-        <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-        <p className="mt-4 text-muted-foreground">
-          {searchTerm || studentFilter !== "all" || methodFilter !== "all" || dateFilter !== "all"
-            ? t("noReceiptsFilters")
-            : t("noReceiptsYet")}
-        </p>
-        {/* {!searchTerm && studentFilter === "all" && methodFilter === "all" && dateFilter === "all" && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="default">
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.receiptNumber}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({
+                    ...prev,
+                    receiptNumber: !!value,
+                  }))
+                }
+              >
+                {t("receiptNumber")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.student}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, student: !!value }))
+                }
+              >
+                {t("student")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.grade}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, grade: !!value }))
+                }
+              >
+                {t("grade")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.amount}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, amount: !!value }))
+                }
+              >
+                {t("amount")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.method}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, method: !!value }))
+                }
+              >
+                {t("method")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.date}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, date: !!value }))
+                }
+              >
+                {t("date")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.description}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({
+                    ...prev,
+                    description: !!value,
+                  }))
+                }
+              >
+                {t("description")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.actions}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, actions: !!value }))
+                }
+              >
+                {t("actions")}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </CardHeader>
+        <CardContent>
+          {filteredReceipts.length === 0 ? (
+            <div className="text-center py-12">
+              <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+              <p className="mt-4 text-muted-foreground">
+                {searchTerm ||
+                studentFilter !== "all" ||
+                methodFilter !== "all" ||
+                dateFilter !== "all"
+                  ? t("noReceiptsFilters")
+                  : t("noReceiptsYet")}
+              </p>
+              {/* {!searchTerm && studentFilter === "all" && methodFilter === "all" && dateFilter === "all" && (
           <Button asChild className="mt-4">
             <Link href="/receipts/create">
               <Plus className="mr-2 h-4 w-4" />
@@ -588,147 +656,206 @@ export default function StudentReceiptTable() {
             </Link>
           </Button>
         )} */}
-      </div>
-    ) : (
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {columnVisibility.receiptNumber && <TableHead className="text-center border-x">{t("receiptNumber")}</TableHead>}
-              {columnVisibility.student && <TableHead className="text-center border-x">{t("student")}</TableHead>}
-              {columnVisibility.grade && <TableHead className="text-center border-x">{t("grade")}</TableHead>}
-              {columnVisibility.amount && <TableHead className="text-center border-x">{t("amount")}</TableHead>}
-              {columnVisibility.method && <TableHead className="text-center border-x">{t("method")}</TableHead>}
-              {columnVisibility.date && <TableHead className="text-center border-x">{t("date")}</TableHead>}
-              {columnVisibility.description && <TableHead className="text-center border-x">{t("description")}</TableHead>}
-              {columnVisibility.actions && <TableHead className="text-center border-x">{t("actions")}</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredReceipts.map((receipt) => (
-              <TableRow key={receipt.id} className="hover:bg-muted/50">
-                <TableCell>
-                  <div className="font-mono text-sm font-medium">
-                    {receipt.receiptNumber}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {format(new Date(receipt.createdAt), "MMM dd, yyyy HH:mm")}
-                  </div>
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <User className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{receipt.student.name}</div>
-                      {receipt.student.email && (
-                        <div className="text-xs text-muted-foreground">
-                          {receipt.student.email}
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {columnVisibility.receiptNumber && (
+                      <TableHead className="text-center border-x">
+                        {t("receiptNumber")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.student && (
+                      <TableHead className="text-center border-x">
+                        {t("student")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.grade && (
+                      <TableHead className="text-center border-x">
+                        {t("grade")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.amount && (
+                      <TableHead className="text-center border-x">
+                        {t("amount")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.method && (
+                      <TableHead className="text-center border-x">
+                        {t("method")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.date && (
+                      <TableHead className="text-center border-x">
+                        {t("date")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.description && (
+                      <TableHead className="text-center border-x">
+                        {t("description")}
+                      </TableHead>
+                    )}
+                    {columnVisibility.actions && (
+                      <TableHead className="text-center border-x">
+                        {t("actions")}
+                      </TableHead>
+                    )}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedReceipts.map((receipt) => (
+                    <TableRow key={receipt.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <div className="font-mono text-sm font-medium">
+                          {receipt.receiptNumber}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
+                        <div className="text-xs text-muted-foreground">
+                          {format(
+                            new Date(receipt.createdAt),
+                            "MMM dd, yyyy HH:mm",
+                          )}
+                        </div>
+                      </TableCell>
 
-                <TableCell>
-                  {receipt.student.grade ? (
-                    <Badge variant="outline">{receipt.student.grade}</Badge>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">-</span>
-                  )}
-                </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <User className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">
+                              {receipt.student.name}
+                            </div>
+                            {receipt.student.email && (
+                              <div className="text-xs text-muted-foreground">
+                                {receipt.student.email}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
 
-                <TableCell>
-                  <div className="font-semibold text-green-600">
-                    ${receipt.amount.toFixed(2)}
-                  </div>
-                </TableCell>
+                      <TableCell>
+                        {receipt.student.grade ? (
+                          <Badge variant="outline">
+                            {receipt.student.grade}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            -
+                          </span>
+                        )}
+                      </TableCell>
 
-                <TableCell>
-                  {receipt.paymentMethod ? (
-                    <Badge variant="secondary" className="text-xs">
-                      {receipt.paymentMethod}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">-</span>
-                  )}
-                </TableCell>
+                      <TableCell>
+                        <div className="font-semibold text-green-600">
+                          ${receipt.amount.toFixed(2)}
+                        </div>
+                      </TableCell>
 
-                <TableCell>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-3 w-3 text-muted-foreground" />
-                    {format(new Date(receipt.date), "MMM dd, yyyy")}
-                  </div>
-                </TableCell>
+                      <TableCell>
+                        {receipt.paymentMethod ? (
+                          <Badge variant="secondary" className="text-xs">
+                            {receipt.paymentMethod}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">
+                            -
+                          </span>
+                        )}
+                      </TableCell>
 
-                <TableCell>
-                  <div className="max-w-[200px] truncate text-sm text-muted-foreground">
-                    {receipt.description || "-"}
-                  </div>
-                </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-3 w-3 text-muted-foreground" />
+                          {format(new Date(receipt.date), "MMM dd, yyyy")}
+                        </div>
+                      </TableCell>
 
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <ModalLink href={`/manager/receipts/${receipt.id}`}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          {t("viewDetails")}
-                        </ModalLink>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handlePrint(receipt.id)}>
-                        <Printer className="mr-2 h-4 w-4" />
-                        {t("printReceipt")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <ModalLink href={`/manager/students/${receipt.student.id}`}>
-                          <User className="mr-2 h-4 w-4" />
-                          {t("viewStudent")}
-                        </ModalLink>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    )}
-  </CardContent>
-</Card>
+                      <TableCell>
+                        <div className="max-w-[200px] truncate text-sm text-muted-foreground">
+                          {receipt.description || "-"}
+                        </div>
+                      </TableCell>
 
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <ModalLink
+                                href={`/manager/receipts/${receipt.id}`}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                {t("viewDetails")}
+                              </ModalLink>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handlePrint(receipt.id)}
+                            >
+                              <Printer className="mr-2 h-4 w-4" />
+                              {t("printReceipt")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <ModalLink
+                                href={`/manager/students/${receipt.student.id}`}
+                              >
+                                <User className="mr-2 h-4 w-4" />
+                                {t("viewStudent")}
+                              </ModalLink>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalCount={filteredReceipts.length}
+        pageSize={ITEMS_PER_PAGE}
+        entityName={t("receipts").toLowerCase()}
+      />
 
       {/* Summary Footer */}
       {filteredReceipts.length > 0 && (
-<Card>
-  <CardContent className="pt-6">
-    <div className="flex justify-between items-center">
-      <div className="text-sm text-muted-foreground">
-        {t("showing")}{" "}
-        <span className="font-medium text-foreground">{filteredReceipts.length}</span>{" "}
-        {t("receipts")}
-      </div>
-      <div className="text-right">
-        <div className="text-sm text-muted-foreground">
-          {t("totalAmountLabel")}
-        </div>
-        <div className="text-2xl font-bold text-green-600">
-          {t("MAD")}{totalAmount.toFixed(2)}
-        </div>
-      </div>
-    </div>
-  </CardContent>
-</Card>
-
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-muted-foreground">
+                {t("showing")}{" "}
+                <span className="font-medium text-foreground">
+                  {filteredReceipts.length}
+                </span>{" "}
+                {t("receipts")}
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-muted-foreground">
+                  {t("totalAmountLabel")}
+                </div>
+                <div className="text-2xl font-bold text-green-600">
+                  {t("MAD")}
+                  {totalAmount.toFixed(2)}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
-  )
+  );
 }

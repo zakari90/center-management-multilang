@@ -1,28 +1,45 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Mail, Shield, Trash2, Pencil } from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { format } from 'date-fns'
-import { UserData } from './types'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Mail, Shield, Trash2, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { format } from "date-fns";
+import { UserData } from "./types";
+import { useState } from "react";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface ManagersTabProps {
-  users: UserData[]
-  onEdit: (user: UserData) => void
-  onDelete: (user: UserData) => void
+  users: UserData[];
+  onEdit: (user: UserData) => void;
+  onDelete: (user: UserData) => void;
 }
 
 export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
-  const t = useTranslations('AllUsersTable')
+  const t = useTranslations("AllUsersTable");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+  const paginatedUsers = users.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   if (users.length === 0) {
     return (
       <div className="text-center py-12">
         <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-        <p className="mt-4 text-muted-foreground">{t('noUsersFound')}</p>
+        <p className="mt-4 text-muted-foreground">{t("noUsersFound")}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -30,17 +47,19 @@ export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-center">{t('user')}</TableHead>
-            <TableHead className="text-center">{t('role')}</TableHead>
-            <TableHead className="text-center">{t('managedCentersHeader')}</TableHead>
-            <TableHead className="text-center">{t('students')}</TableHead>
-            <TableHead className="text-center">{t('teachers')}</TableHead>
-            <TableHead className="text-center">{t('createdDate')}</TableHead>
-            <TableHead className="text-center">{t('actions')}</TableHead>
+            <TableHead className="text-center">{t("user")}</TableHead>
+            <TableHead className="text-center">{t("role")}</TableHead>
+            <TableHead className="text-center">
+              {t("managedCentersHeader")}
+            </TableHead>
+            <TableHead className="text-center">{t("students")}</TableHead>
+            <TableHead className="text-center">{t("teachers")}</TableHead>
+            <TableHead className="text-center">{t("createdDate")}</TableHead>
+            <TableHead className="text-center">{t("actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {paginatedUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
@@ -58,30 +77,32 @@ export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
                   </div>
                 </div>
               </TableCell>
-              
+
               <TableCell>
-                <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={user.role === "ADMIN" ? "default" : "secondary"}
+                >
                   {user.role}
                 </Badge>
               </TableCell>
-              
+
               <TableCell>
-                {user.role === 'ADMIN' ? (
+                {user.role === "ADMIN" ? (
                   <Badge variant="outline">{user.stats.centers}</Badge>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              
+
               <TableCell>{user.stats.students}</TableCell>
               <TableCell>{user.stats.teachers}</TableCell>
-              
+
               <TableCell>
                 <span className="text-sm text-muted-foreground">
-                  {format(new Date(user.createdAt), 'MMM dd, yyyy')}
+                  {format(new Date(user.createdAt), "MMM dd, yyyy")}
                 </span>
               </TableCell>
-              
+
               <TableCell>
                 <div className="flex justify-end gap-2">
                   <Button
@@ -105,6 +126,15 @@ export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
           ))}
         </TableBody>
       </Table>
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalCount={users.length}
+        pageSize={ITEMS_PER_PAGE}
+        entityName={t("users").toLowerCase()}
+      />
     </div>
-  )
+  );
 }

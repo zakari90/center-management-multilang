@@ -1,26 +1,28 @@
-"use client"
+"use client";
 
-import { useTranslations } from "next-intl"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import ViewStudentDialog from "@/components/ViewStudentDialog"
-import ViewStudentCardDialog from "@/components/ViewStudentCardDialog"
-import EditStudentDialog from "@/components/EditStudentDialog"
-import { Student } from "../studentsPresentation"
+import { useTranslations } from "next-intl";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import ViewStudentDialog from "@/components/ViewStudentDialog";
+import ViewStudentCardDialog from "@/components/ViewStudentCardDialog";
+import EditStudentDialog from "@/components/EditStudentDialog";
+import { Student } from "../studentsPresentation";
+import { useState } from "react";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface StudentsTableViewProps {
-  students: Student[]
+  students: Student[];
   columnVisibility: {
-    name: boolean
-    contact: boolean
-    parent: boolean
-    subjects: boolean
-    monthlyFee: boolean
-    actions: boolean
-  }
-  getTotalRevenue: (student: Student) => number
-  onUpdate: () => void
+    name: boolean;
+    contact: boolean;
+    parent: boolean;
+    subjects: boolean;
+    monthlyFee: boolean;
+    actions: boolean;
+  };
+  getTotalRevenue: (student: Student) => number;
+  onUpdate: () => void;
 }
 
 export function StudentsTableView({
@@ -29,7 +31,15 @@ export function StudentsTableView({
   getTotalRevenue,
   onUpdate,
 }: StudentsTableViewProps) {
-  const t = useTranslations("StudentsTable")
+  const t = useTranslations("StudentsTable");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
+  const paginatedStudents = students.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   return (
     <Card className="hidden md:block">
@@ -72,13 +82,19 @@ export function StudentsTableView({
           <tbody className="divide-y">
             {students.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                <td
+                  colSpan={6}
+                  className="px-6 py-8 text-center text-muted-foreground"
+                >
                   {t("noStudents")}
                 </td>
               </tr>
             ) : (
-              students.map((student) => (
-                <tr key={student.id} className="hover:bg-muted/50 transition-colors">
+              paginatedStudents.map((student) => (
+                <tr
+                  key={student.id}
+                  className="hover:bg-muted/50 transition-colors"
+                >
                   {columnVisibility.name && (
                     <td className="px-6 py-4 whitespace-nowrap border-x">
                       <div className="flex items-center gap-4">
@@ -88,9 +104,13 @@ export function StudentsTableView({
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="text-sm font-medium">{student.name}</div>
+                          <div className="text-sm font-medium">
+                            {student.name}
+                          </div>
                           {student.grade && (
-                            <div className="text-sm text-muted-foreground">{student.grade}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {student.grade}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -99,7 +119,9 @@ export function StudentsTableView({
                   {columnVisibility.contact && (
                     <td className="px-6 py-4 border-x">
                       <div className="text-sm">{student.email || "-"}</div>
-                      <div className="text-sm text-muted-foreground">{student.phone || "-"}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {student.phone || "-"}
+                      </div>
                     </td>
                   )}
                   {columnVisibility.parent && (
@@ -119,7 +141,9 @@ export function StudentsTableView({
                   )}
                   {columnVisibility.monthlyFee && (
                     <td className="px-6 py-4 whitespace-nowrap border-x">
-                      <div className="text-sm font-medium">MAD {getTotalRevenue(student).toFixed(2)}</div>
+                      <div className="text-sm font-medium">
+                        MAD {getTotalRevenue(student).toFixed(2)}
+                      </div>
                     </td>
                   )}
                   {columnVisibility.actions && (
@@ -127,7 +151,10 @@ export function StudentsTableView({
                       <div className="flex gap-1 justify-end">
                         <ViewStudentDialog studentId={student.id} />
                         <ViewStudentCardDialog studentId={student.id} />
-                        <EditStudentDialog studentId={student.id} onStudentUpdated={onUpdate} />
+                        <EditStudentDialog
+                          studentId={student.id}
+                          onStudentUpdated={onUpdate}
+                        />
                       </div>
                     </td>
                   )}
@@ -137,6 +164,15 @@ export function StudentsTableView({
           </tbody>
         </table>
       </div>
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalCount={students.length}
+        pageSize={ITEMS_PER_PAGE}
+        entityName={t("students").toLowerCase()}
+      />
     </Card>
-  )
+  );
 }
