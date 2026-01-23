@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -12,89 +12,112 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuth } from "@/context/authContext"
-import { subjectActions, teacherActions, teacherSubjectActions } from "@/lib/dexie/dexieActions"
-import ServerActionTeachers from "@/lib/dexie/teacherServerAction"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
-import { isOnline } from "@/lib/utils/network"
-import { BookOpen, Calendar, ChevronLeft, ChevronRight, Loader2, User, X } from "lucide-react"
-import { useTranslations } from "next-intl"
-import type React from "react"
-import { useEffect, useState } from "react"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/context/authContext";
+import {
+  subjectActions,
+  teacherActions,
+  teacherSubjectActions,
+} from "@/lib/dexie/dexieActions";
+import ServerActionTeachers from "@/lib/dexie/teacherServerAction";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { isOnline } from "@/lib/utils/network";
+import {
+  BookOpen,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  User,
+  X,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ==================== INTERFACES ====================
 interface DaySchedule {
-  day: string
-  startTime: string
-  endTime: string
-  isAvailable: boolean
+  day: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
 }
 
 interface Subject {
-  id: string
-  name: string
-  grade: string
-  price: number
+  id: string;
+  name: string;
+  grade: string;
+  price: number;
 }
 
 interface TeacherSubject {
-  subjectId: string
-  percentage?: number
-  hourlyRate?: number
-  compensationType: "percentage" | "hourly"
+  subjectId: string;
+  percentage?: number;
+  hourlyRate?: number;
+  compensationType: "percentage" | "hourly";
 }
 
 interface AddTeacherDialogProps {
-  onTeacherAdded?: () => void
+  onTeacherAdded?: () => void;
 }
 
 // ==================== SUB-COMPONENTS ====================
 
 // Step Indicator for mobile
-const StepIndicator = ({ 
-  currentStep, 
+const StepIndicator = ({
+  currentStep,
   totalSteps,
-  stepLabels 
-}: { 
-  currentStep: number
-  totalSteps: number
-  stepLabels: string[]
+  stepLabels,
+}: {
+  currentStep: number;
+  totalSteps: number;
+  stepLabels: string[];
 }) => {
-  const icons = [User, BookOpen, Calendar]
-  
+  const icons = [User, BookOpen, Calendar];
+
   return (
     <div className="flex items-center justify-center gap-2 py-3 md:hidden">
       {Array.from({ length: totalSteps }, (_, i) => {
-        const Icon = icons[i]
-        const isActive = i + 1 === currentStep
-        const isCompleted = i + 1 < currentStep
-        
+        const Icon = icons[i];
+        const isActive = i + 1 === currentStep;
+        const isCompleted = i + 1 < currentStep;
+
         return (
           <div key={i} className="flex items-center">
-            <div className={`
+            <div
+              className={`
               flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-all
-              ${isActive 
-                ? 'bg-primary text-primary-foreground scale-110' 
-                : isCompleted 
-                  ? 'bg-primary/20 text-primary' 
-                  : 'bg-muted text-muted-foreground'
+              ${
+                isActive
+                  ? "bg-primary text-primary-foreground scale-110"
+                  : isCompleted
+                    ? "bg-primary/20 text-primary"
+                    : "bg-muted text-muted-foreground"
               }
-            `}>
+            `}
+            >
               <Icon className="h-4 w-4" />
             </div>
             {i < totalSteps - 1 && (
-              <div className={`w-8 h-0.5 mx-1 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />
+              <div
+                className={`w-8 h-0.5 mx-1 ${isCompleted ? "bg-primary" : "bg-muted"}`}
+              />
             )}
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
 // Subject Compensation Card (simplified for dialog)
 const SubjectCompensationCard = ({
@@ -105,18 +128,19 @@ const SubjectCompensationCard = ({
   onUpdate,
   onRemove,
 }: {
-  teacherSubject: TeacherSubject
-  index: number
-  subjects: Subject[]
-  assignedSubjects: TeacherSubject[]
-  onUpdate: (index: number, field: keyof TeacherSubject, value: any) => void
-  onRemove: (index: number) => void
+  teacherSubject: TeacherSubject;
+  index: number;
+  subjects: Subject[];
+  assignedSubjects: TeacherSubject[];
+  onUpdate: (index: number, field: keyof TeacherSubject, value: any) => void;
+  onRemove: (index: number) => void;
 }) => {
-  const t = useTranslations("CreateTeacherForm")
+  const t = useTranslations("CreateTeacherForm");
 
   const availableSubjects = subjects.filter(
-    (s) => !assignedSubjects.some((ts, i) => i !== index && ts.subjectId === s.id)
-  )
+    (s) =>
+      !assignedSubjects.some((ts, i) => i !== index && ts.subjectId === s.id),
+  );
 
   return (
     <Card className="bg-muted/50">
@@ -132,8 +156,14 @@ const SubjectCompensationCard = ({
               </SelectTrigger>
               <SelectContent position="popper" sideOffset={5}>
                 {availableSubjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id} className="text-sm">
-                    <span className="truncate max-w-[200px] sm:max-w-[300px] inline-block">{subject.name} ({subject.grade}) - MAD {subject.price}</span>
+                  <SelectItem
+                    key={subject.id}
+                    value={subject.id}
+                    className="text-sm"
+                  >
+                    <span className="truncate max-w-[200px] sm:max-w-[300px] inline-block">
+                      {subject.name} ({subject.grade}) - MAD {subject.price}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -153,7 +183,9 @@ const SubjectCompensationCard = ({
         <div className="grid grid-cols-2 gap-2">
           <Select
             value={teacherSubject.compensationType}
-            onValueChange={(value) => onUpdate(index, "compensationType", value)}
+            onValueChange={(value) =>
+              onUpdate(index, "compensationType", value)
+            }
           >
             <SelectTrigger className="h-9 text-sm">
               <SelectValue />
@@ -171,7 +203,9 @@ const SubjectCompensationCard = ({
               max={100}
               step={0.1}
               value={teacherSubject.percentage || ""}
-              onChange={(e) => onUpdate(index, "percentage", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
+              }
               placeholder="50%"
               className="h-9 text-sm"
             />
@@ -181,7 +215,9 @@ const SubjectCompensationCard = ({
               min={0}
               step={0.01}
               value={teacherSubject.hourlyRate || ""}
-              onChange={(e) => onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
+              }
               placeholder="MAD/hr"
               className="h-9 text-sm"
             />
@@ -189,21 +225,23 @@ const SubjectCompensationCard = ({
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 // ==================== MAIN COMPONENT ====================
-export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogProps) {
-  const t = useTranslations("CreateTeacherForm")
-  const tTable = useTranslations("TeachersTable")
-  const { user } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [loadingSubjects, setLoadingSubjects] = useState(true)
-  const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 3
+export default function AddTeacherDialog({
+  onTeacherAdded,
+}: AddTeacherDialogProps) {
+  const t = useTranslations("CreateTeacherForm");
+  const tTable = useTranslations("TeachersTable");
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
 
   const DAYS = [
     t("monday"),
@@ -212,21 +250,21 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
     t("thursday"),
     t("friday"),
     t("saturday"),
-    t("sunday")
-  ]
+    t("sunday"),
+  ];
 
   const stepLabels = [
     t("basicInfo"),
     t("subjectsCompensation"),
-    t("weeklySchedule")
-  ]
+    t("weeklySchedule"),
+  ];
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
-  })
+  });
 
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
     DAYS.map((day) => ({
@@ -234,152 +272,182 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
       startTime: "09:00",
       endTime: "17:00",
       isAvailable: false,
-    }))
-  )
+    })),
+  );
 
-  const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([])
+  const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
 
   // Reset form when dialog closes
   useEffect(() => {
     if (!open) {
-      setFormData({ name: "", email: "", phone: "", address: "" })
-      setWeeklySchedule(DAYS.map((day) => ({
-        day,
-        startTime: "09:00",
-        endTime: "17:00",
-        isAvailable: false,
-      })))
-      setTeacherSubjects([])
-      setError("")
-      setCurrentStep(1)
+      setFormData({ name: "", email: "", phone: "", address: "" });
+      setWeeklySchedule(
+        DAYS.map((day) => ({
+          day,
+          startTime: "09:00",
+          endTime: "17:00",
+          isAvailable: false,
+        })),
+      );
+      setTeacherSubjects([]);
+      setError("");
+      setCurrentStep(1);
     }
-  }, [open])
+  }, [open]);
 
   useEffect(() => {
     if (open) {
       const fetchSubjects = async () => {
         try {
-          const allSubjects = await subjectActions.getAll()
+          const allSubjects = await subjectActions.getAll();
           const activeSubjects = allSubjects
-            .filter(s => s.status !== '0')
-            .map(s => ({
+            .filter((s) => s.status !== "0")
+            .map((s) => ({
               id: s.id,
               name: s.name,
               grade: s.grade,
               price: s.price,
-            }))
-          setSubjects(activeSubjects)
+            }));
+          setSubjects(activeSubjects);
         } catch (err) {
-          console.error("Failed to fetch subjects:", err)
+          console.error("Failed to fetch subjects:", err);
         } finally {
-          setLoadingSubjects(false)
+          setLoadingSubjects(false);
         }
-      }
-      fetchSubjects()
+      };
+      fetchSubjects();
     }
-  }, [open])
+  }, [open]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleScheduleChange = (index: number, field: keyof DaySchedule, value: string | boolean) => {
+  const handleScheduleChange = (
+    index: number,
+    field: keyof DaySchedule,
+    value: string | boolean,
+  ) => {
     setWeeklySchedule((prev) => {
-      const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
-      return updated
-    })
-  }
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
 
   const addSubject = () => {
     setTeacherSubjects((prev) => [
       ...prev,
-      { subjectId: "", compensationType: "percentage", percentage: 0, hourlyRate: 0 },
-    ])
-  }
+      {
+        subjectId: "",
+        compensationType: "percentage",
+        percentage: 0,
+        hourlyRate: 0,
+      },
+    ]);
+  };
 
   const removeSubject = (index: number) => {
-    setTeacherSubjects((prev) => prev.filter((_, i) => i !== index))
-  }
+    setTeacherSubjects((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  const updateSubject = (index: number, field: keyof TeacherSubject, value: any) => {
+  const updateSubject = (
+    index: number,
+    field: keyof TeacherSubject,
+    value: any,
+  ) => {
     setTeacherSubjects((prev) => {
-      const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
-      return updated
-    })
-  }
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
 
   const nextStep = () => {
     if (currentStep === 1 && !formData.name.trim()) {
-      setError(t("nameRequired") || "Name is required")
-      return
+      setError(t("nameRequired") || "Name is required");
+      return;
     }
-    setError("")
+    setError("");
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const prevStep = () => {
-    setError("")
+    setError("");
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
+
+  const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // On mobile, if not on the final step, move to next step instead of submitting
-    // (This handles the "Enter" key on mobile keyboard)
-    if (window.innerWidth < 768 && currentStep < totalSteps) {
-      nextStep()
-      return
+    // Unified behavior: If not on final step, act as "Next"
+    if (currentStep < totalSteps) {
+      nextStep();
+      return;
     }
 
-    setIsLoading(true)
-    setError("")
+    // Prevent double submission
+    if (isSubmittingRef.current || isLoading) return;
+    isSubmittingRef.current = true;
+
+    setIsLoading(true);
+    setError("");
 
     if (!user) {
-      setError("Unauthorized: Please log in again")
-      setIsLoading(false)
-      return
+      setError("Unauthorized: Please log in again");
+      setIsLoading(false);
+      isSubmittingRef.current = false;
+      return;
     }
 
     try {
-      const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
+      const validSubjects = teacherSubjects.filter((ts) => ts.subjectId);
 
       for (const ts of validSubjects) {
-        if (ts.compensationType === "percentage" && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
-          throw new Error("Percentage must be between 1 and 100")
+        if (
+          ts.compensationType === "percentage" &&
+          (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)
+        ) {
+          throw new Error("Percentage must be between 1 and 100");
         }
-        if (ts.compensationType === "hourly" && (!ts.hourlyRate || ts.hourlyRate <= 0)) {
-          throw new Error("Hourly rate must be greater than 0")
+        if (
+          ts.compensationType === "hourly" &&
+          (!ts.hourlyRate || ts.hourlyRate <= 0)
+        ) {
+          throw new Error("Hourly rate must be greater than 0");
         }
       }
 
       // Check if email already exists in local DB
       if (formData.email) {
-        const existingTeacher = await teacherActions.getLocalByEmail?.(formData.email)
+        const existingTeacher = await teacherActions.getLocalByEmail?.(
+          formData.email,
+        );
         if (existingTeacher) {
-          setError("Email already in use")
-          setIsLoading(false)
-          return
+          setError("Email already in use");
+          setIsLoading(false);
+          isSubmittingRef.current = false;
+          return;
         }
       }
 
       // Prepare weekly schedule
       const activeSchedule = weeklySchedule
         .filter((day) => day.isAvailable)
-        .map(({ day, startTime, endTime }) => 
-          JSON.stringify({ day, startTime, endTime })
-        )
+        .map(({ day, startTime, endTime }) =>
+          JSON.stringify({ day, startTime, endTime }),
+        );
 
       // Create teacher in local DB
-      const now = Date.now()
-      const teacherId = generateObjectId()
+      const now = Date.now();
+      const teacherId = generateObjectId();
       const newTeacher = {
         id: teacherId,
         name: formData.name,
@@ -388,12 +456,12 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         address: formData.address || undefined,
         weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
         managerId: user.id,
-        status: 'w' as const,
+        status: "w" as const,
         createdAt: now,
         updatedAt: now,
-      }
+      };
 
-      await teacherActions.putLocal(newTeacher)
+      await teacherActions.putLocal(newTeacher);
 
       // Create teacher-subject associations in local DB
       if (validSubjects.length > 0) {
@@ -401,51 +469,61 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           id: generateObjectId(),
           teacherId: teacherId,
           subjectId: ts.subjectId,
-          percentage: ts.compensationType === "percentage" ? ts.percentage : undefined,
-          hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
+          percentage:
+            ts.compensationType === "percentage" ? ts.percentage : undefined,
+          hourlyRate:
+            ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
           assignedAt: now,
-          status: 'w' as const,
+          status: "w" as const,
           createdAt: now,
           updatedAt: now,
-        }))
+        }));
 
-        await teacherSubjectActions.bulkPutLocal(teacherSubjectEntities)
+        await teacherSubjectActions.bulkPutLocal(teacherSubjectEntities);
       }
 
       // Immediate sync to server if online
       if (isOnline()) {
         try {
-          const result = await ServerActionTeachers.SaveToServer(newTeacher as any)
+          const result = await ServerActionTeachers.SaveToServer(
+            newTeacher as any,
+          );
           if (result) {
-            await teacherActions.markSynced(teacherId)
-            const teacherSubjectsToMark = await teacherSubjectActions.getAll()
+            await teacherActions.markSynced(teacherId);
+            const teacherSubjectsToMark = await teacherSubjectActions.getAll();
             const idsToMark = teacherSubjectsToMark
-              .filter(ts => ts.teacherId === teacherId)
-              .map(ts => ts.id)
+              .filter((ts) => ts.teacherId === teacherId)
+              .map((ts) => ts.id);
             if (idsToMark.length > 0) {
-              await teacherSubjectActions.bulkMarkSynced(idsToMark)
+              await teacherSubjectActions.bulkMarkSynced(idsToMark);
             }
           }
         } catch (syncError) {
-          console.error("Teacher immediate sync failed, will retry later:", syncError)
+          console.error(
+            "Teacher immediate sync failed, will retry later:",
+            syncError,
+          );
         }
       }
 
       // Close dialog and notify parent
-      setOpen(false)
-      onTeacherAdded?.()
+      setOpen(false);
+      onTeacherAdded?.();
     } catch (err) {
-      if (err instanceof Error) setError(err.message)
-      else setError(t("genericError"))
+      if (err instanceof Error) setError(err.message);
+      else setError(t("genericError"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+      isSubmittingRef.current = false;
     }
-  }
+  };
 
   // Step 1: Basic Information
   const renderStep1 = () => (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("basicInfo")}</h3>
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("basicInfo")}
+      </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="name" className="text-sm sr-only md:not-sr-only">
@@ -462,7 +540,9 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-sm sr-only md:not-sr-only">{t("email")}</Label>
+          <Label htmlFor="email" className="text-sm sr-only md:not-sr-only">
+            {t("email")}
+          </Label>
           <Input
             type="email"
             id="email"
@@ -474,7 +554,9 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">{t("phone")}</Label>
+          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">
+            {t("phone")}
+          </Label>
           <Input
             id="phone"
             name="phone"
@@ -485,7 +567,9 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="address" className="text-sm sr-only md:not-sr-only">{t("address")}</Label>
+          <Label htmlFor="address" className="text-sm sr-only md:not-sr-only">
+            {t("address")}
+          </Label>
           <Input
             id="address"
             name="address"
@@ -497,13 +581,15 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         </div>
       </div>
     </div>
-  )
+  );
 
   // Step 2: Subjects & Compensation
   const renderStep2 = () => (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("subjectsCompensation")}</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+          {t("subjectsCompensation")}
+        </h3>
         <Button
           type="button"
           variant="outline"
@@ -545,24 +631,30 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         </div>
       )}
     </div>
-  )
+  );
 
   // Step 3: Weekly Schedule
   const renderStep3 = () => (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("weeklySchedule")}</h3>
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("weeklySchedule")}
+      </h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {weeklySchedule.map((schedule, index) => (
           <div
             key={schedule.day}
             className={`flex items-center gap-2 p-2.5 md:p-2 rounded-md border ${
-              schedule.isAvailable ? 'bg-primary/5 border-primary/20' : 'bg-muted/50'
+              schedule.isAvailable
+                ? "bg-primary/5 border-primary/20"
+                : "bg-muted/50"
             }`}
           >
             <Checkbox
               id={`day-${schedule.day}`}
               checked={schedule.isAvailable}
-              onCheckedChange={(checked) => handleScheduleChange(index, "isAvailable", checked as boolean)}
+              onCheckedChange={(checked) =>
+                handleScheduleChange(index, "isAvailable", checked as boolean)
+              }
             />
             <Label
               htmlFor={`day-${schedule.day}`}
@@ -573,38 +665,52 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
           </div>
         ))}
       </div>
-      
+
       {/* Time inputs for selected days */}
-      {weeklySchedule.some(s => s.isAvailable) && (
+      {weeklySchedule.some((s) => s.isAvailable) && (
         <div className="grid grid-cols-2 gap-3 pt-2">
           <div className="space-y-1.5">
-            <Label htmlFor="bulk-start-time" className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("from")}</Label>
+            <Label
+              htmlFor="bulk-start-time"
+              className="text-xs text-muted-foreground sr-only md:not-sr-only"
+            >
+              {t("from")}
+            </Label>
             <Input
               id="bulk-start-time"
               type="time"
-              value={weeklySchedule.find(s => s.isAvailable)?.startTime || "09:00"}
+              value={
+                weeklySchedule.find((s) => s.isAvailable)?.startTime || "09:00"
+              }
               onChange={(e) => {
                 weeklySchedule.forEach((s, i) => {
                   if (s.isAvailable) {
-                    handleScheduleChange(i, "startTime", e.target.value)
+                    handleScheduleChange(i, "startTime", e.target.value);
                   }
-                })
+                });
               }}
               className="h-10 md:h-9"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="bulk-end-time" className="text-xs text-muted-foreground sr-only md:not-sr-only">{t("to")}</Label>
+            <Label
+              htmlFor="bulk-end-time"
+              className="text-xs text-muted-foreground sr-only md:not-sr-only"
+            >
+              {t("to")}
+            </Label>
             <Input
               id="bulk-end-time"
               type="time"
-              value={weeklySchedule.find(s => s.isAvailable)?.endTime || "17:00"}
+              value={
+                weeklySchedule.find((s) => s.isAvailable)?.endTime || "17:00"
+              }
               onChange={(e) => {
                 weeklySchedule.forEach((s, i) => {
                   if (s.isAvailable) {
-                    handleScheduleChange(i, "endTime", e.target.value)
+                    handleScheduleChange(i, "endTime", e.target.value);
                   }
-                })
+                });
               }}
               className="h-10 md:h-9"
             />
@@ -612,7 +718,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         </div>
       )}
     </div>
-  )
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -625,13 +731,15 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
       <DialogContent className="w-[95vw]  max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="hidden md:block">{t("subtitle") || tTable("subtitle")}</DialogDescription>
+          <DialogDescription className="hidden md:block">
+            {t("subtitle") || tTable("subtitle")}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Mobile Step Indicator */}
-        <StepIndicator 
-          currentStep={currentStep} 
-          totalSteps={totalSteps} 
+        <StepIndicator
+          currentStep={currentStep}
+          totalSteps={totalSteps}
           stepLabels={stepLabels}
         />
 
@@ -672,7 +780,7 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
                 </>
               )}
             </Button>
-            
+
             {currentStep < totalSteps ? (
               <Button
                 type="button"
@@ -721,5 +829,5 @@ export default function AddTeacherDialog({ onTeacherAdded }: AddTeacherDialogPro
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

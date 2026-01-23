@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,111 +12,132 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "@/context/authContext"
-import { studentActions, studentSubjectActions, subjectActions, teacherActions, teacherSubjectActions } from "@/lib/dexie/dexieActions"
-import ServerActionStudents from "@/lib/dexie/studentServerAction"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
-import { isOnline } from "@/lib/utils/network"
-import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, Loader2, User, X } from "lucide-react"
-import { useTranslations } from "next-intl"
-import type React from "react"
-import { useEffect, useState } from "react"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/authContext";
+import {
+  studentActions,
+  studentSubjectActions,
+  subjectActions,
+  teacherActions,
+  teacherSubjectActions,
+} from "@/lib/dexie/dexieActions";
+import ServerActionStudents from "@/lib/dexie/studentServerAction";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { isOnline } from "@/lib/utils/network";
+import {
+  BookOpen,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  User,
+  X,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ==================== INTERFACES ====================
 interface Teacher {
-  id: string
-  name: string
-  email: string | null
-  phone: string | null
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
 }
 
 interface TeacherSubject {
-  id: string
-  teacherId: string
-  percentage: number | null
-  hourlyRate: number | null
-  teacher: Teacher
+  id: string;
+  teacherId: string;
+  percentage: number | null;
+  hourlyRate: number | null;
+  teacher: Teacher;
 }
 
 interface Subject {
-  id: string
-  name: string
-  grade: string
-  price: number
-  duration: number | null
-  teacherSubjects: TeacherSubject[]
+  id: string;
+  name: string;
+  grade: string;
+  price: number;
+  duration: number | null;
+  teacherSubjects: TeacherSubject[];
 }
 
 interface EnrolledSubject {
-  subjectId: string
-  teacherId: string
-  subjectName: string
-  teacherName: string
-  grade: string
-  price: number
+  subjectId: string;
+  teacherId: string;
+  subjectName: string;
+  teacherName: string;
+  grade: string;
+  price: number;
 }
 
 interface AddStudentDialogProps {
-  onStudentAdded?: () => void
+  onStudentAdded?: () => void;
 }
 
 // ==================== SUB-COMPONENTS ====================
 
 // Step Indicator for mobile
-const StepIndicator = ({ 
-  currentStep, 
-  totalSteps 
-}: { 
-  currentStep: number
-  totalSteps: number
+const StepIndicator = ({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
 }) => {
-  const icons = [User, BookOpen, CheckCircle]
-  
+  const icons = [User, BookOpen, CheckCircle];
+
   return (
     <div className="flex items-center justify-center gap-2 py-3 md:hidden">
       {Array.from({ length: totalSteps }, (_, i) => {
-        const Icon = icons[i]
-        const isActive = i + 1 === currentStep
-        const isCompleted = i + 1 < currentStep
-        
+        const Icon = icons[i];
+        const isActive = i + 1 === currentStep;
+        const isCompleted = i + 1 < currentStep;
+
         return (
           <div key={i} className="flex items-center">
-            <div className={`
+            <div
+              className={`
               flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-all
-              ${isActive 
-                ? 'bg-primary text-primary-foreground scale-110' 
-                : isCompleted 
-                  ? 'bg-primary/20 text-primary' 
-                  : 'bg-muted text-muted-foreground'
+              ${
+                isActive
+                  ? "bg-primary text-primary-foreground scale-110"
+                  : isCompleted
+                    ? "bg-primary/20 text-primary"
+                    : "bg-muted text-muted-foreground"
               }
-            `}>
+            `}
+            >
               <Icon className="h-4 w-4" />
             </div>
             {i < totalSteps - 1 && (
-              <div className={`w-8 h-0.5 mx-1 ${isCompleted ? 'bg-primary' : 'bg-muted'}`} />
+              <div
+                className={`w-8 h-0.5 mx-1 ${isCompleted ? "bg-primary" : "bg-muted"}`}
+              />
             )}
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
 // ==================== MAIN COMPONENT ====================
-export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogProps) {
-  const t = useTranslations("CreateStudentForm")
-  const tTable = useTranslations("StudentsTable")
-  const { user } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [loadingSubjects, setLoadingSubjects] = useState(true)
-  const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 3
+export default function AddStudentDialog({
+  onStudentAdded,
+}: AddStudentDialogProps) {
+  const t = useTranslations("CreateStudentForm");
+  const tTable = useTranslations("StudentsTable");
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -127,13 +148,15 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
     parentPhone: "",
     parentEmail: "",
     grade: "",
-  })
+  });
 
   // Enrollment flow state
-  const [selectedGrade, setSelectedGrade] = useState<string>("")
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
-  const [selectedTeacher, setSelectedTeacher] = useState<string>("")
-  const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>([])
+  const [selectedGrade, setSelectedGrade] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("");
+  const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>(
+    [],
+  );
 
   // Reset form when dialog closes
   useEffect(() => {
@@ -146,97 +169,112 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         parentPhone: "",
         parentEmail: "",
         grade: "",
-      })
-      setSelectedGrade("")
-      setSelectedSubject(null)
-      setSelectedTeacher("")
-      setEnrolledSubjects([])
-      setError("")
-      setCurrentStep(1)
+      });
+      setSelectedGrade("");
+      setSelectedSubject(null);
+      setSelectedTeacher("");
+      setEnrolledSubjects([]);
+      setError("");
+      setCurrentStep(1);
     }
-  }, [open])
+  }, [open]);
 
   // Fetch subjects when dialog opens
   useEffect(() => {
     if (open) {
       const fetchSubjects = async () => {
         try {
-          const [allSubjects, allTeacherSubjects, allTeachers] = await Promise.all([
-            subjectActions.getAll(),
-            teacherSubjectActions.getAll(),
-            teacherActions.getAll()
-          ])
+          const [allSubjects, allTeacherSubjects, allTeachers] =
+            await Promise.all([
+              subjectActions.getAll(),
+              teacherSubjectActions.getAll(),
+              teacherActions.getAll(),
+            ]);
 
-          const activeSubjects = allSubjects.filter(s => s.status !== '0')
-          const activeTeacherSubjects = allTeacherSubjects.filter(ts => ts.status !== '0')
-          const activeTeachers = allTeachers.filter(t => t.status !== '0')
+          const activeSubjects = allSubjects.filter((s) => s.status !== "0");
+          const activeTeacherSubjects = allTeacherSubjects.filter(
+            (ts) => ts.status !== "0",
+          );
+          const activeTeachers = allTeachers.filter((t) => t.status !== "0");
 
-          const subjectsWithTeachers: Subject[] = activeSubjects.map(subject => {
-            const teacherSubjectsForSubject = activeTeacherSubjects
-              .filter(ts => ts.subjectId === subject.id)
-              .map(ts => {
-                const teacher = activeTeachers.find(t => t.id === ts.teacherId)
-                return {
-                  id: ts.id,
-                  teacherId: ts.teacherId,
-                  percentage: ts.percentage ?? null,
-                  hourlyRate: ts.hourlyRate ?? null,
-                  teacher: teacher ? {
-                    id: teacher.id,
-                    name: teacher.name,
-                    email: teacher.email ?? null,
-                    phone: teacher.phone ?? null,
-                  } : null,
-                }
-              })
-              .filter(ts => ts.teacher !== null) as TeacherSubject[]
+          const subjectsWithTeachers: Subject[] = activeSubjects.map(
+            (subject) => {
+              const teacherSubjectsForSubject = activeTeacherSubjects
+                .filter((ts) => ts.subjectId === subject.id)
+                .map((ts) => {
+                  const teacher = activeTeachers.find(
+                    (t) => t.id === ts.teacherId,
+                  );
+                  return {
+                    id: ts.id,
+                    teacherId: ts.teacherId,
+                    percentage: ts.percentage ?? null,
+                    hourlyRate: ts.hourlyRate ?? null,
+                    teacher: teacher
+                      ? {
+                          id: teacher.id,
+                          name: teacher.name,
+                          email: teacher.email ?? null,
+                          phone: teacher.phone ?? null,
+                        }
+                      : null,
+                  };
+                })
+                .filter((ts) => ts.teacher !== null) as TeacherSubject[];
 
-            return {
-              id: subject.id,
-              name: subject.name,
-              grade: subject.grade,
-              price: subject.price,
-              duration: subject.duration ?? null,
-              teacherSubjects: teacherSubjectsForSubject,
-            }
-          })
+              return {
+                id: subject.id,
+                name: subject.name,
+                grade: subject.grade,
+                price: subject.price,
+                duration: subject.duration ?? null,
+                teacherSubjects: teacherSubjectsForSubject,
+              };
+            },
+          );
 
-          setSubjects(subjectsWithTeachers)
+          setSubjects(subjectsWithTeachers);
         } catch (err) {
-          console.error("Failed to fetch subjects:", err)
+          console.error("Failed to fetch subjects:", err);
         } finally {
-          setLoadingSubjects(false)
+          setLoadingSubjects(false);
         }
-      }
-      fetchSubjects()
+      };
+      fetchSubjects();
     }
-  }, [open])
+  }, [open]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const availableGrades = [...new Set(subjects.map((s) => s.grade))].sort()
-  const subjectsForGrade = selectedGrade ? subjects.filter((s) => s.grade === selectedGrade) : []
-  const teachersForSubject = selectedSubject?.teacherSubjects?.filter((ts) => ts.teacher) || []
+  const availableGrades = [...new Set(subjects.map((s) => s.grade))].sort();
+  const subjectsForGrade = selectedGrade
+    ? subjects.filter((s) => s.grade === selectedGrade)
+    : [];
+  const teachersForSubject =
+    selectedSubject?.teacherSubjects?.filter((ts) => ts.teacher) || [];
 
   const handleAddEnrollment = () => {
     if (!selectedSubject || !selectedTeacher) {
-      setError(t("errorsselectSubjectTeacher"))
-      return
+      setError(t("errorsselectSubjectTeacher"));
+      return;
     }
 
     const alreadyEnrolled = enrolledSubjects.some(
-      (es) => es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher
-    )
+      (es) =>
+        es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
+    );
     if (alreadyEnrolled) {
-      setError(t("errorsalreadyEnrolled"))
-      return
+      setError(t("errorsalreadyEnrolled"));
+      return;
     }
 
-    const teacher = teachersForSubject.find((ts) => ts.teacherId === selectedTeacher)?.teacher
-    if (!teacher) return
+    const teacher = teachersForSubject.find(
+      (ts) => ts.teacherId === selectedTeacher,
+    )?.teacher;
+    if (!teacher) return;
 
     setEnrolledSubjects((prev) => [
       ...prev,
@@ -248,80 +286,93 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         grade: selectedSubject.grade,
         price: selectedSubject.price,
       },
-    ])
+    ]);
 
-    setSelectedGrade("")
-    setSelectedSubject(null)
-    setSelectedTeacher("")
-    setError("")
-  }
+    setSelectedGrade("");
+    setSelectedSubject(null);
+    setSelectedTeacher("");
+    setError("");
+  };
 
   const handleRemoveEnrollment = (subjectId: string, teacherId: string) => {
-    setEnrolledSubjects((prev) => prev.filter((es) => !(es.subjectId === subjectId && es.teacherId === teacherId)))
-  }
+    setEnrolledSubjects((prev) =>
+      prev.filter(
+        (es) => !(es.subjectId === subjectId && es.teacherId === teacherId),
+      ),
+    );
+  };
 
   const nextStep = () => {
     if (currentStep === 1 && !formData.name.trim()) {
-      setError(t("errorsrequiredName") || "Name is required")
-      return
+      setError(t("errorsrequiredName") || "Name is required");
+      return;
     }
     if (currentStep === 2 && enrolledSubjects.length === 0) {
-      setError(t("errorsnoSubjects") || "Please add at least one subject")
-      return
+      setError(t("errorsnoSubjects") || "Please add at least one subject");
+      return;
     }
-    setError("")
+    setError("");
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const prevStep = () => {
-    setError("")
+    setError("");
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
+
+  const isSubmittingRef = useRef(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // On mobile, if not on the final step, move to next step instead of submitting
-    // (This handles the "Enter" key on mobile keyboard)
-    if (window.innerWidth < 768 && currentStep < totalSteps) {
-      nextStep()
-      return
+    // Unified behavior: If not on final step, act as "Next"
+    if (currentStep < totalSteps) {
+      nextStep();
+      return;
     }
 
-    setIsLoading(true)
-    setError("")
+    // Prevent double submission
+    if (isSubmittingRef.current || isLoading) return;
+    isSubmittingRef.current = true;
+
+    setIsLoading(true);
+    setError("");
 
     if (!user) {
-      setError("Unauthorized: Please log in again")
-      setIsLoading(false)
-      return
+      setError("Unauthorized: Please log in again");
+      setIsLoading(false);
+      isSubmittingRef.current = false;
+      return;
     }
 
     try {
       if (!formData.name) {
-        throw new Error(t("errorsrequiredName"))
+        throw new Error(t("errorsrequiredName"));
       }
       if (enrolledSubjects.length === 0) {
-        throw new Error(t("errorsnoSubjects"))
+        throw new Error(t("errorsnoSubjects"));
       }
 
       // Check if email already exists
       if (formData.email) {
-        const existingStudent = await studentActions.getLocalByEmail?.(formData.email)
+        const existingStudent = await studentActions.getLocalByEmail?.(
+          formData.email,
+        );
         if (existingStudent) {
-          setError("Email already in use")
-          setIsLoading(false)
-          return
+          setError("Email already in use");
+          setIsLoading(false);
+          isSubmittingRef.current = false;
+          return;
         }
       }
 
       // Create student in local DB
-      const now = Date.now()
-      const studentId = generateObjectId()
+      const now = Date.now();
+      const studentId = generateObjectId();
       const newStudent = {
         id: studentId,
         name: formData.name,
@@ -332,12 +383,12 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         parentEmail: formData.parentEmail || undefined,
         grade: formData.grade || enrolledSubjects[0]?.grade || undefined,
         managerId: user.id,
-        status: 'w' as const,
+        status: "w" as const,
         createdAt: now,
         updatedAt: now,
-      }
+      };
 
-      await studentActions.putLocal(newStudent)
+      await studentActions.putLocal(newStudent);
 
       // Create student-subject-teacher associations
       const studentSubjectEntities = enrolledSubjects.map((es) => ({
@@ -347,46 +398,60 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         teacherId: es.teacherId,
         managerId: user.id,
         enrolledAt: now,
-        status: 'w' as const,
+        status: "w" as const,
         createdAt: now,
         updatedAt: now,
-      }))
+      }));
 
-      await studentSubjectActions.bulkPutLocal(studentSubjectEntities)
+      await studentSubjectActions.bulkPutLocal(studentSubjectEntities);
 
       // Immediate sync to server if online
       if (isOnline()) {
         try {
-          const result = await ServerActionStudents.SaveToServer(newStudent as any)
+          const result = await ServerActionStudents.SaveToServer(
+            newStudent as any,
+          );
           if (result) {
-            await studentActions.markSynced(studentId)
-            await studentSubjectActions.bulkMarkSynced(studentSubjectEntities.map(e => e.id))
+            await studentActions.markSynced(studentId);
+            await studentSubjectActions.bulkMarkSynced(
+              studentSubjectEntities.map((e) => e.id),
+            );
           }
         } catch (syncError) {
-          console.error("Student immediate sync failed, will retry later:", syncError)
+          console.error(
+            "Student immediate sync failed, will retry later:",
+            syncError,
+          );
         }
       }
 
       // Close dialog and notify parent
-      setOpen(false)
-      onStudentAdded?.()
+      setOpen(false);
+      onStudentAdded?.();
     } catch (err: any) {
-      setError(err.message || t("errorsgeneric"))
+      setError(err.message || t("errorsgeneric"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
+      isSubmittingRef.current = false;
     }
-  }
+  };
 
-  const totalPrice = enrolledSubjects.reduce((total, es) => total + es.price, 0)
+  const totalPrice = enrolledSubjects.reduce(
+    (total, es) => total + es.price,
+    0,
+  );
 
   // Step 1: Student Info
   const renderStep1 = () => (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("studentInfotitle")}</h3>
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("studentInfotitle")}
+      </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="name" className="text-sm sr-only md:not-sr-only">
-            {t("studentInfofullName")} <span className="text-destructive">*</span>
+            {t("studentInfofullName")}{" "}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             id="name"
@@ -399,7 +464,9 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">{t("studentInfophone")}</Label>
+          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">
+            {t("studentInfophone")}
+          </Label>
           <Input
             id="phone"
             name="phone"
@@ -410,7 +477,12 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="parentName" className="text-sm sr-only md:not-sr-only">{t("parentInfoname")}</Label>
+          <Label
+            htmlFor="parentName"
+            className="text-sm sr-only md:not-sr-only"
+          >
+            {t("parentInfoname")}
+          </Label>
           <Input
             id="parentName"
             name="parentName"
@@ -421,7 +493,12 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="parentPhone" className="text-sm sr-only md:not-sr-only">{t("parentInfophone")}</Label>
+          <Label
+            htmlFor="parentPhone"
+            className="text-sm sr-only md:not-sr-only"
+          >
+            {t("parentInfophone")}
+          </Label>
           <Input
             id="parentPhone"
             name="parentPhone"
@@ -433,13 +510,15 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         </div>
       </div>
     </div>
-  )
+  );
 
   // Step 2: Enrollment Flow
   const renderStep2 = () => (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("enrollmenttitle")}</h3>
-      
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("enrollmenttitle")}
+      </h3>
+
       {loadingSubjects ? (
         <div className="flex justify-center py-4">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -452,15 +531,17 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         <div className="space-y-3">
           {/* Select Grade */}
           <div>
-            <span className="text-xs font-medium mb-2 block">{t("enrollmentstep1title")}</span>
+            <span className="text-xs font-medium mb-2 block">
+              {t("enrollmentstep1title")}
+            </span>
             <div className="flex flex-wrap gap-2">
               {availableGrades.map((grade) => (
                 <Badge
                   key={grade}
                   onClick={() => {
-                    setSelectedGrade(grade)
-                    setSelectedSubject(null)
-                    setSelectedTeacher("")
+                    setSelectedGrade(grade);
+                    setSelectedSubject(null);
+                    setSelectedTeacher("");
                   }}
                   variant={selectedGrade === grade ? "default" : "outline"}
                   className="cursor-pointer"
@@ -474,26 +555,34 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
           {/* Select Subject */}
           {selectedGrade && (
             <div>
-              <span className="text-xs font-medium mb-2 block">{t("enrollmentstep2title")}</span>
+              <span className="text-xs font-medium mb-2 block">
+                {t("enrollmentstep2title")}
+              </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
                 {subjectsForGrade.map((subject) => (
                   <Button
                     key={subject.id}
                     type="button"
                     onClick={() => {
-                      setSelectedSubject(subject)
-                      setSelectedTeacher("")
+                      setSelectedSubject(subject);
+                      setSelectedTeacher("");
                     }}
                     disabled={subject.teacherSubjects.length === 0}
-                    variant={selectedSubject?.id === subject.id ? "default" : "outline"}
+                    variant={
+                      selectedSubject?.id === subject.id ? "default" : "outline"
+                    }
                     className="h-auto py-2 px-3 justify-start text-left text-xs"
                     size="sm"
                   >
                     <div className="w-full min-w-0">
                       <div className="font-medium truncate">{subject.name}</div>
-                      <div className="text-xs opacity-70">MAD {subject.price}</div>
+                      <div className="text-xs opacity-70">
+                        MAD {subject.price}
+                      </div>
                       {subject.teacherSubjects.length === 0 && (
-                        <div className="text-xs text-destructive mt-1">{t("enrollmentnoTeachersAssigned")}</div>
+                        <div className="text-xs text-destructive mt-1">
+                          {t("enrollmentnoTeachersAssigned")}
+                        </div>
                       )}
                     </div>
                   </Button>
@@ -514,7 +603,9 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                     key={ts.id}
                     type="button"
                     onClick={() => setSelectedTeacher(ts.teacherId)}
-                    variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
+                    variant={
+                      selectedTeacher === ts.teacherId ? "default" : "outline"
+                    }
                     className="w-full h-auto py-2 justify-start text-left text-xs"
                     size="sm"
                   >
@@ -543,19 +634,25 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
       {enrolledSubjects.length > 0 && (
         <div className="space-y-2 pt-3 border-t md:hidden">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">{enrolledSubjects.length} {t("enrolledSubjectstitle")}</span>
-            <span className="text-sm font-bold text-primary">MAD {totalPrice.toFixed(2)}</span>
+            <span className="text-xs text-muted-foreground">
+              {enrolledSubjects.length} {t("enrolledSubjectstitle")}
+            </span>
+            <span className="text-sm font-bold text-primary">
+              MAD {totalPrice.toFixed(2)}
+            </span>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 
   // Step 3: Summary
   const renderStep3 = () => (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">{t("enrolledSubjectstitle")}</h3>
-      
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("enrolledSubjectstitle")}
+      </h3>
+
       {enrolledSubjects.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
           {t("errorsnoSubjects")}
@@ -563,22 +660,32 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
       ) : (
         <>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">{enrolledSubjects.length} subject(s)</span>
-            <span className="text-lg font-bold text-primary">MAD {totalPrice.toFixed(2)}</span>
+            <span className="text-sm text-muted-foreground">
+              {enrolledSubjects.length} subject(s)
+            </span>
+            <span className="text-lg font-bold text-primary">
+              MAD {totalPrice.toFixed(2)}
+            </span>
           </div>
           <div className="space-y-2 max-h-[200px] md:max-h-[100px] overflow-y-auto">
             {enrolledSubjects.map((es, index) => (
               <Card key={index} className="bg-muted/50">
                 <CardContent className="py-2 px-3 flex justify-between items-center">
                   <div>
-                    <span className="text-sm font-medium">{es.subjectName}</span>
-                    <span className="text-xs text-muted-foreground ml-2">({es.teacherName})</span>
+                    <span className="text-sm font-medium">
+                      {es.subjectName}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({es.teacherName})
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">MAD {es.price}</span>
                     <Button
                       type="button"
-                      onClick={() => handleRemoveEnrollment(es.subjectId, es.teacherId)}
+                      onClick={() =>
+                        handleRemoveEnrollment(es.subjectId, es.teacherId)
+                      }
                       variant="ghost"
                       size="icon"
                       className="h-6 w-6 text-destructive hover:text-destructive"
@@ -593,7 +700,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         </>
       )}
     </div>
-  )
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -606,14 +713,13 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
       <DialogContent className="overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="hidden md:block">{tTable("subtitle")}</DialogDescription>
+          <DialogDescription className="hidden md:block">
+            {tTable("subtitle")}
+          </DialogDescription>
         </DialogHeader>
 
         {/* Mobile Step Indicator */}
-        <StepIndicator 
-          currentStep={currentStep} 
-          totalSteps={totalSteps}
-        />
+        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
         {error && (
           <Alert variant="destructive">
@@ -629,13 +735,15 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
             <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
               {renderStep2()}
             </div>
-            <div className={
-              currentStep === 3 
-                ? "block" 
-                : enrolledSubjects.length > 0 
-                  ? "hidden md:block" 
-                  : "hidden"
-            }>
+            <div
+              className={
+                currentStep === 3
+                  ? "block"
+                  : enrolledSubjects.length > 0
+                    ? "hidden md:block"
+                    : "hidden"
+              }
+            >
               {renderStep3()}
             </div>
           </div>
@@ -658,7 +766,7 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                 </>
               )}
             </Button>
-            
+
             {currentStep < totalSteps ? (
               <Button
                 type="button"
@@ -670,7 +778,11 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isLoading || enrolledSubjects.length === 0} className="flex-1">
+              <Button
+                type="submit"
+                disabled={isLoading || enrolledSubjects.length === 0}
+                className="flex-1"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -693,7 +805,10 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
             >
               {t("actionscancel")}
             </Button>
-            <Button type="submit" disabled={isLoading || enrolledSubjects.length === 0}>
+            <Button
+              type="submit"
+              disabled={isLoading || enrolledSubjects.length === 0}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -707,5 +822,5 @@ export default function AddStudentDialog({ onStudentAdded }: AddStudentDialogPro
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
