@@ -32,7 +32,12 @@
     "deleteAllData": "Supprimer toutes les données",
     "cannotBeUndone": "Ceci est irréversible",
     "yesDeleteEverything": "Oui, supprimer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "passwordLabel": "Entrez le mot de passe pour confirmer",
+    "passwordPlaceholder": "Mot de passe administrateur",
+    "passwordRequired": "Le mot de passe est requis",
+    "incorrectPassword": "Mot de passe incorrect",
+    "passwordConfirmation": "Pour des raisons de sécurité, veuillez entrer votre mot de passe administrateur pour confirmer cette action"
   },
   "InstallPWA": {
     "installMessage": "Installer l'application pour une meilleure expérience",
@@ -162,7 +167,9 @@
     "termsDialogRestrictions": "Vous ne pouvez pas le revendre, le sous-licencier ou l'utiliser pour d'autres centres sans autorisation préalable.",
     "termsDialogConsent": "L'utilisation continue de la plateforme vaut acceptation de ces conditions.",
     "backToHome": "Retour à l'accueil",
-    "successMessage": "Connexion réussie ! Redirection..."
+    "successMessage": "Connexion réussie ! Redirection...",
+    "noAdminExists": "Aucun compte administrateur n'existe. Veuillez d'abord enregistrer un compte administrateur.",
+    "registerAdminButton": "Enregistrer le compte administrateur"
   },
   "loginManager": {
     "title": "Connexion Gestionnaire",
@@ -174,6 +181,28 @@
     "backToHome": "Retour à l'accueil",
     "infoTitle": "Accès Gestionnaire Uniquement",
     "infoDescription": "Cette connexion est réservée aux gestionnaires de centres. Si vous êtes administrateur, veuillez utiliser la connexion administrateur."
+  },
+  "adminRegistration": {
+    "title": "Enregistrement de l'administrateur",
+    "description": "Créer le compte administrateur pour ce système",
+    "nameLabel": "Nom complet",
+    "namePlaceholder": "Entrez le nom complet",
+    "emailLabel": "Email",
+    "emailPlaceholder": "admin@exemple.com",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Entrez le mot de passe",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Ré-entrez le mot de passe",
+    "submitButton": "Enregistrer l'administrateur",
+    "cancelButton": "Annuler",
+    "submitting": "Enregistrement...",
+    "successMessage": "Administrateur enregistré avec succès !",
+    "adminExistsError": "Un compte administrateur existe déjà",
+    "registrationButton": "Enregistrer le compte administrateur",
+    "allFieldsRequired": "Tous les champs sont requis",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 4 caractères",
+    "registrationFailed": "L'enregistrement a échoué"
   },
   "register": {
     "successMessage": "Compte créé avec succès ! Redirection en cours...",

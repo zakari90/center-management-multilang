@@ -33,7 +33,12 @@
     "cannotBeUndone": "This cannot be undone.",
     "yesDeleteEverything": "Yes, delete everything",
     "deleting": "Deleting...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "passwordLabel": "Enter password to confirm",
+    "passwordPlaceholder": "Admin password",
+    "passwordRequired": "Password is required",
+    "incorrectPassword": "Incorrect password",
+    "passwordConfirmation": "For security, please enter your admin password to confirm this action"
   },
 
   "InstallPWA": {
@@ -204,7 +209,9 @@
     "termsDialogRestrictions": "You may not resell, sub-license, or deploy this application for other centers without prior authorization.",
     "termsDialogConsent": "Continued use of the platform confirms your acceptance of these terms.",
     "backToHome": "Back to Home",
-    "successMessage": "Login successful! Redirecting..."
+    "successMessage": "Login successful! Redirecting...",
+    "noAdminExists": "No admin account exists. Please register an admin account first.",
+    "registerAdminButton": "Register Admin Account"
   },
   "loginManager": {
     "title": "Manager Login",
@@ -216,6 +223,28 @@
     "backToHome": "Back to Home",
     "infoTitle": "Manager Access Only",
     "infoDescription": "This login is for center managers. If you're an administrator, please use the admin login."
+  },
+  "adminRegistration": {
+    "title": "Admin Account Registration",
+    "description": "Create the administrator account for this system",
+    "nameLabel": "Full Name",
+    "namePlaceholder": "Enter full name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "admin@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter password",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter password",
+    "submitButton": "Register Admin",
+    "cancelButton": "Cancel",
+    "submitting": "Registering...",
+    "successMessage": "Admin registered successfully!",
+    "adminExistsError": "An admin account already exists",
+    "registrationButton": "Register Admin Account",
+    "allFieldsRequired": "All fields are required",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 4 characters",
+    "registrationFailed": "Registration failed"
   },
   "register": {
     "successMessage": "Account created successfully! Redirecting...",
