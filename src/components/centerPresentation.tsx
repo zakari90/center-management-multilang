@@ -16,7 +16,7 @@ import { ServerActionCenters, ServerActionSubjects } from "@/lib/dexie/serverAct
 import { Center, Subject, localDb } from "@/lib/dexie/dbSchema"
 import { generateObjectId } from "@/lib/utils/generateObjectId"
 import { useLiveQuery } from "dexie-react-hooks"
-import { BookOpen, Building2, CalendarDays, Loader2, Pencil, Plus } from "lucide-react"
+import { BookOpen, Building2, CalendarDays, Loader2, Pencil, Plus, CalendarRange, Clock } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { toast } from "sonner"
@@ -34,7 +34,7 @@ interface CenterPresentationProps {
 
 export default function CenterPresentation({ centerId }: CenterPresentationProps) {
   const t = useTranslations('CenterPresentation')
-  const { availableSubjects, availableGrades, availableClassrooms, daysOfWeek } = useLocalizedConstants()
+  const { availableSubjects, availableGrades, availableClassrooms, daysOfWeek, monthsOfYear } = useLocalizedConstants()
 
   // ✅ Use useLiveQuery for real-time updates from IndexedDB
   const center = useLiveQuery(() => centerActions.getLocal(centerId), [centerId])
@@ -67,6 +67,10 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
 
   const [tempClassrooms, setTempClassrooms] = useState<string[]>([])
   const [tempWorkingDays, setTempWorkingDays] = useState<string[]>([])
+  const [tempWorkingMonths, setTempWorkingMonths] = useState<string[]>([])
+  const [tempWorkingYears, setTempWorkingYears] = useState<string[]>([])
+  const [tempPaymentStartDay, setTempPaymentStartDay] = useState<number>(1)
+  const [tempPaymentEndDay, setTempPaymentEndDay] = useState<number>(30)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isCenterDebugSyncing, setIsCenterDebugSyncing] = useState(false)
   const [isAutoSyncing, setIsAutoSyncing] = useState(false)
@@ -167,7 +171,12 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
   useEffect(() => {
     if (center) {
       setTempClassrooms(center.classrooms)
+
       setTempWorkingDays(center.workingDays)
+      setTempWorkingMonths(center.workingMonths || [])
+      setTempWorkingYears(center.workingYears || [])
+      setTempPaymentStartDay(center.paymentStartDay || 1)
+      setTempPaymentEndDay(center.paymentEndDay || 30)
     }
   }, [center])
 
@@ -349,6 +358,103 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
       console.error("Error updating working days:", error)
       toast(t('workingDaysUpdateFailed') || "Failed to update working days")
     }
+
+
+  // ✅ Update working months
+  const handleSaveWorkingMonths = async () => {
+    if (!center) return
+    
+    try {
+      const updatedCenter: Center = {
+        ...center,
+        workingMonths: tempWorkingMonths,
+        status: 'w',
+        updatedAt: Date.now(),
+      }
+      
+      await centerActions.putLocal(updatedCenter)
+      
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(updatedCenter)
+          await centerActions.markSynced(updatedCenter.id)
+          toast(t('workingMonthsUpdated') || "Working months updated and synced successfully")
+        } catch (syncError) {
+          console.error("Center sync failed, will retry later:", syncError)
+          toast(t('workingMonthsUpdated') || "Working months updated (will sync when online)")
+        }
+      } else {
+        toast(t('workingMonthsUpdated') || "Working months updated (will sync when online)")
+      }
+    } catch (error) {
+      console.error("Error updating working months:", error)
+      toast(t('workingMonthsUpdateFailed') || "Failed to update working months")
+    }
+  }
+
+  // ✅ Update working years
+  const handleSaveWorkingYears = async () => {
+    if (!center) return
+    
+    try {
+      const updatedCenter: Center = {
+        ...center,
+        workingYears: tempWorkingYears,
+        status: 'w',
+        updatedAt: Date.now(),
+      }
+      
+      await centerActions.putLocal(updatedCenter)
+      
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(updatedCenter)
+          await centerActions.markSynced(updatedCenter.id)
+          toast(t('workingYearsUpdated') || "Working years updated and synced successfully")
+        } catch (syncError) {
+          console.error("Center sync failed, will retry later:", syncError)
+          toast(t('workingYearsUpdated') || "Working years updated (will sync when online)")
+        }
+      } else {
+        toast(t('workingYearsUpdated') || "Working years updated (will sync when online)")
+      }
+    } catch (error) {
+      console.error("Error updating working years:", error)
+      toast(t('workingYearsUpdateFailed') || "Failed to update working years")
+    }
+  }
+
+  // ✅ Update payment period
+  const handleSavePaymentPeriod = async () => {
+    if (!center) return
+    
+    try {
+      const updatedCenter: Center = {
+        ...center,
+        paymentStartDay: Number(tempPaymentStartDay),
+        paymentEndDay: Number(tempPaymentEndDay),
+        status: 'w',
+        updatedAt: Date.now(),
+      }
+      
+      await centerActions.putLocal(updatedCenter)
+      
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(updatedCenter)
+          await centerActions.markSynced(updatedCenter.id)
+          toast(t('paymentPeriodUpdated') || "Payment period updated and synced successfully")
+        } catch (syncError) {
+          console.error("Center sync failed, will retry later:", syncError)
+          toast(t('paymentPeriodUpdated') || "Payment period updated (will sync when online)")
+        }
+      } else {
+        toast(t('paymentPeriodUpdated') || "Payment period updated (will sync when online)")
+      }
+    } catch (error) {
+      console.error("Error updating payment period:", error)
+      toast(t('paymentPeriodUpdateFailed') || "Failed to update payment period")
+    }
   }
 
   // 🔍 Debug sync button for center entity
@@ -508,6 +614,113 @@ export default function CenterPresentation({ centerId }: CenterPresentationProps
             }
             noDataText={t('noData')}
           />
+
+          {/* Working Months Section */}
+          <Section
+            title={t('workingMonths')}
+            icon={<CalendarRange className="h-4 w-4 text-muted-foreground" />}
+            items={center.workingMonths || []}
+            getItemLabel={(value) => monthsOfYear.find((m) => m.label === value)?.label ?? value}
+            onEditButton={
+              <EditDialog
+                title={t('editWorkingMonths')}
+                trigger={
+                  <Button variant="ghost" size="sm">
+                    <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
+                  </Button>
+                }
+                onSave={handleSaveWorkingMonths}
+              >
+                <ItemInputList
+                  label={t('workingMonthsLabel')}
+                  placeholder={t('monthPlaceholder')}
+                  items={tempWorkingMonths}
+                  onChange={setTempWorkingMonths}
+                  suggestions={monthsOfYear.map((m) => ({ value: m.label, label: m.label }))}
+                />
+              </EditDialog>
+            }
+            noDataText={t('noData')}
+          />
+
+          {/* Working Years Section */}
+          <Section
+            title={t('workingYears')}
+            icon={<CalendarRange className="h-4 w-4 text-muted-foreground" />}
+            items={center.workingYears || []}
+            onEditButton={
+              <EditDialog
+                title={t('editWorkingYears')}
+                trigger={
+                  <Button variant="ghost" size="sm">
+                    <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
+                  </Button>
+                }
+                onSave={handleSaveWorkingYears}
+              >
+                <ItemInputList
+                  label={t('workingYearsLabel')}
+                  placeholder={t('yearPlaceholder')}
+                  items={tempWorkingYears}
+                  onChange={setTempWorkingYears}
+                  suggestions={[
+                    "2023", "2024", "2025", "2026", 
+                    "2023-2024", "2024-2025", "2025-2026"
+                  ]}
+                />
+              </EditDialog>
+            }
+            noDataText={t('noData')}
+          />
+
+          {/* Payment Period Section */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap justify-between items-center">
+              <div className="flex items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
+                <Clock className="h-4 w-4" />
+                <span className="truncate">{t('paymentPeriod')}</span>
+              </div>
+              <EditDialog
+                title={t('editPaymentPeriod')}
+                trigger={
+                  <Button variant="ghost" size="sm">
+                    <Pencil className="h-4 w-4 mr-1" /> {t('edit')}
+                  </Button>
+                }
+                onSave={handleSavePaymentPeriod}
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('paymentStartDay')}</label>
+                    <input 
+                      type="number" 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      min="1"
+                      max="31"
+                      value={tempPaymentStartDay}
+                      onChange={(e) => setTempPaymentStartDay(Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t('paymentEndDay')}</label>
+                    <input 
+                      type="number" 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      min="1"
+                      max="31"
+                      value={tempPaymentEndDay}
+                      onChange={(e) => setTempPaymentEndDay(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </EditDialog>
+              </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="text-sm">
+                {t('fromDay')} {center.paymentStartDay || 1} {t('toDay')} {center.paymentEndDay || 30}
+              </Badge>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
