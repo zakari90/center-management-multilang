@@ -368,7 +368,7 @@ export function AllTablesViewer() {
           modalTitle={TABLE_CONFIGS[selectedTable].name}
           modalDescription={`View and manage all ${TABLE_CONFIGS[selectedTable].name.toLowerCase()} in your database`}
           data={tableData}
-          columns={TABLE_CONFIGS[selectedTable].columns}
+          columns={TABLE_CONFIGS[selectedTable].columns as any}
           searchPlaceholder={`Search ${TABLE_CONFIGS[selectedTable].name.toLowerCase()}...`}
           emptyMessage={`No ${TABLE_CONFIGS[selectedTable].name.toLowerCase()} found`}
           pageSize={15}
