@@ -34,243 +34,302 @@ import type {
   Schedule,
   Center,
 } from "@/lib/dexie/dbSchema";
-
-// Table configurations for all entities
-const TABLE_CONFIGS = {
-  users: {
-    name: "Users",
-    icon: Users,
-    color: "bg-blue-500",
-    columns: [
-      { key: "name", header: "Name", sortable: true, filterable: true },
-      { key: "email", header: "Email", sortable: true, filterable: true },
-      {
-        key: "role",
-        header: "Role",
-        sortable: true,
-        render: (value: string) => (
-          <Badge variant={value === "ADMIN" ? "default" : "secondary"}>
-            {value}
-          </Badge>
-        ),
-      },
-      {
-        key: "status",
-        header: "Status",
-        render: (value: string) => (
-          <Badge
-            variant={
-              value === "1"
-                ? "default"
-                : value === "w"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {value === "1" ? "Synced" : value === "w" ? "Pending" : "Deleted"}
-          </Badge>
-        ),
-      },
-      { key: "createdAt", header: "Created", sortable: true },
-    ] as ColumnDef<User>[],
-    fetchData: () => localDb.users.toArray(),
-  },
-
-  teachers: {
-    name: "Teachers",
-    icon: GraduationCap,
-    color: "bg-green-500",
-    columns: [
-      { key: "name", header: "Name", sortable: true, filterable: true },
-      { key: "email", header: "Email", sortable: true },
-      { key: "phone", header: "Phone" },
-      {
-        key: "status",
-        header: "Status",
-        render: (value: string) => (
-          <Badge
-            variant={
-              value === "1"
-                ? "default"
-                : value === "w"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {value === "1" ? "Synced" : value === "w" ? "Pending" : "Deleted"}
-          </Badge>
-        ),
-      },
-      { key: "createdAt", header: "Created", sortable: true },
-    ] as ColumnDef<Teacher>[],
-    fetchData: () => localDb.teachers.toArray(),
-  },
-
-  students: {
-    name: "Students",
-    icon: Users,
-    color: "bg-purple-500",
-    columns: [
-      { key: "name", header: "Name", sortable: true, filterable: true },
-      { key: "email", header: "Email", sortable: true },
-      { key: "phone", header: "Phone" },
-      { key: "grade", header: "Grade", sortable: true },
-      { key: "parentName", header: "Parent", sortable: true },
-      {
-        key: "status",
-        header: "Status",
-        render: (value: string) => (
-          <Badge
-            variant={
-              value === "1"
-                ? "default"
-                : value === "w"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {value === "1" ? "Synced" : value === "w" ? "Pending" : "Deleted"}
-          </Badge>
-        ),
-      },
-    ] as ColumnDef<Student>[],
-    fetchData: () => localDb.students.toArray(),
-  },
-
-  subjects: {
-    name: "Subjects",
-    icon: BookOpen,
-    color: "bg-orange-500",
-    columns: [
-      { key: "name", header: "Subject", sortable: true, filterable: true },
-      { key: "grade", header: "Grade", sortable: true },
-      {
-        key: "price",
-        header: "Price",
-        render: (value: number) => `${value.toFixed(2)} MAD`,
-      },
-      { key: "duration", header: "Duration (min)" },
-      {
-        key: "status",
-        header: "Status",
-        render: (value: string) => (
-          <Badge
-            variant={
-              value === "1"
-                ? "default"
-                : value === "w"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {value === "1" ? "Synced" : value === "w" ? "Pending" : "Deleted"}
-          </Badge>
-        ),
-      },
-    ] as ColumnDef<Subject>[],
-    fetchData: () => localDb.subjects.toArray(),
-  },
-
-  receipts: {
-    name: "Receipts",
-    icon: Receipt,
-    color: "bg-red-500",
-    columns: [
-      {
-        key: "receiptNumber",
-        header: "Receipt #",
-        sortable: true,
-        filterable: true,
-      },
-      {
-        key: "amount",
-        header: "Amount",
-        sortable: true,
-        render: (value: number) => `${value.toFixed(2)} MAD`,
-      },
-      {
-        key: "type",
-        header: "Type",
-        render: (value: string) => (
-          <Badge
-            variant={value === "STUDENT_PAYMENT" ? "default" : "secondary"}
-          >
-            {value === "STUDENT_PAYMENT" ? "Student" : "Teacher"}
-          </Badge>
-        ),
-      },
-      { key: "paymentMethod", header: "Method" },
-      { key: "date", header: "Date", sortable: true },
-    ] as ColumnDef<ReceiptType>[],
-    fetchData: () => localDb.receipts.toArray(),
-  },
-
-  schedules: {
-    name: "Schedules",
-    icon: Calendar,
-    color: "bg-cyan-500",
-    columns: [
-      { key: "day", header: "Day", sortable: true },
-      { key: "startTime", header: "Start", sortable: true },
-      { key: "endTime", header: "End" },
-      { key: "roomId", header: "Room" },
-      {
-        key: "status",
-        header: "Status",
-        render: (value: string) => (
-          <Badge
-            variant={
-              value === "1"
-                ? "default"
-                : value === "w"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {value === "1" ? "Synced" : value === "w" ? "Pending" : "Deleted"}
-          </Badge>
-        ),
-      },
-    ] as ColumnDef<Schedule>[],
-    fetchData: () => localDb.schedules.toArray(),
-  },
-
-  centers: {
-    name: "Centers",
-    icon: Building2,
-    color: "bg-indigo-500",
-    columns: [
-      { key: "name", header: "Name", sortable: true, filterable: true },
-      { key: "address", header: "Address" },
-      { key: "phone", header: "Phone" },
-      {
-        key: "classrooms",
-        header: "Classrooms",
-        render: (value: string[]) => value?.length || 0,
-      },
-      {
-        key: "status",
-        header: "Status",
-        render: (value: string) => (
-          <Badge
-            variant={
-              value === "1"
-                ? "default"
-                : value === "w"
-                  ? "secondary"
-                  : "destructive"
-            }
-          >
-            {value === "1" ? "Synced" : value === "w" ? "Pending" : "Deleted"}
-          </Badge>
-        ),
-      },
-    ] as ColumnDef<Center>[],
-    fetchData: () => localDb.centers.toArray(),
-  },
-};
+import { useTranslations } from "next-intl";
 
 export function AllTablesViewer() {
+  const t = useTranslations("AllTablesViewer");
+
+  // Table configurations for all entities
+  const TABLE_CONFIGS = {
+    users: {
+      name: t("tables.users"),
+      icon: Users,
+      color: "bg-blue-500",
+      columns: [
+        {
+          key: "name",
+          header: t("columns.name"),
+          sortable: true,
+          filterable: true,
+        },
+        {
+          key: "email",
+          header: t("columns.email"),
+          sortable: true,
+          filterable: true,
+        },
+        {
+          key: "role",
+          header: t("columns.role"),
+          sortable: true,
+          render: (value: string) => (
+            <Badge variant={value === "ADMIN" ? "default" : "secondary"}>
+              {value}
+            </Badge>
+          ),
+        },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+      ] as ColumnDef<User>[],
+      fetchData: () => localDb.users.toArray(),
+    },
+
+    teachers: {
+      name: t("tables.teachers"),
+      icon: GraduationCap,
+      color: "bg-green-500",
+      columns: [
+        {
+          key: "name",
+          header: t("columns.name"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "email", header: t("columns.email"), sortable: true },
+        { key: "phone", header: t("columns.phone") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+      ] as ColumnDef<Teacher>[],
+      fetchData: () => localDb.teachers.toArray(),
+    },
+
+    students: {
+      name: t("tables.students"),
+      icon: Users,
+      color: "bg-purple-500",
+      columns: [
+        {
+          key: "name",
+          header: t("columns.name"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "email", header: t("columns.email"), sortable: true },
+        { key: "phone", header: t("columns.phone") },
+        { key: "grade", header: t("columns.grade"), sortable: true },
+        { key: "parentName", header: t("columns.parent"), sortable: true },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+      ] as ColumnDef<Student>[],
+      fetchData: () => localDb.students.toArray(),
+    },
+
+    subjects: {
+      name: t("tables.subjects"),
+      icon: BookOpen,
+      color: "bg-orange-500",
+      columns: [
+        {
+          key: "name",
+          header: t("columns.subject"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "grade", header: t("columns.grade"), sortable: true },
+        {
+          key: "price",
+          header: t("columns.price"),
+          render: (value: number) => `${value.toFixed(2)} MAD`,
+        },
+        { key: "duration", header: t("columns.duration") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+      ] as ColumnDef<Subject>[],
+      fetchData: () => localDb.subjects.toArray(),
+    },
+
+    receipts: {
+      name: t("tables.receipts"),
+      icon: Receipt,
+      color: "bg-red-500",
+      columns: [
+        {
+          key: "receiptNumber",
+          header: t("columns.receiptNumber"),
+          sortable: true,
+          filterable: true,
+        },
+        {
+          key: "amount",
+          header: t("columns.amount"),
+          sortable: true,
+          render: (value: number) => `${value.toFixed(2)} MAD`,
+        },
+        {
+          key: "type",
+          header: t("columns.type"),
+          render: (value: string) => (
+            <Badge
+              variant={value === "STUDENT_PAYMENT" ? "default" : "secondary"}
+            >
+              {value === "STUDENT_PAYMENT"
+                ? t("types.student")
+                : t("types.teacher")}
+            </Badge>
+          ),
+        },
+        { key: "paymentMethod", header: t("columns.method") },
+        { key: "date", header: t("columns.date"), sortable: true },
+      ] as ColumnDef<ReceiptType>[],
+      fetchData: () => localDb.receipts.toArray(),
+    },
+
+    schedules: {
+      name: t("tables.schedules"),
+      icon: Calendar,
+      color: "bg-cyan-500",
+      columns: [
+        { key: "day", header: t("columns.day"), sortable: true },
+        { key: "startTime", header: t("columns.startTime"), sortable: true },
+        { key: "endTime", header: t("columns.endTime") },
+        { key: "roomId", header: t("columns.room") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+      ] as ColumnDef<Schedule>[],
+      fetchData: () => localDb.schedules.toArray(),
+    },
+
+    centers: {
+      name: t("tables.centers"),
+      icon: Building2,
+      color: "bg-indigo-500",
+      columns: [
+        {
+          key: "name",
+          header: t("columns.name"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "address", header: t("columns.address") },
+        { key: "phone", header: t("columns.phone") },
+        {
+          key: "classrooms",
+          header: t("columns.classrooms"),
+          render: (value: string[]) => value?.length || 0,
+        },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+      ] as ColumnDef<Center>[],
+      fetchData: () => localDb.centers.toArray(),
+    },
+  };
+
   const [selectedTable, setSelectedTable] = useState<
     keyof typeof TABLE_CONFIGS | null
   >(null);
@@ -316,11 +375,9 @@ export function AllTablesViewer() {
       <div>
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <Database className="h-6 w-6" />
-          All Database Tables
+          {t("title")}
         </h2>
-        <p className="text-muted-foreground mt-1">
-          View and manage all data in your local database
-        </p>
+        <p className="text-muted-foreground mt-1">{t("description")}</p>
       </div>
 
       {/* Table Grid */}
@@ -352,7 +409,7 @@ export function AllTablesViewer() {
               <CardContent>
                 <CardTitle className="text-lg">{config.name}</CardTitle>
                 <CardDescription className="text-sm mt-1">
-                  {count} {count === 1 ? "record" : "records"}
+                  {count} {count === 1 ? t("record") : t("records")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -366,11 +423,17 @@ export function AllTablesViewer() {
           open={!!selectedTable}
           onOpenChange={(open) => !open && setSelectedTable(null)}
           modalTitle={TABLE_CONFIGS[selectedTable].name}
-          modalDescription={`View and manage all ${TABLE_CONFIGS[selectedTable].name.toLowerCase()} in your database`}
+          modalDescription={t("modalDescription", {
+            table: TABLE_CONFIGS[selectedTable].name.toLowerCase(),
+          })}
           data={tableData}
           columns={TABLE_CONFIGS[selectedTable].columns as any}
-          searchPlaceholder={`Search ${TABLE_CONFIGS[selectedTable].name.toLowerCase()}...`}
-          emptyMessage={`No ${TABLE_CONFIGS[selectedTable].name.toLowerCase()} found`}
+          searchPlaceholder={t("searchPlaceholder", {
+            table: TABLE_CONFIGS[selectedTable].name.toLowerCase(),
+          })}
+          emptyMessage={t("emptyMessage", {
+            table: TABLE_CONFIGS[selectedTable].name.toLowerCase(),
+          })}
           pageSize={15}
         />
       )}

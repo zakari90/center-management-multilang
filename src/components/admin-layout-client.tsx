@@ -1,10 +1,27 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { useAuth } from "@/context/authContext";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import { CalendarDays, FileText, Home, LayoutGrid, Users, MoreVertical, LogOut, Globe, Moon, Sun, RefreshCw } from "lucide-react";
+import {
+  CalendarDays,
+  FileText,
+  Home,
+  LayoutGrid,
+  Users,
+  MoreVertical,
+  LogOut,
+  Globe,
+  Moon,
+  Sun,
+  RefreshCw,
+  Database,
+} from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,13 +34,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { syncAllEntitiesForRole, importAllFromServerForRole } from "@/lib/dexie/serverActions";
+import {
+  syncAllEntitiesForRole,
+  importAllFromServerForRole,
+} from "@/lib/dexie/serverActions";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
 }
 
-export default function AdminLayoutClient({ children }: AdminLayoutClientProps) {
+export default function AdminLayoutClient({
+  children,
+}: AdminLayoutClientProps) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const locale = useLocale();
@@ -42,7 +64,11 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
     // Only check authentication after component has mounted and auth is loaded
     if (!mounted || isLoading) return;
 
-    console.log('[AdminLayoutClient] auth resolved', { user, isLoading, locale });
+    console.log("[AdminLayoutClient] auth resolved", {
+      user,
+      isLoading,
+      locale,
+    });
 
     // Redirect if not authenticated
     if (!user) {
@@ -133,6 +159,11 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
       url: `${base}/admin/schedule`,
       icon: "/calendar.svg",
     },
+    {
+      title: t("database"),
+      url: `${base}/admin/database`,
+      icon: "/database.svg",
+    },
   ];
 
   // Three-dot menu for mobile
@@ -146,35 +177,54 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
       </DropdownMenuTrigger>
       <DropdownMenuContent align={isArabic ? "start" : "end"} className="w-48">
         <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+          />
           {isSyncing ? "..." : "Sync Data"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {/* Language Options */}
-        <DropdownMenuItem onClick={() => router.push(`/ar${window.location.pathname.substring(3)}`)}>
+        <DropdownMenuItem
+          onClick={() =>
+            router.push(`/ar${window.location.pathname.substring(3)}`)
+          }
+        >
           <Globe className="mr-2 h-4 w-4" />
           العربية
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push(`/en${window.location.pathname.substring(3)}`)}>
+        <DropdownMenuItem
+          onClick={() =>
+            router.push(`/en${window.location.pathname.substring(3)}`)
+          }
+        >
           <Globe className="mr-2 h-4 w-4" />
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push(`/fr${window.location.pathname.substring(3)}`)}>
+        <DropdownMenuItem
+          onClick={() =>
+            router.push(`/fr${window.location.pathname.substring(3)}`)
+          }
+        >
           <Globe className="mr-2 h-4 w-4" />
           Français
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {/* Theme Toggle */}
-        <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-          {theme === 'dark' ? (
+        <DropdownMenuItem
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? (
             <Sun className="mr-2 h-4 w-4" />
           ) : (
             <Moon className="mr-2 h-4 w-4" />
           )}
-          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          {theme === "dark" ? "Light Mode" : "Dark Mode"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+        <DropdownMenuItem
+          onClick={handleLogout}
+          className="text-destructive focus:text-destructive"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           {tNav("logout")}
         </DropdownMenuItem>
@@ -208,11 +258,36 @@ export default function AdminLayoutClient({ children }: AdminLayoutClientProps) 
         <MobileBottomNav
           ariaLabel={t("dashboard")}
           items={[
-            { label: t("dashboard"), href: `${base}/admin`, icon: <Home className="size-5" /> },
-            { label: t("center"), href: `${base}/admin/center`, icon: <LayoutGrid className="size-5" /> },
-            { label: t("users"), href: `${base}/admin/users`, icon: <Users className="size-5" /> },
-            { label: t("receipts"), href: `${base}/admin/receipts`, icon: <FileText className="size-5" /> },
-            { label: t("schedule"), href: `${base}/admin/schedule`, icon: <CalendarDays className="size-5" /> },
+            {
+              label: t("dashboard"),
+              href: `${base}/admin`,
+              icon: <Home className="size-5" />,
+            },
+            {
+              label: t("center"),
+              href: `${base}/admin/center`,
+              icon: <LayoutGrid className="size-5" />,
+            },
+            {
+              label: t("users"),
+              href: `${base}/admin/users`,
+              icon: <Users className="size-5" />,
+            },
+            {
+              label: t("receipts"),
+              href: `${base}/admin/receipts`,
+              icon: <FileText className="size-5" />,
+            },
+            {
+              label: t("schedule"),
+              href: `${base}/admin/schedule`,
+              icon: <CalendarDays className="size-5" />,
+            },
+            {
+              label: t("database"),
+              href: `${base}/admin/database`,
+              icon: <Database className="size-5" />,
+            },
           ]}
           menu={<ThreeDotsMenu />}
         />

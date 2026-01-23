@@ -1598,5 +1598,68 @@
       "exporting": "Exportation en cours...",
       "exported": "Exporté"
     }
+  },
+  "AllTablesViewer": {
+    "title": "Toutes les tables de la base de données",
+    "description": "Voir et gérer toutes les données de votre base de données locale",
+    "tables": {
+      "users": "Utilisateurs",
+      "teachers": "Enseignants",
+      "students": "Élèves",
+      "subjects": "Matières",
+      "receipts": "Reçus",
+      "schedules": "Horaires",
+      "centers": "Centres"
+    },
+    "columns": {
+      "name": "Nom",
+      "email": "Email",
+      "role": "Rôle",
+      "status": "Statut",
+      "phone": "Téléphone",
+      "grade": "Niveau",
+      "parent": "Parent",
+      "subject": "Matière",
+      "price": "Prix",
+      "duration": "Durée (min)",
+      "amount": "Montant",
+      "type": "Type",
+      "method": "Méthode",
+      "date": "Date",
+      "day": "Jour",
+      "startTime": "Début",
+      "endTime": "Fin",
+      "room": "Salle",
+      "address": "Adresse",
+      "classrooms": "Salles",
+      "created": "Créé",
+      "receiptNumber": "Reçu n°",
+      "paymentMethod": "Méthode",
+      "roomId": "Salle"
+    },
+    "status": {
+      "synced": "Synchronisé",
+      "pending": "En attente",
+      "deleted": "Supprimé"
+    },
+    "types": {
+      "student": "Élève",
+      "teacher": "Enseignant",
+      "studentPayment": "Paiement élève",
+      "teacherPayment": "Paiement enseignant"
+    },
+    "record": "enregistrement",
+    "records": "enregistrements",
+    "searchPlaceholder": "Rechercher {table}...",
+    "emptyMessage": "Aucun {table} trouvé",
+    "modalDescription": "Voir et gérer tous les {table} dans votre base de données"
+  },
+  "AdminLayout": {
+    "dashboard": "Tableau de bord",
+    "center": "Centre",
+    "users": "Utilisateurs",
+    "receipts": "Reçus",
+    "schedule": "Horaire",
+    "database": "Base de données"
   }
 }

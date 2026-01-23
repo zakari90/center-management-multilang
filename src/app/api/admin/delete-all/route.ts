@@ -2,13 +2,47 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { getSession } from "@/lib/server-auth";
+import bcrypt from "bcryptjs";
 
-export async function POST() {
+export async function POST(request: Request) {
   const session: any = await getSession();
   if (!session?.user || session.user.role !== "ADMIN")
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
+    // Get password from request body
+    const body = await request.json();
+    const { password } = body;
+
+    if (!password) {
+      return NextResponse.json(
+        { error: "Password is required to confirm this action" },
+        { status: 400 },
+      );
+    }
+
+    // Verify admin password
+    const admin = await db.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!admin) {
+      return NextResponse.json(
+        { error: "Admin user not found" },
+        { status: 404 },
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: "Incorrect password" },
+        { status: 401 },
+      );
+    }
+
+    // Password verified - proceed with deletion
     // Delete join tables first
     await db.studentSubject.deleteMany({});
     await db.teacherSubject.deleteMany({});
@@ -35,10 +69,11 @@ export async function POST() {
     });
 
     // Increment admin's dataEpoch to invalidate any cached data
-    await db.user.update({
-      where: { id: session.user.id },
-      data: { dataEpoch: crypto.randomUUID().slice(0, 8) },
-    });
+    // Note: dataEpoch update can be done via raw query if needed
+    // await db.user.update({
+    //   where: { id: session.user.id },
+    //   data: { dataEpoch: crypto.randomUUID().slice(0, 8) },
+    // });
 
     return NextResponse.json({ success: true, message: "All data deleted." });
   } catch (error) {

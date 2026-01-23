@@ -1620,5 +1620,68 @@
       "exporting": "Exporting...",
       "exported": "Exported"
     }
+  },
+  "AllTablesViewer": {
+    "title": "All Database Tables",
+    "description": "View and manage all data in your local database",
+    "tables": {
+      "users": "Users",
+      "teachers": "Teachers",
+      "students": "Students",
+      "subjects": "Subjects",
+      "receipts": "Receipts",
+      "schedules": "Schedules",
+      "centers": "Centers"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "phone": "Phone",
+      "grade": "Grade",
+      "parent": "Parent",
+      "subject": "Subject",
+      "price": "Price",
+      "duration": "Duration (min)",
+      "amount": "Amount",
+      "type": "Type",
+      "method": "Method",
+      "date": "Date",
+      "day": "Day",
+      "startTime": "Start",
+      "endTime": "End",
+      "room": "Room",
+      "address": "Address",
+      "classrooms": "Classrooms",
+      "created": "Created",
+      "receiptNumber": "Receipt #",
+      "paymentMethod": "Method",
+      "roomId": "Room"
+    },
+    "status": {
+      "synced": "Synced",
+      "pending": "Pending",
+      "deleted": "Deleted"
+    },
+    "types": {
+      "student": "Student",
+      "teacher": "Teacher",
+      "studentPayment": "Student Payment",
+      "teacherPayment": "Teacher Payment"
+    },
+    "record": "record",
+    "records": "records",
+    "searchPlaceholder": "Search {table}...",
+    "emptyMessage": "No {table} found",
+    "modalDescription": "View and manage all {table} in your database"
+  },
+  "AdminLayout": {
+    "dashboard": "Dashboard",
+    "center": "Center",
+    "users": "Users",
+    "receipts": "Receipts",
+    "schedule": "Schedule",
+    "database": "Database"
   }
 }

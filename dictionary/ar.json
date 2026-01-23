@@ -33,7 +33,12 @@
     "cannotBeUndone": "هذا لا يمكن التراجع عنه",
     "yesDeleteEverything": "نعم، احذف",
     "deleting": "جاري الحذف...",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "passwordLabel": "أدخل كلمة المرور للتأكيد",
+    "passwordPlaceholder": "كلمة مرور المسؤول",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "incorrectPassword": "كلمة المرور غير صحيحة",
+    "passwordConfirmation": "للأمان، يرجى إدخال كلمة مرور المسؤول لتأكيد هذا الإجراء"
   },
   "InstallPWA": {
     "installMessage": "تثبيت التطبيق للحصول على تجربة أفضل",
@@ -176,6 +181,28 @@
     "backToHome": "العودة إلى الصفحة الرئيسية",
     "infoTitle": "وصول المشرف فقط",
     "infoDescription": "هذا تسجيل الدخول مخصص لمديري المراكز. إذا كنت مسؤولاً، يرجى استخدام تسجيل دخول المسؤول."
+  },
+  "adminRegistration": {
+    "title": "تسجيل حساب المسؤول",
+    "description": "إنشاء حساب المسؤول لهذا النظام",
+    "nameLabel": "الاسم الكامل",
+    "namePlaceholder": "أدخل الاسم الكامل",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "admin@example.com",
+    "passwordLabel": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+    "submitButton": "تسجيل المسؤول",
+    "cancelButton": "إلغاء",
+    "submitting": "جاري التسجيل...",
+    "successMessage": "تم تسجيل المسؤول بنجاح!",
+    "adminExistsError": "يوجد بالفعل حساب مسؤول",
+    "registrationButton": "تسجيل حساب المسؤول",
+    "allFieldsRequired": "جميع الحقول مطلوبة",
+    "passwordMismatch": "كلمات المرور غير متطابقة",
+    "passwordTooShort": "يجب أن تحتوي كلمة المرور على 4 أحرف على الأقل",
+    "registrationFailed": "فشل التسجيل"
   },
 
   "register": {
@@ -1599,5 +1626,68 @@
       "exporting": "جاري التصدير...",
       "exported": "تم التصدير"
     }
+  },
+  "AllTablesViewer": {
+    "title": "جميع جداول قاعدة البيانات",
+    "description": "عرض وإدارة جميع البيانات في قاعدة البيانات المحلية الخاصة بك",
+    "tables": {
+      "users": "المستخدمون",
+      "teachers": "المعلمون",
+      "students": "الطلاب",
+      "subjects": "المواد",
+      "receipts": "الإيصالات",
+      "schedules": "الجداول",
+      "centers": "المراكز"
+    },
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "status": "الحالة",
+      "phone": "الهاتف",
+      "grade": "الفئة",
+      "parent": "الوالد",
+      "subject": "المادة",
+      "price": "السعر",
+      "duration": "المدة (دقيقة)",
+      "amount": "المبلغ",
+      "type": "النوع",
+      "method": "الطريقة",
+      "date": "التاريخ",
+      "day": "اليوم",
+      "startTime": "البداية",
+      "endTime": "النهاية",
+      "room": "القاعة",
+      "address": "العنوان",
+      "classrooms": "القاعات",
+      "created": "تاريخ الإنشاء",
+      "receiptNumber": "رقم الإيصال",
+      "paymentMethod": "الطريقة",
+      "roomId": "القاعة"
+    },
+    "status": {
+      "synced": "متزامن",
+      "pending": "قيد الانتظار",
+      "deleted": "محذوف"
+    },
+    "types": {
+      "student": "طالب",
+      "teacher": "معلم",
+      "studentPayment": "دفع الطالب",
+      "teacherPayment": "دفع المعلم"
+    },
+    "record": "سجل",
+    "records": "سجلات",
+    "searchPlaceholder": "ابحث في {table}...",
+    "emptyMessage": "لم يتم العثور على {table}",
+    "modalDescription": "عرض وإدارة جميع {table} في قاعدة البيانات الخاصة بك"
+  },
+  "AdminLayout": {
+    "dashboard": "لوحة التحكم",
+    "center": "المركز",
+    "users": "المستخدمون",
+    "receipts": "الإيصالات",
+    "schedule": "الجدول",
+    "database": "قاعدة البيانات"
   }
 }

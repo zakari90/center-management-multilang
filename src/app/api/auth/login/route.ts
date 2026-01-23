@@ -2,14 +2,10 @@ import db from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 
-const adminUsername = "admin";
-const adminPassword = "admin";
-const adminEmail = "admin@admin.com";
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, email, password } = body;
+    const { id, email, password, role } = body; // Added role parameter
 
     if (!email || !password || !id) {
       return NextResponse.json(
@@ -29,6 +25,19 @@ export async function POST(req: NextRequest) {
           { status: 401 },
         );
       }
+
+      // Validate role if provided - ensure user has the expected role
+      // This prevents managers from logging in on admin tab and vice versa
+      if (role) {
+        const expectedRole = role === "manager" ? "MANAGER" : "ADMIN";
+        if (user.role !== expectedRole) {
+          return NextResponse.json(
+            { error: { message: `Invalid credentials for ${role} login` } },
+            { status: 401 },
+          );
+        }
+      }
+
       // SUCCESS: return user data with passwordHash for offline storage
       return NextResponse.json(
         {
@@ -42,44 +51,13 @@ export async function POST(req: NextRequest) {
           // Include hash for offline login capability (PWA feature)
           passwordHash: user.password,
           // Include dataEpoch for detecting server data resets
-          dataEpoch: user.dataEpoch || "1",
+          dataEpoch: (user as any).dataEpoch || "1",
         },
         { status: 200 },
       );
     }
 
-    // If user doesn't exist, check for default admin scenario
-    if (email === adminEmail && password === adminPassword) {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      user = await db.user.create({
-        data: {
-          id: id,
-          email: adminEmail,
-          password: hashedPassword,
-          name: adminUsername,
-          role: "ADMIN",
-        },
-      });
-
-      return NextResponse.json(
-        {
-          message: "Admin user created and logged in successfully.",
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          },
-          // Include hash for offline login capability (PWA feature)
-          passwordHash: hashedPassword,
-          // Include dataEpoch for detecting server data resets
-          dataEpoch: user.dataEpoch || "1",
-        },
-        { status: 201 },
-      );
-    }
-
-    // Else: user doesn't exist and not default admin credentials
+    // User doesn't exist, return error
     return NextResponse.json(
       { error: { message: "Invalid credentials" } },
       { status: 401 },

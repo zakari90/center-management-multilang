@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Trash, Loader2, AlertTriangle } from "lucide-react";
 import { localDb } from "@/lib/dexie/dbSchema";
 import { toast } from "sonner";
@@ -19,6 +21,7 @@ import {
 export function DeleteAllDataButton() {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [password, setPassword] = useState("");
   const t = useTranslations("deleteALL");
   const locale = useLocale();
   const router = useRouter();
@@ -26,6 +29,15 @@ export function DeleteAllDataButton() {
   // ✅ Delete all data from both server and local DB
   const handleDelete = async () => {
     setIsDeleting(true);
+
+    // Validate password is provided
+    if (!password || password.trim() === "") {
+      toast.error(
+        t("passwordRequired") || "Password is required to confirm this action",
+      );
+      setIsDeleting(false);
+      return;
+    }
 
     try {
       // ✅ Try to delete from server first if online
@@ -35,10 +47,19 @@ export function DeleteAllDataButton() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
+            body: JSON.stringify({ password }),
           });
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+
+            // Check for incorrect password error
+            if (response.status === 401) {
+              toast.error(t("incorrectPassword") || "Incorrect password");
+              setIsDeleting(false);
+              return;
+            }
+
             throw new Error(
               errorData.error || `Server error: ${response.status}`,
             );
@@ -135,20 +156,53 @@ export function DeleteAllDataButton() {
         {t("deleteAllData")}
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          setOpen(isOpen);
+          if (!isOpen) {
+            setPassword(""); // Clear password when dialog closes
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
               {t("deleteAllData")}
             </DialogTitle>
-            <DialogDescription className="pt-4">
-              {t("areYouSureDeleteAllData")}{" "}
-              <strong>{t("deleteAllData")}</strong>?
-              <br />
-              <span className="text-destructive font-semibold">
-                {t("cannotBeUndone")}
-              </span>
+            <DialogDescription className="pt-4 space-y-4">
+              <p>
+                {t("areYouSureDeleteAllData")}{" "}
+                <strong>{t("deleteAllData")}</strong>?
+                <br />
+                <span className="text-destructive font-semibold">
+                  {t("cannotBeUndone")}
+                </span>
+              </p>
+
+              {/* Password Confirmation */}
+              <div className="space-y-2 pt-2">
+                <Label
+                  htmlFor="delete-password"
+                  className="text-sm font-medium"
+                >
+                  {t("passwordConfirmation") ||
+                    "For security, please enter your admin password to confirm this action"}
+                </Label>
+                <Input
+                  id="delete-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={
+                    t("passwordPlaceholder") || "Enter your password"
+                  }
+                  disabled={isDeleting}
+                  className="w-full"
+                  autoFocus
+                />
+              </div>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
