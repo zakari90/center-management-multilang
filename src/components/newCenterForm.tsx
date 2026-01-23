@@ -336,13 +336,13 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id={day.key}
-                        checked={formData.workingDays.includes(day.label)}
+                        checked={formData.workingDays.includes(day.key)}
                         onCheckedChange={(checked) => {
                           setFormData((prev) => ({
                             ...prev,
                             workingDays: checked
-                              ? [...prev.workingDays, day.label]
-                              : prev.workingDays.filter((d) => d !== day.label),
+                              ? [...prev.workingDays, day.key]
+                              : prev.workingDays.filter((d) => d !== day.key),
                           }));
                         }}
                       />
@@ -369,14 +369,14 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id={`month-${month.key}`}
-                        checked={formData.workingMonths.includes(month.label)}
+                        checked={formData.workingMonths.includes(month.key)}
                         onCheckedChange={(checked) => {
                           setFormData((prev) => ({
                             ...prev,
                             workingMonths: checked
-                              ? [...prev.workingMonths, month.label]
+                              ? [...prev.workingMonths, month.key]
                               : prev.workingMonths.filter(
-                                  (m) => m !== month.label,
+                                  (m) => m !== month.key,
                                 ),
                           }));
                         }}
