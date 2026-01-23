@@ -352,7 +352,21 @@
     "workingDaysUpdated": "Jours ouvrables mis à jour avec succès",
     "workingDaysUpdateFailed": "Échec de la mise à jour des jours ouvrables",
     "debugSync": "Déboguer la synchronisation du centre",
-    "debugSyncing": "Synchronisation en cours de débogage..."
+    "debugSyncing": "Synchronisation en cours de débogage...",
+    "workingMonths": "Mois de travail",
+    "editWorkingMonths": "Modifier les mois de travail",
+    "workingMonthsLabel": "Mois de travail",
+    "monthPlaceholder": "Tapez le nom d'un mois",
+    "workingYears": "Années d'activité",
+    "editWorkingYears": "Modifier les années d'activité",
+    "workingYearsLabel": "Années d'activité",
+    "yearPlaceholder": "Ajouter une année (ex: 2023-2024)",
+    "paymentPeriod": "Période de paiement",
+    "editPaymentPeriod": "Modifier la période de paiement",
+    "paymentStartDay": "Jour de début (ex: 1)",
+    "paymentEndDay": "Jour de fin (ex: 5)",
+    "fromDay": "Du jour",
+    "toDay": "Au jour"
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",
@@ -918,7 +932,8 @@
     "center": "Centre",
     "users": "Utilisateurs",
     "receipts": "Reçus",
-    "schedule": "Calendrier"
+    "schedule": "Calendrier",
+    "database": "Base de données"
   },
   "TeachersTable": {
     "title": "Enseignants",
@@ -1702,13 +1717,5 @@
     "searchPlaceholder": "Rechercher {table}...",
     "emptyMessage": "Aucun {table} trouvé",
     "modalDescription": "Voir et gérer tous les {table} dans votre base de données"
-  },
-  "AdminLayout": {
-    "dashboard": "Tableau de bord",
-    "center": "Centre",
-    "users": "Utilisateurs",
-    "receipts": "Reçus",
-    "schedule": "Horaire",
-    "database": "Base de données"
   }
 }

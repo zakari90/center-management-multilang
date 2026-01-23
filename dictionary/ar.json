@@ -355,7 +355,21 @@
     "workingDaysUpdated": "تم تحديث أيام العمل بنجاح",
     "workingDaysUpdateFailed": "فشل تحديث أيام العمل",
     "debugSync": "تصحيح مزامنة المركز",
-    "debugSyncing": "جاري تصحيح المزامنة..."
+    "debugSyncing": "جاري تصحيح المزامنة...",
+    "workingMonths": "أشهر العمل",
+    "editWorkingMonths": "تعديل أشهر العمل",
+    "workingMonthsLabel": "أشهر العمل",
+    "monthPlaceholder": "اكتب اسم الشهر",
+    "workingYears": "سنوات النشاط",
+    "editWorkingYears": "تعديل سنوات النشاط",
+    "workingYearsLabel": "سنوات النشاط",
+    "yearPlaceholder": "أضف سنة (مثال: 2023-2024)",
+    "paymentPeriod": "فترة الدفع",
+    "editPaymentPeriod": "تعديل فترة الدفع",
+    "paymentStartDay": "يوم البدء (مثال: 1)",
+    "paymentEndDay": "يوم الانتهاء (مثال: 5)",
+    "fromDay": "من يوم",
+    "toDay": "إلى يوم"
   },
   "NewCenterForm": {
     "basicInformation": "معلومات أساسية",
@@ -914,7 +928,8 @@
     "center": "المركز",
     "users": "المستخدمون",
     "receipts": "الإيصالات",
-    "schedule": "الجدول الزمني"
+    "schedule": "الجدول الزمني",
+    "database": "قاعدة البيانات"
   },
   "TeachersTable": {
     "title": "المعلمون",
@@ -1703,13 +1718,5 @@
     "searchPlaceholder": "ابحث في {table}...",
     "emptyMessage": "لم يتم العثور على {table}",
     "modalDescription": "عرض وإدارة جميع {table} في قاعدة البيانات الخاصة بك"
-  },
-  "AdminLayout": {
-    "dashboard": "لوحة التحكم",
-    "center": "المركز",
-    "users": "المستخدمون",
-    "receipts": "الإيصالات",
-    "schedule": "الجدول",
-    "database": "قاعدة البيانات"
   }
 }

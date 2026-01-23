@@ -389,7 +389,21 @@
     "workingDaysUpdated": "Working days updated successfully",
     "workingDaysUpdateFailed": "Failed to update working days",
     "debugSync": "Debug Center Sync",
-    "debugSyncing": "Debug syncing..."
+    "debugSyncing": "Debug syncing...",
+    "workingMonths": "Working Months",
+    "editWorkingMonths": "Edit Working Months",
+    "workingMonthsLabel": "Working Months",
+    "monthPlaceholder": "Type a month name",
+    "workingYears": "Working Years",
+    "editWorkingYears": "Edit Working Years",
+    "workingYearsLabel": "Working Years",
+    "yearPlaceholder": "Add a year (e.g. 2023-2024)",
+    "paymentPeriod": "Payment Period",
+    "editPaymentPeriod": "Edit Payment Period",
+    "paymentStartDay": "Start Day (e.g. 1)",
+    "paymentEndDay": "End Day (e.g. 5)",
+    "fromDay": "From Day",
+    "toDay": "To Day"
   },
   "NewCenterForm": {
     "basicInformation": "Basic Information",
@@ -961,7 +975,8 @@
     "center": "Center",
     "users": "Users",
     "receipts": "Receipts",
-    "schedule": "Schedule"
+    "schedule": "Schedule",
+    "database": "Database"
   },
   "TeachersTable": {
     "title": "Teachers",
@@ -1724,13 +1739,5 @@
     "searchPlaceholder": "Search {table}...",
     "emptyMessage": "No {table} found",
     "modalDescription": "View and manage all {table} in your database"
-  },
-  "AdminLayout": {
-    "dashboard": "Dashboard",
-    "center": "Center",
-    "users": "Users",
-    "receipts": "Receipts",
-    "schedule": "Schedule",
-    "database": "Database"
   }
 }
