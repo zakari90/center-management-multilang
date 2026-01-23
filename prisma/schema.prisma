@@ -24,7 +24,7 @@ model Center {
   address       String?
   phone         String?
   classrooms    String[]
-  classrooms    String[]
+
   workingDays   String[]
   workingMonths String[]
   workingYears  String[]
