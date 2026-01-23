@@ -27,6 +27,8 @@ export async function saveCenterToDatabase(centerData: {
   workingDays: string[];
   workingMonths: string[];
   workingYears: string[];
+  paymentStartDay?: number;
+  paymentEndDay?: number;
   subjects?: Array<{
     id: string;
     name: string;
@@ -146,6 +148,8 @@ export async function saveCenterToDatabase(centerData: {
           workingDays,
           workingMonths,
           workingYears,
+          paymentStartDay: paymentStartDay || 1,
+          paymentEndDay: paymentEndDay || 30,
           updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
         },
         include: {
@@ -164,6 +168,8 @@ export async function saveCenterToDatabase(centerData: {
           workingDays,
           workingMonths,
           workingYears,
+          paymentStartDay: paymentStartDay || 1,
+          paymentEndDay: paymentEndDay || 30,
           adminId: session.user.id,
           createdAt: createdAt ? new Date(createdAt) : new Date(),
           updatedAt: updatedAt ? new Date(updatedAt) : new Date(),

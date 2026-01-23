@@ -427,7 +427,10 @@
     "centerCreatedSuccess": "Center created successfully!",
     "errorMessage": "Error creating center. Please try again.",
     "syncedToServer": "Center synced to server successfully!",
-    "savedLocally": "Center saved locally. Will sync when online."
+    "savedLocally": "Center saved locally. Will sync when online.",
+    "paymentPeriod": "Payment Period",
+    "paymentStartDay": "Start Day (e.g. 1)",
+    "paymentEndDay": "End Day (e.g. 5)"
   },
   "SubjectForm": {
     "selectMultipleInfo": "You can select multiple subjects and grades. Each combination will create a separate course.",

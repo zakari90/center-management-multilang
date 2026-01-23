@@ -28,6 +28,8 @@ model Center {
   workingDays   String[]
   workingMonths String[]
   workingYears  String[]
+  paymentStartDay Int    @default(1)
+  paymentEndDay   Int    @default(30)
   managers      String[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

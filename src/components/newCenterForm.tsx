@@ -55,6 +55,8 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
     workingDays: [] as string[],
     workingMonths: [] as string[],
     workingYears: [] as string[],
+    paymentStartDay: 1,
+    paymentEndDay: 30,
     classrooms: [] as string[],
     subjects: [] as SubjectFormData[],
   });
@@ -77,6 +79,8 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
       workingDays: [],
       workingMonths: [],
       workingYears: [],
+      paymentStartDay: 1,
+      paymentEndDay: 30,
     });
     setStep(1);
     setMessage(null);
@@ -154,6 +158,8 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
         workingDays: formData.workingDays,
         workingMonths: formData.workingMonths,
         workingYears: formData.workingYears,
+        paymentStartDay: Number(formData.paymentStartDay) || 1,
+        paymentEndDay: Number(formData.paymentEndDay) || 30,
         managers: [],
         adminId: user.id,
         status: "w",
@@ -410,6 +416,46 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                   "2025-2026",
                 ]}
               />
+
+              <div className="relative my-4 flex items-center justify-center overflow-hidden">
+                <Separator className="flex-1 h-px bg-border" />
+                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
+                  <span className="font-medium text-foreground">
+                    {t("paymentPeriod")}
+                  </span>
+                </div>
+                <Separator className="flex-1 h-px bg-border" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="paymentStartDay">
+                    {t("paymentStartDay")}
+                  </Label>
+                  <Input
+                    id="paymentStartDay"
+                    type="number"
+                    name="paymentStartDay"
+                    min="1"
+                    max="31"
+                    value={formData.paymentStartDay}
+                    onChange={handleChange}
+                    placeholder="1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="paymentEndDay">{t("paymentEndDay")}</Label>
+                  <Input
+                    id="paymentEndDay"
+                    type="number"
+                    name="paymentEndDay"
+                    min="1"
+                    max="31"
+                    value={formData.paymentEndDay}
+                    onChange={handleChange}
+                    placeholder="30"
+                  />
+                </div>
+              </div>
 
               <Button
                 type="button"

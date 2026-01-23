@@ -390,7 +390,10 @@
     "centerCreatedSuccess": "Centre créé avec succès!",
     "errorMessage": "Erreur lors de la création du centre. Veuillez réessayer",
     "syncedToServer": "Centre synchronisé avec le serveur avec succès!",
-    "savedLocally": "Centre enregistré localement. Sera synchronisé lorsque vous serez en ligne."
+    "savedLocally": "Centre enregistré localement. Sera synchronisé lorsque vous serez en ligne.",
+    "paymentPeriod": "Période de paiement",
+    "paymentStartDay": "Jour de début (ex. 1)",
+    "paymentEndDay": "Jour de fin (ex. 5)"
   },
   "SubjectForm": {
     "selectMultipleInfo": "Vous pouvez sélectionner plusieurs matières et niveaux. Chaque combinaison créera un cours distinct",

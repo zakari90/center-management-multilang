@@ -76,6 +76,8 @@ const ServerActionCenters = {
         workingDays: center.workingDays || [],
         workingMonths: center.workingMonths || [],
         workingYears: center.workingYears || [],
+        paymentStartDay: center.paymentStartDay,
+        paymentEndDay: center.paymentEndDay,
         subjects: centerSubjects,
         adminId: center.adminId, // ✅ Include adminId for API route compatibility
         createdAt: new Date(center.createdAt).toISOString(),
@@ -174,6 +176,8 @@ const ServerActionCenters = {
             workingDays: center.workingDays || [],
             workingMonths: center.workingMonths || [],
             workingYears: center.workingYears || [],
+            paymentStartDay: center.paymentStartDay,
+            paymentEndDay: center.paymentEndDay,
             updatedAt: new Date(center.updatedAt).toISOString(),
           }),
         });
