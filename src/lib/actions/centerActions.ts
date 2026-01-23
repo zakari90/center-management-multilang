@@ -87,6 +87,8 @@ export async function saveCenterToDatabase(centerData: {
       workingDays,
       workingMonths,
       workingYears,
+      paymentStartDay,
+      paymentEndDay,
       subjects,
       createdAt,
       updatedAt,
