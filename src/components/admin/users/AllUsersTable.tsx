@@ -330,7 +330,7 @@ export default function AllUsersTable() {
         >
           <TabsList>
             <TabsTrigger value="users">
-              {t("users")} ({users.length})
+              {t("managersTab")} ({users.length})
             </TabsTrigger>
             <TabsTrigger value="teachers">
               {t("teachers")} ({teachers.length})

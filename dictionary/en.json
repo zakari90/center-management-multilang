@@ -562,6 +562,7 @@
     "systemOverview": "System Overview",
     "systemOverviewDescription": "Manage all users, teachers, and students",
     "users": "Users",
+    "managersTab": "Managers",
     "searchUsers": "Search users...",
     "searchTeachers": "Search teachers...",
     "searchStudents": "Search students...",

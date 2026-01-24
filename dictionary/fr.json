@@ -534,6 +534,7 @@
     "systemOverview": "Aperçu du système",
     "systemOverviewDescription": "Gérer tous les utilisateurs, enseignants et élèves",
     "users": "Utilisateurs",
+    "managersTab": "Gestionnaires",
     "searchUsers": "Rechercher les utilisateurs...",
     "searchTeachers": "Rechercher les enseignants...",
     "searchStudents": "Rechercher les élèves...",
