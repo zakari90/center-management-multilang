@@ -124,3 +124,83 @@ export function checkPaymentStatus(
     status,
   };
 }
+
+/**
+ * Generates all payment periods for the academic year based on center settings.
+ * Defaults to September - June (10 months) if not otherwise specified.
+ */
+export function getAcademicYearPeriods(
+  paymentStartDay: number = 1,
+  paymentEndDay: number = 30,
+  academicYear: string = "2025-2026",
+): PaymentPeriod[] {
+  const [startYearStr, endYearStr] = academicYear.split("-");
+  const startYear = parseInt(startYearStr);
+  const endYear = parseInt(endYearStr);
+
+  const periods: PaymentPeriod[] = [];
+
+  // Assuming academic year from Sep (month 8) to June (month 5 next year)
+  // Sep, Oct, Nov, Dec (Year 1)
+  for (let m = 8; m <= 11; m++) {
+    periods.push(
+      getPaymentPeriod(
+        paymentStartDay,
+        paymentEndDay,
+        new Date(startYear, m, 15),
+      ),
+    );
+  }
+  // Jan, Feb, Mar, Apr, May, June (Year 2)
+  for (let m = 0; m <= 5; m++) {
+    periods.push(
+      getPaymentPeriod(
+        paymentStartDay,
+        paymentEndDay,
+        new Date(endYear, m, 15),
+      ),
+    );
+  }
+
+  return periods;
+}
+
+/**
+ * Checks payment status for a specific period.
+ */
+export function getStudentPaymentStatusForPeriod(
+  receipts: any[],
+  period: PaymentPeriod,
+  targetAmount?: number,
+): PaymentStatus {
+  const relevantReceipts = receipts.filter((receipt) => {
+    const receiptDate = new Date(receipt.date || receipt.createdAt);
+    return (
+      (isAfter(receiptDate, period.start) ||
+        isSameDay(receiptDate, period.start)) &&
+      (isBefore(receiptDate, period.end) || isSameDay(receiptDate, period.end))
+    );
+  });
+
+  const amountPaid = relevantReceipts.reduce(
+    (sum, r) => sum + Number(r.amount),
+    0,
+  );
+
+  let status: "PAID" | "PARTIAL" | "UNPAID" = "UNPAID";
+
+  if (amountPaid > 0) {
+    if (targetAmount && amountPaid < targetAmount) {
+      status = "PARTIAL";
+    } else {
+      status = "PAID";
+    }
+  }
+
+  return {
+    isPaid: status === "PAID",
+    amountPaid,
+    period,
+    status,
+  };
+}
