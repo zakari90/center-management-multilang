@@ -23,6 +23,7 @@ import {
   Receipt,
   Calendar,
   Building2,
+  Download,
 } from "lucide-react";
 import { localDb } from "@/lib/dexie/dbSchema";
 import type {
@@ -370,14 +371,55 @@ export function AllTablesViewer() {
     loadData();
   }, [selectedTable]);
 
+  const handleExportAll = async () => {
+    setIsLoading(true);
+    try {
+      const allData: Record<string, any[]> = {};
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `database_export_${timestamp}.json`;
+
+      for (const [key, config] of Object.entries(TABLE_CONFIGS)) {
+        allData[key] = await config.fetchData();
+      }
+
+      const jsonString = JSON.stringify(allData, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to export data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Database className="h-6 w-6" />
-          {t("title")}
-        </h2>
-        <p className="text-muted-foreground mt-1">{t("description")}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Database className="h-6 w-6" />
+            {t("title")}
+          </h2>
+          <p className="text-muted-foreground mt-1">{t("description")}</p>
+        </div>
+        <Button
+          onClick={handleExportAll}
+          disabled={isLoading}
+          variant="outline"
+          className="gap-2"
+        >
+          <Download className="h-4 w-4" />
+          {isLoading ? "Exporting..." : "Export All Data"}
+        </Button>
       </div>
 
       {/* Table Grid */}
