@@ -23,6 +23,7 @@ interface StudentsTableViewProps {
   };
   getTotalRevenue: (student: Student) => number;
   onUpdate: () => void;
+  adminMode?: boolean;
 }
 
 export function StudentsTableView({
@@ -30,6 +31,7 @@ export function StudentsTableView({
   columnVisibility,
   getTotalRevenue,
   onUpdate,
+  adminMode = false,
 }: StudentsTableViewProps) {
   const t = useTranslations("StudentsTable");
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,6 +156,7 @@ export function StudentsTableView({
                         <EditStudentDialog
                           studentId={student.id}
                           onStudentUpdated={onUpdate}
+                          adminMode={adminMode}
                         />
                       </div>
                     </td>

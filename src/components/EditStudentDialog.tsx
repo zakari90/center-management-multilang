@@ -1,78 +1,94 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { useTranslations } from "next-intl"
-import { Pencil, Loader2, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { Pencil, Loader2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   studentActions,
   studentSubjectActions,
   subjectActions,
   teacherSubjectActions,
   teacherActions,
-  centerActions
-} from "@/lib/dexie/dexieActions"
-import { useAuth } from "@/context/authContext"
+  centerActions,
+  userActions,
+} from "@/lib/dexie/dexieActions";
+import { useAuth } from "@/context/authContext";
 
 interface Teacher {
-  id: string
-  name: string
-  email: string | null
-  phone: string | null
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
 }
 
 interface TeacherSubject {
-  id: string
-  teacherId: string
-  percentage: number | null
-  hourlyRate: number | null
-  teacher: Teacher
+  id: string;
+  teacherId: string;
+  percentage: number | null;
+  hourlyRate: number | null;
+  teacher: Teacher;
 }
 
 interface Subject {
-  id: string
-  name: string
-  grade: string
-  price: number
-  duration: number | null
-  teacherSubjects: TeacherSubject[]
+  id: string;
+  name: string;
+  grade: string;
+  price: number;
+  duration: number | null;
+  teacherSubjects: TeacherSubject[];
 }
 
 interface EnrolledSubject {
-  subjectId: string
-  teacherId: string
-  subjectName: string
-  teacherName: string
-  grade: string
-  price: number
+  subjectId: string;
+  teacherId: string;
+  subjectName: string;
+  teacherName: string;
+  grade: string;
+  price: number;
 }
 
 interface EditStudentDialogProps {
-  studentId: string
-  trigger?: React.ReactNode
-  onStudentUpdated?: () => void
+  studentId: string;
+  trigger?: React.ReactNode;
+  onStudentUpdated?: () => void;
+  adminMode?: boolean;
 }
 
-export default function EditStudentDialog({ studentId, trigger, onStudentUpdated }: EditStudentDialogProps) {
-  const t = useTranslations("editStudent")
-  const { user, isLoading: authLoading } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isFetching, setIsFetching] = useState(true)
-  const [error, setError] = useState("")
-  const [subjects, setSubjects] = useState<Subject[]>([])
+export default function EditStudentDialog({
+  studentId,
+  trigger,
+  onStudentUpdated,
+  adminMode = false,
+}: EditStudentDialogProps) {
+  const t = useTranslations("editStudent");
+  const { user, isLoading: authLoading } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [error, setError] = useState("");
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [managers, setManagers] = useState<{ id: string; name: string }[]>([]);
+  const [selectedManagerId, setSelectedManagerId] = useState<string>("");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -83,58 +99,73 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
     parentPhone: "",
     parentEmail: "",
     grade: "",
-  })
+  });
 
   // Enrollment flow state
-  const [selectedGrade, setSelectedGrade] = useState<string>("")
-  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
-  const [selectedTeacher, setSelectedTeacher] = useState<string>("")
+  const [selectedGrade, setSelectedGrade] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("");
 
   // Enrolled subjects list
-  const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>([])
+  const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>(
+    [],
+  );
 
   const fetchData = useCallback(async () => {
-    if (!open) return
-    
-    setIsFetching(true)
-    setError("")
+    if (!open) return;
+
+    setIsFetching(true);
+    setError("");
     try {
       if (!user && !authLoading) {
-        setError(t('unauthorized'))
-        setIsFetching(false)
-        return
-      }
-      
-      if (!user?.id) {
-        setError(t('unauthorized'))
-        setIsFetching(false)
-        return
+        setError(t("unauthorized"));
+        setIsFetching(false);
+        return;
       }
 
-      const [allStudents, allStudentSubjects, allSubjects, allTeacherSubjects, allTeachers, allCenters] = await Promise.all([
+      if (!user?.id) {
+        setError(t("unauthorized"));
+        setIsFetching(false);
+        return;
+      }
+
+      const [
+        allStudents,
+        allStudentSubjects,
+        allSubjects,
+        allTeacherSubjects,
+        allTeachers,
+        allCenters,
+      ] = await Promise.all([
         studentActions.getAll(),
         studentSubjectActions.getAll(),
         subjectActions.getAll(),
         teacherSubjectActions.getAll(),
         teacherActions.getAll(),
-        centerActions.getAll()
-      ])
+        centerActions.getAll(),
+      ]);
 
-      const studentData = allStudents.find(s => s.id === studentId && s.status !== '0')
-      
+      const studentData = allStudents.find(
+        (s) => s.id === studentId && s.status !== "0",
+      );
+
       if (!studentData) {
-        throw new Error(t("studentInfo"))
+        throw new Error(t("studentInfo"));
       }
 
       // Get student subjects with related data
       const studentSubjectsData = allStudentSubjects
-        .filter(ss => ss.studentId === studentId && ss.status !== '0')
-        .map(ss => {
-          const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
-          const teacher = allTeachers.find(t => t.id === ss.teacherId && t.status !== '0')
-          
-          if (!subject || !teacher) return null
-          
+        .filter((ss) => ss.studentId === studentId && ss.status !== "0")
+        .map((ss) => {
+          const subject = allSubjects.find(
+            (s) => s.id === ss.subjectId && s.status !== "0",
+          );
+          const teacher = allTeachers.find(
+            (t) => t.id === ss.teacherId && t.status !== "0",
+          );
+
+          if (!subject || !teacher) return null;
+
           return {
             subjectId: subject.id,
             teacherId: teacher.id,
@@ -142,54 +173,83 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
             teacherName: teacher.name,
             grade: subject.grade,
             price: subject.price,
-          }
+          };
         })
-        .filter(ss => ss !== null) as EnrolledSubject[]
+        .filter((ss) => ss !== null) as EnrolledSubject[];
 
-      // Build subjects with teachers (filter by manager's centers)
-      const managerCenters = allCenters.filter(c => 
-        (c.managers || []).includes(user.id) && c.status !== '0'
-      )
-      const managerCenterIds = managerCenters.map(c => c.id)
-      const managerSubjects = allSubjects
-        .filter(s => managerCenterIds.includes(s.centerId) && s.status !== '0')
-      
-      const subjectsWithTeachers: Subject[] = managerSubjects.map(subject => {
-        const teacherSubjectsForSubject = allTeacherSubjects
-          .filter(ts => ts.subjectId === subject.id && ts.status !== '0')
-          .map(ts => {
-            const teacher = allTeachers.find(t => t.id === ts.teacherId && t.status !== '0')
-            return teacher ? {
-              id: ts.id,
-              teacherId: ts.teacherId,
-              percentage: ts.percentage ?? null,
-              hourlyRate: ts.hourlyRate ?? null,
-              teacher: {
-                id: teacher.id,
-                name: teacher.name,
-                email: teacher.email ?? null,
-                phone: teacher.phone ?? null,
-              },
-            } : null
-          })
-          .filter(ts => ts !== null) as TeacherSubject[]
+      // Manager selection for admin
+      if (adminMode) {
+        const allUsers = await userActions.getAll();
+        const activeManagers = allUsers.filter(
+          (u) => u.status !== "0" && u.role === "MANAGER",
+        );
+        setManagers(activeManagers.map((m) => ({ id: m.id, name: m.name })));
+      }
 
-        return {
-          id: subject.id,
-          name: subject.name,
-          grade: subject.grade,
-          price: subject.price,
-          duration: subject.duration ?? null,
-          teacherSubjects: teacherSubjectsForSubject,
-        }
-      })
+      // Build subjects with teachers
+      let filteredSubjects: typeof allSubjects = [];
+      if (adminMode) {
+        filteredSubjects = allSubjects.filter((s) => s.status !== "0");
+      } else {
+        const managerCenters = allCenters.filter(
+          (c) => (c.managers || []).includes(user.id) && c.status !== "0",
+        );
+        const managerCenterIds = managerCenters.map((c) => c.id);
+        filteredSubjects = allSubjects.filter(
+          (s) => managerCenterIds.includes(s.centerId) && s.status !== "0",
+        );
+      }
 
-      setSubjects(subjectsWithTeachers)
-      
+      const subjectsWithTeachers: Subject[] = filteredSubjects.map(
+        (subject) => {
+          const teacherSubjectsForSubject = allTeacherSubjects
+            .filter((ts) => ts.subjectId === subject.id && ts.status !== "0")
+            .map((ts) => {
+              const teacher = allTeachers.find(
+                (t) => t.id === ts.teacherId && t.status !== "0",
+              );
+              return teacher
+                ? {
+                    id: ts.id,
+                    teacherId: ts.teacherId,
+                    percentage: ts.percentage ?? null,
+                    hourlyRate: ts.hourlyRate ?? null,
+                    teacher: {
+                      id: teacher.id,
+                      name: teacher.name,
+                      email: teacher.email ?? null,
+                      phone: teacher.phone ?? null,
+                    },
+                  }
+                : null;
+            })
+            .filter((ts) => ts !== null) as TeacherSubject[];
+
+          return {
+            id: subject.id,
+            name: subject.name,
+            grade: subject.grade,
+            price: subject.price,
+            duration: subject.duration ?? null,
+            teacherSubjects: teacherSubjectsForSubject,
+          };
+        },
+      );
+
+      setSubjects(subjectsWithTeachers);
+
       // Debug logging
-      console.log('Available subjects:', subjectsWithTeachers)
-      console.log('Manager centers:', managerCenters)
-      console.log('All subjects:', allSubjects.filter(s => s.status !== '0'))
+      console.log("Available subjects:", subjectsWithTeachers);
+      if (!adminMode) {
+        const managerCenters = allCenters.filter(
+          (c) => (c.managers || []).includes(user.id) && c.status !== "0",
+        );
+        console.log("Manager centers:", managerCenters);
+      }
+      console.log(
+        "All subjects:",
+        allSubjects.filter((s) => s.status !== "0"),
+      );
 
       // Set form data
       setFormData({
@@ -200,58 +260,67 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
         parentPhone: studentData.parentPhone || "",
         parentEmail: studentData.parentEmail || "",
         grade: studentData.grade || "",
-      })
+      });
+
+      if (studentData.managerId) {
+        setSelectedManagerId(studentData.managerId);
+      }
 
       // Set enrolled subjects
-      setEnrolledSubjects(studentSubjectsData)
-
+      setEnrolledSubjects(studentSubjectsData);
     } catch (err) {
-      console.error("Failed to fetch data:", err)
-      setError(err instanceof Error ? err.message : t("somethingWentWrong"))
+      console.error("Failed to fetch data:", err);
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
     } finally {
-      setIsFetching(false)
+      setIsFetching(false);
     }
-  }, [studentId, open, user, authLoading, t])
+  }, [studentId, open, user, authLoading, t]);
 
   useEffect(() => {
     if (open && !authLoading) {
-      fetchData()
+      fetchData();
     }
-  }, [open, authLoading, fetchData])
+  }, [open, authLoading, fetchData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Get unique grades from subjects
-  const availableGrades = [...new Set(subjects.map((s) => s.grade))].sort()
+  const availableGrades = [...new Set(subjects.map((s) => s.grade))].sort();
 
   // Filter subjects by selected grade
-  const subjectsForGrade = selectedGrade ? subjects.filter((s) => s.grade === selectedGrade) : []
+  const subjectsForGrade = selectedGrade
+    ? subjects.filter((s) => s.grade === selectedGrade)
+    : [];
 
   // Get teachers for selected subject
-  const teachersForSubject = selectedSubject?.teacherSubjects?.filter((ts) => ts.teacher) || []
+  const teachersForSubject =
+    selectedSubject?.teacherSubjects?.filter((ts) => ts.teacher) || [];
 
   const handleAddEnrollment = () => {
     if (!selectedSubject || !selectedTeacher) {
-      setError(t("fetchSubjects"))
-      return
+      setError(t("fetchSubjects"));
+      return;
     }
 
     // Check if already enrolled in this subject with this teacher
     const alreadyEnrolled = enrolledSubjects.some(
-      (es) => es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
-    )
+      (es) =>
+        es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
+    );
 
     if (alreadyEnrolled) {
-      setError(t("alreadyEnrolled"))
-      return
+      setError(t("alreadyEnrolled"));
+      return;
     }
 
-    const teacher = teachersForSubject.find((ts) => ts.teacherId === selectedTeacher)?.teacher
+    const teacher = teachersForSubject.find(
+      (ts) => ts.teacherId === selectedTeacher,
+    )?.teacher;
 
-    if (!teacher) return
+    if (!teacher) return;
 
     setEnrolledSubjects((prev) => [
       ...prev,
@@ -263,45 +332,49 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
         grade: selectedSubject.grade,
         price: selectedSubject.price,
       },
-    ])
+    ]);
 
     // Reset enrollment flow
-    setSelectedGrade("")
-    setSelectedSubject(null)
-    setSelectedTeacher("")
-    setError("")
-  }
+    setSelectedGrade("");
+    setSelectedSubject(null);
+    setSelectedTeacher("");
+    setError("");
+  };
 
   const handleRemoveEnrollment = (subjectId: string, teacherId: string) => {
-    setEnrolledSubjects((prev) => prev.filter((es) => !(es.subjectId === subjectId && es.teacherId === teacherId)))
-  }
+    setEnrolledSubjects((prev) =>
+      prev.filter(
+        (es) => !(es.subjectId === subjectId && es.teacherId === teacherId),
+      ),
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
       if (!user || !user.id) {
-        throw new Error(t('unauthorized'))
+        throw new Error(t("unauthorized"));
       }
 
       if (!formData.name) {
-        throw new Error(t("nameRequired"))
+        throw new Error(t("nameRequired"));
       }
 
       if (enrolledSubjects.length === 0) {
-        throw new Error(t("atLeastOneSubject"))
+        throw new Error(t("atLeastOneSubject"));
       }
 
       // Get existing student
-      const existingStudent = await studentActions.getLocal(studentId)
+      const existingStudent = await studentActions.getLocal(studentId);
       if (!existingStudent) {
-        throw new Error(t("studentInfo"))
+        throw new Error(t("studentInfo"));
       }
 
       // Update student in local DB
-      const now = Date.now()
+      const now = Date.now();
       const updatedStudent = {
         ...existingStudent,
         name: formData.name,
@@ -311,39 +384,45 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
         parentPhone: formData.parentPhone || undefined,
         parentEmail: formData.parentEmail || undefined,
         grade: formData.grade || undefined,
-        status: 'w' as const,
+        managerId: adminMode ? selectedManagerId : existingStudent.managerId,
+        status: "w" as const,
         updatedAt: now,
-      }
+      };
 
-      await studentActions.putLocal(updatedStudent)
+      await studentActions.putLocal(updatedStudent);
 
       // Update student subjects
-      const existingEnrollments = await studentSubjectActions.getAll()
+      const existingEnrollments = await studentSubjectActions.getAll();
       const currentEnrollments = existingEnrollments.filter(
-        ss => ss.studentId === studentId && ss.status !== '0'
-      )
+        (ss) => ss.studentId === studentId && ss.status !== "0",
+      );
 
       // Remove enrollments that are no longer in the list
       const enrollmentsToRemove = currentEnrollments.filter(
-        ce => !enrolledSubjects.some(
-          es => es.subjectId === ce.subjectId && es.teacherId === ce.teacherId
-        )
-      )
-      
+        (ce) =>
+          !enrolledSubjects.some(
+            (es) =>
+              es.subjectId === ce.subjectId && es.teacherId === ce.teacherId,
+          ),
+      );
+
       for (const enrollment of enrollmentsToRemove) {
-        await studentSubjectActions.markForDelete(enrollment.id)
+        await studentSubjectActions.markForDelete(enrollment.id);
       }
 
       // Add new enrollments
       const enrollmentsToAdd = enrolledSubjects.filter(
-        es => !currentEnrollments.some(
-          ce => ce.subjectId === es.subjectId && ce.teacherId === es.teacherId
-        )
-      )
+        (es) =>
+          !currentEnrollments.some(
+            (ce) =>
+              ce.subjectId === es.subjectId && ce.teacherId === es.teacherId,
+          ),
+      );
 
       for (const enrollment of enrollmentsToAdd) {
-        const { generateObjectId } = await import('@/lib/utils/generateObjectId')
-        const enrollmentId = generateObjectId()
+        const { generateObjectId } =
+          await import("@/lib/utils/generateObjectId");
+        const enrollmentId = generateObjectId();
         await studentSubjectActions.putLocal({
           id: enrollmentId,
           enrolledAt: now,
@@ -351,26 +430,28 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
           subjectId: enrollment.subjectId,
           teacherId: enrollment.teacherId,
           managerId: user.id,
-          status: 'w' as const,
+          status: "w" as const,
           createdAt: now,
           updatedAt: now,
-        })
+        });
       }
 
       // Close dialog and refresh
-      setOpen(false)
-      onStudentUpdated?.()
-
+      setOpen(false);
+      onStudentUpdated?.();
     } catch (err) {
-      console.error(err)
-      setError(err instanceof Error ? err.message : t("somethingWentWrong"))
+      console.error(err);
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Calculate total price
-  const totalPrice = enrolledSubjects.reduce((total, es) => total + es.price, 0)
+  const totalPrice = enrolledSubjects.reduce(
+    (total, es) => total + es.price,
+    0,
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -391,7 +472,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                     {formData.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span>{t("title")}: {formData.name}</span>
+                <span>
+                  {t("title")}: {formData.name}
+                </span>
               </>
             )}
           </DialogTitle>
@@ -413,11 +496,15 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
               {/* Student Information */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{t("studentInfo")}</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("studentInfo")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <Label htmlFor="name" className="text-sm">{t("fullName")}</Label>
+                    <Label htmlFor="name" className="text-sm">
+                      {t("fullName")}
+                    </Label>
                     <Input
                       type="text"
                       id="name"
@@ -429,7 +516,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="grade" className="text-sm">{t("grade")}</Label>
+                    <Label htmlFor="grade" className="text-sm">
+                      {t("grade")}
+                    </Label>
                     <Input
                       type="text"
                       id="grade"
@@ -439,8 +528,32 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                       className="h-9"
                     />
                   </div>
+                  {adminMode && (
+                    <div className="space-y-1">
+                      <Label htmlFor="managerId" className="text-sm">
+                        Manager
+                      </Label>
+                      <Select
+                        value={selectedManagerId}
+                        onValueChange={setSelectedManagerId}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select Manager" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {managers.map((m) => (
+                            <SelectItem key={m.id} value={m.id}>
+                              {m.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <div className="space-y-1">
-                    <Label htmlFor="email" className="text-sm">{t("email")}</Label>
+                    <Label htmlFor="email" className="text-sm">
+                      {t("email")}
+                    </Label>
                     <Input
                       type="email"
                       id="email"
@@ -451,7 +564,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="phone" className="text-sm">{t("phone")}</Label>
+                    <Label htmlFor="phone" className="text-sm">
+                      {t("phone")}
+                    </Label>
                     <Input
                       type="tel"
                       id="phone"
@@ -471,7 +586,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <Label htmlFor="parentName" className="text-sm">{t("parentName")}</Label>
+                    <Label htmlFor="parentName" className="text-sm">
+                      {t("parentName")}
+                    </Label>
                     <Input
                       type="text"
                       id="parentName"
@@ -482,7 +599,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="parentPhone" className="text-sm">{t("parentPhone")}</Label>
+                    <Label htmlFor="parentPhone" className="text-sm">
+                      {t("parentPhone")}
+                    </Label>
                     <Input
                       type="tel"
                       id="parentPhone"
@@ -493,7 +612,9 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                     />
                   </div>
                   <div className="space-y-1 col-span-2">
-                    <Label htmlFor="parentEmail" className="text-sm">{t("parentEmail")}</Label>
+                    <Label htmlFor="parentEmail" className="text-sm">
+                      {t("parentEmail")}
+                    </Label>
                     <Input
                       type="email"
                       id="parentEmail"
@@ -509,14 +630,18 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
               {/* Current Enrollments */}
               <Card>
                 <CardHeader className="pb-3 flex flex-row justify-between items-center">
-                  <CardTitle className="text-base">{t("currentEnrollments")}</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("currentEnrollments")}
+                  </CardTitle>
                   <span className="text-sm font-semibold text-green-600">
                     MAD {totalPrice.toFixed(2)}
                   </span>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {enrolledSubjects.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t("atLeastOneSubject")}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("atLeastOneSubject")}
+                    </p>
                   ) : (
                     enrolledSubjects.map((es, index) => (
                       <div
@@ -524,18 +649,24 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                         className="border p-2 rounded-lg flex justify-between items-center"
                       >
                         <div>
-                          <p className="text-sm font-medium">{es.subjectName}</p>
+                          <p className="text-sm font-medium">
+                            {es.subjectName}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {es.teacherName} • {es.grade}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-green-600">MAD {es.price}</span>
+                          <span className="text-sm text-green-600">
+                            MAD {es.price}
+                          </span>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleRemoveEnrollment(es.subjectId, es.teacherId)}
+                            onClick={() =>
+                              handleRemoveEnrollment(es.subjectId, es.teacherId)
+                            }
                           >
                             <X className="h-4 w-4 text-destructive" />
                           </Button>
@@ -549,16 +680,21 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
               {/* Add New Subject */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{t("addNewSubject")}</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("addNewSubject")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {/* Grade Selection */}
                   <div>
-                    <span className="text-sm font-medium mb-2 block">{t("step1SelectGrade")}</span>
+                    <span className="text-sm font-medium mb-2 block">
+                      {t("step1SelectGrade")}
+                    </span>
                     {availableGrades.length === 0 ? (
                       <Alert>
                         <AlertDescription>
-                          {t("noSubjectsAvailable") || "No subjects available. Please add subjects to your center first."}
+                          {t("noSubjectsAvailable") ||
+                            "No subjects available. Please add subjects to your center first."}
                         </AlertDescription>
                       </Alert>
                     ) : (
@@ -567,12 +703,14 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                           <Button
                             key={grade}
                             type="button"
-                            variant={selectedGrade === grade ? "default" : "outline"}
+                            variant={
+                              selectedGrade === grade ? "default" : "outline"
+                            }
                             size="sm"
                             onClick={() => {
-                              setSelectedGrade(grade)
-                              setSelectedSubject(null)
-                              setSelectedTeacher("")
+                              setSelectedGrade(grade);
+                              setSelectedSubject(null);
+                              setSelectedTeacher("");
                             }}
                           >
                             {grade}
@@ -585,20 +723,28 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                   {/* Subject Selection */}
                   {selectedGrade && (
                     <div>
-                      <span className="text-sm font-medium mb-2 block">{t("step2SelectSubject")}</span>
+                      <span className="text-sm font-medium mb-2 block">
+                        {t("step2SelectSubject")}
+                      </span>
                       <div className="flex flex-wrap gap-2">
                         {subjectsForGrade.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">{t("noSubjectsForGrade")}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t("noSubjectsForGrade")}
+                          </p>
                         ) : (
                           subjectsForGrade.map((subject) => (
                             <Button
                               key={subject.id}
                               type="button"
-                              variant={selectedSubject?.id === subject.id ? "default" : "outline"}
+                              variant={
+                                selectedSubject?.id === subject.id
+                                  ? "default"
+                                  : "outline"
+                              }
                               size="sm"
                               onClick={() => {
-                                setSelectedSubject(subject)
-                                setSelectedTeacher("")
+                                setSelectedSubject(subject);
+                                setSelectedTeacher("");
                               }}
                             >
                               {subject.name} (MAD {subject.price})
@@ -617,13 +763,19 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {teachersForSubject.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">{t("noTeachersAvailable")}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t("noTeachersAvailable")}
+                          </p>
                         ) : (
                           teachersForSubject.map((ts) => (
                             <Button
                               key={ts.teacherId}
                               type="button"
-                              variant={selectedTeacher === ts.teacherId ? "default" : "outline"}
+                              variant={
+                                selectedTeacher === ts.teacherId
+                                  ? "default"
+                                  : "outline"
+                              }
                               size="sm"
                               onClick={() => setSelectedTeacher(ts.teacherId)}
                             >
@@ -675,5 +827,5 @@ export default function EditStudentDialog({ studentId, trigger, onStudentUpdated
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -776,99 +776,128 @@ export default function AddStudentDialog({
           {tTable("addStudent")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="overflow-auto">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="hidden md:block">
-            {tTable("subtitle")}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="overflow-y-auto">
+        <div className="overflow-auto">
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription className="hidden md:block">
+              {tTable("subtitle")}
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Mobile Step Indicator */}
-        <StepIndicator
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          adminMode={adminMode}
-        />
+          {/* Mobile Step Indicator */}
+          <StepIndicator
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            adminMode={adminMode}
+          />
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">
-            {adminMode && (
-              <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
-                {renderStep0()}
-              </div>
-            )}
-            <div
-              className={
-                currentStep !== (adminMode ? 2 : 1)
-                  ? "hidden md:block"
-                  : "block"
-              }
-            >
-              {renderStep1()}
-            </div>
-            <div
-              className={
-                currentStep !== (adminMode ? 3 : 2)
-                  ? "hidden md:block"
-                  : "block"
-              }
-            >
-              {renderStep2()}
-            </div>
-            <div
-              className={
-                currentStep === totalSteps
-                  ? "block"
-                  : enrolledSubjects.length > 0
-                    ? "hidden md:block"
-                    : "hidden"
-              }
-            >
-              {renderStep3()}
-            </div>
-          </div>
-
-          {/* Mobile Navigation Buttons */}
-          <div className="flex justify-between gap-3 pt-4 border-t md:hidden">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {currentStep === 1 ? (
-                t("actionscancel")
-              ) : (
-                <>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  {t("previous") || "Previous"}
-                </>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
+              {adminMode && (
+                <div
+                  className={currentStep !== 1 ? "hidden md:block" : "block"}
+                >
+                  {renderStep0()}
+                </div>
               )}
-            </Button>
+              <div
+                className={
+                  currentStep !== (adminMode ? 2 : 1)
+                    ? "hidden md:block"
+                    : "block"
+                }
+              >
+                {renderStep1()}
+              </div>
+              <div
+                className={
+                  currentStep !== (adminMode ? 3 : 2)
+                    ? "hidden md:block"
+                    : "block"
+                }
+              >
+                {renderStep2()}
+              </div>
+              <div
+                className={
+                  currentStep === totalSteps
+                    ? "block"
+                    : enrolledSubjects.length > 0
+                      ? "hidden md:block"
+                      : "hidden"
+                }
+              >
+                {renderStep3()}
+              </div>
+            </div>
 
-            {currentStep < totalSteps ? (
+            {/* Mobile Navigation Buttons */}
+            <div className="flex justify-between gap-3 pt-4 border-t md:hidden">
               <Button
                 type="button"
-                onClick={nextStep}
+                variant="outline"
+                onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
                 disabled={isLoading}
                 className="flex-1"
               >
-                {t("next") || "Next"}
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {currentStep === 1 ? (
+                  t("actionscancel")
+                ) : (
+                  <>
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    {t("previous") || "Previous"}
+                  </>
+                )}
               </Button>
-            ) : (
+
+              {currentStep < totalSteps ? (
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  {t("next") || "Next"}
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isLoading || enrolledSubjects.length === 0}
+                  className="flex-1"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t("actionscreating")}
+                    </>
+                  ) : (
+                    t("actionssubmit")
+                  )}
+                </Button>
+              )}
+            </div>
+
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isLoading}
+              >
+                {t("actionscancel")}
+              </Button>
               <Button
                 type="submit"
                 disabled={isLoading || enrolledSubjects.length === 0}
-                className="flex-1"
               >
                 {isLoading ? (
                   <>
@@ -879,34 +908,9 @@ export default function AddStudentDialog({
                   t("actionssubmit")
                 )}
               </Button>
-            )}
-          </div>
-
-          {/* Desktop Action Buttons */}
-          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={isLoading}
-            >
-              {t("actionscancel")}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || enrolledSubjects.length === 0}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t("actionscreating")}
-                </>
-              ) : (
-                t("actionssubmit")
-              )}
-            </Button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

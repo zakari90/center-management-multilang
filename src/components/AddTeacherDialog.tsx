@@ -27,6 +27,7 @@ import {
   subjectActions,
   teacherActions,
   teacherSubjectActions,
+  userActions,
 } from "@/lib/dexie/dexieActions";
 import ServerActionTeachers from "@/lib/dexie/teacherServerAction";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
@@ -38,6 +39,7 @@ import {
   ChevronRight,
   Loader2,
   User,
+  Users,
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -68,6 +70,7 @@ interface TeacherSubject {
 
 interface AddTeacherDialogProps {
   onTeacherAdded?: () => void;
+  adminMode?: boolean;
 }
 
 // ==================== SUB-COMPONENTS ====================
@@ -77,12 +80,16 @@ const StepIndicator = ({
   currentStep,
   totalSteps,
   stepLabels,
+  adminMode,
 }: {
   currentStep: number;
   totalSteps: number;
   stepLabels: string[];
+  adminMode?: boolean;
 }) => {
-  const icons = [User, BookOpen, Calendar];
+  const icons = adminMode
+    ? [Users, User, BookOpen, Calendar]
+    : [User, BookOpen, Calendar];
 
   return (
     <div className="flex items-center justify-center gap-2 py-3 md:hidden">
@@ -231,6 +238,7 @@ const SubjectCompensationCard = ({
 // ==================== MAIN COMPONENT ====================
 export default function AddTeacherDialog({
   onTeacherAdded,
+  adminMode = false,
 }: AddTeacherDialogProps) {
   const t = useTranslations("CreateTeacherForm");
   const tTable = useTranslations("TeachersTable");
@@ -239,9 +247,11 @@ export default function AddTeacherDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [managers, setManagers] = useState<{ id: string; name: string }[]>([]);
+  const [selectedManagerId, setSelectedManagerId] = useState<string>("");
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const totalSteps = adminMode ? 4 : 3;
 
   const DAYS = [
     t("monday"),
@@ -292,8 +302,27 @@ export default function AddTeacherDialog({
       setTeacherSubjects([]);
       setError("");
       setCurrentStep(1);
+      setSelectedManagerId("");
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && user) {
+      if (adminMode) fetchManagers();
+    }
+  }, [open, user, adminMode]);
+
+  const fetchManagers = async () => {
+    try {
+      const allUsers = await userActions.getAll();
+      const activeManagers = allUsers.filter(
+        (u) => u.status !== "0" && u.role === "MANAGER",
+      );
+      setManagers(activeManagers.map((m) => ({ id: m.id, name: m.name })));
+    } catch (err) {
+      console.error("Failed to fetch managers:", err);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -365,7 +394,12 @@ export default function AddTeacherDialog({
   };
 
   const nextStep = () => {
-    if (currentStep === 1 && !formData.name.trim()) {
+    if (adminMode && currentStep === 1 && !selectedManagerId) {
+      setError(t("errorsselectManager") || "Please select a manager");
+      return;
+    }
+    const realStep = adminMode ? currentStep - 1 : currentStep;
+    if (realStep === 1 && !formData.name.trim()) {
       setError(t("nameRequired") || "Name is required");
       return;
     }
@@ -455,7 +489,7 @@ export default function AddTeacherDialog({
         phone: formData.phone || undefined,
         address: formData.address || undefined,
         weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
-        managerId: user.id,
+        managerId: adminMode ? selectedManagerId : user.id,
         status: "w" as const,
         createdAt: now,
         updatedAt: now,
@@ -517,6 +551,37 @@ export default function AddTeacherDialog({
       isSubmittingRef.current = false;
     }
   };
+
+  // Step 0: Manager Selection (Admin only)
+  const renderStep0 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("selectManagertitle") || "Select Manager"}
+      </h3>
+      <div className="space-y-2 max-h-[200px] overflow-y-auto">
+        {managers.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No managers available.
+          </p>
+        ) : (
+          managers.map((manager) => (
+            <Button
+              key={manager.id}
+              type="button"
+              variant={selectedManagerId === manager.id ? "default" : "outline"}
+              className="w-full justify-start text-left h-auto py-2"
+              onClick={() => setSelectedManagerId(manager.id)}
+            >
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span>{manager.name}</span>
+              </div>
+            </Button>
+          ))
+        )}
+      </div>
+    </div>
+  );
 
   // Step 1: Basic Information
   const renderStep1 = () => (
@@ -741,6 +806,7 @@ export default function AddTeacherDialog({
           currentStep={currentStep}
           totalSteps={totalSteps}
           stepLabels={stepLabels}
+          adminMode={adminMode}
         />
 
         {error && (
@@ -752,14 +818,19 @@ export default function AddTeacherDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-4">
             <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
-              {renderStep1()}
+              {adminMode ? renderStep0() : renderStep1()}
             </div>
             <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
-              {renderStep2()}
+              {adminMode ? renderStep1() : renderStep2()}
             </div>
             <div className={currentStep !== 3 ? "hidden md:block" : "block"}>
-              {renderStep3()}
+              {adminMode ? renderStep2() : renderStep3()}
             </div>
+            {adminMode && (
+              <div className={currentStep !== 4 ? "hidden md:block" : "block"}>
+                {renderStep3()}
+              </div>
+            )}
           </div>
 
           {/* Mobile Navigation Buttons */}
@@ -785,7 +856,10 @@ export default function AddTeacherDialog({
               <Button
                 type="button"
                 onClick={nextStep}
-                disabled={isLoading}
+                disabled={
+                  isLoading ||
+                  (adminMode && currentStep === 1 && !selectedManagerId)
+                }
                 className="flex-1"
               >
                 {t("next") || "Next"}

@@ -1,16 +1,28 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, GraduationCap, Receipt, ReceiptText, UserPlus } from 'lucide-react'
-import { ModalLink } from '@/components/modal-link'
-import { useTranslations } from 'next-intl'
-import AddStudentDialog from './AddStudentDialog'
-import AddStudentPaymentDialog from './AddStudentPaymentDialog'
-import AddTeacherDialog from './AddTeacherDialog'
-import AddTeacherPaymentDialog from './AddTeacherPaymentDialog'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Calendar,
+  GraduationCap,
+  Receipt,
+  ReceiptText,
+  UserPlus,
+} from "lucide-react";
+import { ModalLink } from "@/components/modal-link";
+import { useTranslations } from "next-intl";
+import AddStudentDialog from "./AddStudentDialog";
+import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
+import AddTeacherDialog from "./AddTeacherDialog";
+import AddTeacherPaymentDialog from "./AddTeacherPaymentDialog";
 
 export default function QuickActions() {
-  const t = useTranslations('QuickActions')
+  const t = useTranslations("QuickActions");
 
   // const actions = [
   //   {
@@ -46,45 +58,53 @@ export default function QuickActions() {
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div >
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center`}>
-                  <UserPlus className="h-6 w-6" />
-                </div>
-                <AddTeacherDialog/>
+          <div>
+            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+              <div
+                className={`h-12 w-12 rounded-full flex items-center justify-center`}
+              >
+                <UserPlus className="h-6 w-6" />
               </div>
+              <AddTeacherDialog adminMode={user?.role === "ADMIN"} />
             </div>
-            <div >
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center`}>
-                  <GraduationCap className="h-6 w-6" />
-                </div>
-                <AddStudentDialog/>
+          </div>
+          <div>
+            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+              <div
+                className={`h-12 w-12 rounded-full flex items-center justify-center`}
+              >
+                <GraduationCap className="h-6 w-6" />
               </div>
+              <AddStudentDialog adminMode={user?.role === "ADMIN"} />
             </div>
-            <div >
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center`}>
-                  +<ReceiptText className="h-6 w-6" />
-                </div>
-                <AddStudentPaymentDialog/>
+          </div>
+          <div>
+            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+              <div
+                className={`h-12 w-12 rounded-full flex items-center justify-center`}
+              >
+                +<ReceiptText className="h-6 w-6" />
               </div>
+              <AddStudentPaymentDialog />
             </div>
-            <div >
-              <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center`}>
+          </div>
+          <div>
+            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+              <div
+                className={`h-12 w-12 rounded-full flex items-center justify-center`}
+              >
                 - <ReceiptText className="h-6 w-6" />
-                </div>
-                <AddTeacherPaymentDialog/>
               </div>
+              <AddTeacherPaymentDialog />
             </div>
+          </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
