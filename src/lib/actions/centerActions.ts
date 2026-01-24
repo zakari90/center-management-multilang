@@ -25,8 +25,6 @@ export async function saveCenterToDatabase(centerData: {
   phone?: string | null;
   classrooms: string[];
   workingDays: string[];
-  workingMonths: string[];
-  workingYears: string[];
   paymentStartDay?: number;
   paymentEndDay?: number;
   subjects?: Array<{
@@ -85,8 +83,6 @@ export async function saveCenterToDatabase(centerData: {
       phone,
       classrooms,
       workingDays,
-      workingMonths,
-      workingYears,
       paymentStartDay,
       paymentEndDay,
       subjects,
@@ -100,11 +96,10 @@ export async function saveCenterToDatabase(centerData: {
       !name ||
       !Array.isArray(classrooms) ||
       !Array.isArray(workingDays) ||
-      !Array.isArray(workingMonths) ||
-      !Array.isArray(workingYears)
+      !Array.isArray(workingDays)
     ) {
       throw new Error(
-        "Missing or invalid fields. ID and name are required, classrooms, workingDays, workingMonths and workingYears must be arrays",
+        "Missing or invalid fields. ID and name are required, classrooms and workingDays must be arrays",
       );
     }
 
@@ -148,8 +143,6 @@ export async function saveCenterToDatabase(centerData: {
           phone: phone || null,
           classrooms,
           workingDays,
-          workingMonths,
-          workingYears,
           paymentStartDay: paymentStartDay || 1,
           paymentEndDay: paymentEndDay || 30,
           updatedAt: updatedAt ? new Date(updatedAt) : new Date(),
@@ -168,8 +161,6 @@ export async function saveCenterToDatabase(centerData: {
           phone: phone || null,
           classrooms,
           workingDays,
-          workingMonths,
-          workingYears,
           paymentStartDay: paymentStartDay || 1,
           paymentEndDay: paymentEndDay || 30,
           adminId: session.user.id,

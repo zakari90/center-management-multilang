@@ -26,8 +26,8 @@ model Center {
   classrooms    String[]
 
   workingDays   String[]
-  workingMonths String[]
-  workingYears  String[]
+
+
   paymentStartDay Int    @default(1)
   paymentEndDay   Int    @default(30)
   

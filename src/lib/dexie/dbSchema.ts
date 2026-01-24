@@ -32,8 +32,7 @@ export interface Center extends SyncEntity {
   phone?: string;
   classrooms: string[];
   workingDays: string[];
-  workingMonths: string[];
-  workingYears: string[];
+
   paymentStartDay?: number;
   paymentEndDay?: number;
   academicYear?: string;

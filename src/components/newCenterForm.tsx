@@ -53,8 +53,6 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
     address: "",
     phone: "",
     workingDays: [] as string[],
-    workingMonths: [] as string[],
-    workingYears: [] as string[],
     paymentStartDay: 1,
     paymentEndDay: 30,
     classrooms: [] as string[],
@@ -77,8 +75,6 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
       subjects: [],
       classrooms: [],
       workingDays: [],
-      workingMonths: [],
-      workingYears: [],
       paymentStartDay: 1,
       paymentEndDay: 30,
     });
@@ -97,10 +93,6 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
 
   const updateClassrooms = (newClassrooms: string[]) => {
     setFormData((prev) => ({ ...prev, classrooms: newClassrooms }));
-  };
-
-  const updateWorkingYears = (newYears: string[]) => {
-    setFormData((prev) => ({ ...prev, workingYears: newYears }));
   };
 
   const addSubject = (
@@ -156,8 +148,6 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
         phone: formData.phone || "",
         classrooms: formData.classrooms,
         workingDays: formData.workingDays,
-        workingMonths: formData.workingMonths,
-        workingYears: formData.workingYears,
         paymentStartDay: Number(formData.paymentStartDay) || 1,
         paymentEndDay: Number(formData.paymentEndDay) || 30,
         managers: [],
@@ -353,69 +343,6 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                   </div>
                 ))}
               </div>
-
-              <div className="relative my-4 flex items-center justify-center overflow-hidden">
-                <Separator className="flex-1 h-px bg-border" />
-                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <span className="font-medium text-foreground">
-                    {t("workingMonths")}
-                  </span>
-                </div>
-                <Separator className="flex-1 h-px bg-border" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {monthsOfYear.map((month) => (
-                  <div key={month.key} className="border rounded-lg p-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`month-${month.key}`}
-                        checked={formData.workingMonths.includes(month.key)}
-                        onCheckedChange={(checked) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            workingMonths: checked
-                              ? [...prev.workingMonths, month.key]
-                              : prev.workingMonths.filter(
-                                  (m) => m !== month.key,
-                                ),
-                          }));
-                        }}
-                      />
-                      <Label
-                        htmlFor={`month-${month.key}`}
-                        className="font-medium"
-                      >
-                        {month.label}
-                      </Label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="relative my-4 flex items-center justify-center overflow-hidden">
-                <Separator className="flex-1 h-px bg-border" />
-                <div className="py-1 px-2 border rounded-full text-center bg-muted text-xs mx-1">
-                  <span className="font-medium text-foreground">
-                    {t("workingYears")}
-                  </span>
-                </div>
-                <Separator className="flex-1 h-px bg-border" />
-              </div>
-              <ItemInputList
-                label={t("workingYears")}
-                placeholder={t("workingYearsPlaceholder")}
-                items={formData.workingYears}
-                onChange={updateWorkingYears}
-                suggestions={[
-                  "2023",
-                  "2024",
-                  "2025",
-                  "2026",
-                  "2023-2024",
-                  "2024-2025",
-                  "2025-2026",
-                ]}
-              />
 
               <div className="relative my-4 flex items-center justify-center overflow-hidden">
                 <Separator className="flex-1 h-px bg-border" />

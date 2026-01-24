@@ -29,12 +29,6 @@ function transformServerCenter(serverCenter: any): Center {
     workingDays: Array.isArray(serverCenter.workingDays)
       ? serverCenter.workingDays
       : [],
-    workingMonths: Array.isArray(serverCenter.workingMonths)
-      ? serverCenter.workingMonths
-      : [],
-    workingYears: Array.isArray(serverCenter.workingYears)
-      ? serverCenter.workingYears
-      : [],
     managers: Array.isArray(serverCenter.managers) ? serverCenter.managers : [],
     adminId: serverCenter.adminId,
     status: "1" as const,
@@ -74,8 +68,6 @@ const ServerActionCenters = {
         phone: center.phone || null,
         classrooms: center.classrooms || [],
         workingDays: center.workingDays || [],
-        workingMonths: center.workingMonths || [],
-        workingYears: center.workingYears || [],
         paymentStartDay: center.paymentStartDay,
         paymentEndDay: center.paymentEndDay,
         subjects: centerSubjects,
@@ -174,8 +166,6 @@ const ServerActionCenters = {
             phone: center.phone || null,
             classrooms: center.classrooms || [],
             workingDays: center.workingDays || [],
-            workingMonths: center.workingMonths || [],
-            workingYears: center.workingYears || [],
             paymentStartDay: center.paymentStartDay,
             paymentEndDay: center.paymentEndDay,
             updatedAt: new Date(center.updatedAt).toISOString(),

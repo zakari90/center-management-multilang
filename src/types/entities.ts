@@ -54,8 +54,7 @@ export interface Center extends BaseEntity {
   classrooms: string[];
   whiteLabeling?: boolean;
   workingDays: string[];
-  workingMonths: string[];
-  workingYears: string[];
+
   paymentStartDay?: number;
   paymentEndDay?: number;
   managers: string[];

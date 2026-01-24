@@ -93,8 +93,6 @@ export default function CenterPresentation({
 
   const [tempClassrooms, setTempClassrooms] = useState<string[]>([]);
   const [tempWorkingDays, setTempWorkingDays] = useState<string[]>([]);
-  const [tempWorkingMonths, setTempWorkingMonths] = useState<string[]>([]);
-  const [tempWorkingYears, setTempWorkingYears] = useState<string[]>([]);
   const [tempPaymentStartDay, setTempPaymentStartDay] = useState<number>(1);
   const [tempPaymentEndDay, setTempPaymentEndDay] = useState<number>(30);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -212,8 +210,6 @@ export default function CenterPresentation({
       setTempClassrooms(center.classrooms);
 
       setTempWorkingDays(center.workingDays);
-      setTempWorkingMonths(center.workingMonths || []);
-      setTempWorkingYears(center.workingYears || []);
       setTempPaymentStartDay(center.paymentStartDay || 1);
       setTempPaymentEndDay(center.paymentEndDay || 30);
 
@@ -440,90 +436,6 @@ export default function CenterPresentation({
     } catch (error) {
       console.error("Error updating working days:", error);
       toast(t("workingDaysUpdateFailed") || "Failed to update working days");
-    }
-  };
-
-  // ✅ Update working months
-  const handleSaveWorkingMonths = async () => {
-    if (!center) return;
-
-    try {
-      const updatedCenter: Center = {
-        ...center,
-        workingMonths: tempWorkingMonths,
-        status: "w",
-        updatedAt: Date.now(),
-      };
-
-      await centerActions.putLocal(updatedCenter);
-
-      if (isOnline()) {
-        try {
-          await ServerActionCenters.SaveToServer(updatedCenter);
-          await centerActions.markSynced(updatedCenter.id);
-          toast(
-            t("workingMonthsUpdated") ||
-              "Working months updated and synced successfully",
-          );
-        } catch (syncError) {
-          console.error("Center sync failed, will retry later:", syncError);
-          toast(
-            t("workingMonthsUpdated") ||
-              "Working months updated (will sync when online)",
-          );
-        }
-      } else {
-        toast(
-          t("workingMonthsUpdated") ||
-            "Working months updated (will sync when online)",
-        );
-      }
-    } catch (error) {
-      console.error("Error updating working months:", error);
-      toast(
-        t("workingMonthsUpdateFailed") || "Failed to update working months",
-      );
-    }
-  };
-
-  // ✅ Update working years
-  const handleSaveWorkingYears = async () => {
-    if (!center) return;
-
-    try {
-      const updatedCenter: Center = {
-        ...center,
-        workingYears: tempWorkingYears,
-        status: "w",
-        updatedAt: Date.now(),
-      };
-
-      await centerActions.putLocal(updatedCenter);
-
-      if (isOnline()) {
-        try {
-          await ServerActionCenters.SaveToServer(updatedCenter);
-          await centerActions.markSynced(updatedCenter.id);
-          toast(
-            t("workingYearsUpdated") ||
-              "Working years updated and synced successfully",
-          );
-        } catch (syncError) {
-          console.error("Center sync failed, will retry later:", syncError);
-          toast(
-            t("workingYearsUpdated") ||
-              "Working years updated (will sync when online)",
-          );
-        }
-      } else {
-        toast(
-          t("workingYearsUpdated") ||
-            "Working years updated (will sync when online)",
-        );
-      }
-    } catch (error) {
-      console.error("Error updating working years:", error);
-      toast(t("workingYearsUpdateFailed") || "Failed to update working years");
     }
   };
 
@@ -775,74 +687,6 @@ export default function CenterPresentation({
                     value: day.key,
                     label: day.label,
                   }))}
-                />
-              </EditDialog>
-            }
-            noDataText={t("noData")}
-          />
-
-          {/* Working Months Section */}
-          <Section
-            title={t("workingMonths")}
-            icon={<CalendarRange className="h-4 w-4 text-muted-foreground" />}
-            items={center.workingMonths || []}
-            getItemLabel={(value) =>
-              monthsOfYear.find((m) => m.key === value)?.label ?? value
-            }
-            onEditButton={
-              <EditDialog
-                title={t("editWorkingMonths")}
-                trigger={
-                  <Button variant="ghost" size="sm">
-                    <Pencil className="h-4 w-4 mr-1" /> {t("edit")}
-                  </Button>
-                }
-                onSave={handleSaveWorkingMonths}
-              >
-                <ItemInputList
-                  label={t("workingMonthsLabel")}
-                  placeholder={t("monthPlaceholder")}
-                  items={tempWorkingMonths}
-                  onChange={setTempWorkingMonths}
-                  suggestions={monthsOfYear.map((m) => ({
-                    value: m.key,
-                    label: m.label,
-                  }))}
-                />
-              </EditDialog>
-            }
-            noDataText={t("noData")}
-          />
-
-          {/* Working Years Section */}
-          <Section
-            title={t("workingYears")}
-            icon={<CalendarRange className="h-4 w-4 text-muted-foreground" />}
-            items={center.workingYears || []}
-            onEditButton={
-              <EditDialog
-                title={t("editWorkingYears")}
-                trigger={
-                  <Button variant="ghost" size="sm">
-                    <Pencil className="h-4 w-4 mr-1" /> {t("edit")}
-                  </Button>
-                }
-                onSave={handleSaveWorkingYears}
-              >
-                <ItemInputList
-                  label={t("workingYearsLabel")}
-                  placeholder={t("yearPlaceholder")}
-                  items={tempWorkingYears}
-                  onChange={setTempWorkingYears}
-                  suggestions={[
-                    "2023",
-                    "2024",
-                    "2025",
-                    "2026",
-                    "2023-2024",
-                    "2024-2025",
-                    "2025-2026",
-                  ]}
                 />
               </EditDialog>
             }
