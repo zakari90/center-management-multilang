@@ -55,13 +55,6 @@ export default function AllUsersTable() {
 
   const [activeTab, setActiveTab] = useState("users");
 
-  // Redirect from users tab if no admin exists
-  React.useEffect(() => {
-    if (!isLoading && activeTab === "users") {
-      setActiveTab("teachers");
-    }
-  }, [activeTab, isLoading]);
-
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
