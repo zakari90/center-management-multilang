@@ -583,7 +583,7 @@ export default function CenterPresentation({
           </CardTitle>
           <p className="text-muted-foreground text-sm">{t("centerOverview")}</p>
           {center.address && (
-            <p className="text-sm text-muted-foreground whitespace-pre-line break-words px-2 sm:px-0">
+            <p className="text-sm text-muted-foreground whitespace-pre-line wrap-break-word px-2 sm:px-0">
               {center.address}
             </p>
           )}
@@ -806,31 +806,29 @@ export default function CenterPresentation({
                 }
                 onSave={handleSavePaymentPeriod}
               >
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
                     <label className="text-sm font-medium">
-                      {t("paymentStartDay")}
+                      {t("fromDay")}
                     </label>
                     <input
                       type="number"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       min="1"
                       max="31"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       value={tempPaymentStartDay}
                       onChange={(e) =>
                         setTempPaymentStartDay(Number(e.target.value))
                       }
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">
-                      {t("paymentEndDay")}
-                    </label>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">{t("toDay")}</label>
                     <input
                       type="number"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       min="1"
                       max="31"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       value={tempPaymentEndDay}
                       onChange={(e) =>
                         setTempPaymentEndDay(Number(e.target.value))
@@ -840,11 +838,43 @@ export default function CenterPresentation({
                 </div>
               </EditDialog>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="text-sm">
+            <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+              <span className="text-sm font-medium">
                 {t("fromDay")} {center.paymentStartDay || 1} {t("toDay")}{" "}
                 {center.paymentEndDay || 30}
-              </Badge>
+              </span>
+            </div>
+          </div>
+
+          <Separator className="my-2" />
+
+          {/* Academic Year 2025-2026 Info Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wide">
+              <CalendarRange className="h-5 w-5" />
+              <span>{t("academicYearInfo.title")}</span>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="p-4 rounded-xl border-2 border-primary/20 bg-primary/5 space-y-2">
+                <div className="flex items-center gap-2 text-primary font-semibold">
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <span>{t("academicYearInfo.startTitle")}</span>
+                </div>
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  {t("academicYearInfo.startDetails")}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl border-2 border-secondary/20 bg-secondary/5 space-y-2">
+                <div className="flex items-center gap-2 text-secondary-foreground font-semibold">
+                  <div className="h-2 w-2 rounded-full bg-secondary" />
+                  <span>{t("academicYearInfo.endTitle")}</span>
+                </div>
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  {t("academicYearInfo.endDetails")}
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -852,7 +882,7 @@ export default function CenterPresentation({
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{t("addNewSubject")}</DialogTitle>
             <DialogDescription>{t("addSubjectDescription")}</DialogDescription>
           </DialogHeader>

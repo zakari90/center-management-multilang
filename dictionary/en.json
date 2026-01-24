@@ -404,7 +404,14 @@
     "paymentStartDay": "Start Day (e.g. 1)",
     "paymentEndDay": "End Day (e.g. 5)",
     "fromDay": "From Day",
-    "toDay": "To Day"
+    "toDay": "To Day",
+    "academicYearInfo": {
+      "title": "2025-2026 Academic Year Details",
+      "startTitle": "School Year Start",
+      "startDetails": "Education and training staff joined on September 1, 2025. Student entry was postponed until September 21, 2025, in some cases to ensure institutional readiness.",
+      "endTitle": "School Year End",
+      "endDetails": "Studies continue for 2nd Baccalaureate until May 30, 2026, while they end on June 30, 2026, for Primary, Middle School, and Common Core."
+    }
   },
   "NewCenterForm": {
     "basicInformation": "Basic Information",
