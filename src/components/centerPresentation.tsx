@@ -12,6 +12,7 @@ import {
   ServerActionSubjects,
 } from "@/lib/dexie/serverActions";
 import { Center, Subject, localDb } from "@/lib/dexie/dbSchema";
+import { cn, getItemColor } from "@/lib/utils";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -911,8 +912,11 @@ function Section({
           items.map((item) => (
             <Badge
               key={item}
-              variant="secondary"
-              className="text-sm truncate max-w-xs"
+              variant="outline"
+              className={cn(
+                "text-sm truncate max-w-xs border-2 font-semibold shadow-sm",
+                getItemColor(getItemLabel ? getItemLabel(item) : item),
+              )}
             >
               {getItemLabel ? getItemLabel(item) : item}
             </Badge>
