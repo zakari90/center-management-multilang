@@ -1,3 +1,8 @@
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import {
   Table,
   TableBody,
@@ -6,17 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Mail, Phone, Trash2, Calendar, Search, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { TeacherData } from "./types";
+import { Calendar, Mail, Phone, Search, Trash2, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import AddTeacherDialog from "@/components/AddTeacherDialog";
-import { PaginationControls } from "@/components/ui/pagination-controls";
+import { TeacherData } from "./types";
 
 interface TeachersTabProps {
   teachers: TeacherData[];
@@ -62,7 +61,7 @@ export function TeachersTab({
             className="pl-10"
           />
         </div>
-        <AddTeacherDialog onTeacherAdded={onTeacherAdded} />
+        {/* <AddTeacherDialog onTeacherAdded={onTeacherAdded} /> */}
       </div>
 
       {filteredTeachers.length === 0 ? (
