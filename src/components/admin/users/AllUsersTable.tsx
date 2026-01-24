@@ -44,6 +44,7 @@ import {
   findOrphanedStudents,
   getOrphanedRecordsCount,
 } from "@/utils/orphanedRecords";
+import AddTeacherDialog from "@/components/AddTeacherDialog";
 
 export default function AllUsersTable() {
   const t = useTranslations("AllUsersTable");
@@ -54,17 +55,12 @@ export default function AllUsersTable() {
 
   const [activeTab, setActiveTab] = useState("users");
 
-  const hasAdmin = React.useMemo(
-    () => users.some((u) => u.role === "ADMIN"),
-    [users],
-  );
-
   // Redirect from users tab if no admin exists
   React.useEffect(() => {
-    if (!isLoading && !hasAdmin && activeTab === "users") {
+    if (!isLoading && activeTab === "users") {
       setActiveTab("teachers");
     }
-  }, [hasAdmin, activeTab, isLoading]);
+  }, [activeTab, isLoading]);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -278,6 +274,8 @@ export default function AllUsersTable() {
           </div>
           {activeTab === "students" ? (
             <AddStudentDialog adminMode onStudentAdded={refreshData} />
+          ) : activeTab === "teachers" ? (
+            <AddTeacherDialog onTeacherAdded={refreshData} />
           ) : (
             <Button onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
@@ -291,7 +289,7 @@ export default function AllUsersTable() {
           <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-medium text-sm text-orange-800 dark:text-orange-200">
                     {t("orphanedRecordsFound")}
@@ -316,7 +314,7 @@ export default function AllUsersTable() {
                 size="sm"
                 variant="outline"
                 onClick={() => setOrphanedRecordsDialogOpen(true)}
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 {t("fixNow")}
               </Button>
@@ -331,7 +329,7 @@ export default function AllUsersTable() {
           className="space-y-4"
         >
           <TabsList>
-            <TabsTrigger value="users" disabled={!hasAdmin}>
+            <TabsTrigger value="users">
               {t("users")} ({users.length})
             </TabsTrigger>
             <TabsTrigger value="teachers">
