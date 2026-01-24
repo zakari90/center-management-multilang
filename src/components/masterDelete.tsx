@@ -173,7 +173,7 @@ export function DeleteAllDataButton() {
             </DialogTitle>
             <DialogDescription className="pt-4 space-y-4">
               <p>
-                {t("areYouSureDeleteAllData")}{" "}
+                {t("areYouSureDeleteAllData")} {t("downloadBackupWarning")}{" "}
                 <strong>{t("deleteAllData")}</strong>?
                 <br />
                 <span className="text-destructive font-semibold">

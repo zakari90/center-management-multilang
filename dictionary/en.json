@@ -38,7 +38,8 @@
     "passwordPlaceholder": "Admin password",
     "passwordRequired": "Password is required",
     "incorrectPassword": "Incorrect password",
-    "passwordConfirmation": "For security, please enter your admin password to confirm this action"
+    "passwordConfirmation": "For security, please enter your admin password to confirm this action",
+    "downloadBackupWarning": "Please make sure to download your data from the database page first."
   },
 
   "InstallPWA": {
@@ -1691,6 +1692,10 @@
   "AllTablesViewer": {
     "title": "All Database Tables",
     "description": "View and manage all data in your local database",
+    "exportButton": {
+      "default": "Export All Data",
+      "loading": "Exporting..."
+    },
     "tables": {
       "users": "Users",
       "teachers": "Teachers",

@@ -38,7 +38,8 @@
     "passwordPlaceholder": "كلمة مرور المسؤول",
     "passwordRequired": "كلمة المرور مطلوبة",
     "incorrectPassword": "كلمة المرور غير صحيحة",
-    "passwordConfirmation": "للأمان، يرجى إدخال كلمة مرور المسؤول لتأكيد هذا الإجراء"
+    "passwordConfirmation": "للأمان، يرجى إدخال كلمة مرور المسؤول لتأكيد هذا الإجراء",
+    "downloadBackupWarning": "يرجى التأكد من تحميل بياناتك من صفحة قاعدة البيانات أولاً."
   },
   "InstallPWA": {
     "installMessage": "تثبيت التطبيق للحصول على تجربة أفضل",
@@ -1670,6 +1671,10 @@
   "AllTablesViewer": {
     "title": "جميع جداول قاعدة البيانات",
     "description": "عرض وإدارة جميع البيانات في قاعدة البيانات المحلية الخاصة بك",
+    "exportButton": {
+      "default": "تصدير جميع البيانات",
+      "loading": "جاري التصدير..."
+    },
     "tables": {
       "users": "المستخدمون",
       "teachers": "المعلمون",

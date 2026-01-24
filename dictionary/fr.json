@@ -37,7 +37,8 @@
     "passwordPlaceholder": "Mot de passe administrateur",
     "passwordRequired": "Le mot de passe est requis",
     "incorrectPassword": "Mot de passe incorrect",
-    "passwordConfirmation": "Pour des raisons de sécurité, veuillez entrer votre mot de passe administrateur pour confirmer cette action"
+    "passwordConfirmation": "Pour des raisons de sécurité, veuillez entrer votre mot de passe administrateur pour confirmer cette action",
+    "downloadBackupWarning": "Veuillez vous assurer de télécharger vos données depuis la page base de données d'abord."
   },
   "InstallPWA": {
     "installMessage": "Installer l'application pour une meilleure expérience",
@@ -1669,6 +1670,10 @@
   "AllTablesViewer": {
     "title": "Toutes les tables de la base de données",
     "description": "Voir et gérer toutes les données de votre base de données locale",
+    "exportButton": {
+      "default": "Exporter toutes les données",
+      "loading": "Exportation..."
+    },
     "tables": {
       "users": "Utilisateurs",
       "teachers": "Enseignants",
