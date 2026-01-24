@@ -776,7 +776,7 @@ export default function AddStudentDialog({
           {tTable("addStudent")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="overflow-y-auto">
+      <DialogContent className="overflow-auto">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">
