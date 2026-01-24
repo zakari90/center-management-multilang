@@ -100,6 +100,13 @@ export default function CenterPresentation({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCenterDebugSyncing, setIsCenterDebugSyncing] = useState(false);
   const [isAutoSyncing, setIsAutoSyncing] = useState(false);
+
+  // ✅ Academic Year Info State
+  const [tempAcademicYear, setTempAcademicYear] = useState("");
+  const [tempStaffEntryDate, setTempStaffEntryDate] = useState("");
+  const [tempStudentEntryDate, setTempStudentEntryDate] = useState("");
+  const [tempSchoolEndDateBac, setTempSchoolEndDateBac] = useState("");
+  const [tempSchoolEndDateOther, setTempSchoolEndDateOther] = useState("");
   const onlineStatus = useIsOnline();
   const hasSyncedOnOnline = useRef(false);
   const previousOnlineStatus = useRef<boolean | null>(null);
@@ -209,6 +216,13 @@ export default function CenterPresentation({
       setTempWorkingYears(center.workingYears || []);
       setTempPaymentStartDay(center.paymentStartDay || 1);
       setTempPaymentEndDay(center.paymentEndDay || 30);
+
+      // Initialize academic year info
+      setTempAcademicYear(center.academicYear || "2025-2026");
+      setTempStaffEntryDate(center.staffEntryDate || "1 شتنبر 2025");
+      setTempStudentEntryDate(center.studentEntryDate || "21 سبتمبر 2025");
+      setTempSchoolEndDateBac(center.schoolEndDateBac || "30 ماي 2026");
+      setTempSchoolEndDateOther(center.schoolEndDateOther || "30 يونيو 2026");
     }
   }, [center]);
 
@@ -557,6 +571,51 @@ export default function CenterPresentation({
     }
   };
 
+  // ✅ Update academic year info
+  const handleSaveAcademicYearInfo = async () => {
+    if (!center) return;
+
+    try {
+      const updatedCenter: Center = {
+        ...center,
+        academicYear: tempAcademicYear,
+        staffEntryDate: tempStaffEntryDate,
+        studentEntryDate: tempStudentEntryDate,
+        schoolEndDateBac: tempSchoolEndDateBac,
+        schoolEndDateOther: tempSchoolEndDateOther,
+        status: "w",
+        updatedAt: Date.now(),
+      };
+
+      await centerActions.putLocal(updatedCenter);
+
+      if (isOnline()) {
+        try {
+          await ServerActionCenters.SaveToServer(updatedCenter);
+          await centerActions.markSynced(updatedCenter.id);
+          toast.success(
+            t("academicYearInfo.updated") ||
+              "Academic year details updated and synced successfully",
+          );
+        } catch (syncError) {
+          console.error("Center info sync failed:", syncError);
+          toast.success(
+            t("academicYearInfo.updated") ||
+              "Academic year details updated (will sync when online)",
+          );
+        }
+      } else {
+        toast.success(
+          t("academicYearInfo.updated") ||
+            "Academic year details updated (will sync when online)",
+        );
+      }
+    } catch (error) {
+      console.error("Error updating academic year info:", error);
+      toast.error("Failed to update academic year details");
+    }
+  };
+
   // 🔍 Debug sync button for center entity
   const handleDebugCenterSync = async () => {
     setIsCenterDebugSyncing(true);
@@ -848,11 +907,81 @@ export default function CenterPresentation({
 
           <Separator className="my-2" />
 
-          {/* Academic Year 2025-2026 Info Section */}
+          {/* Academic Year Info Section */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wide">
-              <CalendarRange className="h-5 w-5" />
-              <span>{t("academicYearInfo.title")}</span>
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wide">
+                <CalendarRange className="h-5 w-5" />
+                <span>
+                  {t("academicYearInfo.title", {
+                    year: center.academicYear || "2025-2026",
+                  })}
+                </span>
+              </div>
+              <EditDialog
+                title={t("academicYearInfo.editTitle")}
+                trigger={
+                  <Button variant="ghost" size="sm">
+                    <Pencil className="h-4 w-4 mr-1" /> {t("edit")}
+                  </Button>
+                }
+                onSave={handleSaveAcademicYearInfo}
+              >
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">
+                      {t("academicYearInfo.academicYearLabel")}
+                    </label>
+                    <input
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={tempAcademicYear}
+                      onChange={(e) => setTempAcademicYear(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">
+                      {t("academicYearInfo.staffEntryDateLabel")}
+                    </label>
+                    <input
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={tempStaffEntryDate}
+                      onChange={(e) => setTempStaffEntryDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">
+                      {t("academicYearInfo.studentEntryDateLabel")}
+                    </label>
+                    <input
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={tempStudentEntryDate}
+                      onChange={(e) => setTempStudentEntryDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">
+                      {t("academicYearInfo.schoolEndDateBacLabel")}
+                    </label>
+                    <input
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={tempSchoolEndDateBac}
+                      onChange={(e) => setTempSchoolEndDateBac(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">
+                      {t("academicYearInfo.schoolEndDateOtherLabel")}
+                    </label>
+                    <input
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={tempSchoolEndDateOther}
+                      onChange={(e) =>
+                        setTempSchoolEndDateOther(e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </EditDialog>
             </div>
 
             <div className="grid gap-4">
@@ -861,8 +990,11 @@ export default function CenterPresentation({
                   <div className="h-2 w-2 rounded-full bg-primary" />
                   <span>{t("academicYearInfo.startTitle")}</span>
                 </div>
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  {t("academicYearInfo.startDetails")}
+                <p className="text-sm text-foreground/80 leading-relaxed font-arabic">
+                  {t("academicYearInfo.startDetails", {
+                    staffDate: center.staffEntryDate || "1 شتنبر 2025",
+                    studentDate: center.studentEntryDate || "21 سبتمبر 2025",
+                  })}
                 </p>
               </div>
 
@@ -871,8 +1003,11 @@ export default function CenterPresentation({
                   <div className="h-2 w-2 rounded-full bg-secondary" />
                   <span>{t("academicYearInfo.endTitle")}</span>
                 </div>
-                <p className="text-sm text-foreground/80 leading-relaxed">
-                  {t("academicYearInfo.endDetails")}
+                <p className="text-sm text-foreground/80 leading-relaxed font-arabic">
+                  {t("academicYearInfo.endDetails", {
+                    bacDate: center.schoolEndDateBac || "30 ماي 2026",
+                    otherDate: center.schoolEndDateOther || "30 يونيو 2026",
+                  })}
                 </p>
               </div>
             </div>

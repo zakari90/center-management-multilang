@@ -406,11 +406,18 @@
     "fromDay": "From Day",
     "toDay": "To Day",
     "academicYearInfo": {
-      "title": "2025-2026 Academic Year Details",
+      "title": "{year} Academic Year Details",
+      "editTitle": "Edit Academic Year Details",
+      "academicYearLabel": "Academic Year (e.g. 2025-2026)",
+      "staffEntryDateLabel": "Staff Entry Date",
+      "studentEntryDateLabel": "Student Entry Date",
+      "schoolEndDateBacLabel": "School End Date (Baccalaureate)",
+      "schoolEndDateOtherLabel": "School End Date (Other Levels)",
       "startTitle": "School Year Start",
-      "startDetails": "Education and training staff joined on September 1, 2025. Student entry was postponed until September 21, 2025, in some cases to ensure institutional readiness.",
+      "startDetails": "Education and training staff joined on {staffDate}. Student entry was postponed until {studentDate} in some cases to ensure institutional readiness.",
       "endTitle": "School Year End",
-      "endDetails": "Studies continue for 2nd Baccalaureate until May 30, 2026, while they end on June 30, 2026, for Primary, Middle School, and Common Core."
+      "endDetails": "Studies continue for 2nd Baccalaureate until {bacDate}, while they end on {otherDate} for Primary, Middle School, and Common Core.",
+      "updated": "Academic year details updated successfully"
     }
   },
   "NewCenterForm": {

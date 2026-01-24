@@ -9,38 +9,47 @@ export async function GET() {
   try {
     const session = await getSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const centers = await db.center.findMany({
       include: {
         admin: { select: { id: true, name: true, email: true } },
-        _count: { select: { subjects: true } }
-      }
+        _count: { select: { subjects: true } },
+      },
     });
 
     const centersWithStats = await Promise.all(
       centers.map(async (center: any & { admin: any; _count: any }) => {
-        const classrooms = Array.isArray(center.classrooms) ? (center.classrooms as string[]) : [];
-        const workingDays = Array.isArray(center.workingDays) ? (center.workingDays as string[]) : [];
-        const managerIds = Array.isArray(center.managers) ? (center.managers as string[]) : [];
+        const classrooms = Array.isArray(center.classrooms)
+          ? (center.classrooms as string[])
+          : [];
+        const workingDays = Array.isArray(center.workingDays)
+          ? (center.workingDays as string[])
+          : [];
+        const managerIds = Array.isArray(center.managers)
+          ? (center.managers as string[])
+          : [];
 
         const [students, teachers, receipts, managers] = await Promise.all([
           db.student.count({ where: { managerId: { in: managerIds } } }),
           db.teacher.count({ where: { managerId: { in: managerIds } } }),
           db.receipt.findMany({
-            where: { type: 'STUDENT_PAYMENT', managerId: { in: managerIds } },
-            select: { amount: true }
+            where: { type: "STUDENT_PAYMENT", managerId: { in: managerIds } },
+            select: { amount: true },
           }),
           managerIds.length
             ? db.user.findMany({
-                where: { id: { in: managerIds }, role: 'MANAGER' },
-                select: { id: true, name: true, email: true }
+                where: { id: { in: managerIds }, role: "MANAGER" },
+                select: { id: true, name: true, email: true },
               })
-            : Promise.resolve([])
+            : Promise.resolve([]),
         ]);
 
-        const revenue = receipts.reduce((sum :number, r:any) => sum + r.amount , 0);
+        const revenue = receipts.reduce(
+          (sum: number, r: any) => sum + r.amount,
+          0,
+        );
 
         return {
           id: center.id,
@@ -56,15 +65,23 @@ export async function GET() {
           subjectsCount: center._count.subjects,
           revenue,
           managersCount: managers.length,
+          academicYear: center.academicYear,
+          staffEntryDate: center.staffEntryDate,
+          studentEntryDate: center.studentEntryDate,
+          schoolEndDateBac: center.schoolEndDateBac,
+          schoolEndDateOther: center.schoolEndDateOther,
           createdAt: center.createdAt,
-          updatedAt: center.updatedAt
+          updatedAt: center.updatedAt,
         };
-      })
+      }),
     );
 
     return NextResponse.json(centersWithStats);
   } catch (error) {
-    console.error('Error fetching centers:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Error fetching centers:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

@@ -36,6 +36,11 @@ export interface Center extends SyncEntity {
   workingYears: string[];
   paymentStartDay?: number;
   paymentEndDay?: number;
+  academicYear?: string;
+  staffEntryDate?: string;
+  studentEntryDate?: string;
+  schoolEndDateBac?: string;
+  schoolEndDateOther?: string;
   managers: string[];
   adminId: string;
 }

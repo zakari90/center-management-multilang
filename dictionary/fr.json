@@ -369,11 +369,18 @@
     "fromDay": "Du jour",
     "toDay": "Au jour",
     "academicYearInfo": {
-      "title": "Détails de l'année scolaire 2025-2026",
+      "title": "Détails de l'année scolaire {year}",
+      "editTitle": "Modifier les détails de l'année scolaire",
+      "academicYearLabel": "Année scolaire (ex: 2025-2026)",
+      "staffEntryDateLabel": "Date de rentrée du personnel",
+      "studentEntryDateLabel": "Date de rentrée des élèves",
+      "schoolEndDateBacLabel": "Date de fin des cours (Baccalauréat)",
+      "schoolEndDateOtherLabel": "Date de fin des cours (Autres niveaux)",
       "startTitle": "Rentrée scolaire",
-      "startDetails": "Le personnel de l'éducation et de la formation a rejoint le 1er septembre 2025. L'entrée des élèves a été reportée au 21 septembre 2025 dans certains cas pour assurer la préparation des établissements.",
+      "startDetails": "Le personnel de l'éducation et de la formation a rejoint le {staffDate}. L'entrée des élèves a été reportée au {studentDate} dans certains cas pour assurer la préparation des établissements.",
       "endTitle": "Fin de l'année scolaire",
-      "endDetails": "Les études se poursuivent pour la 2ème Bac jusqu'au 30 mai 2026, tandis qu'elles se terminent le 30 juin 2026 pour le Primaire, le Collège et le Tronc Commun."
+      "endDetails": "Les études se poursuivent pour la 2ème Bac jusqu'au {bacDate}, tandis qu'elles se terminent le {otherDate} pour le Primaire, le Collège et le Tronc Commun.",
+      "updated": "Détails de l'année scolaire mis à jour avec succès"
     }
   },
   "NewCenterForm": {

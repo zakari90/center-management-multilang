@@ -30,6 +30,13 @@ model Center {
   workingYears  String[]
   paymentStartDay Int    @default(1)
   paymentEndDay   Int    @default(30)
+  
+  academicYear      String?   @default("2025-2026")
+  staffEntryDate    String?   @default("1 شتنبر 2025")
+  studentEntryDate  String?   @default("21 سبتمبر 2025")
+  schoolEndDateBac  String?   @default("30 ماي 2026")
+  schoolEndDateOther String?  @default("30 يونيو 2026")
+
   managers      String[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

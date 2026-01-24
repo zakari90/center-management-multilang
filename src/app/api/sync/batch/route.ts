@@ -1,19 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
-import db from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { entities } = body;
 
-    if (!entities || typeof entities !== 'object') {
+    if (!entities || typeof entities !== "object") {
       return NextResponse.json(
-        { error: 'Invalid request format. Expected { entities: {...} }' },
-        { status: 400 }
+        { error: "Invalid request format. Expected { entities: {...} }" },
+        { status: 400 },
       );
     }
 
-    const results: Record<string, { success: number; failed: number; deleted: number; errors: string[] }> = {};
+    const results: Record<
+      string,
+      { success: number; failed: number; deleted: number; errors: string[] }
+    > = {};
 
     // Batch sync users
     if (Array.isArray(entities.users)) {
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
       for (const user of entities.users) {
         try {
           // Handle deletions (status '0')
-          if (user.status === '0') {
+          if (user.status === "0") {
             await db.user.delete({
               where: { id: user.id },
             });
@@ -48,7 +51,9 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           results.users.failed++;
-          results.users.errors.push(`User ${user.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.users.errors.push(
+            `User ${user.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
@@ -59,7 +64,7 @@ export async function POST(req: NextRequest) {
       for (const center of entities.centers) {
         try {
           // Handle deletions (status '0')
-          if (center.status === '0') {
+          if (center.status === "0") {
             await db.center.delete({
               where: { id: center.id },
             });
@@ -75,6 +80,11 @@ export async function POST(req: NextRequest) {
                 classrooms: center.classrooms,
                 workingDays: center.workingDays,
                 managers: center.managers,
+                academicYear: center.academicYear,
+                staffEntryDate: center.staffEntryDate,
+                studentEntryDate: center.studentEntryDate,
+                schoolEndDateBac: center.schoolEndDateBac,
+                schoolEndDateOther: center.schoolEndDateOther,
                 updatedAt: new Date(),
               },
               create: {
@@ -86,13 +96,20 @@ export async function POST(req: NextRequest) {
                 workingDays: center.workingDays,
                 managers: center.managers,
                 adminId: center.adminId,
+                academicYear: center.academicYear,
+                staffEntryDate: center.staffEntryDate,
+                studentEntryDate: center.studentEntryDate,
+                schoolEndDateBac: center.schoolEndDateBac,
+                schoolEndDateOther: center.schoolEndDateOther,
               },
             });
             results.centers.success++;
           }
         } catch (error) {
           results.centers.failed++;
-          results.centers.errors.push(`Center ${center.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.centers.errors.push(
+            `Center ${center.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
@@ -103,7 +120,7 @@ export async function POST(req: NextRequest) {
       for (const teacher of entities.teachers) {
         try {
           // Handle deletions (status '0')
-          if (teacher.status === '0') {
+          if (teacher.status === "0") {
             await db.teacher.delete({
               where: { id: teacher.id },
             });
@@ -134,7 +151,9 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           results.teachers.failed++;
-          results.teachers.errors.push(`Teacher ${teacher.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.teachers.errors.push(
+            `Teacher ${teacher.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
@@ -145,7 +164,7 @@ export async function POST(req: NextRequest) {
       for (const student of entities.students) {
         try {
           // Handle deletions (status '0')
-          if (student.status === '0') {
+          if (student.status === "0") {
             await db.student.delete({
               where: { id: student.id },
             });
@@ -180,7 +199,9 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           results.students.failed++;
-          results.students.errors.push(`Student ${student.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.students.errors.push(
+            `Student ${student.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
@@ -191,7 +212,7 @@ export async function POST(req: NextRequest) {
       for (const subject of entities.subjects) {
         try {
           // Handle deletions (status '0')
-          if (subject.status === '0') {
+          if (subject.status === "0") {
             await db.subject.delete({
               where: { id: subject.id },
             });
@@ -220,7 +241,9 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           results.subjects.failed++;
-          results.subjects.errors.push(`Subject ${subject.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.subjects.errors.push(
+            `Subject ${subject.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
@@ -231,7 +254,7 @@ export async function POST(req: NextRequest) {
       for (const receipt of entities.receipts) {
         try {
           // Handle deletions (status '0')
-          if (receipt.status === '0') {
+          if (receipt.status === "0") {
             await db.receipt.delete({
               where: { id: receipt.id },
             });
@@ -263,7 +286,9 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           results.receipts.failed++;
-          results.receipts.errors.push(`Receipt ${receipt.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.receipts.errors.push(
+            `Receipt ${receipt.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
@@ -274,7 +299,7 @@ export async function POST(req: NextRequest) {
       for (const schedule of entities.schedules) {
         try {
           // Handle deletions (status '0')
-          if (schedule.status === '0') {
+          if (schedule.status === "0") {
             await db.schedule.delete({
               where: { id: schedule.id },
             });
@@ -306,21 +331,22 @@ export async function POST(req: NextRequest) {
           }
         } catch (error) {
           results.schedules.failed++;
-          results.schedules.errors.push(`Schedule ${schedule.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          results.schedules.errors.push(
+            `Schedule ${schedule.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       }
     }
 
     return NextResponse.json({
-      message: 'Batch sync completed',
+      message: "Batch sync completed",
       results,
     });
   } catch (error) {
-    console.error('Batch sync error:', error);
+    console.error("Batch sync error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }
-
