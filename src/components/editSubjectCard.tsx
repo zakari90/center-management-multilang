@@ -57,24 +57,24 @@ export function EditSubjectCard({
   };
 
   return (
-    <Card className="p-2 sm:p-3">
-      <div className="flex items-center justify-between gap-2">
+    <Card className="p-1.5 sm:p-2">
+      <div className="flex items-center justify-between gap-1.5">
         {/* Subject Info */}
-        <div className="space-y-0.5 min-w-0 flex-1">
+        <div className="space-y-0 min-w-0 flex-1">
           <h4 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-1">
             {subject.name}
           </h4>
-          <div className="flex flex-wrap gap-1 text-[10px] sm:text-xs text-muted-foreground">
-            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+          <div className="flex flex-wrap gap-1 text-[9px] sm:text-[11px] text-muted-foreground">
+            <Badge variant="outline" className="text-[8px] px-0.5 py-0 h-3.5">
               {subject.grade}
             </Badge>
             <span className="flex items-center gap-0.5 whitespace-nowrap">
-              <Coins className="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0" />
+              <Coins className="h-2 w-2 shrink-0" />
               {subject.price} MAD
             </span>
             {subject.duration && (
               <span className="flex items-center gap-0.5 whitespace-nowrap">
-                <Clock className="h-2 w-2 sm:h-2.5 sm:w-2.5 shrink-0" />
+                <Clock className="h-2 w-2 shrink-0" />
                 {subject.duration}h
               </span>
             )}
@@ -82,7 +82,7 @@ export function EditSubjectCard({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-0.5 shrink-0 items-center">
+        <div className="flex gap-0 shrink-0 items-center">
           <EditDialog
             title={t("editSubject")}
             trigger={

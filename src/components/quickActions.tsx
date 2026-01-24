@@ -20,9 +20,11 @@ import AddStudentDialog from "./AddStudentDialog";
 import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
 import AddTeacherDialog from "./AddTeacherDialog";
 import AddTeacherPaymentDialog from "./AddTeacherPaymentDialog";
+import { useAuth } from "@/context/authContext";
 
 export default function QuickActions() {
   const t = useTranslations("QuickActions");
+  const { user } = useAuth();
 
   // const actions = [
   //   {
