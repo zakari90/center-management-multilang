@@ -550,7 +550,7 @@ export default function StudentReceiptTable() {
 
       {/* Table */}
       <Card>
-        <CardHeader className="flex justify-between items-center">
+        <CardHeader className="flex flex-row justify-between items-center space-y-0">
           <div>
             <CardTitle>{t("paymentRecords")}</CardTitle>
             <CardDescription>{t("completeList")}</CardDescription>
@@ -558,8 +558,11 @@ export default function StudentReceiptTable() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="default">
-                <ChevronDown className="ml-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="ml-auto">
+                <span className="hidden sm:inline mr-2">
+                  {t("columns") || "Columns"}
+                </span>
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -707,112 +710,128 @@ export default function StudentReceiptTable() {
                 <TableBody>
                   {paginatedReceipts.map((receipt) => (
                     <TableRow key={receipt.id} className="hover:bg-muted/50">
-                      <TableCell>
-                        <div className="font-mono text-sm font-medium">
-                          {receipt.receiptNumber}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {format(
-                            new Date(receipt.createdAt),
-                            "MMM dd, yyyy HH:mm",
-                          )}
-                        </div>
-                      </TableCell>
-
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <User className="h-4 w-4 text-primary" />
+                      {columnVisibility.receiptNumber && (
+                        <TableCell>
+                          <div className="font-mono text-sm font-medium">
+                            {receipt.receiptNumber}
                           </div>
-                          <div>
-                            <div className="font-medium">
-                              {receipt.student.name}
-                            </div>
-                            {receipt.student.email && (
-                              <div className="text-xs text-muted-foreground">
-                                {receipt.student.email}
-                              </div>
+                          <div className="text-xs text-muted-foreground">
+                            {format(
+                              new Date(receipt.createdAt),
+                              "MMM dd, yyyy HH:mm",
                             )}
                           </div>
-                        </div>
-                      </TableCell>
+                        </TableCell>
+                      )}
 
-                      <TableCell>
-                        {receipt.student.grade ? (
-                          <Badge variant="outline">
-                            {receipt.student.grade}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">
-                            -
-                          </span>
-                        )}
-                      </TableCell>
+                      {columnVisibility.student && (
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <User className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <div className="font-medium">
+                                {receipt.student.name}
+                              </div>
+                              {receipt.student.email && (
+                                <div className="text-xs text-muted-foreground">
+                                  {receipt.student.email}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                      )}
 
-                      <TableCell>
-                        <div className="font-semibold text-green-600">
-                          ${receipt.amount.toFixed(2)}
-                        </div>
-                      </TableCell>
+                      {columnVisibility.grade && (
+                        <TableCell>
+                          {receipt.student.grade ? (
+                            <Badge variant="outline">
+                              {receipt.student.grade}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              -
+                            </span>
+                          )}
+                        </TableCell>
+                      )}
 
-                      <TableCell>
-                        {receipt.paymentMethod ? (
-                          <Badge variant="secondary" className="text-xs">
-                            {receipt.paymentMethod}
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">
-                            -
-                          </span>
-                        )}
-                      </TableCell>
+                      {columnVisibility.amount && (
+                        <TableCell>
+                          <div className="font-semibold text-green-600">
+                            ${receipt.amount.toFixed(2)}
+                          </div>
+                        </TableCell>
+                      )}
 
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-3 w-3 text-muted-foreground" />
-                          {format(new Date(receipt.date), "MMM dd, yyyy")}
-                        </div>
-                      </TableCell>
+                      {columnVisibility.method && (
+                        <TableCell>
+                          {receipt.paymentMethod ? (
+                            <Badge variant="secondary" className="text-xs">
+                              {receipt.paymentMethod}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              -
+                            </span>
+                          )}
+                        </TableCell>
+                      )}
 
-                      <TableCell>
-                        <div className="max-w-[200px] truncate text-sm text-muted-foreground">
-                          {receipt.description || "-"}
-                        </div>
-                      </TableCell>
+                      {columnVisibility.date && (
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                            {format(new Date(receipt.date), "MMM dd, yyyy")}
+                          </div>
+                        </TableCell>
+                      )}
 
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <ModalLink
-                                href={`/manager/receipts/${receipt.id}`}
+                      {columnVisibility.description && (
+                        <TableCell>
+                          <div className="max-w-[200px] truncate text-sm text-muted-foreground">
+                            {receipt.description || "-"}
+                          </div>
+                        </TableCell>
+                      )}
+
+                      {columnVisibility.actions && (
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <ModalLink
+                                  href={`/manager/receipts/${receipt.id}`}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  {t("viewDetails")}
+                                </ModalLink>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handlePrint(receipt.id)}
                               >
-                                <Eye className="mr-2 h-4 w-4" />
-                                {t("viewDetails")}
-                              </ModalLink>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handlePrint(receipt.id)}
-                            >
-                              <Printer className="mr-2 h-4 w-4" />
-                              {t("printReceipt")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <ModalLink
-                                href={`/manager/students/${receipt.student.id}`}
-                              >
-                                <User className="mr-2 h-4 w-4" />
-                                {t("viewStudent")}
-                              </ModalLink>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+                                <Printer className="mr-2 h-4 w-4" />
+                                {t("printReceipt")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <ModalLink
+                                  href={`/manager/students/${receipt.student.id}`}
+                                >
+                                  <User className="mr-2 h-4 w-4" />
+                                  {t("viewStudent")}
+                                </ModalLink>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
