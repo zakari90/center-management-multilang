@@ -105,13 +105,33 @@ export function StudentsCardsView({
               </div>
 
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col">
                   <p className="text-[10px] text-foreground/60 uppercase font-bold tracking-wider">
                     {t("monthlyFee")}
                   </p>
-                  <p className="text-base font-bold text-primary">
-                    MAD {getTotalRevenue(student).toFixed(2)}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-bold text-primary">
+                      MAD {getTotalRevenue(student).toFixed(2)}
+                    </p>
+                    <Badge
+                      variant={
+                        student.paymentStatus.status === "PAID"
+                          ? "default"
+                          : student.paymentStatus.status === "PARTIAL"
+                            ? "secondary"
+                            : "destructive"
+                      }
+                      className={
+                        student.paymentStatus.status === "PAID"
+                          ? "bg-green-100 text-green-700 text-[10px] px-1.5 py-0 h-4 hover:bg-green-100 border-none"
+                          : student.paymentStatus.status === "PARTIAL"
+                            ? "bg-yellow-100 text-yellow-700 text-[10px] px-1.5 py-0 h-4 hover:bg-yellow-100 border-none"
+                            : "bg-red-100 text-red-700 text-[10px] px-1.5 py-0 h-4 hover:bg-red-100 border-none"
+                      }
+                    >
+                      {student.paymentStatus.status}
+                    </Badge>
+                  </div>
                 </div>
                 <div className="flex gap-1">
                   <ViewStudentDialog

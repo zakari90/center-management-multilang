@@ -19,6 +19,7 @@ interface StudentsTableViewProps {
     parent: boolean;
     subjects: boolean;
     monthlyFee: boolean;
+    payment: boolean;
     actions: boolean;
   };
   getTotalRevenue: (student: Student) => number;
@@ -72,6 +73,11 @@ export function StudentsTableView({
               {columnVisibility.monthlyFee && (
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                   {t("monthlyFee")}
+                </th>
+              )}
+              {columnVisibility.payment && (
+                <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
+                  Payment
                 </th>
               )}
               {columnVisibility.actions && (
@@ -142,10 +148,32 @@ export function StudentsTableView({
                     </td>
                   )}
                   {columnVisibility.monthlyFee && (
-                    <td className="px-6 py-4 whitespace-nowrap border-x">
+                    <td className="px-6 py-4 whitespace-nowrap border-x text-center">
                       <div className="text-sm font-medium">
                         MAD {getTotalRevenue(student).toFixed(2)}
                       </div>
+                    </td>
+                  )}
+                  {columnVisibility.payment && (
+                    <td className="px-6 py-4 whitespace-nowrap border-x text-center">
+                      <Badge
+                        variant={
+                          student.paymentStatus.status === "PAID"
+                            ? "default"
+                            : student.paymentStatus.status === "PARTIAL"
+                              ? "secondary"
+                              : "destructive"
+                        }
+                        className={
+                          student.paymentStatus.status === "PAID"
+                            ? "bg-green-100 text-green-700 hover:bg-green-100"
+                            : student.paymentStatus.status === "PARTIAL"
+                              ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                              : "bg-red-100 text-red-700 hover:bg-red-100"
+                        }
+                      >
+                        {student.paymentStatus.status}
+                      </Badge>
                     </td>
                   )}
                   {columnVisibility.actions && (

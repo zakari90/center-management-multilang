@@ -24,7 +24,10 @@ import {
   studentSubjectActions,
   subjectActions,
   teacherActions,
+  receiptActions,
+  centerActions,
 } from "@/lib/dexie/dexieActions";
+import { checkPaymentStatus } from "@/lib/payment-utils";
 import { ChevronDown, Loader2, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
@@ -59,6 +62,10 @@ export interface Student {
   grade: string | null;
   createdAt: string;
   studentSubjects: StudentSubject[];
+  paymentStatus: {
+    isPaid: boolean;
+    status: "PAID" | "PARTIAL" | "UNPAID";
+  };
 }
 
 export default function StudentsTable() {
@@ -76,6 +83,7 @@ export default function StudentsTable() {
     parent: true,
     subjects: true,
     monthlyFee: true,
+    payment: true,
     actions: true,
   });
 
@@ -98,13 +106,26 @@ export default function StudentsTable() {
       }
 
       // ✅ Fetch from local DB and join with subjects and teachers
-      const [allStudents, allStudentSubjects, allSubjects, allTeachers] =
-        await Promise.all([
-          studentActions.getAll(),
-          studentSubjectActions.getAll(),
-          subjectActions.getAll(),
-          teacherActions.getAll(),
-        ]);
+      const [
+        allStudents,
+        allStudentSubjects,
+        allSubjects,
+        allTeachers,
+        allReceipts,
+        allCenters,
+      ] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        teacherActions.getAll(),
+        receiptActions.getAll(),
+        centerActions.getAll(),
+      ]);
+
+      // Get center settings for payment cycle
+      const currentCenter = allCenters.find((c) => c.status !== "0");
+      const paymentStartDay = currentCenter?.paymentStartDay ?? 1;
+      const paymentEndDay = currentCenter?.paymentEndDay ?? 30;
 
       // ✅ Filter students by status only (managers see ALL students)
       const managerStudents = allStudents.filter((s) => s.status !== "0");
@@ -151,6 +172,16 @@ export default function StudentsTable() {
           grade: student.grade ?? null,
           createdAt: new Date(student.createdAt).toISOString(),
           studentSubjects: studentSubjectsForStudent,
+          paymentStatus: checkPaymentStatus(
+            allReceipts.filter(
+              (r) => r.studentId === student.id && r.status !== "0",
+            ),
+            paymentStartDay,
+            paymentEndDay,
+            getTotalRevenue({
+              studentSubjects: studentSubjectsForStudent,
+            } as any),
+          ),
         };
       });
 
@@ -325,6 +356,14 @@ export default function StudentsTable() {
               }
             >
               {t("monthlyFee")}
+            </DropdownMenuCheckboxItem>
+            <DropdownMenuCheckboxItem
+              checked={columnVisibility.payment}
+              onCheckedChange={(value) =>
+                setColumnVisibility((prev) => ({ ...prev, payment: !!value }))
+              }
+            >
+              Payment
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={columnVisibility.actions}
