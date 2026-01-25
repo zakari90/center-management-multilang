@@ -1,0 +1,143 @@
+import { z } from "zod";
+
+// --- Enums ---
+export const SyncStatusSchema = z.enum(["1", "w", "0"]);
+export const RoleSchema = z.enum(["ADMIN", "MANAGER"]);
+export const ReceiptTypeSchema = z.enum(["STUDENT_PAYMENT", "TEACHER_PAYMENT"]);
+
+// --- Base Schemas ---
+export const SyncEntitySchema = z.object({
+  id: z.string().min(1),
+  status: SyncStatusSchema,
+  createdAt: z
+    .number()
+    .or(z.date())
+    .transform((v) => (v instanceof Date ? v.getTime() : v)),
+  updatedAt: z
+    .number()
+    .or(z.date())
+    .transform((v) => (v instanceof Date ? v.getTime() : v)),
+});
+
+// --- Entity Schemas ---
+
+export const CenterSchema = SyncEntitySchema.extend({
+  name: z.string().trim().min(2),
+  address: z.string().trim().optional().nullable(),
+  phone: z.string().trim().optional().nullable(),
+  classrooms: z.array(z.string().trim()),
+  workingDays: z.array(z.string().trim()),
+  paymentStartDay: z.number().min(1).max(31).optional().nullable(),
+  paymentEndDay: z.number().min(1).max(31).optional().nullable(),
+  academicYear: z.string().trim().optional().nullable(),
+  staffEntryDate: z.string().trim().optional().nullable(),
+  studentEntryDate: z.string().trim().optional().nullable(),
+  schoolEndDateBac: z.string().trim().optional().nullable(),
+  schoolEndDateOther: z.string().trim().optional().nullable(),
+  managers: z.array(z.string().min(1)),
+  adminId: z.string().min(1),
+});
+
+export const UserSchema = SyncEntitySchema.extend({
+  email: z.string().trim().email(),
+  password: z.string().min(1),
+  name: z.string().trim().min(2),
+  role: RoleSchema,
+});
+
+export const TeacherSchema = SyncEntitySchema.extend({
+  name: z.string().trim().min(2),
+  email: z.string().trim().email().optional().nullable(),
+  phone: z.string().trim().optional().nullable(),
+  address: z.string().trim().optional().nullable(),
+  weeklySchedule: z
+    .array(z.string())
+    .or(z.record(z.string(), z.any()))
+    .optional()
+    .nullable(),
+  managerId: z.string().min(1),
+});
+
+export const StudentSchema = SyncEntitySchema.extend({
+  name: z.string().trim().min(2),
+  email: z.string().trim().email().optional().nullable(),
+  phone: z.string().trim().optional().nullable(),
+  parentName: z.string().trim().optional().nullable(),
+  parentPhone: z.string().trim().optional().nullable(),
+  parentEmail: z.string().trim().email().optional().nullable(),
+  grade: z.string().trim().optional().nullable(),
+  managerId: z.string().min(1),
+});
+
+export const SubjectSchema = SyncEntitySchema.extend({
+  name: z.string().trim().min(1),
+  grade: z.string().trim().min(1),
+  price: z.number().min(0),
+  duration: z.number().min(0).optional().nullable(),
+  centerId: z.string().min(1),
+});
+
+export const TeacherSubjectSchema = SyncEntitySchema.extend({
+  percentage: z.number().min(0).max(100).optional().nullable(),
+  hourlyRate: z.number().min(0).optional().nullable(),
+  assignedAt: z.number(),
+  teacherId: z.string().min(1),
+  subjectId: z.string().min(1),
+});
+
+export const StudentSubjectSchema = SyncEntitySchema.extend({
+  enrolledAt: z.number().or(z.string()),
+  studentId: z.string().min(1),
+  subjectId: z.string().min(1),
+  teacherId: z.string().min(1),
+  managerId: z.string().min(1),
+});
+
+export const ReceiptSchema = SyncEntitySchema.extend({
+  receiptNumber: z.string().trim().min(1),
+  amount: z.number().min(0),
+  type: ReceiptTypeSchema,
+  description: z.string().trim().optional().nullable(),
+  paymentMethod: z.string().trim().optional().nullable(),
+  date: z
+    .number()
+    .or(z.date())
+    .transform((v) => (v instanceof Date ? v.getTime() : v)),
+  studentId: z.string().min(1).optional().nullable(),
+  teacherId: z.string().min(1).optional().nullable(),
+  managerId: z.string().min(1),
+});
+
+export const ScheduleSchema = SyncEntitySchema.extend({
+  day: z.string().trim().min(1),
+  startTime: z.string().trim().min(1),
+  endTime: z.string().trim().min(1),
+  roomId: z.string().trim().min(1),
+  teacherId: z.string().min(1),
+  subjectId: z.string().min(1),
+  managerId: z.string().min(1),
+  centerId: z.string().min(1).optional().nullable(),
+});
+
+// --- Form Schemas ---
+export const StudentFormSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  email: z.string().trim().email().optional().or(z.literal("")),
+  phone: z.string().trim().optional().or(z.literal("")),
+  parentName: z.string().trim().optional().or(z.literal("")),
+  parentPhone: z.string().trim().optional().or(z.literal("")),
+  parentEmail: z.string().trim().email().optional().or(z.literal("")),
+  grade: z.string().trim().optional().or(z.literal("")),
+});
+
+export const SubjectFormSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  grade: z.string().trim().min(1, "Grade is required"),
+  price: z.coerce.number().min(0, "Price must be positive"),
+  duration: z.coerce.number().min(0).optional().nullable(),
+});
+
+// --- Types ---
+export type StudentFormInput = z.infer<typeof StudentFormSchema>;
+export type SubjectFormInput = z.infer<typeof SubjectFormSchema>;
+export type CenterInput = z.infer<typeof CenterSchema>;

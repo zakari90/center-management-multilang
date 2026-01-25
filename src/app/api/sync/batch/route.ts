@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import {
+  CenterSchema,
+  UserSchema,
+  TeacherSchema,
+  StudentSchema,
+  SubjectSchema,
+  ReceiptSchema,
+  ScheduleSchema,
+} from "@/lib/validations/schemas";
+import { z } from "zod";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,325 +28,273 @@ export async function POST(req: NextRequest) {
       { success: number; failed: number; deleted: number; errors: string[] }
     > = {};
 
-    // Batch sync users
-    if (Array.isArray(entities.users)) {
-      results.users = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const user of entities.users) {
+    // Helper to process entities with validation
+    const processEntities = async <T extends { id: string; status: string }>(
+      name: string,
+      data: any[],
+      schema: z.ZodSchema<T>,
+      dbTable: any,
+      upsertConfig: (item: T) => any,
+    ) => {
+      results[name] = { success: 0, failed: 0, deleted: 0, errors: [] };
+      if (!Array.isArray(data)) return;
+
+      for (const rawItem of data) {
         try {
+          // Validate and sanitize
+          const item = schema.parse(rawItem);
+
           // Handle deletions (status '0')
-          if (user.status === "0") {
-            await db.user.delete({
-              where: { id: user.id },
+          if (item.status === "0") {
+            await dbTable.delete({
+              where: { id: item.id },
             });
-            results.users.deleted++;
+            results[name].deleted++;
           } else {
             // Handle create/update
-            await db.user.upsert({
-              where: { id: user.id },
-              update: {
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                updatedAt: new Date(),
-              },
-              create: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                password: user.password,
-                role: user.role,
-              },
-            });
-            results.users.success++;
+            await dbTable.upsert(upsertConfig(item));
+            results[name].success++;
           }
         } catch (error) {
-          results.users.failed++;
-          results.users.errors.push(
-            `User ${user.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
+          results[name].failed++;
+          const itemId = (rawItem as any)?.id || "unknown";
+          let errorMessage = "Unknown error";
+
+          if (error instanceof z.ZodError) {
+            errorMessage = error.issues
+              .map((e: z.ZodIssue) => `${e.path.join(".")}: ${e.message}`)
+              .join(", ");
+          } else if (error instanceof Error) {
+            errorMessage = error.message;
+          }
+
+          results[name].errors.push(`${name} ${itemId}: ${errorMessage}`);
         }
       }
-    }
+    };
+
+    // Batch sync users
+    await processEntities(
+      "users",
+      entities.users,
+      UserSchema,
+      db.user,
+      (user) => ({
+        where: { id: user.id },
+        update: {
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          updatedAt: new Date(user.updatedAt),
+        },
+        create: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          password: user.password,
+          role: user.role,
+          createdAt: new Date(user.createdAt),
+          updatedAt: new Date(user.updatedAt),
+        },
+      }),
+    );
 
     // Batch sync centers
-    if (Array.isArray(entities.centers)) {
-      results.centers = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const center of entities.centers) {
-        try {
-          // Handle deletions (status '0')
-          if (center.status === "0") {
-            await db.center.delete({
-              where: { id: center.id },
-            });
-            results.centers.deleted++;
-          } else {
-            // Handle create/update
-            await db.center.upsert({
-              where: { id: center.id },
-              update: {
-                name: center.name,
-                address: center.address,
-                phone: center.phone,
-                classrooms: center.classrooms,
-                workingDays: center.workingDays,
-                managers: center.managers,
-                academicYear: center.academicYear,
-                staffEntryDate: center.staffEntryDate,
-                studentEntryDate: center.studentEntryDate,
-                schoolEndDateBac: center.schoolEndDateBac,
-                schoolEndDateOther: center.schoolEndDateOther,
-                updatedAt: new Date(),
-              },
-              create: {
-                id: center.id,
-                name: center.name,
-                address: center.address,
-                phone: center.phone,
-                classrooms: center.classrooms,
-                workingDays: center.workingDays,
-                managers: center.managers,
-                adminId: center.adminId,
-                academicYear: center.academicYear,
-                staffEntryDate: center.staffEntryDate,
-                studentEntryDate: center.studentEntryDate,
-                schoolEndDateBac: center.schoolEndDateBac,
-                schoolEndDateOther: center.schoolEndDateOther,
-              },
-            });
-            results.centers.success++;
-          }
-        } catch (error) {
-          results.centers.failed++;
-          results.centers.errors.push(
-            `Center ${center.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      }
-    }
+    await processEntities(
+      "centers",
+      entities.centers,
+      CenterSchema,
+      db.center,
+      (center) => ({
+        where: { id: center.id },
+        update: {
+          name: center.name,
+          address: center.address,
+          phone: center.phone,
+          classrooms: center.classrooms,
+          workingDays: center.workingDays,
+          managers: center.managers,
+          academicYear: center.academicYear,
+          staffEntryDate: center.staffEntryDate,
+          studentEntryDate: center.studentEntryDate,
+          schoolEndDateBac: center.schoolEndDateBac,
+          schoolEndDateOther: center.schoolEndDateOther,
+          updatedAt: new Date(center.updatedAt),
+        },
+        create: {
+          id: center.id,
+          name: center.name,
+          address: center.address,
+          phone: center.phone,
+          classrooms: center.classrooms,
+          workingDays: center.workingDays,
+          managers: center.managers,
+          adminId: center.adminId,
+          academicYear: center.academicYear,
+          staffEntryDate: center.staffEntryDate,
+          studentEntryDate: center.studentEntryDate,
+          schoolEndDateBac: center.schoolEndDateBac,
+          schoolEndDateOther: center.schoolEndDateOther,
+          createdAt: new Date(center.createdAt),
+          updatedAt: new Date(center.updatedAt),
+        },
+      }),
+    );
 
     // Batch sync teachers
-    if (Array.isArray(entities.teachers)) {
-      results.teachers = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const teacher of entities.teachers) {
-        try {
-          // Handle deletions (status '0')
-          if (teacher.status === "0") {
-            await db.teacher.delete({
-              where: { id: teacher.id },
-            });
-            results.teachers.deleted++;
-          } else {
-            // Handle create/update
-            await db.teacher.upsert({
-              where: { id: teacher.id },
-              update: {
-                name: teacher.name,
-                email: teacher.email,
-                phone: teacher.phone,
-                address: teacher.address,
-                weeklySchedule: teacher.weeklySchedule,
-                updatedAt: new Date(),
-              },
-              create: {
-                id: teacher.id,
-                name: teacher.name,
-                email: teacher.email,
-                phone: teacher.phone,
-                address: teacher.address,
-                weeklySchedule: teacher.weeklySchedule,
-                managerId: teacher.managerId,
-              },
-            });
-            results.teachers.success++;
-          }
-        } catch (error) {
-          results.teachers.failed++;
-          results.teachers.errors.push(
-            `Teacher ${teacher.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      }
-    }
+    await processEntities(
+      "teachers",
+      entities.teachers,
+      TeacherSchema,
+      db.teacher,
+      (teacher) => ({
+        where: { id: teacher.id },
+        update: {
+          name: teacher.name,
+          email: teacher.email,
+          phone: teacher.phone,
+          address: teacher.address,
+          weeklySchedule: teacher.weeklySchedule as any,
+          updatedAt: new Date(teacher.updatedAt),
+        },
+        create: {
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email,
+          phone: teacher.phone,
+          address: teacher.address,
+          weeklySchedule: teacher.weeklySchedule as any,
+          managerId: teacher.managerId,
+          createdAt: new Date(teacher.createdAt),
+          updatedAt: new Date(teacher.updatedAt),
+        },
+      }),
+    );
 
     // Batch sync students
-    if (Array.isArray(entities.students)) {
-      results.students = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const student of entities.students) {
-        try {
-          // Handle deletions (status '0')
-          if (student.status === "0") {
-            await db.student.delete({
-              where: { id: student.id },
-            });
-            results.students.deleted++;
-          } else {
-            // Handle create/update
-            await db.student.upsert({
-              where: { id: student.id },
-              update: {
-                name: student.name,
-                email: student.email,
-                phone: student.phone,
-                parentName: student.parentName,
-                parentPhone: student.parentPhone,
-                parentEmail: student.parentEmail,
-                grade: student.grade,
-                updatedAt: new Date(),
-              },
-              create: {
-                id: student.id,
-                name: student.name,
-                email: student.email,
-                phone: student.phone,
-                parentName: student.parentName,
-                parentPhone: student.parentPhone,
-                parentEmail: student.parentEmail,
-                grade: student.grade,
-                managerId: student.managerId,
-              },
-            });
-            results.students.success++;
-          }
-        } catch (error) {
-          results.students.failed++;
-          results.students.errors.push(
-            `Student ${student.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      }
-    }
+    await processEntities(
+      "students",
+      entities.students,
+      StudentSchema,
+      db.student,
+      (student) => ({
+        where: { id: student.id },
+        update: {
+          name: student.name,
+          email: student.email,
+          phone: student.phone,
+          parentName: student.parentName,
+          parentPhone: student.parentPhone,
+          parentEmail: student.parentEmail,
+          grade: student.grade,
+          updatedAt: new Date(student.updatedAt),
+        },
+        create: {
+          id: student.id,
+          name: student.name,
+          email: student.email,
+          phone: student.phone,
+          parentName: student.parentName,
+          parentPhone: student.parentPhone,
+          parentEmail: student.parentEmail,
+          grade: student.grade,
+          managerId: student.managerId,
+          createdAt: new Date(student.createdAt),
+          updatedAt: new Date(student.updatedAt),
+        },
+      }),
+    );
 
     // Batch sync subjects
-    if (Array.isArray(entities.subjects)) {
-      results.subjects = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const subject of entities.subjects) {
-        try {
-          // Handle deletions (status '0')
-          if (subject.status === "0") {
-            await db.subject.delete({
-              where: { id: subject.id },
-            });
-            results.subjects.deleted++;
-          } else {
-            // Handle create/update
-            await db.subject.upsert({
-              where: { id: subject.id },
-              update: {
-                name: subject.name,
-                grade: subject.grade,
-                price: subject.price,
-                duration: subject.duration,
-                updatedAt: new Date(),
-              },
-              create: {
-                id: subject.id,
-                name: subject.name,
-                grade: subject.grade,
-                price: subject.price,
-                duration: subject.duration,
-                centerId: subject.centerId,
-              },
-            });
-            results.subjects.success++;
-          }
-        } catch (error) {
-          results.subjects.failed++;
-          results.subjects.errors.push(
-            `Subject ${subject.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      }
-    }
+    await processEntities(
+      "subjects",
+      entities.subjects,
+      SubjectSchema,
+      db.subject,
+      (subject) => ({
+        where: { id: subject.id },
+        update: {
+          name: subject.name,
+          grade: subject.grade,
+          price: subject.price,
+          duration: subject.duration,
+          updatedAt: new Date(subject.updatedAt),
+        },
+        create: {
+          id: subject.id,
+          name: subject.name,
+          grade: subject.grade,
+          price: subject.price,
+          duration: subject.duration,
+          centerId: subject.centerId,
+          createdAt: new Date(subject.createdAt),
+          updatedAt: new Date(subject.updatedAt),
+        },
+      }),
+    );
 
     // Batch sync receipts
-    if (Array.isArray(entities.receipts)) {
-      results.receipts = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const receipt of entities.receipts) {
-        try {
-          // Handle deletions (status '0')
-          if (receipt.status === "0") {
-            await db.receipt.delete({
-              where: { id: receipt.id },
-            });
-            results.receipts.deleted++;
-          } else {
-            // Handle create/update
-            await db.receipt.upsert({
-              where: { id: receipt.id },
-              update: {
-                amount: receipt.amount,
-                type: receipt.type,
-                description: receipt.description,
-                paymentMethod: receipt.paymentMethod,
-              },
-              create: {
-                id: receipt.id,
-                receiptNumber: receipt.receiptNumber,
-                amount: receipt.amount,
-                type: receipt.type,
-                description: receipt.description,
-                paymentMethod: receipt.paymentMethod,
-                date: receipt.date ? new Date(receipt.date) : new Date(),
-                studentId: receipt.studentId,
-                teacherId: receipt.teacherId,
-                managerId: receipt.managerId,
-              },
-            });
-            results.receipts.success++;
-          }
-        } catch (error) {
-          results.receipts.failed++;
-          results.receipts.errors.push(
-            `Receipt ${receipt.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      }
-    }
+    await processEntities(
+      "receipts",
+      entities.receipts,
+      ReceiptSchema,
+      db.receipt,
+      (receipt) => ({
+        where: { id: receipt.id },
+        update: {
+          amount: receipt.amount,
+          type: receipt.type,
+          description: receipt.description,
+          paymentMethod: receipt.paymentMethod,
+          updatedAt: new Date(receipt.updatedAt),
+        },
+        create: {
+          id: receipt.id,
+          receiptNumber: receipt.receiptNumber,
+          amount: receipt.amount,
+          type: receipt.type,
+          description: receipt.description,
+          paymentMethod: receipt.paymentMethod,
+          date: new Date(receipt.date),
+          studentId: receipt.studentId,
+          teacherId: receipt.teacherId,
+          managerId: receipt.managerId,
+          createdAt: new Date(receipt.createdAt),
+          updatedAt: new Date(receipt.updatedAt),
+        },
+      }),
+    );
 
     // Batch sync schedules
-    if (Array.isArray(entities.schedules)) {
-      results.schedules = { success: 0, failed: 0, deleted: 0, errors: [] };
-      for (const schedule of entities.schedules) {
-        try {
-          // Handle deletions (status '0')
-          if (schedule.status === "0") {
-            await db.schedule.delete({
-              where: { id: schedule.id },
-            });
-            results.schedules.deleted++;
-          } else {
-            // Handle create/update
-            await db.schedule.upsert({
-              where: { id: schedule.id },
-              update: {
-                day: schedule.day,
-                startTime: schedule.startTime,
-                endTime: schedule.endTime,
-                roomId: schedule.roomId,
-                updatedAt: new Date(),
-              },
-              create: {
-                id: schedule.id,
-                day: schedule.day,
-                startTime: schedule.startTime,
-                endTime: schedule.endTime,
-                roomId: schedule.roomId,
-                teacherId: schedule.teacherId,
-                subjectId: schedule.subjectId,
-                managerId: schedule.managerId,
-                centerId: schedule.centerId,
-              },
-            });
-            results.schedules.success++;
-          }
-        } catch (error) {
-          results.schedules.failed++;
-          results.schedules.errors.push(
-            `Schedule ${schedule.id}: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-        }
-      }
-    }
+    await processEntities(
+      "schedules",
+      entities.schedules,
+      ScheduleSchema,
+      db.schedule,
+      (schedule) => ({
+        where: { id: schedule.id },
+        update: {
+          day: schedule.day,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          roomId: schedule.roomId,
+          updatedAt: new Date(schedule.updatedAt),
+        },
+        create: {
+          id: schedule.id,
+          day: schedule.day,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          roomId: schedule.roomId,
+          teacherId: schedule.teacherId,
+          subjectId: schedule.subjectId,
+          managerId: schedule.managerId,
+          centerId: schedule.centerId,
+          createdAt: new Date(schedule.createdAt),
+          updatedAt: new Date(schedule.updatedAt),
+        },
+      }),
+    );
 
     return NextResponse.json({
       message: "Batch sync completed",

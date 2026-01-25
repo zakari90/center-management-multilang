@@ -793,48 +793,62 @@ export default function AddTeacherDialog({
           {tTable("addTeacher")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw]  max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="hidden md:block">
-            {t("subtitle") || tTable("subtitle")}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-0">
+        <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription className="hidden md:block">
+              {t("subtitle") || tTable("subtitle")}
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Mobile Step Indicator */}
-        <StepIndicator
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          stepLabels={stepLabels}
-          adminMode={adminMode}
-        />
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">
-            <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
-              {adminMode ? renderStep0() : renderStep1()}
-            </div>
-            <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
-              {adminMode ? renderStep1() : renderStep2()}
-            </div>
-            <div className={currentStep !== 3 ? "hidden md:block" : "block"}>
-              {adminMode ? renderStep2() : renderStep3()}
-            </div>
-            {adminMode && (
-              <div className={currentStep !== 4 ? "hidden md:block" : "block"}>
-                {renderStep3()}
-              </div>
-            )}
+          {/* Mobile Step Indicator */}
+          <div className="mt-2">
+            <StepIndicator
+              currentStep={currentStep}
+              totalSteps={totalSteps}
+              stepLabels={stepLabels}
+              adminMode={adminMode}
+            />
           </div>
+        </div>
 
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-2 sm:pt-3">
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <form
+            id="add-teacher-form"
+            onSubmit={handleSubmit}
+            className="space-y-4 pb-4"
+          >
+            <div className="space-y-4">
+              <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
+                {adminMode ? renderStep0() : renderStep1()}
+              </div>
+              <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
+                {adminMode ? renderStep1() : renderStep2()}
+              </div>
+              <div className={currentStep !== 3 ? "hidden md:block" : "block"}>
+                {adminMode ? renderStep2() : renderStep3()}
+              </div>
+              {adminMode && (
+                <div
+                  className={currentStep !== 4 ? "hidden md:block" : "block"}
+                >
+                  {renderStep3()}
+                </div>
+              )}
+            </div>
+          </form>
+        </div>
+
+        <div className="p-4 sm:p-6 pt-2 sm:pt-3 border-t shrink-0 bg-muted/5">
           {/* Mobile Navigation Buttons */}
-          <div className="flex justify-between gap-3 pt-4 border-t md:hidden">
+          <div className="flex justify-between gap-3 md:hidden">
             <Button
               type="button"
               variant="outline"
@@ -866,7 +880,12 @@ export default function AddTeacherDialog({
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isLoading} className="flex-1">
+              <Button
+                form="add-teacher-form"
+                type="submit"
+                disabled={isLoading}
+                className="flex-1"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -880,7 +899,7 @@ export default function AddTeacherDialog({
           </div>
 
           {/* Desktop Action Buttons */}
-          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
+          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3">
             <Button
               type="button"
               variant="outline"
@@ -889,7 +908,7 @@ export default function AddTeacherDialog({
             >
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button form="add-teacher-form" type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -900,7 +919,7 @@ export default function AddTeacherDialog({
               )}
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

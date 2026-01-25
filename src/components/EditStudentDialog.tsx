@@ -33,6 +33,8 @@ import {
   userActions,
 } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
+import { StudentFormSchema } from "@/lib/validations/schemas";
+import { z } from "zod";
 
 interface Teacher {
   id: string;
@@ -359,9 +361,8 @@ export default function EditStudentDialog({
         throw new Error(t("unauthorized"));
       }
 
-      if (!formData.name) {
-        throw new Error(t("nameRequired"));
-      }
+      // Validate and sanitize data
+      const validatedData = StudentFormSchema.parse(formData);
 
       if (enrolledSubjects.length === 0) {
         throw new Error(t("atLeastOneSubject"));
@@ -377,13 +378,13 @@ export default function EditStudentDialog({
       const now = Date.now();
       const updatedStudent = {
         ...existingStudent,
-        name: formData.name,
-        email: formData.email || undefined,
-        phone: formData.phone || undefined,
-        parentName: formData.parentName || undefined,
-        parentPhone: formData.parentPhone || undefined,
-        parentEmail: formData.parentEmail || undefined,
-        grade: formData.grade || undefined,
+        name: validatedData.name,
+        email: validatedData.email || undefined,
+        phone: validatedData.phone || undefined,
+        parentName: validatedData.parentName || undefined,
+        parentPhone: validatedData.parentPhone || undefined,
+        parentEmail: validatedData.parentEmail || undefined,
+        grade: validatedData.grade || undefined,
         managerId: adminMode
           ? selectedManagerId || existingStudent.managerId
           : existingStudent.managerId,
@@ -393,7 +394,7 @@ export default function EditStudentDialog({
 
       await studentActions.putLocal(updatedStudent);
 
-      // Update student subjects
+      // ... existing code for enrollments ...
       const existingEnrollments = await studentSubjectActions.getAll();
       const currentEnrollments = existingEnrollments.filter(
         (ss) => ss.studentId === studentId && ss.status !== "0",
@@ -443,7 +444,11 @@ export default function EditStudentDialog({
       onStudentUpdated?.();
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
+      if (err instanceof z.ZodError) {
+        setError(err.issues.map((i) => i.message).join(", "));
+      } else {
+        setError(err instanceof Error ? err.message : t("somethingWentWrong"));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -464,31 +469,37 @@ export default function EditStudentDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            {formData.name && (
-              <>
-                <Avatar>
-                  <AvatarFallback className="bg-green-100 text-green-600">
-                    {formData.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span>
-                  {t("title")}: {formData.name}
-                </span>
-              </>
-            )}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] overflow-hidden flex flex-col p-0">
+        <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {formData.name && (
+                <>
+                  <Avatar>
+                    <AvatarFallback className="bg-green-100 text-green-600">
+                      {formData.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>
+                    {t("title")}: {formData.name}
+                  </span>
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
 
-        <div className="flex-1 overflow-y-auto pr-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-2 sm:pt-3">
           {isFetching ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form
+              id="edit-student-form"
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -802,30 +813,35 @@ export default function EditStudentDialog({
                   )}
                 </CardContent>
               </Card>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  className="flex-1"
-                >
-                  {t("cancel")}
-                </Button>
-                <Button type="submit" disabled={isLoading} className="flex-1">
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t("saving")}
-                    </>
-                  ) : (
-                    t("saveChanges")
-                  )}
-                </Button>
-              </div>
             </form>
           )}
+        </div>
+        <div className="p-4 sm:p-6 pt-2 sm:pt-3 border-t shrink-0 bg-muted/5">
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="flex-1"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              form="edit-student-form"
+              type="submit"
+              disabled={isLoading}
+              className="flex-1"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t("saving")}
+                </>
+              ) : (
+                t("saveChanges")
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

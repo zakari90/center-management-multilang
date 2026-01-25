@@ -813,21 +813,29 @@ export default function AddStudentPaymentDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-[95vw] md:max-w-[900px] lg:max-w-[1000px] w-full flex flex-col overflow-hidden">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="hidden md:block">
-            {t("subtitle")}
-          </DialogDescription>
-        </DialogHeader>
-        <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
-        <div className="flex-1 overflow-y-auto px-1">
+      <DialogContent className="max-w-[95vw] md:max-w-[900px] lg:max-w-[1000px] w-full max-h-[96vh] flex flex-col overflow-hidden p-0">
+        <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription className="hidden md:block">
+              {t("subtitle")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2">
+            <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-2 sm:pt-3">
           {loadingStudents ? (
             <div className="flex justify-center items-center h-64">
               <Loader2 className="h-12 w-12 animate-spin" />
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="h-full flex flex-col">
+            <form
+              id="add-payment-form"
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
               {error && (
                 <Alert variant="destructive" className="mb-4">
                   <AlertCircle className="h-4 w-4" />
@@ -890,79 +898,77 @@ export default function AddStudentPaymentDialog({
                   </Card>
                 </div>
               </div>
-              {/* Mobile Navigation */}
-              <div className="flex justify-between gap-3 pt-4 border-t mt-4 md:hidden">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
-                  disabled={isLoading}
-                  className="flex-1"
-                >
-                  {currentStep === 1 ? (
-                    t("cancel")
-                  ) : (
-                    <>
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
-                    </>
-                  )}
-                </Button>
-                {currentStep < totalSteps ? (
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={
-                      isLoading || (currentStep === 1 && !selectedStudent)
-                    }
-                    className="flex-1"
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    disabled={
-                      isLoading ||
-                      !selectedStudent ||
-                      formData.selectedSubjects.length === 0
-                    }
-                    className="flex-1"
-                  >
-                    {isLoading && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    {t("createPayment")}
-                  </Button>
-                )}
-              </div>
-              {/* Desktop Buttons */}
-              <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-4 mt-4 border-t pt-4 sticky bottom-0 bg-background">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  disabled={isLoading}
-                >
-                  {t("cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={
-                    isLoading ||
-                    !selectedStudent ||
-                    formData.selectedSubjects.length === 0
-                  }
-                >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {t("createPayment")}
-                </Button>
-              </div>
             </form>
           )}
+        </div>
+        <div className="p-4 sm:p-6 pt-2 sm:pt-3 border-t shrink-0 bg-muted/5">
+          {/* Mobile Navigation */}
+          <div className="flex justify-between gap-3 md:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
+              disabled={isLoading}
+              className="flex-1"
+            >
+              {currentStep === 1 ? (
+                t("cancel")
+              ) : (
+                <>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </>
+              )}
+            </Button>
+            {currentStep < totalSteps ? (
+              <Button
+                type="button"
+                onClick={nextStep}
+                disabled={isLoading || (currentStep === 1 && !selectedStudent)}
+                className="flex-1"
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            ) : (
+              <Button
+                form="add-payment-form"
+                type="submit"
+                disabled={
+                  isLoading ||
+                  !selectedStudent ||
+                  formData.selectedSubjects.length === 0
+                }
+                className="flex-1"
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t("createPayment")}
+              </Button>
+            )}
+          </div>
+          {/* Desktop Buttons */}
+          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isLoading}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              form="add-payment-form"
+              type="submit"
+              disabled={
+                isLoading ||
+                !selectedStudent ||
+                formData.selectedSubjects.length === 0
+              }
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t("createPayment")}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

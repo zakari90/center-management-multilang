@@ -22,6 +22,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { EditDialog } from "./editDialog";
 import { ItemInputList } from "./itemInputList";
+import { SubjectFormSchema } from "@/lib/validations/schemas";
+import { z } from "zod";
 
 interface SubjectCardProps {
   subject: any;
@@ -48,12 +50,27 @@ export function EditSubjectCard({
   });
 
   const handleUpdateSubject = () => {
-    onUpdate(subject.id, {
-      name: tempSubject.selectedSubject,
-      grade: tempSubject.selectedGrade,
-      price: parseFloat(tempSubject.price),
-      duration: tempSubject.duration ? parseInt(tempSubject.duration) : null,
-    });
+    try {
+      const validated = SubjectFormSchema.parse({
+        name: tempSubject.selectedSubject,
+        grade: tempSubject.selectedGrade,
+        price: tempSubject.price,
+        duration: tempSubject.duration || null,
+      });
+
+      onUpdate(subject.id, {
+        name: validated.name,
+        grade: validated.grade,
+        price: validated.price,
+        duration: validated.duration,
+      });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        // Since we don't have a direct error display in this small card,
+        // we log it and potentially the user will see it in the form inputs
+        console.error("Validation error:", err.issues);
+      }
+    }
   };
 
   return (

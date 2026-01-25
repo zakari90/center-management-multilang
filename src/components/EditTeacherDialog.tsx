@@ -533,25 +533,30 @@ export default function EditTeacherDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("subtitle")}</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-[95vw] max-w-[600px] max-h-[96vh] flex flex-col overflow-hidden p-0">
+        <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("subtitle")}</DialogDescription>
+          </DialogHeader>
+        </div>
 
-        {isFetching ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        ) : (
-          <>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-2 sm:pt-3">
+          {isFetching ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <form
+              id="edit-teacher-form"
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
               {/* Basic Information */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground">
@@ -770,31 +775,31 @@ export default function EditTeacherDialog({
                   </div>
                 )}
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  disabled={isLoading}
-                >
-                  {t("cancel")}
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    t("saveChanges")
-                  )}
-                </Button>
-              </div>
             </form>
-          </>
-        )}
+          )}
+        </div>
+        <div className="p-4 sm:p-6 pt-2 sm:pt-3 border-t shrink-0 bg-muted/5">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isLoading}
+            >
+              {t("cancel")}
+            </Button>
+            <Button form="edit-teacher-form" type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                t("saveChanges")
+              )}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

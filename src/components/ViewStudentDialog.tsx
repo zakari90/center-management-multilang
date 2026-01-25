@@ -187,156 +187,166 @@ export default function ViewStudentDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[650px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            {student && (
-              <>
-                <Avatar>
-                  <AvatarFallback className="bg-green-100 text-green-600">
-                    {student.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <span>{student.name}</span>
-                  {student.grade && (
-                    <Badge variant="outline" className="ml-2">
-                      {student.grade}
-                    </Badge>
-                  )}
-                </div>
-              </>
-            )}
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            {t("viewDetails")}
-          </DialogDescription>
-        </DialogHeader>
-
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        ) : error || !student ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error || t("notFound")}</AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-4">
-            {/* Contact Info */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">{t("contactInfo")}</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{student.email || "—"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{student.phone || "—"}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Parent Info */}
-            {(student.parentName || student.parentPhone) && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    {t("parentInfo")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <DialogContent className="w-[95vw] max-w-[650px] max-h-[96vh] flex flex-col overflow-hidden p-0">
+        <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {student && (
+                <>
+                  <Avatar>
+                    <AvatarFallback className="bg-green-100 text-green-600">
+                      {student.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="text-muted-foreground">{t("name")}</p>
-                    <p className="font-medium">{student.parentName || "—"}</p>
+                    <span>{student.name}</span>
+                    {student.grade && (
+                      <Badge variant="outline" className="ml-2">
+                        {student.grade}
+                      </Badge>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">{t("phone")}</p>
-                    <p className="font-medium">{student.parentPhone || "—"}</p>
-                  </div>
-                  {student.parentEmail && (
-                    <div className="col-span-2">
-                      <p className="text-muted-foreground">{t("email")}</p>
-                      <p className="font-medium">{student.parentEmail}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {t("viewDetails")}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-            {/* Enrolled Subjects */}
-            <Card>
-              <CardHeader className="pb-3 flex flex-row justify-between items-center">
-                <CardTitle className="text-base">
-                  {t("enrolledSubjects")}
-                </CardTitle>
-                <Badge variant="secondary">
-                  MAD {totalMonthlyFee.toFixed(2)}/{t("month")}
-                </Badge>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {student.studentSubjects.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    {t("noSubjects")}
-                  </p>
-                ) : (
-                  student.studentSubjects.map((ss) => (
-                    <div
-                      key={ss.id}
-                      className="border p-3 rounded-lg flex justify-between items-center"
-                    >
-                      <div>
-                        <p className="font-medium">{ss.subject.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {ss.teacher.name} • {ss.subject.grade}
-                        </p>
-                      </div>
-                      <Badge>MAD {ss.subject.price}</Badge>
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Recent Receipts */}
-            {student.receipts.length > 0 && (
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-2 sm:pt-3">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : error || !student ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error || t("notFound")}</AlertDescription>
+            </Alert>
+          ) : (
+            <div className="space-y-4 pb-4">
+              {/* Contact Info */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">
-                    {t("payments") || "Payments"}
+                    {t("contactInfo")}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                  {student.receipts.map((receipt) => (
-                    <div
-                      key={receipt.id}
-                      className="flex justify-between items-center text-sm border-b pb-2 last:border-0"
-                    >
-                      <div>
-                        <p className="font-medium">#{receipt.receiptNumber}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {receipt.date}
-                        </p>
-                      </div>
-                      <Badge variant="outline">
-                        MAD {receipt.amount.toFixed(2)}
-                      </Badge>
-                    </div>
-                  ))}
+                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span>{student.email || "—"}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{student.phone || "—"}</span>
+                  </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Joined Date */}
-            <p className="text-xs text-muted-foreground text-center">
-              {t("memberSince")}: {student.createdAt}
-            </p>
-          </div>
-        )}
+              {/* Parent Info */}
+              {(student.parentName || student.parentPhone) && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      {t("parentInfo")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">{t("name")}</p>
+                      <p className="font-medium">{student.parentName || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">{t("phone")}</p>
+                      <p className="font-medium">
+                        {student.parentPhone || "—"}
+                      </p>
+                    </div>
+                    {student.parentEmail && (
+                      <div className="col-span-2">
+                        <p className="text-muted-foreground">{t("email")}</p>
+                        <p className="font-medium">{student.parentEmail}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Enrolled Subjects */}
+              <Card>
+                <CardHeader className="pb-3 flex flex-row justify-between items-center">
+                  <CardTitle className="text-base">
+                    {t("enrolledSubjects")}
+                  </CardTitle>
+                  <Badge variant="secondary">
+                    MAD {totalMonthlyFee.toFixed(2)}/{t("month")}
+                  </Badge>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {student.studentSubjects.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      {t("noSubjects")}
+                    </p>
+                  ) : (
+                    student.studentSubjects.map((ss) => (
+                      <div
+                        key={ss.id}
+                        className="border p-3 rounded-lg flex justify-between items-center"
+                      >
+                        <div>
+                          <p className="font-medium">{ss.subject.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {ss.teacher.name} • {ss.subject.grade}
+                          </p>
+                        </div>
+                        <Badge>MAD {ss.subject.price}</Badge>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Recent Receipts */}
+              {student.receipts.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">
+                      {t("payments") || "Payments"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    {student.receipts.map((receipt) => (
+                      <div
+                        key={receipt.id}
+                        className="flex justify-between items-center text-sm border-b pb-2 last:border-0"
+                      >
+                        <div>
+                          <p className="font-medium">
+                            #{receipt.receiptNumber}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {receipt.date}
+                          </p>
+                        </div>
+                        <Badge variant="outline">
+                          MAD {receipt.amount.toFixed(2)}
+                        </Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Joined Date */}
+              <p className="text-xs text-muted-foreground text-center">
+                {t("memberSince")}: {student.createdAt}
+              </p>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
