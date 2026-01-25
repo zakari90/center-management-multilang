@@ -1156,6 +1156,7 @@
   "StudentReceiptTable": {
     "MAD": "درهم",
     "studentReceipts": "إيصالات الطلاب",
+    "columns": "الأعمدة",
     "title": "إيصالات الطلاب",
     "subtitle": "تتبع مدفوعات الطلاب والرسوم الدراسية",
     "exportCSV": "تصدير CSV",

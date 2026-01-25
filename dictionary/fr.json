@@ -1156,6 +1156,7 @@
   "StudentReceiptTable": {
     "MAD": "MAD",
     "studentReceipts": "Reçus des élèves",
+    "columns": "Colonnes",
     "title": "Reçus des élèves",
     "subtitle": "Suivi des paiements et frais de scolarité des élèves",
     "exportCSV": "Exporter CSV",
