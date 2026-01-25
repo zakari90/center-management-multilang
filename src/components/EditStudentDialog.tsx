@@ -384,7 +384,9 @@ export default function EditStudentDialog({
         parentPhone: formData.parentPhone || undefined,
         parentEmail: formData.parentEmail || undefined,
         grade: formData.grade || undefined,
-        managerId: adminMode ? selectedManagerId : existingStudent.managerId,
+        managerId: adminMode
+          ? selectedManagerId || existingStudent.managerId
+          : existingStudent.managerId,
         status: "w" as const,
         updatedAt: now,
       };
@@ -429,7 +431,7 @@ export default function EditStudentDialog({
           studentId: studentId,
           subjectId: enrollment.subjectId,
           teacherId: enrollment.teacherId,
-          managerId: user.id,
+          managerId: updatedStudent.managerId,
           status: "w" as const,
           createdAt: now,
           updatedAt: now,
