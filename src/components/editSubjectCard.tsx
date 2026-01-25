@@ -57,186 +57,182 @@ export function EditSubjectCard({
   };
 
   return (
-    <Card className="p-1 sm:p-1.5">
-      <div className="flex items-center justify-between gap-1">
-        {/* Subject Info */}
-        <div className="space-y-0 min-w-0 flex-1">
-          <h4 className="font-semibold text-[11px] sm:text-xs leading-tight line-clamp-1">
-            {subject.name}
-          </h4>
-          <div className="flex flex-wrap gap-1 text-[8px] sm:text-[10px] text-muted-foreground">
-            <Badge variant="outline" className="text-[7px] px-0.5 py-0 h-3">
-              {subject.grade}
-            </Badge>
-            <span className="flex items-center gap-0.5 whitespace-nowrap">
-              <Coins className="h-2 w-2 shrink-0" />
-              {subject.price} MAD
-            </span>
-            {subject.duration && (
-              <span className="flex items-center gap-0.5 whitespace-nowrap">
-                <Clock className="h-2 w-2 shrink-0" />
-                {subject.duration}h
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-0 shrink-0 items-center">
-          <EditDialog
-            title={t("editSubject")}
-            trigger={
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
-              >
-                <Pencil className="h-3 w-3" />
-              </Button>
-            }
-            onSave={handleUpdateSubject}
+    <div className="flex items-center gap-1.5 px-2 py-0.5 border rounded-full bg-muted/20 w-fit max-w-full overflow-hidden">
+      {/* Subject Info */}
+      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+        <h4 className="font-semibold text-[11px] sm:text-xs leading-none line-clamp-1 whitespace-nowrap">
+          {subject.name}
+        </h4>
+        <div className="flex items-center gap-1.5 text-[8px] sm:text-[10px] text-muted-foreground whitespace-nowrap">
+          <Badge
+            variant="outline"
+            className="text-[7px] px-1 py-0 h-3 rounded-full border-muted-foreground/30"
           >
-            <div className="border rounded-lg p-3 sm:p-4 space-y-4 bg-muted/10 max-h-[80vh] overflow-y-auto">
-              {/* No changes to the dialog content size, keeping it usable */}
-              <div className="space-y-4">
-                {/* Subject Selection */}
+            {subject.grade}
+          </Badge>
+          <span className="flex items-center gap-0.5">
+            <Coins className="h-2 w-2 shrink-0" />
+            {subject.price}
+          </span>
+          {subject.duration && (
+            <span className="flex items-center gap-0.5">
+              <Clock className="h-2 w-2 shrink-0" />
+              {subject.duration}h
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-0.5 shrink-0 items-center border-l pl-1 ms-auto">
+        <EditDialog
+          title={t("editSubject")}
+          trigger={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 w-5 p-0 hover:bg-muted/40 rounded-full"
+            >
+              <Pencil className="h-2.5 w-2.5" />
+            </Button>
+          }
+          onSave={handleUpdateSubject}
+        >
+          <div className="border rounded-lg p-3 sm:p-4 space-y-4 bg-muted/10 max-h-[80vh] overflow-y-auto">
+            {/* No changes to the dialog content size, keeping it usable */}
+            <div className="space-y-4">
+              {/* Subject Selection */}
+              <div className="space-y-2">
+                <Label
+                  className="text-xs sm:text-sm"
+                  htmlFor="edit-select-subject"
+                >
+                  {t("selectSubject")} {t("requiredField")}
+                </Label>
+                <ItemInputList
+                  id="edit-select-subject"
+                  label={t("labels.subject")}
+                  placeholder={t("placeholders.subject")}
+                  items={
+                    tempSubject.selectedSubject
+                      ? [tempSubject.selectedSubject]
+                      : []
+                  }
+                  onChange={(items) => {
+                    const single = items[0] || "";
+                    setTempSubject((prev) => ({
+                      ...prev,
+                      selectedSubject: single,
+                    }));
+                  }}
+                  suggestions={availableSubjects}
+                />
+              </div>
+
+              {/* Grade Selection */}
+              <div className="space-y-2">
+                <Label
+                  className="text-xs sm:text-sm"
+                  htmlFor="edit-select-grade"
+                >
+                  {t("selectGrade")} {t("requiredField")}
+                </Label>
+                <ItemInputList
+                  id="edit-select-grade"
+                  label={t("labels.grade")}
+                  placeholder={t("placeholders.grade")}
+                  items={
+                    tempSubject.selectedGrade ? [tempSubject.selectedGrade] : []
+                  }
+                  onChange={(items) => {
+                    const single = items[0] || "";
+                    setTempSubject((prev) => ({
+                      ...prev,
+                      selectedGrade: single,
+                    }));
+                  }}
+                  suggestions={availableGrades}
+                />
+              </div>
+
+              {/* Price and Duration */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label
-                    className="text-xs sm:text-sm"
-                    htmlFor="edit-select-subject"
-                  >
-                    {t("selectSubject")} {t("requiredField")}
+                  <Label htmlFor="editPrice" className="text-xs sm:text-sm">
+                    {t("price")} {t("requiredField")}
                   </Label>
-                  <ItemInputList
-                    id="edit-select-subject"
-                    label={t("labels.subject")}
-                    placeholder={t("placeholders.subject")}
-                    items={
-                      tempSubject.selectedSubject
-                        ? [tempSubject.selectedSubject]
-                        : []
-                    }
-                    onChange={(items) => {
-                      const single = items[0] || "";
+                  <Input
+                    id="editPrice"
+                    type="number"
+                    step="0.01"
+                    value={tempSubject.price}
+                    onChange={(e) =>
                       setTempSubject((prev) => ({
                         ...prev,
-                        selectedSubject: single,
-                      }));
-                    }}
-                    suggestions={availableSubjects}
+                        price: e.target.value,
+                      }))
+                    }
+                    placeholder={t("placeholders.price")}
+                    className="text-sm h-10 sm:h-11"
                   />
                 </div>
 
-                {/* Grade Selection */}
                 <div className="space-y-2">
-                  <Label
-                    className="text-xs sm:text-sm"
-                    htmlFor="edit-select-grade"
-                  >
-                    {t("selectGrade")} {t("requiredField")}
+                  <Label htmlFor="editDuration" className="text-xs sm:text-sm">
+                    {t("duration")}
                   </Label>
-                  <ItemInputList
-                    id="edit-select-grade"
-                    label={t("labels.grade")}
-                    placeholder={t("placeholders.grade")}
-                    items={
-                      tempSubject.selectedGrade
-                        ? [tempSubject.selectedGrade]
-                        : []
-                    }
-                    onChange={(items) => {
-                      const single = items[0] || "";
+                  <Input
+                    id="editDuration"
+                    type="number"
+                    value={tempSubject.duration}
+                    onChange={(e) =>
                       setTempSubject((prev) => ({
                         ...prev,
-                        selectedGrade: single,
-                      }));
-                    }}
-                    suggestions={availableGrades}
+                        duration: e.target.value,
+                      }))
+                    }
+                    placeholder={t("placeholders.duration")}
+                    className="text-sm h-10 sm:h-11"
                   />
-                </div>
-
-                {/* Price and Duration */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="editPrice" className="text-xs sm:text-sm">
-                      {t("price")} {t("requiredField")}
-                    </Label>
-                    <Input
-                      id="editPrice"
-                      type="number"
-                      step="0.01"
-                      value={tempSubject.price}
-                      onChange={(e) =>
-                        setTempSubject((prev) => ({
-                          ...prev,
-                          price: e.target.value,
-                        }))
-                      }
-                      placeholder={t("placeholders.price")}
-                      className="text-sm h-10 sm:h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="editDuration"
-                      className="text-xs sm:text-sm"
-                    >
-                      {t("duration")}
-                    </Label>
-                    <Input
-                      id="editDuration"
-                      type="number"
-                      value={tempSubject.duration}
-                      onChange={(e) =>
-                        setTempSubject((prev) => ({
-                          ...prev,
-                          duration: e.target.value,
-                        }))
-                      }
-                      placeholder={t("placeholders.duration")}
-                      className="text-sm h-10 sm:h-11"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
-          </EditDialog>
+          </div>
+        </EditDialog>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 w-5 p-0 hover:bg-destructive/10 rounded-full"
+            >
+              <Trash2 className="h-2.5 w-2.5 text-destructive" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="w-[90vw] max-w-sm">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-lg sm:text-xl">
+                {t("deleteSubject")}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-xs sm:text-sm">
+                {t("deleteConfirmation", { subjectName: subject.name })}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex gap-2 flex-col-reverse sm:flex-row">
+              <AlertDialogCancel className="w-full sm:w-auto">
+                {t("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => onDelete(subject.id)}
+                className="w-full sm:w-auto"
               >
-                <Trash2 className="h-3 w-3 text-destructive" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="w-[90vw] max-w-sm">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-lg sm:text-xl">
-                  {t("deleteSubject")}
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-xs sm:text-sm">
-                  {t("deleteConfirmation", { subjectName: subject.name })}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="flex gap-2 flex-col-reverse sm:flex-row">
-                <AlertDialogCancel className="w-full sm:w-auto">
-                  {t("cancel")}
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => onDelete(subject.id)}
-                  className="w-full sm:w-auto"
-                >
-                  {t("delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+                {t("delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-    </Card>
+    </div>
   );
 }
