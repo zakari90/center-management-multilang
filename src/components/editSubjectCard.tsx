@@ -57,15 +57,15 @@ export function EditSubjectCard({
   };
 
   return (
-    <Card className="p-1.5 sm:p-2">
-      <div className="flex items-center justify-between gap-1.5">
+    <Card className="p-1 sm:p-1.5">
+      <div className="flex items-center justify-between gap-1">
         {/* Subject Info */}
         <div className="space-y-0 min-w-0 flex-1">
-          <h4 className="font-semibold text-xs sm:text-sm leading-tight line-clamp-1">
+          <h4 className="font-semibold text-[11px] sm:text-xs leading-tight line-clamp-1">
             {subject.name}
           </h4>
-          <div className="flex flex-wrap gap-1 text-[9px] sm:text-[11px] text-muted-foreground">
-            <Badge variant="outline" className="text-[8px] px-0.5 py-0 h-3.5">
+          <div className="flex flex-wrap gap-1 text-[8px] sm:text-[10px] text-muted-foreground">
+            <Badge variant="outline" className="text-[7px] px-0.5 py-0 h-3">
               {subject.grade}
             </Badge>
             <span className="flex items-center gap-0.5 whitespace-nowrap">
@@ -89,9 +89,9 @@ export function EditSubjectCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-3 w-3" />
               </Button>
             }
             onSave={handleUpdateSubject}
@@ -208,9 +208,9 @@ export function EditSubjectCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                className="h-6 w-6 sm:h-7 sm:w-7 p-0"
               >
-                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                <Trash2 className="h-3 w-3 text-destructive" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="w-[90vw] max-w-sm">
