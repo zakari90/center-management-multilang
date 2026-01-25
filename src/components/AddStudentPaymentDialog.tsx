@@ -82,6 +82,8 @@ interface FormData {
 
 interface AddStudentPaymentDialogProps {
   onPaymentCreated?: () => void;
+  studentId?: string;
+  trigger?: React.ReactNode;
 }
 
 // Step Indicator for mobile
@@ -261,6 +263,8 @@ function QRScanner({
 
 export default function AddStudentPaymentDialog({
   onPaymentCreated,
+  studentId,
+  trigger,
 }: AddStudentPaymentDialogProps) {
   const t = useTranslations("CreateStudentPaymentForm");
   const { user } = useAuth();
@@ -353,7 +357,9 @@ export default function AddStudentPaymentDialog({
   }, [user]);
 
   useEffect(() => {
-    if (open) fetchStudents();
+    if (open) {
+      fetchStudents();
+    }
   }, [open, fetchStudents]);
 
   const calculateAmount = useCallback(() => {
@@ -392,6 +398,15 @@ export default function AddStudentPaymentDialog({
       selectedSubjects: student.studentSubjects.map((ss) => ss.subject.id),
     }));
   }, []);
+
+  useEffect(() => {
+    if (open && studentId && students.length > 0 && !selectedStudent) {
+      const student = students.find((s) => s.id === studentId);
+      if (student) {
+        handleStudentSelect(student);
+      }
+    }
+  }, [open, studentId, students, selectedStudent, handleStudentSelect]);
 
   const handleQrScan = useCallback(
     (data: string) => {
@@ -792,9 +807,11 @@ export default function AddStudentPaymentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex-1 bg-primary hover:bg-primary/45">
-          {t("studentPayment") || "Student Payment"}
-        </Button>
+        {trigger || (
+          <Button className="flex-1 bg-primary hover:bg-primary/45">
+            {t("studentPayment") || "Student Payment"}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-[95vw] md:max-w-[900px] lg:max-w-[1000px] w-full flex flex-col overflow-hidden">
         <DialogHeader>

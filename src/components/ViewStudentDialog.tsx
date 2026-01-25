@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { useTranslations } from "next-intl"
-import { Eye, Loader2, Mail, Phone, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { Eye, Loader2, Mail, Phone, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -15,87 +15,102 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   studentActions,
   studentSubjectActions,
   subjectActions,
   teacherActions,
-  receiptActions
-} from "@/lib/dexie/dexieActions"
+  receiptActions,
+} from "@/lib/dexie/dexieActions";
 
 interface StudentSubject {
-  id: string
+  id: string;
   subject: {
-    id: string
-    name: string
-    grade: string
-    price: number
-  }
+    id: string;
+    name: string;
+    grade: string;
+    price: number;
+  };
   teacher: {
-    id: string
-    name: string
-  }
-  enrolledAt: string
+    id: string;
+    name: string;
+  };
+  enrolledAt: string;
 }
 
 interface Receipt {
-  id: string
-  receiptNumber: string
-  amount: number
-  date: string
-  paymentMethod: string | null
+  id: string;
+  receiptNumber: string;
+  amount: number;
+  date: string;
+  paymentMethod: string | null;
 }
 
 interface Student {
-  id: string
-  name: string
-  email: string | null
-  phone: string | null
-  parentName: string | null
-  parentPhone: string | null
-  parentEmail: string | null
-  grade: string | null
-  createdAt: string
-  studentSubjects: StudentSubject[]
-  receipts: Receipt[]
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  parentName: string | null;
+  parentPhone: string | null;
+  parentEmail: string | null;
+  grade: string | null;
+  createdAt: string;
+  studentSubjects: StudentSubject[];
+  receipts: Receipt[];
 }
 
 interface ViewStudentDialogProps {
-  studentId: string
-  trigger?: React.ReactNode
+  studentId: string;
+  trigger?: React.ReactNode;
 }
 
-export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDialogProps) {
-  const t = useTranslations("StudentProfile")
-  const [open, setOpen] = useState(false)
-  const [student, setStudent] = useState<Student | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+export default function ViewStudentDialog({
+  studentId,
+  trigger,
+}: ViewStudentDialogProps) {
+  const t = useTranslations("StudentProfile");
+  const [open, setOpen] = useState(false);
+  const [student, setStudent] = useState<Student | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchStudent = useCallback(async () => {
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
     try {
-      const [allStudents, allStudentSubjects, allSubjects, allTeachers, allReceipts] = await Promise.all([
+      const [
+        allStudents,
+        allStudentSubjects,
+        allSubjects,
+        allTeachers,
+        allReceipts,
+      ] = await Promise.all([
         studentActions.getAll(),
         studentSubjectActions.getAll(),
         subjectActions.getAll(),
         teacherActions.getAll(),
-        receiptActions.getAll()
-      ])
+        receiptActions.getAll(),
+      ]);
 
-      const studentData = allStudents.find(s => s.id === studentId && s.status !== '0')
+      const studentData = allStudents.find(
+        (s) => s.id === studentId && s.status !== "0",
+      );
       if (!studentData) {
-        throw new Error(t("notFound"))
+        throw new Error(t("notFound"));
       }
 
       const studentSubjectsData = allStudentSubjects
-        .filter(ss => ss.studentId === studentId && ss.status !== '0')
-        .map(ss => {
-          const subject = allSubjects.find(s => s.id === ss.subjectId && s.status !== '0')
-          const teacher = allTeachers.find(t => t.id === ss.teacherId && t.status !== '0')
-          if (!subject) return null
+        .filter((ss) => ss.studentId === studentId && ss.status !== "0")
+        .map((ss) => {
+          const subject = allSubjects.find(
+            (s) => s.id === ss.subjectId && s.status !== "0",
+          );
+          const teacher = allTeachers.find(
+            (t) => t.id === ss.teacherId && t.status !== "0",
+          );
+          if (!subject) return null;
           return {
             id: ss.id,
             subject: {
@@ -104,24 +119,28 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
               grade: subject.grade,
               price: subject.price,
             },
-            teacher: teacher ? {
-              id: teacher.id,
-              name: teacher.name,
-            } : { id: '', name: t("unknown") },
-            enrolledAt: new Date(ss.enrolledAt || ss.createdAt).toLocaleDateString(),
-          }
+            teacher: teacher
+              ? {
+                  id: teacher.id,
+                  name: teacher.name,
+                }
+              : { id: "", name: t("unknown") },
+            enrolledAt: new Date(
+              ss.enrolledAt || ss.createdAt,
+            ).toLocaleDateString(),
+          };
         })
-        .filter(ss => ss !== null) as StudentSubject[]
+        .filter((ss) => ss !== null) as StudentSubject[];
 
       const studentReceipts = allReceipts
-        .filter(r => r.studentId === studentId && r.status !== '0')
-        .map(r => ({
+        .filter((r) => r.studentId === studentId && r.status !== "0")
+        .map((r) => ({
           id: r.id,
           receiptNumber: r.receiptNumber || r.id.slice(-6).toUpperCase(),
           amount: r.amount,
           date: new Date(r.createdAt).toLocaleDateString(),
           paymentMethod: r.paymentMethod ?? null,
-        }))
+        }));
 
       setStudent({
         id: studentData.id,
@@ -135,31 +154,35 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
         createdAt: new Date(studentData.createdAt).toLocaleDateString(),
         studentSubjects: studentSubjectsData,
         receipts: studentReceipts,
-      })
+      });
     } catch (err) {
-      console.error(err)
-      setError(err instanceof Error ? err.message : t("errorLoad"))
+      console.error(err);
+      setError(err instanceof Error ? err.message : t("errorLoad"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [studentId, t])
+  }, [studentId, t]);
 
   useEffect(() => {
     if (open && studentId) {
-      fetchStudent()
+      fetchStudent();
     }
-  }, [open, studentId, fetchStudent])
+  }, [open, studentId, fetchStudent]);
 
-  const totalMonthlyFee = student?.studentSubjects.reduce(
-    (sum, ss) => sum + ss.subject.price,
-    0
-  ) || 0
+  const totalMonthlyFee =
+    student?.studentSubjects.reduce((sum, ss) => sum + ss.subject.price, 0) ||
+    0;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="sm" title={t("viewDetails")} className="hover:bg-blue-50 hover:text-blue-600">
+          <Button
+            variant="ghost"
+            size="sm"
+            title={t("viewDetails")}
+            className="hover:bg-blue-50 hover:text-blue-600"
+          >
             <Eye className="h-4 w-4" />
           </Button>
         )}
@@ -177,7 +200,9 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
                 <div>
                   <span>{student.name}</span>
                   {student.grade && (
-                    <Badge variant="outline" className="ml-2">{student.grade}</Badge>
+                    <Badge variant="outline" className="ml-2">
+                      {student.grade}
+                    </Badge>
                   )}
                 </div>
               </>
@@ -246,14 +271,18 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
             {/* Enrolled Subjects */}
             <Card>
               <CardHeader className="pb-3 flex flex-row justify-between items-center">
-                <CardTitle className="text-base">{t("enrolledSubjects")}</CardTitle>
+                <CardTitle className="text-base">
+                  {t("enrolledSubjects")}
+                </CardTitle>
                 <Badge variant="secondary">
                   MAD {totalMonthlyFee.toFixed(2)}/{t("month")}
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-2">
                 {student.studentSubjects.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t("noSubjects")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("noSubjects")}
+                  </p>
                 ) : (
                   student.studentSubjects.map((ss) => (
                     <div
@@ -277,19 +306,25 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
             {student.receipts.length > 0 && (
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{t("recentPayments")}</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("payments") || "Payments"}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  {student.receipts.slice(0, 3).map((receipt) => (
+                <CardContent className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                  {student.receipts.map((receipt) => (
                     <div
                       key={receipt.id}
                       className="flex justify-between items-center text-sm border-b pb-2 last:border-0"
                     >
                       <div>
                         <p className="font-medium">#{receipt.receiptNumber}</p>
-                        <p className="text-xs text-muted-foreground">{receipt.date}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {receipt.date}
+                        </p>
                       </div>
-                      <Badge variant="outline">MAD {receipt.amount.toFixed(2)}</Badge>
+                      <Badge variant="outline">
+                        MAD {receipt.amount.toFixed(2)}
+                      </Badge>
                     </div>
                   ))}
                 </CardContent>
@@ -304,5 +339,5 @@ export default function ViewStudentDialog({ studentId, trigger }: ViewStudentDia
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

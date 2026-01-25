@@ -1163,6 +1163,7 @@
     "searchPlaceholder": "Search by name, email, phone, or parent...",
     "all": "All",
     "allGrades": "All Grades",
+    "allPaymentStatuses": "All Payments",
     "totalStudents": "Total Students",
     "activeEnrollments": "Active Enrollments",
     "totalRevenue": "Total Revenue",

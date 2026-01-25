@@ -77,6 +77,7 @@ export default function StudentsTable() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [gradeFilter, setGradeFilter] = useState<string>("all");
+  const [paymentFilter, setPaymentFilter] = useState<string>("all");
   const [columnVisibility, setColumnVisibility] = useState({
     name: true,
     contact: true,
@@ -215,7 +216,10 @@ export default function StudentsTable() {
 
     const matchesGrade = gradeFilter === "all" || student.grade === gradeFilter;
 
-    return matchesSearch && matchesGrade;
+    const matchesPayment =
+      paymentFilter === "all" || student.paymentStatus.status === paymentFilter;
+
+    return matchesSearch && matchesGrade && matchesPayment;
   });
 
   const grades = [
@@ -305,6 +309,19 @@ export default function StudentsTable() {
                 {grade === "all" ? t("allGrades") : grade}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              {t("allPaymentStatuses") || "All Payments"}
+            </SelectItem>
+            <SelectItem value="PAID">PAID</SelectItem>
+            <SelectItem value="PARTIAL">PARTIAL</SelectItem>
+            <SelectItem value="UNPAID">UNPAID</SelectItem>
           </SelectContent>
         </Select>
         <DropdownMenu>

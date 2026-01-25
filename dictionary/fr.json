@@ -1114,6 +1114,7 @@
     "searchPlaceholder": "Recherche par nom, email, téléphone ou parent...",
     "all": "Tous",
     "allGrades": "Tous les niveaux",
+    "allPaymentStatuses": "Tous les paiements",
     "totalStudents": "Élèves totaux",
     "activeEnrollments": "Inscriptions actives",
     "totalRevenue": "Revenu total",

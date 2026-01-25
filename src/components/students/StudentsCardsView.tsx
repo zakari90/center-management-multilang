@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import ViewStudentDialog from "@/components/ViewStudentDialog";
 import ViewStudentCardDialog from "@/components/ViewStudentCardDialog";
 import EditStudentDialog from "@/components/EditStudentDialog";
+import AddStudentPaymentDialog from "@/components/AddStudentPaymentDialog";
 import { Student } from "../studentsPresentation";
-import { Phone, Mail, User, Eye } from "lucide-react";
+import { Phone, Mail, User, Eye, ReceiptText } from "lucide-react";
 
 interface StudentsCardsViewProps {
   students: Student[];
@@ -134,6 +135,20 @@ export function StudentsCardsView({
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  <AddStudentPaymentDialog
+                    studentId={student.id}
+                    onPaymentCreated={onUpdate}
+                    trigger={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
+                        title="Add Payment"
+                      >
+                        <ReceiptText className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
                   <ViewStudentDialog
                     studentId={student.id}
                     trigger={
