@@ -363,7 +363,11 @@ export default function TimetableManagement({
     setIsDialogOpen(true);
   };
 
-  const handleAddSchedule = async () => {
+  const [conflictingScheduleIds, setConflictingScheduleIds] = useState<
+    string[]
+  >([]);
+
+  const handleAddSchedule = async (force = false) => {
     if (
       !selectedSlot ||
       !newEntry.teacherId ||
@@ -393,14 +397,6 @@ export default function TimetableManagement({
           s.startTime === selectedSlot.startTime,
       );
 
-      if (teacherConflict) {
-        setError(
-          t("teacherConflict") || "Teacher already has a class at this time",
-        );
-        setIsSaving(false);
-        return;
-      }
-
       // Check room conflict
       const roomConflict = activeSchedules.find(
         (s) =>
@@ -410,10 +406,30 @@ export default function TimetableManagement({
           (centerId ? s.centerId === centerId : true),
       );
 
-      if (roomConflict) {
-        setError(t("roomConflict") || "Room is already booked at this time");
+      if ((teacherConflict || roomConflict) && !force) {
+        const conflicts = [teacherConflict, roomConflict].filter(
+          Boolean,
+        ) as ScheduleSlot[];
+        setConflictingScheduleIds(conflicts.map((c) => c.id!).filter(Boolean));
+        setError(
+          teacherConflict
+            ? t("teacherConflict") + " " + t("overwritePrompt")
+            : t("roomConflict") + " " + t("overwritePrompt"),
+        );
         setIsSaving(false);
         return;
+      }
+
+      // ✅ If force is true, delete conflicting schedules first
+      if (force && conflictingScheduleIds.length > 0) {
+        for (const id of conflictingScheduleIds) {
+          await scheduleActions.markForDelete(id);
+        }
+        // Update local state to remove deleted schedules
+        setSchedule((prev) =>
+          prev.filter((s) => !conflictingScheduleIds.includes(s.id!)),
+        );
+        setConflictingScheduleIds([]);
       }
 
       // ✅ Get teacher's managerId (for admin-created schedules, use teacher's managerId)
@@ -458,6 +474,7 @@ export default function TimetableManagement({
       setIsDialogOpen(false);
       setNewEntry({ teacherId: "", subjectId: "", roomId: "" });
       setError("");
+      setConflictingScheduleIds([]); // Clear conflicts
 
       // ✅ Commented out online creation
       // const { data } = await axios.post('/api/admin/schedule', {
@@ -537,7 +554,19 @@ export default function TimetableManagement({
 
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            {conflictingScheduleIds.length > 0 && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="ml-4 bg-red-700 hover:bg-red-800"
+                onClick={() => handleAddSchedule(true)} // Force overwrite
+              >
+                {t("overwrite") || "Overwrite"}
+              </Button>
+            )}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -842,7 +871,10 @@ export default function TimetableManagement({
             >
               {t("cancel")}
             </Button>
-            <Button onClick={handleAddSchedule} disabled={isSaving}>
+            <Button
+              onClick={() => handleAddSchedule(false)}
+              disabled={isSaving}
+            >
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t("addToSchedule")}
             </Button>

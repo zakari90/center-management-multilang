@@ -626,6 +626,7 @@
     "weeklySchedule": "Horaire hebdomadaire",
     "weeklyScheduleDescription": "Cliquez sur n'importe quel créneau pour ajouter une classe",
     "time": "Heure",
+    "day": "Jour",
     "addClassSchedule": "Ajouter un horaire de classe",
     "teacher": "Enseignant",
     "subject": "Matière",
@@ -647,7 +648,9 @@
     "teacherConflict": "L'enseignant a déjà une classe à ce moment-là",
     "roomConflict": "La salle est déjà réservée à ce moment-là",
     "scheduleDetails": "Détails de l'horaire",
-    "close": "Fermer"
+    "close": "Fermer",
+    "overwrite": "Écraser",
+    "overwritePrompt": "Écraser l'horaire existant ?"
   },
   "ReceiptDetailPage": {
     "loading": "Chargement du reçu...",

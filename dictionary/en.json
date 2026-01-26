@@ -654,6 +654,7 @@
     "weeklySchedule": "Weekly Schedule",
     "weeklyScheduleDescription": "Click on any time slot to add a class",
     "time": "Time",
+    "day": "Day",
     "addClassSchedule": "Add Class Schedule",
     "teacher": "Teacher",
     "subject": "Subject",
@@ -675,7 +676,9 @@
     "teacherConflict": "Teacher already has a class at this time",
     "roomConflict": "Room is already booked at this time",
     "scheduleDetails": "Schedule Details",
-    "close": "Close"
+    "close": "Close",
+    "overwrite": "Overwrite",
+    "overwritePrompt": "Overwrite existing schedule?"
   },
   "ReceiptDetailPage": {
     "loading": "Loading receipt...",
