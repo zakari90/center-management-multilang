@@ -54,7 +54,7 @@ interface Teacher {
   name: string;
   email?: string;
   phone?: string;
-  weeklySchedule?: WeeklyScheduleSlot[] | string;
+  weeklySchedule?: WeeklyScheduleSlot[] | string | string[]; // ✅ Added string[]
 }
 
 interface Schedule {
@@ -97,10 +97,27 @@ const DAYS = [
 // ==================== HELPER FUNCTIONS ====================
 
 const parseWeeklySchedule = (
-  schedule: WeeklyScheduleSlot[] | string | Record<string, unknown> | undefined,
+  schedule:
+    | WeeklyScheduleSlot[]
+    | string
+    | string[]
+    | Record<string, unknown>
+    | undefined,
 ): WeeklyScheduleSlot[] => {
   if (!schedule) return [];
-  if (Array.isArray(schedule)) return schedule;
+  if (Array.isArray(schedule)) {
+    // ✅ Check if it's an array of strings (JSON strings)
+    if (schedule.length > 0 && typeof schedule[0] === "string") {
+      try {
+        return schedule.map((slot) =>
+          typeof slot === "string" ? JSON.parse(slot) : slot,
+        );
+      } catch {
+        return [];
+      }
+    }
+    return schedule as WeeklyScheduleSlot[];
+  }
   if (typeof schedule === "string") {
     try {
       return JSON.parse(schedule);
@@ -739,7 +756,7 @@ export default function TeacherScheduleView({
           ? typeof teacher.weeklySchedule === "string"
             ? teacher.weeklySchedule
             : Array.isArray(teacher.weeklySchedule)
-              ? (teacher.weeklySchedule as WeeklyScheduleSlot[])
+              ? (teacher.weeklySchedule as any[]) // Relaxed type assertion
               : undefined
           : undefined;
 
