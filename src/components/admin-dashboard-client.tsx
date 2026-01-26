@@ -10,45 +10,45 @@ import { DeleteAllDataButton } from "@/components/masterDelete";
 import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
-import { FirstLoginImport } from "@/components/FirstLoginImport";
+// import { FirstLoginImport } from "@/components/FirstLoginImport";
 import { useTranslations } from "next-intl";
 
 export default function AdminDashboardClient() {
-  const t = useTranslations('Dashboard')
+  const t = useTranslations("Dashboard");
 
   return (
     <>
       {/* <AutoSyncProvider /> */}
       <div className="container mx-auto p-4 sm:p-6 space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{t('title')}</h1>
-          <p className="text-muted-foreground">{t('subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
 
-      {/* First Login Import Prompt */}
-      <FirstLoginImport />
+        {/* First Login Import Prompt */}
+        {/* <FirstLoginImport /> */}
 
-      {/* Stats Overview */}
-      <AdminStatsCards />
-      <AdminQuickActions />
-      <AdminRevenueChart />
-      <CentersOverview />
-      
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        <EnrollmentChart />
-        <TopSubjects />
-      </div>
-      
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        <ManagersList />
-        <SystemActivityLog />
-      </div>
-      
-      {/* Data Synchronization */}
-      {/* <SyncHandler /> */}
-      
-      <DeleteAllDataButton/>
+        {/* Stats Overview */}
+        <AdminStatsCards />
+        <AdminQuickActions />
+        <AdminRevenueChart />
+        <CentersOverview />
+
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <EnrollmentChart />
+          <TopSubjects />
+        </div>
+
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <ManagersList />
+          <SystemActivityLog />
+        </div>
+
+        {/* Data Synchronization */}
+        {/* <SyncHandler /> */}
+
+        <DeleteAllDataButton />
       </div>
     </>
-  )
+  );
 }
