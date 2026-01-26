@@ -38,6 +38,7 @@ import {
   teacherActions,
   subjectActions,
   centerActions,
+  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { useAuth } from "@/context/authContext";
@@ -52,6 +53,11 @@ interface Subject {
   id: string;
   name: string;
   grade: string;
+}
+
+interface TeacherSubject {
+  teacherId: string;
+  subjectId: string;
 }
 
 interface ScheduleSlot {
@@ -90,6 +96,7 @@ export default function TimetableManagement({
 
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
   const [rooms, setRooms] = useState<string[]>(availableClassrooms);
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,13 +143,19 @@ export default function TimetableManagement({
       }
 
       // ✅ Fetch from local DB
-      const [allTeachers, allSubjects, allSchedules, allCenters] =
-        await Promise.all([
-          teacherActions.getAll(),
-          subjectActions.getAll(),
-          scheduleActions.getAll(),
-          centerActions.getAll(),
-        ]);
+      const [
+        allTeachers,
+        allSubjects,
+        allSchedules,
+        allCenters,
+        allTeacherSubjects,
+      ] = await Promise.all([
+        teacherActions.getAll(),
+        subjectActions.getAll(),
+        scheduleActions.getAll(),
+        centerActions.getAll(),
+        teacherSubjectActions.getAll(),
+      ]);
 
       // ✅ Check if user is admin
       const isAdmin = user.role?.toUpperCase() === "ADMIN";
@@ -282,6 +295,11 @@ export default function TimetableManagement({
 
       setTeachers(managerTeachers);
       setSubjects(managerSubjects);
+      setTeacherSubjects(
+        allTeacherSubjects
+          .filter((ts) => ts.status !== "0")
+          .map((ts) => ({ teacherId: ts.teacherId, subjectId: ts.subjectId })),
+      );
       setSchedule(scheduleSlots);
 
       // ✅ Get rooms from relevant centers
@@ -774,11 +792,20 @@ export default function TimetableManagement({
                   <SelectValue placeholder={t("selectSubjectPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.name} ({subject.grade})
-                    </SelectItem>
-                  ))}
+                  {subjects
+                    .filter((subject) => {
+                      if (!newEntry.teacherId) return true;
+                      return teacherSubjects.some(
+                        (ts) =>
+                          ts.teacherId === newEntry.teacherId &&
+                          ts.subjectId === subject.id,
+                      );
+                    })
+                    .map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.name} ({subject.grade})
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
