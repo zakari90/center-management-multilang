@@ -156,18 +156,31 @@ export default function TimetableManagement({
           const center = allCenters.find(
             (c) => c.id === centerId && c.status !== "0",
           );
-          const managerIds = center?.managers || [];
+          // ✅ FIX: Include Admin (user.id) in managerIds
+          const managerIds = [...(center?.managers || []), user.id];
+
           relevantTeachers = allTeachers.filter(
-            (t) => managerIds.includes(t.managerId) && t.status !== "0",
+            (t) =>
+              t.status !== "0" &&
+              // Include if managed by any manager in this center, OR directly by admin, OR orphaned (no manager)
+              (managerIds.includes(t.managerId) || !t.managerId),
           );
         } else {
           // If no centerId, show all active teachers from admin's centers
           const adminCenters = allCenters.filter(
             (c) => c.adminId === user.id && c.status !== "0",
           );
-          const adminManagerIds = adminCenters.flatMap((c) => c.managers || []);
+          // ✅ FIX: Include Admin (user.id) in managerIds
+          const adminManagerIds = [
+            ...adminCenters.flatMap((c) => c.managers || []),
+            user.id,
+          ];
+
           relevantTeachers = allTeachers.filter(
-            (t) => adminManagerIds.includes(t.managerId) && t.status !== "0",
+            (t) =>
+              t.status !== "0" &&
+              // Include if managed by any manager in admin's centers, OR directly by admin, OR orphaned
+              (adminManagerIds.includes(t.managerId) || !t.managerId),
           );
         }
       } else {

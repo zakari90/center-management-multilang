@@ -621,18 +621,29 @@ export default function TeacherScheduleView({
           const center = allCenters.find(
             (c) => c.id === centerId && c.status !== "0",
           );
-          const managerIds = center?.managers || [];
-          activeTeachers = activeTeachers.filter((t) =>
-            managerIds.includes(t.managerId),
+          // ✅ FIX: Include Admin (user.id) in managerIds
+          const managerIds = [...(center?.managers || []), user.id];
+
+          activeTeachers = activeTeachers.filter(
+            (t) =>
+              // Include if managed by any manager in this center, OR directly by admin, OR orphaned
+              managerIds.includes(t.managerId) || !t.managerId,
           );
         } else {
           // Admin sees all teachers from their centers
           const adminCenters = allCenters.filter(
             (c) => c.adminId === user.id && c.status !== "0",
           );
-          const adminManagerIds = adminCenters.flatMap((c) => c.managers || []);
-          activeTeachers = activeTeachers.filter((t) =>
-            adminManagerIds.includes(t.managerId),
+          // ✅ FIX: Include Admin (user.id) in managerIds
+          const adminManagerIds = [
+            ...adminCenters.flatMap((c) => c.managers || []),
+            user.id,
+          ];
+
+          activeTeachers = activeTeachers.filter(
+            (t) =>
+              // Include if managed by any manager in admin's centers, OR directly by admin, OR orphaned
+              adminManagerIds.includes(t.managerId) || !t.managerId,
           );
         }
       } else if (user.id) {
