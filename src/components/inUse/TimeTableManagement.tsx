@@ -360,6 +360,7 @@ export default function TimetableManagement({
 
     setSelectedSlot({ day, startTime, endTime });
     setNewEntry({ teacherId: "", subjectId: "", roomId: "" });
+    setError("");
     setIsDialogOpen(true);
   };
 
@@ -782,6 +783,24 @@ export default function TimetableManagement({
               )}
             </DialogDescription>
           </DialogHeader>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription className="flex items-center justify-between">
+                <span>{error}</span>
+                {conflictingScheduleIds.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="ml-4 bg-red-700 hover:bg-red-800"
+                    onClick={() => handleAddSchedule(true)} // Force overwrite
+                  >
+                    {t("overwrite") || "Overwrite"}
+                  </Button>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
 
           <div className="space-y-4">
             <div className="space-y-2">

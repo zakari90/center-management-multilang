@@ -65,6 +65,7 @@ export function PendingSchedulesDialog({
     [],
   );
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const fetchPendingSchedules = useCallback(async () => {
@@ -85,8 +86,7 @@ export function PendingSchedulesDialog({
           ...schedule,
           teacherName: teacher?.name || "Unknown Teacher",
           subjectName: subject?.name || "Unknown Subject",
-          // We can add conflict error from localStorage if we store it
-          conflictError: undefined,
+          conflictError: schedule.syncError, // ✅ Map persisted sync error
         };
       });
 
@@ -122,6 +122,22 @@ export function PendingSchedulesDialog({
     }
   };
 
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const ServerActionSchedules = (
+        await import("@/lib/dexie/scheduleServerAction")
+      ).default;
+      await ServerActionSchedules.Sync();
+      await fetchPendingSchedules();
+      onRefresh?.();
+    } catch (error) {
+      console.error("Manual sync failed:", error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const pendingCount = pendingSchedules.length;
 
   // Don't render anything if there are no pending schedules
@@ -151,11 +167,29 @@ export function PendingSchedulesDialog({
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            {t("title")}
-          </DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                {t("title")}
+              </DialogTitle>
+              <DialogDescription>{t("description")}</DialogDescription>
+            </div>
+            <Button
+              onClick={handleSync}
+              disabled={syncing || loading}
+              size="sm"
+            >
+              {syncing ? (
+                <>
+                  <Clock className="h-3.5 w-3.5 mr-2 animate-spin" />
+                  Syncing...
+                </>
+              ) : (
+                <>Refresh / Sync Now</>
+              )}
+            </Button>
+          </div>
         </DialogHeader>
 
         {loading ? (
@@ -222,8 +256,7 @@ export function PendingSchedulesDialog({
                   {schedule.conflictError && (
                     <Alert variant="destructive" className="py-2">
                       <AlertDescription className="text-xs">
-                        <strong>{t("conflict")}:</strong>{" "}
-                        {schedule.conflictError}
+                        <strong>Error:</strong> {schedule.conflictError}
                       </AlertDescription>
                     </Alert>
                   )}
