@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/students/route.ts
-import { getSession } from '@/lib/server-auth'
-import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
+import { getSession } from "@/lib/server-auth";
+import db from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { StudentInputSchema } from "@/lib/validations/schemas";
 
 export async function GET() {
   try {
-    const session :any = await getSession()
-    
+    const session: any = await getSession();
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get all students (managers can see all data)
@@ -17,74 +18,90 @@ export async function GET() {
       include: {
         studentSubjects: {
           include: {
-            subject: true
-          }
+            subject: true,
+          },
         },
         _count: {
           select: {
-            receipts: true
-          }
-        }
+            receipts: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        createdAt: "desc",
+      },
+    });
 
-    return NextResponse.json(students)
+    return NextResponse.json(students);
   } catch (error) {
-    console.error('Error fetching students:', error)
+    console.error("Error fetching students:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const session: any = await getSession()
-    
+    const session: any = await getSession();
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json()
-    const { 
-      id,
-      name, 
-      email, 
-      phone, 
-      parentName, 
-      parentPhone, 
-      parentEmail, 
+    const body = await req.json();
+
+    // Validate input
+    const result = StudentInputSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: result.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
+    const {
+      name,
+      email,
+      phone,
+      parentName,
+      parentPhone,
+      parentEmail,
       grade,
-      enrollments  // ← Changed from 'subjects'
-    } = body
+      enrollments,
+    } = result.data;
 
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
-    }
+    const { id } = body; // Extract ID separately as it's not in the input schema (optional)
 
     // Check if student with same ID already exists (for sync conflict handling)
     if (id) {
       const existingStudentById = await db.student.findUnique({
-        where: { id }
-      })
-      
+        where: { id },
+      });
+
       if (existingStudentById) {
-        return NextResponse.json({ error: 'Student with this ID already exists' }, { status: 409 })
+        return NextResponse.json(
+          { error: "Student with this ID already exists" },
+          { status: 409 },
+        );
       }
     }
 
     // Check if email already exists
     if (email) {
       const existingStudent = await db.student.findUnique({
-        where: { email }
-      })
-      
+        where: { email },
+      });
+
       if (existingStudent) {
-        return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
+        return NextResponse.json(
+          { error: "Email already in use" },
+          { status: 400 },
+        );
       }
     }
 
@@ -103,17 +120,19 @@ export async function POST(req: NextRequest) {
           grade: grade || null,
           managerId: session.user.id,
         },
-      })
+      });
 
       // Create student-subject-teacher associations if enrollments provided
       if (enrollments && enrollments.length > 0) {
         await tx.studentSubject.createMany({
-          data: enrollments.map((enrollment: { subjectId: string; teacherId: string }) => ({
-            studentId: newStudent.id,
-            subjectId: enrollment.subjectId,
-            teacherId: enrollment.teacherId,  // ← Added teacherId
-          }))
-        })
+          data: enrollments.map(
+            (enrollment: { subjectId: string; teacherId: string }) => ({
+              studentId: newStudent.id,
+              subjectId: enrollment.subjectId,
+              teacherId: enrollment.teacherId, // ← Added teacherId
+            }),
+          ),
+        });
       }
 
       // Return student with subjects
@@ -123,19 +142,19 @@ export async function POST(req: NextRequest) {
           studentSubjects: {
             include: {
               subject: true,
-              teacher: true  // ← Include teacher info too
-            }
-          }
-        }
-      })
-    })
+              teacher: true, // ← Include teacher info too
+            },
+          },
+        },
+      });
+    });
 
-    return NextResponse.json(student, { status: 201 })
+    return NextResponse.json(student, { status: 201 });
   } catch (error) {
-    console.error('Error creating student:', error)
+    console.error("Error creating student:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

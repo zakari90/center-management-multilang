@@ -4,6 +4,7 @@ import axios from "axios";
 import { getTranslations } from "next-intl/server"; // Import for server-side translations
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { CenterInputSchema, UserUpdateSchema } from "./validations/schemas";
 import { encrypt } from "./server-auth";
 import { generateObjectId } from "./utils/generateObjectId";
 
@@ -159,9 +160,11 @@ export async function updateManager(state: unknown, formData: FormData) {
       password: formData.get("password"),
     };
 
-    if (!data.userId) {
+    const result = UserUpdateSchema.safeParse(data);
+
+    if (!result.success) {
       return {
-        error: { message: t("errors.userIdRequired") },
+        error: result.error.flatten().fieldErrors,
       };
     }
 
@@ -323,21 +326,25 @@ export async function createCenterAction(state: unknown, formData: FormData) {
   try {
     const t = await getTranslations("center");
 
-    const name = formData.get("name") as string;
-    const address = formData.get("address") as string;
-    const phone = formData.get("phone") as string;
-    const classrooms = formData.getAll("classrooms") as string[];
-    const workingDays = formData.getAll("workingDays") as string[];
+    const rawData = {
+      name: formData.get("name"),
+      address: formData.get("address"),
+      phone: formData.get("phone"),
+      classrooms: formData.getAll("classrooms"),
+      workingDays: formData.getAll("workingDays"),
+    };
 
-    if (!name) {
+    const result = CenterInputSchema.safeParse(rawData);
+
+    if (!result.success) {
       return {
-        error: { message: t("errors.nameRequired") },
+        error: result.error.flatten().fieldErrors,
       };
     }
 
     const response = await axios.post(
       `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/centers`,
-      { name, address, phone, classrooms, workingDays },
+      result.data,
       { headers: { "Content-Type": "application/json" } },
     );
 

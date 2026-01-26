@@ -137,7 +137,54 @@ export const SubjectFormSchema = z.object({
   duration: z.coerce.number().min(0).optional().nullable(),
 });
 
+// --- Input Schemas (Sanitization) ---
+export const CenterInputSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  address: z.string().trim().optional().nullable(),
+  phone: z.string().trim().optional().nullable(),
+  classrooms: z.array(z.string().trim()).default([]),
+  workingDays: z.array(z.string().trim()).default([]),
+  managers: z.array(z.string().min(1)).optional().default([]), // IDs of managers
+});
+
+export const StudentInputSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  email: z.string().trim().email().optional().or(z.literal("")),
+  phone: z.string().trim().optional().or(z.literal("")),
+  parentName: z.string().trim().optional().or(z.literal("")),
+  parentPhone: z.string().trim().optional().or(z.literal("")),
+  parentEmail: z.string().trim().email().optional().or(z.literal("")),
+  grade: z.string().trim().optional().or(z.literal("")),
+  enrollments: z
+    .array(
+      z.object({
+        subjectId: z.string().min(1),
+        teacherId: z.string().min(1),
+      }),
+    )
+    .optional()
+    .default([]),
+});
+
+export const SubjectInputSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  grade: z.string().trim().min(1, "Grade is required"),
+  price: z.coerce.number().min(0, "Price must be positive"),
+  duration: z.coerce.number().min(0).optional().nullable(),
+  centerId: z.string().min(1, "Center ID is required"),
+});
+
+export const UserUpdateSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+  username: z.string().trim().min(2, "Username is required"),
+  email: z.string().trim().email("Invalid email").optional().or(z.literal("")),
+  password: z.string().optional().or(z.literal("")), // Optional for updates
+});
+
 // --- Types ---
 export type StudentFormInput = z.infer<typeof StudentFormSchema>;
 export type SubjectFormInput = z.infer<typeof SubjectFormSchema>;
 export type CenterInput = z.infer<typeof CenterSchema>;
+export type CenterSanitizedInput = z.infer<typeof CenterInputSchema>;
+export type StudentSanitizedInput = z.infer<typeof StudentInputSchema>;
+export type SubjectSanitizedInput = z.infer<typeof SubjectInputSchema>;

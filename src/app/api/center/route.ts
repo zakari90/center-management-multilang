@@ -2,35 +2,45 @@ import { getSession } from "@/lib/server-auth";
 import db from "@/lib/db";
 // import { Subject } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import { CenterInputSchema } from "@/lib/validations/schemas";
 // app/api/centers/route.ts
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    const body = await req.json();
 
-    const {
-      id, // Optional: if provided, check if center exists for update
-      name,
-      address,
-      phone,
-      classrooms = [],
-      workingDays = [],
-      managers = [],
-      adminId, // required: this must be a valid User.id (ObjectId as string)
-    } = body
+    // Validate input
+    const result = CenterInputSchema.safeParse(body);
 
-    if (!name || !adminId) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'name and adminId are required' },
+        {
+          error: "Validation failed",
+          details: result.error.flatten().fieldErrors,
+        },
         { status: 400 },
-      )
+      );
+    }
+
+    const { name, address, phone, classrooms, workingDays, managers } =
+      result.data;
+
+    // Extract non-validated fields that we still need from body (like adminId/id for logic, though adminId should ideally be from session)
+    const { id, adminId } = body;
+
+    // Additional check for adminId if it's required for creation logic (though in a real app this should probably come from session)
+    if (!adminId) {
+      return NextResponse.json(
+        { error: "adminId are required" },
+        { status: 400 },
+      );
     }
 
     // ✅ Check if center exists (for update scenario)
     if (id) {
       const existingCenter = await db.center.findUnique({
         where: { id },
-        include: { subjects: true }
+        include: { subjects: true },
       });
 
       if (existingCenter) {
@@ -46,7 +56,7 @@ export async function POST(req: NextRequest) {
             managers,
             updatedAt: new Date(),
           },
-          include: { subjects: true }
+          include: { subjects: true },
         });
 
         return NextResponse.json(updatedCenter, { status: 200 });
@@ -65,24 +75,28 @@ export async function POST(req: NextRequest) {
         managers,
         adminId,
       },
-    })
+    });
 
-    return NextResponse.json(center, { status: 201 })
+    return NextResponse.json(center, { status: 201 });
   } catch (error: any) {
-    console.error('[CENTERS_POST]', error)
-    
+    console.error("[CENTERS_POST]", error);
+
     // Handle duplicate key error (center already exists)
-    if (error?.code === 'P2002') {
+    if (error?.code === "P2002") {
       return NextResponse.json(
-        { error: 'Center with this ID already exists' },
+        { error: "Center with this ID already exists" },
         { status: 409 },
-      )
+      );
     }
-    
+
     return NextResponse.json(
-      { error: 'Failed to create center', details: process.env.NODE_ENV === 'development' ? error.message : undefined },
+      {
+        error: "Failed to create center",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+      },
       { status: 500 },
-    )
+    );
   }
 }
 // export async function POST(req: NextRequest) {
@@ -97,15 +111,15 @@ export async function POST(req: NextRequest) {
 
 //     // Validation
 //     if (!name || !Array.isArray(classrooms) || !Array.isArray(workingDays)) {
-//       return NextResponse.json({ 
-//         error: "Missing or invalid fields. Name is required, classrooms and workingDays must be arrays" 
+//       return NextResponse.json({
+//         error: "Missing or invalid fields. Name is required, classrooms and workingDays must be arrays"
 //       }, { status: 400 });
 //     }
 
 //     // Additional validation for subjects
 //     if (subjects && !Array.isArray(subjects)) {
-//       return NextResponse.json({ 
-//         error: "Subjects must be an array" 
+//       return NextResponse.json({
+//         error: "Subjects must be an array"
 //       }, { status: 400 });
 //     }
 
@@ -117,7 +131,7 @@ export async function POST(req: NextRequest) {
 //         phone: phone || null,
 //         classrooms,
 //         workingDays,
-//         adminId, 
+//         adminId,
 //         subjects: {
 //           create: subjects?.map((subject: any) => ({
 //             name: subject.name,
@@ -130,13 +144,13 @@ export async function POST(req: NextRequest) {
 //       include: {
 //         subjects: true
 //       }
-//     });    
+//     });
 
 //     return NextResponse.json(center, { status: 201 });
 //   } catch (error) {
 //     console.error("[CENTER_POST]", error);
 //     console.log("-------------------------------------------", error);
-//     return NextResponse.json({ 
+//     return NextResponse.json({
 //       error: error,
 //       details: process.env.NODE_ENV === 'development' ? error : undefined
 //     }, { status: 500 });
@@ -145,18 +159,18 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   console.log("[CENTER_GET] 🔄 Starting GET request...");
-  
+
   try {
     console.log("[CENTER_GET] 📋 Getting session...");
     const session: any = await getSession();
-    
+
     console.log("[CENTER_GET] 📋 Session result:", {
       hasSession: !!session,
       hasUser: !!session?.user,
-      userId: session?.user?.id || 'N/A',
-      userRole: session?.user?.role || 'N/A',
+      userId: session?.user?.id || "N/A",
+      userRole: session?.user?.role || "N/A",
     });
-    
+
     if (!session?.user) {
       console.log("[CENTER_GET] ❌ No session/user - returning 401");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -164,54 +178,66 @@ export async function GET(req: NextRequest) {
 
     const adminId = session.user.id;
     const userRole = session.user.role;
-    
+
     console.log("[CENTER_GET] 🔍 Querying centers for:", { adminId, userRole });
 
     const centers = await db.center.findMany({
-      where: { 
-        OR: [
-          { adminId: adminId },
-          { managers: { has: adminId } }
-        ]
+      where: {
+        OR: [{ adminId: adminId }, { managers: { has: adminId } }],
       },
-      include: { subjects: true }
+      include: { subjects: true },
     });
 
     console.log("[CENTER_GET] ✅ Found centers:", {
       count: centers.length,
-      ids: centers.map(c => c.id),
+      ids: centers.map((c) => c.id),
     });
 
     return NextResponse.json(centers, { status: 200 });
   } catch (error: any) {
     console.error("[CENTER_GET] ❌ ERROR:", {
-      message: error?.message || 'Unknown error',
-      name: error?.name || 'Unknown',
-      code: error?.code || 'N/A',
-      stack: error?.stack?.split('\n').slice(0, 5).join('\n') || 'No stack',
+      message: error?.message || "Unknown error",
+      name: error?.name || "Unknown",
+      code: error?.code || "N/A",
+      stack: error?.stack?.split("\n").slice(0, 5).join("\n") || "No stack",
     });
-    
-    return NextResponse.json({ 
-      error: "Failed to get center data",
-      message: error?.message || 'Unknown error',
-      code: error?.code || undefined,
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        error: "Failed to get center data",
+        message: error?.message || "Unknown error",
+        code: error?.code || undefined,
+      },
+      { status: 500 },
+    );
   }
 }
 
-
 export async function PATCH(request: Request) {
   try {
-
-    const body = await request.json()
-    const { centerId, name, address, phone, classrooms, workingDays } = body
+    const body = await request.json();
+    const { centerId } = body; // Only extract centerId from body initially due to collision with result.data
 
     if (!centerId) {
       return NextResponse.json(
-        { error: 'Center ID is required' },
-        { status: 400 }
-      )
+        { error: "Center ID is required" },
+        { status: 400 },
+      );
     }
+
+    // Validate update data
+    const result = CenterInputSchema.partial().safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: result.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
+    }
+
+    const { name, address, phone, classrooms, workingDays } = result.data;
 
     const center = await db.center.update({
       where: { id: centerId },
@@ -220,17 +246,17 @@ export async function PATCH(request: Request) {
         ...(address !== undefined && { address }),
         ...(phone !== undefined && { phone }),
         ...(classrooms && { classrooms }),
-        ...(workingDays && { workingDays })
-      }
-    })
+        ...(workingDays && { workingDays }),
+      },
+    });
 
-    return NextResponse.json(center)
+    return NextResponse.json(center);
   } catch (error) {
     console.log(error);
-    
+
     return NextResponse.json(
-      { error: 'Failed to update center' },
-      { status: 500 }
-    )
+      { error: "Failed to update center" },
+      { status: 500 },
+    );
   }
 }
