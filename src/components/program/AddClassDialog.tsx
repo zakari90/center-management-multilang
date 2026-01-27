@@ -134,6 +134,7 @@ export function AddClassDialog({
         roomId: formData.roomId,
         managerId: userId, // Current user is the manager for this record
         status: "w" as const, // Waiting for sync
+        allowOverwrite: forceOverwrite, // ✅ Transient flag for server sync
         createdAt: now,
         updatedAt: now,
       };

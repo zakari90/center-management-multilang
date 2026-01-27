@@ -1,21 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getSession } from '@/lib/server-auth'
-import db from '@/lib/db'
-import { NextRequest, NextResponse } from 'next/server'
+import { getSession } from "@/lib/server-auth";
+import db from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const session : any = await getSession()
+    const session: any = await getSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json()
-    const { day, startTime, endTime, teacherId, subjectId, roomId, centerId } = body
+    const body = await req.json();
+    const { day, startTime, endTime, teacherId, subjectId, roomId, centerId } =
+      body;
 
     // Validation
     if (!day || !startTime || !endTime || !teacherId || !subjectId || !roomId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
     // Check for conflicts - same teacher, same time
@@ -24,17 +28,20 @@ export async function POST(req: NextRequest) {
         teacherId,
         day,
         startTime,
-      }
-    })
+      },
+    });
 
-    if (teacherConflict) {
-      return NextResponse.json({ 
-        error: {
-          message: 'Teacher already has a class at this time',
-          code: 'TEACHER_CONFLICT',
-          details: { day, startTime, teacherId }
-        }
-      }, { status: 409 })
+    if (teacherConflict && !body.allowOverwrite) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "Teacher already has a class at this time",
+            code: "TEACHER_CONFLICT",
+            details: { day, startTime, teacherId },
+          },
+        },
+        { status: 409 },
+      );
     }
 
     // Check for room conflicts
@@ -43,18 +50,31 @@ export async function POST(req: NextRequest) {
         roomId,
         day,
         startTime,
-        centerId: centerId || null
-      }
-    })
+        centerId: centerId || null,
+      },
+    });
 
-    if (roomConflict) {
-      return NextResponse.json({ 
-        error: {
-          message: 'Room is already booked at this time',
-          code: 'ROOM_CONFLICT',
-          details: { day, startTime, roomId, centerId }
-        }
-      }, { status: 409 })
+    if (roomConflict && !body.allowOverwrite) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "Room is already booked at this time",
+            code: "ROOM_CONFLICT",
+            details: { day, startTime, roomId, centerId },
+          },
+        },
+        { status: 409 },
+      );
+    }
+
+    // Handle overwrite: Delete conflicting schedules if they exist
+    if (body.allowOverwrite) {
+      if (teacherConflict) {
+        await db.schedule.delete({ where: { id: teacherConflict.id } });
+      }
+      if (roomConflict && roomConflict.id !== teacherConflict?.id) {
+        await db.schedule.delete({ where: { id: roomConflict.id } });
+      }
     }
 
     // Create schedule
@@ -67,32 +87,35 @@ export async function POST(req: NextRequest) {
         teacherId,
         subjectId,
         managerId: session.user.id,
-        centerId: centerId || null
+        centerId: centerId || null,
       },
       include: {
         teacher: { select: { id: true, name: true } },
-        subject: { select: { id: true, name: true, grade: true } }
-      }
-    })
+        subject: { select: { id: true, name: true, grade: true } },
+      },
+    });
 
-    return NextResponse.json(schedule, { status: 201 })
+    return NextResponse.json(schedule, { status: 201 });
   } catch (error) {
-    console.error('Schedule creation error:', error)
-    const errorMsg = error instanceof Error ? error.message : 'Internal server error'
-    return NextResponse.json({ 
-      error: {
-        message: errorMsg,
-        code: 'INTERNAL_ERROR'
-      }
-    }, { status: 500 })
+    console.error("Schedule creation error:", error);
+    const errorMsg =
+      error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json(
+      {
+        error: {
+          message: errorMsg,
+          code: "INTERNAL_ERROR",
+        },
+      },
+      { status: 500 },
+    );
   }
 }
 
 export async function GET() {
-  
-  const session = await getSession()
+  const session = await getSession();
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // const { searchParams } = new URL(req.url)
@@ -100,36 +123,34 @@ export async function GET() {
 
   const schedules = await db.schedule.findMany({
     // where: {
-      
+
     //   managerId: session.user.id,
     //   ...(centerId && { centerId })
-    // }, 
+    // },
     include: {
       teacher: {
         select: {
           id: true,
           name: true,
           email: true,
-          weeklySchedule: true
-        }
+          weeklySchedule: true,
+        },
       },
       subject: {
         select: {
           id: true,
           name: true,
-          grade: true
-        }
-      }
+          grade: true,
+        },
+      },
     },
-    orderBy: [
-      { day: 'asc' },
-      { startTime: 'asc' }
-    ]
-  })
+    orderBy: [{ day: "asc" }, { startTime: "asc" }],
+  });
 
   console.log(schedules);
-    console.log("8888---------------------------------------------------------------");
+  console.log(
+    "8888---------------------------------------------------------------",
+  );
 
-
-  return NextResponse.json(schedules)
+  return NextResponse.json(schedules);
 }

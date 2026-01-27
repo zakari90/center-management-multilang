@@ -8,7 +8,6 @@ import { ProgramGrid } from "./ProgramGrid";
 import { AddClassDialog } from "./AddClassDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Calendar } from "lucide-react";
-import { TeacherList } from "./TeacherList";
 import {
   scheduleActions,
   teacherActions,
@@ -17,6 +16,7 @@ import {
   teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
+import { TeacherList } from "./TeacherList";
 
 // Detailed types for the new implementation
 export interface ScheduleSlot {
@@ -203,7 +203,7 @@ export function ProgramView() {
           value="schedule"
           className="mt-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          <Card className="border-none shadow-md overflow-hidden bg-gradient-to-br from-background to-muted/20">
+          <Card className="border-none shadow-md overflow-hidden bg-linear-to-br from-background to-muted/20">
             <CardHeader className="bg-primary/5 pb-6">
               <CardTitle className="text-xl flex items-center gap-2">
                 <span className="w-2 h-6 bg-primary rounded-full block" />

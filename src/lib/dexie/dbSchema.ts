@@ -117,6 +117,7 @@ export interface Schedule extends SyncEntity {
   managerId: string;
   centerId?: string;
   syncError?: string;
+  allowOverwrite?: boolean;
 }
 
 export interface PushSubscription extends SyncEntity {

@@ -56,6 +56,7 @@ const ServerActionSchedules = {
           subjectId: schedule.subjectId,
           roomId: schedule.roomId,
           centerId: schedule.centerId,
+          allowOverwrite: schedule.allowOverwrite,
         }),
       });
       if (!response.ok) {
