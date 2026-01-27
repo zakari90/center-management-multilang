@@ -683,13 +683,22 @@
   "Program": {
     "title": "Program Management",
     "subtitle": "Manage class schedules from scratch",
-    "weeklySchedule": "Weekly Schedule",
-    "gridView": "Grid View",
-    "listView": "List View",
-    "listComingSoon": "List view coming soon...",
     "loading": "Building your program...",
+    "weeklySchedule": "Weekly Schedule",
+    "teachersList": "Teachers List",
     "weeklyTimetable": "Weekly Timetable",
+    "noTeachers": "No teachers found",
+    "addTeachersDescription": "Try adding teachers to your center first.",
+    "teachingHours": "Weekly Hours",
+    "subjects": "Subjects",
+    "assignedSpecialties": "Assigned Specialties",
+    "noSubjectsAssigned": "No subjects assigned",
+    "billingTerms": "Billing Terms",
+    "activeContract": "Active",
+    "moreRecords": "View all records",
     "time": "TIME",
+    "assign": "Assign",
+    "unknownSubject": "Unknown Subject",
     "days": {
       "Monday": "Monday",
       "Tuesday": "Tuesday",
@@ -699,9 +708,6 @@
       "Saturday": "Saturday",
       "Sunday": "Sunday"
     },
-    "add": "Add",
-    "assign": "Assign",
-    "unknownSubject": "Unknown Subject",
     "validationErrors": {
       "allFieldsRequired": "Please select all required information."
     },
@@ -709,7 +715,6 @@
       "teacherBusy": "This teacher is already assigned to a class in another room.",
       "roomOccupied": "This room is already occupied during this time."
     },
-    "overwritePrompt": "Do you want to overwrite?",
     "errors": {
       "saveFailed": "System failed to save the class. Please refresh and try again."
     },
@@ -730,14 +735,20 @@
       "selectSubject": "Choose a course",
       "selectRoom": "Assign a location"
     },
-    "noTeachers": "No teachers found",
-    "addTeachersDescription": "Try adding teachers to your center first.",
-    "teachingHours": "Weekly Hours",
-    "assignedSpecialties": "Assigned Specialties",
-    "billingTerms": "Billing Terms",
-    "activeContract": "Active",
-    "moreRecords": "View all records"
+    "syncIssues": {
+      "title": "Sync Issues",
+      "retryAll": "Retry All",
+      "dismissAll": "Dismiss All",
+      "description": "Some schedules couldn't sync due to conflicts with existing data on the server.",
+      "teacherConflict": "Teacher Conflict",
+      "roomConflict": "Room Conflict",
+      "syncError": "Sync Error",
+      "overwriteTooltip": "Replace existing schedule on server",
+      "overwrite": "Overwrite",
+      "deleteTooltip": "Remove this local schedule"
+    }
   },
+
   "ReceiptDetailPage": {
     "loading": "Loading receipt...",
     "receiptNotFound": "Receipt not found",

@@ -654,14 +654,23 @@
   },
   "Program": {
     "title": "Gestion du Programme",
-    "subtitle": "Gérer les horaires de cours à partir de zéro",
-    "weeklySchedule": "Emploi du temps hebdomadaire",
-    "gridView": "Vue Grille",
-    "listView": "Vue Liste",
-    "listComingSoon": "La vue liste sera bientôt disponible...",
+    "subtitle": "Gérez les emplois du temps à partir de zéro",
     "loading": "Construction de votre programme...",
+    "weeklySchedule": "Emploi du temps hebdomadaire",
+    "teachersList": "Liste des enseignants",
     "weeklyTimetable": "Emploi du temps hebdomadaire",
+    "noTeachers": "Aucun enseignant trouvé",
+    "addTeachersDescription": "Essayez d'abord d'ajouter des enseignants à votre centre.",
+    "teachingHours": "Heures hebdomadaires",
+    "subjects": "Matières",
+    "assignedSpecialties": "Spécialités assignées",
+    "noSubjectsAssigned": "Aucune matière assignée",
+    "billingTerms": "Conditions de facturation",
+    "activeContract": "Actif",
+    "moreRecords": "Voir tous les enregistrements",
     "time": "HEURE",
+    "assign": "Assigner",
+    "unknownSubject": "Matière inconnue",
     "days": {
       "Monday": "Lundi",
       "Tuesday": "Mardi",
@@ -671,26 +680,22 @@
       "Saturday": "Samedi",
       "Sunday": "Dimanche"
     },
-    "add": "Ajouter",
-    "assign": "Assigner",
-    "unknownSubject": "Matière inconnue",
     "validationErrors": {
       "allFieldsRequired": "Veuillez sélectionner toutes les informations requises."
     },
     "conflicts": {
-      "teacherBusy": "Cet enseignant est déjà affecté à un cours dans une autre salle.",
-      "roomOccupied": "Cette salle est déjà occupée pendant cette période."
+      "teacherBusy": "Cet enseignant est déjà assigné à un cours dans une autre salle.",
+      "roomOccupied": "Cette salle est déjà occupée pendant ce créneau."
     },
-    "overwritePrompt": "Voulez-vous écraser ?",
     "errors": {
       "saveFailed": "Le système n'a pas réussi à enregistrer le cours. Veuillez rafraîchir et réessayer."
     },
-    "addClass": "Planifier une session",
+    "addClass": "Planifier une séance",
     "conflictWarning": "Avertissement de planification",
     "buttons": {
-      "replaceExisting": "Écraser et enregistrer quand même",
+      "replaceExisting": "Remplacer et enregistrer quand même",
       "cancel": "Annuler",
-      "confirm": "Planifier la session"
+      "confirm": "Confirmer la séance"
     },
     "labels": {
       "teacher": "Enseignant principal",
@@ -702,14 +707,20 @@
       "selectSubject": "Choisir un cours",
       "selectRoom": "Assigner un emplacement"
     },
-    "noTeachers": "Aucun enseignant trouvé",
-    "addTeachersDescription": "Essayez d'abord d'ajouter des enseignants à votre centre.",
-    "teachingHours": "Heures hebdomadaires",
-    "assignedSpecialties": "Spécialités assignées",
-    "billingTerms": "Conditions de facturation",
-    "activeContract": "Actif",
-    "moreRecords": "Voir tous les enregistrements"
+    "syncIssues": {
+      "title": "Problèmes de synchronisation",
+      "retryAll": "Tout réessayer",
+      "dismissAll": "Tout ignorer",
+      "description": "Certains emplois du temps n'ont pas pu être synchronisés en raison de conflits avec les données existantes sur le serveur.",
+      "teacherConflict": "Conflit d'enseignant",
+      "roomConflict": "Conflit de salle",
+      "syncError": "Erreur de synchro",
+      "overwriteTooltip": "Remplacer l'emploi du temps existant sur le serveur",
+      "overwrite": "Écraser",
+      "deleteTooltip": "Supprimer cet emploi du temps local"
+    }
   },
+
   "ReceiptDetailPage": {
     "loading": "Chargement du reçu...",
     "receiptNotFound": "Reçu introuvable",
