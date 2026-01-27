@@ -91,25 +91,39 @@ export function TeacherList({
 
               <CardContent className="pt-6 space-y-6">
                 {/* Stats Row */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-muted/30 rounded-xl p-3 border border-border/50">
-                    <div className="flex items-center gap-2 text-muted-foreground text-[10px] uppercase font-bold tracking-wider mb-1">
-                      <Clock className="w-3 h-3" />
-                      {t("teachingHours") || "Weekly Hours"}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-muted/30 rounded-xl p-2.5 border border-border/50">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-[9px] uppercase font-extrabold tracking-wider mb-1">
+                      <Clock className="w-2.5 h-2.5" />
+                      {t("teachingHours") || "Weekly"}
                     </div>
-                    <div className="text-lg font-bold text-foreground">
+                    <div className="text-base font-bold text-foreground">
                       {teacher.teachingHours || 0}{" "}
-                      <span className="text-xs font-normal text-muted-foreground">
-                        hrs
+                      <span className="text-[10px] font-normal text-muted-foreground">
+                        h
                       </span>
                     </div>
                   </div>
-                  <div className="bg-muted/30 rounded-xl p-3 border border-border/50 text-right">
-                    <div className="flex items-center gap-2 text-muted-foreground text-[10px] uppercase font-bold tracking-wider mb-1 justify-end">
-                      {t("subjects") || "Subjects"}
-                      <BookOpen className="w-3 h-3" />
+
+                  <div className="bg-primary/5 rounded-xl p-2.5 border border-primary/10">
+                    <div className="flex items-center gap-1.5 text-primary text-[9px] uppercase font-extrabold tracking-wider mb-1">
+                      <TrendingUp className="w-2.5 h-2.5" />
+                      {t("availableHours") || "Available"}
                     </div>
-                    <div className="text-lg font-bold text-foreground">
+                    <div className="text-base font-bold text-primary">
+                      {teacher.availableHours || 0}{" "}
+                      <span className="text-[10px] font-normal text-primary/70">
+                        h
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/30 rounded-xl p-2.5 border border-border/50 text-right">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-[9px] uppercase font-extrabold tracking-wider mb-1 justify-end">
+                      {t("subjects") || "Subs"}
+                      <BookOpen className="w-2.5 h-2.5" />
+                    </div>
+                    <div className="text-base font-bold text-foreground">
                       {teacher.subjects?.length || 0}
                     </div>
                   </div>

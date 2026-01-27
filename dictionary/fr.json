@@ -662,6 +662,7 @@
     "noTeachers": "Aucun enseignant trouvé",
     "addTeachersDescription": "Essayez d'abord d'ajouter des enseignants à votre centre.",
     "teachingHours": "Heures hebdomadaires",
+    "availableHours": "Heures disponibles",
     "subjects": "Matières",
     "assignedSpecialties": "Spécialités assignées",
     "noSubjectsAssigned": "Aucune matière assignée",

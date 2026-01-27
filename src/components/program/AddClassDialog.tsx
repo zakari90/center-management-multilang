@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, X, Clock } from "lucide-react";
 import { Teacher, Subject, ScheduleSlot } from "./ProgramView";
 import { scheduleActions } from "@/lib/dexie/dexieActions";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
@@ -278,9 +278,17 @@ export function AddClassDialog({
                     <SelectItem
                       key={t.id}
                       value={t.id}
-                      className="rounded-lg py-3"
+                      className="rounded-lg py-2.5"
                     >
-                      {t.name}
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span className="font-medium">{t.name}</span>
+                        {t.availableHours !== undefined && (
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            {t.availableHours}h
+                          </span>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

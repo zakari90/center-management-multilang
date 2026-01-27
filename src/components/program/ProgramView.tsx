@@ -36,6 +36,7 @@ export interface Teacher {
   email?: string;
   phone?: string;
   teachingHours?: number;
+  availableHours?: number;
   subjects?: string[];
 }
 
@@ -102,6 +103,16 @@ export function ProgramView() {
         ) as unknown as TeacherSubject[],
       );
 
+      // Helper to calculate duration in hours
+      const calculateDuration = (start: string, end: string): number => {
+        if (!start || !end) return 0;
+        const [startH, startM] = start.split(":").map(Number);
+        const [endH, endM] = end.split(":").map(Number);
+        const startTotalMinutes = (startH || 0) * 60 + (startM || 0);
+        const endTotalMinutes = (endH || 0) * 60 + (endM || 0);
+        return Math.max(0, (endTotalMinutes - startTotalMinutes) / 60);
+      };
+
       // Enhance teachers with subjects and calculated hours
       const activeTeachers = allTeachers
         .filter((t) => t.status !== "0")
@@ -116,10 +127,40 @@ export function ProgramView() {
             .filter(Boolean) as string[];
 
           // Calculate hours from schedule
-          // Simplified calculation: assuming each slot is 1 hour
-          const hourCount = activeSchedules.filter(
-            (s) => s.teacherId === t.id,
-          ).length;
+          let teachingHours = 0;
+          activeSchedules.forEach((s) => {
+            if (s.teacherId === t.id) {
+              teachingHours += calculateDuration(s.startTime, s.endTime);
+            }
+          });
+
+          // Calculate potential hours from weeklySchedule
+          let potentialHours = 0;
+          if (t.weeklySchedule) {
+            try {
+              const schedule =
+                typeof t.weeklySchedule === "string"
+                  ? JSON.parse(t.weeklySchedule)
+                  : t.weeklySchedule;
+
+              if (Array.isArray(schedule)) {
+                schedule.forEach((slotData) => {
+                  const slot =
+                    typeof slotData === "string"
+                      ? JSON.parse(slotData)
+                      : slotData;
+                  if (slot.startTime && slot.endTime) {
+                    potentialHours += calculateDuration(
+                      slot.startTime,
+                      slot.endTime,
+                    );
+                  }
+                });
+              }
+            } catch (e) {
+              console.error("Error parsing weekly schedule for teacher:", e);
+            }
+          }
 
           return {
             id: t.id,
@@ -127,7 +168,11 @@ export function ProgramView() {
             email: t.email,
             phone: t.phone,
             subjects: subjectsForTeacher,
-            teachingHours: hourCount,
+            teachingHours: Math.round(teachingHours * 10) / 10,
+            availableHours: Math.max(
+              0,
+              Math.round((potentialHours - teachingHours) * 10) / 10,
+            ),
           };
         });
       setTeachers(activeTeachers);

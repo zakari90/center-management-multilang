@@ -690,6 +690,7 @@
     "noTeachers": "No teachers found",
     "addTeachersDescription": "Try adding teachers to your center first.",
     "teachingHours": "Weekly Hours",
+    "availableHours": "Available Hours",
     "subjects": "Subjects",
     "assignedSpecialties": "Assigned Specialties",
     "noSubjectsAssigned": "No subjects assigned",
