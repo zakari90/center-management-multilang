@@ -24,6 +24,8 @@ import { Loader2, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { Teacher, Subject, ScheduleSlot } from "./ProgramView";
 import { scheduleActions } from "@/lib/dexie/dexieActions";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
+import ServerActionSchedules from "@/lib/dexie/scheduleServerAction";
+import { isOnline } from "@/lib/utils/network";
 
 interface AddClassDialogProps {
   open: boolean;
@@ -141,6 +143,45 @@ export function AddClassDialog({
 
       // @ts-ignore - dexieActions putLocal usually expects the full entity type
       await scheduleActions.putLocal(newRecord);
+
+      // 4. Try immediate sync if online
+      if (isOnline()) {
+        try {
+          const result = await ServerActionSchedules.SaveToServer(newRecord);
+          if (result?.id) {
+            // Success - mark as synced
+            await scheduleActions.update(newId, {
+              status: "1" as const,
+              syncError: undefined,
+            });
+          }
+        } catch (syncError: unknown) {
+          const errorMsg =
+            syncError instanceof Error ? syncError.message : "Sync failed";
+
+          // Check if it's a conflict error
+          if (
+            errorMsg.includes("409") ||
+            errorMsg.includes("conflict") ||
+            errorMsg.includes("already")
+          ) {
+            // Save error to local DB but still close dialog - user can resolve via SyncIssuesPanel
+            await scheduleActions.update(newId, {
+              syncError: errorMsg,
+            });
+            console.warn(
+              "Schedule saved locally but has server conflict:",
+              errorMsg,
+            );
+          } else {
+            // Save error for other types of failures
+            await scheduleActions.update(newId, {
+              syncError: errorMsg,
+            });
+            console.warn("Schedule saved locally but sync failed:", errorMsg);
+          }
+        }
+      }
 
       onSuccess();
     } catch (err) {

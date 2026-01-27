@@ -17,6 +17,7 @@ import {
 } from "@/lib/dexie/dexieActions";
 import { useAuth } from "@/context/authContext";
 import { TeacherList } from "./TeacherList";
+import { SyncIssuesPanel } from "./SyncIssuesPanel";
 
 // Detailed types for the new implementation
 export interface ScheduleSlot {
@@ -179,6 +180,13 @@ export function ProgramView() {
 
   return (
     <div className="space-y-6">
+      {/* Sync Issues Panel */}
+      <SyncIssuesPanel
+        onResolved={fetchData}
+        teachers={teachers}
+        subjects={subjects}
+      />
+
       <Tabs defaultValue="schedule" className="w-full">
         <div className="flex justify-between items-center mb-4">
           <TabsList className="bg-muted/50 p-1 rounded-xl">
