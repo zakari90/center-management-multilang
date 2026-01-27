@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import TeacherScheduleView from '@/components/teachers/schedule/TeacherScheduleView'
+import TeacherScheduleView from "./inUse/teacherWithSchedule";
 
 export default function TeacherWithSchedule(props: { centerId?: string }) {
-  return <TeacherScheduleView {...props} />
+  return <TeacherScheduleView {...props} />;
 }
