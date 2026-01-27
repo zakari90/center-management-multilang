@@ -1260,9 +1260,21 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                   })}
                 </div>
               ) : dayAvailability.length > 0 ? (
-                <div className="text-center py-6 text-muted-foreground text-sm">
+                <div className="text-center py-4 text-muted-foreground">
                   <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-500" />
-                  {t("availableButNoClasses")}
+                  <p className="text-sm mb-2">{t("availableButNoClasses")}</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {dayAvailability.map((slot, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="outline"
+                        className="text-xs font-mono bg-green-50 text-green-700 border-green-200"
+                      >
+                        <Clock className="h-2.5 w-2.5 mr-1" />
+                        {slot.startTime} - {slot.endTime}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               ) : null}
             </CardContent>

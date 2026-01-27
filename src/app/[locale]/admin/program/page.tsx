@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { ProgramView } from "@/components/program/ProgramView";
-import TeacherScheduleView1 from "@/components/teachers/schedule/TeacherScheduleView";
 import TeacherScheduleView from "@/components/inUse/teacherWithSchedule";
 
 export default function ProgramPage() {
@@ -20,9 +19,6 @@ export default function ProgramPage() {
           </p>
         </div>
       </div>
-      1
-      <TeacherScheduleView1 />
-      2
       <TeacherScheduleView />
       <ProgramView />
     </div>
