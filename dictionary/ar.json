@@ -642,6 +642,64 @@
     "scheduleDetails": "تفاصيل الجدول",
     "close": "إغلاق"
   },
+  "Program": {
+    "title": "إدارة البرنامج",
+    "subtitle": "إدارة جداول الحصص من الصفر",
+    "weeklySchedule": "الجدول الأسبوعي",
+    "gridView": "عرض الشبكة",
+    "listView": "عرض القائمة",
+    "listComingSoon": "عرض القائمة سيتوفر قريباً...",
+    "loading": "جاري بناء برنامجك...",
+    "weeklyTimetable": "الجدول الزمني الأسبوعي",
+    "time": "الوقت",
+    "days": {
+      "Monday": "الاثنين",
+      "Tuesday": "الثلاثاء",
+      "Wednesday": "الأربعاء",
+      "Thursday": "الخميس",
+      "Friday": "الجمعة",
+      "Saturday": "السبت",
+      "Sunday": "الأحد"
+    },
+    "add": "إضافة",
+    "assign": "تعيين",
+    "unknownSubject": "مادة غير معروفة",
+    "validationErrors": {
+      "allFieldsRequired": "يرجى اختيار جميع المعلومات المطلوبة."
+    },
+    "conflicts": {
+      "teacherBusy": "هذا المعلم معين بالفعل لحصة في قاعة أخرى.",
+      "roomOccupied": "هذه القاعة مشغولة بالفعل خلال هذا الوقت."
+    },
+    "overwritePrompt": "هل تريد الاستبدال؟",
+    "errors": {
+      "saveFailed": "فشل النظام في حفظ الحصة. يرجى التحديث والمحاولة مرة أخرى."
+    },
+    "addClass": "تخطيط حصة",
+    "conflictWarning": "تحذير جدولة",
+    "buttons": {
+      "replaceExisting": "الاستبدال والحفظ على أي حال",
+      "cancel": "إلغاء",
+      "confirm": "تخطيط الحصة"
+    },
+    "labels": {
+      "teacher": "المعلم الرئيسي",
+      "subject": "المادة المعينة",
+      "room": "المرفق / القاعة"
+    },
+    "placeholders": {
+      "selectTeacher": "اختر مدرساً",
+      "selectSubject": "اختر دورة",
+      "selectRoom": "تعيين موقع"
+    },
+    "noTeachers": "لم يتم العثور على معلمين",
+    "addTeachersDescription": "حاول إضافة معلمين إلى مركزك أولاً.",
+    "teachingHours": "عدد الساعات الأسبوعية",
+    "assignedSpecialties": "التخصصات المعينة",
+    "billingTerms": "شروط الفوترة",
+    "activeContract": "نشط",
+    "moreRecords": "عرض جميع السجلات"
+  },
   "ReceiptDetailPage": {
     "loading": "جاري تحميل الإيصال...",
     "receiptNotFound": "الإيصال غير موجود",

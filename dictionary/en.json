@@ -680,6 +680,64 @@
     "overwrite": "Overwrite",
     "overwritePrompt": "Overwrite existing schedule?"
   },
+  "Program": {
+    "title": "Program Management",
+    "subtitle": "Manage class schedules from scratch",
+    "weeklySchedule": "Weekly Schedule",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "listComingSoon": "List view coming soon...",
+    "loading": "Building your program...",
+    "weeklyTimetable": "Weekly Timetable",
+    "time": "TIME",
+    "days": {
+      "Monday": "Monday",
+      "Tuesday": "Tuesday",
+      "Wednesday": "Wednesday",
+      "Thursday": "Thursday",
+      "Friday": "Friday",
+      "Saturday": "Saturday",
+      "Sunday": "Sunday"
+    },
+    "add": "Add",
+    "assign": "Assign",
+    "unknownSubject": "Unknown Subject",
+    "validationErrors": {
+      "allFieldsRequired": "Please select all required information."
+    },
+    "conflicts": {
+      "teacherBusy": "This teacher is already assigned to a class in another room.",
+      "roomOccupied": "This room is already occupied during this time."
+    },
+    "overwritePrompt": "Do you want to overwrite?",
+    "errors": {
+      "saveFailed": "System failed to save the class. Please refresh and try again."
+    },
+    "addClass": "Plan a Session",
+    "conflictWarning": "Scheduling Warning",
+    "buttons": {
+      "replaceExisting": "Overwrite & Save Anyway",
+      "cancel": "Dismiss",
+      "confirm": "Plan Session"
+    },
+    "labels": {
+      "teacher": "Lead Teacher",
+      "subject": "Assigned Subject",
+      "room": "Facility / Room"
+    },
+    "placeholders": {
+      "selectTeacher": "Choose an instructor",
+      "selectSubject": "Choose a course",
+      "selectRoom": "Assign a location"
+    },
+    "noTeachers": "No teachers found",
+    "addTeachersDescription": "Try adding teachers to your center first.",
+    "teachingHours": "Weekly Hours",
+    "assignedSpecialties": "Assigned Specialties",
+    "billingTerms": "Billing Terms",
+    "activeContract": "Active",
+    "moreRecords": "View all records"
+  },
   "ReceiptDetailPage": {
     "loading": "Loading receipt...",
     "receiptNotFound": "Receipt not found",
