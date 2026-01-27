@@ -29,7 +29,15 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 // import axios from 'axios' // ✅ Commented out - using local DB
-import { Clock, Eye, Loader2, MapPin, Trash2, User } from "lucide-react";
+import {
+  Clock,
+  Eye,
+  Loader2,
+  MapPin,
+  Trash2,
+  User,
+  CheckCircle,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
 import { useLocalizedConstants } from "../useLocalizedConstants";
@@ -47,6 +55,7 @@ import { EntitySyncControls } from "@/components/EntitySyncControls";
 interface Teacher {
   id: string;
   name: string;
+  weeklySchedule?: any;
 }
 
 interface Subject {
@@ -84,10 +93,47 @@ const TIME_SLOTS = [
   "18:00",
 ];
 
+const parseWeeklySchedule = (schedule: any): any[] => {
+  if (!schedule) return [];
+  if (Array.isArray(schedule)) {
+    return schedule.map((slot) =>
+      typeof slot === "string" ? JSON.parse(slot) : slot,
+    );
+  }
+  if (typeof schedule === "string") {
+    try {
+      return JSON.parse(schedule);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const isTeacherAvailable = (
+  teacher: any,
+  day: string,
+  startTime: string,
+  endTime: string,
+): boolean => {
+  const availability = parseWeeklySchedule(teacher?.weeklySchedule);
+  if (!availability || availability.length === 0) return false;
+
+  return availability.some((slot) => {
+    return (
+      slot.day === day && startTime >= slot.startTime && endTime <= slot.endTime
+    );
+  });
+};
+
 export default function TimetableManagement({
   centerId,
+  refreshKey,
+  onScheduleChangeAction,
 }: {
   centerId?: string;
+  refreshKey?: number;
+  onScheduleChangeAction?: () => void;
 }) {
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations("TimetableManagement");
@@ -206,6 +252,7 @@ export default function TimetableManagement({
       const managerTeachers = relevantTeachers.map((t) => ({
         id: t.id,
         name: t.name,
+        weeklySchedule: t.weeklySchedule,
       }));
 
       // ✅ Filter subjects by center or manager's centers
@@ -247,7 +294,7 @@ export default function TimetableManagement({
           const center = allCenters.find(
             (c) => c.id === centerId && c.status !== "0",
           );
-          const managerIds = center?.managers || [];
+          const managerIds = [...(center?.managers || []), user.id];
           // Show schedules from managers in this center OR schedules directly for this center
           filteredSchedules = filteredSchedules.filter((s) => {
             // Include if schedule belongs to this center (by centerId)
@@ -266,7 +313,10 @@ export default function TimetableManagement({
             (c) => c.adminId === user.id && c.status !== "0",
           );
           const adminCenterIds = adminCenters.map((c) => c.id);
-          const adminManagerIds = adminCenters.flatMap((c) => c.managers || []);
+          const adminManagerIds = [
+            ...adminCenters.flatMap((c) => c.managers || []),
+            user.id,
+          ];
           filteredSchedules = filteredSchedules.filter((s) => {
             // Include if: schedule is in admin's center OR schedule's manager is in admin's centers
             return (
@@ -352,7 +402,7 @@ export default function TimetableManagement({
     if (!authLoading) {
       fetchData();
     }
-  }, [authLoading, fetchData]);
+  }, [authLoading, fetchData, refreshKey]);
 
   const handleSlotClick = (day: string, startTime: string) => {
     const endTimeIndex = TIME_SLOTS.indexOf(startTime) + 1;
@@ -476,6 +526,7 @@ export default function TimetableManagement({
       setNewEntry({ teacherId: "", subjectId: "", roomId: "" });
       setError("");
       setConflictingScheduleIds([]); // Clear conflicts
+      onScheduleChangeAction?.();
 
       // ✅ Commented out online creation
       // const { data } = await axios.post('/api/admin/schedule', {
@@ -502,6 +553,7 @@ export default function TimetableManagement({
 
       // ✅ Update local state
       setSchedule((prev) => prev.filter((s) => s.id !== scheduleId));
+      onScheduleChangeAction?.();
 
       // ✅ Commented out online delete
       // await axios.delete(`/api/admin/schedule/${scheduleId}`)
@@ -682,18 +734,43 @@ export default function TimetableManagement({
                       const slots = getSlotsByDayAndTime(day.label, time);
                       const hasConflict = slots.length > 1;
 
+                      // Check availability for teacher view
+                      const currentTeacher =
+                        viewMode === "teacher" && selectedFilter
+                          ? teachers.find((t) => t.id === selectedFilter)
+                          : null;
+                      const isAvailable =
+                        slots.length === 0 &&
+                        currentTeacher &&
+                        isTeacherAvailable(
+                          currentTeacher,
+                          day.label,
+                          time,
+                          TIME_SLOTS[timeIndex + 1],
+                        );
+
                       return (
                         <div
                           key={`${day.key}-${time}`}
                           onClick={() => handleSlotClick(day.label, time)}
                           className={cn(
-                            "min-h-[100px] p-2 border-2 rounded-md cursor-pointer transition-all",
+                            "min-h-[100px] p-2 border-2 rounded-md cursor-pointer transition-all flex flex-col justify-center",
                             "hover:border-primary hover:bg-primary/5",
-                            slots.length === 0 && "bg-muted/30",
+                            slots.length === 0 && !isAvailable && "bg-muted/30",
+                            isAvailable &&
+                              "bg-green-50 border-green-200 hover:bg-green-100",
                             hasConflict &&
                               "border-destructive bg-destructive/10",
                           )}
                         >
+                          {isAvailable && (
+                            <div className="text-center py-2 text-green-600 space-y-1">
+                              <CheckCircle className="h-4 w-4 mx-auto opacity-70" />
+                              <span className="text-[10px] font-semibold uppercase tracking-wider block">
+                                {t("available") || "Available"}
+                              </span>
+                            </div>
+                          )}
                           <div className="space-y-1">
                             {slots.map((slot, idx) => {
                               const teacher = teachers.find(

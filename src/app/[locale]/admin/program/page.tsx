@@ -1,11 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ProgramView } from "@/components/program/ProgramView";
 import TeacherScheduleView from "@/components/inUse/teacherWithSchedule";
 
 export default function ProgramPage() {
   const t = useTranslations("Program");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleScheduleChange = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -19,8 +25,8 @@ export default function ProgramPage() {
           </p>
         </div>
       </div>
-      <TeacherScheduleView />
-      <ProgramView />
+      <TeacherScheduleView refreshKey={refreshKey} />
+      <ProgramView onScheduleChangeAction={handleScheduleChange} />
     </div>
   );
 }

@@ -593,8 +593,10 @@ const exportTeacherScheduleToExcel = async (
 
 export default function TeacherScheduleView({
   centerId,
+  refreshKey,
 }: {
   centerId?: string;
+  refreshKey?: number;
 }) {
   const t = useTranslations("TeacherScheduleView");
   const { user } = useAuth();
@@ -677,7 +679,7 @@ export default function TeacherScheduleView({
           const center = allCenters.find(
             (c) => c.id === centerId && c.status !== "0",
           );
-          const managerIds = center?.managers || [];
+          const managerIds = [...(center?.managers || []), user.id];
           activeSchedules = activeSchedules.filter(
             (s) => managerIds.includes(s.managerId) || s.centerId === centerId,
           );
@@ -685,7 +687,10 @@ export default function TeacherScheduleView({
           const adminCenters = allCenters.filter(
             (c) => c.adminId === user.id && c.status !== "0",
           );
-          const adminManagerIds = adminCenters.flatMap((c) => c.managers || []);
+          const adminManagerIds = [
+            ...adminCenters.flatMap((c) => c.managers || []),
+            user.id,
+          ];
           const adminCenterIds = adminCenters.map((c) => c.id);
           activeSchedules = activeSchedules.filter(
             (s) =>
@@ -849,7 +854,7 @@ export default function TeacherScheduleView({
 
   useEffect(() => {
     fetchTeacherSchedules();
-  }, [fetchTeacherSchedules]);
+  }, [fetchTeacherSchedules, refreshKey]);
 
   // Filter teachers based on search query
   const filteredTeachers = teachers.filter((teacher) =>

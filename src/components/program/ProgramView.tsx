@@ -53,7 +53,11 @@ export interface TeacherSubject {
   hourlyRate?: number;
 }
 
-export function ProgramView() {
+interface ProgramViewProps {
+  onScheduleChangeAction?: () => void;
+}
+
+export function ProgramView({ onScheduleChangeAction }: ProgramViewProps) {
   const t = useTranslations("Program");
   const { user } = useAuth();
 
@@ -210,6 +214,7 @@ export function ProgramView() {
   const handleSuccess = async () => {
     await fetchData();
     setIsDialogOpen(false);
+    onScheduleChangeAction?.();
   };
 
   if (isLoading) {
