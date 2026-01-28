@@ -394,18 +394,31 @@ export default function AddTeacherDialog({
   };
 
   const nextStep = () => {
+    // Step 1 validation for admin mode: require manager selection
     if (adminMode && currentStep === 1 && !selectedManagerId) {
       setError(t("errorsselectManager") || "Please select a manager");
       return;
     }
+
+    // Calculate the "real" step to determine which validation to apply
     const realStep = adminMode ? currentStep - 1 : currentStep;
+
+    // Step 1 (basic info) validation: require name
     if (realStep === 1 && !formData.name.trim()) {
       setError(t("nameRequired") || "Name is required");
       return;
     }
+
+    // Clear any existing errors
     setError("");
+
+    // Move to next step if not at the final step
     if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+      const newStep = currentStep + 1;
+      console.log(
+        `[AddTeacherDialog] Moving from step ${currentStep} to step ${newStep} (totalSteps: ${totalSteps})`,
+      );
+      setCurrentStep(newStep);
     }
   };
 
