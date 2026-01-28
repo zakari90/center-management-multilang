@@ -1,11 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { User, Mail, Phone, AlertCircle } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'; // Assuming this exists as per original file
+import { AlertCircle, Mail, Phone, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { TeacherWithSchedule } from './types'
-import { cn } from '@/lib/utils' // Assuming this exists as per original file
 import { ExportButton } from './ExportButtons'
+import { TeacherWithSchedule } from './types'
 
 export function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
   const t = useTranslations('TeacherScheduleView')

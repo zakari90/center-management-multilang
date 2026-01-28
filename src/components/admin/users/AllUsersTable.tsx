@@ -268,7 +268,7 @@ export default function AllUsersTable() {
           {activeTab === "students" ? (
             <AddStudentDialog adminMode onStudentAdded={refreshData} />
           ) : activeTab === "teachers" ? (
-            <AddTeacherDialog onTeacherAdded={refreshData} />
+            <AddTeacherDialog onTeacherAdded={refreshData} adminMode />
           ) : (
             <Button onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />

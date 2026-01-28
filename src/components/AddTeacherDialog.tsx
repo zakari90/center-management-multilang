@@ -393,11 +393,11 @@ export default function AddTeacherDialog({
     });
   };
 
-  const nextStep = () => {
+  const validateCurrentStep = () => {
     // Step 1 validation for admin mode: require manager selection
     if (adminMode && currentStep === 1 && !selectedManagerId) {
       setError(t("errorsselectManager") || "Please select a manager");
-      return;
+      return false;
     }
 
     // Calculate the "real" step to determine which validation to apply
@@ -406,8 +406,14 @@ export default function AddTeacherDialog({
     // Step 1 (basic info) validation: require name
     if (realStep === 1 && !formData.name.trim()) {
       setError(t("nameRequired") || "Name is required");
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const nextStep = () => {
+    if (!validateCurrentStep()) return;
 
     // Clear any existing errors
     setError("");
@@ -431,15 +437,7 @@ export default function AddTeacherDialog({
 
   const isSubmittingRef = useRef(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Unified behavior: If not on final step, act as "Next"
-    if (currentStep < totalSteps) {
-      nextStep();
-      return;
-    }
-
+  const saveTeacher = async () => {
     // Prevent double submission
     if (isSubmittingRef.current || isLoading) return;
     isSubmittingRef.current = true;
@@ -563,6 +561,32 @@ export default function AddTeacherDialog({
       setIsLoading(false);
       isSubmittingRef.current = false;
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Mobile/Stepper behavior: If not on final step, act as "Next"
+    if (currentStep < totalSteps) {
+      nextStep();
+      return;
+    }
+
+    await saveTeacher();
+  };
+
+  const handleDesktopSubmit = async () => {
+    // Validate everything
+    if (adminMode && !selectedManagerId) {
+      setError(t("errorsselectManager") || "Please select a manager");
+      return;
+    }
+    if (!formData.name.trim()) {
+      setError(t("nameRequired") || "Name is required");
+      return;
+    }
+
+    await saveTeacher();
   };
 
   // Step 0: Manager Selection (Admin only)
@@ -921,7 +945,7 @@ export default function AddTeacherDialog({
             >
               {t("cancel")}
             </Button>
-            <Button form="add-teacher-form" type="submit" disabled={isLoading}>
+            <Button onClick={handleDesktopSubmit} disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
