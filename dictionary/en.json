@@ -502,7 +502,15 @@
     "method": "Method",
     "date": "Date",
     "income": "Income",
-    "expense": "Expense"
+    "expense": "Expense",
+    "studentsSummary": "Students Summary",
+    "teachersSummary": "Teachers Summary",
+    "totalPaid": "Total Paid",
+    "totalEarned": "Total Earned",
+    "receiptsCount": "Receipts",
+    "studentName": "Student",
+    "teacherName": "Teacher",
+    "grade": "Grade"
   },
   "TeacherScheduleView": {
     "title": "Teacher Schedules",

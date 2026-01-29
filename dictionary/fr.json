@@ -475,7 +475,15 @@
     "method": "Méthode",
     "date": "Date",
     "income": "Revenu",
-    "expense": "Dépense"
+    "expense": "Dépense",
+    "studentsSummary": "Résumé élèves",
+    "teachersSummary": "Résumé enseignants",
+    "totalPaid": "Total payé",
+    "totalEarned": "Total gagné",
+    "receiptsCount": "Reçus",
+    "studentName": "Élève",
+    "teacherName": "Enseignant",
+    "grade": "Niveau"
   },
   "TeacherScheduleView": {
     "title": "Horaires des enseignants",

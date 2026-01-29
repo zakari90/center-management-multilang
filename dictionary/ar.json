@@ -467,7 +467,15 @@
     "method": "الطريقة",
     "date": "التاريخ",
     "income": "دخل",
-    "expense": "نفقة"
+    "expense": "نفقة",
+    "studentsSummary": "ملخص الطلاب",
+    "teachersSummary": "ملخص المعلمين",
+    "totalPaid": "إجمالي المدفوع",
+    "totalEarned": "إجمالي المستحق",
+    "receiptsCount": "عدد الإيصالات",
+    "studentName": "الطالب",
+    "teacherName": "المعلم",
+    "grade": "المستوى"
   },
   "TeacherScheduleView": {
     "title": "جداول المعلمين",

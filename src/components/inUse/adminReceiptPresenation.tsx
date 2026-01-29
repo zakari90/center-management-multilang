@@ -25,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/authContext";
 import {
   receiptActions,
@@ -39,9 +40,11 @@ import {
   Search,
   TrendingDown,
   TrendingUp,
+  User as UserIcon,
+  Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AddStudentPaymentDialog from "../AddStudentPaymentDialog";
 import AddTeacherPaymentDialog from "../AddTeacherPaymentDialog";
 
@@ -179,6 +182,68 @@ export default function AdminReceiptsTable() {
     return matchesSearch && matchesType && matchesMethod;
   });
 
+  // Aggregated data for students and teachers
+  const studentSummaryList = useMemo(() => {
+    const aggregated = receipts
+      .filter((r) => r.type === "STUDENT_PAYMENT" && r.student)
+      .reduce(
+        (acc, r) => {
+          const id = r.student!.id;
+          if (!acc[id]) {
+            acc[id] = {
+              id,
+              name: r.student!.name,
+              grade: r.student!.grade,
+              totalPaid: 0,
+              count: 0,
+            };
+          }
+          acc[id].totalPaid += r.amount;
+          acc[id].count += 1;
+          return acc;
+        },
+        {} as Record<
+          string,
+          {
+            id: string;
+            name: string;
+            grade: string | null;
+            totalPaid: number;
+            count: number;
+          }
+        >,
+      );
+    return Object.values(aggregated).sort((a, b) => b.totalPaid - a.totalPaid);
+  }, [receipts]);
+
+  const teacherSummaryList = useMemo(() => {
+    const aggregated = receipts
+      .filter((r) => r.type === "TEACHER_PAYMENT" && r.teacher)
+      .reduce(
+        (acc, r) => {
+          const id = r.teacher!.id;
+          if (!acc[id]) {
+            acc[id] = {
+              id,
+              name: r.teacher!.name,
+              totalEarned: 0,
+              count: 0,
+            };
+          }
+          acc[id].totalEarned += r.amount;
+          acc[id].count += 1;
+          return acc;
+        },
+        {} as Record<
+          string,
+          { id: string; name: string; totalEarned: number; count: number }
+        >,
+      );
+    return Object.values(aggregated).sort(
+      (a, b) => b.totalEarned - a.totalEarned,
+    );
+  }, [receipts]);
+
   // Calculate stats
   const studentPayments = receipts.filter((r) => r.type === "STUDENT_PAYMENT");
   const teacherPayments = receipts.filter((r) => r.type === "TEACHER_PAYMENT");
@@ -289,158 +354,292 @@ export default function AdminReceiptsTable() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("filters")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={t("searchPlaceholder")}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t("allTypes")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("allTypes")}</SelectItem>
-                <SelectItem value="STUDENT_PAYMENT">
-                  {t("studentPayments")}
-                </SelectItem>
-                <SelectItem value="TEACHER_PAYMENT">
-                  {t("teacherPayments")}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={methodFilter} onValueChange={setMethodFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t("allMethods")} />
-              </SelectTrigger>
-              <SelectContent>
-                {paymentMethods.map((method) => (
-                  <SelectItem key={method} value={method}>
-                    {method === "all" ? t("allMethods") : method}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="receipts" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 md:w-[600px]">
+          <TabsTrigger value="receipts">
+            <ReceiptIcon className="h-4 w-4 mr-2" />
+            {t("allReceipts")}
+          </TabsTrigger>
+          <TabsTrigger value="students">
+            <UserIcon className="h-4 w-4 mr-2" />
+            {t("studentsSummary") || "Students Summary"}
+          </TabsTrigger>
+          <TabsTrigger value="teachers">
+            <Users className="h-4 w-4 mr-2" />
+            {t("teachersSummary") || "Teachers Summary"}
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("allReceipts")}</CardTitle>
-          <CardDescription>
-            {t("showing")} {filteredReceipts.length} {t("of")} {receipts.length}{" "}
-            {t("receipts")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredReceipts.length === 0 ? (
-            <div className="text-center py-12">
-              <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">
-                {searchTerm || typeFilter !== "all" || methodFilter !== "all"
-                  ? t("noReceiptsFound")
-                  : t("noReceiptsYet")}
-              </p>
-              {/* {!searchTerm && typeFilter === 'all' && methodFilter === 'all' && (
-                <Button asChild className="mt-4">
-                  <Link href="/receipts/create">
-                    {t('createFirstReceipt')}
-                  </Link>
-                </Button>
-              )} */}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("manager")}</TableHead>
-                  <TableHead>{t("receiptNumber")}</TableHead>
-                  <TableHead>{t("type")}</TableHead>
-                  <TableHead>{t("for")}</TableHead>
-                  <TableHead>{t("amount")}</TableHead>
-                  <TableHead>{t("method")}</TableHead>
-                  <TableHead>{t("date")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredReceipts.map((receipt) => (
-                  <TableRow key={receipt.id}>
-                    <TableCell>
-                      <div className="font-medium">
-                        {receipt.manager?.name || "-"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{receipt.receiptNumber}</div>
-                      {receipt.description && (
-                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                          {receipt.description}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          receipt.type === "STUDENT_PAYMENT"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {receipt.type === "STUDENT_PAYMENT"
-                          ? t("income")
-                          : t("expense")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">
-                        {receipt.student?.name || receipt.teacher?.name || "-"}
-                      </div>
-                      {receipt.student?.grade && (
-                        <div className="text-xs text-muted-foreground">
-                          {receipt.student.grade}
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div
-                        className={`font-semibold ${
-                          receipt.type === "STUDENT_PAYMENT"
-                            ? "text-green-600"
-                            : "text-orange-600"
-                        }`}
-                      >
-                        ${receipt.amount.toFixed(2)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {receipt.paymentMethod ? (
-                        <Badge variant="outline">{receipt.paymentMethod}</Badge>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(receipt.date).toLocaleDateString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="receipts" className="space-y-6">
+          {/* Filters */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("filters")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder={t("searchPlaceholder")}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder={t("allTypes")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("allTypes")}</SelectItem>
+                    <SelectItem value="STUDENT_PAYMENT">
+                      {t("studentPayments")}
+                    </SelectItem>
+                    <SelectItem value="TEACHER_PAYMENT">
+                      {t("teacherPayments")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={methodFilter} onValueChange={setMethodFilter}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder={t("allMethods")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethods.map((method) => (
+                      <SelectItem key={method} value={method}>
+                        {method === "all" ? t("allMethods") : method}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("allReceipts")}</CardTitle>
+              <CardDescription>
+                {t("showing")} {filteredReceipts.length} {t("of")}{" "}
+                {receipts.length} {t("receipts")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filteredReceipts.length === 0 ? (
+                <div className="text-center py-12">
+                  <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">
+                    {searchTerm ||
+                    typeFilter !== "all" ||
+                    methodFilter !== "all"
+                      ? t("noReceiptsFound")
+                      : t("noReceiptsYet")}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("manager")}</TableHead>
+                        <TableHead>{t("receiptNumber")}</TableHead>
+                        <TableHead>{t("type")}</TableHead>
+                        <TableHead>{t("for")}</TableHead>
+                        <TableHead>{t("amount")}</TableHead>
+                        <TableHead>{t("method")}</TableHead>
+                        <TableHead>{t("date")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredReceipts.map((receipt) => (
+                        <TableRow key={receipt.id}>
+                          <TableCell>
+                            <div className="font-medium">
+                              {receipt.manager?.name || "-"}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">
+                              {receipt.receiptNumber}
+                            </div>
+                            {receipt.description && (
+                              <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                {receipt.description}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={
+                                receipt.type === "STUDENT_PAYMENT"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {receipt.type === "STUDENT_PAYMENT"
+                                ? t("income")
+                                : t("expense")}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">
+                              {receipt.student?.name ||
+                                receipt.teacher?.name ||
+                                "-"}
+                            </div>
+                            {receipt.student?.grade && (
+                              <div className="text-xs text-muted-foreground">
+                                {receipt.student.grade}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div
+                              className={`font-semibold ${
+                                receipt.type === "STUDENT_PAYMENT"
+                                  ? "text-green-600"
+                                  : "text-orange-600"
+                              }`}
+                            >
+                              ${receipt.amount.toFixed(2)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {receipt.paymentMethod ? (
+                              <Badge variant="outline">
+                                {receipt.paymentMethod}
+                              </Badge>
+                            ) : (
+                              "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(receipt.date).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="students">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {t("studentsSummary") || "Students Summary"}
+              </CardTitle>
+              <CardDescription>
+                {t("showing")} {studentSummaryList.length}{" "}
+                {t("students") || "students"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {studentSummaryList.length === 0 ? (
+                <div className="text-center py-12">
+                  <UserIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">
+                    {t("noReceiptsYet")}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("studentName") || "Student"}</TableHead>
+                        <TableHead>{t("grade") || "Grade"}</TableHead>
+                        <TableHead className="text-right">
+                          {t("receiptsCount") || "Receipts"}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {t("totalPaid") || "Total Paid"}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {studentSummaryList.map((student) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">
+                            {student.name}
+                          </TableCell>
+                          <TableCell>{student.grade || "-"}</TableCell>
+                          <TableCell className="text-right">
+                            {student.count}
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-green-600">
+                            ${student.totalPaid.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="teachers">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {t("teachersSummary") || "Teachers Summary"}
+              </CardTitle>
+              <CardDescription>
+                {t("showing")} {teacherSummaryList.length}{" "}
+                {t("teachers") || "teachers"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {teacherSummaryList.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">
+                    {t("noReceiptsYet")}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("teacherName") || "Teacher"}</TableHead>
+                        <TableHead className="text-right">
+                          {t("receiptsCount") || "Receipts"}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {t("totalEarned") || "Total Earned"}
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {teacherSummaryList.map((teacher) => (
+                        <TableRow key={teacher.id}>
+                          <TableCell className="font-medium">
+                            {teacher.name}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {teacher.count}
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-orange-600">
+                            ${teacher.totalEarned.toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
