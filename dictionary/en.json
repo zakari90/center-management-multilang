@@ -1091,6 +1091,8 @@
     "addSubject": "+ Add Subject",
     "weeklySchedule": "Weekly Schedule",
     "selectAvailable": "Select available days and set working hours",
+    "selectManagertitle": "Select Manager",
+    "errorsselectManager": "Please select a manager",
     "cancel": "Cancel",
     "createTeacher": "Create Teacher",
     "creating": "Creating...",

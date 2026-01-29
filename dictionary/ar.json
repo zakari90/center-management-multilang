@@ -1040,6 +1040,8 @@
     "addSubject": "إضافة مادة",
     "weeklySchedule": "الجدول الأسبوعي",
     "selectAvailable": "اختر أيام التوفر وحدد ساعات العمل",
+    "selectManagertitle": "اختر المشرف",
+    "errorsselectManager": "يرجى اختيار المشرف",
     "cancel": "إلغاء",
     "createTeacher": "إنشاء معلم",
     "creating": "جاري الإنشاء...",
