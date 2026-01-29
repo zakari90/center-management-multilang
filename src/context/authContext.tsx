@@ -85,6 +85,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
+  const logout = useCallback(async () => {
+    // Client-side logout - keep local credentials for future offline login
+    setUser(null);
+    setIsOfflineMode(false);
+    try {
+      localStorage.removeItem(LAST_USER_KEY);
+    } catch {}
+
+    // Clear local Dexie database to prevent data leakage between users
+    try {
+      await Promise.all([
+        localDb.centers.clear(),
+        localDb.teachers.clear(),
+        localDb.students.clear(),
+        localDb.subjects.clear(),
+        localDb.teacherSubjects.clear(),
+        localDb.studentSubjects.clear(),
+        localDb.receipts.clear(),
+        localDb.schedules.clear(),
+        localDb.users.clear(),
+        // Note: Keep localAuthUsers for offline login capability
+        // Note: Keep pushSubscriptions as they're device-specific
+      ]);
+      console.log("[AuthProvider] Local database cleared on logout");
+    } catch (e) {
+      console.warn("[AuthProvider] Failed to clear local database:", e);
+    }
+
+    window.location.href = "/";
+  }, []);
+
   const checkAuth = async () => {
     try {
       console.log("[AuthProvider] checkAuth start (client-side only)");
@@ -96,6 +127,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (parsed && typeof parsed === "object") {
           const maybeUser = parsed as User;
           if (maybeUser?.id && maybeUser?.role) {
+            // NEW: If online, check if account still exists on server (Session Revocation)
+            if (isOnline() && maybeUser.email) {
+              try {
+                const res = await fetch("/api/auth/check-status", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email: maybeUser.email }),
+                });
+                const data = await res.json();
+
+                if (data.exists === false || data.isActive === false) {
+                  console.warn(
+                    "[AuthProvider] Account revoked detected on mount. Logging out...",
+                  );
+                  await logout();
+                  return;
+                }
+              } catch (e) {
+                console.warn("[AuthProvider] Account status check failed:", e);
+              }
+            }
+
             setUser(maybeUser);
             console.log("[AuthProvider] user restored from localStorage");
             return;
@@ -319,36 +372,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       true,
     );
     return false;
-  };
-
-  const logout = async () => {
-    // Client-side logout - keep local credentials for future offline login
-    setUser(null);
-    setIsOfflineMode(false);
-    try {
-      localStorage.removeItem(LAST_USER_KEY);
-    } catch {}
-
-    // Clear local Dexie database to prevent data leakage between users
-    try {
-      await Promise.all([
-        localDb.centers.clear(),
-        localDb.teachers.clear(),
-        localDb.students.clear(),
-        localDb.subjects.clear(),
-        localDb.teacherSubjects.clear(),
-        localDb.studentSubjects.clear(),
-        localDb.receipts.clear(),
-        localDb.schedules.clear(),
-        // Note: Keep localAuthUsers for offline login capability
-        // Note: Keep pushSubscriptions as they're device-specific
-      ]);
-      console.log("[AuthProvider] Local database cleared on logout");
-    } catch (e) {
-      console.warn("[AuthProvider] Failed to clear local database:", e);
-    }
-
-    window.location.href = "/";
   };
 
   const updateUser = (userData: User) => {
