@@ -35,6 +35,7 @@ import { isOnline } from "@/lib/utils/network";
 import {
   BookOpen,
   Calendar,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -88,13 +89,13 @@ const StepIndicator = ({
   adminMode?: boolean;
 }) => {
   const icons = adminMode
-    ? [Users, User, BookOpen, Calendar]
-    : [User, BookOpen, Calendar];
+    ? [Users, User, BookOpen, Calendar, CheckCircle]
+    : [User, BookOpen, Calendar, CheckCircle];
 
   return (
     <div className="flex items-center justify-center gap-2 py-3 md:hidden">
       {Array.from({ length: totalSteps }, (_, i) => {
-        const Icon = icons[i];
+        const Icon = icons[i] || CheckCircle;
         const isActive = i + 1 === currentStep;
         const isCompleted = i + 1 < currentStep;
 
@@ -150,10 +151,10 @@ const SubjectCompensationCard = ({
   );
 
   return (
-    <Card className="bg-muted/50">
-      <CardContent className="pt-3 pb-3 space-y-3">
+    <Card className="bg-muted/50 overflow-hidden">
+      <CardContent className="p-3 space-y-3">
         <div className="flex items-start gap-2">
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 min-w-0">
             <Select
               value={teacherSubject.subjectId}
               onValueChange={(value) => onUpdate(index, "subjectId", value)}
@@ -161,14 +162,18 @@ const SubjectCompensationCard = ({
               <SelectTrigger className="w-full h-9 text-sm">
                 <SelectValue placeholder={t("subject")} />
               </SelectTrigger>
-              <SelectContent position="popper" sideOffset={5}>
+              <SelectContent
+                position="popper"
+                sideOffset={5}
+                className="max-w-[85vw]"
+              >
                 {availableSubjects.map((subject) => (
                   <SelectItem
                     key={subject.id}
                     value={subject.id}
                     className="text-sm"
                   >
-                    <span className="truncate max-w-[200px] sm:max-w-[300px] inline-block">
+                    <span className="truncate inline-block max-w-[calc(100vw-80px)]">
                       {subject.name} ({subject.grade}) - MAD {subject.price}
                     </span>
                   </SelectItem>
@@ -181,13 +186,13 @@ const SubjectCompensationCard = ({
             variant="ghost"
             size="icon"
             onClick={() => onRemove(index)}
-            className="h-9 w-9 text-destructive hover:text-destructive"
+            className="h-9 w-9 text-destructive hover:text-destructive flex-shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Select
             value={teacherSubject.compensationType}
             onValueChange={(value) =>
@@ -251,7 +256,7 @@ export default function AddTeacherDialog({
   const [selectedManagerId, setSelectedManagerId] = useState<string>("");
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = adminMode ? 4 : 3;
+  const totalSteps = adminMode ? 5 : 4;
 
   const DAYS = [
     t("monday"),
@@ -263,11 +268,20 @@ export default function AddTeacherDialog({
     t("sunday"),
   ];
 
-  const stepLabels = [
-    t("basicInfo"),
-    t("subjectsCompensation"),
-    t("weeklySchedule"),
-  ];
+  const stepLabels = adminMode
+    ? [
+        t("selectManagertitle") || "Select Manager",
+        t("basicInfo"),
+        t("subjectsCompensation"),
+        t("weeklySchedule"),
+        t("summary") || "Summary",
+      ]
+    : [
+        t("basicInfo"),
+        t("subjectsCompensation"),
+        t("weeklySchedule"),
+        t("summary") || "Summary",
+      ];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -620,6 +634,151 @@ export default function AddTeacherDialog({
     </div>
   );
 
+  // Step 4: Summary/Review
+  const renderSummary = () => {
+    const selectedManager = managers.find((m) => m.id === selectedManagerId);
+    const activeDays = weeklySchedule.filter((s) => s.isAvailable);
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+          {t("summary") || "Summary"}
+        </h3>
+
+        <div className="grid gap-4">
+          {/* Manager Info (Admin Mode) */}
+          {adminMode && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {t("selectManagertitle") || "Manager"}
+              </p>
+              <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-md border border-dashed">
+                <Users className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">
+                  {selectedManager?.name || "---"}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Basic Info */}
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {t("basicInfo")}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-muted/30 p-3 rounded-md border">
+              <div className="space-y-0.5">
+                <p className="text-[10px] text-muted-foreground uppercase">
+                  {t("name")}
+                </p>
+                <p className="text-sm font-medium">{formData.name}</p>
+              </div>
+              {formData.email && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-muted-foreground uppercase">
+                    {t("email")}
+                  </p>
+                  <p className="text-sm font-medium">{formData.email}</p>
+                </div>
+              )}
+              {formData.phone && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-muted-foreground uppercase">
+                    {t("phone")}
+                  </p>
+                  <p className="text-sm font-medium">{formData.phone}</p>
+                </div>
+              )}
+              {formData.address && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-muted-foreground uppercase">
+                    {t("address")}
+                  </p>
+                  <p className="text-sm font-medium">{formData.address}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Subjects */}
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {t("subjectsCompensation")}
+            </p>
+            <div className="bg-muted/30 p-2 rounded-md border space-y-2">
+              {teacherSubjects.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic p-2 text-center">
+                  {t("noSubjectsAssigned")}
+                </p>
+              ) : (
+                teacherSubjects.map((ts, idx) => {
+                  const subject = subjects.find((s) => s.id === ts.subjectId);
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-2 bg-background rounded border text-sm"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {subject?.name || "Unknown"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {subject?.grade}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-mono text-primary">
+                          {ts.compensationType === "percentage"
+                            ? `${ts.percentage}%`
+                            : `MAD ${ts.hourlyRate}`}
+                        </span>
+                        <p className="text-[10px] text-muted-foreground uppercase">
+                          {ts.compensationType === "percentage"
+                            ? t("percentage")
+                            : t("hourlyRate")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Schedule */}
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {t("weeklySchedule")}
+            </p>
+            <div className="bg-muted/30 p-2 rounded-md border">
+              {activeDays.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic p-2 text-center">
+                  {t("noAvailability")}
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {activeDays.map((s, idx) => (
+                    <div
+                      key={idx}
+                      className="flex flex-col items-center px-3 py-1 bg-background rounded border shadow-sm"
+                    >
+                      <span className="text-[10px] font-bold text-primary uppercase">
+                        {s.day.substring(0, 3)}
+                      </span>
+                      <span className="text-xs font-medium">
+                        {s.startTime}-{s.endTime}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Step 1: Basic Information
   const renderStep1 = () => (
     <div className="space-y-3">
@@ -863,21 +1022,40 @@ export default function AddTeacherDialog({
             className="space-y-4 pb-4"
           >
             <div className="space-y-4">
-              <div className={currentStep !== 1 ? "hidden md:block" : "block"}>
-                {adminMode ? renderStep0() : renderStep1()}
-              </div>
-              <div className={currentStep !== 2 ? "hidden md:block" : "block"}>
-                {adminMode ? renderStep1() : renderStep2()}
-              </div>
-              <div className={currentStep !== 3 ? "hidden md:block" : "block"}>
-                {adminMode ? renderStep2() : renderStep3()}
-              </div>
-              {adminMode && (
-                <div
-                  className={currentStep !== 4 ? "hidden md:block" : "block"}
-                >
-                  {renderStep3()}
-                </div>
+              {/* Step rendering logic */}
+              {adminMode ? (
+                <>
+                  <div className={currentStep !== 1 ? "hidden" : "block"}>
+                    {renderStep0()}
+                  </div>
+                  <div className={currentStep !== 2 ? "hidden" : "block"}>
+                    {renderStep1()}
+                  </div>
+                  <div className={currentStep !== 3 ? "hidden" : "block"}>
+                    {renderStep2()}
+                  </div>
+                  <div className={currentStep !== 4 ? "hidden" : "block"}>
+                    {renderStep3()}
+                  </div>
+                  <div className={currentStep !== 5 ? "hidden" : "block"}>
+                    {renderSummary()}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={currentStep !== 1 ? "hidden" : "block"}>
+                    {renderStep1()}
+                  </div>
+                  <div className={currentStep !== 2 ? "hidden" : "block"}>
+                    {renderStep2()}
+                  </div>
+                  <div className={currentStep !== 3 ? "hidden" : "block"}>
+                    {renderStep3()}
+                  </div>
+                  <div className={currentStep !== 4 ? "hidden" : "block"}>
+                    {renderSummary()}
+                  </div>
+                </>
               )}
             </div>
           </form>
@@ -936,25 +1114,47 @@ export default function AddTeacherDialog({
           </div>
 
           {/* Desktop Action Buttons */}
-          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3">
+          <div className="hidden md:flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
               disabled={isLoading}
             >
-              {t("cancel")}
-            </Button>
-            <Button onClick={handleDesktopSubmit} disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {t("creating")}
-                </>
+              {currentStep === 1 ? (
+                t("cancel")
               ) : (
-                t("createTeacher")
+                <>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  {t("previous") || "Previous"}
+                </>
               )}
             </Button>
+
+            {currentStep < totalSteps ? (
+              <Button
+                type="button"
+                onClick={nextStep}
+                disabled={
+                  isLoading ||
+                  (adminMode && currentStep === 1 && !selectedManagerId)
+                }
+              >
+                {t("next") || "Next"}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            ) : (
+              <Button onClick={handleDesktopSubmit} disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t("creating")}
+                  </>
+                ) : (
+                  t("createTeacher")
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
