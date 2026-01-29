@@ -74,43 +74,45 @@ export function EditSubjectCard({
   };
 
   return (
-    <div className="flex items-center gap-1.5 px-2 py-0.5 border rounded-full bg-muted/20 w-fit max-w-full overflow-hidden">
+    <div className="flex items-center gap-3 px-3 py-1.5 border rounded-lg bg-muted/30 w-full sm:w-fit group hover:border-primary/50 transition-colors shadow-sm">
       {/* Subject Info */}
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        <h4 className="font-semibold text-[11px] sm:text-xs leading-none line-clamp-1 whitespace-nowrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 min-w-0 flex-1">
+        <h4 className="font-bold text-sm sm:text-base leading-tight line-clamp-1">
           {subject.name}
         </h4>
-        <div className="flex items-center gap-1.5 text-[8px] sm:text-[10px] text-muted-foreground whitespace-nowrap">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <Badge
-            variant="outline"
-            className="text-[7px] px-1 py-0 h-3 rounded-full border-muted-foreground/30"
+            variant="secondary"
+            className="text-[10px] px-2 py-0 h-5 font-bold uppercase tracking-wider"
           >
             {subject.grade}
           </Badge>
-          <span className="flex items-center gap-0.5">
-            <Coins className="h-2 w-2 shrink-0" />
-            {subject.price}
-          </span>
-          {subject.duration && (
-            <span className="flex items-center gap-0.5">
-              <Clock className="h-2 w-2 shrink-0" />
-              {subject.duration}h
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1 font-medium text-primary">
+              <Coins className="h-3.5 w-3.5 shrink-0" />
+              {subject.price} MAD
             </span>
-          )}
+            {subject.duration && (
+              <span className="flex items-center gap-1 font-medium text-orange-600 dark:text-orange-400">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                {subject.duration}h
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-0.5 shrink-0 items-center border-l pl-1 ms-auto">
+      <div className="flex gap-1.5 shrink-0 items-center border-l pl-3 ms-auto self-stretch">
         <EditDialog
           title={t("editSubject")}
           trigger={
             <Button
               variant="ghost"
               size="sm"
-              className="h-5 w-5 p-0 hover:bg-muted/40 rounded-full"
+              className="h-8 w-8 p-0 hover:bg-muted/40 rounded-full"
             >
-              <Pencil className="h-2.5 w-2.5" />
+              <Pencil className="h-4 w-4" />
             </Button>
           }
           onSave={handleUpdateSubject}
@@ -222,9 +224,9 @@ export function EditSubjectCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-5 w-5 p-0 hover:bg-destructive/10 rounded-full"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 rounded-full"
             >
-              <Trash2 className="h-2.5 w-2.5 text-destructive" />
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="w-[90vw] max-w-sm">
