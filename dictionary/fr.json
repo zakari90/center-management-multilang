@@ -483,7 +483,11 @@
     "receiptsCount": "Reçus",
     "studentName": "Élève",
     "teacherName": "Enseignant",
-    "grade": "Niveau"
+    "grade": "Niveau",
+    "paymentState": "État du paiement",
+    "paid": "Payé",
+    "partial": "Partiel",
+    "unpaid": "Non payé"
   },
   "TeacherScheduleView": {
     "title": "Horaires des enseignants",

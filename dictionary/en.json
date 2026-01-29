@@ -510,7 +510,11 @@
     "receiptsCount": "Receipts",
     "studentName": "Student",
     "teacherName": "Teacher",
-    "grade": "Grade"
+    "grade": "Grade",
+    "paymentState": "Payment State",
+    "paid": "Paid",
+    "partial": "Partial",
+    "unpaid": "Unpaid"
   },
   "TeacherScheduleView": {
     "title": "Teacher Schedules",

@@ -32,7 +32,12 @@ import {
   studentActions,
   teacherActions,
   userActions,
+  studentSubjectActions,
+  subjectActions,
+  centerActions,
 } from "@/lib/dexie/dexieActions";
+import { checkPaymentStatus, PaymentStatus } from "@/lib/payment-utils";
+import { PaymentStatusBadge } from "@/components/payment-status-badge";
 import {
   Coins,
   Loader2,
@@ -57,6 +62,9 @@ interface Receipt {
   description: string | null;
   date: string;
   createdAt: string;
+  studentId?: string;
+  teacherId?: string;
+  managerId?: string;
   manager?: {
     id: string;
     name: string;
@@ -77,6 +85,11 @@ export default function AdminReceiptsTable() {
   const { user } = useAuth();
 
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [studentSubjects, setStudentSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [centers, setCenters] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -95,19 +108,34 @@ export default function AdminReceiptsTable() {
       }
 
       // ✅ Fetch from local DB (all entities in parallel)
-      const [allReceipts, allStudents, allTeachers, allUsers] =
-        await Promise.all([
-          receiptActions.getAll(),
-          studentActions.getAll(),
-          teacherActions.getAll(),
-          userActions.getAll(),
-        ]);
+      const [
+        allReceipts,
+        allStudents,
+        allTeachers,
+        allUsers,
+        allStudentSubjects,
+        allSubjects,
+        allCenters,
+      ] = await Promise.all([
+        receiptActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+        userActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        centerActions.getAll(),
+      ]);
+
+      setStudents(allStudents.filter((s) => s.status !== "0"));
+      setTeachers(allTeachers.filter((t) => t.status !== "0"));
+      setStudentSubjects(allStudentSubjects.filter((ss) => ss.status !== "0"));
+      setSubjects(allSubjects.filter((s) => s.status !== "0"));
+      setCenters(allCenters.filter((c) => c.status !== "0"));
 
       // ✅ Filter receipts by status (exclude deleted)
-      // Admin sees ALL receipts (no managerId filter)
       const activeReceipts = allReceipts.filter((r) => r.status !== "0");
 
-      // ✅ Build receipts with related data (admin view - show all receipts)
+      // ✅ Build receipts with related data
       const receiptsWithData: Receipt[] = activeReceipts.map((receipt) => {
         const student = receipt.studentId
           ? allStudents.find(
@@ -132,6 +160,9 @@ export default function AdminReceiptsTable() {
           description: receipt.description ?? null,
           date: new Date(receipt.date).toISOString(),
           createdAt: new Date(receipt.createdAt).toISOString(),
+          studentId: receipt.studentId,
+          teacherId: receipt.teacherId,
+          managerId: receipt.managerId,
           manager: manager
             ? {
                 id: manager.id,
@@ -213,8 +244,42 @@ export default function AdminReceiptsTable() {
           }
         >,
       );
-    return Object.values(aggregated).sort((a, b) => b.totalPaid - a.totalPaid);
-  }, [receipts]);
+
+    return students
+      .map((student) => {
+        const agg = aggregated[student.id] || { totalPaid: 0, count: 0 };
+
+        const targetAmount = studentSubjects
+          .filter((ss) => ss.studentId === student.id)
+          .reduce((sum, ss) => {
+            const subject = subjects.find((s) => s.id === ss.subjectId);
+            return sum + (subject?.price || 0);
+          }, 0);
+
+        const center =
+          centers.find((c) => c.managers.includes(student.managerId)) ||
+          centers[0];
+        const studentReceipts = receipts.filter(
+          (r) => r.studentId === student.id && r.type === "STUDENT_PAYMENT",
+        );
+
+        const paymentStatus = checkPaymentStatus(
+          studentReceipts,
+          center?.paymentStartDay || 1,
+          center?.paymentEndDay || 30,
+          targetAmount,
+        );
+
+        return {
+          ...agg,
+          id: student.id,
+          name: student.name,
+          grade: student.grade ?? null,
+          paymentStatus,
+        };
+      })
+      .sort((a, b) => b.totalPaid - a.totalPaid);
+  }, [receipts, students, studentSubjects, subjects, centers]);
 
   const teacherSummaryList = useMemo(() => {
     const aggregated = receipts
@@ -239,10 +304,34 @@ export default function AdminReceiptsTable() {
           { id: string; name: string; totalEarned: number; count: number }
         >,
       );
-    return Object.values(aggregated).sort(
-      (a, b) => b.totalEarned - a.totalEarned,
-    );
-  }, [receipts]);
+
+    return teachers
+      .map((teacher) => {
+        const agg = aggregated[teacher.id] || { totalEarned: 0, count: 0 };
+
+        const center =
+          centers.find((c) => c.managers.includes(teacher.managerId)) ||
+          centers[0];
+        const teacherReceipts = receipts.filter(
+          (r) => r.teacherId === teacher.id && r.type === "TEACHER_PAYMENT",
+        );
+
+        const paymentStatus = checkPaymentStatus(
+          teacherReceipts,
+          center?.paymentStartDay || 1,
+          center?.paymentEndDay || 30,
+          0.01, // Simple heuristic
+        );
+
+        return {
+          ...agg,
+          id: teacher.id,
+          name: teacher.name,
+          paymentStatus,
+        };
+      })
+      .sort((a, b) => b.totalEarned - a.totalEarned);
+  }, [receipts, teachers, centers]);
 
   // Calculate stats
   const studentPayments = receipts.filter((r) => r.type === "STUDENT_PAYMENT");
@@ -554,6 +643,9 @@ export default function AdminReceiptsTable() {
                       <TableRow>
                         <TableHead>{t("studentName") || "Student"}</TableHead>
                         <TableHead>{t("grade") || "Grade"}</TableHead>
+                        <TableHead className="text-center">
+                          {t("paymentState") || "Payment State"}
+                        </TableHead>
                         <TableHead className="text-right">
                           {t("receiptsCount") || "Receipts"}
                         </TableHead>
@@ -569,6 +661,11 @@ export default function AdminReceiptsTable() {
                             {student.name}
                           </TableCell>
                           <TableCell>{student.grade || "-"}</TableCell>
+                          <TableCell className="text-center">
+                            <PaymentStatusBadge
+                              status={student.paymentStatus}
+                            />
+                          </TableCell>
                           <TableCell className="text-right">
                             {student.count}
                           </TableCell>
@@ -610,6 +707,9 @@ export default function AdminReceiptsTable() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t("teacherName") || "Teacher"}</TableHead>
+                        <TableHead className="text-center">
+                          {t("paymentState") || "Payment State"}
+                        </TableHead>
                         <TableHead className="text-right">
                           {t("receiptsCount") || "Receipts"}
                         </TableHead>
@@ -623,6 +723,11 @@ export default function AdminReceiptsTable() {
                         <TableRow key={teacher.id}>
                           <TableCell className="font-medium">
                             {teacher.name}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <PaymentStatusBadge
+                              status={teacher.paymentStatus}
+                            />
                           </TableCell>
                           <TableCell className="text-right">
                             {teacher.count}

@@ -475,7 +475,11 @@
     "receiptsCount": "عدد الإيصالات",
     "studentName": "الطالب",
     "teacherName": "المعلم",
-    "grade": "المستوى"
+    "grade": "المستوى",
+    "paymentState": "حالة الدفع",
+    "paid": "تم الدفع",
+    "partial": "دفع جزئي",
+    "unpaid": "لم يتم الدفع"
   },
   "TeacherScheduleView": {
     "title": "جداول المعلمين",
