@@ -89,7 +89,8 @@
       "updateManagerFailed": "Impossible de mettre à jour le gestionnaire",
       "loginFailed": "La connexion a échoué",
       "unexpectedError": "Une erreur inattendue s'est produite",
-      "userIdRequired": "L'identifiant utilisateur est requis"
+      "userIdRequired": "L'identifiant utilisateur est requis",
+      "accountRevoked": "Votre compte a été supprimé par l'administrateur."
     }
   },
   "center": {

@@ -174,6 +174,43 @@ export async function loginWithRole(
       };
     }
 
+    // If online, verify account status before allowing local login
+    if (isOnline()) {
+      try {
+        const statusRes = await fetch("/api/auth/check-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const statusData = await statusRes.json();
+
+        // If account doesn't exist or is inactive, revoke access
+        if (!statusData.exists || !statusData.isActive) {
+          // Import dynamically to avoid circular dependencies
+          const { clearAllLocalData } = await import("./dexie/clearLocalData");
+          await clearAllLocalData();
+
+          return {
+            error: {
+              field: "email",
+              message:
+                t("errors.accountRevoked") ||
+                "Your account has been revoked by the administrator.",
+            },
+            success: false,
+            role: submittedRole,
+            data: undefined,
+          };
+        }
+      } catch (checkError) {
+        // If the check fails, allow fallback to local login
+        console.warn(
+          "[loginWithRole] Account status check failed:",
+          checkError,
+        );
+      }
+    }
+
     let localUser: any = await userActions.getLocalByEmail(email);
 
     if (localUser) {
