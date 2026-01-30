@@ -277,13 +277,6 @@ export default function StudentsTable() {
         totalRevenue={totalRevenue}
         averageSubjects={averageSubjects}
       />
-      {/* Students List - Responsive View */}
-      <StudentsCardsView
-        students={filteredStudents}
-        getTotalRevenue={getTotalRevenue}
-        onUpdate={fetchStudents}
-        adminMode={user?.role === "ADMIN"}
-      />
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
@@ -389,13 +382,21 @@ export default function StudentsTable() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      ------------------------------------------------------------------
+      {/* Students List - Responsive View */}
+
+      <StudentsCardsView
+        students={filteredStudents}
+        getTotalRevenue={getTotalRevenue}
+        onUpdate={fetchStudents}
+        // adminMode={user?.role === "ADMIN"}
+      />
+
       <StudentsTableView
         students={filteredStudents}
         columnVisibility={columnVisibility}
         getTotalRevenue={getTotalRevenue}
         onUpdate={fetchStudents}
-        adminMode={user?.role === "ADMIN"}
+        // adminMode={user?.role === "ADMIN"}
       />
     </div>
   );
