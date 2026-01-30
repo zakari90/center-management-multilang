@@ -49,9 +49,8 @@ import AddTeacherDialog from "@/components/AddTeacherDialog";
 export default function AllUsersTable() {
   const t = useTranslations("AllUsersTable");
 
-  const { users, teachers, students, isLoading, refreshData } = useAllUsers(
-    t("unknownManager"),
-  );
+  const { users, teachers, students, isLoading, refreshData } = useAllUsers();
+  // t("unknownManager"),
 
   const [activeTab, setActiveTab] = useState("users");
 
