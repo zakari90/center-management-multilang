@@ -762,7 +762,8 @@
     "thankYou": "Merci pour votre paiement!",
     "computerGenerated": "Ceci est un reçu généré par ordinateur et est valide sans signature",
     "forQueries": "Pour des questions, veuillez contacter:",
-    "na": "S/O"
+    "na": "S/O",
+    "viewDetails": "Voir les détails"
   },
   "CreateStudentPaymentForm": {
     "hours": "heures",
@@ -1089,7 +1090,8 @@
     "thursday": "Jeudi",
     "friday": "Vendredi",
     "saturday": "Samedi",
-    "sunday": "Dimanche"
+    "sunday": "Dimanche",
+    "noAvailability": "Aucune disponibilité définie."
   },
   "TeacherProfile": {
     "edit": "Modifier",

@@ -789,7 +789,8 @@
     "thankYou": "Thank you for your payment!",
     "computerGenerated": "This is a computer-generated receipt and is valid without signature.",
     "forQueries": "For queries, contact:",
-    "na": "N/A"
+    "na": "N/A",
+    "viewDetails": "View Details"
   },
   "CreateStudentPaymentForm": {
     "hours": "hours",
@@ -1108,6 +1109,7 @@
     "errorsselectManager": "Please select a manager",
     "cancel": "Cancel",
     "createTeacher": "Create Teacher",
+    "nameRequired": "Name is required",
     "creating": "Creating...",
     "loadingSubjects": "Loading subjects...",
     "noSubjects": "No subjects available. Create subjects first.",
@@ -1129,7 +1131,9 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "summary": "Summary",
+    "noAvailability": "No availability set."
   },
   "TeacherProfile": {
     "edit": "Edit",

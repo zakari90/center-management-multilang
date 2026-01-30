@@ -751,7 +751,8 @@
     "thankYou": "شكرا لك على دفعك!",
     "computerGenerated": "هذا إيصال تم إنشاؤه بواسطة الكمبيوتر وصحيح بدون توقيع",
     "forQueries": "للاستفسارات، اتصل ب:",
-    "na": "غير متاح"
+    "na": "غير متاح",
+    "viewDetails": "عرض التفاصيل"
   },
   "CreateStudentPaymentForm": {
     "hours": "ساعات",
@@ -1057,6 +1058,7 @@
     "errorsselectManager": "يرجى اختيار المشرف",
     "cancel": "إلغاء",
     "createTeacher": "إنشاء معلم",
+    "nameRequired": "الاسم مطلوب",
     "creating": "جاري الإنشاء...",
     "loadingSubjects": "جاري تحميل المواد...",
     "noSubjects": "لا توجد مواد متاحة. أنشئ المواد أولا",
@@ -1078,7 +1080,9 @@
     "thursday": "الخميس",
     "friday": "الجمعة",
     "saturday": "السبت",
-    "sunday": "الأحد"
+    "sunday": "الأحد",
+    "summary": "ملخص",
+    "noAvailability": "لم يتم تحديد أوقات التوفر."
   },
   "TeacherProfile": {
     "edit": "تعديل",
