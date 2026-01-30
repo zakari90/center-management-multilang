@@ -24,19 +24,29 @@ import {
   Calendar,
   Search,
   GraduationCap,
+  ReceiptText,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { StudentData } from "./types";
 import { useState } from "react";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import ViewStudentDialog from "@/components/ViewStudentDialog";
+import ViewStudentCardDialog from "@/components/ViewStudentCardDialog";
+import EditStudentDialog from "@/components/EditStudentDialog";
+import AddStudentPaymentDialog from "@/components/AddStudentPaymentDialog";
 
 interface StudentsTabProps {
   students: StudentData[];
   onDelete: (student: StudentData) => void;
+  onUpdate?: () => void;
 }
 
-export function StudentsTab({ students, onDelete }: StudentsTabProps) {
+export function StudentsTab({
+  students,
+  onDelete,
+  onUpdate,
+}: StudentsTabProps) {
   const t = useTranslations("AllUsersTable");
   const [searchTerm, setSearchTerm] = useState("");
   const [gradeFilter, setGradeFilter] = useState<string>("all");
@@ -194,14 +204,37 @@ export function StudentsTab({ students, onDelete }: StudentsTabProps) {
                   </TableCell>
 
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => onDelete(student)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1 justify-end">
+                      <AddStudentPaymentDialog
+                        studentId={student.id}
+                        onPaymentCreated={onUpdate || (() => {})}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
+                            title="Add Payment"
+                          >
+                            <ReceiptText className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <ViewStudentDialog studentId={student.id} />
+                      <ViewStudentCardDialog studentId={student.id} />
+                      <EditStudentDialog
+                        studentId={student.id}
+                        onStudentUpdated={onUpdate || (() => {})}
+                        adminMode
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => onDelete(student)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

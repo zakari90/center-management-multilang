@@ -12,20 +12,33 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Calendar, Mail, Phone, Search, Trash2, Users } from "lucide-react";
+import {
+  Calendar,
+  Mail,
+  Phone,
+  Search,
+  Trash2,
+  Users,
+  ReceiptText,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { TeacherData } from "./types";
+import ViewTeacherDialog from "@/components/ViewTeacherDialog";
+import EditTeacherDialog from "@/components/EditTeacherDialog";
+import AddTeacherPaymentDialog from "@/components/AddTeacherPaymentDialog";
 
 interface TeachersTabProps {
   teachers: TeacherData[];
   onDelete: (teacher: TeacherData) => void;
+  onUpdate?: () => void;
   onTeacherAdded?: () => void;
 }
 
 export function TeachersTab({
   teachers,
   onDelete,
+  onUpdate,
   onTeacherAdded,
 }: TeachersTabProps) {
   const t = useTranslations("AllUsersTable");
@@ -131,14 +144,35 @@ export function TeachersTab({
                   </TableCell>
 
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => onDelete(teacher)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      <AddTeacherPaymentDialog
+                        onPaymentCreated={onUpdate || (() => {})}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600 border border-transparent hover:border-green-200"
+                            title={t("addPayment") || "Add Payment"}
+                          >
+                            <ReceiptText className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <ViewTeacherDialog teacherId={teacher.id} />
+                      <EditTeacherDialog
+                        teacherId={teacher.id}
+                        onTeacherUpdated={onUpdate || (() => {})}
+                        adminMode
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => onDelete(teacher)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

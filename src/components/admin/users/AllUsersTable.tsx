@@ -49,8 +49,9 @@ import AddTeacherDialog from "@/components/AddTeacherDialog";
 export default function AllUsersTable() {
   const t = useTranslations("AllUsersTable");
 
-  const { users, teachers, students, isLoading, refreshData } = useAllUsers();
-  // t("unknownManager"),
+  const { users, teachers, students, isLoading, refreshData } = useAllUsers(
+    t("unknownManager"),
+  );
 
   const [activeTab, setActiveTab] = useState("users");
 
@@ -348,6 +349,7 @@ export default function AllUsersTable() {
           <TabsContent value="teachers" className="space-y-4">
             <TeachersTab
               teachers={teachers}
+              onUpdate={refreshData}
               onDelete={(teacher) =>
                 setItemToDelete({
                   id: teacher.id,
@@ -361,6 +363,7 @@ export default function AllUsersTable() {
           <TabsContent value="students" className="space-y-4">
             <StudentsTab
               students={students}
+              onUpdate={refreshData}
               onDelete={(student) =>
                 setItemToDelete({
                   id: student.id,
