@@ -8,7 +8,9 @@ import {
   studentActions,
   studentSubjectActions,
   subjectActions,
+  centerActions,
 } from "@/lib/dexie/dexieActions";
+import { checkPaymentStatus, PaymentStatus } from "@/lib/payment-utils";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { useAuth } from "@/context/authContext";
 import { ReceiptType } from "@/lib/dexie/dbSchema";
@@ -280,6 +282,13 @@ export default function AddStudentPaymentDialog({
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
   const isSubmittingRef = useRef(false);
+  const [studentPaymentStatus, setStudentPaymentStatus] =
+    useState<PaymentStatus | null>(null);
+  const [allReceipts, setAllReceipts] = useState<any[]>([]);
+  const [centerSettings, setCenterSettings] = useState<{
+    paymentStartDay: number;
+    paymentEndDay: number;
+  }>({ paymentStartDay: 1, paymentEndDay: 30 });
 
   const [formData, setFormData] = useState<FormData>({
     paymentMethod: "CASH",
@@ -307,11 +316,27 @@ export default function AddStudentPaymentDialog({
 
   const fetchStudents = useCallback(async () => {
     try {
-      const [allStudents, allStudentSubjects, allSubjects] = await Promise.all([
+      const [
+        allStudents,
+        allStudentSubjects,
+        allSubjects,
+        receipts,
+        allCenters,
+      ] = await Promise.all([
         studentActions.getAll(),
         studentSubjectActions.getAll(),
         subjectActions.getAll(),
+        receiptActions.getAll(),
+        centerActions.getAll(),
       ]);
+
+      // Store receipts and center settings for payment status calculation
+      setAllReceipts(receipts.filter((r) => r.status !== "0"));
+      const currentCenter = allCenters.find((c) => c.status !== "0");
+      setCenterSettings({
+        paymentStartDay: currentCenter?.paymentStartDay ?? 1,
+        paymentEndDay: currentCenter?.paymentEndDay ?? 30,
+      });
       if (!user) {
         setError("Unauthorized");
         setLoadingStudents(false);
@@ -390,14 +415,33 @@ export default function AddStudentPaymentDialog({
     }));
   }, [selectedStudent]);
 
-  const handleStudentSelect = useCallback((student: Student) => {
-    setSelectedStudent(student);
-    setSearchTerm("");
-    setFormData((prev) => ({
-      ...prev,
-      selectedSubjects: student.studentSubjects.map((ss) => ss.subject.id),
-    }));
-  }, []);
+  const handleStudentSelect = useCallback(
+    (student: Student) => {
+      setSelectedStudent(student);
+      setSearchTerm("");
+      setFormData((prev) => ({
+        ...prev,
+        selectedSubjects: student.studentSubjects.map((ss) => ss.subject.id),
+      }));
+
+      // Calculate payment status for this student
+      const studentReceipts = allReceipts.filter(
+        (r) => r.studentId === student.id,
+      );
+      const totalFee = student.studentSubjects.reduce(
+        (sum, ss) => sum + (ss.subject?.price ?? 0),
+        0,
+      );
+      const status = checkPaymentStatus(
+        studentReceipts,
+        centerSettings.paymentStartDay,
+        centerSettings.paymentEndDay,
+        totalFee,
+      );
+      setStudentPaymentStatus(status);
+    },
+    [allReceipts, centerSettings],
+  );
 
   useEffect(() => {
     if (open && studentId && students.length > 0 && !selectedStudent) {
@@ -628,11 +672,22 @@ export default function AddStudentPaymentDialog({
               onClick={() => {
                 setSelectedStudent(null);
                 setFormData((prev) => ({ ...prev, selectedSubjects: [] }));
+                setStudentPaymentStatus(null);
               }}
             >
               {t("change")}
             </Button>
           </div>
+          {/* Warning if student already paid */}
+          {studentPaymentStatus?.status === "PAID" && (
+            <Alert className="mt-3 bg-amber-50 border-amber-200">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-700">
+                {t("studentAlreadyPaid") ||
+                  "This student has already paid for this billing period."}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       )}
     </div>
@@ -937,7 +992,8 @@ export default function AddStudentPaymentDialog({
                 disabled={
                   isLoading ||
                   !selectedStudent ||
-                  formData.selectedSubjects.length === 0
+                  formData.selectedSubjects.length === 0 ||
+                  studentPaymentStatus?.status === "PAID"
                 }
                 className="flex-1"
               >
@@ -962,7 +1018,8 @@ export default function AddStudentPaymentDialog({
               disabled={
                 isLoading ||
                 !selectedStudent ||
-                formData.selectedSubjects.length === 0
+                formData.selectedSubjects.length === 0 ||
+                studentPaymentStatus?.status === "PAID"
               }
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
