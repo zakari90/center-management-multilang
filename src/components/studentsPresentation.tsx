@@ -266,7 +266,7 @@ export default function StudentsTable() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
-          <AddStudentDialog adminMode={user?.role === "ADMIN"} />
+          <AddStudentDialog />
           <EntitySyncControls entity="students" />
         </div>
       </div>

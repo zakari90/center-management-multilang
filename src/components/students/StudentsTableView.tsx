@@ -48,7 +48,7 @@ export function StudentsTableView({
   );
 
   return (
-    <Card className="hidden md:block">
+    <Card>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-muted/50">
