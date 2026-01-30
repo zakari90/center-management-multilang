@@ -270,7 +270,6 @@ export default function StudentsTable() {
           <EntitySyncControls entity="students" />
         </div>
       </div>
-
       {/* Stats Cards */}
       <StudentsStats
         totalStudents={totalStudents}
@@ -278,17 +277,14 @@ export default function StudentsTable() {
         totalRevenue={totalRevenue}
         averageSubjects={averageSubjects}
       />
-
       {/* Students List - Responsive View */}
-
       <StudentsCardsView
         students={filteredStudents}
         getTotalRevenue={getTotalRevenue}
         onUpdate={fetchStudents}
         adminMode={user?.role === "ADMIN"}
       />
-
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
           <Input
@@ -393,6 +389,7 @@ export default function StudentsTable() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      ------------------------------------------------------------------
       <StudentsTableView
         students={filteredStudents}
         columnVisibility={columnVisibility}
