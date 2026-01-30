@@ -192,7 +192,7 @@ export default function ViewReceiptDialog({
         )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        {/* <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>{t("receiptDetails")}</span>
             {receipt && (
@@ -205,7 +205,7 @@ export default function ViewReceiptDialog({
           <DialogDescription className="sr-only">
             {t("receiptDetails")}
           </DialogDescription>
-        </DialogHeader>
+        </DialogHeader> */}
 
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
@@ -217,7 +217,7 @@ export default function ViewReceiptDialog({
           </Alert>
         ) : (
           <PdfExporter
-            fileName={`${receipt.receiptNumber}.pdf`}
+            fileName={`${receipt.student?.name || receipt.teacher?.name || "receipt"} ${receipt.receiptNumber}`}
             buttonText={t("printReceipt") || "Export as PDF"}
           >
             <div className="space-y-4 p-4 bg-background">

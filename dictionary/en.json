@@ -1291,7 +1291,13 @@
     "unauthorized": "Unauthorized: Please log in again",
     "pendingChanges": "Change pending sync",
     "syncing": "Syncing...",
-    "sync": "Sync"
+    "sync": "Sync",
+    "addPayment": "Add Payment",
+    "payment": "Payment",
+    "paid": "Paid",
+    "partial": "Partial",
+    "unpaid": "Unpaid",
+    "MAD": "MAD"
   },
   "StudentReceiptTable": {
     "MAD": "MAD",

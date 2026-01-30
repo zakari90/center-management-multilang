@@ -308,9 +308,9 @@ export default function StudentsTable() {
             <SelectItem value="all">
               {t("allPaymentStatuses") || "All Payments"}
             </SelectItem>
-            <SelectItem value="PAID">PAID</SelectItem>
-            <SelectItem value="PARTIAL">PARTIAL</SelectItem>
-            <SelectItem value="UNPAID">UNPAID</SelectItem>
+            <SelectItem value="PAID">{t("paid")}</SelectItem>
+            <SelectItem value="PARTIAL">{t("partial")}</SelectItem>
+            <SelectItem value="UNPAID">{t("unpaid")}</SelectItem>
           </SelectContent>
         </Select>
         <div className="hidden md:block">
@@ -373,7 +373,7 @@ export default function StudentsTable() {
                   setColumnVisibility((prev) => ({ ...prev, payment: !!value }))
                 }
               >
-                Payment
+                {t("payment")}
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={columnVisibility.actions}

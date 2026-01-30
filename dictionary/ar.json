@@ -1236,7 +1236,13 @@
     "parent": "الوالد",
     "monthlyFee": "الرسوم الشهرية",
     "noStudents": "لا توجد طلاب",
-    "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى"
+    "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى",
+    "addPayment": "إضافة دفع",
+    "payment": "الأداء",
+    "paid": "مدفوع",
+    "partial": "جزئي",
+    "unpaid": "غير مدفوع",
+    "MAD": "درهم"
   },
   "StudentReceiptTable": {
     "MAD": "درهم",

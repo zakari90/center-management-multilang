@@ -80,7 +80,7 @@ export function StudentsTableView({
               )}
               {columnVisibility.payment && (
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                  Payment
+                  {t("payment")}
                 </th>
               )}
               {columnVisibility.actions && (
@@ -153,7 +153,7 @@ export function StudentsTableView({
                   {columnVisibility.monthlyFee && (
                     <td className="px-6 py-4 whitespace-nowrap border-x text-center">
                       <div className="text-sm font-medium">
-                        MAD {getTotalRevenue(student).toFixed(2)}
+                        {t("MAD")} {getTotalRevenue(student).toFixed(2)}
                       </div>
                     </td>
                   )}
@@ -175,7 +175,7 @@ export function StudentsTableView({
                               : "bg-red-100 text-red-700 hover:bg-red-100"
                         }
                       >
-                        {student.paymentStatus.status}
+                        {t(student.paymentStatus.status.toLowerCase())}
                       </Badge>
                     </td>
                   )}
@@ -190,7 +190,7 @@ export function StudentsTableView({
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
-                              title="Add Payment"
+                              title={t("addPayment")}
                             >
                               <ReceiptText className="h-4 w-4" />
                             </Button>

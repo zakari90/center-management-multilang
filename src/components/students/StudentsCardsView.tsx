@@ -122,7 +122,7 @@ export function StudentsCardsView({
                   </p>
                   <div className="flex items-center gap-2">
                     <p className="text-base font-bold text-primary">
-                      MAD {getTotalRevenue(student).toFixed(2)}
+                      {t("MAD")} {getTotalRevenue(student).toFixed(2)}
                     </p>
                     <Badge
                       variant={
@@ -140,7 +140,7 @@ export function StudentsCardsView({
                             : "bg-red-100 text-red-700 text-[10px] px-1.5 py-0 h-4 hover:bg-red-100 border-none"
                       }
                     >
-                      {student.paymentStatus.status}
+                      {t(student.paymentStatus.status.toLowerCase())}
                     </Badge>
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export function StudentsCardsView({
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600"
-                        title="Add Payment"
+                        title={t("addPayment")}
                       >
                         <ReceiptText className="h-4 w-4" />
                       </Button>
@@ -166,7 +166,7 @@ export function StudentsCardsView({
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                        title="View Details"
+                        title={t("viewDetails")}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>

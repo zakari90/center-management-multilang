@@ -1242,7 +1242,13 @@
     "parent": "Parent",
     "monthlyFee": "Frais mensuels",
     "noStudents": "Aucun élève",
-    "unauthorized": "Non autorisé : Veuillez vous reconnecter"
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter",
+    "addPayment": "Ajouter un paiement",
+    "payment": "Paiement",
+    "paid": "Payé",
+    "partial": "Partiel",
+    "unpaid": "Impayé",
+    "MAD": "MAD"
   },
   "StudentReceiptTable": {
     "MAD": "MAD",

@@ -1,22 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Link } from "@/i18n/navigation";
-import { ModalLink } from "@/components/modal-link";
-import { receiptActions, studentActions } from "@/lib/dexie/dexieActions";
-import { useAuth } from "@/context/authContext";
-import { ReceiptType } from "@/lib/dexie/dbSchema";
-// import axios from 'axios' // ✅ Commented out - using local DB
+import { EntitySyncControls } from "@/components/EntitySyncControls";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -25,6 +12,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -32,34 +35,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Loader2,
-  Search,
-  Plus,
-  Eye,
-  Printer,
-  Download,
-  MoreVertical,
-  DollarSign,
-  Calendar,
-  User,
-  TrendingUp,
-  Receipt as ReceiptIcon,
-  ChevronDown,
-} from "lucide-react";
+import { useAuth } from "@/context/authContext";
+import { ReceiptType } from "@/lib/dexie/dbSchema";
+import { receiptActions, studentActions } from "@/lib/dexie/dexieActions";
 import { format } from "date-fns";
+import {
+  Calendar,
+  ChevronDown,
+  DollarSign,
+  Download,
+  Eye,
+  Loader2,
+  MoreVertical,
+  Receipt as ReceiptIcon,
+  Search,
+  TrendingUp,
+  User,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
-import { EntitySyncControls } from "@/components/EntitySyncControls";
-import { PaginationControls } from "@/components/ui/pagination-controls";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import ViewReceiptDialog from "./ViewReceiptDialog";
 
 interface Receipt {
@@ -821,7 +816,7 @@ export default function StudentReceiptTable() {
                                   }
                                 />
                               </DropdownMenuItem>
-                              <DropdownMenuItem
+                              {/* <DropdownMenuItem
                                 onClick={() => handlePrint(receipt.id)}
                               >
                                 <Printer className="mr-2 h-4 w-4" />
@@ -834,7 +829,7 @@ export default function StudentReceiptTable() {
                                   <User className="mr-2 h-4 w-4" />
                                   {t("viewStudent")}
                                 </ModalLink>
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
