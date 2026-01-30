@@ -1,100 +1,119 @@
-"use client"
+"use client";
 
-import { useTranslations } from "next-intl"
-import { useState, useEffect, useCallback } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Loader2, Printer } from "lucide-react"
-import { 
-  receiptActions, 
-  studentActions, 
-  teacherActions, 
+import { useTranslations } from "next-intl";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Printer } from "lucide-react";
+import {
+  receiptActions,
+  studentActions,
+  teacherActions,
   userActions,
-  centerActions 
-} from "@/lib/dexie/dexieActions"
+  centerActions,
+} from "@/lib/dexie/dexieActions";
 
 interface Receipt {
-  id: string
-  receiptNumber: string
-  amount: number
-  type: "STUDENT_PAYMENT" | "TEACHER_PAYMENT"
-  paymentMethod: string | null
-  description: string | null
-  date: string
-  createdAt: string
+  id: string;
+  receiptNumber: string;
+  amount: number;
+  type: "STUDENT_PAYMENT" | "TEACHER_PAYMENT";
+  paymentMethod: string | null;
+  description: string | null;
+  date: string;
+  createdAt: string;
   student?: {
-    id: string
-    name: string
-    email: string | null
-    phone: string | null
-    grade: string | null
-  }
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    grade: string | null;
+  };
   teacher?: {
-    id: string
-    name: string
-    email: string | null
-    phone: string | null
-  }
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+  };
   manager: {
-    name: string
-    email: string
-  }
+    name: string;
+    email: string;
+  };
   center?: {
-    id: string
-    name: string
-    address: string | null
-    phone: string | null
-  }
+    id: string;
+    name: string;
+    address: string | null;
+    phone: string | null;
+  };
 }
 
 interface ReceiptDetailContentProps {
-  receiptId: string
-  isModal?: boolean
+  receiptId: string;
+  isModal?: boolean;
 }
 
-export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDetailContentProps) {
-  const t = useTranslations("ReceiptDetailPage")
-  const [receipt, setReceipt] = useState<Receipt | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+export function ReceiptDetailContent({
+  receiptId,
+  isModal = false,
+}: ReceiptDetailContentProps) {
+  const t = useTranslations("ReceiptDetailPage");
+  const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchReceipt = useCallback(async () => {
-    setIsLoading(true)
-    setError('')
+    setIsLoading(true);
+    setError("");
     try {
       // ✅ Fetch from local DB
-      const [allReceipts, allStudents, allTeachers, allUsers, allCenters] = await Promise.all([
-        receiptActions.getAll(),
-        studentActions.getAll(),
-        teacherActions.getAll(),
-        userActions.getAll(),
-        centerActions.getAll()
-      ])
+      const [allReceipts, allStudents, allTeachers, allUsers, allCenters] =
+        await Promise.all([
+          receiptActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+          userActions.getAll(),
+          centerActions.getAll(),
+        ]);
 
       // ✅ Find receipt by ID
-      const receipt = allReceipts.find(r => r.id === receiptId && r.status !== '0')
-      
+      const receipt = allReceipts.find(
+        (r) => r.id === receiptId && r.status !== "0",
+      );
+
       if (!receipt) {
-        throw new Error(t("receiptNotFound"))
+        throw new Error(t("receiptNotFound"));
       }
 
       // ✅ Get related data
-      const student = receipt.studentId 
-        ? allStudents.find(s => s.id === receipt.studentId && s.status !== '0')
-        : null
-      
+      const student = receipt.studentId
+        ? allStudents.find(
+            (s) => s.id === receipt.studentId && s.status !== "0",
+          )
+        : null;
+
       const teacher = receipt.teacherId
-        ? allTeachers.find(t => t.id === receipt.teacherId && t.status !== '0')
-        : null
-      
-      const manager = allUsers.find(u => u.id === receipt.managerId && u.status !== '0')
-      
+        ? allTeachers.find(
+            (t) => t.id === receipt.teacherId && t.status !== "0",
+          )
+        : null;
+
+      const manager = allUsers.find(
+        (u) => u.id === receipt.managerId && u.status !== "0",
+      );
+
       // ✅ Find center (if needed - receipts don't have centerId directly, but we can find via manager)
-      const center = allCenters.find(c => 
-        (c.managers || []).includes(receipt.managerId) && c.status !== '0'
-      )
+      const center = allCenters.find(
+        (c) =>
+          (c.managers || []).includes(receipt.managerId) && c.status !== "0",
+      );
 
       // ✅ Build receipt data matching the interface
       const receiptData: Receipt = {
@@ -106,35 +125,43 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
         description: receipt.description ?? null,
         date: new Date(receipt.date).toISOString(),
         createdAt: new Date(receipt.createdAt).toISOString(),
-        student: student ? {
-          id: student.id,
-          name: student.name,
-          email: student.email ?? null,
-          phone: student.phone ?? null,
-          grade: student.grade ?? null,
-        } : undefined,
-        teacher: teacher ? {
-          id: teacher.id,
-          name: teacher.name,
-          email: teacher.email ?? null,
-          phone: teacher.phone ?? null,
-        } : undefined,
-        manager: manager ? {
-          name: manager.name,
-          email: manager.email,
-        } : {
-          name: t('unknownManager'),
-          email: ''
-        },
-        center: center ? {
-          id: center.id,
-          name: center.name,
-          address: center.address ?? null,
-          phone: center.phone ?? null,
-        } : undefined
-      }
+        student: student
+          ? {
+              id: student.id,
+              name: student.name,
+              email: student.email ?? null,
+              phone: student.phone ?? null,
+              grade: student.grade ?? null,
+            }
+          : undefined,
+        teacher: teacher
+          ? {
+              id: teacher.id,
+              name: teacher.name,
+              email: teacher.email ?? null,
+              phone: teacher.phone ?? null,
+            }
+          : undefined,
+        manager: manager
+          ? {
+              name: manager.name,
+              email: manager.email,
+            }
+          : {
+              name: t("unknownManager"),
+              email: "",
+            },
+        center: center
+          ? {
+              id: center.id,
+              name: center.name,
+              address: center.address ?? null,
+              phone: center.phone ?? null,
+            }
+          : undefined,
+      };
 
-      setReceipt(receiptData)
+      setReceipt(receiptData);
 
       // ✅ Commented out API call
       // const response = await fetch(`/api/receipts/${receiptId}`)
@@ -142,28 +169,28 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
       // const data = await response.json()
       // setReceipt(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("somethingWentWrong"))
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [receiptId, t])
+  }, [receiptId, t]);
 
   useEffect(() => {
-    fetchReceipt()
-  }, [fetchReceipt])
+    fetchReceipt();
+  }, [fetchReceipt]);
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
-      window.print()
+      window.print();
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   if (error || !receipt) {
@@ -173,11 +200,11 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
           <AlertDescription>{error || t("receiptNotFound")}</AlertDescription>
         </Alert>
       </div>
-    )
+    );
   }
 
-  const payer = receipt.student || receipt.teacher
-  const center = receipt.center
+  const payer = receipt.student || receipt.teacher;
+  const center = receipt.center;
 
   return (
     <>
@@ -196,14 +223,22 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
 
       <div className={isModal ? "p-2" : "max-w-4xl mx-auto p-6"}>
         {/* Header */}
-        <div className={`no-print ${isModal ? "mb-4" : "mb-6"} flex justify-between items-center gap-4`}>
-          <h1 className={isModal ? "text-2xl font-bold text-foreground" : "text-3xl font-bold text-foreground"}>
+        <div
+          className={`no-print ${isModal ? "mb-4" : "mb-6"} flex justify-between items-center gap-4`}
+        >
+          <h1
+            className={
+              isModal
+                ? "text-2xl font-bold text-foreground"
+                : "text-3xl font-bold text-foreground"
+            }
+          >
             {t("receiptDetails")}
           </h1>
-          <Button onClick={handlePrint} className="gap-2 shrink-0" size={isModal ? "sm" : "default"}>
+          {/* <Button onClick={handlePrint} className="gap-2 shrink-0" size={isModal ? "sm" : "default"}>
             <Printer className="w-5 h-5" />
             {t("printReceipt")}
-          </Button>
+          </Button> */}
         </div>
 
         {/* Receipt Card */}
@@ -211,9 +246,17 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
           <CardHeader className="border-b pb-6">
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className={isModal ? "text-2xl mb-2" : "text-3xl mb-2"}>{t("paymentReceipt")}</CardTitle>
-                <CardDescription className="text-base">{center?.name || t("yourEducationCenter")}</CardDescription>
-                <p className="text-sm text-muted-foreground">{center?.address || t("defaultAddress")}</p>
+                <CardTitle
+                  className={isModal ? "text-2xl mb-2" : "text-3xl mb-2"}
+                >
+                  {t("paymentReceipt")}
+                </CardTitle>
+                <CardDescription className="text-base">
+                  {center?.name || t("yourEducationCenter")}
+                </CardDescription>
+                <p className="text-sm text-muted-foreground">
+                  {center?.address || t("defaultAddress")}
+                </p>
                 {center?.phone && (
                   <p className="text-sm text-muted-foreground">
                     {t("phone")}: {center.phone}
@@ -221,10 +264,19 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
                 )}
               </div>
               <div className="text-right">
-                <Badge variant={receipt.type === "STUDENT_PAYMENT" ? "default" : "secondary"} className="mb-2">
-                  {receipt.type === "STUDENT_PAYMENT" ? t("studentPayment") : t("teacherPayment")}
+                <Badge
+                  variant={
+                    receipt.type === "STUDENT_PAYMENT" ? "default" : "secondary"
+                  }
+                  className="mb-2"
+                >
+                  {receipt.type === "STUDENT_PAYMENT"
+                    ? t("studentPayment")
+                    : t("teacherPayment")}
                 </Badge>
-                <p className="text-sm text-muted-foreground">{t("receiptNumber")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("receiptNumber")}
+                </p>
                 <p className="text-lg font-bold">{receipt.receiptNumber}</p>
               </div>
             </div>
@@ -232,10 +284,14 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
 
           <CardContent className="pt-6">
             {/* Payer and Payment Details */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 ${isModal ? "gap-4 mb-4" : "gap-6 mb-6"}`}>
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 ${isModal ? "gap-4 mb-4" : "gap-6 mb-6"}`}
+            >
               {/* Payer */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">{t("paymentFrom")}</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                  {t("paymentFrom")}
+                </h3>
                 <Card className="bg-muted">
                   <CardContent className="pt-6 space-y-2">
                     <p className="font-semibold text-lg">{payer?.name}</p>
@@ -244,7 +300,11 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
                         {t("grade")}: {receipt.student.grade}
                       </p>
                     )}
-                    {payer?.email && <p className="text-sm text-muted-foreground">{payer.email}</p>}
+                    {payer?.email && (
+                      <p className="text-sm text-muted-foreground">
+                        {payer.email}
+                      </p>
+                    )}
                     {payer?.phone && (
                       <p className="text-sm text-muted-foreground">
                         {t("phone")}: {payer.phone}
@@ -256,11 +316,15 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
 
               {/* Payment Details */}
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-3">{t("paymentDetails")}</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                  {t("paymentDetails")}
+                </h3>
                 <Card className="bg-muted">
                   <CardContent className="pt-6 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">{t("date")}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {t("date")}
+                      </span>
                       <span className="text-sm font-medium">
                         {new Date(receipt.date).toLocaleDateString("en-US", {
                           year: "numeric",
@@ -270,12 +334,20 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">{t("method")}</span>
-                      <span className="text-sm font-medium">{receipt.paymentMethod || t("na")}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {t("method")}
+                      </span>
+                      <span className="text-sm font-medium">
+                        {receipt.paymentMethod || t("na")}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">{t("processedBy")}</span>
-                      <span className="text-sm font-medium">{receipt.manager.name}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {t("processedBy")}
+                      </span>
+                      <span className="text-sm font-medium">
+                        {receipt.manager.name}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -285,7 +357,9 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
             {/* Description */}
             {receipt.description && (
               <div className={isModal ? "mb-4" : "mb-6"}>
-                <h3 className="text-sm font-semibold text-muted-foreground mb-2">{t("description")}</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                  {t("description")}
+                </h3>
                 <Card className="bg-muted">
                   <CardContent className="pt-6">
                     <p>{receipt.description}</p>
@@ -300,7 +374,9 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
                 <span className="text-xl font-semibold">{t("amountPaid")}</span>
                 <span
                   className={`text-4xl font-bold ${
-                    receipt.type === "STUDENT_PAYMENT" ? "text-green-600" : "text-orange-600"
+                    receipt.type === "STUDENT_PAYMENT"
+                      ? "text-green-600"
+                      : "text-orange-600"
                   }`}
                 >
                   ${receipt.amount.toFixed(2)}
@@ -321,10 +397,15 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
             {/* Footer */}
             <div className="mt-8 pt-6 border-t text-center text-muted-foreground text-sm">
               <p>{t("thankYou")}</p>
-              <p className="mt-2 text-xs text-muted-foreground">{t("computerGenerated")}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t("computerGenerated")}
+              </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("forQueries")}{" "}
-                <a href={`mailto:${receipt.manager.email}`} className="underline hover:text-primary">
+                <a
+                  href={`mailto:${receipt.manager.email}`}
+                  className="underline hover:text-primary"
+                >
                   {receipt.manager.email}
                 </a>
               </p>
@@ -333,6 +414,5 @@ export function ReceiptDetailContent({ receiptId, isModal = false }: ReceiptDeta
         </Card>
       </div>
     </>
-  )
+  );
 }
-

@@ -1,23 +1,23 @@
-'use client'
+"use client";
 
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -25,11 +25,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { useAuth } from '@/context/authContext'
-import { receiptActions, studentActions, teacherActions, userActions } from '@/lib/dexie/dexieActions'
-import { ModalLink } from '@/components/modal-link'
-import ViewReceiptDialog from '@/components/ViewReceiptDialog'
+} from "@/components/ui/table";
+import { useAuth } from "@/context/authContext";
+import {
+  receiptActions,
+  studentActions,
+  teacherActions,
+  userActions,
+} from "@/lib/dexie/dexieActions";
+import { ModalLink } from "@/components/modal-link";
+import ViewReceiptDialog from "@/components/ViewReceiptDialog";
 import {
   DollarSign,
   Loader2,
@@ -38,75 +43,83 @@ import {
   Receipt as ReceiptIcon,
   Search,
   TrendingDown,
-  TrendingUp
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, useCallback } from 'react'
+  TrendingUp,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState, useCallback } from "react";
 
 interface Receipt {
   manager?: {
-    id: string
-    name: string
-  }
-  id: string
-  receiptNumber: string
-  amount: number
-  type: 'STUDENT_PAYMENT' | 'TEACHER_PAYMENT'
-  paymentMethod: string | null
-  description: string | null
-  date: string
-  createdAt: string
+    id: string;
+    name: string;
+  };
+  id: string;
+  receiptNumber: string;
+  amount: number;
+  type: "STUDENT_PAYMENT" | "TEACHER_PAYMENT";
+  paymentMethod: string | null;
+  description: string | null;
+  date: string;
+  createdAt: string;
   student?: {
-    id: string
-    name: string
-    grade: string | null
-  }
+    id: string;
+    name: string;
+    grade: string | null;
+  };
   teacher?: {
-    id: string
-    name: string
-  }
+    id: string;
+    name: string;
+  };
 }
 
 export default function ReceiptsTable() {
-  const t = useTranslations('ReceiptsTable')
-  const { user } = useAuth() // ✅ Get current user from AuthContext
-  
-  const [receipts, setReceipts] = useState<Receipt[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
-  const [methodFilter, setMethodFilter] = useState<string>('all')
+  const t = useTranslations("ReceiptsTable");
+  const { user } = useAuth(); // ✅ Get current user from AuthContext
+
+  const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [methodFilter, setMethodFilter] = useState<string>("all");
 
   const fetchReceipts = useCallback(async () => {
     try {
       if (!user) {
-        setError("Unauthorized: Please log in again")
-        setIsLoading(false)
-        return
+        setError("Unauthorized: Please log in again");
+        setIsLoading(false);
+        return;
       }
 
       // ✅ Fetch from local DB
-      const [allReceipts, allStudents, allTeachers, allUsers] = await Promise.all([
-        receiptActions.getAll(),
-        studentActions.getAll(),
-        teacherActions.getAll(),
-        userActions.getAll()
-      ])
+      const [allReceipts, allStudents, allTeachers, allUsers] =
+        await Promise.all([
+          receiptActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+          userActions.getAll(),
+        ]);
 
       // ✅ Filter receipts by managerId and status
-      const managerReceipts = allReceipts
-        .filter(r => r.managerId === user.id && r.status !== '0')
+      const managerReceipts = allReceipts.filter(
+        (r) => r.managerId === user.id && r.status !== "0",
+      );
 
       // ✅ Build receipts with related data
-      const receiptsWithData: Receipt[] = managerReceipts.map(receipt => {
-        const student = receipt.studentId 
-          ? allStudents.find(s => s.id === receipt.studentId && s.status !== '0')
-          : null
+      const receiptsWithData: Receipt[] = managerReceipts.map((receipt) => {
+        const student = receipt.studentId
+          ? allStudents.find(
+              (s) => s.id === receipt.studentId && s.status !== "0",
+            )
+          : null;
         const teacher = receipt.teacherId
-          ? allTeachers.find(t => t.id === receipt.teacherId && t.status !== '0')
-          : null
-        const manager = allUsers.find(u => u.id === receipt.managerId && u.status !== '0')
+          ? allTeachers.find(
+              (t) => t.id === receipt.teacherId && t.status !== "0",
+            )
+          : null;
+        const manager = allUsers.find(
+          (u) => u.id === receipt.managerId && u.status !== "0",
+        );
 
         return {
           id: receipt.id,
@@ -117,76 +130,87 @@ export default function ReceiptsTable() {
           description: receipt.description ?? null,
           date: new Date(receipt.date).toISOString(),
           createdAt: new Date(receipt.createdAt).toISOString(),
-          manager: manager ? {
-            id: manager.id,
-            name: manager.name,
-          } : undefined,
-          student: student ? {
-            id: student.id,
-            name: student.name,
-            grade: student.grade ?? null,
-          } : undefined,
-          teacher: teacher ? {
-            id: teacher.id,
-            name: teacher.name,
-          } : undefined,
-        }
-      })
+          manager: manager
+            ? {
+                id: manager.id,
+                name: manager.name,
+              }
+            : undefined,
+          student: student
+            ? {
+                id: student.id,
+                name: student.name,
+                grade: student.grade ?? null,
+              }
+            : undefined,
+          teacher: teacher
+            ? {
+                id: teacher.id,
+                name: teacher.name,
+              }
+            : undefined,
+        };
+      });
 
-      setReceipts(receiptsWithData)
+      setReceipts(receiptsWithData);
 
       // ✅ Commented out online fetch
       // const { data } = await axios.get('/api/receipts')
       // setReceipts(data)
     } catch (err) {
       console.log(err);
-      setError(t('errorFetchReceipts'))
+      setError(t("errorFetchReceipts"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [user, t])
+  }, [user, t]);
 
   useEffect(() => {
-    fetchReceipts()
-  }, [fetchReceipts])
+    fetchReceipts();
+  }, [fetchReceipts]);
 
-  const filteredReceipts = receipts.filter(receipt => {
-    const matchesSearch = 
+  const filteredReceipts = receipts.filter((receipt) => {
+    const matchesSearch =
       receipt.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       receipt.student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       receipt.teacher?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      receipt.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesType = typeFilter === 'all' || receipt.type === typeFilter
-    const matchesMethod = methodFilter === 'all' || receipt.paymentMethod === methodFilter
+      receipt.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch && matchesType && matchesMethod
-  })
+    const matchesType = typeFilter === "all" || receipt.type === typeFilter;
+    const matchesMethod =
+      methodFilter === "all" || receipt.paymentMethod === methodFilter;
 
-  const studentPayments = receipts.filter(r => r.type === 'STUDENT_PAYMENT')
-  const teacherPayments = receipts.filter(r => r.type === 'TEACHER_PAYMENT')
-  const totalIncome = studentPayments.reduce((sum, r) => sum + r.amount, 0)
-  const totalExpense = teacherPayments.reduce((sum, r) => sum + r.amount, 0)
-  const netAmount = totalIncome - totalExpense
+    return matchesSearch && matchesType && matchesMethod;
+  });
 
-  const paymentMethods = ['all', ...new Set(receipts.map(r => r.paymentMethod).filter(Boolean) as string[])]
+  const studentPayments = receipts.filter((r) => r.type === "STUDENT_PAYMENT");
+  const teacherPayments = receipts.filter((r) => r.type === "TEACHER_PAYMENT");
+  const totalIncome = studentPayments.reduce((sum, r) => sum + r.amount, 0);
+  const totalExpense = teacherPayments.reduce((sum, r) => sum + r.amount, 0);
+  const netAmount = totalIncome - totalExpense;
+
+  const paymentMethods = [
+    "all",
+    ...new Set(
+      receipts.map((r) => r.paymentMethod).filter(Boolean) as string[],
+    ),
+  ];
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">{t('title')}</h1>
-          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
-
       </div>
 
       {error && (
@@ -198,7 +222,9 @@ export default function ReceiptsTable() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('totalReceipts')}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalReceipts")}
+            </CardTitle>
             <ReceiptIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -208,7 +234,9 @@ export default function ReceiptsTable() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('totalIncome')}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalIncome")}
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -216,14 +244,16 @@ export default function ReceiptsTable() {
               ${totalIncome.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {studentPayments.length} {t('receipts')}
+              {studentPayments.length} {t("receipts")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('totalExpenses')}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("totalExpenses")}
+            </CardTitle>
             <TrendingDown className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
@@ -231,22 +261,26 @@ export default function ReceiptsTable() {
               ${totalExpense.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {teacherPayments.length} {t('receipts')}
+              {teacherPayments.length} {t("receipts")}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t('netAmount')}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("netAmount")}
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${netAmount >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            <div
+              className={`text-2xl font-bold ${netAmount >= 0 ? "text-blue-600" : "text-red-600"}`}
+            >
               ${netAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {netAmount >= 0 ? t('profit') : t('loss')}
+              {netAmount >= 0 ? t("profit") : t("loss")}
             </p>
           </CardContent>
         </Card>
@@ -254,14 +288,14 @@ export default function ReceiptsTable() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('filters')}</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('searchPlaceholder')}
+                placeholder={t("searchPlaceholder")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -269,22 +303,26 @@ export default function ReceiptsTable() {
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('allTypes')} />
+                <SelectValue placeholder={t("allTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('allTypes')}</SelectItem>
-                <SelectItem value="STUDENT_PAYMENT">{t('studentPayments')}</SelectItem>
-                <SelectItem value="TEACHER_PAYMENT">{t('teacherPayments')}</SelectItem>
+                <SelectItem value="all">{t("allTypes")}</SelectItem>
+                <SelectItem value="STUDENT_PAYMENT">
+                  {t("studentPayments")}
+                </SelectItem>
+                <SelectItem value="TEACHER_PAYMENT">
+                  {t("teacherPayments")}
+                </SelectItem>
               </SelectContent>
             </Select>
             <Select value={methodFilter} onValueChange={setMethodFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('allMethods')} />
+                <SelectValue placeholder={t("allMethods")} />
               </SelectTrigger>
               <SelectContent>
-                {paymentMethods.map(method => (
+                {paymentMethods.map((method) => (
                   <SelectItem key={method} value={method}>
-                    {method === 'all' ? t('allMethods') : method}
+                    {method === "all" ? t("allMethods") : method}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -295,9 +333,10 @@ export default function ReceiptsTable() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('allReceipts')}</CardTitle>
+          <CardTitle>{t("allReceipts")}</CardTitle>
           <CardDescription>
-            {t('showing')} {filteredReceipts.length} {t('of')} {receipts.length} {t('receipts')}
+            {t("showing")} {filteredReceipts.length} {t("of")} {receipts.length}{" "}
+            {t("receipts")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -305,31 +344,32 @@ export default function ReceiptsTable() {
             <div className="text-center py-12">
               <ReceiptIcon className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">
-                {searchTerm || typeFilter !== 'all' || methodFilter !== 'all' 
-                  ? t('noReceiptsFound')
-                  : t('noReceiptsYet')}
+                {searchTerm || typeFilter !== "all" || methodFilter !== "all"
+                  ? t("noReceiptsFound")
+                  : t("noReceiptsYet")}
               </p>
-
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('manager')}</TableHead>
-                  <TableHead>{t('receiptNumber')}</TableHead>
-                  <TableHead>{t('type')}</TableHead>
-                  <TableHead>{t('for')}</TableHead>
-                  <TableHead>{t('amount')}</TableHead>
-                  <TableHead>{t('method')}</TableHead>
-                  <TableHead>{t('date')}</TableHead>
-                  <TableHead className="text-right">{t('actions')}</TableHead>
+                  <TableHead>{t("manager")}</TableHead>
+                  <TableHead>{t("receiptNumber")}</TableHead>
+                  <TableHead>{t("type")}</TableHead>
+                  <TableHead>{t("for")}</TableHead>
+                  <TableHead>{t("amount")}</TableHead>
+                  <TableHead>{t("method")}</TableHead>
+                  <TableHead>{t("date")}</TableHead>
+                  <TableHead className="text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredReceipts.map((receipt) => (
                   <TableRow key={receipt.id}>
                     <TableCell>
-                      <div className="font-medium">{receipt?.manager?.name || '-'}</div>
+                      <div className="font-medium">
+                        {receipt?.manager?.name || "-"}
+                      </div>
                       {receipt.description && (
                         <div className="text-xs text-muted-foreground truncate max-w-[200px]">
                           {receipt.description}
@@ -345,13 +385,21 @@ export default function ReceiptsTable() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={receipt.type === 'STUDENT_PAYMENT' ? 'default' : 'secondary'}>
-                        {receipt.type === 'STUDENT_PAYMENT' ? t('income') : t('expense')}
+                      <Badge
+                        variant={
+                          receipt.type === "STUDENT_PAYMENT"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {receipt.type === "STUDENT_PAYMENT"
+                          ? t("income")
+                          : t("expense")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        {receipt.student?.name || receipt.teacher?.name || '-'}
+                        {receipt.student?.name || receipt.teacher?.name || "-"}
                       </div>
                       {receipt.student?.grade && (
                         <div className="text-xs text-muted-foreground">
@@ -360,28 +408,34 @@ export default function ReceiptsTable() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className={`font-semibold ${
-                        receipt.type === 'STUDENT_PAYMENT' ? 'text-green-600' : 'text-orange-600'
-                      }`}>
+                      <div
+                        className={`font-semibold ${
+                          receipt.type === "STUDENT_PAYMENT"
+                            ? "text-green-600"
+                            : "text-orange-600"
+                        }`}
+                      >
                         ${receipt.amount.toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell>
                       {receipt.paymentMethod ? (
                         <Badge variant="outline">{receipt.paymentMethod}</Badge>
-                      ) : '-'}
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(receipt.date).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-right">
+                    {/* <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <ViewReceiptDialog receiptId={receipt.id} />
                         <Button variant="ghost" size="sm" onClick={() => window.print()}>
                           <Printer className="h-4 w-4" />
                         </Button>
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
@@ -390,5 +444,5 @@ export default function ReceiptsTable() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
