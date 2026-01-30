@@ -313,74 +313,79 @@ export default function StudentsTable() {
             <SelectItem value="UNPAID">UNPAID</SelectItem>
           </SelectContent>
         </Select>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="default">
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.name}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({ ...prev, name: !!value }))
-              }
-            >
-              {t("name")}
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.contact}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({ ...prev, contact: !!value }))
-              }
-            >
-              {t("contact")}
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.parent}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({ ...prev, parent: !!value }))
-              }
-            >
-              {t("parent")}
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.subjects}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({ ...prev, subjects: !!value }))
-              }
-            >
-              {t("subjects")}
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.monthlyFee}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({
-                  ...prev,
-                  monthlyFee: !!value,
-                }))
-              }
-            >
-              {t("monthlyFee")}
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.payment}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({ ...prev, payment: !!value }))
-              }
-            >
-              Payment
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-              checked={columnVisibility.actions}
-              onCheckedChange={(value) =>
-                setColumnVisibility((prev) => ({ ...prev, actions: !!value }))
-              }
-            >
-              {t("actions")}
-            </DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="hidden md:block">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="default">
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.name}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, name: !!value }))
+                }
+              >
+                {t("name")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.contact}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, contact: !!value }))
+                }
+              >
+                {t("contact")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.parent}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, parent: !!value }))
+                }
+              >
+                {t("parent")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.subjects}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({
+                    ...prev,
+                    subjects: !!value,
+                  }))
+                }
+              >
+                {t("subjects")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.monthlyFee}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({
+                    ...prev,
+                    monthlyFee: !!value,
+                  }))
+                }
+              >
+                {t("monthlyFee")}
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.payment}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, payment: !!value }))
+                }
+              >
+                Payment
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={columnVisibility.actions}
+                onCheckedChange={(value) =>
+                  setColumnVisibility((prev) => ({ ...prev, actions: !!value }))
+                }
+              >
+                {t("actions")}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       {/* Students List - Responsive View */}
 

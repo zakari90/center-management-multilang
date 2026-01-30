@@ -184,7 +184,7 @@ export function StudentsCardsView({
           </Card>
         ))
       )}
-      -----------------------------
+
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}
