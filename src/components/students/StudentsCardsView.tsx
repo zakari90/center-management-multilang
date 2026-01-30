@@ -11,6 +11,8 @@ import EditStudentDialog from "@/components/EditStudentDialog";
 import AddStudentPaymentDialog from "@/components/AddStudentPaymentDialog";
 import { Student } from "../studentsPresentation";
 import { Phone, Mail, User, Eye, ReceiptText } from "lucide-react";
+import { useState } from "react";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface StudentsCardsViewProps {
   students: Student[];
@@ -26,15 +28,23 @@ export function StudentsCardsView({
   adminMode = false,
 }: StudentsCardsViewProps) {
   const t = useTranslations("StudentsTable");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
+  const paginatedStudents = students.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:hidden px-3">
+    <div className="flex flex-col gap-4 md:hidden px-3">
       {students.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground">
           {t("noStudents")}
         </Card>
       ) : (
-        students.map((student) => (
+        paginatedStudents.map((student) => (
           <Card key={student.id} className="overflow-hidden">
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between gap-3">
@@ -174,6 +184,15 @@ export function StudentsCardsView({
           </Card>
         ))
       )}
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        totalCount={students.length}
+        pageSize={ITEMS_PER_PAGE}
+        entityName={t("students").toLowerCase()}
+      />
     </div>
   );
 }
