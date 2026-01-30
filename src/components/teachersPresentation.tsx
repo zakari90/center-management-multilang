@@ -42,8 +42,15 @@ import { useCallback, useEffect, useState } from "react";
 import AddTeacherDialog from "./AddTeacherDialog";
 import PageHeader from "./page-header";
 import { Alert, AlertDescription } from "./ui/alert";
+import { TeachersTableView } from "./teachers/TeachersTableView";
+import { checkPaymentStatus, PaymentStatus } from "@/lib/payment-utils";
+import {
+  receiptActions,
+  centerActions,
+  studentSubjectActions,
+} from "@/lib/dexie/dexieActions";
 
-interface TeacherSubject {
+export interface TeacherSubject {
   id: string;
   percentage: number | null;
   hourlyRate: number | null;
@@ -55,7 +62,7 @@ interface TeacherSubject {
   };
 }
 
-interface Teacher {
+export interface Teacher {
   id: string;
   name: string;
   email: string | null;
@@ -64,6 +71,8 @@ interface Teacher {
   weeklySchedule: any;
   createdAt: string;
   teacherSubjects: TeacherSubject[];
+  paymentStatus: PaymentStatus;
+  estimatedIncome?: number;
 }
 
 export default function TeachersTable() {
@@ -94,11 +103,25 @@ export default function TeachersTable() {
       }
 
       // ✅ Fetch from local DB and join with subjects
-      const [allTeachers, allTeacherSubjects, allSubjects] = await Promise.all([
+      const [
+        allTeachers,
+        allTeacherSubjects,
+        allSubjects,
+        allReceipts,
+        allCenters,
+        allStudentSubjects,
+      ] = await Promise.all([
         teacherActions.getAll(),
         teacherSubjectActions.getAll(),
         subjectActions.getAll(),
+        receiptActions.getAll(),
+        centerActions.getAll(),
+        studentSubjectActions.getAll(),
       ]);
+
+      const currentCenter = allCenters.find((c) => c.status !== "0");
+      const paymentStartDay = currentCenter?.paymentStartDay ?? 1;
+      const paymentEndDay = currentCenter?.paymentEndDay ?? 30;
 
       // ✅ Filter teachers by status only (managers see ALL teachers)
       const managerTeachers = allTeachers.filter((t) => t.status !== "0");
@@ -147,6 +170,35 @@ export default function TeachersTable() {
           }
         }
 
+        // Calculate expected earnings for payment status
+        const expectedEarnings = teacherSubjectsForTeacher.reduce((sum, ts) => {
+          const enrolledCount = allStudentSubjects.filter(
+            (ss) =>
+              ss.subjectId === ts.subject.id &&
+              ss.teacherId === teacher.id &&
+              ss.status !== "0",
+          ).length;
+
+          let amount = 0;
+          if (ts.percentage) {
+            amount = ((ts.subject.price * ts.percentage) / 100) * enrolledCount;
+          } else if (ts.hourlyRate) {
+            amount = ts.hourlyRate * enrolledCount;
+          }
+          return sum + amount;
+        }, 0);
+
+        const teacherReceipts = allReceipts.filter(
+          (r) => r.teacherId === teacher.id && r.status !== "0",
+        );
+
+        const paymentStatus = checkPaymentStatus(
+          teacherReceipts,
+          paymentStartDay,
+          paymentEndDay,
+          expectedEarnings > 0 ? expectedEarnings : undefined,
+        );
+
         return {
           id: teacher.id,
           name: teacher.name,
@@ -156,6 +208,8 @@ export default function TeachersTable() {
           weeklySchedule: parsedSchedule,
           createdAt: new Date(teacher.createdAt).toISOString(),
           teacherSubjects: teacherSubjectsForTeacher,
+          paymentStatus,
+          estimatedIncome: expectedEarnings,
         };
       });
 
@@ -343,135 +397,12 @@ export default function TeachersTable() {
         </CardHeader>
 
         <CardContent>
-          {filteredTeachers.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {t("noTeachersFound")}
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {columnVisibility.teacher && (
-                    <TableHead className="text-center border-x">
-                      {t("teacher")}
-                    </TableHead>
-                  )}
-                  {columnVisibility.contact && (
-                    <TableHead className="text-center border-x">
-                      {t("contact")}
-                    </TableHead>
-                  )}
-                  {columnVisibility.subjects && (
-                    <TableHead className="text-center border-x">
-                      {t("subjects")}
-                    </TableHead>
-                  )}
-                  {columnVisibility.schedule && (
-                    <TableHead className="text-center border-x">
-                      {t("schedule")}
-                    </TableHead>
-                  )}
-                  {columnVisibility.joined && (
-                    <TableHead className="text-center border-x">
-                      {t("joined")}
-                    </TableHead>
-                  )}
-                  {columnVisibility.actions && (
-                    <TableHead className="text-center border-x">
-                      {t("actions")}
-                    </TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTeachers.map((teacher) => (
-                  <TableRow key={teacher.id}>
-                    {columnVisibility.teacher && (
-                      <TableCell className="border-x">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
-                            {teacher.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-medium">{teacher.name}</p>
-                            {teacher.address && (
-                              <p className="text-sm text-muted-foreground">
-                                {teacher.address}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                    )}
-                    {columnVisibility.contact && (
-                      <TableCell className="border-x">
-                        <p>{teacher.email || "-"}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {teacher.phone || "-"}
-                        </p>
-                      </TableCell>
-                    )}
-                    {columnVisibility.subjects && (
-                      <TableCell className="border-x">
-                        {teacher.teacherSubjects.length === 0 ? (
-                          <span className="text-sm text-muted-foreground italic">
-                            {t("noSubjectsAssigned")}
-                          </span>
-                        ) : (
-                          <div className="space-y-1">
-                            {teacher.teacherSubjects.slice(0, 2).map((ts) => (
-                              <div
-                                key={ts.id}
-                                className="flex items-center gap-2"
-                              >
-                                <span className="inline-flex px-2 py-1 rounded-md bg-primary/10 text-xs text-primary">
-                                  {ts.subject.name} ({ts.subject.grade})
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {ts.percentage
-                                    ? `${ts.percentage}%`
-                                    : `$${ts.hourlyRate}/hr`}
-                                </span>
-                              </div>
-                            ))}
-                            {teacher.teacherSubjects.length > 2 && (
-                              <p className="text-xs text-muted-foreground">
-                                {t("moreSubjects", {
-                                  count: teacher.teacherSubjects.length - 2,
-                                })}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </TableCell>
-                    )}
-                    {columnVisibility.schedule && (
-                      <TableCell className="border-x">
-                        {getAvailableDays(teacher.weeklySchedule)}
-                      </TableCell>
-                    )}
-                    {columnVisibility.joined && (
-                      <TableCell className="text-sm text-muted-foreground border-x">
-                        {new Date(teacher.createdAt).toLocaleDateString()}
-                      </TableCell>
-                    )}
-                    {columnVisibility.actions && (
-                      <TableCell className="text-right border-x">
-                        <div className="flex justify-end gap-2">
-                          <ViewTeacherDialog teacherId={teacher.id} />
-                          <EditTeacherDialog
-                            teacherId={teacher.id}
-                            onTeacherUpdated={fetchTeachers}
-                            adminMode={user?.role === "ADMIN"}
-                          />
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <TeachersTableView
+            teachers={filteredTeachers}
+            columnVisibility={columnVisibility}
+            onUpdate={fetchTeachers}
+            adminMode={user?.role === "ADMIN"}
+          />
         </CardContent>
       </Card>
     </div>
