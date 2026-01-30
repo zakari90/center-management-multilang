@@ -60,6 +60,7 @@ import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { EntitySyncControls } from "@/components/EntitySyncControls";
 import { PaginationControls } from "@/components/ui/pagination-controls";
+import ViewReceiptDialog from "./ViewReceiptDialog";
 
 interface Receipt {
   id: string;
@@ -806,13 +807,19 @@ export default function StudentReceiptTable() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <ModalLink
-                                  href={`/manager/receipts/${receipt.id}`}
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  {t("viewDetails")}
-                                </ModalLink>
+                              <DropdownMenuItem
+                                asChild
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                <ViewReceiptDialog
+                                  receiptId={receipt.id}
+                                  trigger={
+                                    <div className="flex w-full items-center px-2 py-1.5 text-sm cursor-default hover:bg-accent hover:text-accent-foreground rounded-sm">
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      {t("viewDetails")}
+                                    </div>
+                                  }
+                                />
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handlePrint(receipt.id)}

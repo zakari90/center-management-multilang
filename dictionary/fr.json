@@ -805,7 +805,8 @@
     "errorCreateReceipt": "Impossible de créer le reçu",
     "errorSomethingWrong": "Quelque chose s'est mal passé",
     "errorCamera": "Impossible d'accéder à la caméra",
-    "studentNotFound": "Élève introuvable"
+    "studentNotFound": "Élève introuvable",
+    "studentAlreadyPaid": "Cet élève a déjà payé pour cette période de facturation."
   },
   "Dashboard": {
     "title": "Tableau de bord",

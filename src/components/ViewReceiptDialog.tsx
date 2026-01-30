@@ -1,12 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { useTranslations } from "next-intl"
-import { Eye, Loader2, Printer } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
+import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { Eye, Loader2, Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import PdfExporter from "./pdfExporter";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -14,88 +21,102 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   receiptActions,
   studentActions,
   teacherActions,
   userActions,
-  centerActions
-} from "@/lib/dexie/dexieActions"
+  centerActions,
+} from "@/lib/dexie/dexieActions";
 
 interface Receipt {
-  id: string
-  receiptNumber: string
-  amount: number
-  type: "STUDENT_PAYMENT" | "TEACHER_PAYMENT"
-  paymentMethod: string | null
-  description: string | null
-  date: string
-  createdAt: string
+  id: string;
+  receiptNumber: string;
+  amount: number;
+  type: "STUDENT_PAYMENT" | "TEACHER_PAYMENT";
+  paymentMethod: string | null;
+  description: string | null;
+  date: string;
+  createdAt: string;
   student?: {
-    id: string
-    name: string
-    email: string | null
-    phone: string | null
-    grade: string | null
-  }
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    grade: string | null;
+  };
   teacher?: {
-    id: string
-    name: string
-    email: string | null
-    phone: string | null
-  }
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+  };
   manager: {
-    name: string
-    email: string
-  }
+    name: string;
+    email: string;
+  };
   center?: {
-    id: string
-    name: string
-    address: string | null
-    phone: string | null
-  }
+    id: string;
+    name: string;
+    address: string | null;
+    phone: string | null;
+  };
 }
 
 interface ViewReceiptDialogProps {
-  receiptId: string
-  trigger?: React.ReactNode
+  receiptId: string;
+  trigger?: React.ReactNode;
 }
 
-export default function ViewReceiptDialog({ receiptId, trigger }: ViewReceiptDialogProps) {
-  const t = useTranslations("ReceiptDetailPage")
-  const [open, setOpen] = useState(false)
-  const [receipt, setReceipt] = useState<Receipt | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+export default function ViewReceiptDialog({
+  receiptId,
+  trigger,
+}: ViewReceiptDialogProps) {
+  const t = useTranslations("ReceiptDetailPage");
+  const [open, setOpen] = useState(false);
+  const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchReceipt = useCallback(async () => {
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
     try {
-      const [allReceipts, allStudents, allTeachers, allUsers, allCenters] = await Promise.all([
-        receiptActions.getAll(),
-        studentActions.getAll(),
-        teacherActions.getAll(),
-        userActions.getAll(),
-        centerActions.getAll()
-      ])
+      const [allReceipts, allStudents, allTeachers, allUsers, allCenters] =
+        await Promise.all([
+          receiptActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+          userActions.getAll(),
+          centerActions.getAll(),
+        ]);
 
-      const receiptData = allReceipts.find(r => r.id === receiptId && r.status !== '0')
+      const receiptData = allReceipts.find(
+        (r) => r.id === receiptId && r.status !== "0",
+      );
       if (!receiptData) {
-        throw new Error(t("receiptNotFound"))
+        throw new Error(t("receiptNotFound"));
       }
 
       const student = receiptData.studentId
-        ? allStudents.find(s => s.id === receiptData.studentId && s.status !== '0')
-        : null
+        ? allStudents.find(
+            (s) => s.id === receiptData.studentId && s.status !== "0",
+          )
+        : null;
       const teacher = receiptData.teacherId
-        ? allTeachers.find(t => t.id === receiptData.teacherId && t.status !== '0')
-        : null
-      const manager = allUsers.find(u => u.id === receiptData.managerId && u.status !== '0')
-      const center = allCenters.find(c =>
-        (c.managers || []).includes(receiptData.managerId) && c.status !== '0'
-      )
+        ? allTeachers.find(
+            (t) => t.id === receiptData.teacherId && t.status !== "0",
+          )
+        : null;
+      const manager = allUsers.find(
+        (u) => u.id === receiptData.managerId && u.status !== "0",
+      );
+      const center = allCenters.find(
+        (c) =>
+          (c.managers || []).includes(receiptData.managerId) &&
+          c.status !== "0",
+      );
 
       setReceipt({
         id: receiptData.id,
@@ -106,58 +127,67 @@ export default function ViewReceiptDialog({ receiptId, trigger }: ViewReceiptDia
         description: receiptData.description ?? null,
         date: new Date(receiptData.date).toISOString(),
         createdAt: new Date(receiptData.createdAt).toISOString(),
-        student: student ? {
-          id: student.id,
-          name: student.name,
-          email: student.email ?? null,
-          phone: student.phone ?? null,
-          grade: student.grade ?? null,
-        } : undefined,
-        teacher: teacher ? {
-          id: teacher.id,
-          name: teacher.name,
-          email: teacher.email ?? null,
-          phone: teacher.phone ?? null,
-        } : undefined,
-        manager: manager ? {
-          name: manager.name,
-          email: manager.email,
-        } : { name: 'Unknown', email: '' },
-        center: center ? {
-          id: center.id,
-          name: center.name,
-          address: center.address ?? null,
-          phone: center.phone ?? null,
-        } : undefined
-      })
+        student: student
+          ? {
+              id: student.id,
+              name: student.name,
+              email: student.email ?? null,
+              phone: student.phone ?? null,
+              grade: student.grade ?? null,
+            }
+          : undefined,
+        teacher: teacher
+          ? {
+              id: teacher.id,
+              name: teacher.name,
+              email: teacher.email ?? null,
+              phone: teacher.phone ?? null,
+            }
+          : undefined,
+        manager: manager
+          ? {
+              name: manager.name,
+              email: manager.email,
+            }
+          : { name: "Unknown", email: "" },
+        center: center
+          ? {
+              id: center.id,
+              name: center.name,
+              address: center.address ?? null,
+              phone: center.phone ?? null,
+            }
+          : undefined,
+      });
     } catch (err) {
-      console.error(err)
-      setError(err instanceof Error ? err.message : t("somethingWentWrong"))
+      console.error(err);
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [receiptId, t])
+  }, [receiptId, t]);
 
   useEffect(() => {
     if (open && receiptId) {
-      fetchReceipt()
+      fetchReceipt();
     }
-  }, [open, receiptId, fetchReceipt])
+  }, [open, receiptId, fetchReceipt]);
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {
-      window.print()
+      window.print();
     }
-  }
+  };
 
-  const payer = receipt?.student || receipt?.teacher
+  const payer = receipt?.student || receipt?.teacher;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="ghost" size="sm" title={t("receiptDetails")}>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <Eye className="h-4 w-4" />
+            <span className="sr-only">{t("viewDetails")}</span>
           </Button>
         )}
       </DialogTrigger>
@@ -186,93 +216,137 @@ export default function ViewReceiptDialog({ receiptId, trigger }: ViewReceiptDia
             <AlertDescription>{error || t("receiptNotFound")}</AlertDescription>
           </Alert>
         ) : (
-          <div className="space-y-4">
-            {/* Receipt Header */}
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-muted-foreground">{receipt.center?.name || t("yourEducationCenter")}</p>
-                {receipt.center?.address && (
-                  <p className="text-xs text-muted-foreground">{receipt.center.address}</p>
-                )}
+          <PdfExporter
+            fileName={`${receipt.receiptNumber}.pdf`}
+            buttonText={t("printReceipt") || "Export as PDF"}
+          >
+            <div className="space-y-4 p-4 bg-background">
+              {/* Receipt Header */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm font-semibold text-primary">
+                    {receipt.center?.name || t("yourEducationCenter")}
+                  </p>
+                  {receipt.center?.address && (
+                    <p className="text-xs text-muted-foreground">
+                      {receipt.center.address}
+                    </p>
+                  )}
+                </div>
+                <div className="text-right">
+                  <Badge
+                    variant={
+                      receipt.type === "STUDENT_PAYMENT"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
+                    {receipt.type === "STUDENT_PAYMENT"
+                      ? t("studentPayment")
+                      : t("teacherPayment")}
+                  </Badge>
+                  <p className="text-lg font-bold mt-1">
+                    #{receipt.receiptNumber}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <Badge variant={receipt.type === "STUDENT_PAYMENT" ? "default" : "secondary"}>
-                  {receipt.type === "STUDENT_PAYMENT" ? t("studentPayment") : t("teacherPayment")}
-                </Badge>
-                <p className="text-lg font-bold mt-1">#{receipt.receiptNumber}</p>
+
+              {/* Payer Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-2 p-4">
+                    <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {t("paymentFrom")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-1 p-4 pt-0">
+                    <p className="font-bold">{payer?.name}</p>
+                    {receipt.student?.grade && (
+                      <p className="text-xs text-muted-foreground">
+                        {t("grade")}: {receipt.student.grade}
+                      </p>
+                    )}
+                    {payer?.email && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {payer.email}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2 p-4">
+                    <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {t("paymentDetails")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-1 p-4 pt-0">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">{t("date")}</span>
+                      <span>{new Date(receipt.date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        {t("method")}
+                      </span>
+                      <span>{receipt.paymentMethod || t("na")}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Description */}
+              {receipt.description && (
+                <Card>
+                  <CardHeader className="pb-1 p-4">
+                    <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground">
+                      {t("description")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0">
+                    <p className="text-xs italic">{receipt.description}</p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Amount */}
+              <div className="border-t border-dashed pt-4 flex justify-between items-end">
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    {t("processedBy")}: {receipt.manager.name}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {t("createdOn")}{" "}
+                    {new Date(receipt.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-semibold block uppercase tracking-tighter">
+                    {t("amountPaid")}
+                  </span>
+                  <span
+                    className={`text-3xl font-black ${
+                      receipt.type === "STUDENT_PAYMENT"
+                        ? "text-green-600"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    $ {receipt.amount.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-muted-foreground text-[10px] pt-4 border-t border-dashed">
+                <p>{t("thankYou")}</p>
+                <p className="mt-1 opacity-50">
+                  Authorized Signature Not Required
+                </p>
               </div>
             </div>
-
-            {/* Payer Info */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">{t("paymentFrom")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                <p className="font-semibold">{payer?.name}</p>
-                {receipt.student?.grade && (
-                  <p className="text-sm text-muted-foreground">{t("grade")}: {receipt.student.grade}</p>
-                )}
-                {payer?.email && <p className="text-sm text-muted-foreground">{payer.email}</p>}
-                {payer?.phone && <p className="text-sm text-muted-foreground">{payer.phone}</p>}
-              </CardContent>
-            </Card>
-
-            {/* Payment Details */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">{t("paymentDetails")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("date")}</span>
-                  <span>{new Date(receipt.date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("method")}</span>
-                  <span>{receipt.paymentMethod || t("na")}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("processedBy")}</span>
-                  <span>{receipt.manager.name}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Description */}
-            {receipt.description && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-muted-foreground">{t("description")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">{receipt.description}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Amount */}
-            <div className="border-t pt-4">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">{t("amountPaid")}</span>
-                <span className={`text-3xl font-bold ${
-                  receipt.type === "STUDENT_PAYMENT" ? "text-green-600" : "text-orange-600"
-                }`}>
-                  MAD {receipt.amount.toFixed(2)}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground text-right mt-1">
-                {t("createdOn")} {new Date(receipt.createdAt).toLocaleString()}
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="text-center text-muted-foreground text-xs pt-4 border-t">
-              <p>{t("thankYou")}</p>
-            </div>
-          </div>
+          </PdfExporter>
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

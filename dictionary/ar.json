@@ -796,7 +796,8 @@
     "errorCreateReceipt": "فشل إنشاء الإيصال",
     "errorSomethingWrong": "حدث خطأ ما",
     "errorCamera": "لا يمكن الوصول إلى الكاميرا",
-    "studentNotFound": "لم يتم العثور على الطالب"
+    "studentNotFound": "لم يتم العثور على الطالب",
+    "studentAlreadyPaid": "لقد قام هذا الطالب بالفعل بالدفع لهذه الفترة."
   },
   "Dashboard": {
     "title": "لوحة التحكم",
