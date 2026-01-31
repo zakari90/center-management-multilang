@@ -809,26 +809,20 @@ export default function AddStudentDialog({
           >
             <div className="space-y-4">
               {adminMode && (
-                <div
-                  className={currentStep !== 1 ? "hidden md:block" : "block"}
-                >
+                <div className={currentStep !== 1 ? "hidden" : "block"}>
                   {renderStep0()}
                 </div>
               )}
               <div
                 className={
-                  currentStep !== (adminMode ? 2 : 1)
-                    ? "hidden md:block"
-                    : "block"
+                  currentStep !== (adminMode ? 2 : 1) ? "hidden" : "block"
                 }
               >
                 {renderStep1()}
               </div>
               <div
                 className={
-                  currentStep !== (adminMode ? 3 : 2)
-                    ? "hidden md:block"
-                    : "block"
+                  currentStep !== (adminMode ? 3 : 2) ? "hidden" : "block"
                 }
               >
                 {renderStep2()}
@@ -838,7 +832,7 @@ export default function AddStudentDialog({
                   currentStep === totalSteps
                     ? "block"
                     : enrolledSubjects.length > 0
-                      ? "hidden md:block"
+                      ? "hidden"
                       : "hidden"
                 }
               >
@@ -850,7 +844,7 @@ export default function AddStudentDialog({
 
         <div className="p-4 sm:p-6 pt-2 sm:pt-3 border-t shrink-0 bg-muted/5">
           {/* Mobile Navigation Buttons */}
-          <div className="flex justify-between gap-3 md:hidden">
+          <div className="flex justify-between gap-3">
             <Button
               type="button"
               variant="outline"
@@ -898,7 +892,7 @@ export default function AddStudentDialog({
           </div>
 
           {/* Desktop Action Buttons */}
-          <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3">
+          {/* <div className="hidden md:flex flex-col-reverse sm:flex-row justify-end gap-3">
             <Button
               type="button"
               variant="outline"
@@ -921,7 +915,7 @@ export default function AddStudentDialog({
                 t("actionssubmit")
               )}
             </Button>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>
