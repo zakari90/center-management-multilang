@@ -362,21 +362,7 @@
     "paymentStartDay": "يوم البدء (مثال: 1)",
     "paymentEndDay": "يوم الانتهاء (مثال: 5)",
     "fromDay": "من يوم",
-    "toDay": "إلى يوم",
-    "academicYearInfo": {
-      "title": "أبرز تفاصيل الموسم الدراسي {year}",
-      "editTitle": "تعديل تفاصيل الموسم الدراسي",
-      "academicYearLabel": "الموسم الدراسي (مثال: 2025-2026)",
-      "staffEntryDateLabel": "تاريخ التحاق الأطر",
-      "studentEntryDateLabel": "تاريخ التحاق التلاميذ",
-      "schoolEndDateBacLabel": "تاريخ نهاية الدراسة (بكالوريا)",
-      "schoolEndDateOtherLabel": "تاريخ نهاية الدراسة (باقي المستويات)",
-      "startTitle": "انطلاق الدخول المدرسي",
-      "startDetails": "التحق أطر التربية والتكوين في {staffDate}، وتم تأجيل دخول التلاميذ إلى غاية {studentDate} في بعض الحالات لضمان جاهزية المؤسسات.",
-      "endTitle": "نهاية الموسم الدراسي",
-      "endDetails": "تستمر الدراسة للثانية بكالوريا إلى {bacDate}، بينما تنتهي في {otherDate} للابتدائي والإعدادي والجذوع المشتركة.",
-      "updated": "تم تحديث تفاصيل الموسم الدراسي بنجاح"
-    }
+    "toDay": "إلى يوم"
   },
   "NewCenterForm": {
     "basicInformation": "معلومات أساسية",

@@ -360,21 +360,7 @@
     "paymentStartDay": "Jour de début (ex: 1)",
     "paymentEndDay": "Jour de fin (ex: 5)",
     "fromDay": "Du jour",
-    "toDay": "Au jour",
-    "academicYearInfo": {
-      "title": "Détails de l'année scolaire {year}",
-      "editTitle": "Modifier les détails de l'année scolaire",
-      "academicYearLabel": "Année scolaire (ex: 2025-2026)",
-      "staffEntryDateLabel": "Date de rentrée du personnel",
-      "studentEntryDateLabel": "Date de rentrée des élèves",
-      "schoolEndDateBacLabel": "Date de fin des cours (Baccalauréat)",
-      "schoolEndDateOtherLabel": "Date de fin des cours (Autres niveaux)",
-      "startTitle": "Rentrée scolaire",
-      "startDetails": "Le personnel de l'éducation et de la formation a rejoint le {staffDate}. L'entrée des élèves a été reportée au {studentDate} dans certains cas pour assurer la préparation des établissements.",
-      "endTitle": "Fin de l'année scolaire",
-      "endDetails": "Les études se poursuivent pour la 2ème Bac jusqu'au {bacDate}, tandis qu'elles se terminent le {otherDate} pour le Primaire, le Collège et le Tronc Commun.",
-      "updated": "Détails de l'année scolaire mis à jour avec succès"
-    }
+    "toDay": "Au jour"
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",
