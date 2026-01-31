@@ -26,13 +26,15 @@ function transformServerTeacher(serverTeacher: any): Teacher {
     address: serverTeacher.address || undefined,
     weeklySchedule: serverTeacher.weeklySchedule || undefined,
     managerId: serverTeacher.managerId,
-    status: '1' as const,
-    createdAt: typeof serverTeacher.createdAt === 'string'
-      ? new Date(serverTeacher.createdAt).getTime()
-      : serverTeacher.createdAt || Date.now(),
-    updatedAt: typeof serverTeacher.updatedAt === 'string'
-      ? new Date(serverTeacher.updatedAt).getTime()
-      : serverTeacher.updatedAt || Date.now(),
+    status: "1" as const,
+    createdAt:
+      typeof serverTeacher.createdAt === "string"
+        ? new Date(serverTeacher.createdAt).getTime()
+        : serverTeacher.createdAt || Date.now(),
+    updatedAt:
+      typeof serverTeacher.updatedAt === "string"
+        ? new Date(serverTeacher.updatedAt).getTime()
+        : serverTeacher.updatedAt || Date.now(),
   };
 }
 
@@ -42,8 +44,8 @@ const ServerActionTeachers = {
     try {
       const teacherSubjects = await teacherSubjectActions.getAll();
       const subjects = teacherSubjects
-        .filter(ts => ts.teacherId === teacher.id && ts.status !== '0')
-        .map(ts => ({
+        .filter((ts) => ts.teacherId === teacher.id && ts.status !== "0")
+        .map((ts) => ({
           subjectId: ts.subjectId,
           percentage: ts.percentage ?? null,
           hourlyRate: ts.hourlyRate ?? null,
@@ -60,7 +62,12 @@ const ServerActionTeachers = {
           email: teacher.email,
           phone: teacher.phone,
           address: teacher.address,
-          weeklySchedule: teacher.weeklySchedule ? (Array.isArray(teacher.weeklySchedule) ? teacher.weeklySchedule : Object.values(teacher.weeklySchedule)) : [],
+          managerId: teacher.managerId,
+          weeklySchedule: teacher.weeklySchedule
+            ? Array.isArray(teacher.weeklySchedule)
+              ? teacher.weeklySchedule
+              : Object.values(teacher.weeklySchedule)
+            : [],
           subjects,
         }),
       });
@@ -76,7 +83,12 @@ const ServerActionTeachers = {
             email: teacher.email,
             phone: teacher.phone,
             address: teacher.address,
-            weeklySchedule: teacher.weeklySchedule ? (Array.isArray(teacher.weeklySchedule) ? teacher.weeklySchedule : Object.values(teacher.weeklySchedule)) : [],
+            managerId: teacher.managerId,
+            weeklySchedule: teacher.weeklySchedule
+              ? Array.isArray(teacher.weeklySchedule)
+                ? teacher.weeklySchedule
+                : Object.values(teacher.weeklySchedule)
+              : [],
             subjects,
           }),
         });
@@ -84,7 +96,9 @@ const ServerActionTeachers = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        throw new Error(
+          `HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || "Unknown error"}`,
+        );
       }
       return response.json();
     } catch (e) {
@@ -95,7 +109,7 @@ const ServerActionTeachers = {
 
   async DeleteFromServer(id: string) {
     try {
-      const response = await fetch(`${api_url}/${id}`, { 
+      const response = await fetch(`${api_url}/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -115,24 +129,40 @@ const ServerActionTeachers = {
     try {
       if (!isOnline()) {
         console.warn("Device is offline, skipping teacher sync");
-        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
+        return {
+          message: "Cannot sync: offline",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
       }
 
       const waitingData = await teacherActions.getByStatus(["0", "w"]);
-      if (waitingData.length === 0) return { message: "No teachers to sync.", results: [], successCount: 0, failCount: 0 };
+      if (waitingData.length === 0)
+        return {
+          message: "No teachers to sync.",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
 
-      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+      const results: Array<{ id: string; success: boolean; error?: string }> =
+        [];
 
       for (const teacher of waitingData) {
         try {
           if (teacher.status === "0") {
             // Pending deletion
-            const result = await ServerActionTeachers.DeleteFromServer(teacher.id);
+            const result = await ServerActionTeachers.DeleteFromServer(
+              teacher.id,
+            );
             if (result && result.ok) {
               await teacherActions.deleteLocal(teacher.id);
               results.push({ id: teacher.id, success: true });
             } else {
-              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              const errorMsg = result
+                ? `Server returned ${result.status}`
+                : "Network error";
               results.push({ id: teacher.id, success: false, error: errorMsg });
             }
           } else if (teacher.status === "w") {
@@ -146,25 +176,34 @@ const ServerActionTeachers = {
                 ...(result.name && { name: result.name }),
                 ...(result.email !== undefined && { email: result.email }),
                 ...(result.phone !== undefined && { phone: result.phone }),
-                ...(result.address !== undefined && { address: result.address }),
-                ...(result.weeklySchedule && { weeklySchedule: result.weeklySchedule }),
-                status: '1' as const,
+                ...(result.address !== undefined && {
+                  address: result.address,
+                }),
+                ...(result.weeklySchedule && {
+                  weeklySchedule: result.weeklySchedule,
+                }),
+                status: "1" as const,
                 updatedAt: Date.now(),
               });
               results.push({ id: teacher.id, success: true });
             } else {
-              results.push({ id: teacher.id, success: false, error: "Server request failed" });
+              results.push({
+                id: teacher.id,
+                success: false,
+                error: "Server request failed",
+              });
             }
           }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          const errorMsg =
+            error instanceof Error ? error.message : "Unknown error";
           console.error(`Error syncing teacher ${teacher.id}:`, error);
           results.push({ id: teacher.id, success: false, error: errorMsg });
         }
       }
 
-      const successCount = results.filter(r => r.success).length;
-      const failCount = results.filter(r => !r.success).length;
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.filter((r) => !r.success).length;
 
       return {
         message: `Teacher sync completed. ${successCount} succeeded, ${failCount} failed.`,
@@ -173,14 +212,17 @@ const ServerActionTeachers = {
         failCount,
       };
     } catch (globalError: any) {
-       console.error("Critical error in ServerActionTeachers.Sync:", globalError);
-       return { 
-         message: "Sync failed completely", 
-         results: [], 
-         successCount: 0, 
-         failCount: 1, 
-         error: globalError.message 
-       };
+      console.error(
+        "Critical error in ServerActionTeachers.Sync:",
+        globalError,
+      );
+      return {
+        message: "Sync failed completely",
+        results: [],
+        successCount: 0,
+        failCount: 1,
+        error: globalError.message,
+      };
     }
   },
 
@@ -205,111 +247,141 @@ const ServerActionTeachers = {
 
     try {
       const data = await ServerActionTeachers.ReadFromServer();
-      
+
       // ✅ Get pending local changes that should NOT be overwritten
-      const pendingTeachers = await teacherActions.getByStatus(['w', '0']);
-      const pendingIds = new Set(pendingTeachers.map(t => t.id));
-      
+      const pendingTeachers = await teacherActions.getByStatus(["w", "0"]);
+      const pendingIds = new Set(pendingTeachers.map((t) => t.id));
+
       // ✅ Also get pending teacherSubjects
-      const pendingTeacherSubjects = await teacherSubjectActions.getByStatus(['w', '0']);
-      const pendingTeacherSubjectIds = new Set(pendingTeacherSubjects.map(ts => ts.id));
-      
+      const pendingTeacherSubjects = await teacherSubjectActions.getByStatus([
+        "w",
+        "0",
+      ]);
+      const pendingTeacherSubjectIds = new Set(
+        pendingTeacherSubjects.map((ts) => ts.id),
+      );
+
       const syncedTeachers = await teacherActions.getByStatus(["1"]);
       const backup = [...syncedTeachers];
-      
+
       try {
         for (const teacher of syncedTeachers) {
           await teacherActions.deleteLocal(teacher.id);
         }
-        
-        const transformedTeachers = Array.isArray(data) 
+
+        const transformedTeachers = Array.isArray(data)
           ? data.map((teacher: any) => transformServerTeacher(teacher))
           : [];
-        
+
         // ✅ Collect all teacherSubjects from server response
         const allTeacherSubjects: any[] = [];
         if (Array.isArray(data)) {
           for (const teacher of data) {
-            if (teacher.teacherSubjects && Array.isArray(teacher.teacherSubjects)) {
+            if (
+              teacher.teacherSubjects &&
+              Array.isArray(teacher.teacherSubjects)
+            ) {
               for (const ts of teacher.teacherSubjects) {
                 // Skip if there are pending local changes for this teacherSubject
                 if (pendingTeacherSubjectIds.has(ts.id)) {
-                  console.log(`[ImportFromServer] Preserved teacherSubject ${ts.id} with pending local changes`);
+                  console.log(
+                    `[ImportFromServer] Preserved teacherSubject ${ts.id} with pending local changes`,
+                  );
                   continue;
                 }
-                
+
                 allTeacherSubjects.push({
                   id: ts.id,
                   teacherId: ts.teacherId,
                   subjectId: ts.subjectId,
                   percentage: ts.percentage ?? null,
                   hourlyRate: ts.hourlyRate ?? null,
-                  assignedAt: typeof ts.assignedAt === 'string' 
-                    ? new Date(ts.assignedAt).getTime() 
-                    : ts.assignedAt || Date.now(),
-                  status: '1' as const,
-                  createdAt: typeof ts.createdAt === 'string'
-                    ? new Date(ts.createdAt).getTime()
-                    : ts.createdAt || Date.now(),
-                  updatedAt: typeof ts.updatedAt === 'string'
-                    ? new Date(ts.updatedAt).getTime()
-                    : ts.updatedAt || Date.now(),
+                  assignedAt:
+                    typeof ts.assignedAt === "string"
+                      ? new Date(ts.assignedAt).getTime()
+                      : ts.assignedAt || Date.now(),
+                  status: "1" as const,
+                  createdAt:
+                    typeof ts.createdAt === "string"
+                      ? new Date(ts.createdAt).getTime()
+                      : ts.createdAt || Date.now(),
+                  updatedAt:
+                    typeof ts.updatedAt === "string"
+                      ? new Date(ts.updatedAt).getTime()
+                      : ts.updatedAt || Date.now(),
                 });
               }
             }
           }
         }
-        
+
         for (const teacher of transformedTeachers) {
           // ✅ Skip if there are pending local changes for this teacher
           if (pendingIds.has(teacher.id)) {
-            console.log(`[ImportFromServer] Preserved teacher ${teacher.id} with pending local changes`);
+            console.log(
+              `[ImportFromServer] Preserved teacher ${teacher.id} with pending local changes`,
+            );
             continue;
           }
-          
+
           const existing = await teacherActions.getLocal(teacher.id);
-          if (existing && existing.status === 'w') {
+          if (existing && existing.status === "w") {
             continue; // Don't overwrite local pending changes
           }
           await teacherActions.putLocal(teacher);
         }
-        
+
         // ✅ Clear synced teacherSubjects for the imported teachers and save new ones
-        const syncedTeacherSubjects = await teacherSubjectActions.getByStatus(["1"]);
-        const teacherIdsToImport = new Set(transformedTeachers.filter(t => !pendingIds.has(t.id)).map(t => t.id));
-        
+        const syncedTeacherSubjects = await teacherSubjectActions.getByStatus([
+          "1",
+        ]);
+        const teacherIdsToImport = new Set(
+          transformedTeachers
+            .filter((t) => !pendingIds.has(t.id))
+            .map((t) => t.id),
+        );
+
         for (const ts of syncedTeacherSubjects) {
           // Only delete teacherSubjects for teachers we're importing
           if (teacherIdsToImport.has(ts.teacherId)) {
             await teacherSubjectActions.deleteLocal(ts.id);
           }
         }
-        
+
         // ✅ Save all teacherSubjects from server
         for (const ts of allTeacherSubjects) {
           await teacherSubjectActions.putLocal(ts);
         }
-        
+
         if (pendingIds.size > 0) {
-          console.log(`[ImportFromServer] Preserved ${pendingIds.size} teacher(s) with pending local changes`);
+          console.log(
+            `[ImportFromServer] Preserved ${pendingIds.size} teacher(s) with pending local changes`,
+          );
         }
-        
-        console.log(`[ImportFromServer] Imported ${allTeacherSubjects.length} teacherSubjects from server`);
-        
-        return { message: `Imported ${transformedTeachers.length} teachers from server.`, count: transformedTeachers.length };
+
+        console.log(
+          `[ImportFromServer] Imported ${allTeacherSubjects.length} teacherSubjects from server`,
+        );
+
+        return {
+          message: `Imported ${transformedTeachers.length} teachers from server.`,
+          count: transformedTeachers.length,
+        };
       } catch (error) {
         console.error("Error during import, restoring backup:", error);
         for (const teacher of backup) {
           await teacherActions.putLocal(teacher);
         }
-        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
+        throw new Error(
+          "Import failed, local data restored. Error: " +
+            (error instanceof Error ? error.message : "Unknown"),
+        );
       }
     } catch (error) {
       console.error("Error importing from server:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default ServerActionTeachers;
-
