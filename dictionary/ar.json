@@ -479,7 +479,9 @@
     "paymentState": "حالة الدفع",
     "paid": "تم الدفع",
     "partial": "دفع جزئي",
-    "unpaid": "لم يتم الدفع"
+    "unpaid": "لم يتم الدفع",
+    "students": "طلاب",
+    "teachers": "معلمون"
   },
   "TeacherScheduleView": {
     "title": "جداول المعلمين",

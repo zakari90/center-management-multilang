@@ -514,7 +514,9 @@
     "paymentState": "Payment State",
     "paid": "Paid",
     "partial": "Partial",
-    "unpaid": "Unpaid"
+    "unpaid": "Unpaid",
+    "students": "students",
+    "teachers": "teachers"
   },
   "TeacherScheduleView": {
     "title": "Teacher Schedules",

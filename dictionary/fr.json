@@ -487,7 +487,9 @@
     "paymentState": "État du paiement",
     "paid": "Payé",
     "partial": "Partiel",
-    "unpaid": "Non payé"
+    "unpaid": "Non payé",
+    "students": "élèves",
+    "teachers": "enseignants"
   },
   "TeacherScheduleView": {
     "title": "Horaires des enseignants",
