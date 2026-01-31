@@ -39,7 +39,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocalizedConstants } from "../useLocalizedConstants";
 import {
   scheduleActions,
@@ -168,6 +168,8 @@ export default function TimetableManagement({
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [selectedScheduleDetails, setSelectedScheduleDetails] =
     useState<ScheduleSlot | null>(null);
+
+  const isSubmittingRef = useRef(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -433,6 +435,8 @@ export default function TimetableManagement({
   >([]);
 
   const handleAddSchedule = async (force = false) => {
+    if (isSubmittingRef.current) return;
+
     if (
       !selectedSlot ||
       !newEntry.teacherId ||
@@ -448,6 +452,7 @@ export default function TimetableManagement({
       return;
     }
 
+    isSubmittingRef.current = true;
     setIsSaving(true);
     try {
       // ✅ Check for conflicts in local DB
@@ -557,6 +562,7 @@ export default function TimetableManagement({
       setError(t("errorAddSchedule"));
     } finally {
       setIsSaving(false);
+      isSubmittingRef.current = false;
     }
   };
 

@@ -1839,20 +1839,5 @@
     "searchPlaceholder": "Search {table}...",
     "emptyMessage": "No {table} found",
     "modalDescription": "View and manage all {table} in your database"
-  },
-  "ScheduleAssignment": {
-    "title": "Room & Time Assignment",
-    "subtitle": "Assign teachers to rooms and time slots",
-    "roomView": "Room View",
-    "teacherView": "Teacher View",
-    "selectTeacher": "Select a teacher",
-    "selectRoom": "Select a room",
-    "assignToSlot": "Assign to Slot (Beta)",
-    "availableTeachers": "Available Teachers",
-    "noAvailableTeachers": "No teachers available for this slot",
-    "roomOccupied": "Room already occupied",
-    "teacherBusy": "Teacher already has a class",
-    "assignmentSuccess": "Assignment saved successfully",
-    "subject": "Subject"
   }
 }

@@ -1814,20 +1814,5 @@
     "searchPlaceholder": "ابحث في {table}...",
     "emptyMessage": "لم يتم العثور على {table}",
     "modalDescription": "عرض وإدارة جميع {table} في قاعدة البيانات الخاصة بك"
-  },
-  "ScheduleAssignment": {
-    "title": "تعيين القاعات والأوقات",
-    "subtitle": "تعيين الأساتذة للقاعات والفترات الزمنية",
-    "roomView": "عرض القاعات",
-    "teacherView": "عرض الأساتذة",
-    "selectTeacher": "اختر أستاذاً",
-    "selectRoom": "اختر قاعة",
-    "assignToSlot": "تعيين للحصة (تجريبي)",
-    "availableTeachers": "الأساتذة المتاحون",
-    "noAvailableTeachers": "لا يوجد أساتذة متاحون لهذه الفترة",
-    "roomOccupied": "القاعة مشغولة بالفعل",
-    "teacherBusy": "الأستاذ لديه حصة بالفعل",
-    "assignmentSuccess": "تم حفظ التعيين بنجاح",
-    "subject": "المادة"
   }
 }

@@ -1818,20 +1818,5 @@
     "searchPlaceholder": "Rechercher {table}...",
     "emptyMessage": "Aucun {table} trouvé",
     "modalDescription": "Voir et gérer tous les {table} dans votre base de données"
-  },
-  "ScheduleAssignment": {
-    "title": "Attribution des Salles et Horaires",
-    "subtitle": "Assigner des enseignants aux salles et créneaux horaires",
-    "roomView": "Vue Salle",
-    "teacherView": "Vue Enseignant",
-    "selectTeacher": "Sélectionner un enseignant",
-    "selectRoom": "Sélectionner une salle",
-    "assignToSlot": "Assigner au créneau (Bêta)",
-    "availableTeachers": "Enseignants disponibles",
-    "noAvailableTeachers": "Aucun enseignant disponible pour ce créneau",
-    "roomOccupied": "Salle déjà occupée",
-    "teacherBusy": "L'enseignant a déjà un cours",
-    "assignmentSuccess": "Attribution enregistrée avec succès",
-    "subject": "Matière"
   }
 }
