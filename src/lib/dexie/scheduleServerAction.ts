@@ -90,6 +90,13 @@ const ServerActionSchedules = {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(
+            `⚠️ Schedule ${id} already deleted from server (404), treating as success.`,
+          );
+          return response;
+        }
+
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error || "Unknown error";
         console.error(
