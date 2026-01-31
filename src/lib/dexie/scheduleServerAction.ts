@@ -172,6 +172,10 @@ const ServerActionSchedules = {
             // Waiting to sync
             try {
               const result = await ServerActionSchedules.SaveToServer(schedule);
+              // If server returns a different ID, delete the old local record first
+              if (result.id && result.id !== schedule.id) {
+                await scheduleActions.deleteLocal(schedule.id);
+              }
               // Mark as synced and clear any previous errors
               await scheduleActions.putLocal({
                 ...schedule,

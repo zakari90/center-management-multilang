@@ -602,9 +602,35 @@ export default function TimetableManagement({
   });
 
   const getSlotsByDayAndTime = (day: string, time: string) => {
-    return filteredSchedule.filter(
+    const slots = filteredSchedule.filter(
       (s) => s.day === day && s.startTime === time,
     );
+
+    // Deduplicate: prefer synced ('1') over pending ('w')
+    const uniqueSlots: ScheduleSlot[] = [];
+    const seenKeys = new Set<string>();
+
+    // Sort: synced first, then by ID for stability
+    const sortedSlots = [...slots].sort((a, b) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const aStatus = (a as any).status;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bStatus = (b as any).status;
+      if (aStatus === "1" && bStatus !== "1") return -1;
+      if (aStatus !== "1" && bStatus === "1") return 1;
+      return 0;
+    });
+
+    for (const slot of sortedSlots) {
+      // Create a unique key for this slot based on teacher+subject+room
+      const key = `${slot.teacherId}-${slot.subjectId}-${slot.roomId}`;
+      if (!seenKeys.has(key)) {
+        uniqueSlots.push(slot);
+        seenKeys.add(key);
+      }
+    }
+
+    return uniqueSlots;
   };
 
   // Show loading while auth is checking or data is fetching
