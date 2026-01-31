@@ -185,7 +185,10 @@ export default function ScheduleAssignmentView({
         setIsLoading(false);
         return;
       }
-      if (!user?.id) return;
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
 
       const [
         allTeachers,

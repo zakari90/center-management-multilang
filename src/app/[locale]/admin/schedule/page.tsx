@@ -30,6 +30,7 @@ export default function SchedulePage() {
           <TabsTrigger value="standard">Standard View</TabsTrigger>
           <TabsTrigger value="assignment">Room Assignment</TabsTrigger>
         </TabsList>
+
         <TabsContent value="standard" className="space-y-4 pt-4">
           <TeacherScheduleView refreshKey={refreshKey} />
           <TimetableManagement
@@ -37,7 +38,7 @@ export default function SchedulePage() {
             onScheduleChangeAction={handleScheduleChange}
           />
         </TabsContent>
-        -------------------------------------------------
+
         <TabsContent value="assignment" className="space-y-4 pt-4">
           <ScheduleAssignmentView
             refreshKey={refreshKey}
