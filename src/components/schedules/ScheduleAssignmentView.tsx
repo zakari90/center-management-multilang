@@ -179,6 +179,7 @@ export default function ScheduleAssignmentView({
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError("");
+    console.log("[ScheduleAssignmentView] Starting fetchData");
     try {
       if (!user && !authLoading) {
         setError("Unauthorized");
@@ -203,6 +204,13 @@ export default function ScheduleAssignmentView({
         centerActions.getAll(),
         teacherSubjectActions.getAll(),
       ]);
+      console.log("[ScheduleAssignmentView] Fetched all entities from Dexie:", {
+        teachersCount: allTeachers.length,
+        subjectsCount: allSubjects.length,
+        schedulesCount: allSchedules.length,
+        centersCount: allCenters.length,
+        teacherSubjectsCount: allTeacherSubjects.length,
+      });
 
       const isAdmin = user.role?.toUpperCase() === "ADMIN";
 
@@ -322,6 +330,12 @@ export default function ScheduleAssignmentView({
           roomId: s.roomId,
         })),
       );
+
+      console.log("[ScheduleAssignmentView] Filtered relevant data:", {
+        relevantTeachersCount: relevantTeachers.length,
+        managerSubjectsCount: managerSubjects.length,
+        relevantSchedulesCount: filteredSchedules.length,
+      });
 
       // --- Filter Rooms ---
       if (centerId) {

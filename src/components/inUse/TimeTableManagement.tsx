@@ -172,6 +172,7 @@ export default function TimetableManagement({
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError("");
+    console.log("[TimetableManagement] Starting fetchData");
     try {
       // Only proceed if auth has finished loading and user is available
       if (!user && !authLoading) {
@@ -202,6 +203,12 @@ export default function TimetableManagement({
         centerActions.getAll(),
         teacherSubjectActions.getAll(),
       ]);
+      console.log("[TimetableManagement] Fetched all entities from Dexie:", {
+        teachersCount: allTeachers.length,
+        subjectsCount: allSubjects.length,
+        schedulesCount: allSchedules.length,
+        centersCount: allCenters.length,
+      });
 
       // ✅ Check if user is admin
       const isAdmin = user.role?.toUpperCase() === "ADMIN";
@@ -351,6 +358,13 @@ export default function TimetableManagement({
           .map((ts) => ({ teacherId: ts.teacherId, subjectId: ts.subjectId })),
       );
       setSchedule(scheduleSlots);
+
+      console.log("[TimetableManagement] Filtered relevant data:", {
+        relevantTeachersCount: relevantTeachers.length,
+        managerSubjectsCount: managerSubjects.length,
+        relevantSchedulesCount: filteredSchedules.length,
+        roomsCount: rooms.length,
+      });
 
       // ✅ Get rooms from relevant centers
       if (centerId) {
