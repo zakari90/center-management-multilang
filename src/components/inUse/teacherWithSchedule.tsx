@@ -887,7 +887,7 @@ export default function TeacherScheduleView({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 className="text-2xl font-bold">{t("title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+          <p className="text-sm text-foreground/70">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <div className="relative">
@@ -961,7 +961,7 @@ export default function TeacherScheduleView({
                   <TabsTrigger
                     key={teacher.id}
                     value={teacher.id}
-                    className="flex flex-col items-start px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground whitespace-nowrap"
+                    className="flex flex-col items-start px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-foreground/70 data-[state=inactive]:hover:text-foreground transition-colors whitespace-nowrap"
                   >
                     <div className="flex items-center gap-2 w-fit">
                       <span className="font-medium">{teacher.name}</span>
@@ -1037,43 +1037,47 @@ function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">
+          <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 dark:bg-blue-500/15 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {teacher.availableHours.toFixed(1)}
               {t("hours")}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground dark:text-foreground/60">
               {t("available")}
             </div>
           </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="text-center p-4 bg-green-500/10 border border-green-500/20 dark:bg-green-500/15 rounded-lg">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {teacher.totalHours.toFixed(1)}
               {t("hours")}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground dark:text-foreground/60">
               {t("scheduled")}
             </div>
           </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">
+          <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {teacher.costPerSubject.toFixed(2)} MAD
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground dark:text-foreground/60">
               {t("costPerSubject") || "Cost/Subject"}
             </div>
           </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">
+          <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {teacher.schedules.length}
             </div>
-            <div className="text-xs text-muted-foreground">{t("classes")}</div>
+            <div className="text-xs text-muted-foreground dark:text-foreground/60">
+              {t("classes")}
+            </div>
           </div>
-          <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <div className="text-2xl font-bold text-orange-600">
+          <div className="text-center p-4 bg-orange-500/10 border border-orange-500/20 dark:bg-orange-500/15 rounded-lg">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
               {teacher.subjectsCount}
             </div>
-            <div className="text-xs text-muted-foreground">{t("subjects")}</div>
+            <div className="text-xs text-muted-foreground dark:text-foreground/60">
+              {t("subjects")}
+            </div>
           </div>
         </div>
 
@@ -1232,8 +1236,8 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                         className={cn(
                           "p-3 rounded-md border space-y-2 transition-colors",
                           withinAvailability
-                            ? "bg-green-50 border-green-200 hover:bg-green-100"
-                            : "bg-red-50 border-red-200 hover:bg-red-100",
+                            ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10 dark:bg-green-500/10 dark:border-green-500/30"
+                            : "bg-destructive/5 border-destructive/20 hover:bg-destructive/10 dark:bg-destructive/10 dark:border-destructive/30",
                         )}
                       >
                         <div className="flex items-start justify-between">
@@ -1515,7 +1519,7 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                     >
                       <div className="text-xs p-1 text-white font-medium truncate flex items-center gap-1">
                         {isConflict && (
-                          <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                          <AlertCircle className="h-3 w-3 shrink-0" />
                         )}
                         <span className="truncate">
                           {schedule.subject.name}
