@@ -529,7 +529,8 @@ export default function TimetableManagement({
 
       await scheduleActions.putLocal(newSchedule);
 
-      // ✅ Update local state
+      // ✅ Update local state (REMOVED to prevent duplication - we rely on onScheduleChangeAction -> refresh)
+      /* 
       const scheduleSlot: ScheduleSlot = {
         id: scheduleId,
         day: selectedSlot.day,
@@ -541,6 +542,7 @@ export default function TimetableManagement({
       };
 
       setSchedule((prev) => [...prev, scheduleSlot]);
+      */
       setIsDialogOpen(false);
       setNewEntry({ teacherId: "", subjectId: "", roomId: "" });
       setError("");
@@ -571,8 +573,9 @@ export default function TimetableManagement({
       // ✅ Soft delete in local DB
       await scheduleActions.markForDelete(scheduleId);
 
-      // ✅ Update local state
-      setSchedule((prev) => prev.filter((s) => s.id !== scheduleId));
+      // ✅ Update local state (REMOVED to prevent race conditions)
+      // setSchedule((prev) => prev.filter((s) => s.id !== scheduleId));
+
       onScheduleChangeAction?.();
 
       // ✅ Commented out online delete
