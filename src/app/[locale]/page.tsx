@@ -164,7 +164,7 @@ function HomePageContent() {
           <div className="absolute inset-0 flex items-center justify-center z-10 p-12">
             <div className="w-full h-full max-h-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden relative transform -rotate-2 border-4 border-white">
               <Image
-                src="/hero-classroom-abstract.png"
+                src="/hero-classroom-abstract.jpeg"
                 fill
                 className="object-cover"
                 alt="Students in a modern classroom environment"
@@ -177,7 +177,7 @@ function HomePageContent() {
 
       {/* Bottom Contact Bar */}
       <div className="bg-[#5B7CFD] text-white py-4 px-6 fixed bottom-0 left-0 right-0 lg:static z-20">
-        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="container mx-auto hover:cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4">
           <div
             onClick={() =>
               window.open(
@@ -187,10 +187,10 @@ function HomePageContent() {
             }
             className="flex items-center gap-2"
           >
-            <span className="w-6 h-6">
+            <span className="w-8 h-8">
               <svg
                 fill="#2add27"
-                viewBox="0 0 24 24"
+                viewBox="0 0 12 12"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 stroke="#2add27"
