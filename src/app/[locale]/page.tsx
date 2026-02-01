@@ -119,7 +119,7 @@ function HomePageContent() {
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
-        <div className="flex-1 z-10 flex items-center justify-center p-6 lg:pt-6">
+        <div className="flex-1 z-10 flex justify-center p-6 mt-10 md:mt-5 md:items-center lg:pt-6">
           <div
             className="max-w-xl w-full flex flex-col items-center lg:items-start space-y-6 text-center lg:text-start"
             style={{
