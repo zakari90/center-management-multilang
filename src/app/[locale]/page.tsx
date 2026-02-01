@@ -119,7 +119,7 @@ function HomePageContent() {
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
-        <div className="flex-1 z-10 flex items-center justify-center p-6 pt-20 lg:pt-6">
+        <div className="flex-1 z-10 flex items-center justify-center p-6 lg:pt-6">
           <div
             className="max-w-xl w-full flex flex-col items-center lg:items-start space-y-6 text-center lg:text-start"
             style={{
@@ -183,7 +183,6 @@ function HomePageContent() {
           <div className="flex items-center gap-2">
             <Phone className="w-6 h-6 fill-current" />
             <IconBrandWhatsapp className="w-6 h-6 fill-current" />
-            <MessageCircle className="w-6 h-6" />
             <span className="text-lg font-bold">للتواصل معنا</span>
           </div>
 
