@@ -13,9 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Loader2, Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "./ui/switch";
 
 interface HomePageEditorProps {
   centerId: string;

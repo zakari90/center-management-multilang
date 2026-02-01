@@ -496,6 +496,7 @@ export default function CenterPresentation({
 
   return (
     <main className="max-w-3xl mx-auto p-4 sm:p-6">
+      <EntitySyncControls entity="centers" />
       <Card className="shadow-lg border border-border bg-background">
         <CardHeader className="text-center space-y-2 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
@@ -581,7 +582,6 @@ export default function CenterPresentation({
               )}
             </div>
           </div>
-
           {/* Classrooms Section */}
           <Section
             title={t("availableClassrooms")}
@@ -608,7 +608,6 @@ export default function CenterPresentation({
             }
             noDataText={t("noData")}
           />
-
           {/* Working Days Section */}
           <Section
             title={t("workingDays")}
@@ -641,7 +640,6 @@ export default function CenterPresentation({
             }
             noDataText={t("noData")}
           />
-
           {/* Payment Period Section */}
           <div className="space-y-2">
             <div className="flex flex-wrap justify-between items-center">
@@ -697,7 +695,7 @@ export default function CenterPresentation({
               </span>
             </div>
           </div>
-
+          ---------------------------------------------
           {/* Homepage Settings Section (Collapsible) */}
           <div className="space-y-2">
             <button
