@@ -190,7 +190,7 @@ function HomePageContent() {
             <span className="w-8 h-8">
               <svg
                 fill="#2add27"
-                viewBox="0 0 12 12"
+                viewBox="0 0 32 32"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 stroke="#2add27"

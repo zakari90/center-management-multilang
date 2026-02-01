@@ -91,6 +91,19 @@ const TIME_SLOTS = [
   "16:00",
   "17:00",
   "18:00",
+  "19:00",
+  "20:00",
+  "21:00",
+  "22:00",
+  "23:00",
+  "00:00",
+  "01:00",
+  "02:00",
+  "03:00",
+  "04:00",
+  "05:00",
+  "06:00",
+  "07:00",
 ];
 
 const parseWeeklySchedule = (schedule: any): any[] => {
@@ -130,10 +143,12 @@ export default function TimetableManagement({
   centerId,
   refreshKey,
   onScheduleChangeAction,
+  readOnly = false,
 }: {
   centerId?: string;
   refreshKey?: number;
   onScheduleChangeAction?: () => void;
+  readOnly?: boolean;
 }) {
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations("TimetableManagement");
@@ -421,6 +436,7 @@ export default function TimetableManagement({
   }, [authLoading, fetchData, refreshKey]);
 
   const handleSlotClick = (day: string, startTime: string) => {
+    if (readOnly) return;
     const endTimeIndex = TIME_SLOTS.indexOf(startTime) + 1;
     const endTime = TIME_SLOTS[endTimeIndex] || "18:00";
 
@@ -651,7 +667,7 @@ export default function TimetableManagement({
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         {/* Per-entity sync controls for schedules */}
-        <EntitySyncControls entity="schedules" />
+        {!readOnly && <EntitySyncControls entity="schedules" />}
       </div>
 
       {error && (
@@ -801,10 +817,13 @@ export default function TimetableManagement({
                       return (
                         <div
                           key={`${day.key}-${time}`}
-                          onClick={() => handleSlotClick(day.label, time)}
+                          onClick={() =>
+                            !readOnly && handleSlotClick(day.label, time)
+                          }
                           className={cn(
-                            "min-h-[100px] p-2 border-2 rounded-md cursor-pointer transition-all flex flex-col justify-center",
-                            "hover:border-primary hover:bg-primary/5",
+                            "min-h-[100px] p-2 border-2 rounded-md transition-all flex flex-col justify-center",
+                            !readOnly &&
+                              "cursor-pointer hover:border-primary hover:bg-primary/5",
                             slots.length === 0 && !isAvailable && "bg-muted/30",
                             isAvailable &&
                               "bg-green-50 border-green-200 hover:bg-green-100",
@@ -851,17 +870,19 @@ export default function TimetableManagement({
                                       >
                                         <Eye className="w-3 h-3 text-primary" />
                                       </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
-                                        onClick={() =>
-                                          slot.id &&
-                                          handleDeleteSchedule(slot.id)
-                                        }
-                                      >
-                                        <Trash2 className="h-3 w-3 text-destructive" />
-                                      </Button>
+                                      {!readOnly && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
+                                          onClick={() =>
+                                            slot.id &&
+                                            handleDeleteSchedule(slot.id)
+                                          }
+                                        >
+                                          <Trash2 className="h-3 w-3 text-destructive" />
+                                        </Button>
+                                      )}
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-1 text-muted-foreground">
