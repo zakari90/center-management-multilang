@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Loader2, Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { Switch } from "./ui/switch";
 
 interface HomePageEditorProps {
   centerId: string;
@@ -275,17 +274,52 @@ export function HomePageEditor({
                   "Allow visitors to register from the homepage"}
               </p>
             </div>
-            <Switch
-              id="publicRegistration"
-              checked={formData.publicRegistrationEnabled}
-              onCheckedChange={(checked) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  publicRegistrationEnabled: checked,
-                }))
-              }
-              disabled={isSubmitting}
-            />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="publicRegistrationEnabled"
+                  name="publicRegistrationEnabled"
+                  checked={formData.publicRegistrationEnabled === true}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      publicRegistrationEnabled: true,
+                    }))
+                  }
+                  disabled={isSubmitting}
+                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                />
+                <Label
+                  htmlFor="publicRegistrationEnabled"
+                  className="font-normal"
+                >
+                  {t("enabled") || "Enabled"}
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  id="publicRegistrationDisabled"
+                  name="publicRegistrationEnabled"
+                  checked={formData.publicRegistrationEnabled === false}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      publicRegistrationEnabled: false,
+                    }))
+                  }
+                  disabled={isSubmitting}
+                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                />
+                <Label
+                  htmlFor="publicRegistrationDisabled"
+                  className="font-normal"
+                >
+                  {t("disabled") || "Disabled"}
+                </Label>
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}

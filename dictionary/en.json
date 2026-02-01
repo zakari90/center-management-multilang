@@ -276,7 +276,8 @@
   "homePage": {
     "title": "Welcome to your Center Management System",
     "description": "",
-    "ownerDashboard": "Dashboard",
+    "ownerDashboard": "Login",
+    "dashboard": "Dashboard",
     "managerDashboard": "Manager Dashboard"
   },
   "adminStats": {
@@ -1839,5 +1840,54 @@
     "searchPlaceholder": "Search {table}...",
     "emptyMessage": "No {table} found",
     "modalDescription": "View and manage all {table} in your database"
+  },
+  "homePageEditor": {
+    "title": "Homepage Settings",
+    "description": "Customize your public homepage content",
+    "preview": "Preview",
+    "hidePreview": "Hide Preview",
+    "homeTitle": "Main Heading",
+    "homeSubtitle": "Secondary Heading",
+    "homeBadge": "Badge Text",
+    "homeDescription": "Description",
+    "homeCtaText": "CTA Button Text",
+    "homePhone": "Contact Phone",
+    "homeAddress": "Contact Address",
+    "publicRegistration": "Public Registration",
+    "publicRegistrationDesc": "Allow visitors to register from the homepage",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "saveSuccess": "Homepage content saved successfully!",
+    "saveFailed": "Failed to save content",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "shareRegistration": {
+    "title": "Share Registration Link",
+    "description": "Send these links to students and teachers to let them register themselves.",
+    "studentLink": "Student Registration Link",
+    "teacherLink": "Teacher Registration Link",
+    "copy": "Copy",
+    "copied": "Link copied!",
+    "shareWhatsapp": "Share on WhatsApp"
+  },
+  "publicRegistration": {
+    "studentTitle": "Student Registration",
+    "teacherTitle": "Teacher Registration",
+    "description": "Fill in your details to register",
+    "name": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "grade": "Grade",
+    "selectGrade": "Select Grade",
+    "parentName": "Parent Name",
+    "parentNamePlaceholder": "Parent Name",
+    "parentPhone": "Parent Phone",
+    "register": "Register",
+    "submitting": "Submitting...",
+    "success": "Registration submitted successfully!",
+    "successDescription": "We will contact you soon with next steps.",
+    "centerOverview": "Center Overview"
   }
 }

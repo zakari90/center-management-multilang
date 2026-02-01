@@ -8,6 +8,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { ModeToggle } from "@/components/ModeToggle";
+import { Button } from "@/components/ui/button";
 
 interface CenterContent {
   id: string;
@@ -64,20 +67,7 @@ function HomePageContent() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    // Only redirect after component has mounted and auth is loaded
-    if (!mounted || isLoading) return;
-
-    if (user?.role === "ADMIN") {
-      router.push(`/${locale}/admin`);
-      return;
-    }
-
-    if (user?.role === "MANAGER") {
-      router.push(`/${locale}/manager`);
-      return;
-    }
-  }, [user, isLoading, mounted, router, locale]);
+  // Removed auto-redirect for logged-in users to allow them to view the homepage
 
   // Show loading state while checking authentication
   if (!mounted || isLoading) {
@@ -111,6 +101,12 @@ function HomePageContent() {
     }
   };
 
+  const getDashboardLink = () => {
+    if (user?.role === "ADMIN") return `/${locale}/admin`;
+    if (user?.role === "MANAGER") return `/${locale}/manager`;
+    return `/${locale}/login`;
+  };
+
   return (
     <main
       className="min-h-screen flex flex-col bg-white overflow-hidden relative"
@@ -119,11 +115,13 @@ function HomePageContent() {
       {/* Top Navigation / Controls */}
       <div className="absolute top-4 right-4 z-50 flex gap-2">
         <Link
-          href={`/${locale}/login`}
+          href={getDashboardLink()}
           className="text-sm text-gray-500 hover:underline"
         >
-          {t("ownerDashboard")}
+          {user ? t("dashboard") : t("ownerDashboard")}
         </Link>
+        <LanguageSwitcher />
+        <ModeToggle />
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">

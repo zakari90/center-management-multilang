@@ -242,7 +242,8 @@
   "homePage": {
     "title": "أهلا بك في إدارة مركزك",
     "description": "",
-    "ownerDashboard": "لوحة التحكم ",
+    "ownerDashboard": "تسجيل الدخول",
+    "dashboard": "لوحة التحكم",
     "managerDashboard": "لوحة تحكم المشرف"
   },
   "adminStats": {
@@ -1832,7 +1833,9 @@
     "saving": "جاري الحفظ...",
     "saveChanges": "حفظ التغييرات",
     "saveSuccess": "تم حفظ محتوى الصفحة الرئيسية بنجاح!",
-    "saveFailed": "فشل حفظ المحتوى"
+    "saveFailed": "فشل حفظ المحتوى",
+    "enabled": "مفعل",
+    "disabled": "معطل"
   },
   "shareRegistration": {
     "title": "مشاركة روابط التسجيل",

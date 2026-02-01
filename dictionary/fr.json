@@ -240,7 +240,8 @@
   "homePage": {
     "title": "Bienvenue à la gestion de votre centre",
     "description": "",
-    "ownerDashboard": "Tableau de bord",
+    "ownerDashboard": "Démarrer session",
+    "dashboard": "Tableau de bord",
     "managerDashboard": "Tableau de bord du gestionnaire"
   },
   "adminStats": {
@@ -1836,7 +1837,9 @@
     "saving": "Enregistrement...",
     "saveChanges": "Enregistrer les modifications",
     "saveSuccess": "Contenu de la page d'accueil enregistré avec succès !",
-    "saveFailed": "Échec de l'enregistrement du contenu"
+    "saveFailed": "Échec de l'enregistrement du contenu",
+    "enabled": "Activé",
+    "disabled": "Désactivé"
   },
   "shareRegistration": {
     "title": "Partager les liens d'inscription",
