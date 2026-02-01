@@ -46,6 +46,7 @@
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.3",
     "jsqr": "^1.4.0",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.479.0",
     "mongodb": "^6.20.0",
     "motion": "^12.23.12",

@@ -3,7 +3,8 @@
 import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
 import { useAuth } from "@/context/authContext";
 import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
+import Lottie from "lottie-react";
+import studentAnimation from "../../../public/Student-transparent.json";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
@@ -160,15 +161,14 @@ function HomePageContent() {
             <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] rounded-[50%] z-0"></div>
           </div>
 
-          {/* Image Placeholder */}
-          <div className="absolute inset-0 flex items-center justify-center z-10 p-12">
-            <div className="w-full h-full max-h-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden relative transform -rotate-2 border-4 border-white">
-              <Image
-                src="/hero-classroom-abstract.jpeg"
-                fill
-                className="object-cover"
-                alt="Students in a modern classroom environment"
-                priority
+          {/* Lottie Animation Container */}
+          <div className="absolute inset-0 flex items-center justify-center z-10 p-4">
+            <div className="w-full h-full max-h-[600px] flex items-center justify-center">
+              <Lottie
+                animationData={studentAnimation}
+                loop={true}
+                autoplay={true}
+                className="w-full h-full select-none pointer-events-none"
               />
             </div>
           </div>
