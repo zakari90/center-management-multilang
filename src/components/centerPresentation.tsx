@@ -6,35 +6,35 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useIsOnline } from "@/hooks/useOnlineStatus";
+import { Center, Subject, localDb } from "@/lib/dexie/dbSchema";
 import { centerActions, subjectActions } from "@/lib/dexie/dexieActions";
 import {
   ServerActionCenters,
   ServerActionSubjects,
 } from "@/lib/dexie/serverActions";
-import { Center, Subject, localDb } from "@/lib/dexie/dbSchema";
 import { cn, getItemColor } from "@/lib/utils";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { isOnline } from "@/lib/utils/network";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   BookOpen,
   Building2,
   CalendarDays,
-  Loader2,
-  Pencil,
-  Plus,
-  CalendarRange,
-  Clock,
-  Home,
   ChevronDown,
   ChevronUp,
+  Clock,
+  Home,
+  Pencil,
+  Plus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { isOnline } from "@/lib/utils/network";
-import { useIsOnline } from "@/hooks/useOnlineStatus";
 import { EditDialog } from "./editDialog";
 import { EditSubjectCard } from "./editSubjectCard";
+import { HomePageEditor } from "./HomePageEditor";
+import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
 import {
   Dialog,
@@ -44,8 +44,6 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { useLocalizedConstants } from "./useLocalizedConstants";
-import { HomePageEditor } from "./HomePageEditor";
-import { ShareRegistrationLink } from "./ShareRegistrationLink";
 
 interface CenterPresentationProps {
   centerId: string;
