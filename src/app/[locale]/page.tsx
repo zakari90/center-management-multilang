@@ -1,16 +1,13 @@
 "use client";
 
+import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
 import { useAuth } from "@/context/authContext";
-import { useTranslations, useLocale } from "next-intl";
+import { MessageCircle, Phone } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
-import { Button } from "@/components/ui/button";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { ModeToggle } from "@/components/ModeToggle";
-import { Phone, MessageCircle } from "lucide-react";
-import Image from "next/image";
-import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
+import { Suspense, useEffect, useState } from "react";
 
 interface CenterContent {
   id: string;
@@ -96,15 +93,15 @@ function HomePageContent() {
 
   // Use center content if available, otherwise use defaults
   const content = {
-    title: center?.homeTitle || "الاولى اعدادي",
-    subtitle: center?.homeSubtitle || "FRANCAIS - MATH",
+    title: center?.homeTitle || "مركز دروس الدعم و التقوية ",
+    subtitle: center?.homeSubtitle || "جميع المواد",
     badge: center?.homeBadge || "التسجيل مفتوح",
     description:
       center?.homeDescription ||
-      "مركز دروس الدعم و التقوية بمدينة  يقدم لكم عرض للاولى اعدادي بأثمنة جد مناسبة",
+      "مركز دروس الدعم و التقوية بمدينة  يقدم لكم عرض بأثمنة جد مناسبة",
     ctaText: center?.homeCtaText || "سارعوا للتسجيل",
     phone: center?.homePhone || "0880275000",
-    address: center?.homeAddress || "روض عبلة حي وريدة ",
+    address: center?.homeAddress || " حي وريدة ",
   };
 
   const handleRegisterClick = () => {
@@ -121,8 +118,12 @@ function HomePageContent() {
     >
       {/* Top Navigation / Controls */}
       <div className="absolute top-4 right-4 z-50 flex gap-2">
-        <LanguageSwitcher />
-        <ModeToggle />
+        <Link
+          href={`/${locale}/login`}
+          className="text-sm text-gray-500 hover:underline"
+        >
+          {t("ownerDashboard")}
+        </Link>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
@@ -159,39 +160,6 @@ function HomePageContent() {
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium">
                 {content.description}
               </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full pt-4">
-              {center ? (
-                <Button
-                  onClick={handleRegisterClick}
-                  className="flex-1 w-full h-14 bg-orange-400 hover:bg-orange-500 text-black text-xl font-bold rounded-full shadow-lg transform transition hover:scale-105"
-                  disabled={center.publicRegistrationEnabled === false}
-                >
-                  {content.ctaText}
-                </Button>
-              ) : (
-                <Link href={`/${locale}/register`} className="flex-1">
-                  <Button className="w-full h-14 bg-orange-400 hover:bg-orange-500 text-black text-xl font-bold rounded-full shadow-lg transform transition hover:scale-105">
-                    {content.ctaText}
-                  </Button>
-                </Link>
-              )}
-
-              <div className="flex items-center justify-center h-14 w-full sm:w-auto px-6 bg-blue-600 text-white rounded-full font-bold text-lg shadow-md">
-                الان ممكن
-              </div>
-            </div>
-
-            {/* Owner Login Link (Subtle) */}
-            <div className="pt-8">
-              <Link
-                href={`/${locale}/login`}
-                className="text-sm text-gray-500 hover:underline"
-              >
-                {t("ownerDashboard")}
-              </Link>
             </div>
           </div>
         </div>
