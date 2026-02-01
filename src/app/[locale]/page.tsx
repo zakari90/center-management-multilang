@@ -2,15 +2,12 @@
 
 import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
 import { useAuth } from "@/context/authContext";
+import { IconBrandWhatsapp } from "@tabler/icons-react";
 import { MessageCircle, Phone } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { ModeToggle } from "@/components/ModeToggle";
-import { Button } from "@/components/ui/button";
 
 interface CenterContent {
   id: string;
@@ -112,20 +109,16 @@ function HomePageContent() {
       className="min-h-screen flex flex-col bg-white overflow-hidden relative"
       dir={locale === "ar" ? "rtl" : "ltr"}
     >
-      {/* Top Navigation / Controls */}
       <div className="absolute top-4 right-4 z-50 flex gap-2">
-        <Link
-          href={getDashboardLink()}
-          className="text-sm text-gray-500 hover:underline"
+        <div
+          onDoubleClick={() => router.push(getDashboardLink())}
+          className="text-sm text-gray-500 hover:underline cursor-pointer select-none"
         >
           {user ? t("dashboard") : t("ownerDashboard")}
-        </Link>
-        <LanguageSwitcher />
-        <ModeToggle />
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
-        {/* Right Content (Text) */}
         <div className="flex-1 z-10 flex items-center justify-center p-6 pt-20 lg:pt-6">
           <div
             className="max-w-xl w-full flex flex-col items-center lg:items-start space-y-6 text-center lg:text-start"
@@ -189,13 +182,21 @@ function HomePageContent() {
         <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Phone className="w-6 h-6 fill-current" />
+            <IconBrandWhatsapp className="w-6 h-6 fill-current" />
             <MessageCircle className="w-6 h-6" />
             <span className="text-lg font-bold">للتواصل معنا</span>
           </div>
 
-          <div className="flex items-center gap-4 bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
+          <div
+            onClick={() =>
+              window.open(
+                `https://wa.me/${content.phone?.replace(/\D/g, "")}`,
+                "_blank",
+              )
+            }
+            className="flex items-center gap-4 bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm cursor-pointer hover:bg-white/30 transition-colors"
+          >
             <span className="text-xl font-mono dir-ltr">{content.phone}</span>
-            <MessageCircle className="w-6 h-6" />
           </div>
 
           <div className="text-sm font-light opacity-90">{content.address}</div>
