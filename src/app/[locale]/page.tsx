@@ -4,7 +4,7 @@ import { useAuth } from "@/context/authContext";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ModeToggle } from "@/components/ModeToggle";
@@ -25,7 +25,7 @@ interface CenterContent {
   publicRegistrationEnabled?: boolean;
 }
 
-export default function HomePage() {
+function HomePageContent() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
@@ -88,7 +88,7 @@ export default function HomePage() {
       <div className="flex min-h-screen items-center justify-center bg-white dark:bg-slate-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-blue-600 dark:text-blue-400">Loading...</p>
+          <p className="mt-4 text-blue-600 dark:text-blue-400">...</p>
         </div>
       </div>
     );
@@ -101,10 +101,10 @@ export default function HomePage() {
     badge: center?.homeBadge || "التسجيل مفتوح",
     description:
       center?.homeDescription ||
-      "مركز دروس الدعم و التقوية بمدينة تازة يقدم لكم عرض للاولى اعدادي بأثمنة جد مناسبة",
+      "مركز دروس الدعم و التقوية بمدينة  يقدم لكم عرض للاولى اعدادي بأثمنة جد مناسبة",
     ctaText: center?.homeCtaText || "سارعوا للتسجيل",
-    phone: center?.homePhone || "0770275193",
-    address: center?.homeAddress || "روض عبلة حي وريدة تازة",
+    phone: center?.homePhone || "0880275000",
+    address: center?.homeAddress || "روض عبلة حي وريدة ",
   };
 
   const handleRegisterClick = () => {
@@ -244,5 +244,22 @@ export default function HomePage() {
         centerId={center?.id}
       />
     </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-white dark:bg-slate-900">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-blue-600 dark:text-blue-400">...</p>
+          </div>
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 }
