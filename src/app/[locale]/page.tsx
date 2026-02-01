@@ -3,19 +3,65 @@
 import { useAuth } from "@/context/authContext";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Phone, MessageCircle } from "lucide-react";
+import Image from "next/image";
+import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
+
+interface CenterContent {
+  id: string;
+  name: string;
+  homeTitle?: string | null;
+  homeSubtitle?: string | null;
+  homeBadge?: string | null;
+  homeDescription?: string | null;
+  homeCtaText?: string | null;
+  homePhone?: string | null;
+  homeAddress?: string | null;
+  publicRegistrationEnabled?: boolean;
+}
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const t = useTranslations("homePage");
   const [mounted, setMounted] = useState(false);
+  const [center, setCenter] = useState<CenterContent | null>(null);
+  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [registerType, setRegisterType] = useState<"student" | "teacher">(
+    "student",
+  );
+
+  // Check URL parameter for registration type
+  useEffect(() => {
+    const regType = searchParams.get("register");
+    if (regType === "student" || regType === "teacher") {
+      setRegisterType(regType);
+      setShowRegisterDialog(true);
+    }
+  }, [searchParams]);
+
+  // Fetch center content on mount
+  useEffect(() => {
+    const fetchCenter = async () => {
+      try {
+        const response = await fetch("/api/public/center");
+        if (response.ok) {
+          const data = await response.json();
+          setCenter(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch center:", error);
+      }
+    };
+    fetchCenter();
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -48,6 +94,26 @@ export default function HomePage() {
     );
   }
 
+  // Use center content if available, otherwise use defaults
+  const content = {
+    title: center?.homeTitle || "الاولى اعدادي",
+    subtitle: center?.homeSubtitle || "FRANCAIS - MATH",
+    badge: center?.homeBadge || "التسجيل مفتوح",
+    description:
+      center?.homeDescription ||
+      "مركز دروس الدعم و التقوية بمدينة تازة يقدم لكم عرض للاولى اعدادي بأثمنة جد مناسبة",
+    ctaText: center?.homeCtaText || "سارعوا للتسجيل",
+    phone: center?.homePhone || "0770275193",
+    address: center?.homeAddress || "روض عبلة حي وريدة تازة",
+  };
+
+  const handleRegisterClick = () => {
+    if (center && center.publicRegistrationEnabled !== false) {
+      setRegisterType("student");
+      setShowRegisterDialog(true);
+    }
+  };
+
   return (
     <main
       className="min-h-screen flex flex-col bg-white overflow-hidden relative"
@@ -60,13 +126,7 @@ export default function HomePage() {
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
-        {/* Right Content (Text) - Actually Left in RTL, but flex logic depends on dir. 
-            In RTL, this is first, so it appears on Right. 
-            In LTR, it appears on Left. 
-            The design has Text on Right and Image on Left. 
-            To force Text Right / Image Left regardless of Language (if that's desired for the flyer look), we might need order classes or explicit row-reverse in LTR.
-            But assuming matching the user's language preference is better.
-        */}
+        {/* Right Content (Text) */}
         <div className="flex-1 z-10 flex items-center justify-center p-6 pt-20 lg:pt-6">
           <div
             className="max-w-xl w-full flex flex-col items-center lg:items-start space-y-6 text-center lg:text-start"
@@ -77,38 +137,47 @@ export default function HomePage() {
           >
             {/* Title Section */}
             <div className="space-y-2 w-full">
-              {/* 1st Year Middle School */}
+              {/* Main Title */}
               <h1 className="text-5xl md:text-7xl font-bold text-[#1a237e] tracking-tight">
-                الاولى اعدادي
+                {content.title}
               </h1>
-              {/* FRANCAIS - MATH */}
+              {/* Subtitle */}
               <h2 className="text-3xl md:text-5xl font-bold text-[#4c8bf5] uppercase tracking-wider">
-                FRANCAIS - MATH
+                {content.subtitle}
               </h2>
             </div>
 
             {/* Registration Open Badge */}
             <div className="inline-block px-8 py-2 rounded-full border-2 border-[#1a237e] bg-blue-50/50">
               <span className="text-xl md:text-2xl font-bold text-[#1a237e]">
-                التسجيل مفتوح
+                {content.badge}
               </span>
             </div>
 
             {/* Description */}
             <div className="bg-white/90 backdrop-blur-sm p-4 rounded-xl border-l-4 border-[#1a237e] w-full shadow-sm">
               <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium">
-                مركز دروس الدعم و التقوية بمدينة تازة يقدم لكم عرض للاولى اعدادي
-                بأثمنة جد مناسبة
+                {content.description}
               </p>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 w-full pt-4">
-              <Link href={`/${locale}/register`} className="flex-1">
-                <Button className="w-full h-14 bg-orange-400 hover:bg-orange-500 text-black text-xl font-bold rounded-full shadow-lg transform transition hover:scale-105">
-                  سارعوا للتسجيل
+              {center ? (
+                <Button
+                  onClick={handleRegisterClick}
+                  className="flex-1 w-full h-14 bg-orange-400 hover:bg-orange-500 text-black text-xl font-bold rounded-full shadow-lg transform transition hover:scale-105"
+                  disabled={center.publicRegistrationEnabled === false}
+                >
+                  {content.ctaText}
                 </Button>
-              </Link>
+              ) : (
+                <Link href={`/${locale}/register`} className="flex-1">
+                  <Button className="w-full h-14 bg-orange-400 hover:bg-orange-500 text-black text-xl font-bold rounded-full shadow-lg transform transition hover:scale-105">
+                    {content.ctaText}
+                  </Button>
+                </Link>
+              )}
 
               <div className="flex items-center justify-center h-14 w-full sm:w-auto px-6 bg-blue-600 text-white rounded-full font-bold text-lg shadow-md">
                 الان ممكن
@@ -136,27 +205,14 @@ export default function HomePage() {
 
           {/* Image Placeholder */}
           <div className="absolute inset-0 flex items-center justify-center z-10 p-12">
-            <div className="w-full h-full max-h-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden relative transform rotate-[-2deg] border-4 border-white">
-              {/* Placeholder Content */}
-              <div className="w-full h-full bg-slate-200 flex items-center justify-center flex-col text-slate-400">
-                <svg
-                  className="w-24 h-24 mb-4 opacity-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="text-xl font-medium">Classroom Image</span>
-              </div>
-              {/* If user provides a real image later, replace the inner div above with:
-                      <Image src="/path/to/image.jpg" fill className="object-cover" alt="Classroom" />
-                  */}
+            <div className="w-full h-full max-h-[500px] bg-white rounded-3xl shadow-2xl overflow-hidden relative transform -rotate-2 border-4 border-white">
+              <Image
+                src="/hero-classroom-abstract.png"
+                fill
+                className="object-cover"
+                alt="Students in a modern classroom environment"
+                priority
+              />
             </div>
           </div>
         </div>
@@ -172,15 +228,21 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-4 bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-            <span className="text-xl font-mono dir-ltr">0770275193</span>
+            <span className="text-xl font-mono dir-ltr">{content.phone}</span>
             <MessageCircle className="w-6 h-6" />
           </div>
 
-          <div className="text-sm font-light opacity-90">
-            روض عبلة حي وريدة تازة
-          </div>
+          <div className="text-sm font-light opacity-90">{content.address}</div>
         </div>
       </div>
+
+      {/* Public Registration Dialog */}
+      <PublicRegistrationDialog
+        open={showRegisterDialog}
+        onOpenChange={setShowRegisterDialog}
+        type={registerType}
+        centerId={center?.id}
+      />
     </main>
   );
 }

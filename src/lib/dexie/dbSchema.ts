@@ -40,6 +40,19 @@ export interface Center extends SyncEntity {
   studentEntryDate?: string;
   schoolEndDateBac?: string;
   schoolEndDateOther?: string;
+
+  // Homepage content (editable by admin)
+  homeTitle?: string;
+  homeSubtitle?: string;
+  homeBadge?: string;
+  homeDescription?: string;
+  homeCtaText?: string;
+  homePhone?: string;
+  homeAddress?: string;
+
+  // Registration settings
+  publicRegistrationEnabled?: boolean;
+
   managers: string[];
   adminId: string;
 }

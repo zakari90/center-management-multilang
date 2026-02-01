@@ -24,6 +24,9 @@ import {
   Plus,
   CalendarRange,
   Clock,
+  Home,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -41,6 +44,8 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { useLocalizedConstants } from "./useLocalizedConstants";
+import { HomePageEditor } from "./HomePageEditor";
+import { ShareRegistrationLink } from "./ShareRegistrationLink";
 
 interface CenterPresentationProps {
   centerId: string;
@@ -99,6 +104,7 @@ export default function CenterPresentation({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCenterDebugSyncing, setIsCenterDebugSyncing] = useState(false);
   const [isAutoSyncing, setIsAutoSyncing] = useState(false);
+  const [showHomePageSettings, setShowHomePageSettings] = useState(false);
 
   const onlineStatus = useIsOnline();
   const hasSyncedOnOnline = useRef(false);
@@ -690,6 +696,47 @@ export default function CenterPresentation({
                 {center.paymentEndDay || 30}
               </span>
             </div>
+          </div>
+
+          {/* Homepage Settings Section (Collapsible) */}
+          <div className="space-y-2">
+            <button
+              onClick={() => setShowHomePageSettings(!showHomePageSettings)}
+              className="flex w-full items-center justify-between p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
+                <Home className="h-4 w-4" />
+                <span>{t("homePageSettings") || "Homepage Settings"}</span>
+              </div>
+              {showHomePageSettings ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </button>
+
+            {showHomePageSettings && (
+              <div className="space-y-4 pt-2">
+                <HomePageEditor
+                  centerId={centerId}
+                  initialData={{
+                    homeTitle: center.homeTitle,
+                    homeSubtitle: center.homeSubtitle,
+                    homeBadge: center.homeBadge,
+                    homeDescription: center.homeDescription,
+                    homeCtaText: center.homeCtaText,
+                    homePhone: center.homePhone,
+                    homeAddress: center.homeAddress,
+                    publicRegistrationEnabled: center.publicRegistrationEnabled,
+                  }}
+                  onSave={() => {
+                    // Trigger refresh
+                    syncWhenOnline();
+                  }}
+                />
+                <ShareRegistrationLink />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

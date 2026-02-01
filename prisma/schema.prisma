@@ -37,6 +37,18 @@ model Center {
   schoolEndDateBac  String?   @default("30 ماي 2026")
   schoolEndDateOther String?  @default("30 يونيو 2026")
 
+  // Homepage content (editable by admin)
+  homeTitle        String?   // Main heading (e.g., "الاولى اعدادي")
+  homeSubtitle     String?   // Secondary heading (e.g., "FRANCAIS - MATH")
+  homeBadge        String?   // Badge text (e.g., "التسجيل مفتوح")
+  homeDescription  String?   // Description paragraph
+  homeCtaText      String?   // CTA button text
+  homePhone        String?   // Contact phone number
+  homeAddress      String?   // Contact address
+  
+  // Registration settings
+  publicRegistrationEnabled Boolean @default(true)
+
   managers      String[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt

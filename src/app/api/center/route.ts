@@ -239,6 +239,18 @@ export async function PATCH(request: Request) {
 
     const { name, address, phone, classrooms, workingDays } = result.data;
 
+    // Extract homepage content fields directly from body (not in schema yet)
+    const {
+      homeTitle,
+      homeSubtitle,
+      homeBadge,
+      homeDescription,
+      homeCtaText,
+      homePhone,
+      homeAddress,
+      publicRegistrationEnabled,
+    } = body;
+
     const center = await db.center.update({
       where: { id: centerId },
       data: {
@@ -247,6 +259,17 @@ export async function PATCH(request: Request) {
         ...(phone !== undefined && { phone }),
         ...(classrooms && { classrooms }),
         ...(workingDays && { workingDays }),
+        // Homepage content fields
+        ...(homeTitle !== undefined && { homeTitle }),
+        ...(homeSubtitle !== undefined && { homeSubtitle }),
+        ...(homeBadge !== undefined && { homeBadge }),
+        ...(homeDescription !== undefined && { homeDescription }),
+        ...(homeCtaText !== undefined && { homeCtaText }),
+        ...(homePhone !== undefined && { homePhone }),
+        ...(homeAddress !== undefined && { homeAddress }),
+        ...(publicRegistrationEnabled !== undefined && {
+          publicRegistrationEnabled,
+        }),
       },
     });
 
