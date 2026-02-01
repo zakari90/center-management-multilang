@@ -3,7 +3,7 @@
 import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
 import { useAuth } from "@/context/authContext";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
-import { MessageCircle, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -118,8 +118,8 @@ function HomePageContent() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row relative">
-        <div className="flex-1 z-10 flex justify-center p-6 mt-10 md:mt-5 md:items-center lg:pt-6">
+      <div className="flex-1 flex flex-col lg:flex-row relative scroll-auto">
+        <div className="flex-1 z-10 flex justify-center p-6 mt-10 md:20 md:items-center lg:pt-6">
           <div
             className="max-w-xl w-full flex flex-col items-center lg:items-start space-y-6 text-center lg:text-start"
             style={{
@@ -181,21 +181,20 @@ function HomePageContent() {
       <div className="bg-[#5B7CFD] text-white py-4 px-6 fixed bottom-0 left-0 right-0 lg:static z-20">
         <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Phone className="w-6 h-6 fill-current" />
-            <IconBrandWhatsapp className="w-6 h-6 fill-current" />
             <span className="text-lg font-bold">للتواصل معنا</span>
-          </div>
+            <div
+              onClick={() =>
+                window.open(
+                  `https://wa.me/${content.phone?.replace(/\D/g, "")}`,
+                  "_blank",
+                )
+              }
+              className="flex items-center gap-2"
+            >
+              <IconBrandWhatsapp className="w-6 h-6 fill-current" />
 
-          <div
-            onClick={() =>
-              window.open(
-                `https://wa.me/${content.phone?.replace(/\D/g, "")}`,
-                "_blank",
-              )
-            }
-            className="flex items-center gap-4 bg-white/20 px-4 py-2 rounded-lg backdrop-blur-sm cursor-pointer hover:bg-white/30 transition-colors"
-          >
-            <span className="text-xl font-mono dir-ltr">{content.phone}</span>
+              <span className="text-xl font-mono">{content.phone}</span>
+            </div>
           </div>
 
           <div className="text-sm font-light opacity-90">{content.address}</div>
