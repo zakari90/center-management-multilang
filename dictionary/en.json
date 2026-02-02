@@ -397,7 +397,8 @@
     "paymentStartDay": "Start Day (e.g. 1)",
     "paymentEndDay": "End Day (e.g. 5)",
     "fromDay": "From Day",
-    "toDay": "To Day"
+    "toDay": "To Day",
+    "homePageSettings": "Homepage Settings"
   },
   "NewCenterForm": {
     "basicInformation": "Basic Information",

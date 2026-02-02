@@ -74,26 +74,26 @@ export function EditSubjectCard({
   };
 
   return (
-    <div className="flex items-center gap-3 px-3 py-1.5 border rounded-lg bg-muted/30 w-full sm:w-fit group hover:border-primary/50 transition-colors shadow-sm">
+    <div className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 border rounded-lg bg-muted/30 w-full sm:w-fit group hover:border-primary/50 transition-colors shadow-sm min-w-0">
       {/* Subject Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 min-w-0 flex-1">
-        <h4 className="font-bold text-sm sm:text-base leading-tight line-clamp-1">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 min-w-0 flex-1 overflow-hidden">
+        <h4 className="font-bold text-sm sm:text-base leading-tight truncate">
           {subject.name}
         </h4>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground min-w-0">
           <Badge
             variant="secondary"
-            className="text-[10px] px-2 py-0 h-5 font-bold uppercase tracking-wider"
+            className="text-[10px] px-2 py-0 h-5 font-bold uppercase tracking-wider truncate max-w-[100px] sm:max-w-none"
           >
             {subject.grade}
           </Badge>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 font-medium text-primary">
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="flex items-center gap-1 font-medium text-primary whitespace-nowrap">
               <Coins className="h-3.5 w-3.5 shrink-0" />
               {subject.price} MAD
             </span>
             {subject.duration && (
-              <span className="flex items-center gap-1 font-medium text-orange-600 dark:text-orange-400">
+              <span className="flex items-center gap-1 font-medium text-orange-600 dark:text-orange-400 whitespace-nowrap">
                 <Clock className="h-3.5 w-3.5 shrink-0" />
                 {subject.duration}h
               </span>
@@ -103,7 +103,7 @@ export function EditSubjectCard({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-1.5 shrink-0 items-center border-l pl-3 ms-auto self-stretch">
+      <div className="flex gap-1.5 shrink-0 items-center border-s ps-2 sm:ps-3 ms-auto self-stretch">
         <EditDialog
           title={t("editSubject")}
           trigger={

@@ -264,17 +264,20 @@ export function HomePageEditor({
           </div>
 
           {/* Public Registration Toggle */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="space-y-0.5">
-              <Label htmlFor="publicRegistration">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-muted/50 rounded-lg gap-4">
+            <div className="space-y-1 flex-1">
+              <Label
+                htmlFor="publicRegistration"
+                className="text-base font-semibold"
+              >
                 {t("publicRegistration") || "Public Registration"}
               </Label>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {t("publicRegistrationDesc") ||
                   "Allow visitors to register from the homepage"}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6 shrink-0 bg-background/50 p-2 sm:p-0 rounded-md sm:bg-transparent justify-center sm:justify-end">
               <div className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -288,11 +291,11 @@ export function HomePageEditor({
                     }))
                   }
                   disabled={isSubmitting}
-                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                  className="h-5 w-5 sm:h-4 sm:w-4 text-primary border-gray-300 focus:ring-primary cursor-pointer"
                 />
                 <Label
                   htmlFor="publicRegistrationEnabled"
-                  className="font-normal"
+                  className="font-medium cursor-pointer"
                 >
                   {t("enabled") || "Enabled"}
                 </Label>
@@ -310,11 +313,11 @@ export function HomePageEditor({
                     }))
                   }
                   disabled={isSubmitting}
-                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                  className="h-5 w-5 sm:h-4 sm:w-4 text-primary border-gray-300 focus:ring-primary cursor-pointer"
                 />
                 <Label
                   htmlFor="publicRegistrationDisabled"
-                  className="font-normal"
+                  className="font-medium cursor-pointer"
                 >
                   {t("disabled") || "Disabled"}
                 </Label>
