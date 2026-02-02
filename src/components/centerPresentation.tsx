@@ -693,7 +693,6 @@ export default function CenterPresentation({
               </span>
             </div>
           </div>
-          ---------------------------------------------
           {/* Homepage Settings Section (Collapsible) */}
           <div className="space-y-2">
             <button

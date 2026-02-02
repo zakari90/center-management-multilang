@@ -74,43 +74,46 @@ export function EditSubjectCard({
   };
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 border rounded-lg bg-muted/30 w-full sm:w-fit group hover:border-primary/50 transition-colors shadow-sm min-w-0">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-3 py-2.5 sm:py-2 border rounded-lg bg-muted/30 w-full group hover:border-primary/50 transition-colors shadow-sm">
       {/* Subject Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 min-w-0 flex-1 overflow-hidden">
-        <h4 className="font-bold text-sm sm:text-base leading-tight truncate">
-          {subject.name}
-        </h4>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground min-w-0">
+      <div className="flex flex-col gap-2.5 min-w-0 flex-1">
+        {/* Name and Badge */}
+        <div className="flex items-start gap-2 min-w-0">
+          <h4 className="font-bold text-sm sm:text-base leading-tight truncate flex-1">
+            {subject.name}
+          </h4>
           <Badge
             variant="secondary"
-            className="text-[10px] px-2 py-0 h-5 font-bold uppercase tracking-wider truncate max-w-[100px] sm:max-w-none"
+            className="text-[10px] px-2 py-0.5 h-5 font-bold uppercase tracking-wider shrink-0"
           >
             {subject.grade}
           </Badge>
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="flex items-center gap-1 font-medium text-primary whitespace-nowrap">
-              <Coins className="h-3.5 w-3.5 shrink-0" />
-              {subject.price} MAD
+        </div>
+
+        {/* Price and Duration */}
+        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+          <span className="flex items-center gap-1 font-medium text-primary whitespace-nowrap">
+            <Coins className="h-3.5 w-3.5 shrink-0" />
+            {subject.price} MAD
+          </span>
+          {subject.duration && (
+            <span className="flex items-center gap-1 font-medium text-orange-600 dark:text-orange-400 whitespace-nowrap">
+              <Clock className="h-3.5 w-3.5 shrink-0" />
+              {subject.duration}h
             </span>
-            {subject.duration && (
-              <span className="flex items-center gap-1 font-medium text-orange-600 dark:text-orange-400 whitespace-nowrap">
-                <Clock className="h-3.5 w-3.5 shrink-0" />
-                {subject.duration}h
-              </span>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-1.5 shrink-0 items-center border-s ps-2 sm:ps-3 ms-auto self-stretch">
+      <div className="flex gap-2 shrink-0 items-center sm:border-s sm:ps-3 w-full sm:w-auto justify-end sm:justify-start mt-2 sm:mt-0">
         <EditDialog
           title={t("editSubject")}
           trigger={
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 hover:bg-muted/40 rounded-full"
+              className="h-8 w-8 p-0 hover:bg-muted/40 rounded-full flex-shrink-0"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -118,7 +121,6 @@ export function EditSubjectCard({
           onSave={handleUpdateSubject}
         >
           <div className="border rounded-lg p-3 sm:p-4 space-y-4 bg-muted/10 max-h-[80vh] overflow-y-auto">
-            {/* No changes to the dialog content size, keeping it usable */}
             <div className="space-y-4">
               {/* Subject Selection */}
               <div className="space-y-2">
@@ -224,14 +226,14 @@ export function EditSubjectCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 hover:bg-destructive/10 rounded-full"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 rounded-full flex-shrink-0"
             >
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="w-[90vw] max-w-sm">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg sm:text-xl">
+              <AlertDialogTitle className="text-base sm:text-lg">
                 {t("deleteSubject")}
               </AlertDialogTitle>
               <AlertDialogDescription className="text-xs sm:text-sm">

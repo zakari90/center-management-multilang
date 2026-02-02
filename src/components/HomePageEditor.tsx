@@ -95,12 +95,12 @@ export function HomePageEditor({
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
               {t("title") || "Homepage Settings"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm sm:text-base">
               {t("description") || "Customize your public homepage content"}
             </CardDescription>
           </div>
@@ -108,6 +108,7 @@ export function HomePageEditor({
             variant="outline"
             size="sm"
             onClick={() => setShowPreview(!showPreview)}
+            className="w-full sm:w-auto h-9"
           >
             {showPreview ? (
               <>
