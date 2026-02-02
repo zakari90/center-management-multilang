@@ -362,7 +362,13 @@
     "paymentEndDay": "Jour de fin (ex: 5)",
     "fromDay": "Du jour",
     "toDay": "Au jour",
-    "homePageSettings": "Paramètres de la page d'accueil"
+    "homePageSettings": "Paramètres de la page d'accueil",
+    "subjectName": "Nom de la matière",
+    "grade": "Niveau",
+    "price": "Prix",
+    "durationHeader": "Durée",
+    "actions": "Actions",
+    "searchPlaceholder": "Rechercher des matières ou niveaux..."
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",

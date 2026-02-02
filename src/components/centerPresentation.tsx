@@ -36,6 +36,7 @@ import { EditSubjectCard } from "./editSubjectCard";
 import { HomePageEditor } from "./HomePageEditor";
 import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
+import { SubjectsTableView } from "./SubjectsTableView";
 import {
   Dialog,
   DialogContent,
@@ -495,7 +496,7 @@ export default function CenterPresentation({
   return (
     <main className="max-w-3xl mx-auto p-4 sm:p-6">
       <EntitySyncControls entity="centers" />
-      <Card className="shadow-lg border border-border bg-background">
+      <Card className="shadow-lg border border-border bg-background w-full">
         <CardHeader className="text-center space-y-2 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
             {center.name}
@@ -553,31 +554,53 @@ export default function CenterPresentation({
             </div>
 
             {/* ✅ Single subject list rendering */}
-            <div className="space-y-3">
-              {subjects && subjects.length > 0 ? (
-                subjects.map((subject) => (
-                  <EditSubjectCard
-                    key={subject.id}
-                    subject={{
-                      id: subject.id,
-                      name: subject.name,
-                      grade: subject.grade,
-                      price: subject.price,
-                      duration: subject.duration ?? null,
-                      onUpdate: new Date(subject.updatedAt).toISOString(),
-                      centerId: subject.centerId,
-                    }}
-                    onUpdate={handleUpdateSubject}
-                    onDelete={handleDeleteSubject}
-                    availableSubjects={availableSubjects}
-                    availableGrades={availableGrades}
-                  />
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground italic">
-                  {t("noSubjects") || "No subjects added"}
+            <div className="space-y-6">
+              {/* Existing Card View */}
+              <div className="space-y-3">
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                  {t("cardView") || "Card View"}
                 </p>
-              )}
+                {subjects && subjects.length > 0 ? (
+                  subjects.map((subject) => (
+                    <EditSubjectCard
+                      key={subject.id}
+                      subject={{
+                        id: subject.id,
+                        name: subject.name,
+                        grade: subject.grade,
+                        price: subject.price,
+                        duration: subject.duration ?? null,
+                        onUpdate: new Date(subject.updatedAt).toISOString(),
+                        centerId: subject.centerId,
+                      }}
+                      onUpdate={handleUpdateSubject}
+                      onDelete={handleDeleteSubject}
+                      availableSubjects={availableSubjects}
+                      availableGrades={availableGrades}
+                    />
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    {t("noSubjects") || "No subjects added"}
+                  </p>
+                )}
+              </div>
+
+              <Separator className="border-dashed" />
+
+              {/* New Table View */}
+              <div className="space-y-3 pt-2">
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                  {t("tableView") || "Table View"}
+                </p>
+                <SubjectsTableView
+                  subjects={subjects || []}
+                  onUpdate={handleUpdateSubject}
+                  onDelete={handleDeleteSubject}
+                  availableSubjects={availableSubjects}
+                  availableGrades={availableGrades}
+                />
+              </div>
             </div>
           </div>
           {/* Classrooms Section */}

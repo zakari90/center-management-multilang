@@ -36,6 +36,7 @@ import type {
   Center,
 } from "@/lib/dexie/dbSchema";
 import { useTranslations } from "next-intl";
+import PageHeader from "./page-header";
 
 export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
@@ -403,14 +404,8 @@ export function AllTablesViewer() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Database className="h-6 w-6" />
-            {t("title")}
-          </h2>
-          <p className="text-muted-foreground mt-1">{t("description")}</p>
-        </div>
+      <div className="flex flex-col md:flex-row items-center justify-between">
+        <PageHeader title={t("title")} subtitle={t("description")} />
         <Button
           onClick={handleExportAll}
           disabled={isLoading}

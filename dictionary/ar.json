@@ -364,7 +364,13 @@
     "paymentEndDay": "يوم الانتهاء (مثال: 5)",
     "fromDay": "من يوم",
     "toDay": "إلى يوم",
-    "homePageSettings": "إعدادات الصفحة الرئيسية"
+    "homePageSettings": "إعدادات الصفحة الرئيسية",
+    "subjectName": "اسم المادة",
+    "grade": "المستوى",
+    "price": "الثمن",
+    "durationHeader": "المدة",
+    "actions": "العمليات",
+    "searchPlaceholder": "البحث عن المواد أو المستويات..."
   },
   "NewCenterForm": {
     "basicInformation": "معلومات أساسية",

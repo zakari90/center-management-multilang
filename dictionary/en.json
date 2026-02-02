@@ -398,7 +398,13 @@
     "paymentEndDay": "End Day (e.g. 5)",
     "fromDay": "From Day",
     "toDay": "To Day",
-    "homePageSettings": "Homepage Settings"
+    "homePageSettings": "Homepage Settings",
+    "subjectName": "Subject Name",
+    "grade": "Grade",
+    "price": "Price",
+    "durationHeader": "Duration",
+    "actions": "Actions",
+    "searchPlaceholder": "Search subjects or grades..."
   },
   "NewCenterForm": {
     "basicInformation": "Basic Information",
