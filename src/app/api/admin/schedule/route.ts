@@ -147,10 +147,5 @@ export async function GET() {
     orderBy: [{ day: "asc" }, { startTime: "asc" }],
   });
 
-  console.log(schedules);
-  console.log(
-    "8888---------------------------------------------------------------",
-  );
-
   return NextResponse.json(schedules);
 }
