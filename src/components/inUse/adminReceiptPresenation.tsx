@@ -52,6 +52,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AddStudentPaymentDialog from "../AddStudentPaymentDialog";
 import AddTeacherPaymentDialog from "../AddTeacherPaymentDialog";
+import PageHeader from "../page-header";
 
 interface Receipt {
   id: string;
@@ -358,11 +359,8 @@ export default function AdminReceiptsTable() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
-        </div>
+      <div className="flex flex-col md:flex-row justify-between items-center">
+        <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex gap-2">
           <AddStudentPaymentDialog onPaymentCreated={fetchReceipts} />
           <AddTeacherPaymentDialog onPaymentCreated={fetchReceipts} />

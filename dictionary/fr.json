@@ -368,7 +368,9 @@
     "price": "Prix",
     "durationHeader": "Durée",
     "actions": "Actions",
-    "searchPlaceholder": "Rechercher des matières ou niveaux..."
+    "searchPlaceholder": "Rechercher des matières ou niveaux...",
+    "cardView": "Vue en cartes",
+    "tableView": "Vue en tableau"
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",

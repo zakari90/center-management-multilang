@@ -370,7 +370,9 @@
     "price": "الثمن",
     "durationHeader": "المدة",
     "actions": "العمليات",
-    "searchPlaceholder": "البحث عن المواد أو المستويات..."
+    "searchPlaceholder": "البحث عن المواد أو المستويات...",
+    "cardView": "عرض البطاقات",
+    "tableView": "عرض الجدول"
   },
   "NewCenterForm": {
     "basicInformation": "معلومات أساسية",

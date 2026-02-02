@@ -404,7 +404,9 @@
     "price": "Price",
     "durationHeader": "Duration",
     "actions": "Actions",
-    "searchPlaceholder": "Search subjects or grades..."
+    "searchPlaceholder": "Search subjects or grades...",
+    "cardView": "Card View",
+    "tableView": "Table View"
   },
   "NewCenterForm": {
     "basicInformation": "Basic Information",
