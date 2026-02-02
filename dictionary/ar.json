@@ -363,7 +363,8 @@
     "paymentStartDay": "يوم البدء (مثال: 1)",
     "paymentEndDay": "يوم الانتهاء (مثال: 5)",
     "fromDay": "من يوم",
-    "toDay": "إلى يوم"
+    "toDay": "إلى يوم",
+    "homePageSettings": "إعدادات الصفحة الرئيسية"
   },
   "NewCenterForm": {
     "basicInformation": "معلومات أساسية",
@@ -1844,7 +1845,14 @@
     "teacherLink": "رابط تسجيل المعلمين",
     "copy": "نسخ",
     "copied": "تم النسخ!",
-    "shareWhatsapp": "مشاركة عبر واتساب"
+    "shareWhatsapp": "مشاركة عبر واتساب",
+    "student": "تسجيل الطلاب",
+    "teacher": "تسجيل المعلمين",
+    "copyLink": "نسخ الرابط",
+    "studentInvite": "سجل كطالب:",
+    "teacherInvite": "سجل كمعلم:",
+    "copyStudentLink": "نسخ رابط الطالب",
+    "copyTeacherLink": "نسخ رابط المعلم"
   },
   "publicRegistration": {
     "studentTitle": "تسجيل الطلاب",
@@ -1862,49 +1870,6 @@
     "register": "تسجيل",
     "submitting": "جاري الإرسال...",
     "success": "تم إرسال التسجيل بنجاح!",
-    "successDescription": "سنتصل بك قريباً لإتمام الخطوات التالية.",
-    "centerOverview": "نظرة عامة على المركز"
-  },
-  "CenterPresentation": {
-    "centerOverview": "نظرة عامة على المركز",
-    "phone": "📞",
-    "subjectsOffered": "المواد المقدمة",
-    "addSubject": "إضافة مادة",
-    "noSubjects": "لم يتم إضافة أي مواد",
-    "availableClassrooms": "القاعات المتاحة",
-    "workingDays": "أيام العمل",
-    "edit": "تعديل",
-    "noData": "لا توجد بيانات",
-    "editClassrooms": "تعديل القاعات",
-    "editWorkingDays": "تعديل أيام العمل",
-    "addNewSubject": "إضافة مادة جديدة",
-    "addSubjectDescription": "املأ النموذج أدناه لإضافة مادة جديدة إلى المركز.",
-    "currency": "درهم",
-    "duration": "دقيقة",
-    "classroomsLabel": "القاعات",
-    "classroomPlaceholder": "اكتب اسم القاعة",
-    "workingDaysLabel": "أيام العمل",
-    "dayPlaceholder": "اكتب اسم اليوم",
-    "loading": "جاري التحميل...",
-    "subjectAdded": "تم إضافة المادة بنجاح",
-    "subjectAddFailed": "فشل إضافة المادة",
-    "subjectNotFound": "المادة غير موجودة",
-    "subjectUpdated": "تم تحديث المادة بنجاح",
-    "subjectUpdateFailed": "فشل تحديث المادة",
-    "subjectDeleted": "تم حذف المادة بنجاح",
-    "subjectDeleteFailed": "فشل حذف المادة",
-    "classroomsUpdated": "تم تحديث القاعات بنجاح",
-    "classroomsUpdateFailed": "فشل تحديث القاعات",
-    "workingDaysUpdated": "تم تحديث أيام العمل بنجاح",
-    "workingDaysUpdateFailed": "فشل تحديث أيام العمل",
-    "debugSync": "تصحيح مزامنة المركز",
-    "debugSyncing": "جاري تصحيح المزامنة...",
-    "paymentPeriod": "فترة الدفع",
-    "editPaymentPeriod": "تعديل فترة الدفع",
-    "paymentStartDay": "يوم البدء (مثلاً 1)",
-    "paymentEndDay": "يوم الانتهاء (مثلاً 5)",
-    "fromDay": "من يوم",
-    "toDay": "إلى يوم",
-    "homePageSettings": "إعدادات الصفحة الرئيسية"
+    "successDescription": "سنتصل بك قريباً لإتمام الخطوات التالية."
   }
 }

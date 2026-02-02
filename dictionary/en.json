@@ -1869,7 +1869,14 @@
     "teacherLink": "Teacher Registration Link",
     "copy": "Copy",
     "copied": "Link copied!",
-    "shareWhatsapp": "Share on WhatsApp"
+    "shareWhatsapp": "Share on WhatsApp",
+    "student": "Student Registration",
+    "teacher": "Teacher Registration",
+    "copyLink": "Copy Link",
+    "studentInvite": "Register as a student:",
+    "teacherInvite": "Register as a teacher:",
+    "copyStudentLink": "Copy Student Link",
+    "copyTeacherLink": "Copy Teacher Link"
   },
   "publicRegistration": {
     "studentTitle": "Student Registration",

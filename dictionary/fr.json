@@ -361,7 +361,8 @@
     "paymentStartDay": "Jour de début (ex: 1)",
     "paymentEndDay": "Jour de fin (ex: 5)",
     "fromDay": "Du jour",
-    "toDay": "Au jour"
+    "toDay": "Au jour",
+    "homePageSettings": "Paramètres de la page d'accueil"
   },
   "NewCenterForm": {
     "basicInformation": "Informations de base",
@@ -1848,7 +1849,14 @@
     "teacherLink": "Lien d'inscription enseignant",
     "copy": "Copier",
     "copied": "Copié !",
-    "shareWhatsapp": "Partager sur WhatsApp"
+    "shareWhatsapp": "Partager sur WhatsApp",
+    "student": "Inscription élève",
+    "teacher": "Inscription enseignant",
+    "copyLink": "Copier le lien",
+    "studentInvite": "S'inscrire en tant qu'élève :",
+    "teacherInvite": "S'inscrire en tant qu'enseignant :",
+    "copyStudentLink": "Copier le lien élève",
+    "copyTeacherLink": "Copier le lien enseignant"
   },
   "publicRegistration": {
     "studentTitle": "Inscription élève",
@@ -1866,49 +1874,6 @@
     "register": "S'inscrire",
     "submitting": "Envoi en cours...",
     "success": "Inscription soumise avec succès !",
-    "successDescription": "Nous vous contacterons bientôt pour les prochaines étapes.",
-    "centerOverview": "Aperçu du centre"
-  },
-  "CenterPresentation": {
-    "centerOverview": "Aperçu du centre",
-    "phone": "📞",
-    "subjectsOffered": "Matières proposées",
-    "addSubject": "Ajouter une matière",
-    "noSubjects": "Aucune matière ajoutée",
-    "availableClassrooms": "Salles disponibles",
-    "workingDays": "Jours ouvrables",
-    "edit": "Modifier",
-    "noData": "Aucune donnée",
-    "editClassrooms": "Modifier les salles",
-    "editWorkingDays": "Modifier les jours ouvrables",
-    "addNewSubject": "Ajouter une nouvelle matière",
-    "addSubjectDescription": "Remplissez le formulaire ci-dessous pour ajouter une nouvelle matière au centre.",
-    "currency": "MAD",
-    "duration": "min",
-    "classroomsLabel": "Salles",
-    "classroomPlaceholder": "Tapez une salle",
-    "workingDaysLabel": "Jours ouvrables",
-    "dayPlaceholder": "Tapez un nom de jour",
-    "loading": "Chargement...",
-    "subjectAdded": "Matière ajoutée avec succès",
-    "subjectAddFailed": "Échec de l'ajout de la matière",
-    "subjectNotFound": "Matière introuvable",
-    "subjectUpdated": "Matière mise à jour avec succès",
-    "subjectUpdateFailed": "Échec de la mise à jour de la matière",
-    "subjectDeleted": "Matière supprimée avec succès",
-    "subjectDeleteFailed": "Échec de la suppression de la matière",
-    "classroomsUpdated": "Salles mises à jour avec succès",
-    "classroomsUpdateFailed": "Échec de la mise à jour des salles",
-    "workingDaysUpdated": "Jours ouvrables mis à jour avec succès",
-    "workingDaysUpdateFailed": "Échec de la mise à jour des jours ouvrables",
-    "debugSync": "Déboguer la synchro du centre",
-    "debugSyncing": "Débogage de la synchronisation...",
-    "paymentPeriod": "Période de paiement",
-    "editPaymentPeriod": "Modifier la période de paiement",
-    "paymentStartDay": "Jour de début (ex. 1)",
-    "paymentEndDay": "Jour de fin (ex. 5)",
-    "fromDay": "Du jour",
-    "toDay": "Au jour",
-    "homePageSettings": "Paramètres de la page d'accueil"
+    "successDescription": "Nous vous contacterons bientôt pour les prochaines étapes."
   }
 }
