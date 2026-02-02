@@ -32,7 +32,6 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditDialog } from "./editDialog";
-import { EditSubjectCard } from "./editSubjectCard";
 import { HomePageEditor } from "./HomePageEditor";
 import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
@@ -557,7 +556,7 @@ export default function CenterPresentation({
             <div className="space-y-6">
               {/* Existing Card View */}
               <div className="space-y-3">
-                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                {/* <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
                   {t("cardView") || "Card View"}
                 </p>
                 {subjects && subjects.length > 0 ? (
@@ -584,9 +583,9 @@ export default function CenterPresentation({
                     {t("noSubjects") || "No subjects added"}
                   </p>
                 )}
-              </div>
+              </div> */}
 
-              <Separator className="border-dashed" />
+              {/* <Separator className="border-dashed" /> */}
 
               {/* New Table View */}
               <div className="space-y-3 pt-2">

@@ -66,7 +66,7 @@ export function SubjectsTableView({
         />
       </div>
 
-      <Card className="overflow-hidden border border-border shadow-sm">
+      <Card className="overflow-hidden border border-border shadow-sm text-center">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-muted/50 text-muted-foreground uppercase text-xs font-semibold tracking-wider">
