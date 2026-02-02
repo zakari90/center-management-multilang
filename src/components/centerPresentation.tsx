@@ -554,40 +554,6 @@ export default function CenterPresentation({
 
             {/* ✅ Single subject list rendering */}
             <div className="space-y-6">
-              {/* Existing Card View */}
-              <div className="space-y-3">
-                {/* <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
-                  {t("cardView") || "Card View"}
-                </p>
-                {subjects && subjects.length > 0 ? (
-                  subjects.map((subject) => (
-                    <EditSubjectCard
-                      key={subject.id}
-                      subject={{
-                        id: subject.id,
-                        name: subject.name,
-                        grade: subject.grade,
-                        price: subject.price,
-                        duration: subject.duration ?? null,
-                        onUpdate: new Date(subject.updatedAt).toISOString(),
-                        centerId: subject.centerId,
-                      }}
-                      onUpdate={handleUpdateSubject}
-                      onDelete={handleDeleteSubject}
-                      availableSubjects={availableSubjects}
-                      availableGrades={availableGrades}
-                    />
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    {t("noSubjects") || "No subjects added"}
-                  </p>
-                )}
-              </div> */}
-
-              {/* <Separator className="border-dashed" /> */}
-
-              {/* New Table View */}
               <div className="space-y-3 pt-2">
                 <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
                   {t("tableView") || "Table View"}
