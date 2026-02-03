@@ -34,6 +34,9 @@ import type {
   Receipt as ReceiptType,
   Schedule,
   Center,
+  TeacherSubject,
+  StudentSubject,
+  PushSubscription,
 } from "@/lib/dexie/dbSchema";
 import { useTranslations } from "next-intl";
 import PageHeader from "./page-header";
@@ -48,6 +51,7 @@ export function AllTablesViewer() {
       icon: Users,
       color: "bg-blue-500",
       columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
         {
           key: "name",
           header: t("columns.name"),
@@ -60,6 +64,8 @@ export function AllTablesViewer() {
           sortable: true,
           filterable: true,
         },
+        { key: "password", header: t("columns.password") },
+        { key: "dataEpoch", header: t("columns.dataEpoch"), sortable: true },
         {
           key: "role",
           header: t("columns.role"),
@@ -92,6 +98,7 @@ export function AllTablesViewer() {
           ),
         },
         { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
       ] as ColumnDef<User>[],
       fetchData: () => localDb.users.toArray(),
     },
@@ -101,6 +108,7 @@ export function AllTablesViewer() {
       icon: GraduationCap,
       color: "bg-green-500",
       columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
         {
           key: "name",
           header: t("columns.name"),
@@ -109,6 +117,106 @@ export function AllTablesViewer() {
         },
         { key: "email", header: t("columns.email"), sortable: true },
         { key: "phone", header: t("columns.phone") },
+        { key: "address", header: t("columns.address") },
+        {
+          key: "weeklySchedule",
+          header: t("columns.weeklySchedule"),
+          render: (value: any) => (value ? JSON.stringify(value) : "-"),
+        },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "managerId", header: t("columns.managerId") },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+      ] as ColumnDef<Teacher>[],
+      fetchData: () => localDb.teachers.toArray(),
+    },
+
+    students: {
+      name: t("tables.students"),
+      icon: Users,
+      color: "bg-purple-500",
+      columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
+        {
+          key: "name",
+          header: t("columns.name"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "email", header: t("columns.email"), sortable: true },
+        { key: "phone", header: t("columns.phone") },
+        { key: "grade", header: t("columns.grade"), sortable: true },
+        { key: "parentName", header: t("columns.parent"), sortable: true },
+        { key: "parentPhone", header: t("columns.phone") },
+        { key: "parentEmail", header: t("columns.email") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "managerId", header: t("columns.managerId") },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+      ] as ColumnDef<Student>[],
+      fetchData: () => localDb.students.toArray(),
+    },
+
+    subjects: {
+      name: t("tables.subjects"),
+      icon: BookOpen,
+      color: "bg-orange-500",
+      columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
+        {
+          key: "name",
+          header: t("columns.subject"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "grade", header: t("columns.grade"), sortable: true },
+        {
+          key: "price",
+          header: t("columns.price"),
+          render: (value: number) => `${value.toFixed(2)} MAD`,
+        },
+        { key: "duration", header: t("columns.duration"), sortable: true },
+        { key: "centerId", header: t("columns.adminId") },
         {
           key: "status",
           header: t("columns.status"),
@@ -131,91 +239,93 @@ export function AllTablesViewer() {
           ),
         },
         { key: "createdAt", header: t("columns.created"), sortable: true },
-      ] as ColumnDef<Teacher>[],
-      fetchData: () => localDb.teachers.toArray(),
-    },
-
-    students: {
-      name: t("tables.students"),
-      icon: Users,
-      color: "bg-purple-500",
-      columns: [
-        {
-          key: "name",
-          header: t("columns.name"),
-          sortable: true,
-          filterable: true,
-        },
-        { key: "email", header: t("columns.email"), sortable: true },
-        { key: "phone", header: t("columns.phone") },
-        { key: "grade", header: t("columns.grade"), sortable: true },
-        { key: "parentName", header: t("columns.parent"), sortable: true },
-        {
-          key: "status",
-          header: t("columns.status"),
-          render: (value: string) => (
-            <Badge
-              variant={
-                value === "1"
-                  ? "default"
-                  : value === "w"
-                    ? "secondary"
-                    : "destructive"
-              }
-            >
-              {value === "1"
-                ? t("status.synced")
-                : value === "w"
-                  ? t("status.pending")
-                  : t("status.deleted")}
-            </Badge>
-          ),
-        },
-      ] as ColumnDef<Student>[],
-      fetchData: () => localDb.students.toArray(),
-    },
-
-    subjects: {
-      name: t("tables.subjects"),
-      icon: BookOpen,
-      color: "bg-orange-500",
-      columns: [
-        {
-          key: "name",
-          header: t("columns.subject"),
-          sortable: true,
-          filterable: true,
-        },
-        { key: "grade", header: t("columns.grade"), sortable: true },
-        {
-          key: "price",
-          header: t("columns.price"),
-          render: (value: number) => `${value.toFixed(2)} MAD`,
-        },
-        { key: "duration", header: t("columns.duration") },
-        {
-          key: "status",
-          header: t("columns.status"),
-          render: (value: string) => (
-            <Badge
-              variant={
-                value === "1"
-                  ? "default"
-                  : value === "w"
-                    ? "secondary"
-                    : "destructive"
-              }
-            >
-              {value === "1"
-                ? t("status.synced")
-                : value === "w"
-                  ? t("status.pending")
-                  : t("status.deleted")}
-            </Badge>
-          ),
-        },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
       ] as ColumnDef<Subject>[],
       fetchData: () => localDb.subjects.toArray(),
+    },
+
+    teacherSubjects: {
+      name: t("tables.teacherSubjects"),
+      icon: GraduationCap,
+      color: "bg-teal-500",
+      columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
+        { key: "teacherId", header: t("columns.teacherId"), sortable: true },
+        { key: "subjectId", header: t("columns.subjectId"), sortable: true },
+        {
+          key: "percentage",
+          header: t("columns.percentage"),
+          render: (value?: number) => (value ? `${value}%` : "-"),
+        },
+        {
+          key: "hourlyRate",
+          header: t("columns.hourlyRate"),
+          render: (value?: number) => (value ? `${value.toFixed(2)} MAD` : "-"),
+        },
+        { key: "assignedAt", header: t("columns.assignedAt"), sortable: true },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+      ] as ColumnDef<TeacherSubject>[],
+      fetchData: () => localDb.teacherSubjects.toArray(),
+    },
+
+    studentSubjects: {
+      name: t("tables.studentSubjects"),
+      icon: Users,
+      color: "bg-indigo-500",
+      columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
+        { key: "studentId", header: t("columns.studentId"), sortable: true },
+        { key: "subjectId", header: t("columns.subjectId"), sortable: true },
+        { key: "teacherId", header: t("columns.teacherId"), sortable: true },
+        { key: "enrolledAt", header: t("columns.enrolledAt"), sortable: true },
+        { key: "managerId", header: t("columns.managerId") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+      ] as ColumnDef<StudentSubject>[],
+      fetchData: () => localDb.studentSubjects.toArray(),
     },
 
     receipts: {
@@ -223,6 +333,7 @@ export function AllTablesViewer() {
       icon: Receipt,
       color: "bg-red-500",
       columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
         {
           key: "receiptNumber",
           header: t("columns.receiptNumber"),
@@ -250,31 +361,9 @@ export function AllTablesViewer() {
         },
         { key: "paymentMethod", header: t("columns.method") },
         { key: "date", header: t("columns.date"), sortable: true },
-      ] as ColumnDef<ReceiptType>[],
-      fetchData: () => localDb.receipts.toArray(),
-    },
-
-    schedules: {
-      name: t("tables.schedules"),
-      icon: Calendar,
-      color: "bg-cyan-500",
-      columns: [
-        { key: "day", header: t("columns.day"), sortable: true },
-        { key: "startTime", header: t("columns.startTime"), sortable: true },
-        { key: "endTime", header: t("columns.endTime") },
-        {
-          key: "subjectName",
-          header: t("columns.subject"),
-          sortable: true,
-          filterable: true,
-        },
-        {
-          key: "teacherName",
-          header: t("columns.teacher"),
-          sortable: true,
-          filterable: true,
-        },
-        { key: "roomId", header: t("columns.room") },
+        { key: "studentId", header: t("columns.studentId") },
+        { key: "teacherId", header: t("columns.teacherId") },
+        { key: "managerId", header: t("columns.managerId") },
         {
           key: "status",
           header: t("columns.status"),
@@ -296,6 +385,61 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+      ] as ColumnDef<ReceiptType>[],
+      fetchData: () => localDb.receipts.toArray(),
+    },
+
+    schedules: {
+      name: t("tables.schedules"),
+      icon: Calendar,
+      color: "bg-cyan-500",
+      columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
+        { key: "day", header: t("columns.day"), sortable: true },
+        { key: "startTime", header: t("columns.startTime"), sortable: true },
+        { key: "endTime", header: t("columns.endTime") },
+        {
+          key: "subjectName",
+          header: t("columns.subject"),
+          sortable: true,
+          filterable: true,
+        },
+        {
+          key: "teacherName",
+          header: t("columns.teacher"),
+          sortable: true,
+          filterable: true,
+        },
+        { key: "roomId", header: t("columns.room") },
+        { key: "teacherId", header: t("columns.teacherId") },
+        { key: "subjectId", header: t("columns.subjectId") },
+        { key: "managerId", header: t("columns.managerId") },
+        { key: "centerId", header: t("columns.adminId") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
       ] as ColumnDef<
         Schedule & { teacherName?: string; subjectName?: string }
       >[],
@@ -322,6 +466,7 @@ export function AllTablesViewer() {
       icon: Building2,
       color: "bg-indigo-500",
       columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
         {
           key: "name",
           header: t("columns.name"),
@@ -333,8 +478,38 @@ export function AllTablesViewer() {
         {
           key: "classrooms",
           header: t("columns.classrooms"),
-          render: (value: string[]) => value?.length || 0,
+          render: (value: string[]) => value?.join(", ") || "-",
         },
+        {
+          key: "workingDays",
+          header: t("columns.workingDays"),
+          render: (value: string[]) => value?.join(", ") || "-",
+        },
+        { key: "paymentStartDay", header: t("columns.paymentStartDay") },
+        { key: "paymentEndDay", header: t("columns.paymentEndDay") },
+        { key: "academicYear", header: t("columns.academicYear") },
+        { key: "staffEntryDate", header: t("columns.staffEntryDate") },
+        { key: "studentEntryDate", header: t("columns.studentEntryDate") },
+        { key: "schoolEndDateBac", header: t("columns.schoolEndDateBac") },
+        { key: "schoolEndDateOther", header: t("columns.schoolEndDateOther") },
+        { key: "homeTitle", header: t("columns.homeTitle") },
+        { key: "homeSubtitle", header: t("columns.homeSubtitle") },
+        { key: "homeBadge", header: t("columns.homeBadge") },
+        { key: "homeDescription", header: t("columns.homeDescription") },
+        { key: "homeCtaText", header: t("columns.homeCtaText") },
+        { key: "homePhone", header: t("columns.homePhone") },
+        { key: "homeAddress", header: t("columns.homeAddress") },
+        {
+          key: "publicRegistrationEnabled",
+          header: t("columns.publicRegistrationEnabled"),
+          render: (value: boolean) => (value ? "Yes" : "No"),
+        },
+        {
+          key: "managers",
+          header: t("columns.managers"),
+          render: (value: string[]) => value?.join(", ") || "-",
+        },
+        { key: "adminId", header: t("columns.adminId") },
         {
           key: "status",
           header: t("columns.status"),
@@ -356,8 +531,51 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
       ] as ColumnDef<Center>[],
       fetchData: () => localDb.centers.toArray(),
+    },
+
+    pushSubscriptions: {
+      name: t("tables.pushSubscriptions"),
+      icon: Database,
+      color: "bg-slate-500",
+      columns: [
+        { key: "id", header: t("columns.id"), sortable: true },
+        { key: "endpoint", header: t("columns.endpoint"), sortable: true },
+        {
+          key: "keys",
+          header: t("columns.keys"),
+          render: (value: any) => (value ? JSON.stringify(value) : "-"),
+        },
+        { key: "userId", header: t("columns.userId") },
+        { key: "role", header: t("columns.role") },
+        {
+          key: "status",
+          header: t("columns.status"),
+          render: (value: string) => (
+            <Badge
+              variant={
+                value === "1"
+                  ? "default"
+                  : value === "w"
+                    ? "secondary"
+                    : "destructive"
+              }
+            >
+              {value === "1"
+                ? t("status.synced")
+                : value === "w"
+                  ? t("status.pending")
+                  : t("status.deleted")}
+            </Badge>
+          ),
+        },
+        { key: "createdAt", header: t("columns.created"), sortable: true },
+        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+      ] as ColumnDef<PushSubscription>[],
+      fetchData: () => localDb.pushSubscriptions.toArray(),
     },
   };
 

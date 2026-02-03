@@ -1867,7 +1867,9 @@
       "updatedAt": "Updated",
       "receiptNumber": "Receipt #",
       "paymentMethod": "Method",
-      "roomId": "Room"
+      "roomId": "Room",
+      "dataEpoch": "Data Epoch",
+      "weeklySchedule": "Weekly Schedule"
     },
     "status": {
       "synced": "Synced",
