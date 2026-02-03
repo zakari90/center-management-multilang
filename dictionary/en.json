@@ -1925,6 +1925,13 @@
     "copyStudentLink": "Copy Student Link",
     "copyTeacherLink": "Copy Teacher Link"
   },
+  "SchedulePage": {
+    "title": "Schedule Management",
+    "description": "Manage the weekly schedule and teacher assignments.",
+    "timetable": "Timetable",
+    "teachers": "Teachers",
+    "assignments": "Room Assignments"
+  },
   "publicRegistration": {
     "studentTitle": "Student Registration",
     "teacherTitle": "Teacher Registration",

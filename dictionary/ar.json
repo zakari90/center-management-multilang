@@ -1900,6 +1900,13 @@
     "copyStudentLink": "نسخ رابط الطالب",
     "copyTeacherLink": "نسخ رابط المعلم"
   },
+  "SchedulePage": {
+    "title": "إدارة الجدول",
+    "description": "إدارة الجدول الأسبوعي وتعيينات المعلمين.",
+    "timetable": "الجدول الزمني",
+    "teachers": "المعلمون",
+    "assignments": "تعيينات القاعات"
+  },
   "publicRegistration": {
     "studentTitle": "تسجيل الطلاب",
     "teacherTitle": "تسجيل المعلمين",

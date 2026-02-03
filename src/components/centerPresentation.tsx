@@ -32,7 +32,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditDialog } from "./editDialog";
 import { HomePageEditor } from "./HomePageEditor";
-import PageHeader from "./page-header";
 import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
 import { SubjectsTableView } from "./SubjectsTableView";
@@ -495,12 +494,12 @@ export default function CenterPresentation({
   return (
     <main>
       {/* <EntitySyncControls entity="centers" /> */}
-      <PageHeader title={center.name} subtitle={t("centerOverview")} />
+      {/* <PageHeader title={center.name} subtitle={t("centerOverview")} /> */}
       <Card className="shadow-lg border border-border bg-background w-full mt-4">
         <CardHeader className="text-center space-y-2 px-4 sm:px-6">
-          {/* <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
             {center.name}
-          </CardTitle> */}
+          </CardTitle>
           {center.address && (
             <p className="text-sm text-muted-foreground whitespace-pre-line wrap-break-word px-2 sm:px-0">
               {center.address}

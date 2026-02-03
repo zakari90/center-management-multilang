@@ -1904,6 +1904,13 @@
     "copyStudentLink": "Copier le lien élève",
     "copyTeacherLink": "Copier le lien enseignant"
   },
+  "SchedulePage": {
+    "title": "Gestion du calendrier",
+    "description": "Gérer le calendrier hebdomadaire et les affectations des enseignants.",
+    "timetable": "Emploi du temps",
+    "teachers": "Enseignants",
+    "assignments": "Affectations des salles"
+  },
   "publicRegistration": {
     "studentTitle": "Inscription élève",
     "teacherTitle": "Inscription enseignant",
