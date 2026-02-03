@@ -45,6 +45,7 @@ import {
   getOrphanedRecordsCount,
 } from "@/utils/orphanedRecords";
 import AddTeacherDialog from "@/components/AddTeacherDialog";
+import PageHeader from "@/components/page-header";
 
 export default function AllUsersTable() {
   const t = useTranslations("AllUsersTable");
@@ -258,152 +259,160 @@ export default function AllUsersTable() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>{t("allUsersTitle")}</CardTitle>
-            <CardDescription>{t("allUsersDescription")}</CardDescription>
-          </div>
-          {activeTab === "students" ? (
-            <AddStudentDialog adminMode onStudentAdded={refreshData} />
-          ) : activeTab === "teachers" ? (
-            <AddTeacherDialog onTeacherAdded={refreshData} adminMode />
-          ) : (
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("addManager")}
-            </Button>
-          )}
-        </div>
-
-        {/* Orphaned Records Alert */}
-        {(orphanedTeachers.length > 0 || orphanedStudents.length > 0) && (
-          <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-medium text-sm text-orange-800 dark:text-orange-200">
-                    {t("orphanedRecordsFound")}
-                  </p>
-                  <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                    {orphanedTeachers.length > 0 && (
-                      <span>
-                        {orphanedTeachers.length} {t("teachers").toLowerCase()}
-                      </span>
-                    )}
-                    {orphanedTeachers.length > 0 &&
-                      orphanedStudents.length > 0 && <span> + </span>}
-                    {orphanedStudents.length > 0 && (
-                      <span>
-                        {orphanedStudents.length} {t("students").toLowerCase()}
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setOrphanedRecordsDialogOpen(true)}
-                className="shrink-0"
-              >
-                {t("fixNow")}
+    <div>
+      <PageHeader
+        title={t("allUsersTitle")}
+        subtitle={t("allUsersDescription")}
+      />
+      <Card className="w-full">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            {activeTab === "students" ? (
+              <AddStudentDialog adminMode onStudentAdded={refreshData} />
+            ) : activeTab === "teachers" ? (
+              <AddTeacherDialog onTeacherAdded={refreshData} adminMode />
+            ) : (
+              <Button onClick={() => setIsAddDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("addManager")}
               </Button>
-            </div>
+            )}
           </div>
-        )}
-      </CardHeader>
-      <CardContent>
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="space-y-4"
-        >
-          <TabsList>
-            <TabsTrigger value="users">
-              {t("managersTab")} ({users.length})
-            </TabsTrigger>
-            <TabsTrigger value="teachers">
-              {t("teachers")} ({teachers.length})
-            </TabsTrigger>
-            <TabsTrigger value="students">
-              {t("students")} ({students.length})
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="users" className="space-y-4">
-            <ManagersTab
-              users={users}
-              onEdit={(user) => {
-                setEditingUser({ ...user, password: "" }); // Clear password for security/edit form
-                setIsEditDialogOpen(true);
-              }}
-              onDelete={(user) =>
-                setItemToDelete({ id: user.id, type: "user", name: user.name })
-              }
-            />
-          </TabsContent>
+          {/* Orphaned Records Alert */}
+          {(orphanedTeachers.length > 0 || orphanedStudents.length > 0) && (
+            <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm text-orange-800 dark:text-orange-200">
+                      {t("orphanedRecordsFound")}
+                    </p>
+                    <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                      {orphanedTeachers.length > 0 && (
+                        <span>
+                          {orphanedTeachers.length}{" "}
+                          {t("teachers").toLowerCase()}
+                        </span>
+                      )}
+                      {orphanedTeachers.length > 0 &&
+                        orphanedStudents.length > 0 && <span> + </span>}
+                      {orphanedStudents.length > 0 && (
+                        <span>
+                          {orphanedStudents.length}{" "}
+                          {t("students").toLowerCase()}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setOrphanedRecordsDialogOpen(true)}
+                  className="shrink-0"
+                >
+                  {t("fixNow")}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-4"
+          >
+            <TabsList>
+              <TabsTrigger value="users">
+                {t("managersTab")} ({users.length})
+              </TabsTrigger>
+              <TabsTrigger value="teachers">
+                {t("teachers")} ({teachers.length})
+              </TabsTrigger>
+              <TabsTrigger value="students">
+                {t("students")} ({students.length})
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="teachers" className="space-y-4">
-            <TeachersTab
-              teachers={teachers}
-              onUpdate={refreshData}
-              onDelete={(teacher) =>
-                setItemToDelete({
-                  id: teacher.id,
-                  type: "teacher",
-                  name: teacher.name,
-                })
-              }
-            />
-          </TabsContent>
+            <TabsContent value="users" className="space-y-4">
+              <ManagersTab
+                users={users}
+                onEdit={(user) => {
+                  setEditingUser({ ...user, password: "" }); // Clear password for security/edit form
+                  setIsEditDialogOpen(true);
+                }}
+                onDelete={(user) =>
+                  setItemToDelete({
+                    id: user.id,
+                    type: "user",
+                    name: user.name,
+                  })
+                }
+              />
+            </TabsContent>
 
-          <TabsContent value="students" className="space-y-4">
-            <StudentsTab
-              students={students}
-              onUpdate={refreshData}
-              onDelete={(student) =>
-                setItemToDelete({
-                  id: student.id,
-                  type: "student",
-                  name: student.name,
-                })
-              }
-            />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
+            <TabsContent value="teachers" className="space-y-4">
+              <TeachersTab
+                teachers={teachers}
+                onUpdate={refreshData}
+                onDelete={(teacher) =>
+                  setItemToDelete({
+                    id: teacher.id,
+                    type: "teacher",
+                    name: teacher.name,
+                  })
+                }
+              />
+            </TabsContent>
 
-      <UserDialogs
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        userFormData={userFormData}
-        setUserFormData={setUserFormData}
-        handleAddUser={handleAddUser}
-        isEditDialogOpen={isEditDialogOpen}
-        setIsEditDialogOpen={setIsEditDialogOpen}
-        editingUser={editingUser}
-        setEditingUser={setEditingUser}
-        handleSaveEdit={handleSaveEdit}
-        itemToDelete={itemToDelete}
-        setItemToDelete={setItemToDelete}
-        handleDelete={handleDelete}
-        isProcessing={isProcessing}
-      />
+            <TabsContent value="students" className="space-y-4">
+              <StudentsTab
+                students={students}
+                onUpdate={refreshData}
+                onDelete={(student) =>
+                  setItemToDelete({
+                    id: student.id,
+                    type: "student",
+                    name: student.name,
+                  })
+                }
+              />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
 
-      <OrphanedRecordsDialog
-        open={orphanedRecordsDialogOpen}
-        onOpenChange={setOrphanedRecordsDialogOpen}
-        orphanedTeachers={orphanedTeachers}
-        orphanedStudents={orphanedStudents}
-        availableManagers={users}
-        onRecordsFixed={() => {
-          refreshData();
-          detectOrphanedRecords();
-        }}
-      />
-    </Card>
+        <UserDialogs
+          isAddDialogOpen={isAddDialogOpen}
+          setIsAddDialogOpen={setIsAddDialogOpen}
+          userFormData={userFormData}
+          setUserFormData={setUserFormData}
+          handleAddUser={handleAddUser}
+          isEditDialogOpen={isEditDialogOpen}
+          setIsEditDialogOpen={setIsEditDialogOpen}
+          editingUser={editingUser}
+          setEditingUser={setEditingUser}
+          handleSaveEdit={handleSaveEdit}
+          itemToDelete={itemToDelete}
+          setItemToDelete={setItemToDelete}
+          handleDelete={handleDelete}
+          isProcessing={isProcessing}
+        />
+
+        <OrphanedRecordsDialog
+          open={orphanedRecordsDialogOpen}
+          onOpenChange={setOrphanedRecordsDialogOpen}
+          orphanedTeachers={orphanedTeachers}
+          orphanedStudents={orphanedStudents}
+          availableManagers={users}
+          onRecordsFixed={() => {
+            refreshData();
+            detectOrphanedRecords();
+          }}
+        />
+      </Card>
+    </div>
   );
 }

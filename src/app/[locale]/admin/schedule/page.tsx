@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import TeacherScheduleView from "@/components/inUse/teacherWithSchedule";
 import TimetableManagement from "@/components/inUse/TimeTableManagement";
-import { PendingSchedulesDialog } from "@/components/schedule/PendingSchedulesDialog";
 
 export default function SchedulePage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -17,8 +16,8 @@ export default function SchedulePage() {
     timestamp: new Date().toISOString(),
   });
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <PendingSchedulesDialog />
+    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+      {/* <PendingSchedulesDialog /> */}
       <TeacherScheduleView refreshKey={refreshKey} />
       <TimetableManagement
         refreshKey={refreshKey}

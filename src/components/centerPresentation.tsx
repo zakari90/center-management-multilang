@@ -1,6 +1,5 @@
 "use client";
 
-import { EntitySyncControls } from "@/components/EntitySyncControls";
 import { ItemInputList } from "@/components/itemInputList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditDialog } from "./editDialog";
 import { HomePageEditor } from "./HomePageEditor";
+import PageHeader from "./page-header";
 import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
 import { SubjectsTableView } from "./SubjectsTableView";
@@ -493,14 +493,14 @@ export default function CenterPresentation({
   };
 
   return (
-    <main className="max-w-3xl mx-auto p-4 sm:p-6">
-      <EntitySyncControls entity="centers" />
+    <main className="md:max-w-2xl md:mx-auto mt-4">
+      {/* <EntitySyncControls entity="centers" /> */}
+      <PageHeader title={t("centerOverview")} />
       <Card className="shadow-lg border border-border bg-background w-full">
         <CardHeader className="text-center space-y-2 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
             {center.name}
           </CardTitle>
-          <p className="text-muted-foreground text-sm">{t("centerOverview")}</p>
           {center.address && (
             <p className="text-sm text-muted-foreground whitespace-pre-line wrap-break-word px-2 sm:px-0">
               {center.address}

@@ -84,7 +84,7 @@ export default function CenterPageClient() {
   }, [fetchCenterId]);
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
+    <div>
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />

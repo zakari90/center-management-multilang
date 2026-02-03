@@ -240,7 +240,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
 
   // ... rest of your component remains the same
   return (
-    <Card className="max-w-2xl mx-auto mt-4">
+    <Card className="md:max-w-2xl md:mx-auto mt-4">
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Step 1: Basic Info */}

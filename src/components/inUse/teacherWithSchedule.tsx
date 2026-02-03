@@ -898,8 +898,9 @@ export default function TeacherScheduleView({
 
   return (
     <div className="space-y-4">
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+
       <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-3">
-        <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex gap-2 flex-wrap">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
