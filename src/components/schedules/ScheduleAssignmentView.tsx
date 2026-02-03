@@ -135,10 +135,12 @@ export default function ScheduleAssignmentView({
   centerId,
   refreshKey,
   onScheduleChangeAction,
+  readOnly = false,
 }: {
   centerId?: string;
   refreshKey?: number;
   onScheduleChangeAction?: () => void;
+  readOnly?: boolean;
 }) {
   const t = useTranslations("ScheduleAssignment");
   const { daysOfWeek, availableClassrooms } = useLocalizedConstants();
@@ -385,6 +387,7 @@ export default function ScheduleAssignmentView({
   // --- Handlers ---
 
   const handleSlotClick = (room: string, startTime: string) => {
+    if (readOnly) return;
     const endTimeIndex = TIME_SLOTS.indexOf(startTime) + 1;
     const endTime = TIME_SLOTS[endTimeIndex] || "18:00";
 
@@ -656,7 +659,8 @@ export default function ScheduleAssignmentView({
                       key={`${room}-${time}`}
                       onClick={() => handleSlotClick(room, time)}
                       className={cn(
-                        "flex-1 min-w-[120px] border-r last:border-r-0 p-1 cursor-pointer transition-colors hover:bg-accent/50",
+                        "flex-1 min-w-[120px] border-r last:border-r-0 p-1 transition-colors",
+                        !readOnly && "cursor-pointer hover:bg-accent/50",
                         slot ? "bg-blue-50 hover:bg-blue-100" : "",
                       )}
                     >

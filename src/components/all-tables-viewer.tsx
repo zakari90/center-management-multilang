@@ -262,6 +262,18 @@ export function AllTablesViewer() {
         { key: "day", header: t("columns.day"), sortable: true },
         { key: "startTime", header: t("columns.startTime"), sortable: true },
         { key: "endTime", header: t("columns.endTime") },
+        {
+          key: "subjectName",
+          header: t("columns.subject"),
+          sortable: true,
+          filterable: true,
+        },
+        {
+          key: "teacherName",
+          header: t("columns.teacher"),
+          sortable: true,
+          filterable: true,
+        },
         { key: "roomId", header: t("columns.room") },
         {
           key: "status",
@@ -284,8 +296,25 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-      ] as ColumnDef<Schedule>[],
-      fetchData: () => localDb.schedules.toArray(),
+      ] as ColumnDef<
+        Schedule & { teacherName?: string; subjectName?: string }
+      >[],
+      fetchData: async () => {
+        const [schedules, teachers, subjects] = await Promise.all([
+          localDb.schedules.toArray(),
+          localDb.teachers.toArray(),
+          localDb.subjects.toArray(),
+        ]);
+
+        const teacherMap = new Map(teachers.map((t) => [t.id, t.name]));
+        const subjectMap = new Map(subjects.map((s) => [s.id, s.name]));
+
+        return schedules.map((schedule) => ({
+          ...schedule,
+          teacherName: teacherMap.get(schedule.teacherId) || t("unknown"),
+          subjectName: subjectMap.get(schedule.subjectId) || t("unknown"),
+        }));
+      },
     },
 
     centers: {

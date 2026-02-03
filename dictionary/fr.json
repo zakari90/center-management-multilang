@@ -1795,6 +1795,7 @@
       "grade": "Niveau",
       "parent": "Parent",
       "subject": "Matière",
+      "teacher": "Enseignant",
       "price": "Prix",
       "duration": "Durée (min)",
       "amount": "Montant",

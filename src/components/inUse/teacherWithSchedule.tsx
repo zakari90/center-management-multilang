@@ -595,9 +595,11 @@ const exportTeacherScheduleToExcel = async (
 export default function TeacherScheduleView({
   centerId,
   refreshKey,
+  readOnly = false,
 }: {
   centerId?: string;
   refreshKey?: number;
+  readOnly?: boolean;
 }) {
   const t = useTranslations("TeacherScheduleView");
   const { user } = useAuth();
