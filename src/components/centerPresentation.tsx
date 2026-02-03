@@ -493,10 +493,10 @@ export default function CenterPresentation({
   };
 
   return (
-    <main className="md:max-w-2xl md:mx-auto mt-4">
+    <main>
       {/* <EntitySyncControls entity="centers" /> */}
       <PageHeader title={t("centerOverview")} />
-      <Card className="shadow-lg border border-border bg-background w-full">
+      <Card className="shadow-lg border border-border bg-background w-full mt-4">
         <CardHeader className="text-center space-y-2 px-4 sm:px-6">
           <CardTitle className="text-2xl sm:text-3xl font-bold text-primary truncate">
             {center.name}
