@@ -360,7 +360,7 @@ export default function AdminReceiptsTable() {
     <div>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center">
+      <div className="flex flex-row justify-between items-center">
         <AddStudentPaymentDialog onPaymentCreated={fetchReceipts} />
         <AddTeacherPaymentDialog onPaymentCreated={fetchReceipts} />
       </div>
