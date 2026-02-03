@@ -357,14 +357,12 @@ export default function AdminReceiptsTable() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div>
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center">
-        <PageHeader title={t("title")} subtitle={t("subtitle")} />
-        <div className="flex gap-2">
-          <AddStudentPaymentDialog onPaymentCreated={fetchReceipts} />
-          <AddTeacherPaymentDialog onPaymentCreated={fetchReceipts} />
-        </div>
+        <AddStudentPaymentDialog onPaymentCreated={fetchReceipts} />
+        <AddTeacherPaymentDialog onPaymentCreated={fetchReceipts} />
       </div>
 
       {error && (
