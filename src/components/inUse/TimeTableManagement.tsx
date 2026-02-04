@@ -986,7 +986,7 @@ export default function TimetableManagement({
                 <SelectTrigger>
                   <SelectValue placeholder={t("selectSubjectPlaceholder")} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="text-wrap">
                   {subjects
                     .filter((subject) => {
                       if (!newEntry.teacherId) return true;
