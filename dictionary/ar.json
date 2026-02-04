@@ -521,7 +521,9 @@
     "noAvailabilityOrSchedules": "لم يتم تكوين التوفر أو الجداول",
     "notAvailableOn": "غير متاح يوم",
     "outsideAvailableHours": "خارج ساعات التوفر",
-    "hours": "ساعة"
+    "hours": "ساعة",
+    "overrideAll": "تجاوز الكل",
+    "conflictsDismissed": "تم تأكيد التعارضات"
   },
   "AllUsersTable": {
     "errorLoadData": "فشل تحميل البيانات",

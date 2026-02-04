@@ -556,7 +556,9 @@
     "noAvailabilityOrSchedules": "No availability or schedules configured",
     "notAvailableOn": "Not available on",
     "outsideAvailableHours": "Outside available hours",
-    "hours": "h"
+    "hours": "h",
+    "overrideAll": "Override All",
+    "conflictsDismissed": "Conflicts acknowledged"
   },
   "AllUsersTable": {
     "errorLoadData": "Failed to load data",

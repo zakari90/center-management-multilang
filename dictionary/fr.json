@@ -529,7 +529,9 @@
     "noAvailabilityOrSchedules": "Aucune disponibilité ou horaire configuré",
     "notAvailableOn": "Non disponible le",
     "outsideAvailableHours": "En dehors des heures disponibles",
-    "hours": "h"
+    "hours": "h",
+    "overrideAll": "Ignorer tout",
+    "conflictsDismissed": "Conflits reconnus"
   },
   "AllUsersTable": {
     "errorLoadData": "Impossible de charger les données",

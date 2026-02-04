@@ -1021,6 +1021,14 @@ export default function TeacherScheduleView({
 
 function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
   const t = useTranslations("TeacherScheduleView");
+  const [dismissed, setDismissed] = useState(false);
+
+  // Reset dismissed state when teacher changes
+  useEffect(() => {
+    setDismissed(false);
+  }, [teacher.id]);
+
+  const conflictsToShow = dismissed ? [] : teacher.conflicts;
 
   return (
     <Card>
@@ -1095,12 +1103,22 @@ function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
           </div>
         </div>
 
-        {teacher.conflicts.length > 0 && (
+        {conflictsToShow.length > 0 && (
           <Alert variant="destructive" className="mt-4">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <div className="font-semibold mb-2">
-                {teacher.conflicts.length} {t("conflictsAlert")}
+              <div className="flex justify-between items-center mb-2">
+                <div className="font-semibold">
+                  {teacher.conflicts.length} {t("conflictsAlert")}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs bg-background hover:bg-accent text-foreground border-destructive/30 hover:border-destructive/50"
+                  onClick={() => setDismissed(true)}
+                >
+                  {t("overrideAll") || "Override All"}
+                </Button>
               </div>
               <ul className="space-y-2 text-sm">
                 {teacher.conflicts.map((conflict) => {
@@ -1134,6 +1152,26 @@ function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
                   );
                 })}
               </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {dismissed && teacher.conflicts.length > 0 && (
+          <Alert className="mt-4 bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription className="flex justify-between items-center">
+              <span>
+                {t("conflictsDismissed") || "Conflicts acknowledged"} (
+                {teacher.conflicts.length})
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs hover:bg-yellow-500/10"
+                onClick={() => setDismissed(false)}
+              >
+                {t("show") || "Show"}
+              </Button>
             </AlertDescription>
           </Alert>
         )}
