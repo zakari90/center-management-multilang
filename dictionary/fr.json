@@ -1104,6 +1104,8 @@
   },
   "TeacherProfile": {
     "edit": "Modifier",
+    "viewDetails": "Voir les détails",
+    "teacherDetails": "Détails de l'enseignant",
     "overview": "Aperçu du profil de l'enseignant",
     "email": "Email",
     "phone": "Téléphone",
