@@ -2,7 +2,6 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -357,30 +356,13 @@ export default function AdminReceiptsTable() {
     );
   }
 
-  const tStudentForm = useTranslations("CreateStudentPaymentForm");
-  const tTeacherForm = useTranslations("TeacherPayment");
-
   return (
     <div>
       <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {/* Header */}
-      <div className="flex flex-row gap-2 items-center">
-        <AddStudentPaymentDialog
-          onPaymentCreated={fetchReceipts}
-          trigger={
-            <Button className="bg-green-600 hover:bg-green-700">
-              {tStudentForm("studentPayment")}
-            </Button>
-          }
-        />
-        <AddTeacherPaymentDialog
-          onPaymentCreated={fetchReceipts}
-          trigger={
-            <Button className="bg-orange-600 hover:bg-orange-700">
-              {tTeacherForm("teacherPayment")}
-            </Button>
-          }
-        />
+      <div className="flex flex-row justify-between items-center">
+        <AddStudentPaymentDialog onPaymentCreated={fetchReceipts} />
+        <AddTeacherPaymentDialog onPaymentCreated={fetchReceipts} />
       </div>
 
       {error && (
