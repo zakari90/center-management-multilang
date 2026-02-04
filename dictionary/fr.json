@@ -800,6 +800,7 @@
     "subjects": "Matières",
     "method": "Méthode",
     "total": "Total",
+    "createPayment": "Créer un paiement",
     "cancel": "Annuler",
     "createReceipt": "Créer un reçu",
     "required": "*",
