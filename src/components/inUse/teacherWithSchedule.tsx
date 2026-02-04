@@ -14,6 +14,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useAuth } from "@/context/authContext";
 import {
   centerActions,
@@ -610,8 +618,19 @@ export default function TeacherScheduleView({
   const [error, setError] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [dismissedConflicts, setDismissedConflicts] = useState<
+    Record<string, boolean>
+  >({});
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Toggle conflict dismissal for a specific teacher
+  const toggleDismissConflicts = useCallback(
+    (teacherId: string, dismissed: boolean) => {
+      setDismissedConflicts((prev) => ({ ...prev, [teacherId]: dismissed }));
+    },
+    [],
+  );
 
   const fetchTeacherSchedules = useCallback(async () => {
     try {
@@ -979,14 +998,15 @@ export default function TeacherScheduleView({
                   >
                     <div className="flex items-center gap-2 w-fit">
                       <span className="font-medium">{teacher.name}</span>
-                      {teacher.conflicts.length > 0 && (
-                        <Badge
-                          variant="destructive"
-                          className="h-5 px-1.5 text-xs"
-                        >
-                          {teacher.conflicts.length}
-                        </Badge>
-                      )}
+                      {teacher.conflicts.length > 0 &&
+                        !dismissedConflicts[teacher.id] && (
+                          <Badge
+                            variant="destructive"
+                            className="h-5 px-1.5 text-xs"
+                          >
+                            {teacher.conflicts.length}
+                          </Badge>
+                        )}
                     </div>
                     <span className="text-xs opacity-80">
                       {teacher.totalHours.toFixed(1)}
@@ -1005,10 +1025,16 @@ export default function TeacherScheduleView({
               value={teacher.id}
               className="space-y-4 mt-4"
             >
-              <TeacherInfoCard teacher={teacher} />
+              <TeacherInfoCard
+                teacher={teacher}
+                dismissed={dismissedConflicts[teacher.id] || false}
+                onDismissChange={(dismissed) =>
+                  toggleDismissConflicts(teacher.id, dismissed)
+                }
+              />
               <AvailabilityCard teacher={teacher} />
 
-              <GridScheduleView teacher={teacher} />
+              <TableScheduleView teacher={teacher} />
             </TabsContent>
           ))}
         </Tabs>
@@ -1019,14 +1045,16 @@ export default function TeacherScheduleView({
 
 // ==================== TEACHER INFO CARD ====================
 
-function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
+function TeacherInfoCard({
+  teacher,
+  dismissed,
+  onDismissChange,
+}: {
+  teacher: TeacherWithSchedule;
+  dismissed: boolean;
+  onDismissChange: (dismissed: boolean) => void;
+}) {
   const t = useTranslations("TeacherScheduleView");
-  const [dismissed, setDismissed] = useState(false);
-
-  // Reset dismissed state when teacher changes
-  useEffect(() => {
-    setDismissed(false);
-  }, [teacher.id]);
 
   const conflictsToShow = dismissed ? [] : teacher.conflicts;
 
@@ -1115,7 +1143,7 @@ function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
                   variant="outline"
                   size="sm"
                   className="h-7 text-xs bg-background hover:bg-accent text-foreground border-destructive/30 hover:border-destructive/50"
-                  onClick={() => setDismissed(true)}
+                  onClick={() => onDismissChange(true)}
                 >
                   {t("overrideAll") || "Override All"}
                 </Button>
@@ -1168,7 +1196,7 @@ function TeacherInfoCard({ teacher }: { teacher: TeacherWithSchedule }) {
                 variant="ghost"
                 size="sm"
                 className="h-6 text-xs hover:bg-yellow-500/10"
-                onClick={() => setDismissed(false)}
+                onClick={() => onDismissChange(false)}
               >
                 {t("show") || "Show"}
               </Button>
@@ -1217,6 +1245,113 @@ function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
             <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">{t("noAvailability")}</p>
             <p className="text-xs mt-1">{t("noAvailabilityDescription")}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ==================== TABLE SCHEDULE VIEW ====================
+
+function TableScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+  const t = useTranslations("TeacherScheduleView");
+
+  // Sort schedules by day order, then by start time
+  const sortedSchedules = [...teacher.schedules].sort((a, b) => {
+    const dayOrder = DAYS.indexOf(a.day) - DAYS.indexOf(b.day);
+    if (dayOrder !== 0) return dayOrder;
+    return a.startTime.localeCompare(b.startTime);
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
+          {t("scheduleTable") || "Schedule"}
+        </CardTitle>
+        <CardDescription>
+          {sortedSchedules.length}{" "}
+          {sortedSchedules.length === 1
+            ? t("class")
+            : t("classesPlural") || "classes"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {sortedSchedules.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">
+              {t("noSchedules") || "No scheduled classes"}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("day") || "Day"}</TableHead>
+                  <TableHead>{t("time") || "Time"}</TableHead>
+                  <TableHead>{t("subject") || "Subject"}</TableHead>
+                  <TableHead>{t("grade") || "Grade"}</TableHead>
+                  <TableHead>{t("room") || "Room"}</TableHead>
+                  <TableHead className="text-center">
+                    {t("status") || "Status"}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedSchedules.map((schedule) => {
+                  const withinAvailability = isWithinAvailability(
+                    schedule,
+                    teacher.weeklySchedule,
+                  );
+
+                  return (
+                    <TableRow
+                      key={schedule.id}
+                      className={cn(
+                        withinAvailability
+                          ? ""
+                          : "bg-destructive/5 hover:bg-destructive/10",
+                      )}
+                    >
+                      <TableCell className="font-medium">
+                        {schedule.day}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          {schedule.startTime} - {schedule.endTime}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {schedule.subject.name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {schedule.subject.grade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3 text-muted-foreground" />
+                          {schedule.roomId}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {withinAvailability ? (
+                          <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-destructive mx-auto" />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         )}
       </CardContent>

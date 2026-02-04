@@ -415,7 +415,7 @@ export default function ReceiptsTable() {
                             : "text-orange-600"
                         }`}
                       >
-                        ${receipt.amount.toFixed(2)}
+                        MAD{receipt.amount.toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell>
