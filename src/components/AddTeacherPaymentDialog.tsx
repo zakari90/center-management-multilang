@@ -645,7 +645,7 @@ export default function AddTeacherPaymentDialog({
         {trigger ? (
           trigger
         ) : (
-          <Button className="flex-1 bg-orange-600 hover:bg-orange-700">
+          <Button className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700">
             {t("teacherPayment") || "Teacher Payment"}
           </Button>
         )}

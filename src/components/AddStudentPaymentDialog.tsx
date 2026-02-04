@@ -863,7 +863,7 @@ export default function AddStudentPaymentDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button className="flex-1 bg-primary hover:bg-primary/45">
+          <Button className="w-full sm:w-auto bg-primary hover:bg-primary/45">
             {t("studentPayment") || "Student Payment"}
           </Button>
         )}
