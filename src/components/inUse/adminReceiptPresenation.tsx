@@ -440,7 +440,7 @@ export default function AdminReceiptsTable() {
         </Card>
       </div>
 
-      <Tabs defaultValue="receipts" className="space-y-6 mt-4">
+      <Tabs defaultValue="receipts" className="space-y-2 mt-6">
         <TabsList className="grid w-full grid-cols-3 md:w-[600px]">
           <TabsTrigger value="receipts">
             <ReceiptIcon className="h-4 w-4 mr-2" />

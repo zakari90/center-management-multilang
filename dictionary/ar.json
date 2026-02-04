@@ -523,7 +523,15 @@
     "outsideAvailableHours": "خارج ساعات التوفر",
     "hours": "ساعة",
     "overrideAll": "تجاوز الكل",
-    "conflictsDismissed": "تم تأكيد التعارضات"
+    "conflictsDismissed": "تم تأكيد التعارضات",
+    "scheduleTable": "جدول المواعيد",
+    "day": "اليوم",
+    "time": "الوقت",
+    "subject": "المادة",
+    "grade": "المستوى",
+    "status": "الحالة",
+    "show": "عرض",
+    "noSchedules": "لا توجد حصص مجدولة"
   },
   "AllUsersTable": {
     "errorLoadData": "فشل تحميل البيانات",

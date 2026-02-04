@@ -186,7 +186,7 @@ const SubjectCompensationCard = ({
             variant="ghost"
             size="icon"
             onClick={() => onRemove(index)}
-            className="h-9 w-9 text-destructive hover:text-destructive flex-shrink-0"
+            className="h-9 w-9 text-destructive hover:text-destructive shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>

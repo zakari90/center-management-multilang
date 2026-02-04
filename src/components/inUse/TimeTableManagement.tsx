@@ -441,7 +441,14 @@ export default function TimetableManagement({
     const endTime = TIME_SLOTS[endTimeIndex] || "18:00";
 
     setSelectedSlot({ day, startTime, endTime });
-    setNewEntry({ teacherId: "", subjectId: "", roomId: "" });
+
+    // Pre-fill based on current view filter
+    setNewEntry({
+      teacherId: viewMode === "teacher" && selectedFilter ? selectedFilter : "",
+      subjectId: "",
+      roomId: viewMode === "room" && selectedFilter ? selectedFilter : "",
+    });
+
     setError("");
     setIsDialogOpen(true);
   };
@@ -804,6 +811,10 @@ export default function TimetableManagement({
                         viewMode === "teacher" && selectedFilter
                           ? teachers.find((t) => t.id === selectedFilter)
                           : null;
+
+                      // Calculate the end time for this slot
+                      const slotEndTime = TIME_SLOTS[timeIndex + 1] || "23:59";
+
                       const isAvailable =
                         slots.length === 0 &&
                         currentTeacher &&
@@ -811,7 +822,7 @@ export default function TimetableManagement({
                           currentTeacher,
                           day.label,
                           time,
-                          TIME_SLOTS[timeIndex + 1],
+                          slotEndTime,
                         );
 
                       return (
@@ -821,25 +832,51 @@ export default function TimetableManagement({
                             !readOnly && handleSlotClick(day.label, time)
                           }
                           className={cn(
-                            "min-h-[100px] p-2 border-2 rounded-md transition-all flex flex-col justify-center",
-                            !readOnly &&
-                              "cursor-pointer hover:border-primary hover:bg-primary/5",
-                            slots.length === 0 && !isAvailable && "bg-muted/30",
-                            isAvailable &&
-                              "bg-green-50 border-green-200 hover:bg-green-100",
+                            "min-h-[80px] p-1.5 border rounded-md transition-all flex flex-col relative group/cell",
+                            !readOnly && "cursor-pointer",
+                            // Default state
+                            "bg-background hover:border-primary/50",
+                            // Empty & Available state
+                            slots.length === 0 &&
+                              isAvailable &&
+                              "bg-green-50/60 hover:bg-green-100/50 border-green-200/50",
+                            // Empty & Not Available (if filtering by teacher)
+                            slots.length === 0 &&
+                              currentTeacher &&
+                              !isAvailable &&
+                              "bg-muted/10 opacity-60",
+                            // Conflict state
                             hasConflict &&
-                              "border-destructive bg-destructive/10",
+                              "bg-destructive/10 border-destructive/50",
                           )}
                         >
-                          {isAvailable && (
-                            <div className="text-center py-2 text-green-600 space-y-1">
-                              <CheckCircle className="h-4 w-4 mx-auto opacity-70" />
-                              <span className="text-[10px] font-semibold uppercase tracking-wider block">
-                                {t("available") || "Available"}
-                              </span>
+                          {/* Availability Indicator */}
+                          {isAvailable && slots.length === 0 && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="flex flex-col items-center opacity-40 group-hover/cell:opacity-100 transition-opacity">
+                                <CheckCircle className="h-4 w-4 text-green-600 mb-0.5" />
+                                <span className="text-[9px] font-bold text-green-700 uppercase tracking-wider">
+                                  {t("available") || "Available"}
+                                </span>
+                              </div>
                             </div>
                           )}
-                          <div className="space-y-1">
+
+                          {/* Hover Add Icon (if empty) */}
+                          {slots.length === 0 && !readOnly && (
+                            <div
+                              className={cn(
+                                "absolute inset-0 flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity z-10",
+                                isAvailable ? "hidden" : "", // Hide if available icon is already showing, or show overlaid? Let's show overlay.
+                              )}
+                            >
+                              <div className="bg-primary/10 p-1.5 rounded-full backdrop-blur-[2px]">
+                                <Clock className="h-4 w-4 text-primary" />
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="space-y-1 z-20 relative">
                             {slots.map((slot, idx) => {
                               const teacher = teachers.find(
                                 (t) => t.id === slot.teacherId,
@@ -851,56 +888,43 @@ export default function TimetableManagement({
                               return (
                                 <div
                                   key={slot.id || idx}
-                                  className="p-2 bg-amber-200 border rounded text-xs space-y-1 group relative overflow-auto bg"
-                                  onClick={(e) => e.stopPropagation()}
+                                  className="p-1.5 bg-card border shadow-sm rounded text-xs space-y-1 group/card relative overflow-hidden hover:shadow-md transition-all border-l-2 border-l-primary"
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent slot click
+                                    if (slot) handleViewDetails(slot);
+                                  }}
                                 >
                                   <div className="flex justify-between items-start">
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs "
-                                    >
+                                    <span className="font-semibold truncate pr-4 text-primary">
                                       {subject?.name}
-                                    </Badge>
-                                    <div className="flex gap-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
-                                        onClick={() => handleViewDetails(slot)}
+                                    </span>
+
+                                    {!readOnly && (
+                                      <button
+                                        className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 p-1 hover:bg-destructive/10 rounded text-destructive transition-all"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (slot.id)
+                                            handleDeleteSchedule(slot.id);
+                                        }}
                                       >
-                                        <Eye className="w-3 h-3 text-primary" />
-                                      </Button>
-                                      {!readOnly && (
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100"
-                                          onClick={() =>
-                                            slot.id &&
-                                            handleDeleteSchedule(slot.id)
-                                          }
-                                        >
-                                          <Trash2 className="h-3 w-3 text-destructive" />
-                                        </Button>
-                                      )}
+                                        <Trash2 className="h-3 w-3" />
+                                      </button>
+                                    )}
+                                  </div>
+
+                                  <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
+                                    <div className="flex items-center gap-1">
+                                      <User className="h-3 w-3 opacity-70" />
+                                      <span className="truncate">
+                                        {teacher?.name}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3 opacity-70" />
+                                      <span>{slot.roomId}</span>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <User className="h-3 w-3" />
-                                    <span>{teacher?.name}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1 text-muted-foreground">
-                                    <MapPin className="h-3 w-3" />
-                                    <span>{slot.roomId}</span>
-                                  </div>
-                                  {subject?.grade && (
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-xs"
-                                    >
-                                      {subject.grade}
-                                    </Badge>
-                                  )}
                                 </div>
                               );
                             })}

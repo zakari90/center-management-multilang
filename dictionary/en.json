@@ -558,7 +558,15 @@
     "outsideAvailableHours": "Outside available hours",
     "hours": "h",
     "overrideAll": "Override All",
-    "conflictsDismissed": "Conflicts acknowledged"
+    "conflictsDismissed": "Conflicts acknowledged",
+    "scheduleTable": "Schedule Table",
+    "day": "Day",
+    "time": "Time",
+    "subject": "Subject",
+    "grade": "Grade",
+    "status": "Status",
+    "show": "Show",
+    "noSchedules": "No scheduled classes"
   },
   "AllUsersTable": {
     "errorLoadData": "Failed to load data",

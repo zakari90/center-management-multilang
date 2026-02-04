@@ -531,7 +531,15 @@
     "outsideAvailableHours": "En dehors des heures disponibles",
     "hours": "h",
     "overrideAll": "Ignorer tout",
-    "conflictsDismissed": "Conflits reconnus"
+    "conflictsDismissed": "Conflits reconnus",
+    "scheduleTable": "Tableau des horaires",
+    "day": "Jour",
+    "time": "Heure",
+    "subject": "Matière",
+    "grade": "Niveau",
+    "status": "Statut",
+    "show": "Afficher",
+    "noSchedules": "Pas de cours planifiés"
   },
   "AllUsersTable": {
     "errorLoadData": "Impossible de charger les données",
