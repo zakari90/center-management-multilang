@@ -1679,7 +1679,7 @@ function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute right-0 mt-2 w-48 bg-popover rounded-lg shadow-lg border z-20 overflow-hidden">
-            <button
+            {/* <button
               onClick={() => {
                 exportTeacherScheduleToExcel(teacher, t);
                 setIsOpen(false);
@@ -1688,7 +1688,7 @@ function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
             >
               <FileSpreadsheet className="h-4 w-4" />
               {t("exportToExcel")}
-            </button>
+            </button> */}
             <button
               onClick={() => {
                 exportTeacherSchedule(teacher, t);
