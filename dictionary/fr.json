@@ -484,8 +484,8 @@
     "paid": "Payé",
     "partial": "Partiel",
     "unpaid": "Non payé",
-    "students": "élèves",
-    "teachers": "enseignants"
+    "students": "Élèves",
+    "teachers": "Enseignants"
   },
   "TeacherScheduleView": {
     "title": "Horaires des enseignants",
