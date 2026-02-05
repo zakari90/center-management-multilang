@@ -649,6 +649,7 @@
     "selectRoomPlaceholder": "اختر فصلا",
     "required": "*",
     "cancel": "إلغاء",
+    "delete": "حذف",
     "addToSchedule": "إضافة إلى الجدول",
     "monday": "الاثنين",
     "tuesday": "الثلاثاء",

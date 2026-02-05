@@ -658,6 +658,7 @@
     "selectRoomPlaceholder": "Sélectionner une salle",
     "required": "*",
     "cancel": "Annuler",
+    "delete": "Supprimer",
     "addToSchedule": "Ajouter à l'horaire",
     "monday": "Lundi",
     "tuesday": "Mardi",

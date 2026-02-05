@@ -625,35 +625,9 @@ export default function TimetableManagement({
   });
 
   const getSlotsByDayAndTime = (day: string, time: string) => {
-    const slots = filteredSchedule.filter(
+    return filteredSchedule.filter(
       (s) => s.day === day && s.startTime === time,
     );
-
-    // Deduplicate: prefer synced ('1') over pending ('w')
-    const uniqueSlots: ScheduleSlot[] = [];
-    const seenKeys = new Set<string>();
-
-    // Sort: synced first, then by ID for stability
-    const sortedSlots = [...slots].sort((a, b) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const aStatus = (a as any).status;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const bStatus = (b as any).status;
-      if (aStatus === "1" && bStatus !== "1") return -1;
-      if (aStatus !== "1" && bStatus === "1") return 1;
-      return 0;
-    });
-
-    for (const slot of sortedSlots) {
-      // Create a unique key for this slot based on teacher+subject+room
-      const key = `${slot.teacherId}-${slot.subjectId}-${slot.roomId}`;
-      if (!seenKeys.has(key)) {
-        uniqueSlots.push(slot);
-        seenKeys.add(key);
-      }
-    }
-
-    return uniqueSlots;
   };
 
   // Show loading while auth is checking or data is fetching
@@ -898,19 +872,6 @@ export default function TimetableManagement({
                                     <span className="font-semibold truncate pr-4 text-primary">
                                       {subject?.name}
                                     </span>
-
-                                    {!readOnly && (
-                                      <button
-                                        className="absolute top-1 right-1 opacity-0 group-hover/card:opacity-100 p-1 hover:bg-destructive/10 rounded text-destructive transition-all"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          if (slot.id)
-                                            handleDeleteSchedule(slot.id);
-                                        }}
-                                      >
-                                        <Trash2 className="h-3 w-3" />
-                                      </button>
-                                    )}
                                   </div>
 
                                   <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
@@ -1158,7 +1119,21 @@ export default function TimetableManagement({
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex justify-between items-center w-full sm:justify-between">
+            {!readOnly && selectedScheduleDetails?.id && (
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (selectedScheduleDetails.id) {
+                    handleDeleteSchedule(selectedScheduleDetails.id);
+                    setIsDetailsDialogOpen(false);
+                  }
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t("delete") || "Delete"}
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={() => setIsDetailsDialogOpen(false)}
