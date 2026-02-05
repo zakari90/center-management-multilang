@@ -570,6 +570,7 @@
   },
   "AllUsersTable": {
     "errorLoadData": "Failed to load data",
+    "addPayment": "Add Payment",
     "allUsersTitle": "All Users",
     "allUsersDescription": "View and manage all system users",
     "managedCentersHeader": "Managed Centers",

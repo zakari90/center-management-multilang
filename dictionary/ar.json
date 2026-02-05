@@ -535,6 +535,7 @@
   },
   "AllUsersTable": {
     "errorLoadData": "فشل تحميل البيانات",
+    "addPayment": "إضافة دفع",
     "allUsersTitle": "جميع المستخدمين",
     "allUsersDescription": "عرض وإدارة جميع مستخدمي النظام",
     "managedCentersHeader": "المراكز المسيرة",

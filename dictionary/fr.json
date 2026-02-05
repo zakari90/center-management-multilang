@@ -543,6 +543,7 @@
   },
   "AllUsersTable": {
     "errorLoadData": "Impossible de charger les données",
+    "addPayment": "Ajouter un paiement",
     "allUsersTitle": "Tous les utilisateurs",
     "allUsersDescription": "Voir et gérer tous les utilisateurs du système",
     "managedCentersHeader": "Centres Gérés",
