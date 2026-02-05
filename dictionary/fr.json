@@ -632,6 +632,7 @@
   "TimetableManagement": {
     "title": "Gestion des horaires",
     "subtitle": "Gérer les horaires des classes, les enseignants et les salles",
+    "available": "Disponible",
     "errorLoadData": "Impossible de charger les données d'horaire",
     "errorAddSchedule": "Impossible d'ajouter l'horaire",
     "errorDeleteSchedule": "Impossible de supprimer l'horaire",
@@ -659,6 +660,7 @@
     "required": "*",
     "cancel": "Annuler",
     "delete": "Supprimer",
+    "exportExcel": "Exporter Excel",
     "addToSchedule": "Ajouter à l'horaire",
     "monday": "Lundi",
     "tuesday": "Mardi",

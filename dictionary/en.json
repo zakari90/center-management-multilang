@@ -659,6 +659,7 @@
   "TimetableManagement": {
     "title": "Schedule Management",
     "subtitle": "Manage class schedules, teachers, and rooms",
+    "available": "Available",
     "errorLoadData": "Failed to load schedule data",
     "errorAddSchedule": "Failed to add schedule",
     "errorDeleteSchedule": "Failed to delete schedule",
@@ -686,6 +687,7 @@
     "required": "*",
     "cancel": "Cancel",
     "delete": "Delete",
+    "exportExcel": "Export Excel",
     "addToSchedule": "Add to Schedule",
     "monday": "Monday",
     "tuesday": "Tuesday",

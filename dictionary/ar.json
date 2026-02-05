@@ -624,6 +624,7 @@
   "TimetableManagement": {
     "title": "إدارة الجدول الزمني",
     "subtitle": "إدارة جداول الفئات والمعلمين والقاعات ",
+    "available": "متاح",
     "errorLoadData": "فشل تحميل بيانات الجدول",
     "errorAddSchedule": "فشل إضافة الجدول",
     "errorDeleteSchedule": "فشل حذف الجدول",
@@ -650,6 +651,7 @@
     "required": "*",
     "cancel": "إلغاء",
     "delete": "حذف",
+    "exportExcel": "تصدير اكسل",
     "addToSchedule": "إضافة إلى الجدول",
     "monday": "الاثنين",
     "tuesday": "الثلاثاء",

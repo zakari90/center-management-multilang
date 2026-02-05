@@ -37,7 +37,9 @@ import {
   Trash2,
   User,
   CheckCircle,
+  FileSpreadsheet,
 } from "lucide-react";
+import ExcelJS from "exceljs";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocalizedConstants } from "../useLocalizedConstants";
@@ -608,6 +610,84 @@ export default function TimetableManagement({
       setError(t("errorDeleteSchedule"));
     }
   };
+# 
+  const handleExportExcel = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Timetable");
+
+      // Set columns
+      const headerRow = ["Time", ...daysOfWeek.map((day) => day.label)];
+      worksheet.addRow(headerRow);
+
+      // Apply styling to header
+      const firstRow = worksheet.getRow(1);
+      firstRow.font = { bold: true };
+      firstRow.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFE0E0E0" },
+      };
+      firstRow.alignment = { horizontal: "center", vertical: "middle" };
+
+      // Add data rows
+      TIME_SLOTS.slice(0, -1).forEach((time, index) => {
+        const timeLabel = `${time} - ${TIME_SLOTS[index + 1]}`;
+        const rowData = [timeLabel];
+
+        daysOfWeek.forEach((day) => {
+          const slots = getSlotsByDayAndTime(day.label, time);
+          if (slots.length > 0) {
+            const cellText = slots
+              .map((slot) => {
+                const teacher = teachers.find((t) => t.id === slot.teacherId);
+                const subject = subjects.find((s) => s.id === slot.subjectId);
+                return `${subject?.name || "N/A"} - ${teacher?.name || "N/A"} (${slot.roomId})`;
+              })
+              .join("\n");
+            rowData.push(cellText);
+          } else {
+            rowData.push("");
+          }
+        });
+
+        const addedRow = worksheet.addRow(rowData);
+        addedRow.alignment = { wrapText: true, vertical: "top" };
+      });
+
+      // Simple column widths
+      worksheet.columns.forEach((col, idx) => {
+        col.width = idx === 0 ? 15 : 25;
+      });
+
+      // Add borders
+      worksheet.eachRow((row) => {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+      });
+
+      // Write to buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Timetable_${new Date().toISOString().split("T")[0]}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export Excel:", err);
+      setError("Failed to export Excel file");
+    }
+  };
 
   const handleViewDetails = (slot: ScheduleSlot) => {
     setSelectedScheduleDetails(slot);
@@ -647,8 +727,20 @@ export default function TimetableManagement({
           <h2 className="text-2xl font-bold">{t("title")}</h2>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
-        {/* Per-entity sync controls for schedules */}
-        {!readOnly && <EntitySyncControls entity="schedules" />}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportExcel}
+            className="flex items-center gap-2"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {t("exportExcel") || "Export Excel"}
+            </span>
+          </Button>
+          {!readOnly && <EntitySyncControls entity="schedules" />}
+        </div>
       </div>
 
       {error && (
