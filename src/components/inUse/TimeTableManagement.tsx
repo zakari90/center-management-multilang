@@ -610,7 +610,7 @@ export default function TimetableManagement({
       setError(t("errorDeleteSchedule"));
     }
   };
-# 
+
   const handleExportExcel = async () => {
     try {
       const workbook = new ExcelJS.Workbook();
