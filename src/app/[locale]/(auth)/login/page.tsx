@@ -1,7 +1,5 @@
 // src/app/[locale]/(auth)/login/page.tsx
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { LoginForm } from "@/components/login-form";
-import { ModeToggle } from "@/components/ModeToggle";
 import OfflineNotificationBanner from "@/components/offline-notification-banner";
 
 // Disable static generation for this page since it uses client-side auth
@@ -13,10 +11,6 @@ export default function LoginPage() {
       <OfflineNotificationBanner />
 
       <div className="w-full lg:max-w-sm">
-        <div className="absolute top-4 right-4 z-50 flex gap-2">
-          <LanguageSwitcher />
-          <ModeToggle />
-        </div>
         <LoginForm />
       </div>
     </div>
