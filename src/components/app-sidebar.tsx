@@ -1,8 +1,7 @@
+import * as React from "react";
 
-import * as React from "react"
-
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -11,24 +10,23 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { School2Icon } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { School2Icon } from "lucide-react";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   items: {
-    title: string
-    url: string
-    icon?: string
-  }[]
+    title: string;
+    url: string;
+    icon?: string;
+  }[];
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }
 
 export function AppSidebar({ items, user, ...props }: AppSidebarProps) {
-  
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -38,9 +36,13 @@ export function AppSidebar({ items, user, ...props }: AppSidebarProps) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <div >
-                <School2Icon className="!size-5" />
-                {/* <span className="text-base font-semibold"> Center</span> */}
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                  <School2Icon className="!size-5 text-primary" />
+                </div>
+                <span className="text-base font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
+                  Center
+                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -53,5 +55,5 @@ export function AppSidebar({ items, user, ...props }: AppSidebarProps) {
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

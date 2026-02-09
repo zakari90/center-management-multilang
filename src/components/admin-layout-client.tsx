@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
@@ -34,10 +34,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   syncAllEntitiesForRole,
   importAllFromServerForRole,
 } from "@/lib/dexie/serverActions";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -61,7 +63,6 @@ export default function AdminLayoutClient({
   }, []);
 
   useEffect(() => {
-    // Only check authentication after component has mounted and auth is loaded
     if (!mounted || isLoading) return;
 
     console.log("[AdminLayoutClient] auth resolved", {
@@ -70,25 +71,23 @@ export default function AdminLayoutClient({
       locale,
     });
 
-    // Redirect if not authenticated
     if (!user) {
       router.push(`/${locale}/login`);
       return;
     }
 
-    // Redirect if not an admin
     if (user.role !== "ADMIN") {
       router.push(`/${locale}/manager`);
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await logout();
     router.push(`/${locale}/login`);
-  };
+  }, [logout, router, locale]);
 
-  const handleSync = async () => {
+  const handleSync = useCallback(async () => {
     if (!user?.id) return;
     setIsSyncing(true);
     try {
@@ -100,9 +99,8 @@ export default function AdminLayoutClient({
     } finally {
       setIsSyncing(false);
     }
-  };
+  }, [user?.id, user?.role]);
 
-  // Show loading state only while mounting / checking authentication
   if (!mounted || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -114,7 +112,6 @@ export default function AdminLayoutClient({
     );
   }
 
-  // Auth resolved: if not authorized, let the redirect effect handle navigation
   if (!user || user.role !== "ADMIN") {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -166,72 +163,6 @@ export default function AdminLayoutClient({
     },
   ];
 
-  // Three-dot menu for mobile
-  const ThreeDotsMenu = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-12 w-12">
-          <MoreVertical className="h-5 w-5" />
-          <span className="sr-only">Menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={isArabic ? "start" : "end"} className="w-48">
-        <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
-          <RefreshCw
-            className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
-          />
-          {isSyncing ? "..." : "Sync Data"}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {/* Language Options */}
-        <DropdownMenuItem
-          onClick={() =>
-            router.push(`/ar${window.location.pathname.substring(3)}`)
-          }
-        >
-          <Globe className="mr-2 h-4 w-4" />
-          العربية
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() =>
-            router.push(`/en${window.location.pathname.substring(3)}`)
-          }
-        >
-          <Globe className="mr-2 h-4 w-4" />
-          English
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() =>
-            router.push(`/fr${window.location.pathname.substring(3)}`)
-          }
-        >
-          <Globe className="mr-2 h-4 w-4" />
-          Français
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        {/* Theme Toggle */}
-        <DropdownMenuItem
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        >
-          {theme === "dark" ? (
-            <Sun className="mr-2 h-4 w-4" />
-          ) : (
-            <Moon className="mr-2 h-4 w-4" />
-          )}
-          {theme === "dark" ? "Light Mode" : "Dark Mode"}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={handleLogout}
-          className="text-destructive focus:text-destructive"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          {tNav("logout")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-
   return (
     <div className="app-shell">
       <SidebarProvider
@@ -249,8 +180,39 @@ export default function AdminLayoutClient({
           user={userData}
         />
         <SidebarInset>
-          <header className="hidden md:flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
+          <header className="hidden md:flex h-14 shrink-0 items-center justify-between border-b px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mx-1 h-4" />
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleSync}
+                disabled={isSyncing}
+                title={isSyncing ? "..." : "Sync Data"}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                title={theme === "dark" ? "Light Mode" : "Dark Mode"}
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </Button>
+              <LanguageSwitcher />
+            </div>
           </header>
           <main className="app-content flex-1 overflow-auto">{children}</main>
         </SidebarInset>
@@ -289,7 +251,71 @@ export default function AdminLayoutClient({
               icon: <Database className="size-5" />,
             },
           ]}
-          menu={<ThreeDotsMenu />}
+          menu={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-12 w-12">
+                  <MoreVertical className="h-5 w-5" />
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align={isArabic ? "start" : "end"}
+                className="w-48"
+              >
+                <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
+                  <RefreshCw
+                    className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                  />
+                  {isSyncing ? "..." : "Sync Data"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(`/ar${window.location.pathname.substring(3)}`)
+                  }
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  العربية
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(`/en${window.location.pathname.substring(3)}`)
+                  }
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(`/fr${window.location.pathname.substring(3)}`)
+                  }
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  Français
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                >
+                  {theme === "dark" ? (
+                    <Sun className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Moon className="mr-2 h-4 w-4" />
+                  )}
+                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {tNav("logout")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
         />
       </SidebarProvider>
     </div>

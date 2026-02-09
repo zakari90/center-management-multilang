@@ -24,11 +24,7 @@ export default function MobileBottomNav({
   const pathname = usePathname();
 
   return (
-    <nav
-      className="app-bottom-nav"
-      aria-label={ariaLabel}
-      role="navigation"
-    >
+    <nav className="app-bottom-nav" aria-label={ariaLabel} role="navigation">
       <div className="app-bottom-nav__inner">
         {items.map((item) => {
           const isActive = pathname === item.href;
@@ -45,11 +41,13 @@ export default function MobileBottomNav({
               <span className="app-bottom-nav__icon" aria-hidden="true">
                 {item.icon}
               </span>
-              <span className="app-bottom-nav__label sr-only">{item.label}</span>
+              <span className="app-bottom-nav__label">{item.label}</span>
             </Link>
           );
         })}
-        <div className="app-bottom-nav__item app-bottom-nav__item--menu">{menu}</div>
+        <div className="app-bottom-nav__item app-bottom-nav__item--menu">
+          {menu}
+        </div>
       </div>
     </nav>
   );
