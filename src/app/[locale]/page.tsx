@@ -110,7 +110,8 @@ function HomePageContent() {
     >
       <div className="absolute top-4 right-4 z-50 flex gap-2">
         <div
-          onDoubleClick={() => router.push(getDashboardLink())}
+          onClick={() => router.push(getDashboardLink())}
+          // onDoubleClick={() => router.push(getDashboardLink())}
           className="text-sm text-gray-500 hover:underline cursor-pointer select-none"
         >
           {user ? t("dashboard") : t("ownerDashboard")}
