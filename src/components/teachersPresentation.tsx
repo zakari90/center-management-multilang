@@ -17,38 +17,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 // import axios from 'axios' // ✅ Commented out - using local DB
-import EditTeacherDialog from "@/components/EditTeacherDialog";
 import { EntitySyncControls } from "@/components/EntitySyncControls";
 import { StatCard } from "@/components/ui/stat-card";
-import ViewTeacherDialog from "@/components/ViewTeacherDialog";
 import { useAuth } from "@/context/authContext";
 import {
+  centerActions,
+  receiptActions,
+  studentSubjectActions,
   subjectActions,
   teacherActions,
   teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
+import { checkPaymentStatus, PaymentStatus } from "@/lib/payment-utils";
 import { BookOpen, ChevronDown, Loader2, UserCheck, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import AddTeacherDialog from "./AddTeacherDialog";
 import PageHeader from "./page-header";
-import { Alert, AlertDescription } from "./ui/alert";
 import { TeachersTableView } from "./teachers/TeachersTableView";
-import { checkPaymentStatus, PaymentStatus } from "@/lib/payment-utils";
-import {
-  receiptActions,
-  centerActions,
-  studentSubjectActions,
-} from "@/lib/dexie/dexieActions";
+import { Alert, AlertDescription } from "./ui/alert";
 
 export interface TeacherSubject {
   id: string;
@@ -265,7 +253,7 @@ export default function TeachersTable() {
         </div>
       </div>
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-3">
         <StatCard
           title={t("totalTeachers")}
           value={teachers.length}
