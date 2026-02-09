@@ -126,7 +126,7 @@ export default function TopSubjects() {
                       <span className="font-medium truncate text-sm sm:text-base">
                         {subject.name}
                       </span>
-                      <Badge variant="secondary" className="text-xs shrink-0">
+                      <Badge variant="secondary" className="text-xs text-wrap">
                         {subject.grade}
                       </Badge>
                     </div>
