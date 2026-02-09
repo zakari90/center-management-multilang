@@ -155,6 +155,20 @@ function HomePageContent() {
           </div>
         </div>
 
+        {/* Mobile Lottie Animation */}
+        {!showRegisterDialog && (
+          <div className="lg:hidden w-full flex items-center justify-center p-4">
+            <div className="w-full max-w-[350px]">
+              <Lottie
+                animationData={studentAnimation}
+                loop={true}
+                autoplay={true}
+                className="w-full h-full"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Left Content (Image & Shapes) */}
         <div className="hidden lg:block lg:w-1/2 relative min-h-[600px]">
           {/* Orange Curve Background */}

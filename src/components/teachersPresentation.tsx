@@ -257,7 +257,7 @@ export default function TeachersTable() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex md:items-center md:justify-between gap-4">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
           <AddTeacherDialog adminMode={user?.role === "ADMIN"} />
