@@ -122,15 +122,14 @@ export default function TopSubjects() {
                     >
                       {index + 1}
                     </Badge>
-                    <span className="font-medium truncate text-sm sm:text-base">
-                      {subject.name}
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="text-xs flex-shrink-0"
-                    >
-                      {subject.grade}
-                    </Badge>
+                    <div className="flex flex-col">
+                      <span className="font-medium truncate text-sm sm:text-base">
+                        {subject.name}
+                      </span>
+                      <Badge variant="secondary" className="text-xs shrink-0">
+                        {subject.grade}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex items-center gap-1 ml-8 sm:ml-0">
                     <span className="text-xs sm:text-sm font-semibold text-green-600 whitespace-nowrap">
@@ -145,7 +144,7 @@ export default function TopSubjects() {
                     value={(subject.students / subject.maxCapacity) * 100}
                     className="h-2 flex-1"
                   />
-                  <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
                     {subject.students}/{subject.maxCapacity}
                   </span>
                 </div>
