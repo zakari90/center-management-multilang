@@ -27,7 +27,7 @@ setup-mongodb-replica-set.md
 # next.js
 /.next/
 /out/
-
+/.agent/
 # production
 /build
 
