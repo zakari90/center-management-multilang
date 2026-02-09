@@ -48,6 +48,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
 import PageHeader from "./page-header";
+import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
+import AddTeacherDialog from "./AddTeacherDialog";
 
 interface Receipt {
   manager?: {
@@ -207,7 +209,14 @@ export default function ReceiptsTable() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <PageHeader title={t("title")} subtitle={t("subtitle")} />
+        <div className="flex flex-col md:flex-row gap-4">
+          <AddStudentPaymentDialog />
+          <AddTeacherDialog />
+        </div>
+      </div>
+
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
