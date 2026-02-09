@@ -140,11 +140,11 @@ export function LoginForm({
       <div>
         {/* --- Main Card --- */}
         {/* style the following as help text */}
-        {/* <p className="text-center text-sm text-muted-foreground mb-4">
+        <p className="text-center text-sm text-muted-foreground mb-4">
           for demo use : <br />
           email : admin@admin.com <br />
           password : admin
-        </p> */}
+        </p>
         <Card className="border-border shadow-lg">
           <CardHeader className="space-y-2 pb-4 text-center sm:pb-6">
             {/* Role Toggle (Segmented Control Style) */}
