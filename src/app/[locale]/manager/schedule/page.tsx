@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import TeacherScheduleView from "@/components/inUse/teacherWithSchedule";
 import TimetableManagement from "@/components/inUse/TimeTableManagement";
-// import { PendingSchedulesDialog } from "@/components/schedule/PendingSchedulesDialog"; // Manager doesn't need to approve/manage pending schedules
 
 export default function SchedulePage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -13,18 +12,17 @@ export default function SchedulePage() {
     setRefreshKey((prev: number) => prev + 1);
   };
 
-  console.log("[ManagerSchedulePage] Client render", {
+  console.log("[AdminSchedulePage] Client render", {
     timestamp: new Date().toISOString(),
   });
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      {/* PendingSchedulesDialog removed for manager read-only view */}
+    <div className="container mx-auto p-4 sm:p-6 space-y-6">
       {/* <PendingSchedulesDialog /> */}
       <TeacherScheduleView refreshKey={refreshKey} />
       <TimetableManagement
+        readOnly={true}
         refreshKey={refreshKey}
         onScheduleChangeAction={handleScheduleChange}
-        readOnly={true} // Enable read-only mode
       />
     </div>
   );

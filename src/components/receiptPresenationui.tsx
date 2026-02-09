@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
+import PageHeader from "./page-header";
 
 interface Receipt {
   manager?: {
@@ -206,13 +207,7 @@ export default function ReceiptsTable() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
-          <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
-        </div>
-      </div>
-
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -291,7 +286,7 @@ export default function ReceiptsTable() {
           <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row  gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
