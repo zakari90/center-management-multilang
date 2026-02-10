@@ -54,10 +54,13 @@ export default function PWAUpdateHandler() {
     };
 
     // Listen for app installed event
+    // Delay the toast so it appears AFTER the mobile install animation finishes
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      toast.success(t("appInstalled"));
+      setTimeout(() => {
+        toast.success(t("appInstalled"));
+      }, 3000);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -132,7 +135,8 @@ export default function PWAUpdateHandler() {
 
       if (outcome === "accepted") {
         setDeferredPrompt(null);
-        toast.success(t("installStarted"));
+        // Don't show toast here — the appinstalled event handler will show it
+        // after the installation animation completes on the device
       }
     } catch {
       toast.error(t("installError"));
