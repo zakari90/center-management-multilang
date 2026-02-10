@@ -1812,6 +1812,18 @@
       "default": "Export All Data",
       "loading": "Exporting..."
     },
+    "unknown": "Unknown",
+    "yes": "Yes",
+    "no": "No",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {current} of {total}",
+      "result": "result",
+      "results": "results",
+      "actions": "Actions",
+      "noData": "No data available"
+    },
     "tables": {
       "users": "Users",
       "teachers": "Teachers",

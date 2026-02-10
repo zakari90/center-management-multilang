@@ -502,7 +502,7 @@ export function AllTablesViewer() {
         {
           key: "publicRegistrationEnabled",
           header: t("columns.publicRegistrationEnabled"),
-          render: (value: boolean) => (value ? "Yes" : "No"),
+          render: (value: boolean) => (value ? t("yes") : t("no")),
         },
         {
           key: "managers",
@@ -719,6 +719,17 @@ export function AllTablesViewer() {
             table: TABLE_CONFIGS[selectedTable].name.toLowerCase(),
           })}
           pageSize={15}
+          translations={{
+            previous: t("pagination.previous"),
+            next: t("pagination.next"),
+            pageOf: t("pagination.pageOf"),
+            result: t("pagination.result"),
+            results: t("pagination.results"),
+            yes: t("yes"),
+            no: t("no"),
+            actions: t("pagination.actions"),
+            noData: t("pagination.noData"),
+          }}
         />
       )}
     </div>

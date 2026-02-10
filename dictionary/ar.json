@@ -1787,6 +1787,18 @@
       "default": "تصدير جميع البيانات",
       "loading": "جاري التصدير..."
     },
+    "unknown": "غير معروف",
+    "yes": "نعم",
+    "no": "لا",
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "pageOf": "صفحة {current} من {total}",
+      "result": "نتيجة",
+      "results": "نتائج",
+      "actions": "الإجراءات",
+      "noData": "لا توجد بيانات"
+    },
     "tables": {
       "users": "المستخدمون",
       "teachers": "المعلمون",

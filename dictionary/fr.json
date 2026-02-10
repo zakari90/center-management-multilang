@@ -1794,6 +1794,18 @@
       "default": "Exporter toutes les données",
       "loading": "Exportation..."
     },
+    "unknown": "Inconnu",
+    "yes": "Oui",
+    "no": "Non",
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "pageOf": "Page {current} sur {total}",
+      "result": "résultat",
+      "results": "résultats",
+      "actions": "Actions",
+      "noData": "Aucune donnée disponible"
+    },
     "tables": {
       "users": "Utilisateurs",
       "teachers": "Enseignants",

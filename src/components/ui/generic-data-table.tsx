@@ -53,6 +53,17 @@ export interface GenericDataTableProps<T = any> {
   rowKey?: keyof T | ((row: T) => string);
   emptyMessage?: string;
   className?: string;
+  translations?: {
+    previous: string;
+    next: string;
+    pageOf: string; // "Page {current} of {total}"
+    result: string;
+    results: string;
+    yes: string;
+    no: string;
+    actions: string;
+    noData: string;
+  };
 }
 
 export function GenericDataTable<T extends Record<string, any>>({
@@ -69,6 +80,17 @@ export function GenericDataTable<T extends Record<string, any>>({
   rowKey = "id",
   emptyMessage = "No data available",
   className,
+  translations = {
+    previous: "Previous",
+    next: "Next",
+    pageOf: "Page {current} of {total}",
+    result: "result",
+    results: "results",
+    yes: "Yes",
+    no: "No",
+    actions: "Actions",
+    noData: "No data available",
+  },
 }: GenericDataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -158,7 +180,7 @@ export function GenericDataTable<T extends Record<string, any>>({
     if (typeof value === "boolean") {
       return (
         <Badge variant={value ? "default" : "secondary"}>
-          {value ? "Yes" : "No"}
+          {value ? translations.yes : translations.no}
         </Badge>
       );
     }
@@ -194,7 +216,7 @@ export function GenericDataTable<T extends Record<string, any>>({
       {searchable && (
         <div className="flex items-center gap-2">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute start-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={searchPlaceholder}
               value={searchTerm}
@@ -202,11 +224,14 @@ export function GenericDataTable<T extends Record<string, any>>({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-8"
+              className="ps-8"
             />
           </div>
           <div className="text-sm text-muted-foreground">
-            {sortedData.length} {sortedData.length === 1 ? "result" : "results"}
+            {sortedData.length}{" "}
+            {sortedData.length === 1
+              ? translations.result
+              : translations.results}
           </div>
         </div>
       )}
@@ -237,7 +262,9 @@ export function GenericDataTable<T extends Record<string, any>>({
                 </TableHead>
               ))}
               {(onView || onEdit || onDelete) && (
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead className="w-[100px]">
+                  {translations.actions}
+                </TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -250,7 +277,7 @@ export function GenericDataTable<T extends Record<string, any>>({
                   }
                   className="h-24 text-center"
                 >
-                  {emptyMessage}
+                  {emptyMessage || translations.noData}
                 </TableCell>
               </TableRow>
             ) : (
@@ -308,7 +335,9 @@ export function GenericDataTable<T extends Record<string, any>>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages}
+            {translations.pageOf
+              .replace("{current}", currentPage.toString())
+              .replace("{total}", totalPages.toString())}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -317,8 +346,8 @@ export function GenericDataTable<T extends Record<string, any>>({
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
+              <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+              {translations.previous}
             </Button>
             <Button
               variant="outline"
@@ -326,8 +355,8 @@ export function GenericDataTable<T extends Record<string, any>>({
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              Next
-              <ChevronRight className="h-4 w-4" />
+              {translations.next}
+              <ChevronRight className="h-4 w-4 rtl:rotate-180" />
             </Button>
           </div>
         </div>
