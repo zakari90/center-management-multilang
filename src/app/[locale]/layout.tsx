@@ -68,6 +68,18 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={isArabic ? "rtl" : "ltr"} suppressHydrationWarning>
       <head>
+        {/* ✅ Early capture of beforeinstallprompt (runs before React hydration) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+          window.__deferredPrompt = null;
+          window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            window.__deferredPrompt = e;
+          });
+        `,
+          }}
+        />
         {/* ✅ PWA Meta Tags */}
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon-192x192.png" />

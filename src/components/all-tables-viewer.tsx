@@ -691,7 +691,9 @@ export function AllTablesViewer() {
                 </div>
               </CardHeader>
               <CardContent>
-                <CardTitle className="text-lg">{config.name}</CardTitle>
+                <CardTitle className="text-lg text-center">
+                  {config.name}
+                </CardTitle>
                 <CardDescription className="text-sm mt-1">
                   {count} {count === 1 ? t("record") : t("records")}
                 </CardDescription>

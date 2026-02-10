@@ -3,17 +3,19 @@
 // Minimal custom Service Worker (no Serwist/Workbox precache)
 // Runtime caching only.
 
-const SW_VERSION = 'v1.0.0'; // Increment this to force an update
+const SW_VERSION = "v1.0.0"; // Increment this to force an update
 const PAGES_CACHE = `pages-${SW_VERSION}`;
 const ASSETS_CACHE = `assets-${SW_VERSION}`;
-const OFFLINE_URL = '/offline.html';
+const OFFLINE_URL = "/offline.html";
 
 const sw = self;
 
-console.log(`[SW] boot ${SW_VERSION}`, { href: sw.location && sw.location.href });
+console.log(`[SW] boot ${SW_VERSION}`, {
+  href: sw.location && sw.location.href,
+});
 
-sw.addEventListener('error', (event) => {
-  console.log('[SW] error', {
+sw.addEventListener("error", (event) => {
+  console.log("[SW] error", {
     message: event && event.message,
     filename: event && event.filename,
     lineno: event && event.lineno,
@@ -21,66 +23,66 @@ sw.addEventListener('error', (event) => {
   });
 });
 
-sw.addEventListener('unhandledrejection', (event) => {
-  console.log('[SW] unhandledrejection', { reason: event && event.reason });
+sw.addEventListener("unhandledrejection", (event) => {
+  console.log("[SW] unhandledrejection", { reason: event && event.reason });
 });
 
 // Critical routes to pre-cache for offline support
 const PRECACHE_ROUTES = [
-  '/',
-  '/ar',
-  '/en',
-  '/fr',
-  '/ar/manager',
-  '/ar/admin',
-  '/fr/manager',
-  '/fr/admin',
-  '/en/manager',
-  '/ar/manager/teachers',
-  '/en/manager/teachers',
-  '/ar/manager/students',
-  '/en/manager/students',
-  '/ar/manager/receipts',
-  '/en/manager/receipts',
- '/en/admin/center',
- '/en/admin/users',
- '/en/admin/receipts',
- '/en/admin/schedule'
+  "/",
+  "/ar",
+  "/en",
+  "/fr",
+  "/ar/manager",
+  "/ar/admin",
+  "/fr/manager",
+  "/fr/admin",
+  "/en/manager",
+  "/ar/manager/teachers",
+  "/en/manager/teachers",
+  "/ar/manager/students",
+  "/en/manager/students",
+  "/ar/manager/receipts",
+  "/en/manager/receipts",
+  "/en/admin/center",
+  "/en/admin/users",
+  "/en/admin/receipts",
+  "/en/admin/schedule",
   // Add more routes as needed
-
 ];
 
-sw.addEventListener('install', (event) => {
-  console.log('[SW] install', SW_VERSION);
-  sw.skipWaiting();
+sw.addEventListener("install", (event) => {
+  console.log("[SW] install", SW_VERSION);
+  // Do NOT call skipWaiting() here — let the UI show an update alert first.
+  // The waiting SW will be activated when the user clicks "Update" via SKIP_WAITING message.
   event.waitUntil(
     (async () => {
       try {
         const cache = await caches.open(PAGES_CACHE);
         await cache.add(OFFLINE_URL);
-        console.log('[SW] cached offline.html');
-        
+        console.log("[SW] cached offline.html");
+
         // Pre-cache critical routes
         for (const route of PRECACHE_ROUTES) {
           try {
-            const response = await fetch(route, { credentials: 'same-origin' });
+            const response = await fetch(route, { credentials: "same-origin" });
             if (response.ok) {
               await cache.put(route, response.clone());
-              console.log('[SW] pre-cached:', route);
+              console.log("[SW] pre-cached:", route);
             }
           } catch (e) {
-            console.log('[SW] failed to pre-cache:', route, e);
+            console.log("[SW] failed to pre-cache:", route, e);
           }
         }
       } catch (e) {
-        console.log('[SW] install failed', e);
+        console.log("[SW] install failed", e);
       }
     })(),
   );
 });
 
-sw.addEventListener('activate', (event) => {
-  console.log('[SW] activate', SW_VERSION);
+sw.addEventListener("activate", (event) => {
+  console.log("[SW] activate", SW_VERSION);
   event.waitUntil(
     (async () => {
       try {
@@ -89,46 +91,50 @@ sw.addEventListener('activate', (event) => {
         await Promise.all(
           cacheNames
             .filter((name) => {
-              return (name.startsWith('pages-') || name.startsWith('assets-')) && 
-                     name !== PAGES_CACHE && 
-                     name !== ASSETS_CACHE;
+              return (
+                (name.startsWith("pages-") || name.startsWith("assets-")) &&
+                name !== PAGES_CACHE &&
+                name !== ASSETS_CACHE
+              );
             })
             .map((name) => {
-              console.log('[SW] deleting old cache:', name);
+              console.log("[SW] deleting old cache:", name);
               return caches.delete(name);
-            })
+            }),
         );
 
         await sw.clients.claim();
-        console.log('[SW] clients claimed');
+        console.log("[SW] clients claimed");
       } catch (e) {
-        console.log('[SW] activation failed', e);
+        console.log("[SW] activation failed", e);
       }
     })(),
   );
 });
 
-sw.addEventListener('message', (event) => {
-  if (event && event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[SW] received SKIP_WAITING');
+sw.addEventListener("message", (event) => {
+  if (event && event.data && event.data.type === "SKIP_WAITING") {
+    console.log("[SW] received SKIP_WAITING");
     sw.skipWaiting();
   }
 });
 
 function getPrimaryAcceptLanguage(header) {
-  if (!header) return 'ar';
-  const first = header.split(',')[0] && header.split(',')[0].trim();
-  if (!first) return 'ar';
-  return (first.split(';')[0] && first.split(';')[0].trim()) || 'ar';
+  if (!header) return "ar";
+  const first = header.split(",")[0] && header.split(",")[0].trim();
+  if (!first) return "ar";
+  return (first.split(";")[0] && first.split(";")[0].trim()) || "ar";
 }
 
 function getLocaleKey(request) {
   try {
-    const lang = getPrimaryAcceptLanguage(request.headers.get('accept-language'));
-    const short = (lang || 'ar').split('-')[0];
-    return short || 'ar';
+    const lang = getPrimaryAcceptLanguage(
+      request.headers.get("accept-language"),
+    );
+    const short = (lang || "ar").split("-")[0];
+    return short || "ar";
   } catch {
-    return 'ar';
+    return "ar";
   }
 }
 
@@ -145,21 +151,24 @@ async function matchAnyLocalePage(cache, origin, pathname) {
 }
 
 async function matchAppShell(cache, origin) {
-  const shell = await matchAnyLocalePage(cache, origin, '/');
+  const shell = await matchAnyLocalePage(cache, origin, "/");
   if (shell) return shell;
-  const plain = await cache.match('/');
+  const plain = await cache.match("/");
   if (plain) return plain;
   return undefined;
 }
 
-sw.addEventListener('fetch', (event) => {
+sw.addEventListener("fetch", (event) => {
   const request = event.request;
-  if (!request || request.method !== 'GET') return;
+  if (!request || request.method !== "GET") return;
 
   const url = new URL(request.url);
 
   // Cache Next.js static assets.
-  if (url.origin === sw.location.origin && url.pathname.startsWith('/_next/static/')) {
+  if (
+    url.origin === sw.location.origin &&
+    url.pathname.startsWith("/_next/static/")
+  ) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(ASSETS_CACHE);
@@ -187,7 +196,7 @@ sw.addEventListener('fetch', (event) => {
           if (res && res.ok) await cache.put(url.pathname, res.clone());
           return res;
         } catch {
-          return new Response('', { status: 504 });
+          return new Response("", { status: 504 });
         }
       })(),
     );
@@ -195,7 +204,10 @@ sw.addEventListener('fetch', (event) => {
   }
 
   // Navigation requests (HTML): option C
-  if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
+  if (
+    request.mode === "navigate" ||
+    (request.headers.get("accept") || "").includes("text/html")
+  ) {
     event.respondWith(
       (async () => {
         const cache = await caches.open(PAGES_CACHE);
@@ -225,7 +237,11 @@ sw.addEventListener('fetch', (event) => {
           }
           return res;
         } catch {
-          const anyLocale = await matchAnyLocalePage(cache, url.origin, url.pathname);
+          const anyLocale = await matchAnyLocalePage(
+            cache,
+            url.origin,
+            url.pathname,
+          );
           if (anyLocale) return anyLocale;
 
           const shell = await matchAppShell(cache, url.origin);
@@ -237,7 +253,7 @@ sw.addEventListener('fetch', (event) => {
           } catch {}
 
           try {
-            const offlineRes = await fetch(OFFLINE_URL, { cache: 'no-store' });
+            const offlineRes = await fetch(OFFLINE_URL, { cache: "no-store" });
             if (offlineRes && offlineRes.ok) {
               try {
                 await cache.put(OFFLINE_URL, offlineRes.clone());
@@ -246,9 +262,9 @@ sw.addEventListener('fetch', (event) => {
             }
           } catch {}
 
-          return new Response('Offline', {
+          return new Response("Offline", {
             status: 503,
-            headers: { 'content-type': 'text/plain; charset=utf-8' },
+            headers: { "content-type": "text/plain; charset=utf-8" },
           });
         }
       })(),
