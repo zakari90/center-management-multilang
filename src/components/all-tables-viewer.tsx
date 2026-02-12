@@ -41,6 +41,23 @@ import type {
 import { useTranslations } from "next-intl";
 import PageHeader from "./page-header";
 
+// Helper to format timestamps into human-friendly dates
+function formatDate(value: number | string | undefined | null): string {
+  if (!value) return "-";
+  const date = typeof value === "number" ? new Date(value) : new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Tables to hide from the grid
+const HIDDEN_TABLES = new Set(["pushSubscriptions"]);
+
 export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
 
@@ -97,8 +114,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<User>[],
       fetchData: () => localDb.users.toArray(),
     },
@@ -145,8 +172,18 @@ export function AllTablesViewer() {
           ),
         },
         { key: "managerId", header: t("columns.managerId") },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<Teacher>[],
       fetchData: () => localDb.teachers.toArray(),
     },
@@ -191,8 +228,18 @@ export function AllTablesViewer() {
           ),
         },
         { key: "managerId", header: t("columns.managerId") },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<Student>[],
       fetchData: () => localDb.students.toArray(),
     },
@@ -238,8 +285,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<Subject>[],
       fetchData: () => localDb.subjects.toArray(),
     },
@@ -262,7 +319,12 @@ export function AllTablesViewer() {
           header: t("columns.hourlyRate"),
           render: (value?: number) => (value ? `${value.toFixed(2)} MAD` : "-"),
         },
-        { key: "assignedAt", header: t("columns.assignedAt"), sortable: true },
+        {
+          key: "assignedAt",
+          header: t("columns.assignedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
         {
           key: "status",
           header: t("columns.status"),
@@ -284,8 +346,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<TeacherSubject>[],
       fetchData: () => localDb.teacherSubjects.toArray(),
     },
@@ -299,7 +371,12 @@ export function AllTablesViewer() {
         { key: "studentId", header: t("columns.studentId"), sortable: true },
         { key: "subjectId", header: t("columns.subjectId"), sortable: true },
         { key: "teacherId", header: t("columns.teacherId"), sortable: true },
-        { key: "enrolledAt", header: t("columns.enrolledAt"), sortable: true },
+        {
+          key: "enrolledAt",
+          header: t("columns.enrolledAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
         { key: "managerId", header: t("columns.managerId") },
         {
           key: "status",
@@ -322,8 +399,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<StudentSubject>[],
       fetchData: () => localDb.studentSubjects.toArray(),
     },
@@ -360,7 +447,12 @@ export function AllTablesViewer() {
           ),
         },
         { key: "paymentMethod", header: t("columns.method") },
-        { key: "date", header: t("columns.date"), sortable: true },
+        {
+          key: "date",
+          header: t("columns.date"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
         { key: "studentId", header: t("columns.studentId") },
         { key: "teacherId", header: t("columns.teacherId") },
         { key: "managerId", header: t("columns.managerId") },
@@ -385,8 +477,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<ReceiptType>[],
       fetchData: () => localDb.receipts.toArray(),
     },
@@ -438,8 +540,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<
         Schedule & { teacherName?: string; subjectName?: string }
       >[],
@@ -531,8 +643,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<Center>[],
       fetchData: () => localDb.centers.toArray(),
     },
@@ -572,8 +694,18 @@ export function AllTablesViewer() {
             </Badge>
           ),
         },
-        { key: "createdAt", header: t("columns.created"), sortable: true },
-        { key: "updatedAt", header: t("columns.updatedAt"), sortable: true },
+        {
+          key: "createdAt",
+          header: t("columns.created"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
+        {
+          key: "updatedAt",
+          header: t("columns.updatedAt"),
+          sortable: true,
+          render: (v: number) => formatDate(v),
+        },
       ] as ColumnDef<PushSubscription>[],
       fetchData: () => localDb.pushSubscriptions.toArray(),
     },
@@ -666,41 +798,43 @@ export function AllTablesViewer() {
 
       {/* Table Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {Object.entries(TABLE_CONFIGS).map(([key, config]) => {
-          const Icon = config.icon;
-          const count = tableCounts[key] || 0;
+        {Object.entries(TABLE_CONFIGS)
+          .filter(([key]) => !HIDDEN_TABLES.has(key))
+          .map(([key, config]) => {
+            const Icon = config.icon;
+            const count = tableCounts[key] || 0;
 
-          return (
-            <Card
-              key={key}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() =>
-                setSelectedTable(key as keyof typeof TABLE_CONFIGS)
-              }
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div
-                    className={`p-2 rounded-lg ${config.color} bg-opacity-10`}
-                  >
-                    <Icon
-                      className={`h-5 w-5 ${config.color.replace("bg-", "text-")}`}
-                    />
+            return (
+              <Card
+                key={key}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() =>
+                  setSelectedTable(key as keyof typeof TABLE_CONFIGS)
+                }
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={`p-2 rounded-lg ${config.color} bg-opacity-10`}
+                    >
+                      <Icon
+                        className={`h-5 w-5 ${config.color.replace("bg-", "text-")}`}
+                      />
+                    </div>
+                    <Badge variant="secondary">{count}</Badge>
                   </div>
-                  <Badge variant="secondary">{count}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardTitle className="text-lg text-center">
-                  {config.name}
-                </CardTitle>
-                <CardDescription className="text-sm mt-1">
-                  {count} {count === 1 ? t("record") : t("records")}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardHeader>
+                <CardContent>
+                  <CardTitle className="text-lg text-center">
+                    {config.name}
+                  </CardTitle>
+                  <CardDescription className="text-sm mt-1 text-center">
+                    {count} {count === 1 ? t("record") : t("records")}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            );
+          })}
       </div>
 
       {/* Modal with table data */}
