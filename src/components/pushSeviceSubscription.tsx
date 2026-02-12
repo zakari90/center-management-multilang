@@ -56,16 +56,11 @@ const SubscriptionButton: React.FC<Props> = ({ userId, role }) => {
 
       alert("تم الاشتراك بنجاح.");
     } catch (error) {
-      console.log("Failed subscription: ", error);
       alert("فشل الاشتراك: " + error);
     }
   }
 
-  return (
-    <button onClick={handleSubscribe}>
-      الاشتراك بالإشعارات
-    </button>
-  );
+  return <button onClick={handleSubscribe}>الاشتراك بالإشعارات</button>;
 };
 
 export default SubscriptionButton;

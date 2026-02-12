@@ -205,7 +205,10 @@
     "allFieldsRequired": "جميع الحقول مطلوبة",
     "passwordMismatch": "كلمات المرور غير متطابقة",
     "passwordTooShort": "يجب أن تحتوي كلمة المرور على 4 أحرف على الأقل",
-    "registrationFailed": "فشل التسجيل"
+    "invalidEmail": "تنسيق البريد الإلكتروني غير صالح",
+    "emailAlreadyRegistered": "البريد الإلكتروني مسجل بالفعل",
+    "registrationFailed": "فشل التسجيل",
+    "registrationError": "فشل تسجيل حساب المسؤول"
   },
 
   "register": {

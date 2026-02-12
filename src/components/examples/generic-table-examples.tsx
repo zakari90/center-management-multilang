@@ -129,7 +129,7 @@ export function ProductTable() {
       title="Products"
       searchPlaceholder="Search products..."
       pageSize={20}
-      onView={(product) => console.log("View", product)}
+      onView={(product) => toast.info(`View ${product.name}`)}
     />
   );
 }

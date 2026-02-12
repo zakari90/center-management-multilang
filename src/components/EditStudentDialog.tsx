@@ -241,17 +241,12 @@ export default function EditStudentDialog({
       setSubjects(subjectsWithTeachers);
 
       // Debug logging
-      console.log("Available subjects:", subjectsWithTeachers);
+
       if (!adminMode) {
         const managerCenters = allCenters.filter(
           (c) => (c.managers || []).includes(user.id) && c.status !== "0",
         );
-        console.log("Manager centers:", managerCenters);
       }
-      console.log(
-        "All subjects:",
-        allSubjects.filter((s) => s.status !== "0"),
-      );
 
       // Set form data
       setFormData({

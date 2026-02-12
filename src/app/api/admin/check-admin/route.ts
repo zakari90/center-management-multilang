@@ -8,15 +8,13 @@ import db from "@/lib/db";
  */
 export async function GET() {
   try {
-    const adminCount = await db.user.count({
-      where: {
-        role: "ADMIN",
-      },
+    const admin = await db.user.findFirst({
+      where: { role: "ADMIN" },
+      select: { id: true },
     });
 
     return NextResponse.json({
-      hasAdmin: adminCount > 0,
-      count: adminCount,
+      hasAdmin: !!admin,
     });
   } catch (error) {
     console.error("Failed to check admin existence:", error);

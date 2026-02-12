@@ -143,23 +143,6 @@ export default function TimetableManagement({
         ]);
 
       // ✅ One-time debug log (only log once per session)
-      if (!(window as any).__scheduleDebugLogged) {
-        console.log("🔍 Schedule Data Debug:", {
-          userId: user.id,
-          userRole: user.role,
-          totalCenters: allCenters.length,
-          centers: allCenters.map((c) => ({
-            id: c.id,
-            name: c.name,
-            adminId: c.adminId,
-            managers: c.managers,
-            status: c.status,
-          })),
-          totalTeachers: allTeachers.length,
-          totalSchedules: allSchedules.length,
-        });
-        (window as any).__scheduleDebugLogged = true;
-      }
 
       // ✅ Check if user is admin
       const isAdmin = user.role?.toUpperCase() === "ADMIN";

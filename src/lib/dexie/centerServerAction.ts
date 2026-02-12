@@ -76,21 +76,6 @@ const ServerActionCenters = {
         updatedAt: new Date(center.updatedAt).toISOString(),
       };
 
-      console.log("🔄 Syncing center to server:", {
-        centerId: center.id,
-        name: center.name,
-        subjectsCount: centerSubjects.length,
-        method: "server-action",
-        requestBody: {
-          ...requestBody,
-          // Log first 100 chars of each field to avoid huge logs
-          subjects: requestBody.subjects?.map((s: any) => ({
-            id: s.id,
-            name: s.name,
-          })),
-        },
-      });
-
       // Validate ObjectId format before sending
       if (!/^[0-9a-fA-F]{24}$/.test(center.id)) {
         throw new Error(
@@ -105,10 +90,6 @@ const ServerActionCenters = {
         const result = await saveCenterToDatabase(requestBody);
 
         if (result.success) {
-          console.log(
-            "✅ Center synced successfully via server action:",
-            result.data,
-          );
           return result.data;
         } else {
           throw new Error("Server action returned unsuccessful result");
@@ -153,7 +134,6 @@ const ServerActionCenters = {
       });
 
       if (!response.ok && response.status === 409) {
-        console.log("⚠️ Center exists, trying PATCH...");
         // PATCH endpoint doesn't handle subjects, so we only update center fields
         response = await fetch(api_url, {
           method: "PATCH",
@@ -174,7 +154,6 @@ const ServerActionCenters = {
 
         // After PATCH, we need to sync subjects separately via POST to /api/subjects
         if (response.ok && centerSubjects.length > 0) {
-          console.log("🔄 Syncing subjects separately...");
           try {
             const subjectSyncResults = await Promise.allSettled(
               centerSubjects.map((subject) =>
@@ -210,7 +189,6 @@ const ServerActionCenters = {
             if (failedSubjects.length > 0) {
               console.warn("⚠️ Some subjects failed to sync:", failedSubjects);
             } else {
-              console.log("✅ All subjects synced successfully");
             }
           } catch (subjectError) {
             console.error("❌ Error syncing subjects:", subjectError);
@@ -241,7 +219,7 @@ const ServerActionCenters = {
       }
 
       const result = await response.json();
-      console.log("✅ Center synced successfully via API:", result);
+
       return result;
     } catch (e) {
       console.error("❌ Error saving center to server:", e);
@@ -258,7 +236,6 @@ const ServerActionCenters = {
         const result = await deleteCenterFromDatabase(id);
 
         if (result.success) {
-          console.log("✅ Center deleted successfully via server action");
           return { ok: true } as Response;
         }
       } catch (serverActionError: any) {
@@ -287,18 +264,9 @@ const ServerActionCenters = {
       throw new Error("Cannot sync: device is offline");
     }
 
-    console.log("🔄 [Center Sync] Starting sync...");
     const { waiting, pending } = await centerActions.getSyncTargets();
 
-    console.log("🔄 [Center Sync] Found:", {
-      waiting: waiting.length,
-      pending: pending.length,
-      waitingIds: waiting.map((c) => c.id),
-      pendingIds: pending.map((c) => c.id),
-    });
-
     if (waiting.length === 0 && pending.length === 0) {
-      console.log("ℹ️ [Center Sync] No centers to sync");
       return { message: "No centers to sync.", results: [] };
     }
 
@@ -393,12 +361,6 @@ const ServerActionCenters = {
     const successCount = results.filter((r) => r.success).length;
     const failCount = results.filter((r) => !r.success).length;
 
-    console.log("✅ [Center Sync] Completed:", {
-      successCount,
-      failCount,
-      results,
-    });
-
     return {
       message: `Center sync completed. ${successCount} succeeded, ${failCount} failed.`,
       results,
@@ -416,7 +378,6 @@ const ServerActionCenters = {
         const result = await getCentersFromDatabase();
 
         if (result.success) {
-          console.log("✅ Centers fetched successfully via server action");
           return result.data;
         }
       } catch (serverActionError: any) {
@@ -477,9 +438,6 @@ const ServerActionCenters = {
         }
 
         if (pendingIds.size > 0) {
-          console.log(
-            `[ImportFromServer] Preserved ${pendingIds.size} center(s) with pending local changes`,
-          );
         }
       });
 

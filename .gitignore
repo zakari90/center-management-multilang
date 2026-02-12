@@ -5,6 +5,8 @@
 /test
 /node_modules
 /.pnp
+/deployment.txt
+
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -12,6 +14,9 @@
 !.yarn/releases
 !.yarn/versions
 .env
+.env.example
+.env.production
+ sharing with a non-technical person on a VPS
 /electron-app
 /ionic-app
 setup-mongodb-replica-set.sh

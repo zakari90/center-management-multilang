@@ -284,9 +284,6 @@ const ServerActionTeachers = {
               for (const ts of teacher.teacherSubjects) {
                 // Skip if there are pending local changes for this teacherSubject
                 if (pendingTeacherSubjectIds.has(ts.id)) {
-                  console.log(
-                    `[ImportFromServer] Preserved teacherSubject ${ts.id} with pending local changes`,
-                  );
                   continue;
                 }
 
@@ -318,9 +315,6 @@ const ServerActionTeachers = {
         for (const teacher of transformedTeachers) {
           // ✅ Skip if there are pending local changes for this teacher
           if (pendingIds.has(teacher.id)) {
-            console.log(
-              `[ImportFromServer] Preserved teacher ${teacher.id} with pending local changes`,
-            );
             continue;
           }
 
@@ -354,14 +348,7 @@ const ServerActionTeachers = {
         }
 
         if (pendingIds.size > 0) {
-          console.log(
-            `[ImportFromServer] Preserved ${pendingIds.size} teacher(s) with pending local changes`,
-          );
         }
-
-        console.log(
-          `[ImportFromServer] Imported ${allTeacherSubjects.length} teacherSubjects from server`,
-        );
 
         return {
           message: `Imported ${transformedTeachers.length} teachers from server.`,

@@ -108,18 +108,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Note: Keep localAuthUsers for offline login capability
         // Note: Keep pushSubscriptions as they're device-specific
       ]);
-      console.log("[AuthProvider] Local database cleared on logout");
-    } catch (e) {
-      console.warn("[AuthProvider] Failed to clear local database:", e);
-    }
+    } catch (e) {}
 
     window.location.href = "/";
   }, []);
 
   const checkAuth = async () => {
     try {
-      console.log("[AuthProvider] checkAuth start (client-side only)");
-
       // 100% client-side: read from localStorage only
       try {
         const raw = localStorage.getItem(LAST_USER_KEY);
@@ -138,33 +133,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const data = await res.json();
 
                 if (data.exists === false || data.isActive === false) {
-                  console.warn(
-                    "[AuthProvider] Account revoked detected on mount. Logging out...",
-                  );
                   await logout();
                   return;
                 }
-              } catch (e) {
-                console.warn("[AuthProvider] Account status check failed:", e);
-              }
+              } catch (e) {}
             }
 
             setUser(maybeUser);
-            console.log("[AuthProvider] user restored from localStorage");
+
             return;
           }
         }
       } catch {}
 
       setUser(null);
-      console.log("[AuthProvider] no stored user");
+
       return;
     } catch (error) {
-      console.error("Auth check failed:", error);
       setUser(null);
     } finally {
       setIsLoading(false);
-      console.log("[AuthProvider] checkAuth end");
     }
   };
 
@@ -180,10 +168,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (hasMismatch) {
           // Get pending changes count for user decision
           const { total } = await getPendingChangesCount();
-
-          console.warn(
-            "[AuthProvider] Epoch mismatch detected, awaiting user confirmation",
-          );
 
           // Set pending state - user must confirm before proceeding
           setEpochMismatchPending({
@@ -212,10 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (passwordHash) {
         try {
           await saveCredentialsLocally(userData, passwordHash);
-          console.log("[AuthProvider] Credentials saved for offline login");
-        } catch (e) {
-          console.warn("[AuthProvider] Failed to save offline credentials:", e);
-        }
+        } catch (e) {}
       }
     },
     [],
@@ -228,10 +209,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!epochMismatchPending) return;
 
     const { userData, passwordHash, serverEpoch } = epochMismatchPending;
-
-    console.log(
-      "[AuthProvider] User confirmed epoch reset, clearing local data...",
-    );
 
     // Clear all local entity data
     await clearAllLocalData();
@@ -253,9 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (passwordHash) {
       try {
         await saveCredentialsLocally(userData, passwordHash);
-      } catch (e) {
-        console.warn("[AuthProvider] Failed to save offline credentials:", e);
-      }
+      } catch (e) {}
     }
   }, [epochMismatchPending]);
 
@@ -263,7 +238,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * Cancel epoch reset - abort login
    */
   const cancelEpochReset = useCallback(() => {
-    console.log("[AuthProvider] User cancelled epoch reset");
     setEpochMismatchPending(null);
   }, []);
 
@@ -277,7 +251,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: LoginWithServerOptions,
     ): Promise<boolean> => {
       const online = isOnline();
-      console.log("[AuthProvider] loginWithCredentials", { email, online });
 
       if (online) {
         // ===== ONLINE LOGIN =====
@@ -306,14 +279,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           options.onError?.(errorMsg, false);
           return false;
         } catch (error: any) {
-          console.error("[AuthProvider] Online login error:", error);
-
           // Network error - try offline
           if (
             error?.message?.includes("fetch") ||
             error?.code === "ERR_NETWORK"
           ) {
-            console.log("[AuthProvider] Network error, trying offline...");
             return attemptOfflineLogin(email, password, options);
           }
 

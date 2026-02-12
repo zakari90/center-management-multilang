@@ -28,11 +28,8 @@ export async function GET(req: NextRequest) {
       orderBy: [{ grade: "asc" }, { name: "asc" }],
     });
 
-    console.log("Subjects with teachers:", JSON.stringify(subjects, null, 2)); // Debug log
-
     return NextResponse.json(subjects);
   } catch (error) {
-    console.error("Error fetching subjects:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -100,8 +97,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(subject);
   } catch (error) {
-    console.log(error);
-
     // Duplicate key (e.g. subject with this id already exists)
     if ((error as any)?.code === "P2002") {
       return NextResponse.json(
@@ -162,8 +157,6 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(subject);
   } catch (error) {
-    console.log(error);
-
     return NextResponse.json(
       { error: "Failed to update subject" },
       { status: 500 },
@@ -195,8 +188,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.log(error);
-
     return NextResponse.json(
       { error: "Failed to delete subject" },
       { status: 500 },

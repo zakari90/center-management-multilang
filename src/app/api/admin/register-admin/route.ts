@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 import db from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
@@ -9,14 +10,22 @@ import { generateObjectId } from "@/lib/utils/generateObjectId";
  * Public endpoint - but only works if no admin exists
  */
 export async function POST(request: Request) {
+  let locale = "en";
   try {
     const body = await request.json();
+    if (body.locale) locale = body.locale;
+
     const { name, email, password } = body;
+
+    const t = await getTranslations({
+      locale,
+      namespace: "adminRegistration",
+    });
 
     // Validate required fields
     if (!name || !email || !password) {
       return NextResponse.json(
-        { error: "Name, email, and password are required" },
+        { error: t("allFieldsRequired") },
         { status: 400 },
       );
     }
@@ -24,16 +33,13 @@ export async function POST(request: Request) {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: t("invalidEmail") }, { status: 400 });
     }
 
     // Validate password length
     if (password.length < 4) {
       return NextResponse.json(
-        { error: "Password must be at least 4 characters long" },
+        { error: t("passwordTooShort") },
         { status: 400 },
       );
     }
@@ -48,7 +54,7 @@ export async function POST(request: Request) {
     if (existingAdminCount > 0) {
       return NextResponse.json(
         {
-          error: "An admin account already exists. Only one admin is allowed.",
+          error: t("adminExistsError"),
         },
         { status: 409 },
       );
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email is already registered" },
+        { error: t("emailAlreadyRegistered") },
         { status: 409 },
       );
     }
@@ -72,7 +78,6 @@ export async function POST(request: Request) {
     // Create the admin user
     const admin = await db.user.create({
       data: {
-        id: generateObjectId(),
         name,
         email,
         password: hashedPassword,
@@ -92,8 +97,15 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Failed to register admin:", error);
+
+    // Get translations for error (using the locale we captured or default)
+    const t = await getTranslations({
+      locale,
+      namespace: "adminRegistration",
+    });
+
     return NextResponse.json(
-      { error: "Failed to register admin account" },
+      { error: t("registrationError") },
       { status: 500 },
     );
   }

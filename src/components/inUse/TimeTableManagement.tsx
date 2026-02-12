@@ -191,7 +191,7 @@ export default function TimetableManagement({
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError("");
-    console.log("[TimetableManagement] Starting fetchData");
+
     try {
       // Only proceed if auth has finished loading and user is available
       if (!user && !authLoading) {
@@ -222,12 +222,6 @@ export default function TimetableManagement({
         centerActions.getAll(),
         teacherSubjectActions.getAll(),
       ]);
-      console.log("[TimetableManagement] Fetched all entities from Dexie:", {
-        teachersCount: allTeachers.length,
-        subjectsCount: allSubjects.length,
-        schedulesCount: allSchedules.length,
-        centersCount: allCenters.length,
-      });
 
       // ✅ Check if user is admin
       const isAdmin = user.role?.toUpperCase() === "ADMIN";
@@ -378,13 +372,6 @@ export default function TimetableManagement({
       );
       setSchedule(scheduleSlots);
 
-      console.log("[TimetableManagement] Filtered relevant data:", {
-        relevantTeachersCount: relevantTeachers.length,
-        managerSubjectsCount: managerSubjects.length,
-        relevantSchedulesCount: filteredSchedules.length,
-        roomsCount: rooms.length,
-      });
-
       // ✅ Get rooms from relevant centers
       if (centerId) {
         const center = allCenters.find(
@@ -422,7 +409,6 @@ export default function TimetableManagement({
       //   centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
       // ])
     } catch (err) {
-      console.error("Failed to fetch data:", err);
       setError(t("errorLoadData"));
     } finally {
       setIsLoading(false);
@@ -585,7 +571,6 @@ export default function TimetableManagement({
       //   centerId,
       // })
     } catch (err) {
-      console.error("Failed to add schedule:", err);
       setError(t("errorAddSchedule"));
     } finally {
       setIsSaving(false);
@@ -606,7 +591,6 @@ export default function TimetableManagement({
       // ✅ Commented out online delete
       // await axios.delete(`/api/admin/schedule/${scheduleId}`)
     } catch (err) {
-      console.error("Failed to delete schedule:", err);
       setError(t("errorDeleteSchedule"));
     }
   };
@@ -684,7 +668,6 @@ export default function TimetableManagement({
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Failed to export Excel:", err);
       setError("Failed to export Excel file");
     }
   };

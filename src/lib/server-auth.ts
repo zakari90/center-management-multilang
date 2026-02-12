@@ -24,28 +24,16 @@ export async function getSession() {
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session");
-    
-    console.log("[getSession] 🔍 Cookie check:", {
-      hasSessionCookie: !!sessionCookie,
-      cookieValueLength: sessionCookie?.value?.length || 0,
-      allCookieNames: cookieStore.getAll().map(c => c.name),
-    });
-    
+
     if (!sessionCookie?.value) {
-      console.log("[getSession] ❌ No session cookie found");
       return null;
     }
-    
+
     const decrypted = await decrypt(sessionCookie.value);
-    console.log("[getSession] ✅ Session decrypted:", {
-      hasUser: !!(decrypted as any)?.user,
-      userId: (decrypted as any)?.user?.id || 'N/A',
-      role: (decrypted as any)?.user?.role || 'N/A',
-    });
-    
+
     return decrypted;
   } catch (error) {
-    console.error('[getSession] ❌ Failed to get/decrypt session:', error);
+    console.error("[getSession] ❌ Failed to get/decrypt session:", error);
     return null;
   }
 }
@@ -65,7 +53,7 @@ export async function updateSession(request: NextRequest) {
     });
     return res;
   } catch (error) {
-    console.error('[updateSession] failed to update session', error);
+    console.error("[updateSession] failed to update session", error);
     return NextResponse.next();
   }
 }

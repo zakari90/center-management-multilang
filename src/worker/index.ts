@@ -5,50 +5,32 @@
 // we use a minimal `any` typing here.
 const sw: any = self as any;
 
-console.log("[SW] boot", { href: sw.location?.href });
-
 sw.addEventListener("error", (event: any) => {
   // Surface SW script errors that prevent install/activate.
-  console.log("[SW] error", {
-    message: (event as ErrorEvent).message,
-    filename: (event as ErrorEvent).filename,
-    lineno: (event as ErrorEvent).lineno,
-    colno: (event as ErrorEvent).colno,
-  });
 });
 
-sw.addEventListener("unhandledrejection", (event: any) => {
-  console.log("[SW] unhandledrejection", {
-    reason: (event as PromiseRejectionEvent).reason,
-  });
-});
+sw.addEventListener("unhandledrejection", (event: any) => {});
 
 const PAGES_CACHE = "pages-v1";
 const ASSETS_CACHE = "assets-v1";
 
 sw.addEventListener("install", (event: any) => {
-  console.log("[SW] install");
   // Activate new SW immediately.
   sw.skipWaiting();
   event.waitUntil(
     (async () => {
       const cache = await caches.open(ASSETS_CACHE);
       await cache.add("/offline.html");
-      console.log("[SW] precached /offline.html");
     })(),
   );
 });
 
 sw.addEventListener("activate", (event: any) => {
-  console.log("[SW] activate");
   event.waitUntil(
     (async () => {
       try {
         await sw.clients.claim();
-        console.log("[SW] clients claimed");
-      } catch (e) {
-        console.log("[SW] clients claim failed", e);
-      }
+      } catch (e) {}
     })(),
   );
 });
@@ -100,7 +82,6 @@ async function matchAppShell(
 
 sw.addEventListener("message", (event: any) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
-    console.log("[SW] received SKIP_WAITING");
     sw.skipWaiting();
   }
 });
@@ -147,8 +128,6 @@ sw.addEventListener("fetch", (event: any) => {
 
   event.respondWith(
     (async () => {
-      console.log("[SW] navigate fetch", { pathname: url.pathname });
-
       // Locale-aware caching:
       // If you include a locale in the URL (recommended), caching is naturally separated.
       // When localePrefix is "never", the URL doesn't change per language; SW cannot
@@ -160,10 +139,6 @@ sw.addEventListener("fetch", (event: any) => {
       const locale = urlLocale ?? acceptLanguage;
       const cacheKeyUrl = `${url.origin}${url.pathname}?__sw_locale=${encodeURIComponent(locale)}`;
       const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
-      console.log("[SW] navigation cache key", {
-        pathname: url.pathname,
-        locale,
-      });
 
       const cache = await caches.open(PAGES_CACHE);
 
@@ -186,9 +161,6 @@ sw.addEventListener("fetch", (event: any) => {
       try {
         const preload = await event.preloadResponse;
         if (preload) {
-          console.log("[SW] using navigation preload", {
-            pathname: url.pathname,
-          });
           try {
             await cache.put(cacheKey, preload.clone());
           } catch {}
@@ -196,10 +168,7 @@ sw.addEventListener("fetch", (event: any) => {
         }
 
         const networkResponse = await fetch(request);
-        console.log("[SW] network ok", {
-          pathname: url.pathname,
-          status: networkResponse.status,
-        });
+
         try {
           if (networkResponse.ok) {
             await cache.put(cacheKey, networkResponse.clone());
@@ -214,21 +183,14 @@ sw.addEventListener("fetch", (event: any) => {
           url.pathname,
         );
         if (anyLocale) {
-          console.log("[SW] offline cache hit (any locale)", {
-            pathname: url.pathname,
-          });
           return anyLocale;
         }
 
         const shell = await matchAppShell(cache, url.origin);
         if (shell) {
-          console.log("[SW] offline fallback to app shell", {
-            pathname: url.pathname,
-          });
           return shell;
         }
 
-        console.log("[SW] offline cache miss", { pathname: url.pathname });
         return new Response("Offline", {
           status: 503,
           headers: { "Content-Type": "text/plain; charset=utf-8" },

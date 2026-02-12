@@ -115,8 +115,6 @@ export default function CenterPresentation({
 
     setIsAutoSyncing(true);
     try {
-      console.log("[AutoSync] Starting automatic sync when online...");
-
       // Sync centers and subjects (relevant to this component)
       const [centerResult, subjectResult] = await Promise.allSettled([
         ServerActionCenters.Sync(),
@@ -146,7 +144,6 @@ export default function CenterPresentation({
             { duration: 3000 },
           );
         }
-        console.log("[AutoSync] Sync completed successfully");
       } else {
         const errors = [
           centerResult.status === "rejected" ? centerResult.reason : null,
@@ -479,7 +476,7 @@ export default function CenterPresentation({
     setIsCenterDebugSyncing(true);
     try {
       const result = await ServerActionCenters.Sync();
-      console.log("[CenterSync Debug] Result:", result);
+
       toast(
         result?.message || "Center sync completed. See console for details.",
       );

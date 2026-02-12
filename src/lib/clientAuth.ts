@@ -3,18 +3,18 @@
 
 /**
  * Client-side Authentication Service
- * 
+ *
  * Orchestrates login flow for offline-first PWA:
  * - Online: Login via server, save credentials locally
  * - Offline: Login against local IndexedDB
  */
 
-import { isOnline } from './utils/network';
-import { 
-  saveCredentialsLocally, 
+import { isOnline } from "./utils/network";
+import {
+  saveCredentialsLocally,
   validateOfflineLogin,
   hasLocalCredentials,
-} from './offlineAuth';
+} from "./offlineAuth";
 
 export interface LoginResult {
   success: boolean;
@@ -31,25 +31,23 @@ export interface LoginResult {
 /**
  * Unified login function that works both online and offline
  * @param email - User email
- * @param password - User password  
+ * @param password - User password
  * @param serverLoginFn - Server action function for online login
  */
 export async function loginWithOfflineSupport(
   email: string,
   password: string,
-  serverLoginFn: (formData: FormData) => Promise<any>
+  serverLoginFn: (formData: FormData) => Promise<any>,
 ): Promise<LoginResult> {
   const online = isOnline();
-  
-  console.log('[ClientAuth] Login attempt', { email, online });
 
   if (online) {
     // ===== ONLINE LOGIN =====
     try {
       // Create FormData for server action
       const formData = new FormData();
-      formData.set('email', email);
-      formData.set('password', password);
+      formData.set("email", email);
+      formData.set("password", password);
 
       // Call the server login action
       const result = await serverLoginFn(formData);
@@ -62,9 +60,8 @@ export async function loginWithOfflineSupport(
         if (passwordHash) {
           try {
             await saveCredentialsLocally(user, passwordHash);
-            console.log('[ClientAuth] Credentials saved for offline use');
           } catch (e) {
-            console.warn('[ClientAuth] Failed to save credentials locally:', e);
+            console.warn("[ClientAuth] Failed to save credentials locally:", e);
             // Don't fail login if local save fails
           }
         }
@@ -79,22 +76,24 @@ export async function loginWithOfflineSupport(
       // Login failed
       return {
         success: false,
-        error: result.error?.message || result.error?.email || result.error?.password || 'Login failed',
+        error:
+          result.error?.message ||
+          result.error?.email ||
+          result.error?.password ||
+          "Login failed",
         isOffline: false,
       };
-
     } catch (error: any) {
-      console.error('[ClientAuth] Online login error:', error);
-      
+      console.error("[ClientAuth] Online login error:", error);
+
       // If network error, try offline login as fallback
-      if (error?.message?.includes('fetch') || error?.code === 'ERR_NETWORK') {
-        console.log('[ClientAuth] Network error, trying offline login...');
+      if (error?.message?.includes("fetch") || error?.code === "ERR_NETWORK") {
         return attemptOfflineLogin(email, password);
       }
 
       return {
         success: false,
-        error: error?.message || 'Login failed',
+        error: error?.message || "Login failed",
         isOffline: false,
       };
     }
@@ -107,16 +106,17 @@ export async function loginWithOfflineSupport(
 /**
  * Attempt offline login against local IndexedDB
  */
-async function attemptOfflineLogin(email: string, password: string): Promise<LoginResult> {
-  console.log('[ClientAuth] Attempting offline login for:', email);
-
+async function attemptOfflineLogin(
+  email: string,
+  password: string,
+): Promise<LoginResult> {
   // Check if user has offline credentials
   const hasCredentials = await hasLocalCredentials(email);
-  
+
   if (!hasCredentials) {
     return {
       success: false,
-      error: 'First login requires internet connection',
+      error: "First login requires internet connection",
       isOffline: true,
     };
   }
@@ -125,7 +125,6 @@ async function attemptOfflineLogin(email: string, password: string): Promise<Log
   const offlineResult = await validateOfflineLogin(email, password);
 
   if (offlineResult.success && offlineResult.user) {
-    console.log('[ClientAuth] Offline login successful');
     return {
       success: true,
       user: offlineResult.user,
@@ -135,7 +134,7 @@ async function attemptOfflineLogin(email: string, password: string): Promise<Log
 
   return {
     success: false,
-    error: offlineResult.error || 'Invalid credentials',
+    error: offlineResult.error || "Invalid credentials",
     isOffline: true,
   };
 }

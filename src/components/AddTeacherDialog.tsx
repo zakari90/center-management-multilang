@@ -435,9 +435,7 @@ export default function AddTeacherDialog({
     // Move to next step if not at the final step
     if (currentStep < totalSteps) {
       const newStep = currentStep + 1;
-      console.log(
-        `[AddTeacherDialog] Moving from step ${currentStep} to step ${newStep} (totalSteps: ${totalSteps})`,
-      );
+
       setCurrentStep(newStep);
     }
   };

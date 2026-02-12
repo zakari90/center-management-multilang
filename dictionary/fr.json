@@ -204,7 +204,10 @@
     "allFieldsRequired": "Tous les champs sont requis",
     "passwordMismatch": "Les mots de passe ne correspondent pas",
     "passwordTooShort": "Le mot de passe doit contenir au moins 4 caractères",
-    "registrationFailed": "L'enregistrement a échoué"
+    "invalidEmail": "Format d'email invalide",
+    "emailAlreadyRegistered": "L'email est déjà enregistré",
+    "registrationFailed": "L'enregistrement a échoué",
+    "registrationError": "Échec de l'enregistrement du compte administrateur"
   },
   "register": {
     "successMessage": "Compte créé avec succès ! Redirection en cours...",

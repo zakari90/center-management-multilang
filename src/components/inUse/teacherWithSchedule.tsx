@@ -636,7 +636,6 @@ export default function TeacherScheduleView({
     try {
       setIsLoading(true);
       setError("");
-      console.log("[TeacherScheduleView] Starting fetchTeacherSchedules");
 
       if (!user) {
         setIsLoading(false);
@@ -653,12 +652,6 @@ export default function TeacherScheduleView({
           subjectActions.getAll(),
           centerActions.getAll(),
         ]);
-      console.log("[TeacherScheduleView] Fetched all entities from Dexie:", {
-        teachersCount: allTeachers.length,
-        schedulesCount: allSchedules.length,
-        subjectsCount: allSubjects.length,
-        centersCount: allCenters.length,
-      });
 
       // ✅ Filter active entities (exclude deleted)
       let activeTeachers = allTeachers.filter((t) => t.status !== "0");
@@ -734,12 +727,6 @@ export default function TeacherScheduleView({
         );
       }
       const activeSubjects = allSubjects.filter((s) => s.status !== "0");
-
-      console.log("[TeacherScheduleView] Filtered active entities:", {
-        activeTeachersCount: activeTeachers.length,
-        activeSchedulesCount: activeSchedules.length,
-        activeSubjectsCount: activeSubjects.length,
-      });
 
       // ✅ Build schedules with related data (teacher and subject)
       const schedulesWithData: Schedule[] = activeSchedules.map((schedule) => {

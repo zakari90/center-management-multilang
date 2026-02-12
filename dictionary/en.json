@@ -245,7 +245,10 @@
     "allFieldsRequired": "All fields are required",
     "passwordMismatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 4 characters",
-    "registrationFailed": "Registration failed"
+    "invalidEmail": "Invalid email format",
+    "emailAlreadyRegistered": "Email is already registered",
+    "registrationFailed": "Registration failed",
+    "registrationError": "Failed to register admin account"
   },
   "register": {
     "successMessage": "Account created successfully! Redirecting...",

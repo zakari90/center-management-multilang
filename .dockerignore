@@ -1,0 +1,36 @@
+# Dependencies & build artifacts
+node_modules
+.next
+out
+build
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Environment & secrets
+.env
+.env.*
+
+# IDE & editor
+.vscode
+.agent
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Data & logs
+mongo-data
+mongodb-data
+data
+*.log
+
+# Misc
+README.md
+docs
+tests
+coverage
+*.tsbuildinfo

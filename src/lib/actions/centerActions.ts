@@ -42,13 +42,6 @@ export async function saveCenterToDatabase(centerData: {
   try {
     const session: any = await getSessionInServerAction();
 
-    console.log("[CENTER_SAVE] Session check:", {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userId: session?.user?.id,
-      userRole: session?.user?.role,
-    });
-
     if (!session || !session.user) {
       console.error("[CENTER_SAVE] No session found");
       throw new Error("Unauthorized: No session found. Please log in again.");
@@ -115,15 +108,6 @@ export async function saveCenterToDatabase(centerData: {
     if (subjects && !Array.isArray(subjects)) {
       throw new Error("Subjects must be an array");
     }
-
-    console.log("[CENTER_SAVE] Validated data:", {
-      centerId: id,
-      name,
-      adminId: session.user.id,
-      classroomsCount: classrooms.length,
-      workingDaysCount: workingDays.length,
-      subjectsCount: subjects?.length || 0,
-    });
 
     // ✅ Check if center already exists
     const existingCenter = await db.center.findUnique({
@@ -310,12 +294,10 @@ export async function getCentersFromDatabase() {
     // ✅ Return empty array instead of throwing error when no session
     // This prevents SSR errors while still being secure
     if (!session || !session.user) {
-      console.log("[CENTER_GET] No session found, returning empty array");
       return { success: true, data: [] };
     }
 
     if (!["ADMIN", "MANAGER"].includes(session.user.role)) {
-      console.log("[CENTER_GET] Unauthorized role:", session.user.role);
       return { success: true, data: [] };
     }
 

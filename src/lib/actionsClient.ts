@@ -50,14 +50,11 @@ export async function decrypt(input: string) {
 export async function getSession() {
   const session = Cookies.get("session");
   if (!session) {
-    console.log("[getSession] no session cookie found");
     return null;
   }
   try {
     const decoded = await decrypt(session);
-    console.log("[getSession] session decoded", {
-      hasUser: !!(decoded as any)?.user,
-    });
+
     return decoded;
   } catch (error) {
     console.error("[getSession] failed to decrypt session cookie", error);

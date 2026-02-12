@@ -79,8 +79,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(center, { status: 201 });
   } catch (error: any) {
-    console.error("[CENTERS_POST]", error);
-
     // Handle duplicate key error (center already exists)
     if (error?.code === "P2002") {
       return NextResponse.json(
@@ -158,28 +156,15 @@ export async function POST(req: NextRequest) {
 // }
 
 export async function GET(req: NextRequest) {
-  console.log("[CENTER_GET] 🔄 Starting GET request...");
-
   try {
-    console.log("[CENTER_GET] 📋 Getting session...");
     const session: any = await getSession();
 
-    console.log("[CENTER_GET] 📋 Session result:", {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userId: session?.user?.id || "N/A",
-      userRole: session?.user?.role || "N/A",
-    });
-
     if (!session?.user) {
-      console.log("[CENTER_GET] ❌ No session/user - returning 401");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const adminId = session.user.id;
     const userRole = session.user.role;
-
-    console.log("[CENTER_GET] 🔍 Querying centers for:", { adminId, userRole });
 
     const centers = await db.center.findMany({
       where: {
@@ -188,20 +173,8 @@ export async function GET(req: NextRequest) {
       include: { subjects: true },
     });
 
-    console.log("[CENTER_GET] ✅ Found centers:", {
-      count: centers.length,
-      ids: centers.map((c) => c.id),
-    });
-
     return NextResponse.json(centers, { status: 200 });
   } catch (error: any) {
-    console.error("[CENTER_GET] ❌ ERROR:", {
-      message: error?.message || "Unknown error",
-      name: error?.name || "Unknown",
-      code: error?.code || "N/A",
-      stack: error?.stack?.split("\n").slice(0, 5).join("\n") || "No stack",
-    });
-
     return NextResponse.json(
       {
         error: "Failed to get center data",
@@ -275,8 +248,6 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(center);
   } catch (error) {
-    console.log(error);
-
     return NextResponse.json(
       { error: "Failed to update center" },
       { status: 500 },

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getSession } from '@/lib/server-auth'
-import db from '@/lib/db'
-import { NextResponse } from 'next/server'
+import { getSession } from "@/lib/server-auth";
+import db from "@/lib/db";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session :any = await getSession()
-    
+    const session: any = await getSession();
+
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const teachers = await db.teacher.findMany({
@@ -24,47 +24,42 @@ export async function GET() {
           select: {
             id: true,
             name: true,
-          }
+          },
         },
         _count: {
           select: {
             teacherSubjects: true,
             studentSubjects: true,
             receipts: true,
-          }
-        }
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
-    })
-    
-    console.log(teachers);
-    
+        createdAt: "desc",
+      },
+    });
 
-    const transformedTeachers = teachers.map((teacher:any) => ({
+    const transformedTeachers = teachers.map((teacher: any) => ({
       id: teacher.id,
       name: teacher.name,
       email: teacher.email,
       phone: teacher.phone,
       address: teacher.address,
-      weeklySchedule:teacher.weeklySchedule,
+      weeklySchedule: teacher.weeklySchedule,
       createdAt: teacher.createdAt.toISOString(),
       manager: teacher.manager,
       stats: {
         subjects: teacher._count.teacherSubjects,
         students: teacher._count.studentSubjects,
         receipts: teacher._count.receipts,
-      }
-    }))
-console.log(transformedTeachers);
+      },
+    }));
 
-    return NextResponse.json(transformedTeachers)
+    return NextResponse.json(transformedTeachers);
   } catch (error) {
-    console.error('Error fetching teachers:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch teachers' }, 
-      { status: 500 }
-    )
+      { error: "Failed to fetch teachers" },
+      { status: 500 },
+    );
   }
 }

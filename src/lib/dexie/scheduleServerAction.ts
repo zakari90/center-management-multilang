@@ -71,7 +71,7 @@ const ServerActionSchedules = {
         throw new Error(`HTTP ${response.status}: ${errorMessage}`);
       }
       const result = await response.json();
-      console.log("✅ Schedule saved to server:", result.id);
+
       return result;
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : "Network error";
@@ -106,7 +106,6 @@ const ServerActionSchedules = {
         throw new Error(`HTTP ${response.status}: ${errorMessage}`);
       }
 
-      console.log("✅ Schedule deleted from server:", id);
       return response;
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : "Network error";

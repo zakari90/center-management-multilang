@@ -26,19 +26,6 @@ export default function CenterPageClient() {
 
       // Debug logging (only in development)
 
-      console.log("🔍 Center Debug:", {
-        userId: user.id,
-        userRole: user.role,
-        totalCenters: centers.length,
-        centers: centers.map((c) => ({
-          id: c.id,
-          name: c.name,
-          adminId: c.adminId,
-          status: c.status,
-          matches: c.adminId === user.id,
-        })),
-      });
-
       // Filter: For admin users, show centers where adminId matches OR if no adminId, show first active center
       // This handles cases where adminId might not be set correctly during sync
       const activeCenters = centers.filter((c) => c.status !== "0");
@@ -55,19 +42,13 @@ export default function CenterPageClient() {
             : null;
 
       if (centerToShow) {
-        if (process.env.NODE_ENV === "development") {
-          console.log("✅ Using center:", centerToShow.id, centerToShow.name);
-        }
         setCenterId(centerToShow.id);
       } else {
         // Only log in development to reduce console noise
-        if (process.env.NODE_ENV === "development") {
-          console.log("❌ No center found");
-        }
+
         setCenterId(null);
       }
     } catch (error) {
-      console.error("Error fetching center data from local DB:", error);
       setCenterId(null);
     } finally {
       setIsLoading(false);

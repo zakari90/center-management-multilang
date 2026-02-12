@@ -75,24 +75,27 @@ export function LoginForm({
     setRole(initialRole);
   }, [initialRole]);
 
-  // Check if admin exists when role is admin
+  // Check if admin exists on mount (determines whether manager tab is shown)
   useEffect(() => {
-    if (role === "admin") {
-      setCheckingAdmin(true);
-      fetch("/api/admin/check-admin")
-        .then((res) => res.json())
-        .then((data) => {
-          setHasAdmin(data.hasAdmin);
-        })
-        .catch((error) => {
-          console.error("Failed to check admin existence:", error);
-          setHasAdmin(null);
-        })
-        .finally(() => {
-          setCheckingAdmin(false);
-        });
-    }
-  }, [role]);
+    setCheckingAdmin(true);
+    fetch("/api/admin/check-admin")
+      .then((res) => res.json())
+      .then((data) => {
+        setHasAdmin(data.hasAdmin);
+        // If no admin exists & role is manager, reset to admin
+        if (!data.hasAdmin && role === "manager") {
+          setRole("admin");
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to check admin existence:", error);
+        setHasAdmin(null);
+      })
+      .finally(() => {
+        setCheckingAdmin(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const activeStateMatchesRole = state?.role ? state.role === role : true;
   const errorState = isErrorState(state) ? state : null;
@@ -139,34 +142,30 @@ export function LoginForm({
       {" "}
       <div>
         {/* --- Main Card --- */}
-        {/* style the following as help text */}
-        <p className="text-center text-sm text-muted-foreground mb-4">
-          for demo use : <br />
-          email : admin@admin.com <br />
-          password : admin
-        </p>
         <Card className="border-border shadow-lg">
           <CardHeader className="space-y-2 pb-4 text-center sm:pb-6">
-            {/* Role Toggle (Segmented Control Style) */}
-            <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 text-sm font-medium ring-offset-background">
-              {(["admin", "manager"] as Role[]).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => handleRoleChange(option)}
-                  className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                    role === option
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
-                  )}
-                >
-                  {option === "admin"
-                    ? t("adminOption")
-                    : tManager("managerOption")}
-                </button>
-              ))}
-            </div>
+            {/* Role Toggle (Segmented Control Style) — hidden if no admin exists */}
+            {hasAdmin !== false && (
+              <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 text-sm font-medium ring-offset-background">
+                {(["admin", "manager"] as Role[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => handleRoleChange(option)}
+                    className={cn(
+                      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                      role === option
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+                    )}
+                  >
+                    {option === "admin"
+                      ? t("adminOption")
+                      : tManager("managerOption")}
+                  </button>
+                ))}
+              </div>
+            )}
           </CardHeader>
 
           <CardContent className="space-y-6 px-6 pb-6">

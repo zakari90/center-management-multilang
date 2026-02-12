@@ -59,12 +59,6 @@ export default async function RootLayout({
   const isArabic = locale === "ar";
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
-  console.log("[RootLayout] Server render", {
-    timestamp: new Date().toISOString(),
-    locale,
-    isArabic,
-  });
-
   return (
     <html lang={locale} dir={isArabic ? "rtl" : "ltr"} suppressHydrationWarning>
       <head>
@@ -201,6 +195,7 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     keywords: t("keywords"),
+    metadataBase: new URL(DOMAIN || "http://localhost:3000"),
 
     // ✅ PWA Manifest
     manifest: "/manifest.json",

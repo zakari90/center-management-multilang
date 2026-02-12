@@ -161,7 +161,6 @@ export default function ReceiptsTable() {
       // const { data } = await axios.get('/api/receipts')
       // setReceipts(data)
     } catch (err) {
-      console.log(err);
       setError(t("errorFetchReceipts"));
     } finally {
       setIsLoading(false);

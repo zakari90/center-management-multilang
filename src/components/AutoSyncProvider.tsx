@@ -1,8 +1,6 @@
 "use client";
 
 import { useAutoSync } from "@/hooks/useAutoSync";
-import { toast } from "sonner";
-import { useTranslations } from "next-intl";
 
 /**
  * Provider component that enables auto-sync for the entire app
@@ -15,8 +13,6 @@ import { useTranslations } from "next-intl";
  * ```
  */
 export function AutoSyncProvider() {
-  const t = useTranslations("SyncHandler");
-
   // Auto-sync configuration
   useAutoSync({
     syncOnMount: true, // Sync local changes on app startup
@@ -28,54 +24,33 @@ export function AutoSyncProvider() {
     debug: process.env.NODE_ENV === "development", // Show logs in dev mode
     onSyncStart: () => {
       // Optional: Show loading indicator
-      console.log("🔄 Syncing...");
     },
     onSyncComplete: (success, results) => {
-      // Optional: Show success/error notification
       if (success) {
-        console.log("✅ Data synced successfully");
+        // Sync succeeded — nothing to show for offline-first PWA
       } else {
-        // Parse results to find what failed
-        const failures: string[] = [];
+        // Offline-first: silently log sync failures (server may be unreachable)
         if (results) {
           Object.entries(results).forEach(([key, result]: [string, any]) => {
             if (result.status === "rejected") {
-              // Extract actual error message from rejection
-              const errorMsg =
-                result.reason?.message ||
-                result.reason?.toString() ||
-                t("networkError");
-              failures.push(`${key}: ${errorMsg}`);
-              console.error(`❌ ${key} sync rejected:`, result.reason);
-            } else if (result.value?.failCount > 0) {
-              // Extract error from the result value if available
-              const errorDetail =
-                result.value?.error ||
-                result.value?.results?.find((r: any) => !r.success)?.error ||
-                t("unknownError");
-              failures.push(
-                `${key}: ${result.value.failCount} ${t("failed")} (${errorDetail})`,
+              console.warn(
+                `⚠️ ${key} sync skipped (server unreachable):`,
+                result.reason?.message || result.reason,
               );
-              console.error(`⚠️ ${key} partial failure:`, result.value);
+            } else if (result.value?.failCount > 0) {
+              console.warn(`⚠️ ${key} partial sync failure:`, result.value);
             }
           });
         }
-
-        const errorMessage =
-          failures.length > 0
-            ? `${t("syncIssues")}:\n${failures.join("\n")}`
-            : t("syncCompletedWithErrors");
-
-        // Log full details to console for debugging
-        console.error("📋 Full sync results:", results);
-
-        toast.error(errorMessage, { duration: 8000 });
+        console.warn(
+          "📋 Sync completed with issues (offline-first mode):",
+          results,
+        );
       }
     },
     onSyncError: (error) => {
-      // Optional: Log or show error
-      console.error("Auto-sync error:", error);
-      toast.error(t("syncError", { error: error.message }));
+      // Offline-first: silently log — don't bother the user
+      console.warn("Auto-sync skipped (server unreachable):", error.message);
     },
   });
 

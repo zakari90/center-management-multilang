@@ -27,7 +27,6 @@ export async function clearAllLocalData(): Promise<void> {
       // Note: Keep pushSubscriptions as they're device-specific
       // Note: Keep syncMeta as it stores epoch info
     ]);
-    console.log("[clearLocalData] All entity data cleared due to epoch reset");
   } catch (error) {
     console.error("[clearLocalData] Error clearing local data:", error);
     throw error;
@@ -100,7 +99,6 @@ export async function updateSyncMeta(
       dataEpoch,
       lastSyncAt: Date.now(),
     });
-    console.log("[clearLocalData] Sync meta updated:", { userId, dataEpoch });
   } catch (error) {
     console.error("[clearLocalData] Error updating sync meta:", error);
     throw error;
@@ -221,15 +219,6 @@ export async function exportLocalDataAsJson(): Promise<{
       },
     };
 
-    console.log("[clearLocalData] Data exported:", {
-      centers: centers.length,
-      teachers: teachers.length,
-      students: students.length,
-      subjects: subjects.length,
-      receipts: receipts.length,
-      schedules: schedules.length,
-    });
-
     return exportData;
   } catch (error) {
     console.error("[clearLocalData] Error exporting local data:", error);
@@ -254,6 +243,4 @@ export function downloadExportAsFile(data: object, filename?: string): void {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-
-  console.log("[clearLocalData] Data downloaded as file");
 }

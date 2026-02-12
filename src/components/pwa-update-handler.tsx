@@ -58,9 +58,9 @@ export default function PWAUpdateHandler() {
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      setTimeout(() => {
-        toast.success(t("appInstalled"));
-      }, 3000);
+      // setTimeout(() => {
+      //   toast.success(t("appInstalled"));
+      // }, 6000);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);

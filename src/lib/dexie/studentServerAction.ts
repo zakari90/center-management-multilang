@@ -282,9 +282,6 @@ const ServerActionStudents = {
               for (const ss of student.studentSubjects) {
                 // Skip if there are pending local changes for this studentSubject
                 if (pendingStudentSubjectIds.has(ss.id)) {
-                  console.log(
-                    `[ImportFromServer] Preserved studentSubject ${ss.id} with pending local changes`,
-                  );
                   continue;
                 }
 
@@ -316,9 +313,6 @@ const ServerActionStudents = {
         for (const student of transformedStudents) {
           // ✅ Skip if there are pending local changes for this student
           if (pendingIds.has(student.id)) {
-            console.log(
-              `[ImportFromServer] Preserved student ${student.id} with pending local changes`,
-            );
             continue;
           }
 
@@ -352,14 +346,7 @@ const ServerActionStudents = {
         }
 
         if (pendingIds.size > 0) {
-          console.log(
-            `[ImportFromServer] Preserved ${pendingIds.size} student(s) with pending local changes`,
-          );
         }
-
-        console.log(
-          `[ImportFromServer] Imported ${allStudentSubjects.length} studentSubjects from server`,
-        );
 
         return {
           message: `Imported ${transformedStudents.length} students from server.`,

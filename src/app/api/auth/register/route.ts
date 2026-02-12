@@ -7,11 +7,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { email, password, username } = body;
-  console.log('📝 Registration attempt:', { email, username, timestamp: new Date().toISOString() });
+
     if (!email || !password || !username) {
       return NextResponse.json(
         { error: { message: "All fields are required." } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: { email: "Email is already in use." } },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -45,15 +45,14 @@ export async function POST(req: NextRequest) {
         },
       },
 
-      { status: 201 }
+      { status: 201 },
     );
 
     return response;
   } catch (error) {
-    console.error("Registration error:", error);
     return NextResponse.json(
       { error: { message: "Internal server error" } },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,6 +29,7 @@ export function AdminRegistrationDialog({
   onSuccess,
 }: AdminRegistrationDialogProps) {
   const t = useTranslations("adminRegistration");
+  const locale = useLocale();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -76,6 +77,7 @@ export function AdminRegistrationDialog({
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          locale,
         }),
       });
 
@@ -131,9 +133,9 @@ export function AdminRegistrationDialog({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
+        <DialogHeader className="mt-2 flex items-center gap-2">
+          <DialogTitle>
+            {/* <UserPlus className="h-5 w-5" /> */}
             {t("title")}
           </DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>

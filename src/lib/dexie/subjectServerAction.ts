@@ -25,13 +25,15 @@ function transformServerSubject(serverSubject: any): Subject {
     price: serverSubject.price,
     duration: serverSubject.duration || undefined,
     centerId: serverSubject.centerId,
-    status: '1' as const,
-    createdAt: typeof serverSubject.createdAt === 'string'
-      ? new Date(serverSubject.createdAt).getTime()
-      : serverSubject.createdAt || Date.now(),
-    updatedAt: typeof serverSubject.updatedAt === 'string'
-      ? new Date(serverSubject.updatedAt).getTime()
-      : serverSubject.updatedAt || Date.now(),
+    status: "1" as const,
+    createdAt:
+      typeof serverSubject.createdAt === "string"
+        ? new Date(serverSubject.createdAt).getTime()
+        : serverSubject.createdAt || Date.now(),
+    updatedAt:
+      typeof serverSubject.updatedAt === "string"
+        ? new Date(serverSubject.updatedAt).getTime()
+        : serverSubject.updatedAt || Date.now(),
   };
 }
 
@@ -74,7 +76,9 @@ const ServerActionSubjects = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        throw new Error(
+          `HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || "Unknown error"}`,
+        );
       }
       return response.json();
     } catch (e) {
@@ -102,24 +106,40 @@ const ServerActionSubjects = {
     try {
       if (!isOnline()) {
         console.warn("Device is offline, skipping subject sync");
-        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
+        return {
+          message: "Cannot sync: offline",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
       }
 
       const waitingData = await subjectActions.getByStatus(["0", "w"]);
-      if (waitingData.length === 0) return { message: "No subjects to sync.", results: [], successCount: 0, failCount: 0 };
+      if (waitingData.length === 0)
+        return {
+          message: "No subjects to sync.",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
 
-      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+      const results: Array<{ id: string; success: boolean; error?: string }> =
+        [];
 
       for (const subject of waitingData) {
         try {
           if (subject.status === "0") {
             // Pending deletion
-            const result = await ServerActionSubjects.DeleteFromServer(subject.id);
+            const result = await ServerActionSubjects.DeleteFromServer(
+              subject.id,
+            );
             if (result && result.ok) {
               await subjectActions.deleteLocal(subject.id);
               results.push({ id: subject.id, success: true });
             } else {
-              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              const errorMsg = result
+                ? `Server returned ${result.status}`
+                : "Network error";
               results.push({ id: subject.id, success: false, error: errorMsg });
             }
           } else if (subject.status === "w") {
@@ -133,24 +153,31 @@ const ServerActionSubjects = {
                 ...(result.name && { name: result.name }),
                 ...(result.grade && { grade: result.grade }),
                 ...(result.price !== undefined && { price: result.price }),
-                ...(result.duration !== undefined && { duration: result.duration }),
-                status: '1' as const,
+                ...(result.duration !== undefined && {
+                  duration: result.duration,
+                }),
+                status: "1" as const,
                 updatedAt: Date.now(),
               });
               results.push({ id: subject.id, success: true });
             } else {
-              results.push({ id: subject.id, success: false, error: "Server request failed" });
+              results.push({
+                id: subject.id,
+                success: false,
+                error: "Server request failed",
+              });
             }
           }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          const errorMsg =
+            error instanceof Error ? error.message : "Unknown error";
           console.error(`Error syncing subject ${subject.id}:`, error);
           results.push({ id: subject.id, success: false, error: errorMsg });
         }
       }
 
-      const successCount = results.filter(r => r.success).length;
-      const failCount = results.filter(r => !r.success).length;
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.filter((r) => !r.success).length;
 
       return {
         message: `Subject sync completed. ${successCount} succeeded, ${failCount} failed.`,
@@ -159,14 +186,17 @@ const ServerActionSubjects = {
         failCount,
       };
     } catch (globalError: any) {
-       console.error("Critical error in ServerActionSubjects.Sync:", globalError);
-       return { 
-         message: "Sync failed completely", 
-         results: [], 
-         successCount: 0, 
-         failCount: 1, 
-         error: globalError.message 
-       };
+      console.error(
+        "Critical error in ServerActionSubjects.Sync:",
+        globalError,
+      );
+      return {
+        message: "Sync failed completely",
+        results: [],
+        successCount: 0,
+        failCount: 1,
+        error: globalError.message,
+      };
     }
   },
 
@@ -191,54 +221,58 @@ const ServerActionSubjects = {
 
     try {
       const data = await ServerActionSubjects.ReadFromServer();
-      
+
       // ✅ Get pending local changes that should NOT be overwritten
-      const pendingSubjects = await subjectActions.getByStatus(['w', '0']);
-      const pendingIds = new Set(pendingSubjects.map(s => s.id));
-      
+      const pendingSubjects = await subjectActions.getByStatus(["w", "0"]);
+      const pendingIds = new Set(pendingSubjects.map((s) => s.id));
+
       const syncedSubjects = await subjectActions.getByStatus(["1"]);
       const backup = [...syncedSubjects];
-      
+
       try {
         for (const subject of syncedSubjects) {
           await subjectActions.deleteLocal(subject.id);
         }
-        
-        const transformedSubjects = Array.isArray(data) 
+
+        const transformedSubjects = Array.isArray(data)
           ? data.map((subject: any) => transformServerSubject(subject))
           : [];
-        
+
         for (const subject of transformedSubjects) {
           // ✅ Skip if there are pending local changes for this subject
           if (pendingIds.has(subject.id)) {
-            console.log(`[ImportFromServer] Preserved subject ${subject.id} with pending local changes`);
             continue;
           }
-          
+
           const existing = await subjectActions.getLocal(subject.id);
-          if (existing && existing.status === 'w') {
+          if (existing && existing.status === "w") {
             continue; // Don't overwrite local pending changes
           }
           await subjectActions.putLocal(subject);
         }
-        
+
         if (pendingIds.size > 0) {
-          console.log(`[ImportFromServer] Preserved ${pendingIds.size} subject(s) with pending local changes`);
         }
-        
-        return { message: `Imported ${transformedSubjects.length} subjects from server.`, count: transformedSubjects.length };
+
+        return {
+          message: `Imported ${transformedSubjects.length} subjects from server.`,
+          count: transformedSubjects.length,
+        };
       } catch (error) {
         console.error("Error during import, restoring backup:", error);
         for (const subject of backup) {
           await subjectActions.putLocal(subject);
         }
-        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
+        throw new Error(
+          "Import failed, local data restored. Error: " +
+            (error instanceof Error ? error.message : "Unknown"),
+        );
       }
     } catch (error) {
       console.error("Error importing from server:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default ServerActionSubjects;

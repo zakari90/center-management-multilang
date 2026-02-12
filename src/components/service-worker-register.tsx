@@ -19,16 +19,14 @@ export default function ServiceWorkerRegister() {
         if (!registration) {
           // Try to register the service worker manually as fallback
           navigator.serviceWorker
-            .register("/custom-sw.js", { updateViaCache: 'none' }) // keep aligned with LoadWS
+            .register("/custom-sw.js", { updateViaCache: "none" }) // keep aligned with LoadWS
             .then((reg) => {
-              console.log("[SW] Service worker registered:", reg.scope);
               reg.update().catch(() => {});
             })
             .catch((error) => {
               console.error("[SW] Registration failed:", error);
             });
         } else {
-          console.log("[SW] Service worker already registered:", registration.scope);
           registration.update().catch(() => {});
         }
       })
@@ -38,11 +36,9 @@ export default function ServiceWorkerRegister() {
 
     // Listen for service worker updates
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      console.log("[SW] Controller changed, reloading page");
       window.location.reload();
     });
   }, []);
 
   return null;
 }
-

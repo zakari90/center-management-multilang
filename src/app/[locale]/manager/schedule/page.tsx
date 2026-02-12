@@ -12,9 +12,6 @@ export default function SchedulePage() {
     setRefreshKey((prev: number) => prev + 1);
   };
 
-  console.log("[AdminSchedulePage] Client render", {
-    timestamp: new Date().toISOString(),
-  });
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
       {/* <PendingSchedulesDialog /> */}

@@ -65,12 +65,6 @@ export default function AdminLayoutClient({
   useEffect(() => {
     if (!mounted || isLoading) return;
 
-    console.log("[AdminLayoutClient] auth resolved", {
-      user,
-      isLoading,
-      locale,
-    });
-
     if (!user) {
       router.push(`/${locale}/login`);
       return;
@@ -95,7 +89,6 @@ export default function AdminLayoutClient({
       await syncAllEntitiesForRole(isAdmin);
       await importAllFromServerForRole(isAdmin);
     } catch (error) {
-      console.error("Sync error:", error);
     } finally {
       setIsSyncing(false);
     }
