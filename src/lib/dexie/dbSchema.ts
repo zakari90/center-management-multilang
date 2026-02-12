@@ -12,6 +12,12 @@ export enum ReceiptType {
   TEACHER_PAYMENT = "TEACHER_PAYMENT",
 }
 
+export enum DeleteRequestStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
+
 export type SyncStatus = "1" | "w" | "0";
 // '1' = synced with server
 // 'w' = waiting/pending sync
@@ -62,6 +68,10 @@ export interface User extends SyncEntity {
   password: string;
   name: string;
   role: Role;
+  // Admin notification preferences
+  notifyNewUser?: boolean;
+  notifyPayments?: boolean;
+  notifyDeleteRequests?: boolean;
 }
 
 export interface Teacher extends SyncEntity {
@@ -140,6 +150,25 @@ export interface PushSubscription extends SyncEntity {
   role?: Role;
 }
 
+export interface DeleteRequest extends SyncEntity {
+  entityType: string; // "teacher" | "student"
+  entityId: string;
+  entityName: string;
+  reason?: string;
+  requestStatus: DeleteRequestStatus; // named differently from SyncEntity.status
+  requestedBy: string; // Manager user ID
+  reviewedBy?: string; // Admin user ID
+}
+
+export interface AppNotification extends SyncEntity {
+  userId: string; // Recipient
+  type: string; // "new_user" | "payment" | "delete_request" | "delete_approved" | "delete_rejected"
+  title: string;
+  body: string;
+  isRead: boolean;
+  data?: Record<string, any>;
+}
+
 // Local authentication storage for offline login
 export interface LocalAuthUser {
   id: string; // MongoDB ObjectId from server
@@ -172,6 +201,8 @@ export class AppDatabase extends Dexie {
   receipts!: Table<Receipt>;
   schedules!: Table<Schedule>;
   pushSubscriptions!: Table<PushSubscription>;
+  deleteRequests!: Table<DeleteRequest>;
+  appNotifications!: Table<AppNotification>;
   localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
   syncMeta!: Table<SyncMeta>; // For tracking data epochs
 
@@ -242,6 +273,34 @@ export class AppDatabase extends Dexie {
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
       pushSubscriptions:
         "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+      localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
+      syncMeta: "id, userId, dataEpoch",
+    });
+
+    // Version 4: Add deleteRequests and appNotifications tables
+    this.version(4).stores({
+      centers: "id, status, adminId, [status+updatedAt], updatedAt",
+      users: "id, &email, status, role, [status+updatedAt], updatedAt",
+      teachers:
+        "id, status, managerId, email, [status+updatedAt], [managerId+status], updatedAt",
+      students:
+        "id, status, managerId, email, grade, [status+updatedAt], [managerId+status], [managerId+grade], updatedAt",
+      subjects:
+        "id, status, centerId, grade, [centerId+grade], [centerId+status], [status+updatedAt], updatedAt",
+      teacherSubjects:
+        "id, status, teacherId, subjectId, [teacherId+subjectId], [teacherId+status], [subjectId+status], [status+updatedAt], updatedAt",
+      studentSubjects:
+        "id, status, studentId, subjectId, teacherId, [studentId+subjectId], [studentId+teacherId], [subjectId+teacherId], [status+updatedAt], updatedAt",
+      receipts:
+        "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
+      schedules:
+        "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
+      pushSubscriptions:
+        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+      deleteRequests:
+        "id, status, entityType, entityId, requestStatus, requestedBy, [requestedBy+requestStatus], [status+updatedAt], updatedAt",
+      appNotifications:
+        "id, status, userId, type, isRead, [userId+isRead], [userId+type], [status+updatedAt], updatedAt, createdAt",
       localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",
     });

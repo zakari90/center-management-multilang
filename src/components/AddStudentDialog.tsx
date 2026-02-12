@@ -22,7 +22,6 @@ import {
   subjectActions,
   teacherActions,
   teacherSubjectActions,
-  userActions,
 } from "@/lib/dexie/dexieActions";
 import ServerActionStudents from "@/lib/dexie/studentServerAction";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
@@ -34,7 +33,6 @@ import {
   ChevronRight,
   Loader2,
   User,
-  Users,
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -86,15 +84,11 @@ interface AddStudentDialogProps {
 const StepIndicator = ({
   currentStep,
   totalSteps,
-  adminMode,
 }: {
   currentStep: number;
   totalSteps: number;
-  adminMode?: boolean;
 }) => {
-  const icons = adminMode
-    ? [Users, User, BookOpen, CheckCircle]
-    : [User, BookOpen, CheckCircle];
+  const icons = [User, BookOpen, CheckCircle];
 
   return (
     <div className="flex items-center justify-center gap-2 py-3 md:hidden">
@@ -143,12 +137,9 @@ export default function AddStudentDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [managers, setManagers] = useState<{ id: string; name: string }[]>([]);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = adminMode ? 4 : 3;
-
-  const [selectedManagerId, setSelectedManagerId] = useState<string>("");
+  const totalSteps = 3;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -185,29 +176,10 @@ export default function AddStudentDialog({
       setSelectedSubject(null);
       setSelectedTeacher("");
       setEnrolledSubjects([]);
-      setSelectedManagerId("");
       setError("");
       setCurrentStep(1);
     }
   }, [open]);
-
-  // Fetch managers if in admin mode
-  useEffect(() => {
-    if (open && adminMode) {
-      const fetchManagers = async () => {
-        try {
-          const allUsers = await userActions.getAll();
-          const activeManagers = allUsers.filter(
-            (u) => u.status !== "0" && u.role === "MANAGER",
-          );
-          setManagers(activeManagers.map((m) => ({ id: m.id, name: m.name })));
-        } catch (err) {
-          console.error("Failed to fetch managers:", err);
-        }
-      };
-      fetchManagers();
-    }
-  }, [open, adminMode]);
 
   // Fetch subjects when dialog opens
   useEffect(() => {
@@ -333,11 +305,7 @@ export default function AddStudentDialog({
   };
 
   const nextStep = () => {
-    if (adminMode && currentStep === 1 && !selectedManagerId) {
-      setError(t("errorsselectManager") || "Please select a manager");
-      return;
-    }
-    const realStep = adminMode ? currentStep - 1 : currentStep;
+    const realStep = currentStep;
     if (realStep === 1 && !formData.name.trim()) {
       setError(t("errorsrequiredName") || "Name is required");
       return;
@@ -417,7 +385,7 @@ export default function AddStudentDialog({
         parentPhone: formData.parentPhone || undefined,
         parentEmail: formData.parentEmail || undefined,
         grade: formData.grade || enrolledSubjects[0]?.grade || undefined,
-        managerId: adminMode ? selectedManagerId : user.id,
+        managerId: user.id,
         status: "w" as const,
         createdAt: now,
         updatedAt: now,
@@ -431,7 +399,7 @@ export default function AddStudentDialog({
         studentId: studentId,
         subjectId: es.subjectId,
         teacherId: es.teacherId,
-        managerId: adminMode ? selectedManagerId : user.id,
+        managerId: user.id,
         enrolledAt: now,
         status: "w" as const,
         createdAt: now,
@@ -474,37 +442,6 @@ export default function AddStudentDialog({
   const totalPrice = enrolledSubjects.reduce(
     (total, es) => total + es.price,
     0,
-  );
-
-  // Step 0: Manager Selection (Admin only)
-  const renderStep0 = () => (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
-        {t("selectManagertitle") || "Select Manager"}
-      </h3>
-      <div className="space-y-2 max-h-[200px] overflow-y-auto">
-        {managers.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No managers available.
-          </p>
-        ) : (
-          managers.map((manager) => (
-            <Button
-              key={manager.id}
-              type="button"
-              variant={selectedManagerId === manager.id ? "default" : "outline"}
-              className="w-full justify-start text-left h-auto py-2"
-              onClick={() => setSelectedManagerId(manager.id)}
-            >
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>{manager.name}</span>
-              </div>
-            </Button>
-          ))
-        )}
-      </div>
-    </div>
   );
 
   // Step 1: Student Info
@@ -787,11 +724,7 @@ export default function AddStudentDialog({
 
           {/* Mobile Step Indicator */}
           <div className="mt-2">
-            <StepIndicator
-              currentStep={currentStep}
-              totalSteps={totalSteps}
-              adminMode={adminMode}
-            />
+            <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
           </div>
         </div>
 
@@ -808,34 +741,13 @@ export default function AddStudentDialog({
             className="space-y-4 pb-4"
           >
             <div className="space-y-4">
-              {adminMode && (
-                <div className={currentStep !== 1 ? "hidden" : "block"}>
-                  {renderStep0()}
-                </div>
-              )}
-              <div
-                className={
-                  currentStep !== (adminMode ? 2 : 1) ? "hidden" : "block"
-                }
-              >
+              <div className={currentStep !== 1 ? "hidden" : "block"}>
                 {renderStep1()}
               </div>
-              <div
-                className={
-                  currentStep !== (adminMode ? 3 : 2) ? "hidden" : "block"
-                }
-              >
+              <div className={currentStep !== 2 ? "hidden" : "block"}>
                 {renderStep2()}
               </div>
-              <div
-                className={
-                  currentStep === totalSteps
-                    ? "block"
-                    : enrolledSubjects.length > 0
-                      ? "hidden"
-                      : "hidden"
-                }
-              >
+              <div className={currentStep === totalSteps ? "block" : "hidden"}>
                 {renderStep3()}
               </div>
             </div>

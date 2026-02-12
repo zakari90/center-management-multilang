@@ -18,6 +18,12 @@ enum ReceiptType {
   TEACHER_PAYMENT
 }
 
+enum DeleteRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Center {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   name          String
@@ -66,6 +72,12 @@ model User {
   name                String
   role                Role
   dataEpoch           String             @default("1")  // Incremented on data reset by admin
+
+  // Admin notification preferences
+  notifyNewUser       Boolean            @default(true)
+  notifyPayments      Boolean            @default(true)
+  notifyDeleteRequests Boolean           @default(true)
+
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
@@ -203,4 +215,28 @@ model PushSubscription {
   userId     String?  @db.ObjectId
   createdAt  DateTime @default(now())
   role       Role?
+}
+
+model DeleteRequest {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  entityType  String              // "teacher" | "student"
+  entityId    String              @db.ObjectId
+  entityName  String              // Snapshot of name for display
+  reason      String?
+  status      DeleteRequestStatus @default(PENDING)
+  requestedBy String              @db.ObjectId // Manager user ID
+  reviewedBy  String?             @db.ObjectId // Admin user ID
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model AppNotification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId  // Recipient
+  type      String   // "new_user" | "payment" | "delete_request" | "delete_approved" | "delete_rejected"
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  data      Json?    // Extra metadata (entity IDs, amounts, etc.)
+  createdAt DateTime @default(now())
 }
