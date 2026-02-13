@@ -17,7 +17,6 @@ export default function SchedulePage() {
       {/* <PendingSchedulesDialog /> */}
       <TeacherScheduleView refreshKey={refreshKey} />
       <TimetableManagement
-        readOnly={true}
         refreshKey={refreshKey}
         onScheduleChangeAction={handleScheduleChange}
       />
