@@ -125,9 +125,42 @@ const parseWeeklySchedule = (schedule: any): any[] => {
   return [];
 };
 
+const normalizeDayKey = (day: string): string => {
+  if (!day) return "";
+  const d = day.toLowerCase().trim();
+  // English
+  if (d === "monday" || d === "mon") return "monday";
+  if (d === "tuesday" || d === "tue") return "tuesday";
+  if (d === "wednesday" || d === "wed") return "wednesday";
+  if (d === "thursday" || d === "thu") return "thursday";
+  if (d === "friday" || d === "fri") return "friday";
+  if (d === "saturday" || d === "sat") return "saturday";
+  if (d === "sunday" || d === "sun") return "sunday";
+
+  // French
+  if (d === "lundi") return "monday";
+  if (d === "mardi") return "tuesday";
+  if (d === "mercredi") return "wednesday";
+  if (d === "jeudi") return "thursday";
+  if (d === "vendredi") return "friday";
+  if (d === "samedi") return "saturday";
+  if (d === "dimanche") return "sunday";
+
+  // Arabic (with and without hamza)
+  if (d === "الاثنين" || d === "الإثنين") return "monday";
+  if (d === "الثلاثاء") return "tuesday";
+  if (d === "الأربعاء" || d === "الاربعاء") return "wednesday";
+  if (d === "الخميس") return "thursday";
+  if (d === "الجمعة") return "friday";
+  if (d === "السبت") return "saturday";
+  if (d === "الأحد" || d === "الاحد") return "sunday";
+
+  return d; // Return as is if already a key or unknown
+};
+
 const isTeacherAvailable = (
   teacher: any,
-  day: string,
+  dayKey: string,
   startTime: string,
   endTime: string,
 ): boolean => {
@@ -136,7 +169,9 @@ const isTeacherAvailable = (
 
   return availability.some((slot) => {
     return (
-      slot.day === day && startTime >= slot.startTime && endTime <= slot.endTime
+      normalizeDayKey(slot.day) === normalizeDayKey(dayKey) &&
+      startTime >= slot.startTime &&
+      endTime <= slot.endTime
     );
   });
 };
@@ -355,7 +390,7 @@ export default function TimetableManagement({
       // ✅ Transform schedules to match ScheduleSlot interface
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map((s) => ({
         id: s.id,
-        day: s.day,
+        day: normalizeDayKey(s.day), // Normalize existing data
         startTime: s.startTime,
         endTime: s.endTime,
         teacherId: s.teacherId,
@@ -419,12 +454,12 @@ export default function TimetableManagement({
     }
   }, [authLoading, fetchData, refreshKey]);
 
-  const handleSlotClick = (day: string, startTime: string) => {
+  const handleSlotClick = (dayKey: string, startTime: string) => {
     if (readOnly) return;
     const endTimeIndex = TIME_SLOTS.indexOf(startTime) + 1;
     const endTime = TIME_SLOTS[endTimeIndex] || "18:00";
 
-    setSelectedSlot({ day, startTime, endTime });
+    setSelectedSlot({ day: dayKey, startTime, endTime });
 
     // Pre-fill based on current view filter
     setNewEntry({
@@ -466,19 +501,19 @@ export default function TimetableManagement({
       const allSchedules = await scheduleActions.getAll();
       const activeSchedules = allSchedules.filter((s) => s.status !== "0");
 
-      // Check teacher conflict
+      // Check teacher conflict (same teacher, same day, same time)
       const teacherConflict = activeSchedules.find(
         (s) =>
           s.teacherId === newEntry.teacherId &&
-          s.day === selectedSlot.day &&
+          normalizeDayKey(s.day) === normalizeDayKey(selectedSlot.day) &&
           s.startTime === selectedSlot.startTime,
       );
 
-      // Check room conflict
+      // Check room conflict (same room, same day, same time)
       const roomConflict = activeSchedules.find(
         (s) =>
           s.roomId === newEntry.roomId &&
-          s.day === selectedSlot.day &&
+          normalizeDayKey(s.day) === normalizeDayKey(selectedSlot.day) &&
           s.startTime === selectedSlot.startTime &&
           (centerId ? s.centerId === centerId : true),
       );
@@ -521,7 +556,7 @@ export default function TimetableManagement({
       const scheduleId = generateObjectId();
       const newSchedule = {
         id: scheduleId,
-        day: selectedSlot.day,
+        day: normalizeDayKey(selectedSlot.day),
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
         teacherId: newEntry.teacherId,
@@ -616,7 +651,7 @@ export default function TimetableManagement({
         const rowData = [timeLabel];
 
         daysOfWeek.forEach((day) => {
-          const slots = getSlotsByDayAndTime(day.label, time);
+          const slots = getSlotsByDayAndTime(day.key, time); // Match by key
           if (slots.length > 0) {
             const cellText = slots
               .map((slot) => {
@@ -683,9 +718,11 @@ export default function TimetableManagement({
     return true;
   });
 
-  const getSlotsByDayAndTime = (day: string, time: string) => {
+  const getSlotsByDayAndTime = (dayKey: string, time: string) => {
     return filteredSchedule.filter(
-      (s) => s.day === day && s.startTime === time,
+      (s) =>
+        normalizeDayKey(s.day) === normalizeDayKey(dayKey) &&
+        s.startTime === time,
     );
   };
 
@@ -848,8 +885,8 @@ export default function TimetableManagement({
 
                     {/* Day  */}
                     {daysOfWeek.map((day) => {
-                      const slots = getSlotsByDayAndTime(day.label, time);
-                      const hasConflict = slots.length > 1;
+                      const slots = getSlotsByDayAndTime(day.key, time);
+                      const hasConflict = false; // We'll handle visual conflict markers differently if needed, but per-slot multiple entries are valid now
 
                       // Check availability for teacher view
                       const currentTeacher =
@@ -865,7 +902,7 @@ export default function TimetableManagement({
                         currentTeacher &&
                         isTeacherAvailable(
                           currentTeacher,
-                          day.label,
+                          day.key,
                           time,
                           slotEndTime,
                         );
@@ -874,7 +911,7 @@ export default function TimetableManagement({
                         <div
                           key={`${day.key}-${time}`}
                           onClick={() =>
-                            !readOnly && handleSlotClick(day.label, time)
+                            !readOnly && handleSlotClick(day.key, time)
                           }
                           className={cn(
                             "min-h-[80px] p-1.5 border rounded-md transition-all flex flex-col relative group/cell",
@@ -980,8 +1017,9 @@ export default function TimetableManagement({
             <DialogDescription>
               {selectedSlot && (
                 <>
-                  {selectedSlot.day}, {selectedSlot.startTime} -{" "}
-                  {selectedSlot.endTime}
+                  {daysOfWeek.find((d) => d.key === selectedSlot.day)?.label ||
+                    selectedSlot.day}
+                  , {selectedSlot.startTime} - {selectedSlot.endTime}
                 </>
               )}
             </DialogDescription>
@@ -1114,8 +1152,11 @@ export default function TimetableManagement({
             <DialogDescription>
               {selectedScheduleDetails && (
                 <>
-                  {selectedScheduleDetails.day},{" "}
-                  {selectedScheduleDetails.startTime} -{" "}
+                  {daysOfWeek.find(
+                    (d) =>
+                      d.key === normalizeDayKey(selectedScheduleDetails.day),
+                  )?.label || selectedScheduleDetails.day}
+                  , {selectedScheduleDetails.startTime} -{" "}
                   {selectedScheduleDetails.endTime}
                 </>
               )}
@@ -1184,7 +1225,12 @@ export default function TimetableManagement({
                   {t("day") || "Day"}
                 </Label>
                 <div className="p-3 bg-muted rounded-md">
-                  <span>{selectedScheduleDetails.day}</span>
+                  <span>
+                    {daysOfWeek.find(
+                      (d) =>
+                        d.key === normalizeDayKey(selectedScheduleDetails.day),
+                    )?.label || selectedScheduleDetails.day}
+                  </span>
                 </div>
               </div>
             </div>

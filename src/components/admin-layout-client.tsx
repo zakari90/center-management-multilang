@@ -206,8 +206,8 @@ export default function AdminLayoutClient({
                 )}
               </Button>
               <LanguageSwitcher />
-              <NotificationBell />
             </div>
+            <NotificationBell />
           </header>
           <main className="app-content flex-1 overflow-auto">{children}</main>
         </SidebarInset>

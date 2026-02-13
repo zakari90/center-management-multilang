@@ -94,14 +94,47 @@ interface TeacherWithSchedule extends Teacher {
 }
 
 const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
 ];
+
+const normalizeDayKey = (day: string): string => {
+  if (!day) return "";
+  const d = day.toLowerCase().trim();
+  // English
+  if (d === "monday" || d === "mon") return "monday";
+  if (d === "tuesday" || d === "tue") return "tuesday";
+  if (d === "wednesday" || d === "wed") return "wednesday";
+  if (d === "thursday" || d === "thu") return "thursday";
+  if (d === "friday" || d === "fri") return "friday";
+  if (d === "saturday" || d === "sat") return "saturday";
+  if (d === "sunday" || d === "sun") return "sunday";
+
+  // French
+  if (d === "lundi") return "monday";
+  if (d === "mardi") return "tuesday";
+  if (d === "mercredi") return "wednesday";
+  if (d === "jeudi") return "thursday";
+  if (d === "vendredi") return "friday";
+  if (d === "samedi") return "saturday";
+  if (d === "dimanche") return "sunday";
+
+  // Arabic (with and without hamza)
+  if (d === "الاثنين" || d === "الإثنين") return "monday";
+  if (d === "الثلاثاء") return "tuesday";
+  if (d === "الأربعاء" || d === "الاربعاء") return "wednesday";
+  if (d === "الخميس") return "thursday";
+  if (d === "الجمعة") return "friday";
+  if (d === "السبت") return "saturday";
+  if (d === "الأحد" || d === "الاحد") return "sunday";
+
+  return d;
+};
 
 // ==================== HELPER FUNCTIONS ====================
 
@@ -169,7 +202,9 @@ const isWithinAvailability = (
 ): boolean => {
   // Defensive check for missing schedule times
   if (!schedule?.startTime || !schedule?.endTime) return false;
-  const availableSlot = availability.find((slot) => slot.day === schedule.day);
+  const availableSlot = availability.find(
+    (slot) => normalizeDayKey(slot.day) === normalizeDayKey(schedule.day),
+  );
   if (!availableSlot || !availableSlot.startTime || !availableSlot.endTime)
     return false;
 
@@ -228,7 +263,7 @@ const exportTeacherSchedule = (
     text += `${"-".repeat(50)}\n`;
     teacher.conflicts.forEach((conflict) => {
       const availability = teacher.weeklySchedule.find(
-        (s) => s.day === conflict.day,
+        (s) => normalizeDayKey(s.day) === normalizeDayKey(conflict.day),
       );
       text += `  ⚠️  ${conflict.day} ${conflict.startTime}-${conflict.endTime}: ${conflict.subject.name} (${conflict.subject.grade})\n`;
       if (availability) {
@@ -386,7 +421,9 @@ const exportTeacherScheduleToExcel = async (
   };
 
   const sortedSchedules = [...teacher.schedules].sort((a, b) => {
-    const dayCompare = DAYS.indexOf(a.day) - DAYS.indexOf(b.day);
+    const dayCompare =
+      DAYS.indexOf(normalizeDayKey(a.day)) -
+      DAYS.indexOf(normalizeDayKey(b.day));
     if (dayCompare !== 0) return dayCompare;
     return a.startTime.localeCompare(b.startTime);
   });
@@ -474,7 +511,7 @@ const exportTeacherScheduleToExcel = async (
 
     const conflictsData = teacher.conflicts.map((conflict) => {
       const availability = teacher.weeklySchedule.find(
-        (s) => s.day === conflict.day,
+        (s) => normalizeDayKey(s.day) === normalizeDayKey(conflict.day),
       );
       const issue = availability
         ? `${t("outsideAvailableHours")} (${availability.startTime}-${availability.endTime})`
@@ -552,19 +589,24 @@ const exportTeacherScheduleToExcel = async (
   timeSlots.forEach((time) => {
     const row: Record<string, string> = { time };
 
-    DAYS.forEach((day) => {
+    DAYS.forEach((dayKey) => {
       const schedule = teacher.schedules.find(
-        (s) => s.day === day && s.startTime <= time && s.endTime > time,
+        (s) =>
+          normalizeDayKey(s.day) === dayKey &&
+          s.startTime <= time &&
+          s.endTime > time,
       );
 
       if (schedule) {
-        row[day] = `${schedule.subject.name} (${schedule.roomId})`;
+        row[dayKey] = `${schedule.subject.name} (${schedule.roomId})`;
       } else {
         const isAvailable = teacher.weeklySchedule.some(
           (slot) =>
-            slot.day === day && slot.startTime <= time && slot.endTime > time,
+            normalizeDayKey(slot.day) === dayKey &&
+            slot.startTime <= time &&
+            slot.endTime > time,
         );
-        row[day] = isAvailable ? t("available") : "-";
+        row[dayKey] = isAvailable ? t("available") : "-";
       }
     });
 
@@ -574,8 +616,8 @@ const exportTeacherScheduleToExcel = async (
   // Color code weekly overview
   weeklySheet.eachRow((row, rowNumber) => {
     if (rowNumber > 1) {
-      DAYS.forEach((day) => {
-        const cell = row.getCell(day);
+      DAYS.forEach((dayKey) => {
+        const cell = row.getCell(dayKey);
         if (cell.value === t("available")) {
           cell.fill = {
             type: "pattern" as const,
@@ -607,10 +649,11 @@ export default function TeacherScheduleView({
 }: {
   centerId?: string;
   refreshKey?: number;
-  readOnly?: boolean;
+  readOnly?: boolean; // Translations
 }) {
   const t = useTranslations("TeacherScheduleView");
-  const { user } = useAuth();
+  const tCommon = useTranslations("Common");
+  const { user, isLoading: authLoading } = useAuth();
 
   const [teachers, setTeachers] = useState<TeacherWithSchedule[]>([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
@@ -744,7 +787,7 @@ export default function TeacherScheduleView({
 
         return {
           id: schedule.id,
-          day: schedule.day,
+          day: normalizeDayKey(schedule.day),
           startTime: schedule.startTime,
           endTime: schedule.endTime,
           roomId: schedule.roomId,
@@ -1019,9 +1062,9 @@ export default function TeacherScheduleView({
                   toggleDismissConflicts(teacher.id, dismissed)
                 }
               />
-              <AvailabilityCard teacher={teacher} />
+              <AvailabilityCard teacher={teacher} tCommon={tCommon} />
 
-              <TableScheduleView teacher={teacher} />
+              <TableScheduleView teacher={teacher} tCommon={tCommon} />
             </TabsContent>
           ))}
         </Tabs>
@@ -1197,7 +1240,13 @@ function TeacherInfoCard({
 
 // ==================== AVAILABILITY CARD ====================
 
-function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
+function AvailabilityCard({
+  teacher,
+  tCommon,
+}: {
+  teacher: TeacherWithSchedule;
+  tCommon: ReturnType<typeof useTranslations>;
+}) {
   const t = useTranslations("TeacherScheduleView");
 
   return (
@@ -1218,7 +1267,7 @@ function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
                 className="p-3 bg-primary/10 border border-primary/20 rounded-lg"
               >
                 <div className="font-semibold text-sm text-primary">
-                  {slot.day}
+                  {tCommon(`daysOfWeek.${slot.day}`)}
                 </div>
                 <div className="text-sm text-primary/80 mt-1 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -1241,7 +1290,13 @@ function AvailabilityCard({ teacher }: { teacher: TeacherWithSchedule }) {
 
 // ==================== TABLE SCHEDULE VIEW ====================
 
-function TableScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+function TableScheduleView({
+  teacher,
+  tCommon,
+}: {
+  teacher: TeacherWithSchedule;
+  tCommon: ReturnType<typeof useTranslations>;
+}) {
   const t = useTranslations("TeacherScheduleView");
 
   // Sort schedules by day order, then by start time
@@ -1305,7 +1360,7 @@ function TableScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                       )}
                     >
                       <TableCell className="font-medium">
-                        {schedule.day}
+                        {tCommon(`daysOfWeek.${schedule.day}`)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -1348,7 +1403,13 @@ function TableScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 
 // ==================== GRID SCHEDULE VIEW ====================
 
-function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+function GridScheduleView({
+  teacher,
+  tCommon,
+}: {
+  teacher: TeacherWithSchedule;
+  tCommon: ReturnType<typeof useTranslations>;
+}) {
   const t = useTranslations("TeacherScheduleView");
 
   const schedulesByDay = teacher.schedules.reduce(
@@ -1371,11 +1432,11 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {DAYS.map((day) => {
-        const daySchedules = (schedulesByDay[day] || []).sort((a, b) =>
+      {DAYS.map((dayKey) => {
+        const daySchedules = (schedulesByDay[dayKey] || []).sort((a, b) =>
           a.startTime.localeCompare(b.startTime),
         );
-        const dayAvailability = availabilityByDay[day] || [];
+        const dayAvailability = availabilityByDay[dayKey] || [];
 
         const hasContent =
           daySchedules.length > 0 || dayAvailability.length > 0;
@@ -1383,12 +1444,12 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
         if (!hasContent) return null;
 
         return (
-          <Card key={day}>
+          <Card key={dayKey}>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-primary" />
-                  {day}
+                  {tCommon(`daysOfWeek.${dayKey}`)}
                 </div>
                 {daySchedules.length > 0 && (
                   <Badge variant="secondary">{daySchedules.length}</Badge>
@@ -1470,7 +1531,13 @@ function GridScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 
 // ==================== LIST SCHEDULE VIEW ====================
 
-function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
+function ListScheduleView({
+  teacher,
+  tCommon,
+}: {
+  teacher: TeacherWithSchedule;
+  tCommon: ReturnType<typeof useTranslations>;
+}) {
   const t = useTranslations("TeacherScheduleView");
 
   const schedulesByDay = teacher.schedules.reduce(
@@ -1501,7 +1568,7 @@ function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
-                  {day}
+                  {tCommon(`daysOfWeek.${day}`)}
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   {dayAvailability && (
@@ -1598,11 +1665,13 @@ function ListScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 
 function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
   const t = useTranslations("TeacherScheduleView");
+  const tCommon = useTranslations("Common");
 
   const schedulesByDay = teacher.schedules.reduce(
     (acc, schedule) => {
-      if (!acc[schedule.day]) acc[schedule.day] = [];
-      acc[schedule.day].push(schedule);
+      const dayKey = normalizeDayKey(schedule.day);
+      if (!acc[dayKey]) acc[dayKey] = [];
+      acc[dayKey].push(schedule);
       return acc;
     },
     {} as Record<string, Schedule[]>,
@@ -1610,8 +1679,9 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
 
   const availabilityByDay = teacher.weeklySchedule.reduce(
     (acc, slot) => {
-      if (!acc[slot.day]) acc[slot.day] = [];
-      acc[slot.day].push(slot);
+      const dayKey = normalizeDayKey(slot.day);
+      if (!acc[dayKey]) acc[dayKey] = [];
+      acc[dayKey].push(slot);
       return acc;
     },
     {} as Record<string, WeeklyScheduleSlot[]>,
@@ -1636,7 +1706,7 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               <div className="flex items-center justify-between">
                 <div className="font-semibold text-sm flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  {day}
+                  {tCommon(`daysOfWeek.${day}`)}
                 </div>
                 {schedules.length > 0 && (
                   <Badge variant="secondary" className="text-xs">
