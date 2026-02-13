@@ -1,11 +1,6 @@
-"use client"
+"use client";
 
-
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,31 +9,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { useAuth } from "@/context/authContext"
-import { DotSquare, LogOut } from "lucide-react"
-import { useTranslations } from "next-intl"
-import LanguageSwitcher from "./LanguageSwitcher"
-import { ModeToggle } from "./ModeToggle"
+} from "@/components/ui/sidebar";
+import { useAuth } from "@/context/authContext";
+import { DotSquare, LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { ModeToggle } from "./ModeToggle";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
-  const { logout, isLoading } = useAuth()
-  const t = useTranslations("NavUser")
+  const { isMobile } = useSidebar();
+  const { logout, isLoading } = useAuth();
+  const t = useTranslations("NavUser");
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -50,7 +45,9 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">{user.name}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user.name}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -71,7 +68,9 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">{t("userAvatar")}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {t("userAvatar")}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -82,20 +81,20 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup className="flex justify-around">
+            <DropdownMenuGroup className="flex justify-around md:hidden">
               <DropdownMenuItem>
-                <ModeToggle/>
+                <ModeToggle />
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <LanguageSwitcher/>
+                <LanguageSwitcher />
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
+            <DropdownMenuItem
               className="hover:cursor-pointer"
               disabled={isLoading}
               onClick={() => {
-                logout()
+                logout();
               }}
             >
               <LogOut />
@@ -105,5 +104,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

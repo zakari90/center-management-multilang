@@ -41,7 +41,9 @@ export default function MobileBottomNav({
               <span className="app-bottom-nav__icon" aria-hidden="true">
                 {item.icon}
               </span>
-              <span className="app-bottom-nav__label">{item.label}</span>
+              <span className="app-bottom-nav__label sm:sr-only">
+                {item.label}
+              </span>
             </Link>
           );
         })}
