@@ -35,12 +35,11 @@ import {
   BookOpen,
   Calendar,
   CheckCircle,
-  ChevronLeft,
   Loader2,
   User,
   X,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -240,6 +239,9 @@ export default function AddTeacherDialog({
 }: AddTeacherDialogProps) {
   const t = useTranslations("CreateTeacherForm");
   const tTable = useTranslations("TeachersTable");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+  const direction = isRtl ? "rtl" : "ltr";
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -565,7 +567,7 @@ export default function AddTeacherDialog({
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
-          {t("summary") || "Summary"}
+          {t("summary")}
         </h3>
 
         <div className="grid gap-4">
@@ -627,14 +629,12 @@ export default function AddTeacherDialog({
                       className="flex items-center justify-between p-2 bg-background rounded border text-sm"
                     >
                       <div className="flex flex-col">
-                        <span className="font-medium">
-                          {subject?.name || "Unknown"}
-                        </span>
+                        <span className="font-medium">{subject?.name}</span>
                         <span className="text-[10px] text-muted-foreground">
                           {subject?.grade}
                         </span>
                       </div>
-                      <div className="text-right">
+                      <div className="text-end">
                         <span className="font-mono text-primary">
                           {ts.compensationType === "percentage"
                             ? `${ts.percentage}%`
@@ -897,7 +897,10 @@ export default function AddTeacherDialog({
           {tTable("addTeacher")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-0">
+      <DialogContent
+        className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-0"
+        dir={direction}
+      >
         <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
           <DialogHeader>
             <DialogTitle>{t("title")}</DialogTitle>
