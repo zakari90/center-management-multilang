@@ -154,13 +154,13 @@ export default function TimetableManagement({
 }) {
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations("TimetableManagement");
-  const { daysOfWeek, availableClassrooms } = useLocalizedConstants();
+  const { daysOfWeek } = useLocalizedConstants();
   const { user, isLoading: authLoading } = useAuth(); // ✅ Get current user and loading state from AuthContext
 
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
-  const [rooms, setRooms] = useState<string[]>(availableClassrooms);
+  const [rooms, setRooms] = useState<string[]>([]);
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -379,8 +379,6 @@ export default function TimetableManagement({
         );
         if (center?.classrooms?.length) {
           setRooms(center.classrooms);
-        } else {
-          setRooms(availableClassrooms);
         }
       } else {
         // Get all unique classrooms from relevant centers
@@ -396,8 +394,6 @@ export default function TimetableManagement({
 
         if (allManagerClassrooms.length > 0) {
           setRooms(allManagerClassrooms);
-        } else {
-          setRooms(availableClassrooms);
         }
       }
 

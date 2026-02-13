@@ -14,7 +14,7 @@ export default function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
     <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b mb-6 border-border/40">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground bg-linear-to-r from-foreground to-foreground/70 bg-clip-text">
           {title}
         </h1>
         {subtitle && (
