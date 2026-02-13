@@ -178,7 +178,7 @@ export default function ManagerStatsCards() {
     },
     {
       title: t("monthlyRevenuetitle"),
-      icon: "",
+      icon: TrendingUp,
       value: `MAD ${stats.monthlyRevenue.toFixed(2)}`,
       subtitle: (
         <div className="flex items-center gap-1">
