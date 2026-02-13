@@ -1,82 +1,102 @@
 // components/admin/admin-stats-cards.tsx
-'use client'
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // import axios from 'axios' // ✅ Commented out - using local DB instead
+import { TrendingUp, UserCheck, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
 import {
-  DollarSign,
-  TrendingUp,
-  UserCheck,
-  Users
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useState } from 'react'
-import { 
-  userActions, 
-  studentActions, 
-  teacherActions, 
-  receiptActions 
-} from '@/lib/dexie/dexieActions'
-import { Role } from '@/lib/dexie/dbSchema'
+  userActions,
+  studentActions,
+  teacherActions,
+  receiptActions,
+} from "@/lib/dexie/dexieActions";
+import { Role } from "@/lib/dexie/dbSchema";
 
 interface AdminStats {
-  totalCenters: number
-  totalManagers: number
-  totalStudents: number
-  totalTeachers: number
-  totalRevenue: number
-  monthlyRevenue: number
-  revenueGrowth: number
+  totalCenters: number;
+  totalManagers: number;
+  totalStudents: number;
+  totalTeachers: number;
+  totalRevenue: number;
+  monthlyRevenue: number;
+  revenueGrowth: number;
 }
 
 export default function AdminStatsCards() {
-  const t = useTranslations('adminStats')
-  const [stats, setStats] = useState<AdminStats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const t = useTranslations("adminStats");
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStats = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
     try {
       // ✅ Fetch from local DB
-      const [allUsers, allStudents, allTeachers, allReceipts] = await Promise.all([
-        userActions.getAll(),
-        studentActions.getAll(),
-        teacherActions.getAll(),
-        receiptActions.getAll()
-      ])
+      const [allUsers, allStudents, allTeachers, allReceipts] =
+        await Promise.all([
+          userActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+          receiptActions.getAll(),
+        ]);
 
       // ✅ Filter active entities (exclude deleted)
-      const activeUsers = allUsers.filter(u => u.status !== '0')
-      const activeStudents = allStudents.filter(s => s.status !== '0')
-      const activeTeachers = allTeachers.filter(t => t.status !== '0')
-      const activeReceipts = allReceipts.filter(r => r.status !== '0')
+      const activeUsers = allUsers.filter((u) => u.status !== "0");
+      const activeStudents = allStudents.filter((s) => s.status !== "0");
+      const activeTeachers = allTeachers.filter((t) => t.status !== "0");
+      const activeReceipts = allReceipts.filter((r) => r.status !== "0");
 
       // ✅ Calculate stats
-      const totalManagers = activeUsers.filter(u => u.role === Role.MANAGER).length
-      const totalStudents = activeStudents.length
-      const totalTeachers = activeTeachers.length
+      const totalManagers = activeUsers.filter(
+        (u) => u.role === Role.MANAGER,
+      ).length;
+      const totalStudents = activeStudents.length;
+      const totalTeachers = activeTeachers.length;
 
       // ✅ Calculate revenue
-      const totalRevenue = activeReceipts.reduce((sum, r) => sum + r.amount, 0)
-      
+      const totalRevenue = activeReceipts.reduce((sum, r) => sum + r.amount, 0);
+
       // ✅ Calculate monthly revenue (current month)
-      const now = new Date()
-      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
-      const monthlyReceipts = activeReceipts.filter(r => r.date >= currentMonthStart)
-      const monthlyRevenue = monthlyReceipts.reduce((sum, r) => sum + r.amount, 0)
+      const now = new Date();
+      const currentMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1,
+      ).getTime();
+      const monthlyReceipts = activeReceipts.filter(
+        (r) => r.date >= currentMonthStart,
+      );
+      const monthlyRevenue = monthlyReceipts.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
 
       // ✅ Calculate revenue growth (compare with previous month)
-      const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime()
-      const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0).getTime()
-      const previousMonthReceipts = activeReceipts.filter(r => 
-        r.date >= previousMonthStart && r.date <= previousMonthEnd
-      )
-      const previousMonthRevenue = previousMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
-      const revenueGrowth = previousMonthRevenue > 0 
-        ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 
-        : 0
+      const previousMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1,
+      ).getTime();
+      const previousMonthEnd = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        0,
+      ).getTime();
+      const previousMonthReceipts = activeReceipts.filter(
+        (r) => r.date >= previousMonthStart && r.date <= previousMonthEnd,
+      );
+      const previousMonthRevenue = previousMonthReceipts.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
+      const revenueGrowth =
+        previousMonthRevenue > 0
+          ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) *
+            100
+          : 0;
 
       setStats({
         totalCenters: 0, // Centers are managed separately
@@ -85,23 +105,23 @@ export default function AdminStatsCards() {
         totalTeachers,
         totalRevenue,
         monthlyRevenue,
-        revenueGrowth
-      })
+        revenueGrowth,
+      });
 
       // ✅ Commented out API call
       // const { data } = await axios.get('/api/admin/dashboard/stats')
       // setStats(data)
     } catch (err) {
-      console.error('Failed to fetch stats from local DB:', err)
-      setError('Failed to load statistics')
+      console.error("Failed to fetch stats from local DB:", err);
+      setError("Failed to load statistics");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    fetchStats()
-  }, [fetchStats])
+    fetchStats();
+  }, [fetchStats]);
 
   if (isLoading) {
     return (
@@ -117,25 +137,21 @@ export default function AdminStatsCards() {
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-red-600 bg-red-50 rounded-md">
-        {error}
-      </div>
-    )
+    return <div className="p-4 text-red-600 bg-red-50 rounded-md">{error}</div>;
   }
 
-  if (!stats) return null
+  if (!stats) return null;
 
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            {t('totalManagers')}
+            {t("totalManagers")}
           </CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -147,7 +163,7 @@ export default function AdminStatsCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            {t('totalStudents')}
+            {t("totalStudents")}
           </CardTitle>
           <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -159,7 +175,7 @@ export default function AdminStatsCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            {t('totalTeachers')}
+            {t("totalTeachers")}
           </CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
@@ -171,18 +187,19 @@ export default function AdminStatsCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            {t('totalRevenue')}
+            {t("totalRevenue")}
           </CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${stats.totalRevenue.toFixed(2)}</div>
+          <div className="text-2xl font-bold">
+            MAD{stats.totalRevenue.toFixed(2)}
+          </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" />
-            +{stats.revenueGrowth.toFixed(1)}% {t('thisMonth')}
+            <TrendingUp className="h-3 w-3" />+{stats.revenueGrowth.toFixed(1)}%{" "}
+            {t("thisMonth")}
           </p>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
