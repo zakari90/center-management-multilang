@@ -2,7 +2,6 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -33,22 +32,18 @@ import {
   teacherActions,
   userActions,
 } from "@/lib/dexie/dexieActions";
-import { ModalLink } from "@/components/modal-link";
-import ViewReceiptDialog from "@/components/ViewReceiptDialog";
 import {
   Loader2,
-  Plus,
-  Printer,
   Receipt as ReceiptIcon,
   Search,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useCallback } from "react";
-import PageHeader from "./page-header";
+import { useCallback, useEffect, useState } from "react";
 import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
-import AddTeacherDialog from "./AddTeacherDialog";
+import PageHeader from "./page-header";
+import AddTeacherPaymentDialog from "./AddTeacherPaymentDialog";
 
 interface Receipt {
   manager?: {
@@ -211,7 +206,7 @@ export default function ReceiptsTable() {
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex flex-col md:flex-row gap-4">
           <AddStudentPaymentDialog />
-          <AddTeacherDialog />
+          <AddTeacherPaymentDialog />
         </div>
       </div>
 
