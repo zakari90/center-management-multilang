@@ -1,134 +1,191 @@
-// components/ReceiptsSummary.tsx
-'use client'
+"use client";
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
-import { useAuth } from '@/context/authContext'
-import { receiptActions } from '@/lib/dexie/dexieActions'
-import { ReceiptType } from '@/lib/dexie/dbSchema'
-import AddStudentPaymentDialog from '@/components/AddStudentPaymentDialog'
-import AddTeacherPaymentDialog from '@/components/AddTeacherPaymentDialog'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/authContext";
+import { receiptActions } from "@/lib/dexie/dexieActions";
+import { ReceiptType } from "@/lib/dexie/dbSchema";
+import {
+  Banknote,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  DollarSign,
+} from "lucide-react";
 
 interface ReceiptStats {
-  totalReceipts: number
-  totalRevenue: number
-  studentPayments: number
-  teacherPayments: number
-  thisMonthRevenue: number
+  totalReceipts: number;
+  totalRevenue: number;
+  studentPayments: number;
+  teacherPayments: number;
+  thisMonthRevenue: number;
+  netProfit: number;
 }
 
 export default function ReceiptsSummary() {
-  const t = useTranslations('ManagerReceiptsSummary')
-  const [stats, setStats] = useState<ReceiptStats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const { user } = useAuth()
+  const t = useTranslations("ManagerReceiptsSummary");
+  const [stats, setStats] = useState<ReceiptStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
-      fetchStats()
+      fetchStats();
     }
-  }, [user])
+  }, [user]);
 
   const fetchStats = async () => {
     try {
-      if (!user) return
+      if (!user) return;
 
-      // ✅ Fetch from localDB instead of API
-      const receipts = await receiptActions.getAll()
+      const receipts = await receiptActions.getAll();
+      const activeReceipts = receipts.filter((r) => r.status !== "0");
 
-      // Filter by status only (exclude deleted items) - all users see all data
-      const activeReceipts = receipts.filter(r => r.status !== '0')
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-      // Calculate date range for this month
-      const now = new Date()
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      const stats = activeReceipts.reduce(
+        (acc, receipt) => {
+          acc.totalReceipts++;
 
-      // Calculate stats
-      const stats = activeReceipts.reduce((acc, receipt) => {
-        acc.totalReceipts++
-        acc.totalRevenue += receipt.amount
+          // Calculate true revenue and expenses
+          if (receipt.type === ReceiptType.STUDENT_PAYMENT) {
+            acc.studentPayments += receipt.amount;
+            if (new Date(receipt.date) >= firstDayOfMonth) {
+              acc.thisMonthRevenue += receipt.amount;
+            }
+          } else if (receipt.type === ReceiptType.TEACHER_PAYMENT) {
+            acc.teacherPayments += receipt.amount;
+          }
 
-        if (receipt.type === ReceiptType.STUDENT_PAYMENT) {
-          acc.studentPayments += receipt.amount
-        } else if (receipt.type === ReceiptType.TEACHER_PAYMENT) {
-          acc.teacherPayments += receipt.amount
-        }
+          return acc;
+        },
+        {
+          totalReceipts: 0,
+          totalRevenue: 0,
+          studentPayments: 0,
+          teacherPayments: 0,
+          thisMonthRevenue: 0,
+          netProfit: 0,
+        },
+      );
 
-        if (new Date(receipt.date) >= firstDayOfMonth) {
-          acc.thisMonthRevenue += receipt.amount
-        }
+      // Derived stats
+      stats.totalRevenue = stats.studentPayments; // Redefine total revenue as total income
+      stats.netProfit = stats.studentPayments - stats.teacherPayments;
 
-        return acc
-      }, {
-        totalReceipts: 0,
-        totalRevenue: 0,
-        studentPayments: 0,
-        teacherPayments: 0,
-        thisMonthRevenue: 0
-      })
-
-      setStats(stats)
-
-      // ✅ Old API call - commented out
-      // const response = await fetch('/api/receipts/stats')
-      // if (response.ok) {
-      //   const data = await response.json()
-      //   setStats(data)
-      // }
+      setStats(stats);
     } catch (err) {
-      console.error(t('errorFetchStats'), err)
+      console.error(t("errorFetchStats"), err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <Card className="p-6">
         <Skeleton className="h-6 w-1/3 mb-4" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-md" />
+            <Skeleton key={i} className="h-24 w-full rounded-xl" />
           ))}
         </div>
       </Card>
-    )
+    );
   }
 
-  if (!stats) return null
+  if (!stats) return null;
 
   return (
-    <Card className="shadow-sm border border-muted">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-semibold text-foreground">
-          {t('financialOverview')}
+    <Card className="shadow-md border-none overflow-hidden bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-950 dark:to-gray-900/50">
+      <CardHeader className="pb-2 border-b bg-muted/20">
+        <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <Banknote className="h-5 w-5 text-primary" />
+          {t("financialOverview")}
         </CardTitle>
       </CardHeader>
 
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Stat label={t('totalRevenue')} value={stats.totalRevenue} color="text-green-600" />
-          <Stat label={t('thisMonth')} value={stats.thisMonthRevenue} color="text-blue-600" />
-          <Stat label={t('income')} value={stats.studentPayments} color="text-green-600" />
-          <Stat label={t('expenses')} value={stats.teacherPayments} color="text-orange-600" />
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label={t("income")}
+            value={stats.studentPayments}
+            icon={TrendingUp}
+            colorClass="text-emerald-600"
+            bgClass="bg-emerald-100"
+            trend="up"
+          />
+          <StatCard
+            label={t("expenses")}
+            value={stats.teacherPayments}
+            icon={TrendingDown}
+            colorClass="text-rose-600"
+            bgClass="bg-rose-100"
+            trend="down"
+          />
+          <StatCard
+            label="Net Profit"
+            value={stats.netProfit}
+            icon={Wallet}
+            colorClass="text-blue-600"
+            bgClass="bg-blue-100"
+          />
+          <StatCard
+            label={t("thisMonth")}
+            value={stats.thisMonthRevenue}
+            icon={DollarSign}
+            colorClass="text-violet-600"
+            bgClass="bg-violet-100"
+          />
         </div>
       </CardContent>
-
-      <CardFooter className="flex flex-col justify-center items-center md:flex-row gap-1 border-t pt-2">
-        <AddStudentPaymentDialog onPaymentCreated={fetchStats} />
-        <AddTeacherPaymentDialog onPaymentCreated={fetchStats} />
-      </CardFooter>
     </Card>
-  )
+  );
 }
 
-function Stat({ label, value, color }: { label: string; value: number; color: string }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  colorClass,
+  bgClass,
+  trend,
+}: {
+  label: string;
+  value: number;
+  icon: any;
+  colorClass: string;
+  bgClass: string;
+  trend?: "up" | "down";
+}) {
   return (
-    <div>
-      <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${color}`}>MAD {value.toFixed(2)}</p>
+    <div className="relative group overflow-hidden rounded-xl border bg-card p-4 transition-all hover:shadow-md">
+      <div className="flex items-center justify-between space-y-0 pb-2">
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <div
+          className={`p-2 rounded-full ${bgClass} ${bgClass.replace("bg-", "bg-opacity-20 ")}`}
+        >
+          <Icon className={`h-4 w-4 ${colorClass}`} />
+        </div>
+      </div>
+      <div className="flex items-center justify-between pt-2">
+        <div className={`text-2xl font-bold ${colorClass}`}>
+          MAD{" "}
+          {value.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </div>
+      </div>
+      {/* Decorative subtle background icon */}
+      <Icon
+        className={`absolute -right-4 -bottom-4 h-24 w-24 opacity-[0.03] ${colorClass} rotate-12 transition-transform group-hover:scale-110`}
+      />
     </div>
-  )
+  );
 }

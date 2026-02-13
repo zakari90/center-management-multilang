@@ -373,6 +373,7 @@ export interface GenericDataTableModalProps<
   onOpenChange: (open: boolean) => void;
   modalTitle?: string;
   modalDescription?: string;
+  dir?: "ltr" | "rtl" | "auto";
 }
 
 export function GenericDataTableModal<T extends Record<string, any>>({
@@ -380,11 +381,15 @@ export function GenericDataTableModal<T extends Record<string, any>>({
   onOpenChange,
   modalTitle,
   modalDescription,
+  dir,
   ...tableProps
 }: GenericDataTableModalProps<T>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-[95vw] lg:max-w-7xl max-h-[90vh] overflow-y-auto"
+        dir={dir}
+      >
         <DialogHeader>
           {modalTitle && <DialogTitle>{modalTitle}</DialogTitle>}
           {modalDescription && (

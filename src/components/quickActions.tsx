@@ -1,20 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Calendar,
-  GraduationCap,
-  Receipt,
-  ReceiptText,
-  UserPlus,
-} from "lucide-react";
-import { ModalLink } from "@/components/modal-link";
+import { GraduationCap, UserPlus, Wallet, CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import AddStudentDialog from "./AddStudentDialog";
 import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
@@ -26,87 +12,79 @@ export default function QuickActions() {
   const t = useTranslations("QuickActions");
   const { user } = useAuth();
 
-  // const actions = [
-  //   {
-  //     title: t('actions.addStudent.title'),
-  //     description: t('actions.addStudent.description'),
-  //     icon: UserPlus,
-  //     href: '/manager/students/create',
-  //     color: 'text-blue-600 bg-blue-100'
-  //   },
-  //   {
-  //     title: t('actions.addTeacher.title'),
-  //     description: t('actions.addTeacher.description'),
-  //     icon: GraduationCap,
-  //     href: '/manager/teachers/create',
-  //     color: 'text-purple-600 bg-purple-100'
-  //   },
-  //   {
-  //     title: t('actions.newReceipt.title'),
-  //     description: t('actions.newReceipt.description'),
-  //     icon: Receipt,
-  //     href: '/manager/receipts/create',
-  //     color: 'text-orange-600 bg-orange-100'
-  //   },
-  //   {
-  //     title: t('actions.schedule.title'),
-  //     description: t('actions.schedule.description'),
-  //     icon: Calendar,
-  //     href: '/manager/schedule',
-  //     color: 'text-pink-600 bg-pink-100'
-  //   }
-  // ]
+  const ActionCard = ({ icon: Icon, title, colorClass, bgColorClass }: any) => (
+    <div
+      className={`
+      relative group overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm
+      transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer
+      flex flex-col items-center justify-center p-6 gap-3 h-full w-full
+    `}
+    >
+      <div
+        className={`absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity ${bgColorClass}`}
+      />
+      <div
+        className={`p-3 rounded-full ${colorClass} bg-opacity-10 ring-1 ring-inset ring-black/5 ${bgColorClass.replace("bg-", "bg-opacity-10 ")}`}
+      >
+        <Icon className="h-6 w-6" />
+      </div>
+      <span className="font-semibold text-sm text-center">{title}</span>
+    </div>
+  );
 
   return (
-    <Card className="col-span-4">
-      <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div>
-            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-              <div
-                className={`h-12 w-12 rounded-full flex items-center justify-center`}
-              >
-                <UserPlus className="h-6 w-6" />
-              </div>
-              <AddTeacherDialog adminMode={user?.role === "ADMIN"} />
-            </div>
-          </div>
-          <div>
-            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-              <div
-                className={`h-12 w-12 rounded-full flex items-center justify-center`}
-              >
-                <GraduationCap className="h-6 w-6" />
-              </div>
-              <AddStudentDialog adminMode={user?.role === "ADMIN"} />
-            </div>
-          </div>
-          <div>
-            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-              <div
-                className={`h-12 w-12 rounded-full flex items-center justify-center`}
-              >
-                +<ReceiptText className="h-6 w-6" />
-              </div>
-              <AddStudentPaymentDialog />
-            </div>
-          </div>
-          <div>
-            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
-              <div
-                className={`h-12 w-12 rounded-full flex items-center justify-center`}
-              >
-                - <ReceiptText className="h-6 w-6" />
-              </div>
-              <AddTeacherPaymentDialog />
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold tracking-tight">{t("title")}</h2>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <AddStudentDialog
+          adminMode={user?.role === "ADMIN"}
+          trigger={
+            <ActionCard
+              icon={GraduationCap}
+              title={t("actions.addStudent.title")}
+              colorClass="text-blue-600"
+              bgColorClass="bg-blue-600"
+            />
+          }
+        />
+
+        <AddTeacherDialog
+          adminMode={user?.role === "ADMIN"}
+          trigger={
+            <ActionCard
+              icon={UserPlus}
+              title={t("actions.addTeacher.title")}
+              colorClass="text-purple-600"
+              bgColorClass="bg-purple-600"
+            />
+          }
+        />
+
+        <AddStudentPaymentDialog
+          trigger={
+            <ActionCard
+              icon={Wallet}
+              title={t("actions.newReceipt.title")}
+              colorClass="text-green-600"
+              bgColorClass="bg-green-600"
+            />
+          }
+        />
+
+        <AddTeacherPaymentDialog
+          trigger={
+            <ActionCard
+              icon={CreditCard}
+              title={t("actions.teacherPayment.title") || "Pay Teacher"}
+              colorClass="text-orange-600"
+              bgColorClass="bg-orange-600"
+            />
+          }
+        />
+      </div>
+    </section>
   );
 }

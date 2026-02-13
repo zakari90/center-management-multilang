@@ -211,21 +211,35 @@ export default function ManagerStatsCards() {
       {statsData.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <Card key={index} className="w-full">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+          <Card
+            key={index}
+            className="w-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden relative group border-none shadow-md"
+          >
+            <div
+              className={`absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity ${stat.colorClass.replace("text-", "bg-")}`}
+            />
+
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10 relative">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}
               </CardTitle>
-              <Icon className="h-4 w-4 text-muted-foreground" />
+              <div
+                className={`p-2 rounded-full ${stat.colorClass.replace("text-", "bg-").replace("600", "100")} dark:${stat.colorClass.replace("text-", "bg-").replace("600", "900")}/30`}
+              >
+                {/* @ts-ignore */}
+                <Icon className={`h-4 w-4 ${stat.colorClass}`} />
+              </div>
             </CardHeader>
 
-            <CardContent className="px-4 pb-4">
-              <div className={`text-2xl font-bold ${stat.colorClass}`}>
+            <CardContent className="px-6 pb-4 z-10 relative">
+              <div className="text-2xl font-bold tracking-tight">
                 {stat.value}
               </div>
-              {/* <div className="text-xs text-muted-foreground mt-1">
-                {stat.subtitle}
-              </div> */}
+              {stat.subtitle && (
+                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  {stat.subtitle}
+                </div>
+              )}
             </CardContent>
           </Card>
         );

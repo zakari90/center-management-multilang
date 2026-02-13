@@ -38,7 +38,7 @@ import type {
   StudentSubject,
   PushSubscription,
 } from "@/lib/dexie/dbSchema";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import PageHeader from "./page-header";
 
 // Helper to format timestamps into human-friendly dates
@@ -60,6 +60,8 @@ const HIDDEN_TABLES = new Set(["pushSubscriptions"]);
 
 export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
+  const locale = useLocale();
+  const direction = locale === "ar" ? "rtl" : "ltr";
 
   // Table configurations for all entities
   const TABLE_CONFIGS = {
@@ -855,6 +857,7 @@ export function AllTablesViewer() {
             table: TABLE_CONFIGS[selectedTable].name.toLowerCase(),
           })}
           pageSize={15}
+          dir={direction}
           translations={{
             previous: t("pagination.previous"),
             next: t("pagination.next"),

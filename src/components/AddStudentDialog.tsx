@@ -68,6 +68,7 @@ interface EnrolledSubject {
 interface AddStudentDialogProps {
   onStudentAdded?: () => void;
   adminMode?: boolean;
+  trigger?: React.ReactNode;
 }
 
 // ==================== SUB-COMPONENTS ====================
@@ -121,6 +122,7 @@ const StepIndicator = ({
 export default function AddStudentDialog({
   onStudentAdded,
   adminMode = false,
+  trigger,
 }: AddStudentDialogProps) {
   const t = useTranslations("CreateStudentForm");
   const tTable = useTranslations("StudentsTable");
@@ -700,10 +702,14 @@ export default function AddStudentDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          {/* <Plus className="h-4 w-4 mr-2" /> */}
-          {tTable("addStudent")}
-        </Button>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button>
+            {/* <Plus className="h-4 w-4 mr-2" /> */}
+            {tTable("addStudent")}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-0">
         <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">

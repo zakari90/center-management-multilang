@@ -68,6 +68,7 @@ interface TeacherSubject {
 interface AddTeacherDialogProps {
   onTeacherAdded?: () => void;
   adminMode?: boolean;
+  trigger?: React.ReactNode;
 }
 
 // ==================== SUB-COMPONENTS ====================
@@ -236,6 +237,7 @@ const SubjectCompensationCard = ({
 export default function AddTeacherDialog({
   onTeacherAdded,
   adminMode = false,
+  trigger,
 }: AddTeacherDialogProps) {
   const t = useTranslations("CreateTeacherForm");
   const tTable = useTranslations("TeachersTable");
@@ -892,10 +894,14 @@ export default function AddTeacherDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          {/* <Plus className="h-4 w-4 mr-2" /> */}
-          {tTable("addTeacher")}
-        </Button>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button>
+            {/* <Plus className="h-4 w-4 mr-2" /> */}
+            {tTable("addTeacher")}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent
         className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-0"
