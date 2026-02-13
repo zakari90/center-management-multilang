@@ -42,7 +42,6 @@ import { format } from "date-fns";
 import {
   Calendar,
   ChevronDown,
-  DollarSign,
   Download,
   Eye,
   Loader2,
@@ -361,7 +360,7 @@ export default function StudentReceiptTable() {
             <CardTitle className="text-sm font-medium">
               {t("totalAmount")}
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
+            MAD
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">

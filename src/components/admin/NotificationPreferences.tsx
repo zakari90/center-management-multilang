@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Bell, Loader2, UserPlus, DollarSign, Trash2 } from "lucide-react";
+import { Bell, Loader2, UserPlus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -112,7 +112,7 @@ export default function NotificationPreferences() {
       key: "notifyPayments" as const,
       label: "Payments",
       description: "When a payment is recorded",
-      icon: <DollarSign className="h-4 w-4 text-green-500" />,
+      icon: "MAD",
     },
     {
       key: "notifyDeleteRequests" as const,

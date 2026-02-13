@@ -36,7 +36,6 @@ import {
 import { ModalLink } from "@/components/modal-link";
 import ViewReceiptDialog from "@/components/ViewReceiptDialog";
 import {
-  DollarSign,
   Loader2,
   Plus,
   Printer,
@@ -274,7 +273,7 @@ export default function ReceiptsTable() {
             <CardTitle className="text-sm font-medium">
               {t("netAmount")}
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-600" />
+            MAD
           </CardHeader>
           <CardContent>
             <div

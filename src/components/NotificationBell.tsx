@@ -1,15 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  Bell,
-  Check,
-  CheckCheck,
-  Trash2,
-  User,
-  DollarSign,
-  X,
-} from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,7 +26,7 @@ interface AppNotification {
 
 const typeIcons: Record<string, React.ReactNode> = {
   new_user: <User className="h-4 w-4 text-blue-500" />,
-  payment: <DollarSign className="h-4 w-4 text-green-500" />,
+  payment: "MAD",
   delete_request: <Trash2 className="h-4 w-4 text-orange-500" />,
   delete_approved: <Check className="h-4 w-4 text-green-500" />,
   delete_rejected: <X className="h-4 w-4 text-red-500" />,

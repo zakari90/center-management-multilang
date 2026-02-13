@@ -1,99 +1,118 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // import axios from 'axios' // ✅ Commented out - using localDB instead
+import { GraduationCap, Receipt, TrendingUp, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@/context/authContext";
 import {
-  DollarSign,
-  GraduationCap,
-  Receipt,
-  TrendingUp,
-  Users
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import { useEffect, useState, useCallback } from 'react'
-import { useAuth } from '@/context/authContext'
-import { studentActions, teacherActions, subjectActions, receiptActions, studentSubjectActions } from '@/lib/dexie/dexieActions'
-import { ReceiptType } from '@/lib/dexie/dbSchema'
+  studentActions,
+  teacherActions,
+  subjectActions,
+  receiptActions,
+  studentSubjectActions,
+} from "@/lib/dexie/dexieActions";
+import { ReceiptType } from "@/lib/dexie/dbSchema";
 
 interface DashboardStats {
-  totalStudents: number
-  activeEnrollments: number
-  totalTeachers: number
-  totalSubjects: number
-  monthlyRevenue: number
-  revenueGrowth: number
-  totalRevenue: number
-  totalReceipts: number
+  totalStudents: number;
+  activeEnrollments: number;
+  totalTeachers: number;
+  totalSubjects: number;
+  monthlyRevenue: number;
+  revenueGrowth: number;
+  totalRevenue: number;
+  totalReceipts: number;
 }
 
 export default function ManagerStatsCards() {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const t = useTranslations('ManagerStatsCards')
-  const [error, setError] = useState<string | null>(null)
-  const { user } = useAuth()
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations("ManagerStatsCards");
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const fetchStats = useCallback(async () => {
-    setError(null)
-    setIsLoading(true)
+    setError(null);
+    setIsLoading(true);
     try {
       if (!user) {
-        setError('User not authenticated')
-        return
+        setError("User not authenticated");
+        return;
       }
-      
+
       // ✅ Fetch from localDB instead of API
-      const [students, teachers, subjects, receipts, studentSubjects] = await Promise.all([
-        studentActions.getAll(),
-        teacherActions.getAll(),
-        subjectActions.getAll(),
-        receiptActions.getAll(),
-        studentSubjectActions.getAll(),
-      ])
+      const [students, teachers, subjects, receipts, studentSubjects] =
+        await Promise.all([
+          studentActions.getAll(),
+          teacherActions.getAll(),
+          subjectActions.getAll(),
+          receiptActions.getAll(),
+          studentSubjectActions.getAll(),
+        ]);
 
       // Filter by status (exclude deleted items)
       // Managers see ALL students and teachers, but only their own revenue
-      const allActiveStudents = students.filter(s => s.status !== '0')
-      const allActiveTeachers = teachers.filter(t => t.status !== '0')
-      const activeSubjects = subjects.filter(s => s.status !== '0')
-      
+      const allActiveStudents = students.filter((s) => s.status !== "0");
+      const allActiveTeachers = teachers.filter((t) => t.status !== "0");
+      const activeSubjects = subjects.filter((s) => s.status !== "0");
+
       // Revenue is filtered by manager (each manager sees only their own revenue)
-      const managerReceipts = receipts.filter(r => 
-        r.managerId === user.id && r.status !== '0'
-      )
-      
+      const managerReceipts = receipts.filter(
+        (r) => r.managerId === user.id && r.status !== "0",
+      );
+
       // Enrollments for all active students
-      const activeEnrollments = studentSubjects.filter(ss => 
-        ss.status !== '0' && allActiveStudents.some(s => s.id === ss.studentId)
-      )
+      const activeEnrollments = studentSubjects.filter(
+        (ss) =>
+          ss.status !== "0" &&
+          allActiveStudents.some((s) => s.id === ss.studentId),
+      );
 
       // Calculate date ranges
-      const now = new Date()
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const firstDayOfLastMonth = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1,
+      );
+      const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
       // Filter receipts by date
-      const thisMonthReceipts = managerReceipts.filter(r => {
-        const receiptDate = new Date(r.date)
-        return receiptDate >= firstDayOfMonth && r.type === ReceiptType.STUDENT_PAYMENT
-      })
-      const lastMonthReceipts = managerReceipts.filter(r => {
-        const receiptDate = new Date(r.date)
-        return receiptDate >= firstDayOfLastMonth && 
-               receiptDate <= lastDayOfLastMonth && 
-               r.type === ReceiptType.STUDENT_PAYMENT
-      })
+      const thisMonthReceipts = managerReceipts.filter((r) => {
+        const receiptDate = new Date(r.date);
+        return (
+          receiptDate >= firstDayOfMonth &&
+          r.type === ReceiptType.STUDENT_PAYMENT
+        );
+      });
+      const lastMonthReceipts = managerReceipts.filter((r) => {
+        const receiptDate = new Date(r.date);
+        return (
+          receiptDate >= firstDayOfLastMonth &&
+          receiptDate <= lastDayOfLastMonth &&
+          r.type === ReceiptType.STUDENT_PAYMENT
+        );
+      });
 
       // Calculate revenue
-      const monthlyRevenue = thisMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
-      const lastMonthRevenue = lastMonthReceipts.reduce((sum, r) => sum + r.amount, 0)
-      const revenueGrowth = lastMonthRevenue > 0 
-        ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
-        : 0
+      const monthlyRevenue = thisMonthReceipts.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
+      const lastMonthRevenue = lastMonthReceipts.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
+      const revenueGrowth =
+        lastMonthRevenue > 0
+          ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+          : 0;
       const totalRevenue = managerReceipts
-        .filter(r => r.type === ReceiptType.STUDENT_PAYMENT)
-        .reduce((sum, r) => sum + r.amount, 0)
+        .filter((r) => r.type === ReceiptType.STUDENT_PAYMENT)
+        .reduce((sum, r) => sum + r.amount, 0);
 
       setStats({
         totalStudents: allActiveStudents.length,
@@ -103,25 +122,25 @@ export default function ManagerStatsCards() {
         monthlyRevenue,
         totalReceipts: managerReceipts.length,
         activeEnrollments: activeEnrollments.length,
-        revenueGrowth
-      })
+        revenueGrowth,
+      });
 
       // ✅ Old API call - commented out
       // const { data } = await axios.get('/api/dashboard/stats')
       // setStats(data)
     } catch (err) {
-      console.error('Failed to fetch stats:', err)
-      setError('Failed to load statistics')
+      console.error("Failed to fetch stats:", err);
+      setError("Failed to load statistics");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     if (user) {
-      fetchStats()
+      fetchStats();
     }
-  }, [user, fetchStats])
+  }, [user, fetchStats]);
 
   if (isLoading) {
     return (
@@ -137,66 +156,66 @@ export default function ManagerStatsCards() {
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
-  if (!stats) return null
+  if (!stats) return null;
 
   const statsData = [
     {
-      title: t('studentstitle'),
+      title: t("studentstitle"),
       icon: Users,
       value: stats.totalStudents,
-      subtitle: t('studentsactive', { count: stats.activeEnrollments }),
-      colorClass: 'text-blue-600'
+      subtitle: t("studentsactive", { count: stats.activeEnrollments }),
+      colorClass: "text-blue-600",
     },
     {
-      title: t('teacherstitle'),
+      title: t("teacherstitle"),
       icon: GraduationCap,
       value: stats.totalTeachers,
-      subtitle: t('teacherssubtitle', { count: stats.totalSubjects }),
-      colorClass: 'text-purple-600'
+      subtitle: t("teacherssubtitle", { count: stats.totalSubjects }),
+      colorClass: "text-purple-600",
     },
     {
-      title: t('monthlyRevenuetitle'),
-      icon: DollarSign,
+      title: t("monthlyRevenuetitle"),
+      icon: "",
       value: `MAD ${stats.monthlyRevenue.toFixed(2)}`,
       subtitle: (
         <div className="flex items-center gap-1">
           <TrendingUp className="h-3 w-3 text-green-600" />
-          <span>{t('monthlyRevenuegrowth', { percent: stats.revenueGrowth.toFixed(1) })}</span>
+          <span>
+            {t("monthlyRevenuegrowth", {
+              percent: stats.revenueGrowth.toFixed(1),
+            })}
+          </span>
         </div>
       ),
-      colorClass: 'text-green-600',
-      isRevenue: true
+      colorClass: "text-green-600",
+      isRevenue: true,
     },
     {
-      title: t('totalRevenuetitle'),
+      title: t("totalRevenuetitle"),
       icon: Receipt,
       value: `MAD ${stats.totalRevenue.toFixed(2)}`,
-      subtitle: t('totalRevenuesubtitle', { count: stats.totalReceipts }),
-      colorClass: 'text-orange-600',
-      isRevenue: true
-    }
-  ]
+      subtitle: t("totalRevenuesubtitle", { count: stats.totalReceipts }),
+      colorClass: "text-orange-600",
+      isRevenue: true,
+    },
+  ];
 
-    if (error) {
-    return (
-      <div className="p-4 text-red-600 bg-red-50 rounded-md">
-        {error}
-      </div>
-    )
+  if (error) {
+    return <div className="p-4 text-red-600 bg-red-50 rounded-md">{error}</div>;
   }
   return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statsData.map((stat, index) => {
-        const Icon = stat.icon
+        const Icon = stat.icon;
         return (
-          <Card key={index} className='w-full'>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">                
-                {stat.title}</CardTitle>
+          <Card key={index} className="w-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {stat.title}
+              </CardTitle>
               <Icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
 
@@ -209,9 +228,8 @@ export default function ManagerStatsCards() {
               </div> */}
             </CardContent>
           </Card>
-        )
+        );
       })}
     </div>
-
-  )
+  );
 }
