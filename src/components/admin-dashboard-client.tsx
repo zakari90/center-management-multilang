@@ -11,20 +11,29 @@ import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 // import { FirstLoginImport } from "@/components/FirstLoginImport";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { AutoSyncProvider } from "./AutoSyncProvider";
 import PageHeader from "./page-header";
 
 export default function AdminDashboardClient() {
   const t = useTranslations("Dashboard");
-
+  const format = useFormatter();
+  const dateTime = new Date();
   return (
     <>
       <AutoSyncProvider />
 
       <div className="container mx-auto p-4 sm:p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
-
+        {/* <div className="text-sm font-medium text-muted-foreground hidden sm:flex items-center gap-2 bg-muted/30 px-4 py-2 rounded-full border border-border/50">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          {format.dateTime(dateTime, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            weekday: "long",
+          })}
+        </div> */}
         {/* Key Performance Indicators */}
         <section>
           <AdminStatsCards />
