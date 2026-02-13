@@ -784,7 +784,7 @@ export function AllTablesViewer() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={direction}>
       <div className="flex flex-col md:flex-row items-center justify-between">
         <PageHeader title={t("title")} subtitle={t("description")} />
         <Button

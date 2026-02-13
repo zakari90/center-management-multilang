@@ -998,6 +998,10 @@
       "schedule": {
         "title": "Calendrier",
         "description": "Voir le calendrier"
+      },
+      "teacherPayment": {
+        "title": "Payer l'enseignant",
+        "description": "Enregistrer le paiement de l'enseignant"
       }
     }
   },

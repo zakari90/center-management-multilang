@@ -22,31 +22,44 @@ export default function AdminDashboardClient() {
     <>
       <AutoSyncProvider />
 
-      <PageHeader title={t("title")} subtitle={t("subtitle")} />
+      <div className="container mx-auto p-4 sm:p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <PageHeader title={t("title")} subtitle={t("subtitle")} />
 
-      {/* First Login Import Prompt */}
-      {/* <FirstLoginImport /> */}
+        {/* Key Performance Indicators */}
+        <section>
+          <AdminStatsCards />
+        </section>
 
-      {/* Stats Overview */}
-      <AdminStatsCards />
-      <AdminQuickActions />
-      <AdminRevenueChart />
-      <CentersOverview />
+        {/* Quick Actions */}
+        <section>
+          <AdminQuickActions />
+        </section>
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        <EnrollmentChart />
-        <TopSubjects />
+        {/* Revenue Chart */}
+        <section>
+          <AdminRevenueChart />
+        </section>
+
+        {/* Centers Overview */}
+        <section>
+          <CentersOverview />
+        </section>
+
+        {/* Charts Section */}
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <EnrollmentChart />
+          <TopSubjects />
+        </div>
+
+        {/* Managers & Activity */}
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <ManagersList />
+          <SystemActivityLog />
+        </div>
+
+        {/* Danger Zone */}
+        <DeleteAllDataButton />
       </div>
-
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        <ManagersList />
-        <SystemActivityLog />
-      </div>
-
-      {/* Data Synchronization */}
-      {/* <SyncHandler /> */}
-
-      <DeleteAllDataButton />
     </>
   );
 }

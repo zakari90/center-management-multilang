@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default function AdminPage() {
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+    <div>
       <OfflineNotificationBanner />
       <DeleteRequestsPanel />
       <AdminDashboardClient />
