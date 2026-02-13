@@ -3,7 +3,7 @@
 // Minimal custom Service Worker (no Serwist/Workbox precache)
 // Runtime caching only.
 
-const SW_VERSION = "v1.0.0"; // Increment this to force an update
+const SW_VERSION = "v1.1.0"; // Bumped: network-first with timeout strategy
 const PAGES_CACHE = `pages-${SW_VERSION}`;
 const ASSETS_CACHE = `assets-${SW_VERSION}`;
 const OFFLINE_URL = "/offline.html";
@@ -38,18 +38,32 @@ const PRECACHE_ROUTES = [
   "/fr/manager",
   "/fr/admin",
   "/en/manager",
+  "/en/admin",
   "/ar/manager/teachers",
   "/en/manager/teachers",
+  "/fr/manager/teachers",
   "/ar/manager/students",
   "/en/manager/students",
+  "/fr/manager/students",
   "/ar/manager/receipts",
   "/en/manager/receipts",
+  "/fr/manager/receipts",
+  "/ar/admin/center",
   "/en/admin/center",
+  "/fr/admin/center",
+  "/ar/admin/users",
   "/en/admin/users",
+  "/fr/admin/users",
+  "/ar/admin/receipts",
   "/en/admin/receipts",
+  "/fr/admin/receipts",
+  "/ar/admin/schedule",
   "/en/admin/schedule",
-  // Add more routes as needed
+  "/fr/admin/schedule",
 ];
+
+// Network timeout for navigation requests (ms)
+const NAVIGATION_TIMEOUT_MS = 3000;
 
 sw.addEventListener("install", (event) => {
   console.log("[SW] install", SW_VERSION);
@@ -158,13 +172,32 @@ async function matchAppShell(cache, origin) {
   return undefined;
 }
 
+/**
+ * Race a fetch against a timeout. Returns the response if the network
+ * answers within `ms`, otherwise rejects so the caller can fall back to cache.
+ */
+function fetchWithTimeout(request, ms) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), ms);
+  return fetch(request, { signal: controller.signal }).then(
+    (res) => {
+      clearTimeout(timeoutId);
+      return res;
+    },
+    (err) => {
+      clearTimeout(timeoutId);
+      throw err;
+    },
+  );
+}
+
 sw.addEventListener("fetch", (event) => {
   const request = event.request;
   if (!request || request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  // Cache Next.js static assets.
+  // Cache Next.js static assets (stale-while-revalidate).
   if (
     url.origin === sw.location.origin &&
     url.pathname.startsWith("/_next/static/")
@@ -184,13 +217,6 @@ sw.addEventListener("fetch", (event) => {
           return cached;
         }
 
-        // Fallback: if pages were precached under the plain pathname (e.g. /ar/admin)
-        // return that when offline/refreshing.
-        const plainCached = await cache.match(url.pathname);
-        if (plainCached) {
-          return plainCached;
-        }
-
         try {
           const res = await fetch(request);
           if (res && res.ok) await cache.put(url.pathname, res.clone());
@@ -203,33 +229,21 @@ sw.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navigation requests (HTML): option C
-  if (
-    request.mode === "navigate" ||
-    (request.headers.get("accept") || "").includes("text/html")
-  ) {
+  // ── Navigation requests: network-first with timeout ──────────────
+  // Only intercept real page navigations (not RSC data fetches, prefetches, etc.)
+  if (request.mode === "navigate") {
     event.respondWith(
       (async () => {
         const cache = await caches.open(PAGES_CACHE);
         const locale = getLocaleKey(request);
         const cacheKey = `${url.pathname}?__sw_locale=${locale}`;
 
-        const cached = await cache.match(cacheKey);
-        if (cached) {
-          event.waitUntil(
-            fetch(request)
-              .then((res) => {
-                if (res && res.ok) return cache.put(cacheKey, res.clone());
-              })
-              .catch(() => {}),
-          );
-          return cached;
-        }
-
         try {
-          const res = await fetch(request);
+          // Try network first, with a timeout so slow connections
+          // fall back to the cache instead of hanging forever.
+          const res = await fetchWithTimeout(request, NAVIGATION_TIMEOUT_MS);
           if (res && res.ok) {
-            // Store under both keys to stay compatible with precache + locale-aware runtime caching.
+            // Store under both keys for precache + locale-aware lookup.
             await cache.put(cacheKey, res.clone());
             try {
               await cache.put(url.pathname, res.clone());
@@ -237,6 +251,12 @@ sw.addEventListener("fetch", (event) => {
           }
           return res;
         } catch {
+          // Network failed or timed out — serve from cache.
+          console.log("[SW] network failed, trying cache for:", url.pathname);
+
+          const cached = await cache.match(cacheKey);
+          if (cached) return cached;
+
           const anyLocale = await matchAnyLocalePage(
             cache,
             url.origin,
@@ -244,22 +264,18 @@ sw.addEventListener("fetch", (event) => {
           );
           if (anyLocale) return anyLocale;
 
+          // Try the plain pathname (from precache).
+          const plainCached = await cache.match(url.pathname);
+          if (plainCached) return plainCached;
+
+          // Try the app shell as a last-resort SPA fallback.
           const shell = await matchAppShell(cache, url.origin);
           if (shell) return shell;
 
+          // Nothing cached — show the offline page.
           try {
             const offlineCached = await cache.match(OFFLINE_URL);
             if (offlineCached) return offlineCached;
-          } catch {}
-
-          try {
-            const offlineRes = await fetch(OFFLINE_URL, { cache: "no-store" });
-            if (offlineRes && offlineRes.ok) {
-              try {
-                await cache.put(OFFLINE_URL, offlineRes.clone());
-              } catch {}
-              return offlineRes;
-            }
           } catch {}
 
           return new Response("Offline", {

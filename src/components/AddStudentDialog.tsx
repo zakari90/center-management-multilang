@@ -26,15 +26,7 @@ import {
 import ServerActionStudents from "@/lib/dexie/studentServerAction";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { isOnline } from "@/lib/utils/network";
-import {
-  BookOpen,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  User,
-  X,
-} from "lucide-react";
+import { BookOpen, CheckCircle, Loader2, User, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
@@ -764,14 +756,7 @@ export default function AddStudentDialog({
               disabled={isLoading}
               className="flex-1"
             >
-              {currentStep === 1 ? (
-                t("actionscancel")
-              ) : (
-                <>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  {t("previous") || "Previous"}
-                </>
-              )}
+              {currentStep === 1 ? t("actionscancel") : <>{t("previous")}</>}
             </Button>
 
             {currentStep < totalSteps ? (
@@ -781,8 +766,7 @@ export default function AddStudentDialog({
                 disabled={isLoading}
                 className="flex-1"
               >
-                {t("next") || "Next"}
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {t("next")}
               </Button>
             ) : (
               <Button

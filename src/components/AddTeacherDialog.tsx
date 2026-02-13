@@ -36,7 +36,6 @@ import {
   Calendar,
   CheckCircle,
   ChevronLeft,
-  ChevronRight,
   Loader2,
   User,
   X,
@@ -956,16 +955,8 @@ export default function AddTeacherDialog({
               disabled={isLoading}
               className="flex-1"
             >
-              {currentStep === 1 ? (
-                t("cancel")
-              ) : (
-                <>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  {t("previous") || "Previous"}
-                </>
-              )}
+              {currentStep === 1 ? t("cancel") : <>{t("previous")}</>}
             </Button>
-
             {currentStep < totalSteps ? (
               <Button
                 type="button"
@@ -973,8 +964,7 @@ export default function AddTeacherDialog({
                 disabled={isLoading}
                 className="flex-1"
               >
-                {t("next") || "Next"}
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {t("next")}
               </Button>
             ) : (
               <Button
@@ -1003,20 +993,12 @@ export default function AddTeacherDialog({
               onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
               disabled={isLoading}
             >
-              {currentStep === 1 ? (
-                t("cancel")
-              ) : (
-                <>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  {t("previous") || "Previous"}
-                </>
-              )}
+              {currentStep === 1 ? t("cancel") : <>{t("previous")}</>}
             </Button>
 
             {currentStep < totalSteps ? (
               <Button type="button" onClick={nextStep} disabled={isLoading}>
-                {t("next") || "Next"}
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {t("next")}
               </Button>
             ) : (
               <Button onClick={handleDesktopSubmit} disabled={isLoading}>
