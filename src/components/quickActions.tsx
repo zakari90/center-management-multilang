@@ -78,7 +78,9 @@ export default function QuickActions() {
           trigger={
             <ActionCard
               icon={CreditCard}
-              title={t("actions.teacherPayment.title") || "Pay Teacher"}
+              title={
+                t("actions.teacherPaymentMainAction.title") || "Pay Teacher"
+              }
               colorClass="text-orange-600"
               bgColorClass="bg-orange-600"
             />

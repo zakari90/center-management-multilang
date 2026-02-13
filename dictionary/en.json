@@ -1039,7 +1039,7 @@
         "title": "Schedule",
         "description": "View calendar"
       },
-      "teacherPayment": {
+      "teacherPaymentMainAction": {
         "title": "Pay Teacher",
         "description": "Record teacher payment"
       }

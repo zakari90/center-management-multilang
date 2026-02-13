@@ -990,7 +990,7 @@
         "title": "الجدول الزمني",
         "description": "عرض التقويم"
       },
-      "teacherPayment": {
+      "teacherPaymentMainAction": {
         "title": "دفع المعلم",
         "description": "تسجيل دفع المعلم"
       }

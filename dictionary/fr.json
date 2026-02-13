@@ -999,7 +999,7 @@
         "title": "Calendrier",
         "description": "Voir le calendrier"
       },
-      "teacherPayment": {
+      "teacherPaymentMainAction": {
         "title": "Payer l'enseignant",
         "description": "Enregistrer le paiement de l'enseignant"
       }
