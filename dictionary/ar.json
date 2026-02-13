@@ -90,7 +90,8 @@
       "updateManagerFailed": "فشل تحديث المشرف",
       "loginFailed": "فشل تسجيل الدخول",
       "unexpectedError": "حدث خطأ غير متوقع",
-      "userIdRequired": "معرف المستخدم مطلوب"
+      "userIdRequired": "معرف المستخدم مطلوب",
+      "accountRevoked": "تم إلغاء تنشيط حسابك من قبل المسؤول."
     }
   },
   "center": {

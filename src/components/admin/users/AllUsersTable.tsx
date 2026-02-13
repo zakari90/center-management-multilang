@@ -1,51 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { isOnline } from "@/lib/utils/network";
-import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { Role, SyncStatus, User } from "@/lib/dexie/dbSchema";
 import {
-  userActions,
-  teacherActions,
   studentActions,
+  teacherActions,
+  userActions,
 } from "@/lib/dexie/dexieActions";
-import ServerActionUsers from "@/lib/dexie/userServerAction";
-import ServerActionTeachers from "@/lib/dexie/teacherServerAction";
 import ServerActionStudents from "@/lib/dexie/studentServerAction";
-import { Role, User, SyncStatus } from "@/lib/dexie/dbSchema";
+import ServerActionTeachers from "@/lib/dexie/teacherServerAction";
+import ServerActionUsers from "@/lib/dexie/userServerAction";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { isOnline } from "@/lib/utils/network";
+import { Loader2, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { useAllUsers } from "./useAllUsers";
-import { ManagersTab } from "./ManagersTab";
-import { TeachersTab } from "./TeachersTab";
-import { StudentsTab } from "./StudentsTab";
-import { UserDialogs } from "./UserDialogs";
 import AddStudentDialog from "@/components/AddStudentDialog";
-import { OrphanedRecordsDialog } from "./OrphanedRecordsDialog";
-import {
-  UserData,
-  UserFormData,
-  ItemToDelete,
-  TeacherData,
-  StudentData,
-} from "./types";
-import {
-  findOrphanedTeachers,
-  findOrphanedStudents,
-  getOrphanedRecordsCount,
-} from "@/utils/orphanedRecords";
 import AddTeacherDialog from "@/components/AddTeacherDialog";
 import PageHeader from "@/components/page-header";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ManagersTab } from "./ManagersTab";
+import { StudentsTab } from "./StudentsTab";
+import { TeachersTab } from "./TeachersTab";
+import { ItemToDelete, UserData, UserFormData } from "./types";
+import { useAllUsers } from "./useAllUsers";
+import { UserDialogs } from "./UserDialogs";
 
 export default function AllUsersTable() {
   const t = useTranslations("AllUsersTable");
@@ -69,41 +51,6 @@ export default function AllUsersTable() {
     password: "",
     role: "MANAGER",
   });
-
-  // Orphaned Records State
-  const [orphanedRecordsDialogOpen, setOrphanedRecordsDialogOpen] =
-    useState(false);
-  const [orphanedTeachers, setOrphanedTeachers] = useState<
-    ReturnType<typeof findOrphanedTeachers>
-  >([]);
-  const [orphanedStudents, setOrphanedStudents] = useState<
-    ReturnType<typeof findOrphanedStudents>
-  >([]);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-
-  // Detect orphaned records when data loads
-  const detectOrphanedRecords = async () => {
-    try {
-      const fetchedUsers = await userActions.getAll();
-      const activeUsers = fetchedUsers.filter((u) => u.status !== "0");
-      setAllUsers(activeUsers);
-
-      const orphanedT = findOrphanedTeachers(teachers, activeUsers);
-      const orphanedS = findOrphanedStudents(students, activeUsers);
-
-      setOrphanedTeachers(orphanedT);
-      setOrphanedStudents(orphanedS);
-    } catch (error) {
-      console.error("Failed to detect orphaned records:", error);
-    }
-  };
-
-  // Run detection when teachers or students change
-  React.useEffect(() => {
-    if (!isLoading && (teachers.length > 0 || students.length > 0)) {
-      detectOrphanedRecords();
-    }
-  }, [teachers, students, isLoading]);
 
   // Delete Handler
   const handleDelete = async () => {
@@ -278,46 +225,6 @@ export default function AllUsersTable() {
               </Button>
             )}
           </div>
-
-          {/* Orphaned Records Alert */}
-          {(orphanedTeachers.length > 0 || orphanedStudents.length > 0) && (
-            <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm text-orange-800 dark:text-orange-200">
-                      {t("orphanedRecordsFound")}
-                    </p>
-                    <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                      {orphanedTeachers.length > 0 && (
-                        <span>
-                          {orphanedTeachers.length}{" "}
-                          {t("teachers").toLowerCase()}
-                        </span>
-                      )}
-                      {orphanedTeachers.length > 0 &&
-                        orphanedStudents.length > 0 && <span> + </span>}
-                      {orphanedStudents.length > 0 && (
-                        <span>
-                          {orphanedStudents.length}{" "}
-                          {t("students").toLowerCase()}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setOrphanedRecordsDialogOpen(true)}
-                  className="shrink-0"
-                >
-                  {t("fixNow")}
-                </Button>
-              </div>
-            </div>
-          )}
         </CardHeader>
         <CardContent>
           <Tabs
@@ -399,18 +306,6 @@ export default function AllUsersTable() {
           setItemToDelete={setItemToDelete}
           handleDelete={handleDelete}
           isProcessing={isProcessing}
-        />
-
-        <OrphanedRecordsDialog
-          open={orphanedRecordsDialogOpen}
-          onOpenChange={setOrphanedRecordsDialogOpen}
-          orphanedTeachers={orphanedTeachers}
-          orphanedStudents={orphanedStudents}
-          availableManagers={users}
-          onRecordsFixed={() => {
-            refreshData();
-            detectOrphanedRecords();
-          }}
         />
       </Card>
     </div>

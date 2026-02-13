@@ -172,7 +172,8 @@
       "updateManagerFailed": "Failed to update manager",
       "loginFailed": "Login failed",
       "unexpectedError": "An unexpected error occurred",
-      "userIdRequired": "User ID is required"
+      "userIdRequired": "User ID is required",
+      "accountRevoked": "Your account has been revoked by the administrator."
     }
   },
   "center": {
