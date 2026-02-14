@@ -39,7 +39,6 @@ import {
   importAllFromServerForRole,
 } from "@/lib/dexie/serverActions";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import NotificationBell from "@/components/NotificationBell";
 
 interface ManagerLayoutClientProps {
   children: React.ReactNode;
@@ -200,7 +199,6 @@ export default function ManagerLayoutClient({
                 )}
               </Button>
               <LanguageSwitcher />
-              <NotificationBell />
             </div>
           </header>
           <main className="app-content flex-1 overflow-auto">{children}</main>
