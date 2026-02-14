@@ -45,10 +45,14 @@ export function PushNotificationManager() {
   async function registerServiceWorker() {
     try {
       // We use the shim sw.js which imports custom-sw.js
-      const registration = await navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-        updateViaCache: "none",
-      });
+      let registration = await navigator.serviceWorker.getRegistration();
+
+      if (!registration) {
+        registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+        });
+      }
+
       const sub = await registration.pushManager.getSubscription();
       setSubscription(sub);
     } catch (error) {
