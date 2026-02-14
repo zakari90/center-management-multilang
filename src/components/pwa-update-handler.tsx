@@ -77,7 +77,7 @@ export default function PWAUpdateHandler() {
             setWaitingWorker(registration.waiting);
             setShowUpdate(true);
             if (!hasShownNotification) {
-              toast.info(t("updateAvailable"));
+              // toast.info(t("updateAvailable"));
               hasShownNotification = true;
             }
           }
@@ -96,7 +96,7 @@ export default function PWAUpdateHandler() {
                   setShowUpdate(true);
                   // Only show toast if we haven't shown it yet
                   if (!hasShownNotification) {
-                    toast.info(t("updateAvailable"));
+                    // toast.info(t("updateAvailable"));
                     hasShownNotification = true;
                   }
                 }
