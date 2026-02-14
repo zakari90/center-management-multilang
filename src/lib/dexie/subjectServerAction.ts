@@ -58,14 +58,13 @@ const ServerActionSubjects = {
         }),
       });
 
-      // If POST fails with conflict, try PATCH (update)
+      // If POST fails with conflict, try PATCH (update) on the dynamic route
       if (!response.ok && response.status === 409) {
-        response = await fetch(api_url, {
+        response = await fetch(`${api_url}/${subject.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
-            subjectId: subject.id,
             name: subject.name,
             grade: subject.grade,
             price: subject.price,
@@ -89,11 +88,10 @@ const ServerActionSubjects = {
 
   async DeleteFromServer(id: string) {
     try {
-      const response = await fetch(api_url, {
+      const response = await fetch(`${api_url}/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ subjectId: id }),
       });
       return response;
     } catch (e) {

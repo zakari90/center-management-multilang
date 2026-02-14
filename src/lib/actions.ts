@@ -122,8 +122,8 @@ export async function createManager(state: unknown, formData: FormData) {
     // The client-side code that calls this should save to localDb after success
     // or we handle it on the client side after receiving the response
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/manager/register`,
-      data,
+      `${apiUrl}/admin/users`,
+      { ...data, role: "MANAGER" },
       { headers: { "Content-Type": "application/json" } },
     );
 
@@ -168,9 +168,9 @@ export async function updateManager(state: unknown, formData: FormData) {
       };
     }
 
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 6524}/api`}/manager/${data.userId}`,
-      data,
+    const response = await axios.put(
+      `${apiUrl}/admin/users/${data.userId}`,
+      { ...data, role: "MANAGER" },
       { headers: { "Content-Type": "application/json" } },
     );
 
@@ -282,9 +282,13 @@ export async function loginManager(state: unknown, formData: FormData) {
       };
     }
 
-    const response = await axios.post(`${apiUrl}/manager/login`, data, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await axios.post(
+      `${apiUrl}/auth/login`,
+      { ...data, role: "manager" },
+      {
+        headers: { "Content-Type": "application/json" },
+      },
+    );
 
     const user = response.data.user;
     const passwordHash = response.data.passwordHash; // For offline auth

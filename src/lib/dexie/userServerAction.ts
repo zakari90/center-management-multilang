@@ -15,7 +15,6 @@ function getApiUrl(pathname: string) {
 }
 
 const api_url = getApiUrl("/api/admin/users");
-const managerRegisterUrl = getApiUrl("/api/manager/register");
 
 // ✅ Transform server user data to match local User interface
 function transformServerUser(serverUser: any): User {
@@ -25,10 +24,11 @@ function transformServerUser(serverUser: any): User {
     password: serverUser.password || "",
     name: serverUser.name,
     role: (serverUser.role || "MANAGER").toUpperCase() as Role,
-    status: '1' as const,
-    createdAt: typeof serverUser.createdAt === 'string'
-      ? new Date(serverUser.createdAt).getTime()
-      : serverUser.createdAt || Date.now(),
+    status: "1" as const,
+    createdAt:
+      typeof serverUser.createdAt === "string"
+        ? new Date(serverUser.createdAt).getTime()
+        : serverUser.createdAt || Date.now(),
     updatedAt: Date.now(),
   };
 }
@@ -37,47 +37,24 @@ const ServerActionUsers = {
   // ✅ Save user to server (handles both create and update)
   async SaveToServer(user: User) {
     try {
-      // For managers, use manager register endpoint
-      if (user.role === Role.MANAGER) {
-        const response = await fetch(managerRegisterUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            email: user.email,
-            password: user.password,
-            username: user.name,
-            id: user.id,
-          }),
-        });
-        if (!response.ok) {
-          // If conflict, try update via admin endpoint
-          if (response.status === 409) {
-            const updateResponse = await fetch(`${api_url}/${user.id}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                password: user.password,
-              }),
-            });
-            if (!updateResponse.ok) {
-              const errorData = await updateResponse.json().catch(() => ({}));
-              throw new Error(`HTTP Error: ${updateResponse.status} - ${errorData.error || 'Unknown error'}`);
-            }
-            return updateResponse.json();
-          }
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
-        }
-        return response.json();
-      } else {
-        // For admins, use admin users endpoint
-        const response = await fetch(api_url, {
-          method: "POST",
+      // Try POST first (create) for all roles
+      const response = await fetch(api_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          password: user.password,
+        }),
+      });
+
+      if (!response.ok && response.status === 409) {
+        // If conflict (email or ID exists), try update via path-based endpoint
+        const updateResponse = await fetch(`${api_url}/${user.id}`, {
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
@@ -87,31 +64,23 @@ const ServerActionUsers = {
             password: user.password,
           }),
         });
-        if (!response.ok && response.status === 409) {
-          // Try update
-          const updateResponse = await fetch(`${api_url}/${user.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              password: user.password,
-            }),
-          });
-          if (!updateResponse.ok) {
-            const errorData = await updateResponse.json().catch(() => ({}));
-            throw new Error(`HTTP Error: ${updateResponse.status} - ${errorData.error || 'Unknown error'}`);
-          }
-          return updateResponse.json();
+
+        if (!updateResponse.ok) {
+          const errorData = await updateResponse.json().catch(() => ({}));
+          throw new Error(
+            `HTTP Error: ${updateResponse.status} - ${errorData.error || "Unknown error"}`,
+          );
         }
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`HTTP Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
-        }
-        return response.json();
+        return updateResponse.json();
       }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || "Unknown error"}`,
+        );
+      }
+      return response.json();
     } catch (e) {
       console.error("Error saving user to server:", e);
       return null;
@@ -124,7 +93,7 @@ const ServerActionUsers = {
 
   async DeleteFromServer(id: string) {
     try {
-      const response = await fetch(`${api_url}/${id}`, { 
+      const response = await fetch(`${api_url}/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -144,13 +113,25 @@ const ServerActionUsers = {
     try {
       if (!isOnline()) {
         console.warn("Device is offline, skipping user sync");
-        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
+        return {
+          message: "Cannot sync: offline",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
       }
 
       const waitingData = await userActions.getByStatus(["0", "w"]);
-      if (waitingData.length === 0) return { message: "No users to sync.", results: [], successCount: 0, failCount: 0 };
+      if (waitingData.length === 0)
+        return {
+          message: "No users to sync.",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
 
-      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+      const results: Array<{ id: string; success: boolean; error?: string }> =
+        [];
 
       for (const user of waitingData) {
         try {
@@ -161,7 +142,9 @@ const ServerActionUsers = {
               await userActions.deleteLocal(user.id);
               results.push({ id: user.id, success: true });
             } else {
-              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              const errorMsg = result
+                ? `Server returned ${result.status}`
+                : "Network error";
               results.push({ id: user.id, success: false, error: errorMsg });
             }
           } else if (user.status === "w") {
@@ -174,23 +157,28 @@ const ServerActionUsers = {
                 ...(result.id && { id: result.id }),
                 ...(result.name && { name: result.name }),
                 ...(result.email && { email: result.email }),
-                status: '1' as const,
+                status: "1" as const,
                 updatedAt: Date.now(),
               });
               results.push({ id: user.id, success: true });
             } else {
-              results.push({ id: user.id, success: false, error: "Server request failed" });
+              results.push({
+                id: user.id,
+                success: false,
+                error: "Server request failed",
+              });
             }
           }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          const errorMsg =
+            error instanceof Error ? error.message : "Unknown error";
           console.error(`Error syncing user ${user.id}:`, error);
           results.push({ id: user.id, success: false, error: errorMsg });
         }
       }
 
-      const successCount = results.filter(r => r.success).length;
-      const failCount = results.filter(r => !r.success).length;
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.filter((r) => !r.success).length;
 
       return {
         message: `User sync completed. ${successCount} succeeded, ${failCount} failed.`,
@@ -199,14 +187,14 @@ const ServerActionUsers = {
         failCount,
       };
     } catch (globalError: any) {
-       console.error("Critical error in ServerActionUsers.Sync:", globalError);
-       return { 
-         message: "Sync failed completely", 
-         results: [], 
-         successCount: 0, 
-         failCount: 1, // Treat as 1 failure to ensure it's logged
-         error: globalError.message 
-       };
+      console.error("Critical error in ServerActionUsers.Sync:", globalError);
+      return {
+        message: "Sync failed completely",
+        results: [],
+        successCount: 0,
+        failCount: 1, // Treat as 1 failure to ensure it's logged
+        error: globalError.message,
+      };
     }
   },
 
@@ -232,49 +220,50 @@ const ServerActionUsers = {
       }
 
       const data = await ServerActionUsers.ReadFromServer();
-      
+
       // Transform and save data
-      const transformedUsers = Array.isArray(data) 
+      const transformedUsers = Array.isArray(data)
         ? data.map((user: any) => transformServerUser(user))
         : [];
-        
-      // We don't delete everything blindly if we might have local pending changes? 
+
+      // We don't delete everything blindly if we might have local pending changes?
       // The original logic deleted sync'd users. We should preserve that behavior but be careful.
       const syncedUsers = await userActions.getByStatus(["1"]);
 
-      
-      await localDb.transaction('rw', localDb.users, async () => {
+      await localDb.transaction("rw", localDb.users, async () => {
         // Delete only synced users to avoid losing local work
         for (const user of syncedUsers) {
-           await userActions.deleteLocal(user.id);
+          await userActions.deleteLocal(user.id);
         }
-        
+
         for (const user of transformedUsers) {
           const existing = await userActions.getLocal(user.id);
           // Don't overwrite pending changes
-          if (existing && (existing.status === 'w' || existing.status === '0')) {
-            continue; 
+          if (
+            existing &&
+            (existing.status === "w" || existing.status === "0")
+          ) {
+            continue;
           }
           await userActions.putLocal(user);
         }
       });
 
-      return { 
-        message: `Imported ${transformedUsers.length} users from server.`, 
+      return {
+        message: `Imported ${transformedUsers.length} users from server.`,
         count: transformedUsers.length,
-        failCount: 0 
+        failCount: 0,
       };
-
     } catch (error: any) {
       console.error("Error importing users from server:", error);
-      return { 
-        message: "Import failed", 
-        count: 0, 
-        failCount: 1, 
-        error: error instanceof Error ? error.message : "Unknown error" 
+      return {
+        message: "Import failed",
+        count: 0,
+        failCount: 1,
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
-  }
+  },
 };
 
 export default ServerActionUsers;

@@ -120,6 +120,22 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // ✅ Link manager to the Admin's center if applicable
+    if (role === "MANAGER") {
+      const center = await db.center.findFirst({
+        where: { adminId: session.user.id },
+      });
+
+      if (center) {
+        await db.center.update({
+          where: { id: center.id },
+          data: {
+            managers: { push: newUser.id },
+          },
+        });
+      }
+    }
+
     return NextResponse.json(
       {
         message: "User created successfully",

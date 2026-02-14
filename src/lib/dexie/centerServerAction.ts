@@ -14,7 +14,7 @@ function getApiUrl(pathname: string) {
   return `${baseUrl}${pathname}`;
 }
 
-const api_url = getApiUrl("/api/center");
+const api_url = getApiUrl("/api/centers");
 const subjects_api_url = getApiUrl("/api/subjects");
 
 function transformServerCenter(serverCenter: any): Center {

@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
-import { getTranslations } from "next-intl/server";
 import db from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { getTranslations } from "next-intl/server";
+import { NextResponse } from "next/server";
 
 /**
  * POST /api/admin/register-admin

@@ -307,7 +307,7 @@ export default function TimetableManagement({
       //   axios.get('/api/admin/teachers'),
       //   axios.get('/api/subjects'),
       //   axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
-      //   centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
+      //   axios.get(`/api/centers/${centerId}`) : Promise.resolve(null)
       // ])
     } catch (err) {
       console.error("Failed to fetch data:", err);
