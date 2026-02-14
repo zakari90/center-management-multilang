@@ -192,7 +192,7 @@ export default function AdminStatsCards() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            MAD{stats.totalRevenue.toFixed(2)}
+            MAD ${stats.totalRevenue.toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
             <TrendingUp className="h-3 w-3" />+{stats.revenueGrowth.toFixed(1)}%{" "}

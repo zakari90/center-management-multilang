@@ -428,8 +428,7 @@ export default function CreateStudentPaymentForm({
           })
           .filter(Boolean)
           .join(", ");
-        const finalDescription =
-          formData.description || `Payment for: ${subjectNames}`;
+        const finalDescription = formData.description || `${subjectNames}`;
 
         const now = Date.now();
         const receiptId = generateObjectId();

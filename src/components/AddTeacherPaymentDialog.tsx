@@ -357,7 +357,7 @@ export default function AddTeacherPaymentDialog({
           `${s.subjectName} (${s.enrolledStudents} students): MAD ${s.calculatedAmount.toFixed(2)}`,
       );
       const finalDescription =
-        formData.description || `Payment for: ${subjectDetails.join(", ")}`;
+        formData.description || `${subjectDetails.join(", ")}`;
       const now = Date.now();
       const receiptId = generateObjectId();
       const receiptDate = formData.date

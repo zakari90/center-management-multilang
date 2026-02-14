@@ -100,7 +100,6 @@ export default function StudentReceiptTable() {
     method: true,
     date: true,
     description: true,
-    actions: true,
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -266,10 +265,6 @@ export default function StudentReceiptTable() {
     ),
   ];
 
-  const handlePrint = (receiptId: string) => {
-    router.push(`/receipts/${receiptId}`);
-  };
-
   const handleExportCSV = () => {
     const csvContent = [
       [
@@ -298,7 +293,7 @@ export default function StudentReceiptTable() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${t("studentReceipts")}-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `{t("studentReceipts")}-{format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -364,7 +359,7 @@ export default function StudentReceiptTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalAmount.toFixed(2)}
+              {totalAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {t("fromFiltered")}
@@ -381,7 +376,7 @@ export default function StudentReceiptTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              ${thisMonthAmount.toFixed(2)}
+              MAD {thisMonthAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {thisMonthReceipts.length} {t("receipts")}
@@ -398,7 +393,7 @@ export default function StudentReceiptTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              ${avgAmount.toFixed(2)}
+              MAD {avgAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {t("perReceipt")}
@@ -444,7 +439,7 @@ export default function StudentReceiptTable() {
                 <SelectItem value="all">{t("allStudents")}</SelectItem>
                 {students.map((student) => (
                   <SelectItem key={student.id} value={student.id}>
-                    {student.name} {student.grade ? `(${student.grade})` : ""}
+                    {student.name} {student.grade ? `({student.grade})` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -623,14 +618,6 @@ export default function StudentReceiptTable() {
               >
                 {t("description")}
               </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem
-                checked={columnVisibility.actions}
-                onCheckedChange={(value) =>
-                  setColumnVisibility((prev) => ({ ...prev, actions: !!value }))
-                }
-              >
-                {t("actions")}
-              </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
@@ -695,11 +682,6 @@ export default function StudentReceiptTable() {
                         {t("description")}
                       </TableHead>
                     )}
-                    {columnVisibility.actions && (
-                      <TableHead className="text-center border-x">
-                        {t("actions")}
-                      </TableHead>
-                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -756,7 +738,7 @@ export default function StudentReceiptTable() {
                       {columnVisibility.amount && (
                         <TableCell>
                           <div className="font-semibold text-green-600">
-                            ${receipt.amount.toFixed(2)}
+                            MAD {receipt.amount.toFixed(2)}
                           </div>
                         </TableCell>
                       )}
@@ -789,48 +771,6 @@ export default function StudentReceiptTable() {
                           <div className="max-w-[200px] truncate text-sm text-muted-foreground">
                             {receipt.description || "-"}
                           </div>
-                        </TableCell>
-                      )}
-
-                      {columnVisibility.actions && (
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                asChild
-                                onSelect={(e) => e.preventDefault()}
-                              >
-                                <ViewReceiptDialog
-                                  receiptId={receipt.id}
-                                  trigger={
-                                    <div className="flex w-full items-center px-2 py-1.5 text-sm cursor-default hover:bg-accent hover:text-accent-foreground rounded-sm">
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      {t("viewDetails")}
-                                    </div>
-                                  }
-                                />
-                              </DropdownMenuItem>
-                              {/* <DropdownMenuItem
-                                onClick={() => handlePrint(receipt.id)}
-                              >
-                                <Printer className="mr-2 h-4 w-4" />
-                                {t("printReceipt")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <ModalLink
-                                  href={`/manager/students/${receipt.student.id}`}
-                                >
-                                  <User className="mr-2 h-4 w-4" />
-                                  {t("viewStudent")}
-                                </ModalLink>
-                              </DropdownMenuItem> */}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
                         </TableCell>
                       )}
                     </TableRow>
@@ -868,8 +808,7 @@ export default function StudentReceiptTable() {
                   {t("totalAmountLabel")}
                 </div>
                 <div className="text-2xl font-bold text-green-600">
-                  {t("MAD")}
-                  {totalAmount.toFixed(2)}
+                  MAD {totalAmount.toFixed(2)}
                 </div>
               </div>
             </div>

@@ -159,7 +159,7 @@ export default function CenterOverview() {
                         {/* Name and Badge - Stack on very small screens */}
                         <div className="flex flex-col xs:flex-row xs:items-center xs:flex-wrap gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <Building2 className="h-5 w-5 text-primary flex-shrink-0" />
+                            <Building2 className="h-5 w-5 text-primary shrink-0" />
                             <span className="text-base sm:text-lg font-semibold truncate">
                               {center.name}
                             </span>
@@ -172,7 +172,7 @@ export default function CenterOverview() {
                         {/* Address */}
                         {center.address && (
                           <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 shrink-0" />
                             <span className="line-clamp-2">
                               {center.address}
                             </span>
@@ -185,7 +185,7 @@ export default function CenterOverview() {
                         {/* Students */}
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Users className="h-3 w-3 flex-shrink-0" />
+                            <Users className="h-3 w-3 shrink-0" />
                             <span>{t("students")}</span>
                           </div>
                           <div className="text-xl sm:text-2xl font-bold text-primary">
@@ -196,7 +196,7 @@ export default function CenterOverview() {
                         {/* Teachers */}
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Users className="h-3 w-3 flex-shrink-0" />
+                            <Users className="h-3 w-3 shrink-0" />
                             <span>{t("teachers")}</span>
                           </div>
                           <div className="text-xl sm:text-2xl font-bold text-primary">
@@ -207,7 +207,7 @@ export default function CenterOverview() {
                         {/* Revenue - Full width on mobile if needed */}
                         <div className="space-y-1 xs:col-span-2 sm:col-span-1">
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Coins className="h-3 w-3 flex-shrink-0" />
+                            <Coins className="h-3 w-3 shrink-0" />
                             <span>{t("revenue")}</span>
                           </div>
                           <div className="text-xl sm:text-2xl font-bold text-green-600">
@@ -246,7 +246,7 @@ export default function CenterOverview() {
                       variant="outline"
                       size="sm"
                       asChild
-                      className="w-full sm:w-auto sm:flex-shrink-0 order-first sm:order-last"
+                      className="w-full sm:w-auto sm:shrink-0 order-first sm:order-last"
                     >
                       <Link href={`/admin/center`}>
                         <Eye className="h-4 w-4" />
