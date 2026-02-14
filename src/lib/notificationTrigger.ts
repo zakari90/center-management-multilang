@@ -119,3 +119,17 @@ export async function notifyDeleteRequestResolved(
     data: { entityType, entityName },
   });
 }
+/** Notify admin when a manager requests a delete */
+export async function notifyNewDeleteRequest(
+  managerName: string,
+  entityType: string,
+  entityName: string,
+  reason?: string,
+): Promise<void> {
+  await notifyAdmin({
+    type: "delete_request",
+    title: "Delete Request Received",
+    body: `${managerName} requested to delete ${entityType} "${entityName}"${reason ? `: ${reason}` : ""}`,
+    data: { entityType, entityName, managerName },
+  });
+}

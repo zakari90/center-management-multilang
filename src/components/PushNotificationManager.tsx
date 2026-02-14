@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
+import { useAuth } from "@/context/authContext";
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -28,6 +29,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export function PushNotificationManager() {
+  const { user } = useAuth();
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null,
@@ -41,6 +43,35 @@ export function PushNotificationManager() {
       registerServiceWorker();
     }
   }, []);
+
+  // Sync subscription with user details (role/id) when available
+  useEffect(() => {
+    if (subscription && user) {
+      const syncSubscription = async () => {
+        try {
+          await fetch("/api/subscribe", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              endpoint: subscription.endpoint,
+              keys: subscription.toJSON().keys,
+              userId: user.id,
+              role: user.role,
+            }),
+          });
+          // Quietly updated
+        } catch (e) {
+          console.error("Failed to sync subscription", e);
+        }
+      };
+
+      // Debounce or just run once?
+      // User likely stable. Subscription stable.
+      syncSubscription();
+    }
+  }, [subscription, user]);
 
   async function registerServiceWorker() {
     try {
@@ -82,8 +113,8 @@ export function PushNotificationManager() {
         body: JSON.stringify({
           endpoint: sub.endpoint,
           keys: sub.toJSON().keys,
-          // In a real app, you'd send userId and role here contextually
-          // For now we might just want to subscribe the device
+          userId: user?.id,
+          role: user?.role,
         }),
       });
 
@@ -135,7 +166,7 @@ export function PushNotificationManager() {
         body: JSON.stringify({
           title: "Test Notification",
           body: message,
-          // userId/role would be inferred from session in a real scenario
+          userId: user?.id, // Send to self
         }),
       });
 

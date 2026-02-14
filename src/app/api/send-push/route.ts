@@ -38,12 +38,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, body, userId, role } = await req.json();
+    const { title, body, userId, role, type } = await req.json();
 
-    // Find subscriptions by user or role
-    const where = userId ? { userId } : role ? { role } : {};
+    // Mapping of notification types to User model preference fields
+    const preferenceMapping: Record<string, string> = {
+      new_user: "notifyNewUser",
+      payment: "notifyPayments",
+      delete_request: "notifyDeleteRequests",
+    };
 
-    const subs = await db.pushSubscription.findMany({ where });
+    // Build the query
+    let where: any = {};
+
+    if (userId) {
+      where.userId = userId;
+    } else if (role) {
+      where.role = role;
+
+      // If a specific notification type is provided, filter by user preference
+      if (type && preferenceMapping[type]) {
+        const prefField = preferenceMapping[type];
+        where.user = {
+          [prefField]: true,
+        };
+      }
+    }
+
+    const subs = await db.pushSubscription.findMany({
+      where,
+      include: { user: true }, // Include user to verify if needed, though 'where' covers it
+    });
 
     if (subs.length === 0) {
       return NextResponse.json({
