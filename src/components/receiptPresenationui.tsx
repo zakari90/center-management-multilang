@@ -357,7 +357,6 @@ export default function ReceiptsTable() {
                   <TableHead>{t("amount")}</TableHead>
                   <TableHead>{t("method")}</TableHead>
                   <TableHead>{t("date")}</TableHead>
-                  <TableHead className="text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -425,14 +424,6 @@ export default function ReceiptsTable() {
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(receipt.date).toLocaleDateString()}
                     </TableCell>
-                    {/* <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <ViewReceiptDialog receiptId={receipt.id} />
-                        <Button variant="ghost" size="sm" onClick={() => window.print()}>
-                          <Printer className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
