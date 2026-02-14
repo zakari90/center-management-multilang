@@ -8,6 +8,7 @@ import ServerActionStudents from "./studentServerAction";
 import ServerActionSubjects from "./subjectServerAction";
 import ServerActionReceipts from "./receiptServerAction";
 import ServerActionSchedules from "./scheduleServerAction";
+import ServerActionDeleteRequests from "./deleteRequestServerAction";
 
 // ✅ Export all server actions for easy importing
 export {
@@ -18,6 +19,7 @@ export {
   ServerActionSubjects,
   ServerActionReceipts,
   ServerActionSchedules,
+  ServerActionDeleteRequests,
 };
 
 // ✅ Convenience function to sync all entities
@@ -145,4 +147,3 @@ export async function importAllFromServerForRole(isAdmin: boolean) {
     };
   }
 }
-

@@ -14,6 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/authContext";
 import { Trash2 } from "lucide-react";
+import { deleteRequestActions } from "@/lib/dexie/dexieActions";
+import { ServerActionDeleteRequests } from "@/lib/dexie/serverActions";
+import { DeleteRequestStatus } from "@/lib/dexie/dbSchema";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -50,30 +53,43 @@ export function RequestDeleteDialog({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/manager/delete-request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          entityId,
-          entityType,
-          entityName,
-          reason,
-          requestedBy: user.id,
-          managerName: user.name,
-        }),
+      // 1. Save to local Dexie DB first (Offline-First)
+      const requestId = await deleteRequestActions.create({
+        id: crypto.randomUUID(), // Generate a temporary ID
+        entityId,
+        entityType,
+        entityName,
+        reason,
+        requestedBy: user.id,
+        requestStatus: DeleteRequestStatus.PENDING,
+        status: "w", // Waiting to sync
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
 
-      if (!res.ok) throw new Error("Failed to submit request");
-
-      toast.success("Request Submitted", {
-        description: "Admin will review your request.",
+      // 2. Try to sync immediately
+      toast.info("Saving request...", {
+        description: "Attempting to sync with server.",
       });
+
+      const syncResult = await ServerActionDeleteRequests.Sync();
+
+      if (syncResult.successCount > 0) {
+        toast.success("Request Sent", {
+          description: "Admin will review your request.",
+        });
+      } else {
+        toast.success("Saved Offline", {
+          description: "Request will be sent when online.",
+        });
+      }
+
       setOpen(false);
       setReason("");
     } catch (error) {
       console.error("Delete request error:", error);
       toast.error("Error", {
-        description: "Failed to submit delete request.",
+        description: "Failed to save delete request.",
       });
     } finally {
       setIsSubmitting(false);

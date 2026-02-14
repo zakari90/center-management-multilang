@@ -65,6 +65,7 @@ model Center {
   subjects      Subject[]
 }
 
+
 model User {
   id                  String             @id @default(auto()) @map("_id") @db.ObjectId
   email               String             @unique
@@ -72,11 +73,6 @@ model User {
   name                String
   role                Role
   dataEpoch           String             @default("1")  // Incremented on data reset by admin
-
-  // Admin notification preferences
-  notifyNewUser       Boolean            @default(true)
-  notifyPayments      Boolean            @default(true)
-  notifyDeleteRequests Boolean           @default(true)
 
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
@@ -86,8 +82,8 @@ model User {
   managedReceipts     Receipt[]          @relation("UserManagedReceipts")
   administeredCenters Center[]           @relation("AdminCenters")
   schedules           Schedule[]         @relation("ManagerSchedules")
-  pushSubscriptions   PushSubscription[]
 }
+
 
 model Teacher {
   id               String             @id @default(auto()) @map("_id") @db.ObjectId
@@ -207,16 +203,6 @@ model Schedule {
   centerId         String?            @db.ObjectId
 }
 
-model PushSubscription {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  endpoint   String   @unique
-  keys       Json
-  user       User?    @relation(fields: [userId], references: [id])
-  userId     String?  @db.ObjectId
-  createdAt  DateTime @default(now())
-  role       Role?
-}
-
 model DeleteRequest {
   id          String              @id @default(auto()) @map("_id") @db.ObjectId
   entityType  String              // "teacher" | "student"
@@ -228,15 +214,4 @@ model DeleteRequest {
   reviewedBy  String?             @db.ObjectId // Admin user ID
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
-}
-
-model AppNotification {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId  // Recipient
-  type      String   // "new_user" | "payment" | "delete_request" | "delete_approved" | "delete_rejected"
-  title     String
-  body      String
-  isRead    Boolean  @default(false)
-  data      Json?    // Extra metadata (entity IDs, amounts, etc.)
-  createdAt DateTime @default(now())
 }
