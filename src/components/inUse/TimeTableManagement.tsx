@@ -259,7 +259,9 @@ export default function TimetableManagement({
       ]);
 
       // ✅ Check if user is admin
-      const isAdmin = user.role?.toUpperCase() === "ADMIN";
+      const isAdmin =
+        user.role?.toUpperCase() === "ADMIN" ||
+        user.role?.toUpperCase() === "MANAGER";
 
       // ✅ Filter teachers: for admin, show all teachers; for manager, filter by managerId
       let relevantTeachers: typeof allTeachers = [];
@@ -431,14 +433,6 @@ export default function TimetableManagement({
           setRooms(allManagerClassrooms);
         }
       }
-
-      // ✅ Commented out online fetch
-      // const [teachersRes, subjectsRes, scheduleRes, centerRes] = await Promise.all([
-      //   axios.get('/api/admin/teachers'),
-      //   axios.get('/api/subjects'),
-      //   axios.get(`/api/admin/schedule${centerId ? `?centerId=${centerId}` : ''}`),
-      //   centerId ? axios.get(`/api/admin/centers/${centerId}`) : Promise.resolve(null)
-      // ])
     } catch (err) {
       setError(t("errorLoadData"));
     } finally {
