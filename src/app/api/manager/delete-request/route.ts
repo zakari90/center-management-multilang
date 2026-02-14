@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
+import { DeleteRequestStatus } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
         entityName,
         reason,
         requestedBy,
-        status: "PENDING",
+        status: DeleteRequestStatus.PENDING,
       },
     });
 
