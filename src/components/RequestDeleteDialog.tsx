@@ -22,7 +22,14 @@ import { toast } from "sonner";
 
 interface RequestDeleteDialogProps {
   entityId: string;
-  entityType: "teacher" | "student";
+  entityType:
+    | "teacher"
+    | "student"
+    | "subject"
+    | "schedule"
+    | "receipt"
+    | "teacherSubject"
+    | "studentSubject";
   entityName: string;
   trigger?: React.ReactNode;
 }

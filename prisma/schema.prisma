@@ -82,6 +82,7 @@ model User {
   managedReceipts     Receipt[]          @relation("UserManagedReceipts")
   administeredCenters Center[]           @relation("AdminCenters")
   schedules           Schedule[]         @relation("ManagerSchedules")
+  notifyDeleteRequests Boolean           @default(true)
 }
 
 
@@ -214,4 +215,24 @@ model DeleteRequest {
   reviewedBy  String?             @db.ObjectId // Admin user ID
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+}
+
+model AppNotification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  data      Json?
+  createdAt DateTime @default(now())
+}
+
+model PushSubscription {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
+  role      String?
+  endpoint  String   @unique
+  keys      Json
+  createdAt DateTime @default(now())
 }

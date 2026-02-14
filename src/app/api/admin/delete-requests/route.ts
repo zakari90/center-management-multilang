@@ -56,74 +56,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send push notification to admin(s)
-    try {
-      const admins = await db.user.findMany({
-        where: { role: "ADMIN", notifyDeleteRequests: true },
-      });
-
-      for (const admin of admins) {
-        // Create in-app notification for admin
-        await db.appNotification.create({
-          data: {
-            userId: admin.id,
-            type: "delete_request",
-            title: "Delete Request",
-            body: `A manager wants to delete ${entityType}: ${entityName}`,
-            isRead: false,
-            data: {
-              entityType,
-              entityId,
-              entityName,
-              requestedBy,
-              deleteRequestId: deleteRequest.id,
-            },
-          },
-        });
-      }
-
-      // Send web push to all admins
-      const adminSubs = await db.pushSubscription.findMany({
-        where: { role: "ADMIN" },
-      });
-
-      if (adminSubs.length > 0) {
-        const payload = JSON.stringify({
-          title: "Delete Request",
-          body: `A manager wants to delete ${entityType}: ${entityName}`,
-          type: "delete_request",
-        });
-
-        const webpush = (await import("web-push")).default;
-        const PUBLIC_KEY = process.env.NEXT_PUBLIC_PUBLIC_KEY || "";
-        const PRIVATE_KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY || "";
-        const VAPID_EMAIL =
-          process.env.VAPID_EMAIL || "mailto:admin@yourdomain.com";
-
-        if (PUBLIC_KEY && PRIVATE_KEY) {
-          webpush.setVapidDetails(VAPID_EMAIL, PUBLIC_KEY, PRIVATE_KEY);
-          for (const sub of adminSubs) {
-            try {
-              const keys = sub.keys as { p256dh?: string; auth?: string };
-              if (keys?.p256dh && keys?.auth) {
-                await webpush.sendNotification(
-                  {
-                    endpoint: sub.endpoint,
-                    keys: { p256dh: keys.p256dh, auth: keys.auth },
-                  },
-                  payload,
-                );
-              }
-            } catch (pushErr) {
-              console.error("Push failed for admin:", pushErr);
-            }
-          }
-        }
-      }
-    } catch (notifyErr) {
-      console.error("Notification failed (non-blocking):", notifyErr);
-    }
-
     return NextResponse.json({ ok: true, data: deleteRequest });
   } catch (e) {
     console.error("Failed to create delete request:", e);
@@ -157,73 +89,29 @@ export async function PATCH(req: NextRequest) {
 
     // If approved, actually delete the entity
     if (action === "APPROVED") {
-      if (deleteRequest.entityType === "teacher") {
-        await db.teacher.delete({ where: { id: deleteRequest.entityId } });
-      } else if (deleteRequest.entityType === "student") {
-        await db.student.delete({ where: { id: deleteRequest.entityId } });
+      const { entityId, entityType } = deleteRequest;
+
+      if (entityType === "teacher") {
+        await db.teacher.delete({ where: { id: entityId } });
+      } else if (entityType === "student") {
+        await db.student.delete({ where: { id: entityId } });
+      } else if (entityType === "subject") {
+        // Cascading delete for subject: teacher-subject links, student-subject links, and schedules
+        await Promise.all([
+          db.teacherSubject.deleteMany({ where: { subjectId: entityId } }),
+          db.studentSubject.deleteMany({ where: { subjectId: entityId } }),
+          db.schedule.deleteMany({ where: { subjectId: entityId } }),
+          db.subject.delete({ where: { id: entityId } }),
+        ]);
+      } else if (entityType === "schedule") {
+        await db.schedule.delete({ where: { id: entityId } });
+      } else if (entityType === "receipt") {
+        await db.receipt.delete({ where: { id: entityId } });
+      } else if (entityType === "teacherSubject") {
+        await db.teacherSubject.delete({ where: { id: entityId } });
+      } else if (entityType === "studentSubject") {
+        await db.studentSubject.delete({ where: { id: entityId } });
       }
-    }
-
-    // Notify the requesting manager
-    try {
-      const statusText = action === "APPROVED" ? "approved" : "rejected";
-
-      // Create in-app notification for the manager
-      await db.appNotification.create({
-        data: {
-          userId: deleteRequest.requestedBy,
-          type: action === "APPROVED" ? "delete_approved" : "delete_rejected",
-          title: `Delete Request ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
-          body: `Your request to delete ${deleteRequest.entityType} "${deleteRequest.entityName}" was ${statusText}.`,
-          isRead: false,
-          data: {
-            entityType: deleteRequest.entityType,
-            entityId: deleteRequest.entityId,
-            deleteRequestId: id,
-          },
-        },
-      });
-
-      // Send web push to the manager
-      const managerSubs = await db.pushSubscription.findMany({
-        where: { userId: deleteRequest.requestedBy },
-      });
-
-      if (managerSubs.length > 0) {
-        const payload = JSON.stringify({
-          title: `Delete Request ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
-          body: `Your request to delete ${deleteRequest.entityType} "${deleteRequest.entityName}" was ${statusText}.`,
-          type: action === "APPROVED" ? "delete_approved" : "delete_rejected",
-        });
-
-        const webpush = (await import("web-push")).default;
-        const PUBLIC_KEY = process.env.NEXT_PUBLIC_PUBLIC_KEY || "";
-        const PRIVATE_KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY || "";
-        const VAPID_EMAIL =
-          process.env.VAPID_EMAIL || "mailto:admin@yourdomain.com";
-
-        if (PUBLIC_KEY && PRIVATE_KEY) {
-          webpush.setVapidDetails(VAPID_EMAIL, PUBLIC_KEY, PRIVATE_KEY);
-          for (const sub of managerSubs) {
-            try {
-              const keys = sub.keys as { p256dh?: string; auth?: string };
-              if (keys?.p256dh && keys?.auth) {
-                await webpush.sendNotification(
-                  {
-                    endpoint: sub.endpoint,
-                    keys: { p256dh: keys.p256dh, auth: keys.auth },
-                  },
-                  payload,
-                );
-              }
-            } catch (pushErr) {
-              console.error("Push failed for manager:", pushErr);
-            }
-          }
-        }
-      }
-    } catch (notifyErr) {
-      console.error("Notification failed (non-blocking):", notifyErr);
     }
 
     return NextResponse.json({ ok: true, data: deleteRequest });
