@@ -158,6 +158,7 @@ export const StudentInputSchema = z.object({
   enrollments: z
     .array(
       z.object({
+        id: z.string().min(1).optional(),
         subjectId: z.string().min(1),
         teacherId: z.string().min(1),
       }),

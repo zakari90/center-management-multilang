@@ -18,12 +18,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Clock, Loader2, MapPin, User as UserIcon } from "lucide-react"; // Renamed User to UserIcon to avoid conflict with User type
+import { Clock, Loader2, MapPin, User as UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { localDb } from "@/lib/dexie/dbSchema";
 import { useAuth } from "@/context/authContext";
+import { useLocalizedConstants } from "@/components/useLocalizedConstants";
 
 interface Teacher {
   id: string;
@@ -62,6 +63,39 @@ const TIME_SLOTS = [
   "18:00",
 ];
 
+const normalizeDayKey = (day: string): string => {
+  if (!day) return "";
+  const d = day.toLowerCase().trim();
+  // English
+  if (d === "monday" || d === "mon") return "monday";
+  if (d === "tuesday" || d === "tue") return "tuesday";
+  if (d === "wednesday" || d === "wed") return "wednesday";
+  if (d === "thursday" || d === "thu") return "thursday";
+  if (d === "friday" || d === "fri") return "friday";
+  if (d === "saturday" || d === "sat") return "saturday";
+  if (d === "sunday" || d === "sun") return "sunday";
+
+  // French
+  if (d === "lundi") return "monday";
+  if (d === "mardi") return "tuesday";
+  if (d === "mercredi") return "wednesday";
+  if (d === "jeudi") return "thursday";
+  if (d === "vendredi") return "friday";
+  if (d === "samedi") return "saturday";
+  if (d === "dimanche") return "sunday";
+
+  // Arabic (with and without hamza)
+  if (d === "الاثنين" || d === "الإثنين") return "monday";
+  if (d === "الثلاثاء") return "tuesday";
+  if (d === "الأربعاء" || d === "الاربعاء") return "wednesday";
+  if (d === "الخميس") return "thursday";
+  if (d === "الجمعة") return "friday";
+  if (d === "السبت") return "saturday";
+  if (d === "الأحد" || d === "الاحد") return "sunday";
+
+  return d; // Return as is if already a key or unknown
+};
+
 export default function TimetableManagement({
   centerId,
 }: {
@@ -69,15 +103,7 @@ export default function TimetableManagement({
 }) {
   const t = useTranslations("TimetableOverview");
   const { user, isLoading: authLoading } = useAuth();
-
-  const DAYS = [
-    t("monday"),
-    t("tuesday"),
-    t("wednesday"),
-    t("thursday"),
-    t("friday"),
-    t("saturday"),
-  ];
+  const { daysOfWeek } = useLocalizedConstants();
 
   const [viewMode, setViewMode] = useState<"all" | "teacher" | "room">("all");
   const [selectedFilter, setSelectedFilter] = useState<string>("");
@@ -94,30 +120,72 @@ export default function TimetableManagement({
         localDb.centers.toArray(),
       ]);
 
-    // Filter by managerId and status
-    const managerSchedules = allSchedules
-      .filter((s) => s.managerId === user.id && s.status !== "0")
-      .filter((s) => !centerId || s.centerId === centerId);
+    const isAdmin = user.role?.toUpperCase() === "ADMIN";
 
-    // Show all active teachers
-    const managerTeachers = allTeachers
-      .filter((t) => t.status !== "0")
-      .map((t) => ({
-        id: t.id,
-        name: t.name,
-      }));
+    // ✅ Filter teachers based on role (mirrors inUse/TimeTableManagement.tsx)
+    let relevantTeachers: typeof allTeachers = [];
+
+    if (isAdmin) {
+      if (centerId) {
+        const center = allCenters.find(
+          (c) => c.id === centerId && c.status !== "0",
+        );
+        const managerIds = [...(center?.managers || []), user.id];
+        relevantTeachers = allTeachers.filter(
+          (t) =>
+            t.status !== "0" &&
+            (managerIds.includes(t.managerId) || !t.managerId),
+        );
+      } else {
+        const adminCenters = allCenters.filter(
+          (c) => c.adminId === user.id && c.status !== "0",
+        );
+        const adminManagerIds = [
+          ...adminCenters.flatMap((c) => c.managers || []),
+          user.id,
+        ];
+        relevantTeachers = allTeachers.filter(
+          (t) =>
+            t.status !== "0" &&
+            (adminManagerIds.includes(t.managerId) || !t.managerId),
+        );
+      }
+    } else {
+      // Manager sees only their teachers
+      relevantTeachers = allTeachers.filter(
+        (t) => t.managerId === user.id && t.status !== "0",
+      );
+    }
+
+    const managerTeachers = relevantTeachers.map((t) => ({
+      id: t.id,
+      name: t.name,
+    }));
+
+    // ✅ Filter subjects by center or relevant centers
+    let relevantCenterIds: string[] = [];
+    if (isAdmin) {
+      if (centerId) {
+        relevantCenterIds = [centerId];
+      } else {
+        const adminCenters = allCenters.filter(
+          (c) => c.adminId === user.id && c.status !== "0",
+        );
+        relevantCenterIds = adminCenters.map((c) => c.id);
+      }
+    } else {
+      const managerCenters = allCenters.filter(
+        (c) => (c.managers || []).includes(user.id) && c.status !== "0",
+      );
+      relevantCenterIds = managerCenters.map((c) => c.id);
+    }
 
     const managerSubjects = allSubjects
       .filter((s) => {
         if (centerId) {
           return s.centerId === centerId && s.status !== "0";
         }
-        const managerCenters = allCenters.filter(
-          (c) => (c.managers || []).includes(user.id) && c.status !== "0",
-        );
-        return (
-          managerCenters.some((c) => c.id === s.centerId) && s.status !== "0"
-        );
+        return relevantCenterIds.includes(s.centerId) && s.status !== "0";
       })
       .map((s) => ({
         id: s.id,
@@ -125,8 +193,42 @@ export default function TimetableManagement({
         grade: s.grade,
       }));
 
-    // Build schedule slots with related data
-    const schedulesWithData: ScheduleSlot[] = managerSchedules.map(
+    // ✅ Filter schedules based on role (mirrors inUse/TimeTableManagement.tsx)
+    let filteredSchedules = allSchedules.filter((s) => s.status !== "0");
+
+    if (isAdmin) {
+      if (centerId) {
+        const center = allCenters.find(
+          (c) => c.id === centerId && c.status !== "0",
+        );
+        const managerIds = [...(center?.managers || []), user.id];
+        filteredSchedules = filteredSchedules.filter(
+          (s) => s.centerId === centerId || managerIds.includes(s.managerId),
+        );
+      } else {
+        const adminCenters = allCenters.filter(
+          (c) => c.adminId === user.id && c.status !== "0",
+        );
+        const adminCenterIds = adminCenters.map((c) => c.id);
+        const adminManagerIds = [
+          ...adminCenters.flatMap((c) => c.managers || []),
+          user.id,
+        ];
+        filteredSchedules = filteredSchedules.filter(
+          (s) =>
+            (s.centerId && adminCenterIds.includes(s.centerId)) ||
+            adminManagerIds.includes(s.managerId),
+        );
+      }
+    } else {
+      // Manager sees only their schedules
+      filteredSchedules = filteredSchedules
+        .filter((s) => s.managerId === user.id)
+        .filter((s) => !centerId || s.centerId === centerId);
+    }
+
+    // Build schedule slots with related data — normalize day keys
+    const schedulesWithData: ScheduleSlot[] = filteredSchedules.map(
       (schedule) => {
         const teacher = managerTeachers.find(
           (t) => t.id === schedule.teacherId,
@@ -137,7 +239,7 @@ export default function TimetableManagement({
 
         return {
           id: schedule.id,
-          day: schedule.day,
+          day: normalizeDayKey(schedule.day),
           startTime: schedule.startTime,
           endTime: schedule.endTime,
           teacherId: schedule.teacherId,
@@ -170,11 +272,13 @@ export default function TimetableManagement({
         centerRooms = center.classrooms;
       }
     } else {
-      const managerCenters = allCenters.filter(
-        (c) => (c.managers || []).includes(user.id) && c.status !== "0",
-      );
+      const relevantCenters = isAdmin
+        ? allCenters.filter((c) => c.adminId === user.id && c.status !== "0")
+        : allCenters.filter(
+            (c) => (c.managers || []).includes(user.id) && c.status !== "0",
+          );
       const allRooms = new Set<string>();
-      managerCenters.forEach((c) => {
+      relevantCenters.forEach((c) => {
         if (c.classrooms) {
           c.classrooms.forEach((room) => allRooms.add(room));
         }
@@ -213,9 +317,11 @@ export default function TimetableManagement({
     return true;
   });
 
-  const getSlotsByDayAndTime = (day: string, time: string) => {
+  const getSlotsByDayAndTime = (dayKey: string, time: string) => {
     return filteredSchedule.filter(
-      (s) => s.day === day && s.startTime === time,
+      (s) =>
+        normalizeDayKey(s.day) === normalizeDayKey(dayKey) &&
+        s.startTime === time,
     );
   };
 
@@ -247,8 +353,8 @@ export default function TimetableManagement({
           <CardTitle>{t("viewOptions")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
-            <div className="flex-1">
+          <div className="flex gap-4 flex-wrap">
+            <div className="flex-1 min-w-[150px]">
               <Label>{t("viewMode")}</Label>
               <Select
                 value={viewMode}
@@ -269,7 +375,7 @@ export default function TimetableManagement({
             </div>
 
             {viewMode === "teacher" && (
-              <div className="flex-1">
+              <div className="flex-1 min-w-[150px]">
                 <Label>{t("selectTeacher")}</Label>
                 <Select
                   value={selectedFilter}
@@ -290,7 +396,7 @@ export default function TimetableManagement({
             )}
 
             {viewMode === "room" && (
-              <div className="flex-1">
+              <div className="flex-1 min-w-[150px]">
                 <Label>{t("selectRoom")}</Label>
                 <Select
                   value={selectedFilter}
@@ -321,35 +427,35 @@ export default function TimetableManagement({
         <CardContent>
           <div className="overflow-x-auto relative">
             <div className="min-w-[1200px]">
-              <div className="grid grid-cols-7 gap-2 mb-2">
-                <div className="font-semibold text-sm text-muted-foreground p-2 sticky">
+              <div className="grid grid-cols-8 gap-2 mb-2">
+                <div className="font-semibold text-sm text-muted-foreground p-2 sticky left-0 bg-background z-10">
                   {t("time")}
                 </div>
-                {DAYS.map((day) => (
+                {daysOfWeek.map((day) => (
                   <div
-                    key={day}
+                    key={day.key}
                     className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md"
                   >
-                    {day}
+                    {day.label}
                   </div>
                 ))}
               </div>
 
               <div className="space-y-2 sticky">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
-                  <div key={time} className="grid grid-cols-7 gap-2">
-                    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md">
+                  <div key={time} className="grid grid-cols-8 gap-2">
+                    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                       <Clock className="h-3 w-3 mr-1" />
                       {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
-                    {DAYS.map((day) => {
-                      const slots = getSlotsByDayAndTime(day, time);
+                    {daysOfWeek.map((day) => {
+                      const slots = getSlotsByDayAndTime(day.key, time);
                       const hasConflict = slots.length > 1;
 
                       return (
                         <div
-                          key={`${day}-${time}`}
+                          key={`${day.key}-${time}`}
                           className={cn(
                             "min-h-[100px] p-2 border-2 rounded-md",
                             slots.length === 0 && "bg-muted/30",
@@ -369,7 +475,7 @@ export default function TimetableManagement({
                               return (
                                 <div
                                   key={slot.id || idx}
-                                  className="p-2 bg-white border rounded text-xs space-y-1"
+                                  className="p-2 bg-white dark:bg-muted border rounded text-xs space-y-1"
                                 >
                                   <div className="flex justify-between items-start">
                                     <Badge

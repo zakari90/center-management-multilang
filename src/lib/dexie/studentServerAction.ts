@@ -47,7 +47,11 @@ const ServerActionStudents = {
       const studentSubjects = await studentSubjectActions.getAll();
       const enrollments = studentSubjects
         .filter((ss) => ss.studentId === student.id && ss.status !== "0")
-        .map((ss) => ({ subjectId: ss.subjectId, teacherId: ss.teacherId }));
+        .map((ss) => ({
+          id: ss.id,
+          subjectId: ss.subjectId,
+          teacherId: ss.teacherId,
+        }));
 
       // Try POST first (create)
       let response = await fetch(api_url, {

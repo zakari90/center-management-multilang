@@ -126,10 +126,15 @@ export async function POST(req: NextRequest) {
       if (enrollments && enrollments.length > 0) {
         await tx.studentSubject.createMany({
           data: enrollments.map(
-            (enrollment: { subjectId: string; teacherId: string }) => ({
+            (enrollment: {
+              id?: string;
+              subjectId: string;
+              teacherId: string;
+            }) => ({
+              ...(enrollment.id && { id: enrollment.id }),
               studentId: newStudent.id,
               subjectId: enrollment.subjectId,
-              teacherId: enrollment.teacherId, // ← Added teacherId
+              teacherId: enrollment.teacherId,
             }),
           ),
         });
