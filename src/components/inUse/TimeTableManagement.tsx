@@ -258,136 +258,67 @@ export default function TimetableManagement({
         teacherSubjectActions.getAll(),
       ]);
 
-      // ✅ Check if user is admin
-      const isAdmin =
-        user.role?.toUpperCase() === "ADMIN" ||
-        user.role?.toUpperCase() === "MANAGER";
+      // ✅ Determine role
+      const isAdmin = user.role?.toUpperCase() === "ADMIN";
+      const isManager = user.role?.toUpperCase() === "MANAGER";
 
-      // ✅ Filter teachers: for admin, show all teachers; for manager, filter by managerId
-      let relevantTeachers: typeof allTeachers = [];
-
-      if (isAdmin) {
-        // For admin, if centerId is provided, show teachers from that center's managers
-        if (centerId) {
-          const center = allCenters.find(
-            (c) => c.id === centerId && c.status !== "0",
-          );
-          // ✅ FIX: Include Admin (user.id) in managerIds
-          const managerIds = [...(center?.managers || []), user.id];
-
-          relevantTeachers = allTeachers.filter(
-            (t) =>
-              t.status !== "0" &&
-              // Include if managed by any manager in this center, OR directly by admin, OR orphaned (no manager)
-              (managerIds.includes(t.managerId) || !t.managerId),
-          );
-        } else {
-          // If no centerId, show all active teachers from admin's centers
-          const adminCenters = allCenters.filter(
-            (c) => c.adminId === user.id && c.status !== "0",
-          );
-          // ✅ FIX: Include Admin (user.id) in managerIds
-          const adminManagerIds = [
-            ...adminCenters.flatMap((c) => c.managers || []),
-            user.id,
-          ];
-
-          relevantTeachers = allTeachers.filter(
-            (t) =>
-              t.status !== "0" &&
-              // Include if managed by any manager in admin's centers, OR directly by admin, OR orphaned
-              (adminManagerIds.includes(t.managerId) || !t.managerId),
-          );
-        }
-      } else {
-        // Manager sees only their teachers
-        relevantTeachers = allTeachers.filter(
-          (t) => t.managerId === user.id && t.status !== "0",
-        );
-      }
-
-      const managerTeachers = relevantTeachers.map((t) => ({
-        id: t.id,
-        name: t.name,
-        weeklySchedule: t.weeklySchedule,
-      }));
-
-      // ✅ Filter subjects by center or manager's centers
-      let relevantCenterIds: string[] = [];
-      if (isAdmin) {
-        if (centerId) {
-          relevantCenterIds = [centerId];
-        } else {
-          // Admin sees all centers they own
-          const adminCenters = allCenters.filter(
-            (c) => c.adminId === user.id && c.status !== "0",
-          );
-          relevantCenterIds = adminCenters.map((c) => c.id);
-        }
-      } else {
-        // Manager sees centers they manage
-        const managerCenters = allCenters.filter(
-          (c) => (c.managers || []).includes(user.id) && c.status !== "0",
-        );
-        relevantCenterIds = managerCenters.map((c) => c.id);
-      }
-
-      const managerSubjects = allSubjects
-        .filter((s) => {
-          if (centerId) {
-            return s.centerId === centerId && s.status !== "0";
-          }
-          return relevantCenterIds.includes(s.centerId) && s.status !== "0";
+      // 1. Determine accessible centers
+      const accessibleCenters = allCenters
+        .filter((c) => {
+          if (isAdmin) return c.adminId === user.id;
+          if (isManager) return (c.managers || []).includes(user.id);
+          return false;
         })
+        .filter((c) => c.status !== "0");
+
+      const accessibleCenterIds = accessibleCenters.map((c) => c.id);
+
+      // If a specific centerId is provided, we only care about that one if it's accessible
+      const targetCenterIds = centerId
+        ? accessibleCenterIds.includes(centerId)
+          ? [centerId]
+          : []
+        : accessibleCenterIds;
+
+      // 2. Determine relevant managers (for teacher lookup)
+      // A teacher is visible if they are managed by the current user
+      // OR by any admin/manager of a center the current user has access to.
+      const relevantManagerIds = new Set([
+        ...accessibleCenters.flatMap((c) => [c.adminId, ...(c.managers || [])]),
+        user.id,
+      ]);
+
+      // 3. Filter teachers
+      const managerTeachers = allTeachers
+        .filter(
+          (t) =>
+            t.status !== "0" &&
+            ((t.managerId && relevantManagerIds.has(t.managerId)) ||
+              !t.managerId),
+        )
+        .map((t) => ({
+          id: t.id,
+          name: t.name,
+          weeklySchedule: t.weeklySchedule,
+        }));
+
+      // 4. Filter subjects
+      const managerSubjects = allSubjects
+        .filter(
+          (s) =>
+            s.status !== "0" &&
+            s.centerId &&
+            targetCenterIds.includes(s.centerId),
+        )
         .map((s) => ({ id: s.id, name: s.name, grade: s.grade }));
 
-      // ✅ Filter schedules: for admin, show all schedules; for manager, filter by managerId
-      let filteredSchedules = allSchedules.filter((s) => s.status !== "0");
-
-      if (isAdmin) {
-        // Admin sees all schedules for their center(s)
-        if (centerId) {
-          // Get manager IDs for this center
-          const center = allCenters.find(
-            (c) => c.id === centerId && c.status !== "0",
-          );
-          const managerIds = [...(center?.managers || []), user.id];
-          // Show schedules from managers in this center OR schedules directly for this center
-          filteredSchedules = filteredSchedules.filter((s) => {
-            // Include if schedule belongs to this center (by centerId)
-            if (s.centerId === centerId) {
-              return true;
-            }
-            // OR if schedule's manager is in this center's managers list
-            if (managerIds.includes(s.managerId)) {
-              return true;
-            }
-            return false;
-          });
-        } else {
-          // Filter by admin's centers and their managers
-          const adminCenters = allCenters.filter(
-            (c) => c.adminId === user.id && c.status !== "0",
-          );
-          const adminCenterIds = adminCenters.map((c) => c.id);
-          const adminManagerIds = [
-            ...adminCenters.flatMap((c) => c.managers || []),
-            user.id,
-          ];
-          filteredSchedules = filteredSchedules.filter((s) => {
-            // Include if: schedule is in admin's center OR schedule's manager is in admin's centers
-            return (
-              (s.centerId && adminCenterIds.includes(s.centerId)) ||
-              adminManagerIds.includes(s.managerId)
-            );
-          });
-        }
-      } else {
-        // Manager sees only their schedules
-        filteredSchedules = filteredSchedules
-          .filter((s) => s.managerId === user.id)
-          .filter((s) => !centerId || s.centerId === centerId);
-      }
+      // 5. Filter schedules
+      const filteredSchedules = allSchedules.filter(
+        (s) =>
+          s.status !== "0" &&
+          ((s.centerId && targetCenterIds.includes(s.centerId)) ||
+            s.managerId === user.id),
+      );
 
       // ✅ Transform schedules to match ScheduleSlot interface
       const scheduleSlots: ScheduleSlot[] = filteredSchedules.map((s) => ({
@@ -410,29 +341,12 @@ export default function TimetableManagement({
       setSchedule(scheduleSlots);
 
       // ✅ Get rooms from relevant centers
-      if (centerId) {
-        const center = allCenters.find(
-          (c) => c.id === centerId && c.status !== "0",
-        );
-        if (center?.classrooms?.length) {
-          setRooms(center.classrooms);
-        }
-      } else {
-        // Get all unique classrooms from relevant centers
-        const relevantCenters = isAdmin
-          ? allCenters.filter((c) => c.adminId === user.id && c.status !== "0")
-          : allCenters.filter(
-              (c) => (c.managers || []).includes(user.id) && c.status !== "0",
-            );
+      const finalRooms = allCenters
+        .filter((c) => targetCenterIds.includes(c.id) && c.status !== "0")
+        .flatMap((c) => c.classrooms || [])
+        .filter((room, index, self) => self.indexOf(room) === index); // Remove duplicates
 
-        const allManagerClassrooms = relevantCenters
-          .flatMap((c) => c.classrooms || [])
-          .filter((room, index, self) => self.indexOf(room) === index); // Remove duplicates
-
-        if (allManagerClassrooms.length > 0) {
-          setRooms(allManagerClassrooms);
-        }
-      }
+      setRooms(finalRooms);
     } catch (err) {
       setError(t("errorLoadData"));
     } finally {
