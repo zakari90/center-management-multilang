@@ -689,6 +689,7 @@
     "chooseTeacher": "Choose teacher",
     "chooseRoom": "Choose room",
     "weeklySchedule": "Weekly Schedule",
+    "weeklyScheduleReadOnly": "Weekly Schedule (Read Only)",
     "weeklyScheduleDescription": "Click on any time slot to add a class",
     "time": "Time",
     "day": "Day",

@@ -652,6 +652,7 @@
     "chooseTeacher": "Choisir un enseignant",
     "chooseRoom": "Choisir une salle",
     "weeklySchedule": "Horaire hebdomadaire",
+    "weeklyScheduleReadOnly": "Horaire hebdomadaire (lecture seule)",
     "weeklyScheduleDescription": "Cliquez sur n'importe quel créneau pour ajouter une classe",
     "time": "Heure",
     "day": "Jour",

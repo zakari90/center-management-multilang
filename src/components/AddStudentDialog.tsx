@@ -714,7 +714,7 @@ export default function AddStudentDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-0">
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-1">
         <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
           <DialogHeader>
             <DialogTitle>{t("title")}</DialogTitle>

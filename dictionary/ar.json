@@ -654,6 +654,7 @@
     "chooseTeacher": "اختر معلما",
     "chooseRoom": "اختر فصلا",
     "weeklySchedule": "الجدول الأسبوعي",
+    "weeklyScheduleReadOnly": "الجدول الأسبوعي (للقراءة فقط)",
     "weeklyScheduleDescription": "انقر على أي فترة زمنية لإضافة فئة",
     "time": "الوقت",
     "addClassSchedule": "إضافة جدول الفئة",

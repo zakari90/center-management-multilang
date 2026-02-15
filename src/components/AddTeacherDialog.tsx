@@ -144,7 +144,7 @@ const SubjectCompensationCard = ({
   );
 
   return (
-    <Card className="bg-muted/50 overflow-hidden">
+    <Card className="bg-muted/50 overflow-hidden p-1">
       <CardContent className="p-3 space-y-3">
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">

@@ -654,7 +654,7 @@ export default function AddTeacherPaymentDialog({
         )}
       </DialogTrigger>
 
-      <DialogContent className="max-w-[95vw] md:max-w-[700px] lg:max-w-[800px] w-full h-auto flex flex-col overflow-hidden">
+      <DialogContent className="max-w-[95vw] md:max-w-[700px] lg:max-w-[800px] w-full h-auto flex flex-col overflow-hidden p-1">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription className="hidden md:block">

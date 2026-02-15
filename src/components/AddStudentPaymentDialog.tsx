@@ -870,7 +870,7 @@ export default function AddStudentPaymentDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-[95vw] md:max-w-[900px] lg:max-w-[1000px] w-full max-h-[96vh] flex flex-col overflow-hidden p-0">
+      <DialogContent className="max-w-[95vw] md:max-w-[900px] lg:max-w-[1000px] w-full max-h-[96vh] flex flex-col overflow-hidden p-1">
         <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
           <DialogHeader>
             <DialogTitle>{t("title")}</DialogTitle>
