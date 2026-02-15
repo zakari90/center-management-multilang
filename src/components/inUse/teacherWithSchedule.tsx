@@ -654,6 +654,7 @@ export default function TeacherScheduleView({
   const t = useTranslations("TeacherScheduleView");
   const tCommon = useTranslations("Common");
   const { user, isLoading: authLoading } = useAuth();
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
   const [teachers, setTeachers] = useState<TeacherWithSchedule[]>([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
@@ -1000,7 +1001,8 @@ export default function TeacherScheduleView({
                   >
                     <div className="flex items-center gap-2 w-fit">
                       <span className="font-medium">{teacher.name}</span>
-                      {teacher.conflicts.length > 0 &&
+                      {isAdmin &&
+                        teacher.conflicts.length > 0 &&
                         !dismissedConflicts[teacher.id] && (
                           <Badge
                             variant="destructive"
@@ -1012,8 +1014,10 @@ export default function TeacherScheduleView({
                     </div>
                     <span className="text-xs opacity-80">
                       {teacher.totalHours.toFixed(1)}
-                      {t("hours")}/{teacher.availableHours.toFixed(1)}
-                      {t("hours")} • {teacher.costPerSubject.toFixed(2)} MAD
+                      {t("hours")}
+                      {isAdmin &&
+                        `/${teacher.availableHours.toFixed(1)}${t("hours")}`}
+                      {isAdmin && ` • ${teacher.costPerSubject.toFixed(2)} MAD`}
                     </span>
                   </TabsTrigger>
                 ))}
@@ -1029,12 +1033,15 @@ export default function TeacherScheduleView({
             >
               <TeacherInfoCard
                 teacher={teacher}
+                isAdmin={isAdmin}
                 dismissed={dismissedConflicts[teacher.id] || false}
                 onDismissChange={(dismissed) =>
                   toggleDismissConflicts(teacher.id, dismissed)
                 }
               />
-              <AvailabilityCard teacher={teacher} tCommon={tCommon} />
+              {isAdmin && (
+                <AvailabilityCard teacher={teacher} tCommon={tCommon} />
+              )}
 
               <TableScheduleView teacher={teacher} tCommon={tCommon} />
             </TabsContent>
@@ -1049,10 +1056,12 @@ export default function TeacherScheduleView({
 
 function TeacherInfoCard({
   teacher,
+  isAdmin,
   dismissed,
   onDismissChange,
 }: {
   teacher: TeacherWithSchedule;
+  isAdmin: boolean;
   dismissed: boolean;
   onDismissChange: (dismissed: boolean) => void;
 }) {
@@ -1089,15 +1098,17 @@ function TeacherInfoCard({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 dark:bg-blue-500/15 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {teacher.availableHours.toFixed(1)}
-              {t("hours")}
+          {isAdmin && (
+            <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 dark:bg-blue-500/15 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {teacher.availableHours.toFixed(1)}
+                {t("hours")}
+              </div>
+              <div className="text-xs text-muted-foreground dark:text-foreground/60">
+                {t("available")}
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground dark:text-foreground/60">
-              {t("available")}
-            </div>
-          </div>
+          )}
           <div className="text-center p-4 bg-green-500/10 border border-green-500/20 dark:bg-green-500/15 rounded-lg">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {teacher.totalHours.toFixed(1)}
@@ -1107,14 +1118,16 @@ function TeacherInfoCard({
               {t("scheduled")}
             </div>
           </div>
-          <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              {teacher.costPerSubject.toFixed(2)} MAD
+          {isAdmin && (
+            <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {teacher.costPerSubject.toFixed(2)} MAD
+              </div>
+              <div className="text-xs text-muted-foreground dark:text-foreground/60">
+                {t("costPerSubject") || "Cost/Subject"}
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground dark:text-foreground/60">
-              {t("costPerSubject") || "Cost/Subject"}
-            </div>
-          </div>
+          )}
           <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {teacher.schedules.length}

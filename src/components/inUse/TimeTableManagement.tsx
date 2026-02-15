@@ -191,6 +191,7 @@ export default function TimetableManagement({
   const t = useTranslations("TimetableManagement");
   const { daysOfWeek } = useLocalizedConstants();
   const { user, isLoading: authLoading } = useAuth(); // ✅ Get current user and loading state from AuthContext
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -259,7 +260,6 @@ export default function TimetableManagement({
       ]);
 
       // ✅ Determine role
-      const isAdmin = user.role?.toUpperCase() === "ADMIN";
       const isManager = user.role?.toUpperCase() === "MANAGER";
 
       // 1. Determine accessible centers
@@ -806,6 +806,7 @@ export default function TimetableManagement({
                       const slotEndTime = TIME_SLOTS[timeIndex + 1] || "23:59";
 
                       const isAvailable =
+                        isAdmin && // Only show availability for admins
                         slots.length === 0 &&
                         currentTeacher &&
                         isTeacherAvailable(
