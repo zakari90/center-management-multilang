@@ -880,7 +880,14 @@
       "thursday": "Jeudi",
       "friday": "Vendredi",
       "saturday": "Samedi",
-      "sunday": "Dimanche"
+      "sunday": "Dimanche",
+      "Lundi": "Lundi",
+      "Mardi": "Mardi",
+      "Mercredi": "Mercredi",
+      "Jeudi": "Jeudi",
+      "Vendredi": "Vendredi",
+      "Samedi": "Samedi",
+      "Dimanche": "Dimanche"
     },
     "months": {
       "january": "Janvier",
@@ -1072,6 +1079,13 @@
     "subjects": "Matières",
     "schedule": "Calendrier",
     "actions": "Actions",
+    "teachers": "enseignants",
+    "addPayment": "Ajouter un paiement",
+    "paymentStatus": "Statut de paiement",
+    "estIncome": "Est: {amount} MAD",
+    "paid": "PAYÉ",
+    "unpaid": "IMPAYÉ",
+    "partial": "PARTIEL",
     "addYourFirstTeacher": "Ajoutez votre premier enseignant"
   },
   "CreateTeacherForm": {

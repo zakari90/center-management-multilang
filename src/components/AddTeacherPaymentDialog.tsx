@@ -478,7 +478,7 @@ export default function AddTeacherPaymentDialog({
               <AlertDescription>{t("subjectsnone")}</AlertDescription>
             </Alert>
           ) : (
-            <div className="space-y-3 max-h-[300px] md:max-h-[250px] overflow-y-auto">
+            <div className="space-y-3">
               {paymentData.subjects.map((subject) => (
                 <Card
                   key={subject.subjectId}

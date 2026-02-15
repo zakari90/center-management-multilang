@@ -916,7 +916,14 @@
       "thursday": "Thursday",
       "friday": "Friday",
       "saturday": "Saturday",
-      "sunday": "Sunday"
+      "sunday": "Sunday",
+      "Monday": "Monday",
+      "Tuesday": "Tuesday",
+      "Wednesday": "Wednesday",
+      "Thursday": "Thursday",
+      "Friday": "Friday",
+      "Saturday": "Saturday",
+      "Sunday": "Sunday"
     },
     "months": {
       "january": "January",
@@ -1114,6 +1121,13 @@
     "subjects": "Subjects",
     "schedule": "Schedule",
     "actions": "Actions",
+    "teachers": "teachers",
+    "addPayment": "Add Payment",
+    "paymentStatus": "Payment Status",
+    "estIncome": "Est: MAD {amount}",
+    "paid": "PAID",
+    "unpaid": "UNPAID",
+    "partial": "PARTIAL",
     "addYourFirstTeacher": "Add your first teacher"
   },
   "CreateTeacherForm": {

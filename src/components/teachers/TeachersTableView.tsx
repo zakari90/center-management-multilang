@@ -83,7 +83,7 @@ export function TeachersTableView({
               )}
               {/* Added Payment Column */}
               <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                Payment Status
+                {t("paymentStatus")}
               </th>
               {columnVisibility.actions && (
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
@@ -160,7 +160,9 @@ export function TeachersTableView({
                           ))}
                           {teacher.teacherSubjects.length > 2 && (
                             <p className="text-xs text-muted-foreground">
-                              +{teacher.teacherSubjects.length - 2} more
+                              {t("moreSubjects", {
+                                count: teacher.teacherSubjects.length - 2,
+                              })}
                             </p>
                           )}
                         </div>
@@ -197,11 +199,15 @@ export function TeachersTableView({
                               : "bg-red-100 text-red-700 hover:bg-red-100"
                         }
                       >
-                        {teacher.paymentStatus?.status || "UNPAID"}
+                        {teacher.paymentStatus?.status
+                          ? t(teacher.paymentStatus.status.toLowerCase() as any)
+                          : t("unpaid" as any)}
                       </Badge>
                       {teacher.estimatedIncome !== undefined && (
                         <span className="text-xs text-muted-foreground">
-                          Est: MAD {teacher.estimatedIncome.toFixed(2)}
+                          {t("estIncome", {
+                            amount: teacher.estimatedIncome.toFixed(2),
+                          })}
                         </span>
                       )}
                     </div>
@@ -217,7 +223,7 @@ export function TeachersTableView({
                               variant="ghost"
                               size="sm"
                               className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600 border border-transparent hover:border-green-200"
-                              title={t("addPayment") || "Add Payment"}
+                              title={t("addPayment")}
                             >
                               <ReceiptText className="h-4 w-4" />
                             </Button>
@@ -252,7 +258,7 @@ export function TeachersTableView({
         onPageChange={setCurrentPage}
         totalCount={teachers.length}
         pageSize={ITEMS_PER_PAGE}
-        entityName={t("teachers" as any) || "teachers"}
+        entityName={t("teachers")}
       />
     </Card>
   );

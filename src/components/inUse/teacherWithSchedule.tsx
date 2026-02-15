@@ -1253,7 +1253,7 @@ function AvailabilityCard({
                 className="p-3 bg-primary/10 border border-primary/20 rounded-lg"
               >
                 <div className="font-semibold text-sm text-primary">
-                  {tCommon(`daysOfWeek.${slot.day}`)}
+                  {tCommon(`daysOfWeek.${normalizeDayKey(slot.day)}`)}
                 </div>
                 <div className="text-sm text-primary/80 mt-1 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -1692,7 +1692,7 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               <div className="flex items-center justify-between">
                 <div className="font-semibold text-sm flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  {tCommon(`daysOfWeek.${day}`)}
+                  {tCommon(`daysOfWeek.${normalizeDayKey(day)}`)}
                 </div>
                 {schedules.length > 0 && (
                   <Badge variant="secondary" className="text-xs">

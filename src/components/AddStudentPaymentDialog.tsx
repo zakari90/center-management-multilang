@@ -628,7 +628,7 @@ export default function AddStudentPaymentDialog({
             />
           )}
           {!showQrScanner && (
-            <div className="max-h-48 md:max-h-64 overflow-y-auto border rounded-lg">
+            <div className="border rounded-lg">
               {filteredStudents.length === 0 ? (
                 <p className="text-sm text-center text-muted-foreground p-4">
                   {t("noStudentsFound")}
@@ -719,7 +719,7 @@ export default function AddStudentPaymentDialog({
           <AlertDescription>{t("noSubjects")}</AlertDescription>
         </Alert>
       ) : selectedStudent ? (
-        <div className="space-y-2 max-h-[250px] md:max-h-64 overflow-y-auto">
+        <div className="space-y-2">
           {selectedStudent.studentSubjects.map((ss) => (
             <Card
               key={ss.id}
