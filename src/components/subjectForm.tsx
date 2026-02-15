@@ -21,7 +21,7 @@ export const SubjectForm = ({
   availableGrades: string[];
 }) => {
   // Use `subjectForm` namespace to access your keys like "instructions", "selectSubject" etc.
-  const t = useTranslations("subjectForm");
+  const t = useTranslations("SubjectForm");
 
   const [subjectData, setSubjectData] = useState({
     selectedSubject: "",

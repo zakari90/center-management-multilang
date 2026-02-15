@@ -419,7 +419,7 @@
     "selectSubjects": "Sélectionner les matières",
     "selectSubjectsRequired": "Sélectionner les matières *",
     "subjectsPlaceholder": "Entrez ou sélectionnez les matières",
-    "selected": "Sélectionné",
+    "selected": "Sélectionné : {value}",
     "selectGrades": "Sélectionner les niveaux",
     "selectGradesRequired": "Sélectionner les niveaux *",
     "gradesPlaceholder": "Entrez ou sélectionnez les niveaux",
@@ -1553,20 +1553,6 @@
     "nameRequired": "Le nom de l'élève est obligatoire",
     "atLeastOneSubject": "Veuillez inscrire l'élève à au moins une matière",
     "unauthorized": "Non autorisé : Veuillez vous reconnecter"
-  },
-  "subjectForm": {
-    "instructions": "Veuillez sélectionner une matière et un niveau. La durée est optionnelle.",
-    "selectSubject": "Sélectionnez la matière *",
-    "selected": "Sélectionné : {value}",
-    "selectGrade": "Sélectionnez le niveau *",
-    "price": "Prix (MAD) *",
-    "duration": "Durée (heures)",
-    "addButton": "Ajouter la matière au centre",
-    "required": "requis",
-    "selectTeacherPlaceholder": "Tapez ou sélectionnez une matière",
-    "selectSubjectPlaceholder": "Tapez ou sélectionnez une matière",
-    "selectGradePlaceholder": "Tapez ou sélectionnez un niveau",
-    "selectRoomPlaceholder": "Tapez ou sélectionnez une salle"
   },
   "FirstLoginImport": {
     "title": "Importer les données du serveur",

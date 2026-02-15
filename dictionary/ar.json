@@ -421,7 +421,7 @@
     "selectSubjects": "اختر المواد",
     "selectSubjectsRequired": "اختر المواد *",
     "subjectsPlaceholder": "اكتب أو اختر المواد",
-    "selected": "المختارة",
+    "selected": "مختار: {value}",
     "selectGrades": "اختر الفئات",
     "selectGradesRequired": "اختر الفئات *",
     "gradesPlaceholder": "اكتب أو اختر الفئات",
@@ -434,7 +434,16 @@
     "willCreate": "سيتم إنشاء",
     "courses": "دورة",
     "moreSubjects": "مواد أخرى...",
-    "addSubjectsToCenter": "إضافة المادة(مواد) للمركز"
+    "addSubjectsToCenter": "إضافة المادة(مواد) للمركز",
+    "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
+    "selectSubject": "اختر المادة *",
+    "selectGrade": "اختر الدرجة *",
+    "addButton": "إضافة المادة إلى المركز",
+    "required": "مطلوب",
+    "selectTeacherPlaceholder": "اكتب أو اختر مادة",
+    "selectSubjectPlaceholder": "اكتب أو اختر مادة",
+    "selectGradePlaceholder": "اكتب أو اختر درجة",
+    "selectRoomPlaceholder": "اكتب أو اختر غرفة"
   },
   "AdminReceiptsTable": {
     "title": "الإيصالات",
@@ -1622,20 +1631,6 @@
     "nameRequired": "اسم الطالب مطلوب",
     "atLeastOneSubject": "يرجى تسجيل الطالب في مادة واحدة على الأقل",
     "unauthorized": "غير مصرح: يرجى تسجيل الدخول مرة أخرى"
-  },
-  "subjectForm": {
-    "instructions": "يرجى اختيار مادة واحدة ودرجة واحدة. المدة اختيارية.",
-    "selectSubject": "اختر المادة *",
-    "selected": "مختار: {value}",
-    "selectGrade": "اختر الدرجة *",
-    "price": "السعر (درهم) *",
-    "duration": "المدة (ساعات/شهر)",
-    "addButton": "إضافة المادة إلى المركز",
-    "required": "مطلوب",
-    "selectTeacherPlaceholder": "اكتب أو اختر مادة",
-    "selectSubjectPlaceholder": "اكتب أو اختر مادة",
-    "selectGradePlaceholder": "اكتب أو اختر درجة",
-    "selectRoomPlaceholder": "اكتب أو اختر غرفة"
   },
   "FirstLoginImport": {
     "title": "استيراد البيانات من الخادم",
