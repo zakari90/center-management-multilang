@@ -97,7 +97,7 @@ export default function ReceiptsSummary() {
   if (!stats) return null;
 
   return (
-    <Card className="shadow-md border-none overflow-hidden bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-950 dark:to-gray-900/50">
+    <Card className="shadow-md border-none overflow-hidden bg-linear-to-br from-white to-gray-50/50 dark:from-gray-950 dark:to-gray-900/50">
       <CardHeader className="pb-2 border-b bg-muted/20">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <Banknote className="h-5 w-5 text-primary" />

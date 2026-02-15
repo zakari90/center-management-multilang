@@ -152,7 +152,7 @@ export default function ReceiptsTable() {
 
   const isLoading = receipts === undefined;
 
-  const filteredReceipts = receipts.filter((receipt) => {
+  const filteredReceipts = (receipts || []).filter((receipt) => {
     const matchesSearch =
       receipt.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       receipt.student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,8 +166,12 @@ export default function ReceiptsTable() {
     return matchesSearch && matchesType && matchesMethod;
   });
 
-  const studentPayments = receipts.filter((r) => r.type === "STUDENT_PAYMENT");
-  const teacherPayments = receipts.filter((r) => r.type === "TEACHER_PAYMENT");
+  const studentPayments = (receipts || []).filter(
+    (r) => r.type === "STUDENT_PAYMENT",
+  );
+  const teacherPayments = (receipts || []).filter(
+    (r) => r.type === "TEACHER_PAYMENT",
+  );
   const totalIncome = studentPayments.reduce((sum, r) => sum + r.amount, 0);
   const totalExpense = teacherPayments.reduce((sum, r) => sum + r.amount, 0);
   const netAmount = totalIncome - totalExpense;
@@ -175,7 +179,7 @@ export default function ReceiptsTable() {
   const paymentMethods = [
     "all",
     ...new Set(
-      receipts.map((r) => r.paymentMethod).filter(Boolean) as string[],
+      (receipts || []).map((r) => r.paymentMethod).filter(Boolean) as string[],
     ),
   ];
 

@@ -28,6 +28,7 @@ import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { isOnline } from "@/lib/utils/network";
 import { BookOpen, CheckCircle, Loader2, User, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -127,6 +128,7 @@ export default function AddStudentDialog({
   const t = useTranslations("CreateStudentForm");
   const tTable = useTranslations("StudentsTable");
   const { user } = useAuth();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -425,6 +427,7 @@ export default function AddStudentDialog({
       // Close dialog and notify parent
       setOpen(false);
       onStudentAdded?.();
+      router.refresh();
     } catch (err: any) {
       setError(err.message || t("errorsgeneric"));
     } finally {

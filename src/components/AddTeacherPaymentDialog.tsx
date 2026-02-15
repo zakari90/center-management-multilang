@@ -49,6 +49,7 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 interface SubjectStats {
@@ -130,6 +131,7 @@ export default function AddTeacherPaymentDialog({
 }: AddTeacherPaymentDialogProps) {
   const t = useTranslations("TeacherPayment");
   const { user } = useAuth();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingTeachers, setLoadingTeachers] = useState(true);
@@ -391,6 +393,7 @@ export default function AddTeacherPaymentDialog({
       }
       setOpen(false);
       onPaymentCreated?.();
+      router.refresh();
     } catch (err) {
       if (err instanceof Error) setError(err.message);
       else setError(t("errorgeneric"));

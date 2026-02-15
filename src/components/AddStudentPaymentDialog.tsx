@@ -49,6 +49,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import jsQR from "jsqr";
 import {
   Dialog,
@@ -270,6 +271,7 @@ export default function AddStudentPaymentDialog({
 }: AddStudentPaymentDialogProps) {
   const t = useTranslations("CreateStudentPaymentForm");
   const { user } = useAuth();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -570,6 +572,7 @@ export default function AddStudentPaymentDialog({
         }
         setOpen(false);
         onPaymentCreated?.();
+        router.refresh();
       } catch (err) {
         if (err instanceof Error) setError(err.message);
         else setError("Something went wrong");
