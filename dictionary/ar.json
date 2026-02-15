@@ -811,6 +811,8 @@
     "method": "الطريقة",
     "total": "الإجمالي",
     "cancel": "إلغاء",
+    "previous": "السابق",
+    "next": "التالي",
     "createPayment": "إنشاء الدفع",
     "createReceipt": "إنشاء إيصال",
     "required": "*",
@@ -870,6 +872,8 @@
     "summarytotal": "المبلغ الإجمالي:",
     "buttonscancel": "إلغاء",
     "buttonscreate": "إنشاء الدفع",
+    "previous": "السابق",
+    "next": "التالي",
     "MAD": "درهم"
   },
   "Common": {

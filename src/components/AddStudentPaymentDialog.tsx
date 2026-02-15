@@ -907,13 +907,13 @@ export default function AddStudentPaymentDialog({
                     className={`border-0 shadow-none md:border md:shadow-sm ${currentStep !== 1 ? "hidden md:block" : ""}`}
                   >
                     <CardHeader className="hidden md:flex">
-                      <CardTitle className="flex items-center gap-2">
+                      {/* <CardTitle className="flex items-center gap-2">
                         <User className="h-5 w-5" />
                         {t("findStudent")}
                       </CardTitle>
                       <CardDescription>
                         {t("searchOrScanStudent")}
-                      </CardDescription>
+                      </CardDescription> */}
                     </CardHeader>
                     <CardContent className="p-0 md:p-6">
                       {renderStep1()}
@@ -925,7 +925,7 @@ export default function AddStudentPaymentDialog({
                     className={`border-0 shadow-none md:border md:shadow-sm ${!selectedStudent ? "opacity-60 pointer-events-none" : ""} ${currentStep !== 2 ? "hidden md:block" : ""}`}
                   >
                     <CardHeader className="hidden md:flex">
-                      <CardTitle>{t("selectSubjects")}</CardTitle>
+                      {/* <CardTitle>{t("selectSubjects")}</CardTitle> */}
                       {!selectedStudent && (
                         <CardDescription className="text-xs mt-1">
                           {t("selectStudentFirst")}
@@ -942,7 +942,7 @@ export default function AddStudentPaymentDialog({
                     className={`border-0 shadow-none md:border md:shadow-sm ${formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""} ${currentStep !== 3 ? "hidden md:block" : ""}`}
                   >
                     <CardHeader className="hidden md:flex">
-                      <CardTitle>{t("paymentDetails")}</CardTitle>
+                      {/* <CardTitle>{t("paymentDetails")}</CardTitle> */}
                       {formData.selectedSubjects.length === 0 && (
                         <CardDescription className="text-xs">
                           {t("selectSubjectsFirst")}
@@ -968,14 +968,7 @@ export default function AddStudentPaymentDialog({
               disabled={isLoading}
               className="flex-1"
             >
-              {currentStep === 1 ? (
-                t("cancel")
-              ) : (
-                <>
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
-                </>
-              )}
+              {currentStep === 1 ? t("cancel") : <>{t("previous")}</>}
             </Button>
             {currentStep < totalSteps ? (
               <Button
@@ -984,8 +977,7 @@ export default function AddStudentPaymentDialog({
                 disabled={isLoading || (currentStep === 1 && !selectedStudent)}
                 className="flex-1"
               >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
+                {t("next")}
               </Button>
             ) : (
               <Button

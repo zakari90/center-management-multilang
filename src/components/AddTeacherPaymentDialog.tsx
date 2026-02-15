@@ -707,14 +707,7 @@ export default function AddTeacherPaymentDialog({
                 disabled={isLoading}
                 className="flex-1"
               >
-                {currentStep === 1 ? (
-                  t("buttonscancel")
-                ) : (
-                  <>
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Previous
-                  </>
-                )}
+                {currentStep === 1 ? t("buttonscancel") : <>{t("previous")}</>}
               </Button>
               {currentStep < totalSteps ? (
                 <Button
@@ -727,7 +720,7 @@ export default function AddTeacherPaymentDialog({
                   }
                   className="flex-1 bg-orange-600 hover:bg-orange-700"
                 >
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  {t("next")}
                 </Button>
               ) : (
                 <Button

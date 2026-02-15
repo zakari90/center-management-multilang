@@ -849,6 +849,8 @@
     "method": "Method",
     "total": "Total",
     "cancel": "Cancel",
+    "previous": "Previous",
+    "next": "Next",
     "createPayment": "Create Payment",
     "createReceipt": "Create Receipt",
     "required": "*",
@@ -905,6 +907,8 @@
     "paymentdate": "Payment Date *",
     "paymentdescription": "Description/Notes",
     "paymentdescriptionplaceholder": "Monthly salary, bonus, etc.",
+    "previous": "Previous",
+    "next": "Next",
 
     "summarytitle": "Payment Summary",
     "summaryteacher": "Teacher:",
