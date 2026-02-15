@@ -192,6 +192,8 @@ export default function TimetableManagement({
   const { daysOfWeek } = useLocalizedConstants();
   const { user, isLoading: authLoading } = useAuth(); // ✅ Get current user and loading state from AuthContext
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
+  const isManager = user?.role?.toUpperCase() === "MANAGER";
+  const effectiveReadOnly = readOnly || isManager;
 
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -317,6 +319,7 @@ export default function TimetableManagement({
         (s) =>
           s.status !== "0" &&
           ((s.centerId && targetCenterIds.includes(s.centerId)) ||
+            (s.managerId && relevantManagerIds.has(s.managerId)) ||
             s.managerId === user.id),
       );
 
@@ -761,7 +764,11 @@ export default function TimetableManagement({
       <Card>
         <CardHeader>
           <CardTitle>{t("weeklySchedule")}</CardTitle>
-          <CardDescription>{t("weeklyScheduleDescription")}</CardDescription>
+          <CardDescription>
+            {effectiveReadOnly
+              ? t("weeklyScheduleReadOnly") || "Weekly Schedule (Read Only)"
+              : t("weeklyScheduleDescription")}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto relative">
@@ -820,11 +827,11 @@ export default function TimetableManagement({
                         <div
                           key={`${day.key}-${time}`}
                           onClick={() =>
-                            !readOnly && handleSlotClick(day.key, time)
+                            !effectiveReadOnly && handleSlotClick(day.key, time)
                           }
                           className={cn(
                             "min-h-[80px] p-1.5 border rounded-md transition-all flex flex-col relative group/cell",
-                            !readOnly && "cursor-pointer",
+                            !effectiveReadOnly && "cursor-pointer",
                             // Default state
                             "bg-background hover:border-primary/50",
                             // Empty & Available state
@@ -854,7 +861,7 @@ export default function TimetableManagement({
                           )}
 
                           {/* Hover Add Icon (if empty) */}
-                          {slots.length === 0 && !readOnly && (
+                          {slots.length === 0 && !effectiveReadOnly && (
                             <div
                               className={cn(
                                 "absolute inset-0 flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity z-10",
@@ -1146,7 +1153,7 @@ export default function TimetableManagement({
           )}
 
           <DialogFooter className="flex justify-between items-center w-full sm:justify-between">
-            {!readOnly && selectedScheduleDetails?.id && (
+            {!effectiveReadOnly && selectedScheduleDetails?.id && (
               <Button
                 variant="destructive"
                 onClick={() => {

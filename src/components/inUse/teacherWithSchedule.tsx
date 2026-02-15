@@ -734,6 +734,7 @@ export default function TeacherScheduleView({
         (s) =>
           s.status !== "0" &&
           ((s.centerId && targetCenterIds.includes(s.centerId)) ||
+            (s.managerId && relevantManagerIds.has(s.managerId)) ||
             s.managerId === user.id),
       );
 
