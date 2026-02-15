@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Receipt, TrendingUp, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useAuth } from "@/context/authContext";
 import {
   studentActions,
@@ -27,20 +28,12 @@ interface DashboardStats {
 }
 
 export default function ManagerStatsCards() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations("ManagerStatsCards");
-  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchStats = useCallback(async () => {
-    setError(null);
-    setIsLoading(true);
+  const stats = useLiveQuery(async () => {
     try {
-      if (!user) {
-        setError("User not authenticated");
-        return;
-      }
+      if (!user) return null;
 
       // ✅ Fetch from localDB instead of API
       const [students, teachers, subjects, receipts, studentSubjects] =
@@ -53,12 +46,11 @@ export default function ManagerStatsCards() {
         ]);
 
       // Filter by status (exclude deleted items)
-      // Managers see ALL students and teachers, but only their own revenue
       const allActiveStudents = students.filter((s) => s.status !== "0");
       const allActiveTeachers = teachers.filter((t) => t.status !== "0");
       const activeSubjects = subjects.filter((s) => s.status !== "0");
 
-      // Revenue is filtered by manager (each manager sees only their own revenue)
+      // Revenue is filtered by manager
       const managerReceipts = receipts.filter(
         (r) => r.managerId === user.id && r.status !== "0",
       );
@@ -110,37 +102,27 @@ export default function ManagerStatsCards() {
         lastMonthRevenue > 0
           ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
           : 0;
-      const totalRevenue = managerReceipts
+      const totalRevenueTotal = managerReceipts
         .filter((r) => r.type === ReceiptType.STUDENT_PAYMENT)
         .reduce((sum, r) => sum + r.amount, 0);
 
-      setStats({
+      return {
         totalStudents: allActiveStudents.length,
         totalTeachers: allActiveTeachers.length,
         totalSubjects: activeSubjects.length,
-        totalRevenue,
+        totalRevenue: totalRevenueTotal,
         monthlyRevenue,
         totalReceipts: managerReceipts.length,
         activeEnrollments: activeEnrollments.length,
         revenueGrowth,
-      });
-
-      // ✅ Old API call - commented out
-      // const { data } = await axios.get('/api/dashboard/stats')
-      // setStats(data)
+      };
     } catch (err) {
       console.error("Failed to fetch stats:", err);
-      setError("Failed to load statistics");
-    } finally {
-      setIsLoading(false);
+      return null;
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      fetchStats();
-    }
-  }, [user, fetchStats]);
+  const isLoading = stats === undefined;
 
   if (isLoading) {
     return (
@@ -203,8 +185,12 @@ export default function ManagerStatsCards() {
     },
   ];
 
-  if (error) {
-    return <div className="p-4 text-red-600 bg-red-50 rounded-md">{error}</div>;
+  if (stats === null && !isLoading) {
+    return (
+      <div className="p-4 text-red-600 bg-red-50 rounded-md">
+        Failed to load statistics
+      </div>
+    );
   }
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

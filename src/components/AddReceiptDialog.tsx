@@ -4,6 +4,7 @@
 import type React from "react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import {
   receiptActions,
   studentActions,
@@ -77,6 +78,7 @@ export default function AddReceiptDialog({
 }: AddReceiptDialogProps) {
   const t = useTranslations("CreateStudentPaymentForm");
   const tReceipts = useTranslations("ReceiptsTable");
+  const router = useRouter();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -295,6 +297,7 @@ export default function AddReceiptDialog({
 
         setOpen(false);
         onReceiptAdded?.();
+        router.refresh();
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);

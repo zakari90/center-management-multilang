@@ -30,6 +30,7 @@ import {
 import { checkPaymentStatus } from "@/lib/payment-utils";
 import { ChevronDown, Loader2, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useState } from "react";
 import PageHeader from "./page-header";
 
@@ -71,10 +72,6 @@ export interface Student {
 export default function StudentsTable() {
   const t = useTranslations("StudentsTable");
   const { user, isLoading: authLoading } = useAuth(); // ✅ Get current user and loading state from AuthContext
-
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [gradeFilter, setGradeFilter] = useState<string>("all");
   const [paymentFilter, setPaymentFilter] = useState<string>("all");
@@ -88,23 +85,9 @@ export default function StudentsTable() {
     actions: true,
   });
 
-  const fetchStudents = useCallback(async () => {
+  const students = useLiveQuery(async () => {
     try {
-      setLoading(true);
-      setError("");
-
-      // Only proceed if auth has finished loading and user is available
-      if (!user && !authLoading) {
-        setError(t("unauthorized"));
-        setLoading(false);
-        return;
-      }
-
-      if (!user?.id) {
-        setError(t("unauthorized"));
-        setLoading(false);
-        return;
-      }
+      if (!user) return [];
 
       // ✅ Fetch from local DB and join with subjects and teachers
       const [
@@ -127,6 +110,13 @@ export default function StudentsTable() {
       const currentCenter = allCenters.find((c) => c.status !== "0");
       const paymentStartDay = currentCenter?.paymentStartDay ?? 1;
       const paymentEndDay = currentCenter?.paymentEndDay ?? 30;
+
+      const getTotalRevenueLocal = (studentSubjects: StudentSubject[]) => {
+        return studentSubjects.reduce(
+          (total, ss) => total + (ss?.subject?.price ?? 0),
+          0,
+        );
+      };
 
       // ✅ Filter students by status only (managers see ALL students)
       const managerStudents = allStudents.filter((s) => s.status !== "0");
@@ -179,35 +169,21 @@ export default function StudentsTable() {
             ),
             paymentStartDay,
             paymentEndDay,
-            getTotalRevenue({
-              studentSubjects: studentSubjectsForStudent,
-            } as any),
+            getTotalRevenueLocal(studentSubjectsForStudent),
           ),
         };
       });
 
-      setStudents(studentsWithSubjects);
-      setError("");
-
-      // ✅ Commented out online fetch
-      // const { data } = await axios.get("/api/students")
-      // setStudents(data)
+      return studentsWithSubjects;
     } catch (err) {
       console.error("Error fetching students:", err);
-      setError(t("errorFetchStudents"));
-    } finally {
-      setLoading(false);
+      return [];
     }
-  }, [user, authLoading, t]);
+  }, [user]);
 
-  useEffect(() => {
-    // Wait for auth to finish loading before fetching data
-    if (!authLoading) {
-      fetchStudents();
-    }
-  }, [authLoading, fetchStudents]);
+  const loading = students === undefined;
 
-  const filteredStudents = students.filter((student) => {
+  const filteredStudents = (students || []).filter((student) => {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -224,7 +200,7 @@ export default function StudentsTable() {
 
   const grades = [
     "all",
-    ...new Set(students.map((s) => s.grade).filter(Boolean)),
+    ...new Set((students || []).map((s) => s.grade).filter(Boolean)),
   ];
 
   const getTotalRevenue = (student: Student) => {
@@ -235,15 +211,17 @@ export default function StudentsTable() {
     );
   };
 
-  const totalStudents = students.length;
-  const totalRevenue = students.reduce(
+  const totalStudents = students?.length || 0;
+  const totalRevenue = (students || []).reduce(
     (sum, student) => sum + getTotalRevenue(student),
     0,
   );
   const averageSubjects =
     totalStudents > 0
-      ? students.reduce((sum, s) => sum + (s.studentSubjects?.length || 0), 0) /
-        totalStudents
+      ? (students || []).reduce(
+          (sum, s) => sum + (s.studentSubjects?.length || 0),
+          0,
+        ) / totalStudents
       : 0;
 
   // Show loading while auth is checking or data is loading
@@ -257,12 +235,6 @@ export default function StudentsTable() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
@@ -392,7 +364,7 @@ export default function StudentsTable() {
       <StudentsCardsView
         students={filteredStudents}
         getTotalRevenue={getTotalRevenue}
-        onUpdate={fetchStudents}
+        onUpdate={() => {}}
         // adminMode={user?.role === "ADMIN"}
       />
 
@@ -400,7 +372,7 @@ export default function StudentsTable() {
         students={filteredStudents}
         columnVisibility={columnVisibility}
         getTotalRevenue={getTotalRevenue}
-        onUpdate={fetchStudents}
+        onUpdate={() => {}}
         // adminMode={user?.role === "ADMIN"}
       />
     </div>

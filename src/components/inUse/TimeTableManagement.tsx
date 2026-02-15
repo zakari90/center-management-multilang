@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import ExcelJS from "exceljs";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocalizedConstants } from "../useLocalizedConstants";
 import {
@@ -195,15 +196,6 @@ export default function TimetableManagement({
   const isManager = user?.role?.toUpperCase() === "MANAGER";
   const effectiveReadOnly = readOnly || isManager;
 
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
-  const [rooms, setRooms] = useState<string[]>([]);
-  const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{
     day: string;
@@ -226,25 +218,9 @@ export default function TimetableManagement({
 
   const isSubmittingRef = useRef(false);
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError("");
-
+  const queryData = useLiveQuery(async () => {
     try {
-      // Only proceed if auth has finished loading and user is available
-      if (!user && !authLoading) {
-        setError(t("unauthorized") || "Unauthorized: Please log in again");
-        setIsLoading(false);
-        return;
-      }
-
-      if (!user?.id) {
-        setError(
-          t("unauthorized") || "User ID not available. Please log in again.",
-        );
-        setIsLoading(false);
-        return;
-      }
+      if (!user) return null;
 
       // ✅ Fetch from local DB
       const [
@@ -261,14 +237,13 @@ export default function TimetableManagement({
         teacherSubjectActions.getAll(),
       ]);
 
-      // ✅ Determine role
-      const isManager = user.role?.toUpperCase() === "MANAGER";
+      const isManagerLocal = user.role?.toUpperCase() === "MANAGER";
 
       // 1. Determine accessible centers
       const accessibleCenters = allCenters
         .filter((c) => {
           if (isAdmin) return c.adminId === user.id;
-          if (isManager) return (c.managers || []).includes(user.id);
+          if (isManagerLocal) return (c.managers || []).includes(user.id);
           return false;
         })
         .filter((c) => c.status !== "0");
@@ -283,8 +258,6 @@ export default function TimetableManagement({
         : accessibleCenterIds;
 
       // 2. Determine relevant managers (for teacher lookup)
-      // A teacher is visible if they are managed by the current user
-      // OR by any admin/manager of a center the current user has access to.
       const relevantManagerIds = new Set([
         ...accessibleCenters.flatMap((c) => [c.adminId, ...(c.managers || [])]),
         user.id,
@@ -334,36 +307,35 @@ export default function TimetableManagement({
         roomId: s.roomId,
       }));
 
-      setTeachers(managerTeachers);
-      setSubjects(managerSubjects);
-      setTeacherSubjects(
-        allTeacherSubjects
-          .filter((ts) => ts.status !== "0")
-          .map((ts) => ({ teacherId: ts.teacherId, subjectId: ts.subjectId })),
-      );
-      setSchedule(scheduleSlots);
-
       // ✅ Get rooms from relevant centers
       const finalRooms = allCenters
         .filter((c) => targetCenterIds.includes(c.id) && c.status !== "0")
         .flatMap((c) => c.classrooms || [])
         .filter((room, index, self) => self.indexOf(room) === index); // Remove duplicates
 
-      setRooms(finalRooms);
+      return {
+        teachers: managerTeachers,
+        subjects: managerSubjects,
+        schedule: scheduleSlots,
+        rooms: finalRooms,
+        teacherSubjects: allTeacherSubjects
+          .filter((ts) => ts.status !== "0")
+          .map((ts) => ({ teacherId: ts.teacherId, subjectId: ts.subjectId })),
+      };
     } catch (err) {
-      setError(t("errorLoadData"));
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to fetch timetable data:", err);
+      return null;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, user?.role, authLoading, centerId, t]);
+  }, [user?.id, user?.role, centerId, refreshKey]);
 
-  useEffect(() => {
-    // Wait for auth to finish loading before fetching data
-    if (!authLoading) {
-      fetchData();
-    }
-  }, [authLoading, fetchData, refreshKey]);
+  const teachers = queryData?.teachers || [];
+  const subjects = queryData?.subjects || [];
+  const teacherSubjects = queryData?.teacherSubjects || [];
+  const rooms = queryData?.rooms || [];
+  const schedule = queryData?.schedule || [];
+  const isLoading = queryData === undefined;
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSlotClick = (dayKey: string, startTime: string) => {
     if (readOnly) return;
@@ -448,10 +420,7 @@ export default function TimetableManagement({
         for (const id of conflictingScheduleIds) {
           await scheduleActions.markForDelete(id);
         }
-        // Update local state to remove deleted schedules
-        setSchedule((prev) =>
-          prev.filter((s) => !conflictingScheduleIds.includes(s.id!)),
-        );
+        // Update local state is handled automatically by useLiveQuery
         setConflictingScheduleIds([]);
       }
 

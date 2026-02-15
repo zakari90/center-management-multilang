@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/authContext";
 import { receiptActions } from "@/lib/dexie/dexieActions";
@@ -28,19 +29,11 @@ interface ReceiptStats {
 
 export default function ReceiptsSummary() {
   const t = useTranslations("ManagerReceiptsSummary");
-  const [stats, setStats] = useState<ReceiptStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchStats();
-    }
-  }, [user]);
-
-  const fetchStats = async () => {
+  const stats = useLiveQuery(async () => {
     try {
-      if (!user) return;
+      if (!user) return null;
 
       const receipts = await receiptActions.getAll();
       const activeReceipts = receipts.filter((r) => r.status !== "0");
@@ -48,7 +41,7 @@ export default function ReceiptsSummary() {
       const now = new Date();
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-      const stats = activeReceipts.reduce(
+      const computedStats = activeReceipts.reduce(
         (acc, receipt) => {
           acc.totalReceipts++;
 
@@ -75,16 +68,18 @@ export default function ReceiptsSummary() {
       );
 
       // Derived stats
-      stats.totalRevenue = stats.studentPayments; // Redefine total revenue as total income
-      stats.netProfit = stats.studentPayments - stats.teacherPayments;
+      computedStats.totalRevenue = computedStats.studentPayments; // Redefine total revenue as total income
+      computedStats.netProfit =
+        computedStats.studentPayments - computedStats.teacherPayments;
 
-      setStats(stats);
+      return computedStats;
     } catch (err) {
       console.error(t("errorFetchStats"), err);
-    } finally {
-      setIsLoading(false);
+      return null;
     }
-  };
+  }, [user]);
+
+  const isLoading = stats === undefined;
 
   if (isLoading) {
     return (

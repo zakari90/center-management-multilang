@@ -32,6 +32,7 @@ import {
 import { checkPaymentStatus, PaymentStatus } from "@/lib/payment-utils";
 import { BookOpen, ChevronDown, Loader2, UserCheck, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useState } from "react";
 import AddTeacherDialog from "./AddTeacherDialog";
 import PageHeader from "./page-header";
@@ -66,9 +67,6 @@ export interface Teacher {
 export default function TeachersTable() {
   const t = useTranslations("TeachersTable");
   const { user } = useAuth(); // ✅ Get current user from AuthContext
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [columnVisibility, setColumnVisibility] = useState({
     teacher: true,
@@ -79,16 +77,9 @@ export default function TeachersTable() {
     actions: true,
   });
 
-  const fetchTeachers = useCallback(async () => {
+  const teachers = useLiveQuery(async () => {
     try {
-      setIsLoading(true);
-      setError("");
-
-      if (!user) {
-        setError("Unauthorized: Please log in again");
-        setIsLoading(false);
-        return;
-      }
+      if (!user) return [];
 
       // ✅ Fetch from local DB and join with subjects
       const [
@@ -201,24 +192,16 @@ export default function TeachersTable() {
         };
       });
 
-      setTeachers(teachersWithSubjects);
-
-      // ✅ Commented out online fetch
-      // const response = await axios.get('/api/teachers')
-      // setTeachers(response.data)
+      return teachersWithSubjects;
     } catch (err) {
       console.error("Failed to fetch teachers:", err);
-      setError(err instanceof Error ? err.message : t("error"));
-    } finally {
-      setIsLoading(false);
+      return [];
     }
-  }, [user, t]);
+  }, [user]);
 
-  useEffect(() => {
-    fetchTeachers();
-  }, [fetchTeachers]);
+  const isLoading = teachers === undefined;
 
-  const filteredTeachers = teachers.filter(
+  const filteredTeachers = (teachers || []).filter(
     (teacher) =>
       teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       teacher.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -240,11 +223,6 @@ export default function TeachersTable() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
         <div className="flex flex-col items-stretch gap-2 md:items-end">
@@ -256,12 +234,14 @@ export default function TeachersTable() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 m-3">
         <StatCard
           title={t("totalTeachers")}
-          value={teachers.length}
+          value={teachers?.length || 0}
           icon={Users}
         />
         <StatCard
           title={t("activeTeachers")}
-          value={teachers.filter((t) => t.teacherSubjects.length > 0).length}
+          value={
+            (teachers || []).filter((t) => t.teacherSubjects.length > 0).length
+          }
           icon={UserCheck}
           iconBgColor="bg-green-100"
           iconColor="text-green-600"
@@ -271,7 +251,7 @@ export default function TeachersTable() {
           title={t("subjectsCovered")}
           value={
             new Set(
-              teachers.flatMap((t) =>
+              (teachers || []).flatMap((t) =>
                 t.teacherSubjects.map((ts) => ts.subject.id),
               ),
             ).size
@@ -292,7 +272,7 @@ export default function TeachersTable() {
               {filteredTeachers.length > 0
                 ? t("showing", {
                     count: filteredTeachers.length,
-                    total: teachers.length,
+                    total: teachers?.length || 0,
                   })
                 : t("noTeachersFound")}
             </CardDescription>
@@ -388,7 +368,7 @@ export default function TeachersTable() {
           <TeachersTableView
             teachers={filteredTeachers}
             columnVisibility={columnVisibility}
-            onUpdate={fetchTeachers}
+            onUpdate={() => {}}
             adminMode={user?.role === "ADMIN"}
           />
         </CardContent>

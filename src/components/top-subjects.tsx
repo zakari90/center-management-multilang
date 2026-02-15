@@ -28,21 +28,15 @@ interface TopSubject {
   maxCapacity: number;
 }
 
+import { useLiveQuery } from "dexie-react-hooks";
+
 export default function TopSubjects() {
-  const [subjects, setSubjects] = useState<TopSubject[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations("TopSubjects");
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchTopSubjects();
-    }
-  }, [user]);
-
-  const fetchTopSubjects = async () => {
+  const subjects = useLiveQuery(async () => {
     try {
-      if (!user) return;
+      if (!user) return [];
 
       // ✅ Fetch from localDB instead of API
       const [subjectsData, studentSubjectsData, studentsData] =
@@ -62,7 +56,7 @@ export default function TopSubjects() {
       );
 
       // Map subjects with enrollment counts
-      const topSubjects = activeSubjects
+      const topSubjectsData = activeSubjects
         .map((subject) => {
           const enrollments = activeEnrollments.filter(
             (ss) => ss.subjectId === subject.id,
@@ -80,17 +74,14 @@ export default function TopSubjects() {
         .sort((a, b) => b.revenue - a.revenue) // Sort by revenue descending
         .slice(0, 5); // Take top 5
 
-      setSubjects(topSubjects);
-
-      // ✅ Old API call - commented out
-      // const { data } = await axios.get('/api/dashboard/top-subjects')
-      // setSubjects(data)
+      return topSubjectsData;
     } catch (err) {
       console.error("Failed to fetch top subjects:", err);
-    } finally {
-      setIsLoading(false);
+      return [];
     }
-  };
+  }, [user]);
+
+  const isLoading = subjects === undefined;
 
   return (
     <Card>

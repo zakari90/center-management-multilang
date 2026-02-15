@@ -40,6 +40,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useState } from "react";
 import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
 import PageHeader from "./page-header";
@@ -72,21 +73,14 @@ interface Receipt {
 export default function ReceiptsTable() {
   const t = useTranslations("ReceiptsTable");
   const { user } = useAuth(); // ✅ Get current user from AuthContext
-
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [methodFilter, setMethodFilter] = useState<string>("all");
 
-  const fetchReceipts = useCallback(async () => {
+  const receipts = useLiveQuery(async () => {
     try {
-      if (!user) {
-        setError("Unauthorized: Please log in again");
-        setIsLoading(false);
-        return;
-      }
+      if (!user) return [];
 
       // ✅ Fetch from local DB
       const [allReceipts, allStudents, allTeachers, allUsers] =
@@ -149,21 +143,14 @@ export default function ReceiptsTable() {
         };
       });
 
-      setReceipts(receiptsWithData);
-
-      // ✅ Commented out online fetch
-      // const { data } = await axios.get('/api/receipts')
-      // setReceipts(data)
+      return receiptsWithData;
     } catch (err) {
-      setError(t("errorFetchReceipts"));
-    } finally {
-      setIsLoading(false);
+      console.error(t("errorFetchReceipts"), err);
+      return [];
     }
   }, [user, t]);
 
-  useEffect(() => {
-    fetchReceipts();
-  }, [fetchReceipts]);
+  const isLoading = receipts === undefined;
 
   const filteredReceipts = receipts.filter((receipt) => {
     const matchesSearch =

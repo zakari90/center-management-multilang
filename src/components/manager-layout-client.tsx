@@ -39,6 +39,7 @@ import {
   importAllFromServerForRole,
 } from "@/lib/dexie/serverActions";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 
 interface ManagerLayoutClientProps {
   children: React.ReactNode;
@@ -88,10 +89,11 @@ export default function ManagerLayoutClient({
       await syncAllEntitiesForRole(isAdmin);
       await importAllFromServerForRole(isAdmin);
     } catch (error) {
+      // Handle error if needed
     } finally {
       setIsSyncing(false);
     }
-  }, [user?.id, user?.role]);
+  }, [user?.id, user?.role, router]); // Added router to dependency array
 
   if (!mounted || isLoading) {
     return (
@@ -166,6 +168,7 @@ export default function ManagerLayoutClient({
           items={navItems}
           user={userData}
         />
+        <AutoSyncProvider />
         <SidebarInset>
           <header className="hidden md:flex h-14 shrink-0 items-center justify-between border-b px-4">
             <div className="flex items-center gap-2">
