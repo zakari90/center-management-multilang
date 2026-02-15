@@ -15,7 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -43,9 +42,7 @@ import {
   Calendar,
   ChevronDown,
   Download,
-  Eye,
   Loader2,
-  MoreVertical,
   Receipt as ReceiptIcon,
   Search,
   TrendingUp,
@@ -54,7 +51,6 @@ import {
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import ViewReceiptDialog from "./ViewReceiptDialog";
 
 interface Receipt {
   id: string;

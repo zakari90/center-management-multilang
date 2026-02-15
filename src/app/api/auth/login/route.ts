@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, email, password, role } = body; // Added role parameter
+    const { email, password, role } = body; // Added role parameter
 
-    if (!email || !password || !id) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: { message: "Email, password, and id are required." } },
+        { error: { message: "Email and password are required." } },
         { status: 400 },
       );
     }

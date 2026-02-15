@@ -199,16 +199,7 @@ export async function loginAdmin(state: unknown, formData: FormData) {
   try {
     const t = await getTranslations("auth");
 
-    // Always generate a valid ObjectId for new users
-    // If user exists, the API will return their existing ID
-    const providedId = formData.get("id") as string;
-    const validId =
-      providedId && /^[0-9a-fA-F]{24}$/.test(providedId)
-        ? providedId
-        : generateObjectId();
-
     const data = {
-      id: validId,
       email: formData.get("email"),
       password: formData.get("password"),
       role: "admin", // Enforce admin role validation
@@ -271,6 +262,7 @@ export async function loginManager(state: unknown, formData: FormData) {
     const data = {
       email: formData.get("email"),
       password: formData.get("password"),
+      role: "manager", // Enforce manager role validation
     };
 
     const loginSchema = createLoginSchema(t);
@@ -282,13 +274,9 @@ export async function loginManager(state: unknown, formData: FormData) {
       };
     }
 
-    const response = await axios.post(
-      `${apiUrl}/auth/login`,
-      { ...data, role: "manager" },
-      {
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+    const response = await axios.post(`${apiUrl}/auth/login`, data, {
+      headers: { "Content-Type": "application/json" },
+    });
 
     const user = response.data.user;
     const passwordHash = response.data.passwordHash; // For offline auth
