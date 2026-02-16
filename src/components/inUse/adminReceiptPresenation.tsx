@@ -395,7 +395,7 @@ export default function AdminReceiptsTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              ${totalIncome.toFixed(2)}
+              MAD {totalIncome.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               {studentPayments.length} {t("receipts")}
@@ -412,7 +412,7 @@ export default function AdminReceiptsTable() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              ${totalExpense.toFixed(2)}
+              MAD {totalExpense.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               {teacherPayments.length} {t("receipts")}
@@ -431,7 +431,7 @@ export default function AdminReceiptsTable() {
             <div
               className={`text-2xl font-bold ${netAmount >= 0 ? "text-blue-600" : "text-red-600"}`}
             >
-              ${netAmount.toFixed(2)}
+              MAD {netAmount.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               {netAmount >= 0 ? t("profit") : t("loss")}
@@ -589,7 +589,7 @@ export default function AdminReceiptsTable() {
                                   : "text-orange-600"
                               }`}
                             >
-                              ${receipt.amount.toFixed(2)}
+                              MAD {receipt.amount.toFixed(2)}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -667,7 +667,7 @@ export default function AdminReceiptsTable() {
                             {student.count}
                           </TableCell>
                           <TableCell className="text-right font-bold text-green-600">
-                            ${student.totalPaid.toFixed(2)}
+                            MAD {student.totalPaid.toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -730,7 +730,7 @@ export default function AdminReceiptsTable() {
                             {teacher.count}
                           </TableCell>
                           <TableCell className="text-right font-bold text-orange-600">
-                            ${teacher.totalEarned.toFixed(2)}
+                            MAD {teacher.totalEarned.toFixed(2)}
                           </TableCell>
                         </TableRow>
                       ))}
