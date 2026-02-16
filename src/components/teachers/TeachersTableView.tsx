@@ -37,7 +37,7 @@ export function TeachersTableView({
 }: TeachersTableViewProps) {
   const t = useTranslations("TeachersTable");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const totalPages = Math.ceil(teachers.length / ITEMS_PER_PAGE);
   const paginatedTeachers = teachers.slice(

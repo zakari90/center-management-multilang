@@ -45,6 +45,7 @@ import { useCallback, useEffect, useState } from "react";
 import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
 import PageHeader from "./page-header";
 import AddTeacherPaymentDialog from "./AddTeacherPaymentDialog";
+import { PaginationControls } from "./ui/pagination-controls";
 
 interface Receipt {
   manager?: {
@@ -77,6 +78,8 @@ export default function ReceiptsTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [methodFilter, setMethodFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
 
   const receipts = useLiveQuery(async () => {
     try {
@@ -165,6 +168,12 @@ export default function ReceiptsTable() {
 
     return matchesSearch && matchesType && matchesMethod;
   });
+
+  const totalPages = Math.ceil(filteredReceipts.length / ITEMS_PER_PAGE);
+  const paginatedReceipts = filteredReceipts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const studentPayments = (receipts || []).filter(
     (r) => r.type === "STUDENT_PAYMENT",
@@ -284,11 +293,20 @@ export default function ReceiptsTable() {
               <Input
                 placeholder={t("searchPlaceholder")}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="pl-10"
               />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select
+              value={typeFilter}
+              onValueChange={(val) => {
+                setTypeFilter(val);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("allTypes")} />
               </SelectTrigger>
@@ -302,7 +320,13 @@ export default function ReceiptsTable() {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <Select value={methodFilter} onValueChange={setMethodFilter}>
+            <Select
+              value={methodFilter}
+              onValueChange={(val) => {
+                setMethodFilter(val);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t("allMethods")} />
               </SelectTrigger>
@@ -350,7 +374,7 @@ export default function ReceiptsTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredReceipts.map((receipt) => (
+                {paginatedReceipts.map((receipt) => (
                   <TableRow key={receipt.id}>
                     <TableCell>
                       <div className="font-medium">
@@ -401,7 +425,7 @@ export default function ReceiptsTable() {
                             : "text-orange-600"
                         }`}
                       >
-                        MAD ${receipt.amount.toFixed(2)}
+                        MAD {receipt.amount.toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -418,6 +442,19 @@ export default function ReceiptsTable() {
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {filteredReceipts.length > 0 && (
+            <div className="mt-4">
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalCount={filteredReceipts.length}
+                pageSize={ITEMS_PER_PAGE}
+                entityName={t("receipts").toLowerCase()}
+              />
+            </div>
           )}
         </CardContent>
       </Card>

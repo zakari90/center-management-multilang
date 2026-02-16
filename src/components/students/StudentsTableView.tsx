@@ -40,7 +40,7 @@ export function StudentsTableView({
 }: StudentsTableViewProps) {
   const t = useTranslations("StudentsTable");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
   const paginatedStudents = students.slice(

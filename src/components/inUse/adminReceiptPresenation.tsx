@@ -53,6 +53,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AddStudentPaymentDialog from "../AddStudentPaymentDialog";
 import AddTeacherPaymentDialog from "../AddTeacherPaymentDialog";
 import PageHeader from "../page-header";
+import { PaginationControls } from "../ui/pagination-controls";
 
 interface Receipt {
   id: string;
@@ -96,6 +97,11 @@ export default function AdminReceiptsTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [methodFilter, setMethodFilter] = useState<string>("all");
+
+  const [currentPageReceipts, setCurrentPageReceipts] = useState(1);
+  const [currentPageStudents, setCurrentPageStudents] = useState(1);
+  const [currentPageTeachers, setCurrentPageTeachers] = useState(1);
+  const ITEMS_PER_PAGE = 5;
 
   const fetchReceipts = useCallback(async () => {
     try {
@@ -214,6 +220,14 @@ export default function AdminReceiptsTable() {
     return matchesSearch && matchesType && matchesMethod;
   });
 
+  const totalPagesReceipts = Math.ceil(
+    filteredReceipts.length / ITEMS_PER_PAGE,
+  );
+  const paginatedReceipts = filteredReceipts.slice(
+    (currentPageReceipts - 1) * ITEMS_PER_PAGE,
+    currentPageReceipts * ITEMS_PER_PAGE,
+  );
+
   // Aggregated data for students and teachers
   const studentSummaryList = useMemo(() => {
     const aggregated = receipts
@@ -282,6 +296,14 @@ export default function AdminReceiptsTable() {
       .sort((a, b) => b.totalPaid - a.totalPaid);
   }, [receipts, students, studentSubjects, subjects, centers]);
 
+  const totalPagesStudents = Math.ceil(
+    studentSummaryList.length / ITEMS_PER_PAGE,
+  );
+  const paginatedStudents = studentSummaryList.slice(
+    (currentPageStudents - 1) * ITEMS_PER_PAGE,
+    currentPageStudents * ITEMS_PER_PAGE,
+  );
+
   const teacherSummaryList = useMemo(() => {
     const aggregated = receipts
       .filter((r) => r.type === "TEACHER_PAYMENT" && r.teacher)
@@ -333,6 +355,14 @@ export default function AdminReceiptsTable() {
       })
       .sort((a, b) => b.totalEarned - a.totalEarned);
   }, [receipts, teachers, centers]);
+
+  const totalPagesTeachers = Math.ceil(
+    teacherSummaryList.length / ITEMS_PER_PAGE,
+  );
+  const paginatedTeachers = teacherSummaryList.slice(
+    (currentPageTeachers - 1) * ITEMS_PER_PAGE,
+    currentPageTeachers * ITEMS_PER_PAGE,
+  );
 
   // Calculate stats
   const studentPayments = receipts.filter((r) => r.type === "STUDENT_PAYMENT");
@@ -469,11 +499,20 @@ export default function AdminReceiptsTable() {
                   <Input
                     placeholder={t("searchPlaceholder")}
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPageReceipts(1);
+                    }}
                     className="pl-10"
                   />
                 </div>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <Select
+                  value={typeFilter}
+                  onValueChange={(val) => {
+                    setTypeFilter(val);
+                    setCurrentPageReceipts(1);
+                  }}
+                >
                   <SelectTrigger className="w-full md:w-[180px]">
                     <SelectValue placeholder={t("allTypes")} />
                   </SelectTrigger>
@@ -487,7 +526,13 @@ export default function AdminReceiptsTable() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={methodFilter} onValueChange={setMethodFilter}>
+                <Select
+                  value={methodFilter}
+                  onValueChange={(val) => {
+                    setMethodFilter(val);
+                    setCurrentPageReceipts(1);
+                  }}
+                >
                   <SelectTrigger className="w-full md:w-[180px]">
                     <SelectValue placeholder={t("allMethods")} />
                   </SelectTrigger>
@@ -539,7 +584,7 @@ export default function AdminReceiptsTable() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredReceipts.map((receipt) => (
+                      {paginatedReceipts.map((receipt) => (
                         <TableRow key={receipt.id}>
                           <TableCell>
                             <div className="font-medium">
@@ -610,6 +655,19 @@ export default function AdminReceiptsTable() {
                   </Table>
                 </div>
               )}
+
+              {filteredReceipts.length > 0 && (
+                <div className="mt-4">
+                  <PaginationControls
+                    currentPage={currentPageReceipts}
+                    totalPages={totalPagesReceipts}
+                    onPageChange={setCurrentPageReceipts}
+                    totalCount={filteredReceipts.length}
+                    pageSize={ITEMS_PER_PAGE}
+                    entityName={t("receipts").toLowerCase()}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -652,7 +710,7 @@ export default function AdminReceiptsTable() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {studentSummaryList.map((student) => (
+                      {paginatedStudents.map((student) => (
                         <TableRow key={student.id}>
                           <TableCell className="font-medium">
                             {student.name}
@@ -673,6 +731,18 @@ export default function AdminReceiptsTable() {
                       ))}
                     </TableBody>
                   </Table>
+                </div>
+              )}
+              {studentSummaryList.length > 0 && (
+                <div className="mt-4">
+                  <PaginationControls
+                    currentPage={currentPageStudents}
+                    totalPages={totalPagesStudents}
+                    onPageChange={setCurrentPageStudents}
+                    totalCount={studentSummaryList.length}
+                    pageSize={ITEMS_PER_PAGE}
+                    entityName={t("students").toLowerCase()}
+                  />
                 </div>
               )}
             </CardContent>
@@ -716,7 +786,7 @@ export default function AdminReceiptsTable() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {teacherSummaryList.map((teacher) => (
+                      {paginatedTeachers.map((teacher) => (
                         <TableRow key={teacher.id}>
                           <TableCell className="font-medium">
                             {teacher.name}
@@ -736,6 +806,18 @@ export default function AdminReceiptsTable() {
                       ))}
                     </TableBody>
                   </Table>
+                </div>
+              )}
+              {teacherSummaryList.length > 0 && (
+                <div className="mt-4">
+                  <PaginationControls
+                    currentPage={currentPageTeachers}
+                    totalPages={totalPagesTeachers}
+                    onPageChange={setCurrentPageTeachers}
+                    totalCount={teacherSummaryList.length}
+                    pageSize={ITEMS_PER_PAGE}
+                    entityName={t("teachers").toLowerCase()}
+                  />
                 </div>
               )}
             </CardContent>

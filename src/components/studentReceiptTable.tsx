@@ -99,7 +99,7 @@ export default function StudentReceiptTable() {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const fetchData = useCallback(async () => {
     try {
