@@ -856,7 +856,7 @@ export function AllTablesViewer() {
           emptyMessage={t("emptyMessage", {
             table: TABLE_CONFIGS[selectedTable].name.toLowerCase(),
           })}
-          pageSize={15}
+          pageSize={5}
           dir={direction}
           translations={{
             previous: t("pagination.previous"),

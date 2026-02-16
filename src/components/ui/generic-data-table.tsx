@@ -73,7 +73,7 @@ export function GenericDataTable<T extends Record<string, any>>({
   description,
   searchable = true,
   searchPlaceholder = "Search...",
-  pageSize = 10,
+  pageSize = 5,
   onView,
   onEdit,
   onDelete,
@@ -205,9 +205,13 @@ export function GenericDataTable<T extends Record<string, any>>({
       {/* Header */}
       {(title || description) && (
         <div>
-          {title && <h3 className="text-lg font-semibold">{title}</h3>}
+          {title && (
+            <h3 className="text-lg font-semibold text-center">{title}</h3>
+          )}
           {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="text-sm text-muted-foreground text-center">
+              {description}
+            </p>
           )}
         </div>
       )}
@@ -215,7 +219,7 @@ export function GenericDataTable<T extends Record<string, any>>({
       {/* Search */}
       {searchable && (
         <div className="flex items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 max-w-sm ">
             <Search className="absolute start-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={searchPlaceholder}
@@ -224,7 +228,7 @@ export function GenericDataTable<T extends Record<string, any>>({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="ps-8"
+              className="ps-8 ml-auto mr-auto"
             />
           </div>
           <div className="text-sm text-muted-foreground">
