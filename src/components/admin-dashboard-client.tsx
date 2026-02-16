@@ -23,73 +23,37 @@ export default function AdminDashboardClient() {
     <>
       <AutoSyncProvider />
 
-      <div className="container mx-auto p-4 sm:p-8 space-y-12 animate-in fade-in duration-700">
+      <div className="container mx-auto p-4 sm:p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
+        <AdminStatsCards />
 
-        <section className="space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-            {t("stats_overview") || "Statistics Overview"}
-          </h2>
-          <AdminStatsCards />
+        {/* Quick Actions */}
+        <AdminQuickActions />
+
+        {/* Revenue Chart */}
+        <section>
+          <AdminRevenueChart />
         </section>
 
-        <section className="space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-            {t("quick_actions") || "Quick Actions"}
-          </h2>
-          <AdminQuickActions />
-        </section>
-
-        <div className="grid gap-10 grid-cols-1 xl:grid-cols-3">
-          <section className="xl:col-span-2 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-              {t("revenue_analytics") || "Revenue Analytics"}
-            </h2>
-            <AdminRevenueChart />
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-              {t("top_performing") || "Top Performing"}
-            </h2>
-            <TopSubjects />
-          </section>
-        </div>
-
-        <section className="space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-            {t("centers_status") || "Centers Status"}
-          </h2>
+        {/* Centers Overview */}
+        <section>
           <CentersOverview />
         </section>
 
-        <div className="grid gap-10 grid-cols-1 lg:grid-cols-2">
-          <section className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-              {t("enrollment_trends") || "Enrollment Trends"}
-            </h2>
-            <EnrollmentChart />
-          </section>
-          <section className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-              {t("recent_activity") || "Recent Activity"}
-            </h2>
-            <SystemActivityLog />
-          </section>
+        {/* Charts Section */}
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <EnrollmentChart />
+          <TopSubjects />
         </div>
 
-        <section className="space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
-            {t("management") || "Management"}
-          </h2>
-          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
-            <ManagersList />
-          </div>
-        </section>
-
-        <div className="pt-8 border-t border-border/50">
-          <DeleteAllDataButton />
+        {/* Managers & Activity */}
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <ManagersList />
+          <SystemActivityLog />
         </div>
+
+        {/* Danger Zone */}
+        <DeleteAllDataButton />
       </div>
     </>
   );

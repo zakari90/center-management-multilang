@@ -832,15 +832,7 @@
   },
   "Dashboard": {
     "title": "Tableau de bord",
-    "subtitle": "Aperçu général du système",
-    "stats_overview": "Aperçu des statistiques",
-    "quick_actions": "Actions rapides",
-    "revenue_analytics": "Analytique des revenus",
-    "top_performing": "Meilleures performances",
-    "centers_status": "État des centres",
-    "enrollment_trends": "Tendances d'inscription",
-    "recent_activity": "Activité récente",
-    "management": "Gestion"
+    "subtitle": "Aperçu du système"
   },
   "TeacherPayment": {
     "teacherPayment": "Paiement de l'enseignant",
