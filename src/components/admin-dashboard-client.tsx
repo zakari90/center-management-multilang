@@ -11,14 +11,13 @@ import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 // import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 // import { FirstLoginImport } from "@/components/FirstLoginImport";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { AutoSyncProvider } from "./AutoSyncProvider";
 import PageHeader from "./page-header";
 
 export default function AdminDashboardClient() {
   const t = useTranslations("Dashboard");
-  const format = useFormatter();
-  const dateTime = new Date();
+
   return (
     <>
       <AutoSyncProvider />
