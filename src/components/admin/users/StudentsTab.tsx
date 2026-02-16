@@ -51,7 +51,7 @@ export function StudentsTab({
   const [searchTerm, setSearchTerm] = useState("");
   const [gradeFilter, setGradeFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const uniqueGrades = Array.from(
     new Set(students.map((s) => s.grade).filter(Boolean)),

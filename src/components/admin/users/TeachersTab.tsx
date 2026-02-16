@@ -44,7 +44,7 @@ export function TeachersTab({
   const t = useTranslations("AllUsersTable");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const filteredTeachers = teachers.filter(
     (teacher) =>

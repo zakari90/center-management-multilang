@@ -25,7 +25,7 @@ interface ManagersTabProps {
 export function ManagersTab({ users, onEdit, onDelete }: ManagersTabProps) {
   const t = useTranslations("AllUsersTable");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
 
   const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
   const paginatedUsers = users.slice(
