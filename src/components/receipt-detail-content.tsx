@@ -379,7 +379,7 @@ export function ReceiptDetailContent({
                       : "text-orange-600"
                   }`}
                 >
-                  ${receipt.amount.toFixed(2)}
+                  MAD{receipt.amount.toFixed(2)}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground text-right">

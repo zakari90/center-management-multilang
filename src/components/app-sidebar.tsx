@@ -34,15 +34,12 @@ export function AppSidebar({ items, user, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                  <School2Icon className="!size-5 text-primary" />
+                  <School2Icon className="size-5! text-primary" />
                 </div>
-                <span className="text-base font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
-                  Center
-                </span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

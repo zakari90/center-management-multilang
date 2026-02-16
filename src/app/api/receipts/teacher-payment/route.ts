@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
       totalAmount += subjectAmount;
       subjectDetails.push(
-        `${ts.subject.name} (${enrolledStudents} students): $${subjectAmount.toFixed(2)}`,
+        `${ts.subject.name} (${enrolledStudents} students): ${subjectAmount.toFixed(2)}`,
       );
     }
 

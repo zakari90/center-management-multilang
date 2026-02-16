@@ -2,21 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTranslations } from "next-intl";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useState } from "react";
 import { useAuth } from "@/context/authContext";
-import { receiptActions } from "@/lib/dexie/dexieActions";
 import { ReceiptType } from "@/lib/dexie/dbSchema";
-import {
-  Banknote,
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  ArrowUpRight,
-  ArrowDownRight,
-  DollarSign,
-} from "lucide-react";
+import { receiptActions } from "@/lib/dexie/dexieActions";
+import { useLiveQuery } from "dexie-react-hooks";
+import { Banknote, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ReceiptStats {
   totalReceipts: number;
@@ -133,7 +124,7 @@ export default function ReceiptsSummary() {
           <StatCard
             label={t("thisMonth")}
             value={stats.thisMonthRevenue}
-            icon={DollarSign}
+            icon={"MAD"}
             colorClass="text-violet-600"
             bgClass="bg-violet-100"
           />

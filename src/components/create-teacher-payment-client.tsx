@@ -299,7 +299,7 @@ export default function CreateTeacherPaymentFormClient({
       // ✅ Create description if not provided
       const subjectDetails = selectedSubjectsData.map(
         (s) =>
-          `${s.subjectName} (${s.enrolledStudents} students): $${s.calculatedAmount.toFixed(2)}`,
+          `${s.subjectName} (${s.enrolledStudents} students): MAD${s.calculatedAmount.toFixed(2)}`,
       );
       const finalDescription =
         formData.description || `${subjectDetails.join(", ")}`;
