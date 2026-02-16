@@ -584,15 +584,17 @@ export default function AddStudentPaymentDialog({
     [selectedStudent, formData, user, onPaymentCreated, currentStep],
   );
 
-  const filteredStudents = students.filter((student) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      student.name.toLowerCase().includes(search) ||
-      student.email?.toLowerCase().includes(search) ||
-      student.phone?.includes(search) ||
-      student.grade?.toLowerCase().includes(search)
-    );
-  });
+  const filteredStudents = students
+    .filter((student) => {
+      const search = searchTerm.toLowerCase();
+      return (
+        student.name.toLowerCase().includes(search) ||
+        student.email?.toLowerCase().includes(search) ||
+        student.phone?.includes(search) ||
+        student.grade?.toLowerCase().includes(search)
+      );
+    })
+    .slice(0, 5);
 
   // Step 1: Student Selection
   const renderStep1 = () => (
