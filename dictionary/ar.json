@@ -832,7 +832,15 @@
   },
   "Dashboard": {
     "title": "لوحة التحكم",
-    "subtitle": "نظرة عامة على النظام"
+    "subtitle": "نظرة عامة على النظام",
+    "stats_overview": "نظرة عامة على الإحصائيات",
+    "quick_actions": "إجراءات سريعة",
+    "revenue_analytics": "تحليلات الإيرادات",
+    "top_performing": "الأكثر أداءً",
+    "centers_status": "حالة المراكز",
+    "enrollment_trends": "اتجهات التسجيل",
+    "recent_activity": "النشاط الأخير",
+    "management": "الإدارة"
   },
   "TeacherPayment": {
     "teacherPayment": "دفع المعلم",

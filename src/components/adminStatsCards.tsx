@@ -148,54 +148,86 @@ export default function AdminStatsCards() {
 
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+      <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-none bg-linear-to-br from-blue-500/10 to-transparent">
+        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+          <Users className="h-12 w-12 text-blue-500" />
+        </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <CardTitle className="text-sm font-medium text-blue-700/80">
             {t("totalManagers")}
           </CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <div className="p-2 rounded-lg bg-blue-500/10">
+            <Users className="h-4 w-4 text-blue-600" />
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalManagers}</div>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold tracking-tight text-blue-950">
+            {stats.totalManagers}
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+      <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-none bg-linear-to-br from-purple-500/10 to-transparent">
+        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+          <UserCheck className="h-12 w-12 text-purple-500" />
+        </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <CardTitle className="text-sm font-medium text-purple-700/80">
             {t("totalStudents")}
           </CardTitle>
-          <UserCheck className="h-4 w-4 text-muted-foreground" />
+          <div className="p-2 rounded-lg bg-purple-500/10">
+            <UserCheck className="h-4 w-4 text-purple-600" />
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalStudents}</div>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold tracking-tight text-purple-950">
+            {stats.totalStudents}
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+      <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-none bg-linear-to-br from-green-500/10 to-transparent">
+        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+          <Users className="h-12 w-12 text-green-500" />
+        </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <CardTitle className="text-sm font-medium text-green-700/80">
             {t("totalTeachers")}
           </CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <div className="p-2 rounded-lg bg-green-500/10">
+            <Users className="h-4 w-4 text-green-600" />
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.totalTeachers}</div>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold tracking-tight text-green-950">
+            {stats.totalTeachers}
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+      <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-none bg-linear-to-br from-orange-500 to-orange-600 text-white shadow-orange-200">
+        <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform">
+          <TrendingUp className="h-12 w-12 text-white" />
+        </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+          <CardTitle className="text-sm font-medium text-orange-50/90">
             {t("totalRevenue")}
           </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            MAD {stats.totalRevenue.toFixed(2)}
+          <div className="p-2 rounded-lg bg-white/20">
+            <TrendingUp className="h-4 w-4 text-white" />
           </div>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" />+{stats.revenueGrowth.toFixed(1)}%{" "}
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="text-3xl font-bold tracking-tight">
+            MAD{" "}
+            {stats.totalRevenue.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
+          </div>
+          <p className="text-xs text-orange-100/80 mt-1 flex items-center gap-1">
+            <span className="flex items-center gap-0.5 font-bold bg-white/20 px-1.5 py-0.5 rounded text-[10px]">
+              +{stats.revenueGrowth.toFixed(1)}%
+            </span>
             {t("thisMonth")}
           </p>
         </CardContent>

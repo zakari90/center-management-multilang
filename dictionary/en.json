@@ -870,7 +870,15 @@
   },
   "Dashboard": {
     "title": "Dashboard",
-    "subtitle": "System-wide overview "
+    "subtitle": "System-wide overview ",
+    "stats_overview": "Statistics Overview",
+    "quick_actions": "Quick Actions",
+    "revenue_analytics": "Revenue Analytics",
+    "top_performing": "Top Performing",
+    "centers_status": "Centers Status",
+    "enrollment_trends": "Enrollment Trends",
+    "recent_activity": "Recent Activity",
+    "management": "Management"
   },
   "TeacherPayment": {
     "teacherPayment": "Teacher Payment",
