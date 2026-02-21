@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 // import axios from 'axios' // ✅ Commented out - using localDB instead
 import {
   Card,
@@ -9,28 +8,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
-import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useAuth } from "@/context/authContext";
 import {
+  studentActions,
   studentSubjectActions,
   subjectActions,
-  studentActions,
   teacherActions,
   teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { getChartColorArray } from "@/lib/utils/themeColors";
+import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { useLiveQuery } from "dexie-react-hooks";
 
@@ -38,6 +37,8 @@ interface SubjectEnrollment {
   subject: string;
   students: number;
   revenue: number;
+  teacherName: string;
+  originalSubjectName: string;
 }
 
 export default function EnrollmentChart() {
@@ -49,20 +50,13 @@ export default function EnrollmentChart() {
     try {
       if (!user) return [];
 
-      // ✅ Fetch from localDB instead of API
-      const [
-        studentSubjects,
-        subjects,
-        students,
-        teacherSubjectsData,
-        teachersData,
-      ] = await Promise.all([
-        studentSubjectActions.getAll(),
-        subjectActions.getAll(),
-        studentActions.getAll(),
-        teacherSubjectActions.getAll(),
-        teacherActions.getAll(),
-      ]);
+      const [studentSubjects, subjects, students, teachersData] =
+        await Promise.all([
+          studentSubjectActions.getAll(),
+          subjectActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+        ]);
 
       // Filter by status only (managers see ALL students)
       const managerStudents = students.filter((s) => s.status !== "0");
@@ -73,36 +67,51 @@ export default function EnrollmentChart() {
           managerStudents.some((s) => s.id === ss.studentId),
       );
 
-      // Group enrollments by subjectId
-      const enrollmentMap = new Map<string, number>();
+      // Group by (SubjectId, TeacherId)
+      const subjectTeacherMap = new Map<
+        string,
+        {
+          subjectId: string;
+          teacherId: string;
+          students: number;
+        }
+      >();
+
       activeEnrollments.forEach((enrollment) => {
-        const count = enrollmentMap.get(enrollment.subjectId) || 0;
-        enrollmentMap.set(enrollment.subjectId, count + 1);
+        const key = `${enrollment.subjectId}-${enrollment.teacherId}`;
+        const existing = subjectTeacherMap.get(key);
+        if (existing) {
+          existing.students += 1;
+        } else {
+          subjectTeacherMap.set(key, {
+            subjectId: enrollment.subjectId,
+            teacherId: enrollment.teacherId,
+            students: 1,
+          });
+        }
       });
 
       // Join with subjects and calculate revenue
-      const chartData = Array.from(enrollmentMap.entries())
-        .map(([subjectId, studentsCount]) => {
-          const subject = activeSubjects.find((s) => s.id === subjectId);
+      const chartData = Array.from(subjectTeacherMap.values())
+        .map((entry) => {
+          const subject = activeSubjects.find((s) => s.id === entry.subjectId);
+          const teacher = teachersData.find((t) => t.id === entry.teacherId);
 
-          // Find teachers for this subject
-          const assignedTeachers = teacherSubjectsData
-            .filter((ts) => ts.subjectId === subjectId && ts.status !== "0")
-            .map((ts) => {
-              const teacher = teachersData.find((t) => t.id === ts.teacherId);
-              return teacher?.name;
-            })
-            .filter(Boolean) as string[];
+          if (!subject) return null;
+
+          const teacherName = teacher?.name || tGlobal("unknownManager");
 
           return {
-            subject: subject?.name || "Unknown",
-            students: studentsCount,
-            revenue: (subject?.price || 0) * studentsCount,
-            teachers: assignedTeachers.join(", "),
+            subject: `${subject.name} (${teacherName})`,
+            students: entry.students,
+            revenue: subject.price * entry.students,
+            teacherName: teacherName,
+            originalSubjectName: subject.name,
           };
         })
+        .filter((s): s is NonNullable<typeof s> => s !== null)
         .sort((a, b) => b.students - a.students) // Sort by most students
-        .slice(0, 6); // Take top 6 subjects
+        .slice(0, 6); // Take top 6 pairings
 
       return chartData;
     } catch (err) {
@@ -141,18 +150,22 @@ export default function EnrollmentChart() {
               />
               <YAxis />
               <Tooltip
-                formatter={(value: number, name: string, props: any) => {
+                formatter={(value: number, name: string) => {
                   if (name === "revenue") return `MAD ${value.toFixed(2)}`;
                   return value;
                 }}
                 labelFormatter={(label, items) => {
-                  const item = items[0]?.payload;
+                  const item = items?.[0]?.payload as
+                    | SubjectEnrollment
+                    | undefined;
                   return (
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold">{label}</span>
-                      {item?.teachers && (
+                      <span className="font-bold">
+                        {item?.originalSubjectName || label}
+                      </span>
+                      {item?.teacherName && (
                         <span className="text-xs italic text-muted-foreground">
-                          {tGlobal("teacher")}: {item.teachers}
+                          {tGlobal("teacher")}: {item.teacherName}
                         </span>
                       )}
                     </div>

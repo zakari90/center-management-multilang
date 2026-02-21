@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/context/authContext";
 import {
@@ -25,6 +24,7 @@ interface TopSubject {
   id: string;
   name: string;
   grade: string;
+  teacherName: string;
   students: number;
   revenue: number;
   maxCapacity: number;
@@ -42,19 +42,13 @@ export default function TopSubjects() {
       if (!user) return [];
 
       // ✅ Fetch from localDB instead of API
-      const [
-        subjectsData,
-        studentSubjectsData,
-        studentsData,
-        teacherSubjectsData,
-        teachersData,
-      ] = await Promise.all([
-        subjectActions.getAll(),
-        studentSubjectActions.getAll(),
-        studentActions.getAll(),
-        teacherSubjectActions.getAll(),
-        teacherActions.getAll(),
-      ]);
+      const [subjectsData, studentSubjectsData, studentsData, teachersData] =
+        await Promise.all([
+          subjectActions.getAll(),
+          studentSubjectActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+        ]);
 
       // Filter by status only (managers see ALL students)
       const managerStudents = studentsData.filter((s) => s.status !== "0");
@@ -65,33 +59,51 @@ export default function TopSubjects() {
           managerStudents.some((s) => s.id === ss.studentId),
       );
 
-      // Map subjects with enrollment counts and teachers
-      const topSubjectsData = activeSubjects
-        .map((subject) => {
-          const enrollments = activeEnrollments.filter(
-            (ss) => ss.subjectId === subject.id,
-          );
+      // Group by (SubjectId, TeacherId)
+      const subjectTeacherMap = new Map<
+        string,
+        {
+          subjectId: string;
+          teacherId: string;
+          students: number;
+        }
+      >();
 
-          // Find teachers for this subject
-          const assignedTeachers = teacherSubjectsData
-            .filter((ts) => ts.subjectId === subject.id && ts.status !== "0")
-            .map((ts) => {
-              const teacher = teachersData.find((t) => t.id === ts.teacherId);
-              return teacher?.name;
-            })
-            .filter(Boolean) as string[];
+      activeEnrollments.forEach((enrollment) => {
+        const key = `${enrollment.subjectId}-${enrollment.teacherId}`;
+        const existing = subjectTeacherMap.get(key);
+        if (existing) {
+          existing.students += 1;
+        } else {
+          subjectTeacherMap.set(key, {
+            subjectId: enrollment.subjectId,
+            teacherId: enrollment.teacherId,
+            students: 1,
+          });
+        }
+      });
+
+      // Map to finalized TopSubject structure
+      const topSubjectsData: TopSubject[] = Array.from(
+        subjectTeacherMap.values(),
+      )
+        .map((entry) => {
+          const subject = activeSubjects.find((s) => s.id === entry.subjectId);
+          const teacher = teachersData.find((t) => t.id === entry.teacherId);
+
+          if (!subject) return null;
 
           return {
-            id: subject.id,
+            id: `${entry.subjectId}-${entry.teacherId}`,
             name: subject.name,
             grade: subject.grade,
-            teachers: assignedTeachers,
-            students: enrollments.length,
-            revenue: subject.price * enrollments.length,
+            teacherName: teacher?.name || tGlobal("unknownManager"),
+            students: entry.students,
+            revenue: subject.price * entry.students,
             maxCapacity: 30, // Hardcoded as in API
           };
         })
-        .filter((s) => s.students > 0) // Filter subjects with students
+        .filter((s): s is TopSubject => s !== null)
         .sort((a, b) => b.revenue - a.revenue) // Sort by revenue descending
         .slice(0, 5); // Take top 5
 
@@ -136,9 +148,12 @@ export default function TopSubjects() {
                     </Badge>
                     <div className="flex flex-col">
                       <span className="font-medium truncate text-sm sm:text-base">
-                        {subject.name}
+                        {subject.name} - {subject.teacherName}
                       </span>
-                      <Badge variant="secondary" className="text-xs text-wrap">
+                      <Badge
+                        variant="secondary"
+                        className="text-xs text-wrap w-fit"
+                      >
                         {subject.grade}
                       </Badge>
                     </div>
@@ -166,11 +181,9 @@ export default function TopSubjects() {
                   <p className="text-xs text-muted-foreground">
                     {t("studentsEnrolled", { count: subject.students })}
                   </p>
-                  {subject.teachers.length > 0 && (
-                    <p className="text-[10px] sm:text-xs text-muted-foreground italic">
-                      {tGlobal("teacher")}: {subject.teachers.join(", ")}
-                    </p>
-                  )}
+                  <p className="text-[10px] sm:text-xs text-muted-foreground italic">
+                    {tGlobal("teacher")}: {subject.teacherName}
+                  </p>
                 </div>
               </div>
             ))}
