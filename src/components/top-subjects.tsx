@@ -181,9 +181,6 @@ export default function TopSubjects() {
                   <p className="text-xs text-muted-foreground">
                     {t("studentsEnrolled", { count: subject.students })}
                   </p>
-                  {/* <p className="text-[10px] sm:text-xs text-muted-foreground italic">
-                    {tGlobal("teacher")}: {subject.teacherName}
-                  </p> */}
                 </div>
               </div>
             ))}

@@ -24,8 +24,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Label,
-  LabelList,
   Legend,
   ResponsiveContainer,
   Tooltip,
@@ -104,7 +102,9 @@ export default function EnrollmentChart() {
           const teacherName = teacher?.name || tGlobal("unknownManager");
 
           return {
-            subject: `${subject.name} (${teacherName})`,
+            subjectId: entry.subjectId,
+            teacherId: entry.teacherId,
+            subject: `${subject.name} - ${teacherName}`,
             students: entry.students,
             revenue: subject.price * entry.students,
             teacherName: teacherName,
@@ -145,10 +145,11 @@ export default function EnrollmentChart() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="subject"
-                angle={0} // ← Changed to -45 for angled labels
+                angle={-45} // ← Changed to -45 for angled labels
                 textAnchor="end" // ← Keep this for angled text
-                height={80} // ← Reduced height
+                height={120} // ← Increased height for angled labels
                 interval={0} // ← Show all labels
+                fontSize={11}
               />
               <YAxis />
               <Tooltip
@@ -185,12 +186,6 @@ export default function EnrollmentChart() {
                 name={t("chart.students")}
                 radius={[8, 8, 0, 0]}
               >
-                <LabelList
-                  dataKey="subject"
-                  position="top"
-                  offset={10}
-                  className="fill-foreground text-[10px] sm:text-xs font-medium"
-                />
                 {data.map((entry, index) => {
                   const colors = getChartColorArray();
                   return (
