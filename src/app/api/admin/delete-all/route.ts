@@ -43,7 +43,11 @@ export async function POST(request: Request) {
     }
 
     // Password verified - proceed with deletion
-    // Delete join tables first
+    // Delete notifications and delete requests first
+    await db.appNotification.deleteMany({});
+    await db.deleteRequest.deleteMany({});
+
+    // Delete join tables
     await db.studentSubject.deleteMany({});
     await db.teacherSubject.deleteMany({});
 

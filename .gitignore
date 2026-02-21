@@ -15,6 +15,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+multilingualPWABlueprint.txt
+.multilingualPWABlueprint.txt
+/multilingualPWABlueprint.txt
 .env
 .env.example
 .env.production
