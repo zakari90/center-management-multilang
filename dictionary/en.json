@@ -349,7 +349,12 @@
   "systemActivityLog": {
     "title": "System Activity",
     "description": "Recent platform events",
-    "noActivity": "No recent activity"
+    "noActivity": "No recent activity",
+    "centerCreated": "Center \"{name}\" was created",
+    "managerAdded": "Manager \"{name}\" was added",
+    "studentEnrolled": "Student \"{name}\" was enrolled",
+    "paymentReceived": "Payment received from {name}",
+    "studentPlaceholder": "student"
   },
   "error": {
     "server": "Internal Server Error",

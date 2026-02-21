@@ -2,6 +2,7 @@
 
 # dependencies
 # Serwist
+
 /test
 /node_modules
 /.pnp

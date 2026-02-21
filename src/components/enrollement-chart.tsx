@@ -27,6 +27,8 @@ import {
   studentSubjectActions,
   subjectActions,
   studentActions,
+  teacherActions,
+  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { getChartColorArray } from "@/lib/utils/themeColors";
 
@@ -41,16 +43,25 @@ interface SubjectEnrollment {
 export default function EnrollmentChart() {
   const t = useTranslations("EnrollmentChart");
   const { user } = useAuth();
+  const tGlobal = useTranslations("AllUsersTable");
 
   const data = useLiveQuery(async () => {
     try {
       if (!user) return [];
 
       // ✅ Fetch from localDB instead of API
-      const [studentSubjects, subjects, students] = await Promise.all([
+      const [
+        studentSubjects,
+        subjects,
+        students,
+        teacherSubjectsData,
+        teachersData,
+      ] = await Promise.all([
         studentSubjectActions.getAll(),
         subjectActions.getAll(),
         studentActions.getAll(),
+        teacherSubjectActions.getAll(),
+        teacherActions.getAll(),
       ]);
 
       // Filter by status only (managers see ALL students)
@@ -73,10 +84,21 @@ export default function EnrollmentChart() {
       const chartData = Array.from(enrollmentMap.entries())
         .map(([subjectId, studentsCount]) => {
           const subject = activeSubjects.find((s) => s.id === subjectId);
+
+          // Find teachers for this subject
+          const assignedTeachers = teacherSubjectsData
+            .filter((ts) => ts.subjectId === subjectId && ts.status !== "0")
+            .map((ts) => {
+              const teacher = teachersData.find((t) => t.id === ts.teacherId);
+              return teacher?.name;
+            })
+            .filter(Boolean) as string[];
+
           return {
             subject: subject?.name || "Unknown",
             students: studentsCount,
             revenue: (subject?.price || 0) * studentsCount,
+            teachers: assignedTeachers.join(", "),
           };
         })
         .sort((a, b) => b.students - a.students) // Sort by most students
@@ -119,9 +141,22 @@ export default function EnrollmentChart() {
               />
               <YAxis />
               <Tooltip
-                formatter={(value: number, name: string) => {
+                formatter={(value: number, name: string, props: any) => {
                   if (name === "revenue") return `MAD ${value.toFixed(2)}`;
                   return value;
+                }}
+                labelFormatter={(label, items) => {
+                  const item = items[0]?.payload;
+                  return (
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold">{label}</span>
+                      {item?.teachers && (
+                        <span className="text-xs italic text-muted-foreground">
+                          {tGlobal("teacher")}: {item.teachers}
+                        </span>
+                      )}
+                    </div>
+                  );
                 }}
                 contentStyle={{
                   backgroundColor: "var(--popover)",

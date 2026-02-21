@@ -17,6 +17,8 @@ import {
   subjectActions,
   studentSubjectActions,
   studentActions,
+  teacherActions,
+  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 
 interface TopSubject {
@@ -33,18 +35,26 @@ import { useLiveQuery } from "dexie-react-hooks";
 export default function TopSubjects() {
   const t = useTranslations("TopSubjects");
   const { user } = useAuth();
+  const tGlobal = useTranslations("AllUsersTable"); // For "teacher" label
 
   const subjects = useLiveQuery(async () => {
     try {
       if (!user) return [];
 
       // ✅ Fetch from localDB instead of API
-      const [subjectsData, studentSubjectsData, studentsData] =
-        await Promise.all([
-          subjectActions.getAll(),
-          studentSubjectActions.getAll(),
-          studentActions.getAll(),
-        ]);
+      const [
+        subjectsData,
+        studentSubjectsData,
+        studentsData,
+        teacherSubjectsData,
+        teachersData,
+      ] = await Promise.all([
+        subjectActions.getAll(),
+        studentSubjectActions.getAll(),
+        studentActions.getAll(),
+        teacherSubjectActions.getAll(),
+        teacherActions.getAll(),
+      ]);
 
       // Filter by status only (managers see ALL students)
       const managerStudents = studentsData.filter((s) => s.status !== "0");
@@ -55,16 +65,27 @@ export default function TopSubjects() {
           managerStudents.some((s) => s.id === ss.studentId),
       );
 
-      // Map subjects with enrollment counts
+      // Map subjects with enrollment counts and teachers
       const topSubjectsData = activeSubjects
         .map((subject) => {
           const enrollments = activeEnrollments.filter(
             (ss) => ss.subjectId === subject.id,
           );
+
+          // Find teachers for this subject
+          const assignedTeachers = teacherSubjectsData
+            .filter((ts) => ts.subjectId === subject.id && ts.status !== "0")
+            .map((ts) => {
+              const teacher = teachersData.find((t) => t.id === ts.teacherId);
+              return teacher?.name;
+            })
+            .filter(Boolean) as string[];
+
           return {
             id: subject.id,
             name: subject.name,
             grade: subject.grade,
+            teachers: assignedTeachers,
             students: enrollments.length,
             revenue: subject.price * enrollments.length,
             maxCapacity: 30, // Hardcoded as in API
@@ -141,9 +162,16 @@ export default function TopSubjects() {
                 </div>
 
                 {/* Students Info */}
-                <p className="text-xs text-muted-foreground">
-                  {t("studentsEnrolled", { count: subject.students })}
-                </p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-xs text-muted-foreground">
+                    {t("studentsEnrolled", { count: subject.students })}
+                  </p>
+                  {subject.teachers.length > 0 && (
+                    <p className="text-[10px] sm:text-xs text-muted-foreground italic">
+                      {tGlobal("teacher")}: {subject.teachers.join(", ")}
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>

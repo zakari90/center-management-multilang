@@ -312,7 +312,12 @@
   "systemActivityLog": {
     "title": "Activité du système",
     "description": "Événements récents de la plateforme",
-    "noActivity": "Aucune activité récente"
+    "noActivity": "Aucune activité récente",
+    "centerCreated": "Le centre \"{name}\" a été créé",
+    "managerAdded": "Le gestionnaire \"{name}\" a été ajouté",
+    "studentEnrolled": "L'étudiant \"{name}\" a été inscrit",
+    "paymentReceived": "Paiement reçu de {name}",
+    "studentPlaceholder": "étudiant"
   },
   "error": {
     "server": "Erreur interne du serveur",

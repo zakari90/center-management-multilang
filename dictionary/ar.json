@@ -315,7 +315,12 @@
   "systemActivityLog": {
     "title": "نشاط النظام",
     "description": "أحداث المنصة الأخيرة",
-    "noActivity": "لا توجد أنشطة أخيرة"
+    "noActivity": "لا توجد أنشطة أخيرة",
+    "centerCreated": "تم إنشاء المركز \"{name}\"",
+    "managerAdded": "تم إضافة المشرف \"{name}\"",
+    "studentEnrolled": "تم تسجيل الطالب \"{name}\"",
+    "paymentReceived": "تم استلام دفعة من {name}",
+    "studentPlaceholder": "طالب"
   },
   "error": {
     "server": "خطأ في الخادم",
