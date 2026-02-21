@@ -17,7 +17,6 @@ import {
   studentSubjectActions,
   studentActions,
   teacherActions,
-  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 
 interface TopSubject {
@@ -181,9 +180,9 @@ export default function TopSubjects() {
                   <p className="text-xs text-muted-foreground">
                     {t("studentsEnrolled", { count: subject.students })}
                   </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground italic">
+                  {/* <p className="text-[10px] sm:text-xs text-muted-foreground italic">
                     {tGlobal("teacher")}: {subject.teacherName}
-                  </p>
+                  </p> */}
                 </div>
               </div>
             ))}

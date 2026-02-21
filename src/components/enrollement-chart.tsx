@@ -14,7 +14,6 @@ import {
   studentSubjectActions,
   subjectActions,
   teacherActions,
-  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { getChartColorArray } from "@/lib/utils/themeColors";
 import { Loader2 } from "lucide-react";
@@ -24,6 +23,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Legend,
   ResponsiveContainer,
   Tooltip,
@@ -138,15 +138,16 @@ export default function EnrollmentChart() {
             {t("noData")}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" />
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart data={data} margin={{ bottom: 100, top: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="subject"
-                angle={0} // ← Changed to -45 for angled labels
-                textAnchor="end" // ← Keep this for angled text
-                height={80} // ← Reduced height
-                interval={0} // ← Show all labels
+                angle={-45}
+                textAnchor="end"
+                height={80}
+                interval={0}
+                tick={{ fontSize: 11 }}
               />
               <YAxis />
               <Tooltip
@@ -165,7 +166,7 @@ export default function EnrollmentChart() {
                       </span>
                       {item?.teacherName && (
                         <span className="text-xs italic text-muted-foreground">
-                          {tGlobal("teacher")}: {item.teacherName}
+                          {tGlobal("teacher")}: {item?.teacherName}
                         </span>
                       )}
                     </div>
@@ -181,8 +182,18 @@ export default function EnrollmentChart() {
                 dataKey="students"
                 fill="var(--chart-1)"
                 name={t("chart.students")}
-                radius={[8, 8, 0, 0]}
+                radius={[4, 4, 0, 0]}
+                barSize={40}
               >
+                <LabelList
+                  dataKey="students"
+                  position="top"
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    fill: "var(--foreground)",
+                  }}
+                />
                 {data.map((entry, index) => {
                   const colors = getChartColorArray();
                   return (
