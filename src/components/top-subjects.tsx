@@ -17,6 +17,7 @@ import {
   studentSubjectActions,
   studentActions,
   teacherActions,
+  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 
 interface TopSubject {
@@ -99,7 +100,7 @@ export default function TopSubjects() {
             teacherName: teacher?.name || tGlobal("unknownManager"),
             students: entry.students,
             revenue: subject.price * entry.students,
-            maxCapacity: 30, // Hardcoded as in API
+            maxCapacity: 100, // Hardcoded as in API
           };
         })
         .filter((s): s is TopSubject => s !== null)
