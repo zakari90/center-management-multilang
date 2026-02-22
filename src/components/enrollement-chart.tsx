@@ -165,11 +165,11 @@ export default function EnrollmentChart() {
                       <span className="font-bold">
                         {item?.originalSubjectName || label}
                       </span>
-                      {item?.teacherName && (
+                      {/* {item?.teacherName && (
                         <span className="text-xs italic text-muted-foreground">
                           {tGlobal("teacher")}: {item.teacherName}
                         </span>
-                      )}
+                      )} */}
                     </div>
                   );
                 }}
