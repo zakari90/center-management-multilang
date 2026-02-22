@@ -1,4 +1,6 @@
 "use client";
+
+// import axios from 'axios' // ✅ Commented out - using localDB instead
 import {
   Card,
   CardContent,
@@ -12,6 +14,7 @@ import {
   studentSubjectActions,
   subjectActions,
   teacherActions,
+  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { getChartColorArray } from "@/lib/utils/themeColors";
 import { Loader2 } from "lucide-react";
@@ -31,12 +34,9 @@ import {
 import { useLiveQuery } from "dexie-react-hooks";
 
 interface SubjectEnrollment {
-  id: string;
-  "teachers and subjects": string;
+  subject: string;
   students: number;
   revenue: number;
-  teacherName: string;
-  originalSubjectName: string;
 }
 
 export default function EnrollmentChart() {
@@ -48,13 +48,20 @@ export default function EnrollmentChart() {
     try {
       if (!user) return [];
 
-      const [studentSubjects, subjects, students, teachersData] =
-        await Promise.all([
-          studentSubjectActions.getAll(),
-          subjectActions.getAll(),
-          studentActions.getAll(),
-          teacherActions.getAll(),
-        ]);
+      // ✅ Fetch from localDB instead of API
+      const [
+        studentSubjects,
+        subjects,
+        students,
+        teacherSubjectsData,
+        teachersData,
+      ] = await Promise.all([
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        studentActions.getAll(),
+        teacherSubjectActions.getAll(),
+        teacherActions.getAll(),
+      ]);
 
       // Filter by status only (managers see ALL students)
       const managerStudents = students.filter((s) => s.status !== "0");
@@ -65,52 +72,36 @@ export default function EnrollmentChart() {
           managerStudents.some((s) => s.id === ss.studentId),
       );
 
-      // Group by (SubjectId, TeacherId)
-      const subjectTeacherMap = new Map<
-        string,
-        {
-          subjectId: string;
-          teacherId: string;
-          students: number;
-        }
-      >();
-
+      // Group enrollments by subjectId
+      const enrollmentMap = new Map<string, number>();
       activeEnrollments.forEach((enrollment) => {
-        const key = `${enrollment.subjectId}-${enrollment.teacherId}`;
-        const existing = subjectTeacherMap.get(key);
-        if (existing) {
-          existing.students += 1;
-        } else {
-          subjectTeacherMap.set(key, {
-            subjectId: enrollment.subjectId,
-            teacherId: enrollment.teacherId,
-            students: 1,
-          });
-        }
+        const count = enrollmentMap.get(enrollment.subjectId) || 0;
+        enrollmentMap.set(enrollment.subjectId, count + 1);
       });
 
       // Join with subjects and calculate revenue
-      const chartData = Array.from(subjectTeacherMap.values())
-        .map((entry) => {
-          const subject = activeSubjects.find((s) => s.id === entry.subjectId);
-          const teacher = teachersData.find((t) => t.id === entry.teacherId);
+      const chartData = Array.from(enrollmentMap.entries())
+        .map(([subjectId, studentsCount]) => {
+          const subject = activeSubjects.find((s) => s.id === subjectId);
 
-          if (!subject) return null;
-
-          const teacherName = teacher?.name || tGlobal("unknownManager");
+          // Find teachers for this subject
+          const assignedTeachers = teacherSubjectsData
+            .filter((ts) => ts.subjectId === subjectId && ts.status !== "0")
+            .map((ts) => {
+              const teacher = teachersData.find((t) => t.id === ts.teacherId);
+              return teacher?.name;
+            })
+            .filter(Boolean) as string[];
 
           return {
-            id: `${entry.subjectId}-${entry.teacherId}`,
-            "teachers and subjects": `${subject.name} - ${teacherName}`,
-            students: entry.students,
-            revenue: subject.price * entry.students,
-            teacherName: teacherName,
-            originalSubjectName: subject.name,
+            subject: subject?.name || "Unknown",
+            students: studentsCount,
+            revenue: (subject?.price || 0) * studentsCount,
+            teachers: assignedTeachers.join(", "),
           };
         })
-        .filter((s): s is NonNullable<typeof s> => s !== null)
         .sort((a, b) => b.students - a.students) // Sort by most students
-        .slice(0, 6); // Take top 6 pairings
+        .slice(0, 6); // Take top 6 subjects
 
       return chartData;
     } catch (err) {
@@ -137,31 +128,33 @@ export default function EnrollmentChart() {
             {t("noData")}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
-                dataKey="teachers and subjects"
-                angle={-45} // ← Angled labels
-                textAnchor="end"
-                height={120}
-                interval={0}
-                fontSize={11}
+                dataKey="subject"
+                angle={0} // ← Changed to -45 for angled labels
+                textAnchor="end" // ← Keep this for angled text
+                height={80} // ← Reduced height
+                interval={0} // ← Show all labels
               />
               <YAxis />
               <Tooltip
-                formatter={(value: number, name: string) => {
+                formatter={(value: number, name: string, props: any) => {
                   if (name === "revenue") return `MAD ${value.toFixed(2)}`;
                   return value;
                 }}
                 labelFormatter={(label, items) => {
-                  const item = items?.[0]?.payload as
-                    | SubjectEnrollment
-                    | undefined;
+                  const item = items[0]?.payload;
                   return (
-                    <span className="font-bold">
-                      {item?.originalSubjectName || label}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold">{label}</span>
+                      {item?.teachers && (
+                        <span className="text-xs italic text-muted-foreground">
+                          {tGlobal("teacher")}: {item.teachers}
+                        </span>
+                      )}
+                    </div>
                   );
                 }}
                 contentStyle={{
@@ -176,15 +169,15 @@ export default function EnrollmentChart() {
                 name={t("chart.students")}
                 radius={[8, 8, 0, 0]}
               >
-                {(() => {
+                {data.map((entry, index) => {
                   const colors = getChartColorArray();
-                  return data.map((entry, index) => (
+                  return (
                     <Cell
                       key={`cell-${index}`}
                       fill={colors[index % colors.length]}
                     />
-                  ));
-                })()}
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
