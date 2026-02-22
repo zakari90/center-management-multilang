@@ -1043,7 +1043,12 @@
     "noData": "Aucune donnée d'inscription disponible",
     "chart": {
       "students": "Élèves"
-    }
+    },
+    "revenue": "Revenus",
+    "clickForMore": "Cliquez pour plus de détails",
+    "legend": "Matière — Enseignant",
+    "noTeacher": "Aucun enseignant assigné",
+    "pricePerStudent": "Prix / Élève"
   },
   "TopSubjects": {
     "title": "Matières les plus performantes",

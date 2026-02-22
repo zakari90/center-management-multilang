@@ -1094,7 +1094,12 @@
     "noData": "No enrollment data available",
     "chart": {
       "students": "Students"
-    }
+    },
+    "revenue": "Revenue",
+    "clickForMore": "Click for more details",
+    "legend": "Subject — Teacher",
+    "noTeacher": "No teacher assigned",
+    "pricePerStudent": "Price / Student"
   },
   "TopSubjects": {
     "title": "Top Performing Subjects",
