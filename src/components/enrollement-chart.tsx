@@ -14,7 +14,6 @@ import {
   studentSubjectActions,
   subjectActions,
   teacherActions,
-  teacherSubjectActions,
 } from "@/lib/dexie/dexieActions";
 import { getChartColorArray } from "@/lib/utils/themeColors";
 import { Loader2 } from "lucide-react";
@@ -34,7 +33,8 @@ import {
 import { useLiveQuery } from "dexie-react-hooks";
 
 interface SubjectEnrollment {
-  subject: string;
+  id: string;
+  "teachers and subjects": string;
   students: number;
   revenue: number;
   teacherName: string;
@@ -102,9 +102,8 @@ export default function EnrollmentChart() {
           const teacherName = teacher?.name || tGlobal("unknownManager");
 
           return {
-            subjectId: entry.subjectId,
-            teacherId: entry.teacherId,
-            subject: `${subject.name} - ${teacherName}`,
+            id: `${entry.subjectId}-${entry.teacherId}`,
+            "teachers and subjects": `${subject.name} - ${teacherName}`,
             students: entry.students,
             revenue: subject.price * entry.students,
             teacherName: teacherName,
@@ -144,11 +143,11 @@ export default function EnrollmentChart() {
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
-                dataKey="subject"
-                angle={-45} // ← Changed to -45 for angled labels
-                textAnchor="end" // ← Keep this for angled text
-                height={120} // ← Increased height for angled labels
-                interval={0} // ← Show all labels
+                dataKey="teachers and subjects"
+                angle={-45} // ← Angled labels
+                textAnchor="end"
+                height={120}
+                interval={0}
                 fontSize={11}
               />
               <YAxis />
