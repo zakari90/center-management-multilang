@@ -181,7 +181,7 @@ export default function EnrollmentChart() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={data}
-                onClick={(state) => {
+                onClick={(state: any) => {
                   if (state?.activePayload?.[0]?.payload) {
                     setSelectedSubject(state.activePayload[0].payload);
                   }
