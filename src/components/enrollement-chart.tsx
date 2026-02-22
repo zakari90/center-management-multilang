@@ -162,7 +162,13 @@ export default function EnrollmentChart() {
                   borderRadius: "8px",
                 }}
               />
-              <Legend />
+              <Legend
+                iconSize={10}
+                wrapperStyle={{
+                  fontSize: "12px",
+                  paddingTop: "8px",
+                }}
+              />
               <Bar
                 dataKey="students"
                 fill="var(--chart-1)"
