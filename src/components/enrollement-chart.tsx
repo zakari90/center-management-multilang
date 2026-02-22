@@ -1,6 +1,4 @@
 "use client";
-
-// import axios from 'axios' // ✅ Commented out - using localDB instead
 import {
   Card,
   CardContent,
@@ -139,7 +137,7 @@ export default function EnrollmentChart() {
             {t("noData")}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
@@ -161,16 +159,9 @@ export default function EnrollmentChart() {
                     | SubjectEnrollment
                     | undefined;
                   return (
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold">
-                        {item?.originalSubjectName || label}
-                      </span>
-                      {/* {item?.teacherName && (
-                        <span className="text-xs italic text-muted-foreground">
-                          {tGlobal("teacher")}: {item.teacherName}
-                        </span>
-                      )} */}
-                    </div>
+                    <span className="font-bold">
+                      {item?.originalSubjectName || label}
+                    </span>
                   );
                 }}
                 contentStyle={{
@@ -185,15 +176,15 @@ export default function EnrollmentChart() {
                 name={t("chart.students")}
                 radius={[8, 8, 0, 0]}
               >
-                {data.map((entry, index) => {
+                {(() => {
                   const colors = getChartColorArray();
-                  return (
+                  return data.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={colors[index % colors.length]}
                     />
-                  );
-                })}
+                  ));
+                })()}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
