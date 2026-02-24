@@ -87,7 +87,7 @@ export default function TopSubjects() {
             teachers: assignedTeachers,
             students: enrollments.length,
             revenue: subject.price * enrollments.length,
-            maxCapacity: 30, // Hardcoded as in API
+            maxCapacity: 100, // Hardcoded as in API
           };
         })
         .filter((s) => s.students > 0) // Filter subjects with students

@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { checkReachability } from "@/lib/utils/network";
 
 export interface OnlineStatus {
   isOnline: boolean;
@@ -12,19 +13,39 @@ export interface OnlineStatus {
  */
 export function useOnlineStatus() {
   const [status, setStatus] = useState<OnlineStatus>({
-    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
   });
 
   const [goingOfflineTime, setGoingOfflineTime] = useState<number | null>(null);
+  const isVerifying = useRef(false);
 
   useEffect(() => {
+    const performReachabilityCheck = async () => {
+      if (isVerifying.current) return;
+      isVerifying.current = true;
+
+      const isReachable = await checkReachability();
+
+      if (isReachable) {
+        setStatus({
+          isOnline: true,
+          lastOnline: new Date(),
+          offlineTime: goingOfflineTime ? Date.now() - goingOfflineTime : 0,
+        });
+        setGoingOfflineTime(null);
+      } else {
+        // Still effectively offline if server unreachable
+        setStatus((prev) => ({
+          ...prev,
+          isOnline: false,
+        }));
+      }
+      isVerifying.current = false;
+    };
+
     const handleOnline = () => {
-      setStatus({
-        isOnline: true,
-        lastOnline: new Date(),
-        offlineTime: goingOfflineTime ? Date.now() - goingOfflineTime : 0,
-      });
-      setGoingOfflineTime(null);
+      // Don't trust the browser, verify reachability
+      performReachabilityCheck();
     };
 
     const handleOffline = () => {
@@ -35,19 +56,30 @@ export function useOnlineStatus() {
       }));
     };
 
-    // Set initial state
-    const isCurrentlyOnline = navigator.onLine;
-    setStatus({
-      isOnline: isCurrentlyOnline,
-      lastOnline: isCurrentlyOnline ? new Date() : undefined,
-    });
+    // Initial check
+    if (navigator.onLine) {
+      performReachabilityCheck();
+    } else {
+      setStatus({
+        isOnline: false,
+        lastOnline: undefined,
+      });
+    }
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Periodic check if "online" but might have lost reachability silently
+    const intervalId = setInterval(() => {
+      if (navigator.onLine) {
+        performReachabilityCheck();
+      }
+    }, 30000); // Check every 30s
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      clearInterval(intervalId);
     };
   }, [goingOfflineTime]);
 
@@ -59,19 +91,42 @@ export function useOnlineStatus() {
  */
 export function useIsOnline(): boolean {
   const [isOnline, setIsOnline] = useState(true);
+  const isVerifying = useRef(false);
 
   useEffect(() => {
-    setIsOnline(navigator.onLine);
+    const performCheck = async () => {
+      if (isVerifying.current) return;
+      isVerifying.current = true;
+      const reachable = await checkReachability();
+      setIsOnline(reachable);
+      isVerifying.current = false;
+    };
 
-    const handleOnline = () => setIsOnline(true);
+    if (navigator.onLine) {
+      performCheck();
+    } else {
+      setIsOnline(false);
+    }
+
+    const handleOnline = () => {
+      performCheck();
+    };
+
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    const intervalId = setInterval(() => {
+      if (navigator.onLine) {
+        performCheck();
+      }
+    }, 30000);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      clearInterval(intervalId);
     };
   }, []);
 
@@ -99,7 +154,9 @@ export function useOfflineStatus() {
     isOnline,
     lastOnline: status.lastOnline,
     offlineTime: status.offlineTime,
-    offlineTimeFormatted: status.offlineTime ? formatOfflineTime(status.offlineTime) : null,
+    offlineTimeFormatted: status.offlineTime
+      ? formatOfflineTime(status.offlineTime)
+      : null,
     wasOffline: !isOnline,
   };
 }
