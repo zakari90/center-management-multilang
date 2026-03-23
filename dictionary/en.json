@@ -249,7 +249,10 @@
     "invalidEmail": "Invalid email format",
     "emailAlreadyRegistered": "Email is already registered",
     "registrationFailed": "Registration failed",
-    "registrationError": "Failed to register admin account"
+    "registrationError": "Failed to register admin account",
+    "e2eeTitle": "End-to-End Encryption",
+    "e2eeDescription": "Store data securely as unreadable blobs.",
+    "e2eeWarning": "WARNING: If you lose your password, ALL DATA IS PERMANENTLY LOST. No resets are possible. Search and sorting will also be noticeably slower."
   },
   "register": {
     "successMessage": "Account created successfully! Redirecting...",

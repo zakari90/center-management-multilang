@@ -207,7 +207,10 @@
     "invalidEmail": "Format d'email invalide",
     "emailAlreadyRegistered": "L'email est déjà enregistré",
     "registrationFailed": "L'enregistrement a échoué",
-    "registrationError": "Échec de l'enregistrement du compte administrateur"
+    "registrationError": "Échec de l'enregistrement du compte administrateur",
+    "e2eeTitle": "Chiffrement de Bout en Bout",
+    "e2eeDescription": "Stocker les données de manière sécurisée sous forme de blobs illisibles.",
+    "e2eeWarning": "ATTENTION : Si vous perdez votre mot de passe, TOUTES LES DONNÉES SERONT DÉFINITIVEMENT PERDUES. Aucune réinitialisation n'est possible. La recherche et le tri seront également nettement plus lents."
   },
   "register": {
     "successMessage": "Compte créé avec succès ! Redirection en cours...",

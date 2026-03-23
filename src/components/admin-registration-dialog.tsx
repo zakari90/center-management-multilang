@@ -235,13 +235,13 @@ export function AdminRegistrationDialog({
 
           {/* Encryption Toggle */}
           <div className="space-y-3 rounded-lg border p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
                 <Label className="text-base text-destructive">
-                  End-to-End Encryption
+                  {t("e2eeTitle")}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Store data securely as unreadable blobs.
+                  {t("e2eeDescription")}
                 </p>
               </div>
               <Switch
@@ -252,11 +252,9 @@ export function AdminRegistrationDialog({
             </div>
             {isEncrypted && (
               <Alert variant="destructive" className="mt-2 py-2">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="h-4 w-4 shrink-0" />
                 <AlertDescription className="ml-2 text-xs font-semibold leading-relaxed">
-                  WARNING: If you lose your password, ALL DATA IS PERMANENTLY
-                  LOST. No resets are possible. Search and sorting will also be
-                  noticeably slower.
+                  {t("e2eeWarning")}
                 </AlertDescription>
               </Alert>
             )}
