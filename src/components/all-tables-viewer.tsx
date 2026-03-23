@@ -871,6 +871,7 @@ export function AllTablesViewer() {
             onChange={handleImportData}
             className="hidden"
           />
+          ssss
           <Button
             onClick={() => fileInputRef.current?.click()}
             disabled={isImporting || isLoading}
