@@ -16,6 +16,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import {
   Database,
   Users,
   GraduationCap,
@@ -765,6 +774,8 @@ export function AllTablesViewer() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
 
   const handleExportAll = async () => {
     setIsLoading(true);
@@ -799,15 +810,21 @@ export function AllTablesViewer() {
     }
   };
 
-  const handleImportData = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    setPendingImportFile(file);
+    setImportDialogOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
+  const processImport = async (mode: "merge" | "replace") => {
+    if (!pendingImportFile) return;
+    setImportDialogOpen(false);
     setIsImporting(true);
+
     try {
-      const text = await file.text();
+      const text = await pendingImportFile.text();
       const importedData = JSON.parse(text);
 
       if (
@@ -819,7 +836,6 @@ export function AllTablesViewer() {
         return;
       }
 
-      // Valid table names from our DB (excluding admin tables)
       const validTables = new Set(
         Object.keys(TABLE_CONFIGS).filter((k) => !EXCLUDED_TABLES.has(k)),
       );
@@ -831,6 +847,9 @@ export function AllTablesViewer() {
 
         const table = (localDb as any)[tableName];
         if (table) {
+          if (mode === "replace") {
+            await table.clear();
+          }
           await table.bulkPut(records);
           importedCount++;
         }
@@ -854,8 +873,7 @@ export function AllTablesViewer() {
       );
     } finally {
       setIsImporting(false);
-      // Reset file input so same file can be re-selected
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setPendingImportFile(null);
     }
   };
 
@@ -868,7 +886,7 @@ export function AllTablesViewer() {
             ref={fileInputRef}
             type="file"
             accept=".json"
-            onChange={handleImportData}
+            onChange={handleFileSelected}
             className="hidden"
           />
           <Button
@@ -893,6 +911,38 @@ export function AllTablesViewer() {
           </Button>
         </div>
       </div>
+
+      {/* Import mode dialog */}
+      <AlertDialog
+        open={importDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setImportDialogOpen(false);
+            setPendingImportFile(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("importDialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("importDialog.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel>{t("importDialog.cancel")}</AlertDialogCancel>
+            <Button variant="outline" onClick={() => processImport("merge")}>
+              {t("importDialog.merge")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => processImport("replace")}
+            >
+              {t("importDialog.replace")}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Table Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

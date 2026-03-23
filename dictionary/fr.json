@@ -1829,6 +1829,13 @@
       "importError": "Échec de l'importation des données : {error}",
       "importInvalidFile": "Format de fichier invalide. Veuillez sélectionner un fichier JSON valide."
     },
+    "importDialog": {
+      "title": "Importer des données",
+      "description": "Choisissez comment gérer les données existantes. Fusionner ajoutera et mettra à jour les enregistrements. Remplacer supprimera les données existantes et importera des nouvelles.",
+      "merge": "Fusionner avec les données",
+      "replace": "Remplacer les données",
+      "cancel": "Annuler"
+    },
     "unknown": "Inconnu",
     "yes": "Oui",
     "no": "Non",
