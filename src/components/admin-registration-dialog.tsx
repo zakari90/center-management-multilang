@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Switch } from "@/components/ui/switch";
 import { Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -244,11 +243,30 @@ export function AdminRegistrationDialog({
                   {t("e2eeDescription")}
                 </p>
               </div>
-              <Switch
-                checked={isEncrypted}
-                onCheckedChange={setIsEncrypted}
-                disabled={isSubmitting || success}
-              />
+              <div className="flex shrink-0 items-center space-x-4 rtl:space-x-reverse">
+                <label className="flex cursor-pointer items-center gap-1.5 text-sm font-medium">
+                  <input
+                    type="radio"
+                    name="encryption_mode"
+                    className="h-4 w-4 cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    checked={!isEncrypted}
+                    onChange={() => setIsEncrypted(false)}
+                    disabled={isSubmitting || success}
+                  />
+                  <span>{t("e2eeNo")}</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-1.5 text-sm font-medium text-destructive">
+                  <input
+                    type="radio"
+                    name="encryption_mode"
+                    className="h-4 w-4 cursor-pointer accent-destructive disabled:cursor-not-allowed disabled:opacity-50"
+                    checked={isEncrypted}
+                    onChange={() => setIsEncrypted(true)}
+                    disabled={isSubmitting || success}
+                  />
+                  <span>{t("e2eeYes")}</span>
+                </label>
+              </div>
             </div>
             {isEncrypted && (
               <Alert variant="destructive" className="mt-2 py-2">
