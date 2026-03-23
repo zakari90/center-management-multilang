@@ -1,10 +1,18 @@
 "use client";
 
+import { AdminRegistrationDialog } from "@/components/admin-registration-dialog";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/authContext";
@@ -22,16 +30,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { AdminRegistrationDialog } from "@/components/admin-registration-dialog";
 // import { AutoSyncProvider } from "./AutoSyncProvider"
 
 type Role = "admin" | "manager";
@@ -57,10 +56,8 @@ export function LoginForm({
 }: LoginFormProps) {
   const t = useTranslations("login");
   const tManager = useTranslations("loginManager");
-  const tHome = useTranslations("homePage");
   const locale = useLocale();
   const { login } = useAuth();
-  const router = useRouter();
 
   const [role, setRole] = useState<Role>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
@@ -96,6 +93,18 @@ export function LoginForm({
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleDeleteAdmin = async () => {
+    if (confirm("Are you sure you want to delete the admin data?")) {
+      try {
+        await fetch("/api/admin/delete-admin", { method: "DELETE" });
+        setHasAdmin(false);
+        setIsRegisterDialogOpen(true);
+      } catch (error) {
+        console.error("Failed to delete admin:", error);
+      }
+    }
+  };
 
   const activeStateMatchesRole = state?.role ? state.role === role : true;
   const errorState = isErrorState(state) ? state : null;
@@ -204,6 +213,19 @@ export function LoginForm({
                         "No admin account exists. Please register an admin account first."}
                     </AlertDescription>
                   </Alert>
+                )}
+
+                {/* Show delete admin button for testing */}
+                {role === "admin" && hasAdmin === true && !checkingAdmin && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDeleteAdmin}
+                    className="w-full h-8 text-xs font-medium"
+                  >
+                    Delete Admin Data (Testing)
+                  </Button>
                 )}
               </div>
 

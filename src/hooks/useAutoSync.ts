@@ -4,7 +4,7 @@ import {
   syncAllEntitiesForRole,
   importAllFromServerForRole,
 } from "@/lib/dexie/serverActions";
-import { isOnline, waitForOnline } from "@/lib/utils/network";
+import { isOnline, verifyOnline, waitForOnline } from "@/lib/utils/network";
 import { useAuth } from "@/context/authContext";
 
 export interface AutoSyncOptions {
@@ -148,8 +148,8 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
       return false;
     }
 
-    if (!isOnline()) {
-      log("Device is offline, skipping sync");
+    if (!(await verifyOnline())) {
+      log("Device is offline or server unreachable, skipping sync");
       return false;
     }
 
@@ -220,8 +220,8 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
       return false;
     }
 
-    if (!isOnline()) {
-      log("Device is offline, skipping import");
+    if (!(await verifyOnline())) {
+      log("Device is offline or server unreachable, skipping import");
       return false;
     }
 
