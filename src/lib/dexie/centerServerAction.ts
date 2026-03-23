@@ -31,6 +31,7 @@ function transformServerCenter(serverCenter: any): Center {
       : [],
     managers: Array.isArray(serverCenter.managers) ? serverCenter.managers : [],
     adminId: serverCenter.adminId,
+    encryptedData: serverCenter.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverCenter.createdAt === "string"
@@ -57,6 +58,7 @@ const ServerActionCenters = {
           grade: s.grade,
           price: s.price,
           duration: s.duration,
+          encryptedData: s.encryptedData || undefined,
           createdAt: new Date(s.createdAt).toISOString(),
           updatedAt: new Date(s.updatedAt).toISOString(),
         }));
@@ -68,10 +70,10 @@ const ServerActionCenters = {
         phone: center.phone || null,
         classrooms: center.classrooms || [],
         workingDays: center.workingDays || [],
-        paymentStartDay: center.paymentStartDay,
         paymentEndDay: center.paymentEndDay,
         subjects: centerSubjects,
         adminId: center.adminId, // ✅ Include adminId for API route compatibility
+        encryptedData: center.encryptedData || undefined,
         createdAt: new Date(center.createdAt).toISOString(),
         updatedAt: new Date(center.updatedAt).toISOString(),
       };
@@ -148,6 +150,7 @@ const ServerActionCenters = {
             workingDays: center.workingDays || [],
             paymentStartDay: center.paymentStartDay,
             paymentEndDay: center.paymentEndDay,
+            encryptedData: center.encryptedData || undefined,
             updatedAt: new Date(center.updatedAt).toISOString(),
           }),
         });
@@ -168,6 +171,7 @@ const ServerActionCenters = {
                     grade: subject.grade,
                     price: subject.price,
                     duration: subject.duration,
+                    encryptedData: subject.encryptedData || undefined,
                     createdAt: subject.createdAt,
                     updatedAt: subject.updatedAt,
                   }),

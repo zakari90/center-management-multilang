@@ -25,6 +25,7 @@ function transformServerSubject(serverSubject: any): Subject {
     price: serverSubject.price,
     duration: serverSubject.duration || undefined,
     centerId: serverSubject.centerId,
+    encryptedData: serverSubject.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverSubject.createdAt === "string"
@@ -53,6 +54,7 @@ const ServerActionSubjects = {
           grade: subject.grade,
           price: subject.price,
           duration: subject.duration,
+          encryptedData: subject.encryptedData || undefined,
           createdAt: new Date(subject.createdAt).toISOString(),
           updatedAt: new Date(subject.updatedAt).toISOString(),
         }),

@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
             name: user.name,
             email: user.email,
             role: user.role,
+            isEncrypted: user.isEncrypted,
+            encryptionSalt: user.encryptionSalt,
           },
           // Include hash for offline login capability (PWA feature)
           passwordHash: user.password,

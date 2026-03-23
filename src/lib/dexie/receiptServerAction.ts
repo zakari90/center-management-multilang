@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // receiptServerAction.ts
 
-import { receiptActions, studentSubjectActions, teacherSubjectActions } from "./dexieActions";
+import {
+  receiptActions,
+  studentSubjectActions,
+  teacherSubjectActions,
+} from "./dexieActions";
 import { Receipt, ReceiptType } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
@@ -27,19 +31,22 @@ function transformServerReceipt(serverReceipt: any): Receipt {
     type: serverReceipt.type as ReceiptType,
     description: serverReceipt.description || undefined,
     paymentMethod: serverReceipt.paymentMethod || undefined,
-    date: typeof serverReceipt.date === 'string'
+    date: serverReceipt.date
       ? new Date(serverReceipt.date).getTime()
-      : serverReceipt.date || Date.now(),
+      : Date.now(),
     studentId: serverReceipt.studentId || undefined,
     teacherId: serverReceipt.teacherId || undefined,
     managerId: serverReceipt.managerId,
-    status: '1' as const,
-    createdAt: typeof serverReceipt.createdAt === 'string'
-      ? new Date(serverReceipt.createdAt).getTime()
-      : serverReceipt.createdAt || Date.now(),
-    updatedAt: typeof serverReceipt.updatedAt === 'string'
-      ? new Date(serverReceipt.updatedAt).getTime()
-      : serverReceipt.updatedAt || Date.now(),
+    encryptedData: serverReceipt.encryptedData || undefined,
+    status: "1" as const,
+    createdAt:
+      typeof serverReceipt.createdAt === "string"
+        ? new Date(serverReceipt.createdAt).getTime()
+        : serverReceipt.createdAt || Date.now(),
+    updatedAt:
+      typeof serverReceipt.updatedAt === "string"
+        ? new Date(serverReceipt.updatedAt).getTime()
+        : serverReceipt.updatedAt || Date.now(),
   };
 }
 
@@ -56,15 +63,20 @@ const ServerActionReceipts = {
           teacherId: receipt.teacherId || null,
           amount: receipt.amount,
           type: receipt.type,
+          managerId: receipt.managerId,
+          encryptedData: receipt.encryptedData || undefined,
+          createdAt: new Date(receipt.createdAt).toISOString(),
           paymentMethod: receipt.paymentMethod,
           description: receipt.description,
-          date: new Date(receipt.date).toISOString().split('T')[0],
+          date: new Date(receipt.date).toISOString().split("T")[0],
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || 'Unknown error'}`);
+        throw new Error(
+          `HTTP Error: ${response.status} - ${errorData.error?.message || errorData.error || "Unknown error"}`,
+        );
       }
       return response.json();
     } catch (e) {
@@ -75,7 +87,7 @@ const ServerActionReceipts = {
 
   async DeleteFromServer(id: string) {
     try {
-      const response = await fetch(`${baseUrl}/api/receipts/${id}`, { 
+      const response = await fetch(`${baseUrl}/api/receipts/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -91,24 +103,40 @@ const ServerActionReceipts = {
     try {
       if (!isOnline()) {
         console.warn("Device is offline, skipping receipt sync");
-        return { message: "Cannot sync: offline", results: [], successCount: 0, failCount: 0 };
+        return {
+          message: "Cannot sync: offline",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
       }
 
       const waitingData = await receiptActions.getByStatus(["0", "w"]);
-      if (waitingData.length === 0) return { message: "No receipts to sync.", results: [], successCount: 0, failCount: 0 };
+      if (waitingData.length === 0)
+        return {
+          message: "No receipts to sync.",
+          results: [],
+          successCount: 0,
+          failCount: 0,
+        };
 
-      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+      const results: Array<{ id: string; success: boolean; error?: string }> =
+        [];
 
       for (const receipt of waitingData) {
         try {
           if (receipt.status === "0") {
             // Pending deletion
-            const result = await ServerActionReceipts.DeleteFromServer(receipt.id);
+            const result = await ServerActionReceipts.DeleteFromServer(
+              receipt.id,
+            );
             if (result && result.ok) {
               await receiptActions.deleteLocal(receipt.id);
               results.push({ id: receipt.id, success: true });
             } else {
-              const errorMsg = result ? `Server returned ${result.status}` : "Network error";
+              const errorMsg = result
+                ? `Server returned ${result.status}`
+                : "Network error";
               results.push({ id: receipt.id, success: false, error: errorMsg });
             }
           } else if (receipt.status === "w") {
@@ -119,25 +147,32 @@ const ServerActionReceipts = {
               await receiptActions.putLocal({
                 ...receipt,
                 ...(result.id && { id: result.id }),
-                ...(result.receiptNumber && { receiptNumber: result.receiptNumber }),
+                ...(result.receiptNumber && {
+                  receiptNumber: result.receiptNumber,
+                }),
                 ...(result.amount !== undefined && { amount: result.amount }),
-                status: '1' as const,
+                status: "1" as const,
                 updatedAt: Date.now(),
               });
               results.push({ id: receipt.id, success: true });
             } else {
-              results.push({ id: receipt.id, success: false, error: "Server request failed" });
+              results.push({
+                id: receipt.id,
+                success: false,
+                error: "Server request failed",
+              });
             }
           }
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          const errorMsg =
+            error instanceof Error ? error.message : "Unknown error";
           console.error(`Error syncing receipt ${receipt.id}:`, error);
           results.push({ id: receipt.id, success: false, error: errorMsg });
         }
       }
 
-      const successCount = results.filter(r => r.success).length;
-      const failCount = results.filter(r => !r.success).length;
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.filter((r) => !r.success).length;
 
       return {
         message: `Receipt sync completed. ${successCount} succeeded, ${failCount} failed.`,
@@ -146,14 +181,17 @@ const ServerActionReceipts = {
         failCount,
       };
     } catch (globalError: any) {
-       console.error("Critical error in ServerActionReceipts.Sync:", globalError);
-       return { 
-         message: "Sync failed completely", 
-         results: [], 
-         successCount: 0, 
-         failCount: 1, 
-         error: globalError.message 
-       };
+      console.error(
+        "Critical error in ServerActionReceipts.Sync:",
+        globalError,
+      );
+      return {
+        message: "Sync failed completely",
+        results: [],
+        successCount: 0,
+        failCount: 1,
+        error: globalError.message,
+      };
     }
   },
 
@@ -180,36 +218,42 @@ const ServerActionReceipts = {
       const data = await ServerActionReceipts.ReadFromServer();
       const syncedReceipts = await receiptActions.getByStatus(["1"]);
       const backup = [...syncedReceipts];
-      
+
       try {
         for (const receipt of syncedReceipts) {
           await receiptActions.deleteLocal(receipt.id);
         }
-        
-        const transformedReceipts = Array.isArray(data) 
+
+        const transformedReceipts = Array.isArray(data)
           ? data.map((receipt: any) => transformServerReceipt(receipt))
           : [];
         for (const receipt of transformedReceipts) {
           const existing = await receiptActions.getLocal(receipt.id);
-          if (existing && existing.status === 'w') {
+          if (existing && existing.status === "w") {
             continue; // Don't overwrite local pending changes
           }
           await receiptActions.putLocal(receipt);
         }
-        
-        return { message: `Imported ${transformedReceipts.length} receipts from server.`, count: transformedReceipts.length };
+
+        return {
+          message: `Imported ${transformedReceipts.length} receipts from server.`,
+          count: transformedReceipts.length,
+        };
       } catch (error) {
         console.error("Error during import, restoring backup:", error);
         for (const receipt of backup) {
           await receiptActions.putLocal(receipt);
         }
-        throw new Error("Import failed, local data restored. Error: " + (error instanceof Error ? error.message : "Unknown"));
+        throw new Error(
+          "Import failed, local data restored. Error: " +
+            (error instanceof Error ? error.message : "Unknown"),
+        );
       }
     } catch (error) {
       console.error("Error importing from server:", error);
       throw error;
     }
-  }
+  },
 };
 
 export default ServerActionReceipts;

@@ -17,6 +17,8 @@ export interface OfflineAuthResult {
     name: string;
     email: string;
     role: string;
+    isEncrypted?: boolean;
+    encryptionSalt?: string;
   };
   error?: string;
 }
@@ -27,7 +29,14 @@ export interface OfflineAuthResult {
  * @param passwordHash - The bcrypt hash from server (NOT plain password)
  */
 export async function saveCredentialsLocally(
-  user: { id: string; name: string; email: string; role: string },
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    isEncrypted?: boolean;
+    encryptionSalt?: string;
+  },
   passwordHash: string,
 ): Promise<void> {
   try {
@@ -39,6 +48,8 @@ export async function saveCredentialsLocally(
       passwordHash: passwordHash,
       name: user.name,
       role: user.role as Role,
+      isEncrypted: !!user.isEncrypted,
+      encryptionSalt: user.encryptionSalt,
       lastOnlineLogin: now,
       createdAt: now,
       updatedAt: now,
@@ -95,6 +106,8 @@ export async function validateOfflineLogin(
         name: localUser.name,
         email: localUser.email,
         role: localUser.role,
+        isEncrypted: localUser.isEncrypted,
+        encryptionSalt: localUser.encryptionSalt,
       },
     };
   } catch (error) {

@@ -1,0 +1,77 @@
+# Data Storage & Security Plan for Center Management System
+
+This document outlines security options for the application's data, providing the administrator with a choice between three approaches.
+
+---
+
+## Recommended Approach: Standard Security (No E2EE)
+
+Your app already has strong baseline security. Before considering E2EE, implement these simple, high-impact measures:
+
+| Action                                           | Effort     | Impact                                  |
+|--------------------------------------------------|------------|-----------------------------------------|
+| Enforce HTTPS everywhere (already via Next.js)   | Zero       | Encrypts all data in transit            |
+| Enable MongoDB at-rest encryption (config flag)  | 5 minutes  | Encrypts database files on disk         |
+| Add rate-limiting to login API                   | 1 hour     | Blocks brute-force password guessing    |
+
+These three layers protect against 99% of real-world threats without breaking search, sync, or risking data loss.
+
+---
+
+## Administrative Choice: Storage Modes
+
+If additional security is needed, the system will include a settings toggle for the Admin to choose between:
+
+### Option A: Simple Mode (Standard — Recommended)
+Data is stored locally in IndexedDB as plain JSON and synced to MongoDB over HTTPS.
+
+**Advantages:**
+- Lightning fast performance: searching, filtering, and sorting 10,000+ records is instant.
+- Low memory usage: the browser queries data without pulling everything into RAM.
+- Smaller sync payloads: ideal for poor/limited network conditions.
+- Easy conflict resolution: the server can merge offline changes because it can read the data.
+- Admin recovery: administrators can fix data directly in the database if needed.
+- No data loss risk: password resets work normally without affecting stored data.
+
+**Downsides:**
+- Anyone with direct database access (server breach) or device developer tools can read the raw data.
+
+### Option B: End-to-End Encryption (E2EE) Mode
+Data is encrypted locally in the browser using the user's password as a key. The server only receives and stores unreadable blobs. The server NEVER sees plain text.
+
+**Advantages:**
+- Maximum privacy/security: even if the server is breached, data remains unreadable.
+- Trustless architecture: the server does not need to be trusted with sensitive data.
+
+**Downsides:**
+- No database search/sort: to search for a student, the app must download ALL students, decrypt them into memory, and search via JavaScript.
+- Performance lag on older phones: decrypting thousands of records can freeze the UI or crash the browser tab (Out of Memory).
+- Permanent data loss risk: if an admin/manager forgets their password, their data is gone forever. No "forgot password" reset is possible.
+- Larger files & slower syncs: encrypted strings increase payload size by 30-50%, using more bandwidth on limited networks.
+- Dangerous password changes: changing a password requires decrypting and re-encrypting every single record. If the browser crashes mid-process, the database is corrupted.
+
+---
+
+## Implementation Steps for E2EE (If Option B Is Selected)
+
+### Step 1: Key Generation & Management
+1. On login, derive an AES-256-GCM encryption key from the user's password using PBKDF2.
+2. Hold this key strictly in browser memory (React Context). NEVER write it to localStorage or IndexedDB.
+3. If the user closes the tab, they must log in again to regenerate the key.
+
+### Step 2: Local Encryption (Dexie / IndexedDB)
+1. Hook into Dexie lifecycle events (hook('creating'), hook('updating'), hook('reading')).
+2. Before writing: convert plain text JSON (excluding the primary ID) into an encrypted Base64 string.
+3. On reading: intercept the encrypted string, decrypt it, and return normal JSON to the React UI.
+
+### Step 3: Securing Synchronization (useAutoSync)
+1. The API must accept encrypted blobs as-is without validation.
+2. Update Prisma schema: replace specific types (Integers, Dates) with String fields large enough for Base64 data.
+3. The server acts as a "dumb" storage locker — it stores and returns encrypted blobs without processing.
+
+### Step 4: Key Rotation (Password Change) — DANGER ZONE
+1. Fetch every single record the user owns (students, receipts, schedules, etc.).
+2. Decrypt all records using the OLD password's key.
+3. Re-encrypt all records using the NEW password's key.
+4. Overwrite both local and remote databases.
+WARNING: Closing the browser or losing internet halfway through this process will corrupt the database. Consider showing a mandatory progress screen that prevents navigation during this operation.

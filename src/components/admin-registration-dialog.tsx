@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ export function AdminRegistrationDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isEncrypted, setIsEncrypted] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -77,6 +79,7 @@ export function AdminRegistrationDialog({
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          isEncrypted,
           locale,
         }),
       });
@@ -97,6 +100,7 @@ export function AdminRegistrationDialog({
         password: "",
         confirmPassword: "",
       });
+      setIsEncrypted(false);
 
       // Close dialog after a short delay
       setTimeout(() => {
@@ -124,6 +128,7 @@ export function AdminRegistrationDialog({
         password: "",
         confirmPassword: "",
       });
+      setIsEncrypted(false);
       setError(null);
       setSuccess(false);
       onOpenChange(false);
@@ -226,6 +231,35 @@ export function AdminRegistrationDialog({
               disabled={isSubmitting || success}
               required
             />
+          </div>
+
+          {/* Encryption Toggle */}
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base text-destructive">
+                  End-to-End Encryption
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Store data securely as unreadable blobs.
+                </p>
+              </div>
+              <Switch
+                checked={isEncrypted}
+                onCheckedChange={setIsEncrypted}
+                disabled={isSubmitting || success}
+              />
+            </div>
+            {isEncrypted && (
+              <Alert variant="destructive" className="mt-2 py-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="ml-2 text-xs font-semibold leading-relaxed">
+                  WARNING: If you lose your password, ALL DATA IS PERMANENTLY
+                  LOST. No resets are possible. Search and sorting will also be
+                  noticeably slower.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           <DialogFooter>

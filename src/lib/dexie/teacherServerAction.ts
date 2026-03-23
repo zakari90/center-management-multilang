@@ -24,8 +24,9 @@ function transformServerTeacher(serverTeacher: any): Teacher {
     email: serverTeacher.email || undefined,
     phone: serverTeacher.phone || undefined,
     address: serverTeacher.address || undefined,
-    weeklySchedule: serverTeacher.weeklySchedule || undefined,
+    weeklySchedule: serverTeacher.weeklySchedule || {},
     managerId: serverTeacher.managerId,
+    encryptedData: serverTeacher.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverTeacher.createdAt === "string"
@@ -63,11 +64,13 @@ const ServerActionTeachers = {
           phone: teacher.phone,
           address: teacher.address,
           managerId: teacher.managerId,
+          encryptedData: teacher.encryptedData || undefined,
+          createdAt: new Date(teacher.createdAt).toISOString(),
           weeklySchedule: teacher.weeklySchedule
             ? Array.isArray(teacher.weeklySchedule)
               ? teacher.weeklySchedule
               : Object.values(teacher.weeklySchedule)
-            : [],
+            : {},
           subjects,
         }),
       });
@@ -84,11 +87,13 @@ const ServerActionTeachers = {
             phone: teacher.phone,
             address: teacher.address,
             managerId: teacher.managerId,
+            encryptedData: teacher.encryptedData || undefined,
+            updatedAt: new Date(teacher.updatedAt).toISOString(),
             weeklySchedule: teacher.weeklySchedule
               ? Array.isArray(teacher.weeklySchedule)
                 ? teacher.weeklySchedule
                 : Object.values(teacher.weeklySchedule)
-              : [],
+              : {},
             subjects,
           }),
         });
@@ -181,6 +186,9 @@ const ServerActionTeachers = {
                 }),
                 ...(result.weeklySchedule && {
                   weeklySchedule: result.weeklySchedule,
+                }),
+                ...(result.encryptedData !== undefined && {
+                  encryptedData: result.encryptedData,
                 }),
                 status: "1" as const,
                 updatedAt: Date.now(),
@@ -293,6 +301,7 @@ const ServerActionTeachers = {
                   subjectId: ts.subjectId,
                   percentage: ts.percentage ?? null,
                   hourlyRate: ts.hourlyRate ?? null,
+                  encryptedData: ts.encryptedData || undefined,
                   assignedAt:
                     typeof ts.assignedAt === "string"
                       ? new Date(ts.assignedAt).getTime()

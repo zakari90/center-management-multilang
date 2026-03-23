@@ -28,6 +28,7 @@ function transformServerSchedule(serverSchedule: any): Schedule {
     subjectId: serverSchedule.subjectId,
     managerId: serverSchedule.managerId,
     centerId: serverSchedule.centerId || undefined,
+    encryptedData: serverSchedule.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverSchedule.createdAt === "string"
@@ -55,7 +56,9 @@ const ServerActionSchedules = {
           teacherId: schedule.teacherId,
           subjectId: schedule.subjectId,
           roomId: schedule.roomId,
-          centerId: schedule.centerId,
+          managerId: schedule.managerId,
+          centerId: schedule.centerId || null,
+          encryptedData: schedule.encryptedData || undefined,
           allowOverwrite: schedule.allowOverwrite,
         }),
       });

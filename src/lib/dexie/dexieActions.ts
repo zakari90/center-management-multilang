@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from "dexie";
 import { SyncEntity, localDb } from "./dbSchema";
+import { encryptEntity, decryptEntity } from "../utils/encryptionEngine";
 
 export interface SyncTargets<T> {
   waiting: T[];
@@ -27,39 +28,62 @@ export interface DexieActions<T extends SyncEntity> {
 export function generateDexieActions<T extends SyncEntity>(
   table: Table<T>,
   hasEmailField = false,
+  shouldEncrypt = true,
 ): DexieActions<T> {
+  const encryptItem = shouldEncrypt
+    ? async (item: T) => (await encryptEntity(item)) as T
+    : async (item: T) => item;
+  const decryptItem = shouldEncrypt
+    ? async (item: T) => (await decryptEntity(item)) as T
+    : async (item: T) => item;
+
   const actions: DexieActions<T> = {
     putLocal: async (item: T): Promise<string> => {
-      const key = await table.put(item);
+      const encryptedItem = await encryptItem(item);
+      const key = await table.put(encryptedItem);
       return key as string;
     },
 
     create: async (item: T): Promise<string> => {
-      const key = await table.add(item);
+      const encryptedItem = await encryptItem(item);
+      const key = await table.add(encryptedItem);
       return key as string;
     },
 
     update: async (id: string, changes: Partial<T>): Promise<number> => {
-      return await table.update(id, changes as any);
+      // Must decrypt current, merge changes, then re-encrypt to maintain data integrity
+      const current = await table.get(id);
+      if (!current) return 0;
+      const decryptedCurrent = await decryptItem(current);
+      const merged = { ...decryptedCurrent, ...changes };
+      const encryptedMerged = await encryptItem(merged as T);
+      return (await table.put(encryptedMerged)) ? 1 : 0;
     },
 
     // ✅ Optimized bulk insert - 10-100x faster than individual puts
     bulkPutLocal: async (items: T[]): Promise<string[]> => {
       if (items.length === 0) return [];
-      const keys = await table.bulkPut(items, { allKeys: true });
+      const encryptedItems = await Promise.all(
+        items.map((i) => encryptItem(i)),
+      );
+      const keys = await table.bulkPut(encryptedItems, { allKeys: true });
       return keys as string[];
     },
 
     getAll: async (): Promise<T[]> => {
-      return await table.orderBy("updatedAt").reverse().toArray();
+      const records = await table.orderBy("updatedAt").reverse().toArray();
+      return Promise.all(records.map((r) => decryptItem(r)));
     },
 
     getByStatus: async (statuses: string[]): Promise<T[]> => {
-      return await table.where("status").anyOf(statuses).toArray();
+      const records = await table.where("status").anyOf(statuses).toArray();
+      return Promise.all(records.map((r) => decryptItem(r)));
     },
 
     getLocal: async (id: string): Promise<T | undefined> => {
-      return await table.get(id);
+      const record = await table.get(id);
+      if (!record) return undefined;
+      return await decryptItem(record);
     },
 
     deleteLocal: async (id: string): Promise<void> => {
@@ -111,13 +135,18 @@ export function generateDexieActions<T extends SyncEntity>(
         .between(["0", 0], ["0", Date.now() + 1])
         .toArray();
 
-      return { waiting, pending };
+      return {
+        waiting: await Promise.all(waiting.map((r) => decryptItem(r))),
+        pending: await Promise.all(pending.map((r) => decryptItem(r))),
+      };
     },
   };
 
   if (hasEmailField) {
     actions.getLocalByEmail = async (email: string): Promise<T | undefined> => {
-      return await table.where("email").equals(email).first();
+      const record = await table.where("email").equals(email).first();
+      if (!record) return undefined;
+      return await decryptItem(record);
     };
   }
 
@@ -125,31 +154,56 @@ export function generateDexieActions<T extends SyncEntity>(
 }
 
 // Export actions
-export const centerActions = generateDexieActions(localDb.centers, false);
-export const userActions = generateDexieActions(localDb.users, true);
-export const teacherActions = generateDexieActions(localDb.teachers, true);
-export const studentActions = generateDexieActions(localDb.students, true);
-export const subjectActions = generateDexieActions(localDb.subjects, false);
+export const centerActions = generateDexieActions(localDb.centers, false, true);
+export const userActions = generateDexieActions(localDb.users, true, false); // No encryption on Users
+export const teacherActions = generateDexieActions(
+  localDb.teachers,
+  true,
+  true,
+);
+export const studentActions = generateDexieActions(
+  localDb.students,
+  true,
+  true,
+);
+export const subjectActions = generateDexieActions(
+  localDb.subjects,
+  false,
+  true,
+);
 export const teacherSubjectActions = generateDexieActions(
   localDb.teacherSubjects,
   false,
+  true,
 );
 export const studentSubjectActions = generateDexieActions(
   localDb.studentSubjects,
   false,
+  true,
 );
-export const receiptActions = generateDexieActions(localDb.receipts, false);
-export const scheduleActions = generateDexieActions(localDb.schedules, false);
+export const receiptActions = generateDexieActions(
+  localDb.receipts,
+  false,
+  true,
+);
+export const scheduleActions = generateDexieActions(
+  localDb.schedules,
+  false,
+  true,
+);
 export const pushSubscriptionActions = generateDexieActions(
   localDb.pushSubscriptions,
+  false,
   false,
 );
 export const deleteRequestActions = generateDexieActions(
   localDb.deleteRequests,
   false,
+  true,
 );
 export const appNotificationActions = generateDexieActions(
   localDb.appNotifications,
+  false,
   false,
 );
 

@@ -28,6 +28,7 @@ function transformServerStudent(serverStudent: any): Student {
     parentEmail: serverStudent.parentEmail || undefined,
     grade: serverStudent.grade || undefined,
     managerId: serverStudent.managerId,
+    encryptedData: serverStudent.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverStudent.createdAt === "string"
@@ -84,10 +85,12 @@ const ServerActionStudents = {
             phone: student.phone,
             parentName: student.parentName,
             parentPhone: student.parentPhone,
-            parentEmail: student.parentEmail,
-            grade: student.grade,
+            parentEmail: student.parentEmail || null,
+            grade: student.grade || null,
             managerId: student.managerId,
             enrollments: enrollments, // Include local enrollments
+            encryptedData: student.encryptedData || undefined,
+            createdAt: new Date(student.createdAt).toISOString(),
           }),
         });
       }
@@ -294,6 +297,7 @@ const ServerActionStudents = {
                   studentId: ss.studentId,
                   subjectId: ss.subjectId,
                   teacherId: ss.teacherId,
+                  encryptedData: ss.encryptedData || undefined,
                   managerId: ss.managerId || student.managerId,
                   enrolledAt:
                     typeof ss.enrolledAt === "string"

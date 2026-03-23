@@ -29,6 +29,7 @@ export interface SyncEntity {
   status: SyncStatus;
   createdAt: number;
   updatedAt: number;
+  encryptedData?: string;
 }
 
 // Entity Interfaces
@@ -176,6 +177,8 @@ export interface LocalAuthUser {
   passwordHash: string; // bcrypt hash (same as server)
   name: string;
   role: Role;
+  isEncrypted: boolean;
+  encryptionSalt?: string;
   lastOnlineLogin: number; // Timestamp of last successful online login
   createdAt: number;
   updatedAt: number;
@@ -250,7 +253,8 @@ export class AppDatabase extends Dexie {
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
       pushSubscriptions:
         "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
-      localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
+      localAuthUsers:
+        "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
     });
 
     // Version 3: Add syncMeta table for tracking data epochs
@@ -273,7 +277,8 @@ export class AppDatabase extends Dexie {
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
       pushSubscriptions:
         "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
-      localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
+      localAuthUsers:
+        "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",
     });
 
@@ -301,7 +306,8 @@ export class AppDatabase extends Dexie {
         "id, status, entityType, entityId, requestStatus, requestedBy, [requestedBy+requestStatus], [status+updatedAt], updatedAt",
       appNotifications:
         "id, status, userId, type, isRead, [userId+isRead], [userId+type], [status+updatedAt], updatedAt, createdAt",
-      localAuthUsers: "id, &email, role, lastOnlineLogin, updatedAt",
+      localAuthUsers:
+        "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",
     });
   }
