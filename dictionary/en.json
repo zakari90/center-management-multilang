@@ -1846,6 +1846,17 @@
       "default": "Export All Data",
       "loading": "Exporting..."
     },
+    "importButton": {
+      "default": "Import Data",
+      "loading": "Importing..."
+    },
+    "toast": {
+      "exportSuccess": "Data exported successfully",
+      "exportError": "Failed to export data",
+      "importSuccess": "Successfully imported {count} tables",
+      "importError": "Failed to import data: {error}",
+      "importInvalidFile": "Invalid file format. Please select a valid JSON file."
+    },
     "unknown": "Unknown",
     "yes": "Yes",
     "no": "No",

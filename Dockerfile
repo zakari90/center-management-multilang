@@ -1,49 +1,42 @@
 # ─── Stage 1: Install dependencies ────────────────────────────────────────────
 FROM node:22-alpine AS deps
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
+# Enable corepack and install dependencies
+RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-
 # ─── Stage 2: Build the application ──────────────────────────────────────────
 FROM node:22-alpine AS builder
-
-RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
+# Enable corepack
+RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Generate Prisma Client for the Linux Alpine target
-RUN pnpm prisma generate
-
-# Build Next.js in standalone mode
-RUN pnpm build
-
+# Generate Prisma Client and build application in one layer
+RUN pnpm prisma generate && pnpm build
 
 # ─── Stage 3: Production runtime ─────────────────────────────────────────────
 FROM node:22-alpine AS runner
-
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a non-root user for security
+# Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy the standalone server output
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Copy the standalone server and necessary assets
+# standalone mode includes node_modules needed for production
 COPY --from=builder /app/public ./public
-
-# Copy Prisma schema (needed for migrations / introspection at runtime)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 
 USER nextjs

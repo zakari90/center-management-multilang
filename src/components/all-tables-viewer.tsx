@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   GenericDataTable,
   GenericDataTableModal,
@@ -24,6 +24,7 @@ import {
   Calendar,
   Building2,
   Download,
+  Upload,
 } from "lucide-react";
 import { localDb } from "@/lib/dexie/dbSchema";
 import type {
@@ -40,6 +41,7 @@ import type {
 } from "@/lib/dexie/dbSchema";
 import { useLocale, useTranslations } from "next-intl";
 import PageHeader from "./page-header";
+import { toast } from "sonner";
 
 // Helper to format timestamps into human-friendly dates
 function formatDate(value: number | string | undefined | null): string {
@@ -57,6 +59,14 @@ function formatDate(value: number | string | undefined | null): string {
 
 // Tables to hide from the grid
 const HIDDEN_TABLES = new Set(["pushSubscriptions"]);
+
+// Tables to exclude from export/import (admin-sensitive data)
+const EXCLUDED_TABLES = new Set([
+  "users",
+  "localAuthUsers",
+  "syncMeta",
+  "pushSubscriptions",
+]);
 
 export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
@@ -753,6 +763,9 @@ export function AllTablesViewer() {
     loadData();
   }, [selectedTable]);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+
   const handleExportAll = async () => {
     setIsLoading(true);
     try {
@@ -762,6 +775,7 @@ export function AllTablesViewer() {
       const filename = `database_export_${timestamp}.json`;
 
       for (const [key, config] of Object.entries(TABLE_CONFIGS)) {
+        if (EXCLUDED_TABLES.has(key)) continue;
         allData[key] = await config.fetchData();
       }
 
@@ -776,10 +790,72 @@ export function AllTablesViewer() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      toast.success(t("toast.exportSuccess"));
     } catch (error) {
       console.error("Failed to export data:", error);
+      toast.error(t("toast.exportError"));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImportData = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const importedData = JSON.parse(text);
+
+      if (
+        typeof importedData !== "object" ||
+        importedData === null ||
+        Array.isArray(importedData)
+      ) {
+        toast.error(t("toast.importInvalidFile"));
+        return;
+      }
+
+      // Valid table names from our DB (excluding admin tables)
+      const validTables = new Set(
+        Object.keys(TABLE_CONFIGS).filter((k) => !EXCLUDED_TABLES.has(k)),
+      );
+      let importedCount = 0;
+
+      for (const [tableName, records] of Object.entries(importedData)) {
+        if (!validTables.has(tableName)) continue;
+        if (!Array.isArray(records) || records.length === 0) continue;
+
+        const table = (localDb as any)[tableName];
+        if (table) {
+          await table.bulkPut(records);
+          importedCount++;
+        }
+      }
+
+      // Reload table counts
+      const counts: Record<string, number> = {};
+      for (const [key, config] of Object.entries(TABLE_CONFIGS)) {
+        const data = await config.fetchData();
+        counts[key] = data.length;
+      }
+      setTableCounts(counts);
+
+      toast.success(t("toast.importSuccess", { count: importedCount }));
+    } catch (error) {
+      console.error("Failed to import data:", error);
+      toast.error(
+        t("toast.importError", {
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    } finally {
+      setIsImporting(false);
+      // Reset file input so same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -787,15 +863,35 @@ export function AllTablesViewer() {
     <div className="space-y-6" dir={direction}>
       <div className="flex flex-col md:flex-row items-center justify-between">
         <PageHeader title={t("title")} subtitle={t("description")} />
-        <Button
-          onClick={handleExportAll}
-          disabled={isLoading}
-          variant="outline"
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          {isLoading ? t("exportButton.loading") : t("exportButton.default")}
-        </Button>
+        <div className="flex gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleImportData}
+            className="hidden"
+          />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isImporting || isLoading}
+            variant="outline"
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            {isImporting
+              ? t("importButton.loading")
+              : t("importButton.default")}
+          </Button>
+          <Button
+            onClick={handleExportAll}
+            disabled={isLoading || isImporting}
+            variant="outline"
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            {isLoading ? t("exportButton.loading") : t("exportButton.default")}
+          </Button>
+        </div>
       </div>
 
       {/* Table Grid */}

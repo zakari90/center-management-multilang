@@ -3,6 +3,8 @@ node_modules
 .next
 out
 build
+dist
+*.tsbuildinfo
 
 # Version control
 .git
@@ -15,11 +17,14 @@ build
 
 # IDE & editor
 .vscode
+.idea
 .agent
+*.swp
+*.swo
 
 # Docker
-Dockerfile
-docker-compose.yml
+Dockerfile*
+docker-compose*
 .dockerignore
 
 # Data & logs
@@ -27,10 +32,23 @@ mongo-data
 mongodb-data
 data
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Misc
 README.md
 docs
 tests
 coverage
-*.tsbuildinfo
+.github
+.vercel
+*.md
+api.txt
+deployment.txt
+multilingualPWABlueprint.txt
+used_apis.txt
+used_apis_dexie.txt
+hash.js
+setup.sh

@@ -1824,6 +1824,17 @@
       "default": "تصدير جميع البيانات",
       "loading": "جاري التصدير..."
     },
+    "importButton": {
+      "default": "استيراد البيانات",
+      "loading": "جاري الاستيراد..."
+    },
+    "toast": {
+      "exportSuccess": "تم تصدير البيانات بنجاح",
+      "exportError": "فشل تصدير البيانات",
+      "importSuccess": "تم استيراد {count} جداول بنجاح",
+      "importError": "فشل استيراد البيانات: {error}",
+      "importInvalidFile": "تنسيق الملف غير صالح. يرجى اختيار ملف JSON صالح."
+    },
     "unknown": "غير معروف",
     "yes": "نعم",
     "no": "لا",
