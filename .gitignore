@@ -1,46 +1,29 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-# Serwist
-
-/test
 /node_modules
 /.pnp
-/deployment.txt
-/api.txt
-/used_apis_dexie.txt
-/used_apis.txt
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-multilingualPWABlueprint.txt
-.multilingualPWABlueprint.txt
-/multilingualPWABlueprint.txt
-.env
-.env.example
-.env.production
- sharing with a non-technical person on a VPS
-/electron-app
-/ionic-app
-setup-mongodb-replica-set.sh
-setup-mongodb-replica-set.ps1
-start-mongodb-replica.ps
-setup-mongodb-replica-set.md
-# prisma - ignore generated files but keep schema
-/prisma/migrations
-# testing
-/coverage
-.hash.js
-/.hash.js
+
 # next.js
 /.next/
 /out/
-/.agent/
+
 # production
 /build
+
+# testing
+/coverage
+/test
+
+# env files
+.env
+.env.*
 
 # misc
 .DS_Store
@@ -52,15 +35,23 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE / editor
+.vscode/
+.idea/
+
+# agent / workflows
+/.agent/
+.agent/workflows/
+
+# git config files (tracked separately or not needed)
+.gitattributes
 
 # mongodb
 /data/db
@@ -70,3 +61,24 @@ mongod.lock
 mongodb.log
 /mongodb-data
 /mongo-data
+
+# prisma - ignore generated files but keep schema
+/prisma/migrations
+
+# non-essential project docs
+/deployment.txt
+/api.txt
+/used_apis_dexie.txt
+/used_apis.txt
+/multilingualPWABlueprint.txt
+.multilingualPWABlueprint.txt
+setup-mongodb-replica-set.sh
+setup-mongodb-replica-set.ps1
+start-mongodb-replica.ps
+setup-mongodb-replica-set.md
+.hash.js
+/hash.js
+
+# platform apps
+/electron-app
+/ionic-app
