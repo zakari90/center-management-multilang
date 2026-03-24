@@ -86,7 +86,14 @@ type LoginError = {
 export async function loginWithRole(
   state: unknown,
   formData: FormData,
-): Promise<LoginError | { data: { user: any }; success: true; role: string }> {
+): Promise<
+  | LoginError
+  | {
+      data: { user: any; passwordHash?: string; dataEpoch?: string };
+      success: true;
+      role: string;
+    }
+> {
   const submittedRole =
     (formData.get("role") as string) === "manager" ? "manager" : "admin";
   const email = formData.get("email") as string;
@@ -147,9 +154,13 @@ export async function loginWithRole(
             // Ignore local caching failures
           }
 
-          // No session cookie; just return user
+          // No session cookie; just return user + E2EE-critical fields
           return {
-            data: { user: serverUser },
+            data: {
+              user: serverUser,
+              passwordHash: (result as any).data?.passwordHash,
+              dataEpoch: (result as any).data?.dataEpoch,
+            },
             success: true,
             role: submittedRole,
           };

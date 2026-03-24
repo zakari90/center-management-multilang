@@ -30,7 +30,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 // import { AutoSyncProvider } from "./AutoSyncProvider"
 
 type Role = "admin" | "manager";
@@ -62,6 +62,7 @@ export function LoginForm({
   const [role, setRole] = useState<Role>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [state, action, isPending] = useActionState(loginWithRole, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isRegisterDialogOpen, setIsRegisterDialogOpen] = useState(false);
@@ -111,11 +112,16 @@ export function LoginForm({
 
   useEffect(() => {
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
-      // <AutoSyncProvider />
-      login(state.data.user);
-      try {
-        localStorage.setItem("last-auth-user", JSON.stringify(state.data.user));
-      } catch {}
+      // Capture the raw password from the form for E2EE key derivation
+      const rawPassword = formRef.current
+        ? (new FormData(formRef.current).get("password") as string) || undefined
+        : undefined;
+      login(
+        state.data.user,
+        rawPassword,
+        state.data.passwordHash,
+        state.data.dataEpoch,
+      );
       const userRole = state.data.user.role;
       const base = `/${locale}`;
       const destination =
@@ -178,7 +184,12 @@ export function LoginForm({
           </CardHeader>
 
           <CardContent className="space-y-6 px-6 pb-6">
-            <form key={role} action={action} className="space-y-5">
+            <form
+              key={role}
+              ref={formRef}
+              action={action}
+              className="space-y-5"
+            >
               <input type="hidden" name="role" value={role} />
 
               {/* Alerts Container */}
@@ -216,7 +227,7 @@ export function LoginForm({
                 )}
 
                 {/* Show delete admin button for testing */}
-                {role === "admin" && hasAdmin === true && !checkingAdmin && (
+                {/* {role === "admin" && hasAdmin === true && !checkingAdmin && (
                   <Button
                     type="button"
                     variant="destructive"
@@ -226,7 +237,7 @@ export function LoginForm({
                   >
                     Delete Admin Data (Testing)
                   </Button>
-                )}
+                )} */}
               </div>
 
               {/* Show registration button if no admin exists */}
