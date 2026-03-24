@@ -2,7 +2,7 @@
 // studentServerAction.ts
 
 import { studentActions, studentSubjectActions } from "./dexieActions";
-import { Student } from "./dbSchema";
+import { Student, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -54,6 +54,11 @@ const ServerActionStudents = {
           teacherId: ss.teacherId,
         }));
 
+      // Read the raw Dexie record to reliably get encryptedData blob
+      // (decryptEntity may have removed it from the in-memory object)
+      const rawRecord = await localDb.students.get(student.id);
+      const encryptedData = rawRecord?.encryptedData || student.encryptedData;
+
       // Try POST first (create)
       let response = await fetch(api_url, {
         method: "POST",
@@ -70,7 +75,7 @@ const ServerActionStudents = {
           grade: student.grade,
           managerId: student.managerId,
           enrollments,
-          encryptedData: student.encryptedData || undefined,
+          encryptedData: encryptedData || undefined,
         }),
       });
 
