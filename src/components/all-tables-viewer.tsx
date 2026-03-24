@@ -46,7 +46,6 @@ import type {
   Center,
   TeacherSubject,
   StudentSubject,
-  PushSubscription,
 } from "@/lib/dexie/dbSchema";
 import { useLocale, useTranslations } from "next-intl";
 import PageHeader from "./page-header";
@@ -67,15 +66,10 @@ function formatDate(value: number | string | undefined | null): string {
 }
 
 // Tables to hide from the grid
-const HIDDEN_TABLES = new Set(["pushSubscriptions"]);
+const HIDDEN_TABLES = new Set<string>([]);
 
 // Tables to exclude from export/import (admin-sensitive data)
-const EXCLUDED_TABLES = new Set([
-  "users",
-  "localAuthUsers",
-  "syncMeta",
-  "pushSubscriptions",
-]);
+const EXCLUDED_TABLES = new Set(["users", "localAuthUsers", "syncMeta"]);
 
 export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
@@ -678,57 +672,6 @@ export function AllTablesViewer() {
         },
       ] as ColumnDef<Center>[],
       fetchData: () => localDb.centers.toArray(),
-    },
-
-    pushSubscriptions: {
-      name: t("tables.pushSubscriptions"),
-      icon: Database,
-      color: "bg-slate-500",
-      columns: [
-        { key: "id", header: t("columns.id"), sortable: true },
-        { key: "endpoint", header: t("columns.endpoint"), sortable: true },
-        {
-          key: "keys",
-          header: t("columns.keys"),
-          render: (value: any) => (value ? JSON.stringify(value) : "-"),
-        },
-        { key: "userId", header: t("columns.userId") },
-        { key: "role", header: t("columns.role") },
-        {
-          key: "status",
-          header: t("columns.status"),
-          render: (value: string) => (
-            <Badge
-              variant={
-                value === "1"
-                  ? "default"
-                  : value === "w"
-                    ? "secondary"
-                    : "destructive"
-              }
-            >
-              {value === "1"
-                ? t("status.synced")
-                : value === "w"
-                  ? t("status.pending")
-                  : t("status.deleted")}
-            </Badge>
-          ),
-        },
-        {
-          key: "createdAt",
-          header: t("columns.created"),
-          sortable: true,
-          render: (v: number) => formatDate(v),
-        },
-        {
-          key: "updatedAt",
-          header: t("columns.updatedAt"),
-          sortable: true,
-          render: (v: number) => formatDate(v),
-        },
-      ] as ColumnDef<PushSubscription>[],
-      fetchData: () => localDb.pushSubscriptions.toArray(),
     },
   };
 

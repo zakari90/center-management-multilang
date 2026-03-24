@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Dexie, { Table } from 'dexie';
+import Dexie, { Table } from "dexie";
 
 export enum ReceiptType {
-  STUDENT_PAYMENT = 'STUDENT_PAYMENT',
-  TEACHER_PAYMENT = 'TEACHER_PAYMENT',
+  STUDENT_PAYMENT = "STUDENT_PAYMENT",
+  TEACHER_PAYMENT = "TEACHER_PAYMENT",
 }
 
 // Base interface for all synced entities
 export interface SyncEntity {
   id: string;
-  status: '1' | 'w' | '0'; // '1' = synced, 'w' = waiting, '0' = marked for deletion
+  status: "1" | "w" | "0"; // '1' = synced, 'w' = waiting, '0' = marked for deletion
   createdAt: number;
   updatedAt: number;
 }
@@ -97,13 +97,6 @@ export interface Schedule extends SyncEntity {
   centerId?: string;
 }
 
-export interface PushSubscription extends SyncEntity {
-  endpoint: string;
-  keys: Record<string, any>;
-  userId?: string;
-  role?: string;
-}
-
 export class AppDatabase extends Dexie {
   centers!: Table<Center>;
   users!: Table<User>;
@@ -114,25 +107,25 @@ export class AppDatabase extends Dexie {
   studentSubjects!: Table<StudentSubject>;
   receipts!: Table<Receipt>;
   schedules!: Table<Schedule>;
-  pushSubscriptions!: Table<PushSubscription>;
 
   constructor() {
-    super('EducationAppDatabase');
+    super("EducationAppDatabase");
 
     this.version(1).stores({
-      centers: 'id, status, adminId, updatedAt',
-      users: 'id, status, email, role, updatedAt',
-      teachers: 'id, status, managerId, email, updatedAt',
-      students: 'id, status, managerId, email, updatedAt',
-      subjects: 'id, status, centerId, updatedAt',
-      teacherSubjects: 'id, status, teacherId, subjectId, updatedAt',
-      studentSubjects: 'id, status, studentId, subjectId, teacherId, updatedAt',
-      receipts: 'id, status, receiptNumber, managerId, studentId, teacherId, date, updatedAt',
-      schedules: 'id, status, teacherId, subjectId, managerId, centerId, day, updatedAt',
-      pushSubscriptions: 'id, status, endpoint, userId, updatedAt',
+      centers: "id, status, adminId, updatedAt",
+      users: "id, status, email, role, updatedAt",
+      teachers: "id, status, managerId, email, updatedAt",
+      students: "id, status, managerId, email, updatedAt",
+      subjects: "id, status, centerId, updatedAt",
+      teacherSubjects: "id, status, teacherId, subjectId, updatedAt",
+      studentSubjects: "id, status, studentId, subjectId, teacherId, updatedAt",
+      receipts:
+        "id, status, receiptNumber, managerId, studentId, teacherId, date, updatedAt",
+      schedules:
+        "id, status, teacherId, subjectId, managerId, centerId, day, updatedAt",
+      pushSubscriptions: "id, status, endpoint, userId, updatedAt",
     });
   }
 }
 
 export const localDb = new AppDatabase();
-

@@ -90,8 +90,6 @@ export function DeleteAllDataButton() {
         localDb.schedules.clear(),
         localDb.deleteRequests.clear(),
         localDb.appNotifications.clear(),
-        // Keep pushSubscriptions - they're device-specific
-        // localDb.pushSubscriptions.clear(),
       ]);
 
       toast.success(

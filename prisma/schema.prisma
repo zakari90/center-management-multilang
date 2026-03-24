@@ -239,11 +239,3 @@ model AppNotification {
   createdAt DateTime @default(now())
 }
 
-model PushSubscription {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String?  @db.ObjectId
-  role      String?
-  endpoint  String   @unique
-  keys      Json
-  createdAt DateTime @default(now())
-}

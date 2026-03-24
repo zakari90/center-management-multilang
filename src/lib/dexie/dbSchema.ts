@@ -144,13 +144,6 @@ export interface Schedule extends SyncEntity {
   allowOverwrite?: boolean;
 }
 
-export interface PushSubscription extends SyncEntity {
-  endpoint: string;
-  keys: Record<string, any>;
-  userId?: string;
-  role?: Role;
-}
-
 export interface DeleteRequest extends SyncEntity {
   entityType: string; // "teacher" | "student"
   entityId: string;
@@ -203,7 +196,6 @@ export class AppDatabase extends Dexie {
   studentSubjects!: Table<StudentSubject>;
   receipts!: Table<Receipt>;
   schedules!: Table<Schedule>;
-  pushSubscriptions!: Table<PushSubscription>;
   deleteRequests!: Table<DeleteRequest>;
   appNotifications!: Table<AppNotification>;
   localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
@@ -229,8 +221,6 @@ export class AppDatabase extends Dexie {
         "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
       schedules:
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
-      pushSubscriptions:
-        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
     });
 
     // Version 2: Add localAuthUsers table for offline authentication
@@ -251,8 +241,7 @@ export class AppDatabase extends Dexie {
         "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
       schedules:
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
-      pushSubscriptions:
-        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+
       localAuthUsers:
         "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
     });
@@ -275,8 +264,7 @@ export class AppDatabase extends Dexie {
         "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
       schedules:
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
-      pushSubscriptions:
-        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+
       localAuthUsers:
         "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",
@@ -300,8 +288,7 @@ export class AppDatabase extends Dexie {
         "id, &receiptNumber, status, managerId, studentId, teacherId, type, date, [status+updatedAt], [managerId+date], [studentId+date], [teacherId+date], [type+date], [managerId+type], updatedAt",
       schedules:
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
-      pushSubscriptions:
-        "id, &endpoint, status, userId, role, [status+updatedAt], updatedAt",
+
       deleteRequests:
         "id, status, entityType, entityId, requestStatus, requestedBy, [requestedBy+requestStatus], [status+updatedAt], updatedAt",
       appNotifications:

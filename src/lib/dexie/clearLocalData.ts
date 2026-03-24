@@ -24,7 +24,6 @@ export async function clearAllLocalData(): Promise<void> {
       localDb.schedules.clear(),
       localDb.users.clear(),
       // Note: Keep localAuthUsers for offline login capability
-      // Note: Keep pushSubscriptions as they're device-specific
       // Note: Keep syncMeta as it stores epoch info
     ]);
   } catch (error) {

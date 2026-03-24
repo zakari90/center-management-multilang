@@ -191,11 +191,6 @@ export const scheduleActions = generateDexieActions(
   false,
   true,
 );
-export const pushSubscriptionActions = generateDexieActions(
-  localDb.pushSubscriptions,
-  false,
-  false,
-);
 export const deleteRequestActions = generateDexieActions(
   localDb.deleteRequests,
   false,

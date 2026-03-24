@@ -212,15 +212,3 @@ export interface ActivityLog extends BaseEntity {
   link?: string;
   amount?: number;
 }
-
-// ==================== PUSH SUBSCRIPTION ====================
-
-export interface PushSubscription extends BaseEntity {
-  endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-  userId?: string;
-  role?: Role;
-}

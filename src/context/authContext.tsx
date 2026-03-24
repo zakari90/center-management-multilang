@@ -115,7 +115,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localDb.schedules.clear(),
         localDb.users.clear(),
         // Note: Keep localAuthUsers for offline login capability
-        // Note: Keep pushSubscriptions as they're device-specific
       ]);
     } catch (e) {}
 
