@@ -1,14 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Trash, Loader2, AlertTriangle } from "lucide-react";
-import { localDb } from "@/lib/dexie/dbSchema";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { localDb } from "@/lib/dexie/dbSchema";
+import { AlertTriangle, Loader2, Trash } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function DeleteAllDataButton() {
   const [open, setOpen] = useState(false);
@@ -24,7 +23,6 @@ export function DeleteAllDataButton() {
   const [password, setPassword] = useState("");
   const t = useTranslations("deleteALL");
   const locale = useLocale();
-  const router = useRouter();
 
   // ✅ Delete all data from both server and local DB
   const handleDelete = async () => {
@@ -176,7 +174,7 @@ export function DeleteAllDataButton() {
             <DialogDescription className="pt-4 space-y-4">
               <p>
                 {t("areYouSureDeleteAllData")} {t("downloadBackupWarning")}{" "}
-                <strong>{t("deleteAllData")}</strong>?
+                {/* <strong>{t("deleteAllData")}</strong> */}
                 <br />
                 <span className="text-destructive font-semibold">
                   {t("cannotBeUndone")}
@@ -207,7 +205,7 @@ export function DeleteAllDataButton() {
               </div>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2">
             <Button
               onClick={() => setOpen(false)}
               variant="outline"

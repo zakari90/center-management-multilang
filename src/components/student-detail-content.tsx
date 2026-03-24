@@ -392,9 +392,9 @@ export function StudentDetailContent({
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-primary">
-                          ${ss.subject.price.toFixed(2)}
-                        </p>
+                        <div className="text-sm font-medium">
+                          {ss.subject.price.toFixed(2)} MAD
+                        </div>
                       </div>
                     </div>
                   ))}

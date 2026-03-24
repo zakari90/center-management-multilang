@@ -20,7 +20,7 @@ export function PaymentStatusBadge({
       <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-green-200 gap-1">
         <CheckCircle2 className="w-3 h-3" />
         {t("paid") || "Paid"}
-        {showAmount && ` ($${status.amountPaid})`}
+        {showAmount && ` (${status.amountPaid} MAD)`}
       </Badge>
     );
   }
@@ -30,7 +30,7 @@ export function PaymentStatusBadge({
       <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200 gap-1">
         <Clock className="w-3 h-3" />
         {t("partial") || "Partial"}
-        {showAmount && ` ($${status.amountPaid})`}
+        {showAmount && ` (${status.amountPaid} MAD)`}
       </Badge>
     );
   }

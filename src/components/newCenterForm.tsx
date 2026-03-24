@@ -433,7 +433,7 @@ export const NewCenterForm = ({ onCenterCreated }: NewCenterFormProps) => {
                             </span>
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
-                            {t("price")}: ${subject.price}
+                            {t("price")}: {subject.price} MAD
                             {subject.duration &&
                               ` • ${t("duration")}: ${subject.duration} ${t("minutes")}`}
                           </div>

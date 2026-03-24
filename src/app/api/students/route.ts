@@ -52,16 +52,55 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // Validate input
-    const result = StudentInputSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: result.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
+    // If E2EE encrypted data is present, skip strict validation
+    // because the real field values are inside the encrypted blob
+    const isEncrypted = !!body.encryptedData;
+
+    let validatedData: any;
+
+    if (isEncrypted) {
+      // Minimal validation — just ensure an ID-like name exists
+      validatedData = {
+        name: body.name || "ENCRYPTED",
+        email:
+          body.email &&
+          body.email !== "ENCRYPTED" &&
+          body.email !== "encrypted@e2ee.local"
+            ? body.email
+            : undefined,
+        phone:
+          body.phone && body.phone !== "ENCRYPTED" ? body.phone : undefined,
+        parentName:
+          body.parentName && body.parentName !== "ENCRYPTED"
+            ? body.parentName
+            : undefined,
+        parentPhone:
+          body.parentPhone && body.parentPhone !== "ENCRYPTED"
+            ? body.parentPhone
+            : undefined,
+        parentEmail:
+          body.parentEmail &&
+          body.parentEmail !== "ENCRYPTED" &&
+          body.parentEmail !== "encrypted@e2ee.local"
+            ? body.parentEmail
+            : undefined,
+        grade:
+          body.grade && body.grade !== "ENCRYPTED" ? body.grade : undefined,
+        enrollments: body.enrollments || [],
+      };
+    } else {
+      // Normal validation
+      const result = StudentInputSchema.safeParse(body);
+      if (!result.success) {
+        return NextResponse.json(
+          {
+            error: "Validation failed",
+            details: result.error.flatten().fieldErrors,
+          },
+          { status: 400 },
+        );
+      }
+      validatedData = result.data;
     }
 
     const {
@@ -73,9 +112,8 @@ export async function POST(req: NextRequest) {
       parentEmail,
       grade,
       enrollments,
-    } = result.data;
-
-    const { id } = body; // Extract ID separately as it's not in the input schema (optional)
+    } = validatedData;
+    const { id } = body;
 
     // Check if student with same ID already exists (for sync conflict handling)
     if (id) {
@@ -91,8 +129,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if email already exists
-    if (email) {
+    // Check if email already exists (skip for encrypted dummy emails)
+    if (email && !isEncrypted) {
       const existingStudent = await db.student.findUnique({
         where: { email },
       });
@@ -119,6 +157,8 @@ export async function POST(req: NextRequest) {
           parentEmail: parentEmail || null,
           grade: grade || null,
           managerId: session.user.id,
+          ...(isEncrypted &&
+            body.encryptedData && { encryptedData: body.encryptedData }),
         },
       });
 

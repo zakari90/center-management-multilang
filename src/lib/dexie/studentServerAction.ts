@@ -70,6 +70,7 @@ const ServerActionStudents = {
           grade: student.grade,
           managerId: student.managerId,
           enrollments,
+          encryptedData: student.encryptedData || undefined,
         }),
       });
 
