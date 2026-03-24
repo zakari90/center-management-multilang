@@ -65,12 +65,8 @@ export async function POST(request: Request) {
     // Delete centers (depends on admin)
     await db.center.deleteMany({});
 
-    // Optionally delete users except current admin
-    await db.user.deleteMany({
-      where: {
-        id: { not: session.user.id },
-      },
-    });
+    // Delete ALL users including admin (full reset)
+    await db.user.deleteMany({});
 
     // Increment admin's dataEpoch to invalidate any cached data
     // Note: dataEpoch update can be done via raw query if needed
