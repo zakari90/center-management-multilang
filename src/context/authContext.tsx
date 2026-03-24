@@ -14,7 +14,11 @@ import {
 } from "@/lib/offlineAuth";
 import { useTranslations } from "next-intl";
 import { isOnline } from "@/lib/utils/network";
-import { deriveKey, setGlobalCryptoKey } from "@/lib/utils/crypto";
+import {
+  deriveKey,
+  setGlobalCryptoKey,
+  getGlobalCryptoKey,
+} from "@/lib/utils/crypto";
 import { localDb } from "@/lib/dexie/dbSchema";
 import {
   checkEpochMismatch,
@@ -148,6 +152,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             setUser(maybeUser);
+
+            // Check if user should be encrypted but key is missing
+            const { isEncrypted } = getGlobalCryptoKey();
+            if (maybeUser.isEncrypted && !isEncrypted) {
+              console.warn(
+                "User is encrypted but E2EE key is missing (likely page refresh).",
+              );
+              // We could potentially trigger a re-auth dialog here if we had the UI
+            }
 
             return;
           }

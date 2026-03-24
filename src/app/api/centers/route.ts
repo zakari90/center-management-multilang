@@ -94,20 +94,50 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const result = CenterInputSchema.safeParse(body);
+    const { id, adminId, encryptedData } = body;
 
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: result.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
+    // If E2EE encrypted data is present, skip strict validation
+    const isEncrypted = !!encryptedData || body.name === "ENCRYPTED";
+
+    let validatedData: any;
+
+    if (isEncrypted) {
+      // Minimal validation for encrypted centers
+      validatedData = {
+        name: body.name || "ENCRYPTED",
+        address: body.address || null,
+        phone: body.phone || null,
+        classrooms: body.classrooms || [],
+        workingDays: body.workingDays || [],
+        paymentStartDay: body.paymentStartDay || 1,
+        paymentEndDay: body.paymentEndDay || 30,
+        academicYear: body.academicYear || null,
+        staffEntryDate: body.staffEntryDate || null,
+        studentEntryDate: body.studentEntryDate || null,
+        schoolEndDateBac: body.schoolEndDateBac || null,
+        schoolEndDateOther: body.schoolEndDateOther || null,
+        publicRegistrationEnabled: body.publicRegistrationEnabled ?? true,
+        managers: body.managers || [],
+      };
+    } else {
+      const result = CenterInputSchema.safeParse(body);
+      if (!result.success) {
+        return NextResponse.json(
+          {
+            error: "Validation failed",
+            details: result.error.flatten().fieldErrors,
+          },
+          { status: 400 },
+        );
+      }
+      validatedData = result.data;
     }
 
-    const { id, adminId } = body;
-    const data = { ...result.data, adminId: adminId || session.user.id };
+    const data = {
+      ...validatedData,
+      adminId: adminId || session.user.id,
+      ...(isEncrypted && encryptedData && { encryptedData }),
+    };
 
     if (id) {
       const existing = await db.center.findUnique({ where: { id } });

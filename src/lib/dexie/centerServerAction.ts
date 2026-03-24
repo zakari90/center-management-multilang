@@ -63,20 +63,39 @@ const ServerActionCenters = {
           updatedAt: new Date(s.updatedAt).toISOString(),
         }));
 
-      const requestBody = {
+      // Read the raw Dexie record to reliably get encryptedData blob
+      const rawRecord = await localDb.centers.get(center.id);
+      const encryptedData = rawRecord?.encryptedData || center.encryptedData;
+      const isRecordEncrypted = !!encryptedData;
+
+      // Base payload with non-sensitive fields
+      const basePayload = {
         id: center.id,
-        name: center.name,
-        address: center.address || null,
-        phone: center.phone || null,
+        adminId: center.adminId,
+        status: center.status,
+        paymentEndDay: center.paymentEndDay,
         classrooms: center.classrooms || [],
         workingDays: center.workingDays || [],
-        paymentEndDay: center.paymentEndDay,
         subjects: centerSubjects,
-        adminId: center.adminId, // ✅ Include adminId for API route compatibility
-        encryptedData: center.encryptedData || undefined,
+        ...(encryptedData && { encryptedData }),
         createdAt: new Date(center.createdAt).toISOString(),
         updatedAt: new Date(center.updatedAt).toISOString(),
       };
+
+      // If encrypted, only send base payload + dummy sensitive fields
+      const requestBody = isRecordEncrypted
+        ? {
+            ...basePayload,
+            name: "ENCRYPTED",
+            address: center.address ? "ENCRYPTED" : undefined,
+            phone: center.phone ? "ENCRYPTED" : undefined,
+          }
+        : {
+            ...basePayload,
+            name: center.name,
+            address: center.address,
+            phone: center.phone,
+          };
 
       // Validate ObjectId format before sending
       if (!/^[0-9a-fA-F]{24}$/.test(center.id)) {

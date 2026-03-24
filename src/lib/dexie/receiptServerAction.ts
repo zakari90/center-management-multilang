@@ -6,7 +6,7 @@ import {
   studentSubjectActions,
   teacherSubjectActions,
 } from "./dexieActions";
-import { Receipt, ReceiptType } from "./dbSchema";
+import { Receipt, ReceiptType, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -54,22 +54,44 @@ const ServerActionReceipts = {
   // ✅ Save receipt to server using direct amount (no subjectIds lookup needed)
   async SaveToServer(receipt: Receipt) {
     try {
+      // Read the raw Dexie record to reliably get encryptedData blob
+      const rawRecord = await localDb.receipts.get(receipt.id);
+      const encryptedData = rawRecord?.encryptedData || receipt.encryptedData;
+      const isRecordEncrypted = !!encryptedData;
+
+      // Base payload with non-sensitive fields
+      const basePayload = {
+        id: receipt.id,
+        receiptNumber: receipt.receiptNumber,
+        type: receipt.type,
+        studentId: receipt.studentId || null,
+        teacherId: receipt.teacherId || null,
+        managerId: receipt.managerId,
+        status: receipt.status,
+        date: new Date(receipt.date).toISOString().split("T")[0],
+        ...(encryptedData && { encryptedData }),
+      };
+
+      // If encrypted, only send base payload + dummy sensitive fields
+      const requestBody = isRecordEncrypted
+        ? {
+            ...basePayload,
+            amount: 0,
+            paymentMethod: receipt.paymentMethod ? "ENCRYPTED" : undefined,
+            description: receipt.description ? "ENCRYPTED" : undefined,
+          }
+        : {
+            ...basePayload,
+            amount: receipt.amount,
+            paymentMethod: receipt.paymentMethod,
+            description: receipt.description,
+          };
+
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          studentId: receipt.studentId || null,
-          teacherId: receipt.teacherId || null,
-          amount: receipt.amount,
-          type: receipt.type,
-          managerId: receipt.managerId,
-          encryptedData: receipt.encryptedData || undefined,
-          createdAt: new Date(receipt.createdAt).toISOString(),
-          paymentMethod: receipt.paymentMethod,
-          description: receipt.description,
-          date: new Date(receipt.date).toISOString().split("T")[0],
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

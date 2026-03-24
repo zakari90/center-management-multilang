@@ -11,60 +11,82 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { day, startTime, endTime, teacherId, subjectId, roomId, centerId } =
-      body;
+    const {
+      id,
+      day,
+      startTime,
+      endTime,
+      teacherId,
+      subjectId,
+      roomId,
+      centerId,
+      encryptedData,
+    } = body;
+
+    // If E2EE encrypted data is present, skip strict validation
+    const isEncrypted = !!encryptedData || startTime === "ENCRYPTED";
 
     // Validation
-    if (!day || !startTime || !endTime || !teacherId || !subjectId || !roomId) {
+    if (
+      !isEncrypted &&
+      (!day || !startTime || !endTime || !teacherId || !subjectId || !roomId)
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    // Check for conflicts - same teacher, same time
-    const teacherConflict = await db.schedule.findFirst({
-      where: {
-        teacherId,
-        day,
-        startTime,
-      },
-    });
+    // Check for conflicts - skip or be lenient for encrypted dummy values
+    const isDummyTime = startTime === "ENCRYPTED" || day === "ENCRYPTED";
 
-    if (teacherConflict && !body.allowOverwrite) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Teacher already has a class at this time",
-            code: "TEACHER_CONFLICT",
-            details: { day, startTime, teacherId },
-          },
+    let teacherConflict = null;
+    let roomConflict = null;
+
+    if (!isEncrypted || !isDummyTime) {
+      // Only check for conflicts if we have real time data
+      teacherConflict = await db.schedule.findFirst({
+        where: {
+          teacherId,
+          day,
+          startTime,
         },
-        { status: 409 },
-      );
-    }
+      });
 
-    // Check for room conflicts
-    const roomConflict = await db.schedule.findFirst({
-      where: {
-        roomId,
-        day,
-        startTime,
-        centerId: centerId || null,
-      },
-    });
-
-    if (roomConflict && !body.allowOverwrite) {
-      return NextResponse.json(
-        {
-          error: {
-            message: "Room is already booked at this time",
-            code: "ROOM_CONFLICT",
-            details: { day, startTime, roomId, centerId },
+      if (teacherConflict && !body.allowOverwrite) {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Teacher already has a class at this time",
+              code: "TEACHER_CONFLICT",
+              details: { day, startTime, teacherId },
+            },
           },
+          { status: 409 },
+        );
+      }
+
+      roomConflict = await db.schedule.findFirst({
+        where: {
+          roomId,
+          day,
+          startTime,
+          centerId: centerId || null,
         },
-        { status: 409 },
-      );
+      });
+
+      if (roomConflict && !body.allowOverwrite) {
+        return NextResponse.json(
+          {
+            error: {
+              message: "Room is already booked at this time",
+              code: "ROOM_CONFLICT",
+              details: { day, startTime, roomId, centerId },
+            },
+          },
+          { status: 409 },
+        );
+      }
     }
 
     // Handle overwrite: Delete conflicting schedules if they exist
@@ -80,6 +102,7 @@ export async function POST(req: NextRequest) {
     // Create schedule
     const schedule = await db.schedule.create({
       data: {
+        id: id || undefined,
         day,
         startTime,
         endTime,
@@ -88,6 +111,7 @@ export async function POST(req: NextRequest) {
         subjectId,
         managerId: session.user.id,
         centerId: centerId || null,
+        ...(isEncrypted && encryptedData && { encryptedData }),
       },
       include: {
         teacher: { select: { id: true, name: true } },

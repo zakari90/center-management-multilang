@@ -2,7 +2,7 @@
 // teacherServerAction.ts
 
 import { teacherActions, teacherSubjectActions } from "./dexieActions";
-import { Teacher } from "./dbSchema";
+import { Teacher, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -52,27 +52,48 @@ const ServerActionTeachers = {
           hourlyRate: ts.hourlyRate ?? null,
         }));
 
+      // Read the raw Dexie record to reliably get encryptedData blob
+      const rawRecord = await localDb.teachers.get(teacher.id);
+      const encryptedData = rawRecord?.encryptedData || teacher.encryptedData;
+      const isRecordEncrypted = !!encryptedData;
+
+      // Base payload with non-sensitive fields
+      const basePayload = {
+        id: teacher.id,
+        managerId: teacher.managerId,
+        status: teacher.status,
+        subjects,
+        weeklySchedule: teacher.weeklySchedule
+          ? Array.isArray(teacher.weeklySchedule)
+            ? teacher.weeklySchedule
+            : Object.values(teacher.weeklySchedule)
+          : [],
+        ...(encryptedData && { encryptedData }),
+      };
+
+      // If encrypted, only send base payload + dummy sensitive fields
+      const requestBody = isRecordEncrypted
+        ? {
+            ...basePayload,
+            name: "ENCRYPTED",
+            email: teacher.email ? "ENCRYPTED" : undefined,
+            phone: teacher.phone ? "ENCRYPTED" : undefined,
+            address: teacher.address ? "ENCRYPTED" : undefined,
+          }
+        : {
+            ...basePayload,
+            name: teacher.name,
+            email: teacher.email,
+            phone: teacher.phone,
+            address: teacher.address,
+          };
+
       // Try POST first (create)
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          id: teacher.id,
-          name: teacher.name,
-          email: teacher.email,
-          phone: teacher.phone,
-          address: teacher.address,
-          managerId: teacher.managerId,
-          encryptedData: teacher.encryptedData || undefined,
-          createdAt: new Date(teacher.createdAt).toISOString(),
-          weeklySchedule: teacher.weeklySchedule
-            ? Array.isArray(teacher.weeklySchedule)
-              ? teacher.weeklySchedule
-              : Object.values(teacher.weeklySchedule)
-            : {},
-          subjects,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       // If POST fails with conflict, try PATCH (update)
@@ -82,19 +103,8 @@ const ServerActionTeachers = {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
-            name: teacher.name,
-            email: teacher.email,
-            phone: teacher.phone,
-            address: teacher.address,
-            managerId: teacher.managerId,
-            encryptedData: teacher.encryptedData || undefined,
+            ...requestBody,
             updatedAt: new Date(teacher.updatedAt).toISOString(),
-            weeklySchedule: teacher.weeklySchedule
-              ? Array.isArray(teacher.weeklySchedule)
-                ? teacher.weeklySchedule
-                : Object.values(teacher.weeklySchedule)
-              : {},
-            subjects,
           }),
         });
       }

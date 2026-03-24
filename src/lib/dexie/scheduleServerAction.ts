@@ -2,7 +2,7 @@
 // scheduleServerAction.ts
 
 import { scheduleActions } from "./dexieActions";
-import { Schedule } from "./dbSchema";
+import { Schedule, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -45,22 +45,45 @@ const ServerActionSchedules = {
   // ✅ Save schedule to server
   async SaveToServer(schedule: Schedule) {
     try {
+      // Read the raw Dexie record to reliably get encryptedData blob
+      const rawRecord = await localDb.schedules.get(schedule.id);
+      const encryptedData = rawRecord?.encryptedData || schedule.encryptedData;
+      const isRecordEncrypted = !!encryptedData;
+
+      // Base payload with non-sensitive fields
+      const basePayload = {
+        id: schedule.id,
+        teacherId: schedule.teacherId,
+        subjectId: schedule.subjectId,
+        managerId: schedule.managerId,
+        centerId: schedule.centerId || null,
+        status: schedule.status,
+        allowOverwrite: schedule.allowOverwrite,
+        ...(encryptedData && { encryptedData }),
+      };
+
+      // If encrypted, only send base payload + dummy sensitive fields
+      const requestBody = isRecordEncrypted
+        ? {
+            ...basePayload,
+            day: "ENCRYPTED",
+            startTime: "ENCRYPTED",
+            endTime: "ENCRYPTED",
+            roomId: "ENCRYPTED",
+          }
+        : {
+            ...basePayload,
+            day: schedule.day,
+            startTime: schedule.startTime,
+            endTime: schedule.endTime,
+            roomId: schedule.roomId,
+          };
+
       const response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          day: schedule.day,
-          startTime: schedule.startTime,
-          endTime: schedule.endTime,
-          teacherId: schedule.teacherId,
-          subjectId: schedule.subjectId,
-          roomId: schedule.roomId,
-          managerId: schedule.managerId,
-          centerId: schedule.centerId || null,
-          encryptedData: schedule.encryptedData || undefined,
-          allowOverwrite: schedule.allowOverwrite,
-        }),
+        body: JSON.stringify(requestBody),
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

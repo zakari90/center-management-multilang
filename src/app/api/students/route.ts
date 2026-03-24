@@ -54,18 +54,19 @@ export async function POST(req: NextRequest) {
 
     // If E2EE encrypted data is present, skip strict validation
     // because the real field values are inside the encrypted blob
-    const isEncrypted = !!body.encryptedData;
+    // Also check if name is 'ENCRYPTED' which is a strong hint
+    const isEncrypted = !!body.encryptedData || body.name === "ENCRYPTED";
 
     let validatedData: any;
 
     if (isEncrypted) {
-      // Minimal validation — just ensure an ID-like name exists
+      // Minimal validation — just ensure an ID exists or fallback to ENCRYPTED
+      // We prioritize any real data sent, but allow dummy values
       validatedData = {
         name: body.name || "ENCRYPTED",
         email:
           body.email &&
-          body.email !== "ENCRYPTED" &&
-          body.email !== "encrypted@e2ee.local"
+          !["ENCRYPTED", "encrypted@e2ee.local", ""].includes(body.email)
             ? body.email
             : undefined,
         phone:
@@ -80,8 +81,7 @@ export async function POST(req: NextRequest) {
             : undefined,
         parentEmail:
           body.parentEmail &&
-          body.parentEmail !== "ENCRYPTED" &&
-          body.parentEmail !== "encrypted@e2ee.local"
+          !["ENCRYPTED", "encrypted@e2ee.local", ""].includes(body.parentEmail)
             ? body.parentEmail
             : undefined,
         grade:

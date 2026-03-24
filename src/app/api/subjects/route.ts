@@ -45,21 +45,38 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    const { id, createdAt, updatedAt, encryptedData } = body;
 
-    // Validate input
-    const result = SubjectInputSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: result.error.flatten().fieldErrors,
-        },
-        { status: 400 },
-      );
+    // If E2EE encrypted data is present, skip strict validation
+    const isEncrypted = !!encryptedData || body.name === "ENCRYPTED";
+
+    let validatedData: any;
+
+    if (isEncrypted) {
+      // Minimal validation for encrypted subjects
+      validatedData = {
+        name: body.name || "ENCRYPTED",
+        grade: body.grade || "ENCRYPTED",
+        price: typeof body.price === "number" ? body.price : 0,
+        duration: typeof body.duration === "number" ? body.duration : null,
+        centerId: body.centerId,
+      };
+    } else {
+      // Validate input
+      const result = SubjectInputSchema.safeParse(body);
+      if (!result.success) {
+        return NextResponse.json(
+          {
+            error: "Validation failed",
+            details: result.error.flatten().fieldErrors,
+          },
+          { status: 400 },
+        );
+      }
+      validatedData = result.data;
     }
 
-    const { name, grade, price, duration, centerId } = result.data;
-    const { id, createdAt, updatedAt } = body;
+    const { name, grade, price, duration, centerId } = validatedData;
 
     // Standard POST only creates. If it exists, return 409 conflict.
     if (id) {
@@ -83,6 +100,7 @@ export async function POST(request: Request) {
         price,
         duration,
         centerId,
+        ...(isEncrypted && encryptedData && { encryptedData }),
         ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
         ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       },

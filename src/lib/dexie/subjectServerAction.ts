@@ -2,7 +2,7 @@
 // subjectServerAction.ts
 
 import { subjectActions } from "./dexieActions";
-import { Subject } from "./dbSchema";
+import { Subject, localDb } from "./dbSchema";
 import { isOnline } from "../utils/network";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -42,22 +42,40 @@ const ServerActionSubjects = {
   // ✅ Save subject to server (handles both create and update)
   async SaveToServer(subject: Subject) {
     try {
+      // Read the raw Dexie record to reliably get encryptedData blob
+      const rawRecord = await localDb.subjects.get(subject.id);
+      const encryptedData = rawRecord?.encryptedData || subject.encryptedData;
+      const isRecordEncrypted = !!encryptedData;
+
+      // Base payload with non-sensitive fields
+      const basePayload = {
+        id: subject.id,
+        centerId: subject.centerId,
+        price: subject.price,
+        duration: subject.duration,
+        status: subject.status,
+        ...(encryptedData && { encryptedData }),
+      };
+
+      // If encrypted, only send base payload + dummy sensitive fields
+      const requestBody = isRecordEncrypted
+        ? {
+            ...basePayload,
+            name: "ENCRYPTED",
+            grade: "ENCRYPTED",
+          }
+        : {
+            ...basePayload,
+            name: subject.name,
+            grade: subject.grade,
+          };
+
       // Try POST first (create)
       let response = await fetch(api_url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          id: subject.id,
-          centerId: subject.centerId,
-          name: subject.name,
-          grade: subject.grade,
-          price: subject.price,
-          duration: subject.duration,
-          encryptedData: subject.encryptedData || undefined,
-          createdAt: new Date(subject.createdAt).toISOString(),
-          updatedAt: new Date(subject.updatedAt).toISOString(),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       // If POST fails with conflict, try PATCH (update) on the dynamic route
@@ -67,10 +85,8 @@ const ServerActionSubjects = {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
-            name: subject.name,
-            grade: subject.grade,
-            price: subject.price,
-            duration: subject.duration,
+            ...requestBody,
+            updatedAt: new Date(subject.updatedAt).toISOString(),
           }),
         });
       }

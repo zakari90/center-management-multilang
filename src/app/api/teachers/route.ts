@@ -5,47 +5,67 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const session: any = await getSession()
+    const session: any = await getSession();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== 'MANAGER' && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json()
-    const { id, name, email, phone, address, weeklySchedule, subjects } = body
+    const body = await req.json();
+    const {
+      id,
+      name,
+      email,
+      phone,
+      address,
+      weeklySchedule,
+      subjects,
+      encryptedData,
+    } = body;
 
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    // If E2EE encrypted data is present, skip strict validation
+    const isEncrypted = !!encryptedData || name === "ENCRYPTED";
+
+    if (!name && !isEncrypted) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
     // Check if teacher with same ID already exists (for sync conflict handling)
     if (id) {
       const existingTeacherById = await db.teacher.findUnique({
-        where: { id }
-      })
+        where: { id },
+      });
 
       if (existingTeacherById) {
-        return NextResponse.json({ error: 'Teacher with this ID already exists' }, { status: 409 })
+        return NextResponse.json(
+          { error: "Teacher with this ID already exists" },
+          { status: 409 },
+        );
       }
     }
 
-    // Check if email already exists
-    if (email) {
+    // Check if email already exists (skip for encrypted dummy emails)
+    const isDummyEmail =
+      email === "ENCRYPTED" || email === "encrypted@e2ee.local";
+    if (email && !isDummyEmail) {
       const existingTeacher = await db.teacher.findUnique({
-        where: { email }
-      })
+        where: { email },
+      });
 
       if (existingTeacher) {
-        return NextResponse.json({ error: 'Email already in use' }, { status: 400 })
+        return NextResponse.json(
+          { error: "Email already in use" },
+          { status: 400 },
+        );
       }
     }
 
     // Ensure weeklySchedule is an array or empty array
-    const scheduleArray = Array.isArray(weeklySchedule) ? weeklySchedule : []
+    const scheduleArray = Array.isArray(weeklySchedule) ? weeklySchedule : [];
 
     // Create teacher with subjects in a transaction
     const teacher = await db.$transaction(async (tx: any) => {
@@ -59,8 +79,9 @@ export async function POST(req: NextRequest) {
           address: address || null,
           weeklySchedule: scheduleArray, // Pass array directly
           managerId: session.user.id,
+          ...(isEncrypted && encryptedData && { encryptedData }),
         },
-      })
+      });
 
       // Create teacher-subject associations if subjects provided
       if (subjects && subjects.length > 0) {
@@ -70,8 +91,8 @@ export async function POST(req: NextRequest) {
             subjectId: subject.subjectId,
             percentage: subject.percentage,
             hourlyRate: subject.hourlyRate,
-          }))
-        })
+          })),
+        });
       }
 
       // Return teacher with subjects
@@ -80,29 +101,29 @@ export async function POST(req: NextRequest) {
         include: {
           teacherSubjects: {
             include: {
-              subject: true
-            }
-          }
-        }
-      })
-    })
+              subject: true,
+            },
+          },
+        },
+      });
+    });
 
-    return NextResponse.json(teacher, { status: 201 })
+    return NextResponse.json(teacher, { status: 201 });
   } catch (error) {
-    console.error('Error creating teacher:', error)
+    console.error("Error creating teacher:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
 export async function GET() {
   try {
-    const session: any = await getSession()
+    const session: any = await getSession();
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get all teachers (managers can see all data)
@@ -110,26 +131,26 @@ export async function GET() {
       include: {
         teacherSubjects: {
           include: {
-            subject: true
-          }
+            subject: true,
+          },
         },
         _count: {
           select: {
-            receipts: true
-          }
-        }
+            receipts: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        createdAt: "desc",
+      },
+    });
 
-    return NextResponse.json(teachers)
+    return NextResponse.json(teachers);
   } catch (error) {
-    console.error('Error fetching teachers:', error)
+    console.error("Error fetching teachers:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
