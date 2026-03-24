@@ -78,7 +78,6 @@ export async function decryptEntity<T extends Record<string, any>>(
       key,
     );
     const restoredItem = { ...item, ...sensitiveData };
-    delete restoredItem.encryptedData; // Clean up
     return restoredItem as T;
   } catch (error) {
     console.error(`Failed to decrypt entity ${item.id}`, error);
