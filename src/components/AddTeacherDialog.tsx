@@ -212,7 +212,7 @@ const SubjectCompensationCard = ({
                 onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
               }
               placeholder="50%"
-              className="h-9 text-sm w-[50px]"
+              className="h-9 text-sm"
             />
           ) : (
             <Input

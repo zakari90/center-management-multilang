@@ -25,7 +25,9 @@ function transformServerTeacher(serverTeacher: any): Teacher {
     phone: serverTeacher.phone || undefined,
     address: serverTeacher.address || undefined,
     weeklySchedule: serverTeacher.weeklySchedule || {},
+    overrideConflicts: serverTeacher.overrideConflicts || false,
     managerId: serverTeacher.managerId,
+
     encryptedData: serverTeacher.encryptedData || undefined,
     status: "1" as const,
     createdAt:
@@ -68,8 +70,10 @@ const ServerActionTeachers = {
             ? teacher.weeklySchedule
             : Object.values(teacher.weeklySchedule)
           : [],
+        overrideConflicts: teacher.overrideConflicts || false,
         ...(encryptedData && { encryptedData }),
       };
+
 
       // If encrypted, only send base payload + dummy sensitive fields
       const requestBody = isRecordEncrypted

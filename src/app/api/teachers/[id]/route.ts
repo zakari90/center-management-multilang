@@ -100,7 +100,8 @@ export async function PATCH(
     }
 
     const body = await req.json()
-    const { name, email, phone, address, weeklySchedule, subjects } = body
+    const { name, email, phone, address, weeklySchedule, subjects, overrideConflicts } = body
+
 
     // Verify teacher belongs to this manager
     const existingTeacher = await db.teacher.findUnique({
@@ -125,7 +126,10 @@ export async function PATCH(
           phone: phone !== undefined ? phone : existingTeacher.phone,
           address: address !== undefined ? address : existingTeacher.address,
           weeklySchedule: weeklySchedule !== undefined ? weeklySchedule : existingTeacher.weeklySchedule,
+          overrideConflicts: overrideConflicts !== undefined ? overrideConflicts : (existingTeacher as any).overrideConflicts,
         }
+
+
       })
 
       // Update subjects if provided

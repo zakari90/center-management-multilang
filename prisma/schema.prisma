@@ -96,7 +96,9 @@ model Teacher {
   phone            String?
   address          String?
   weeklySchedule   Json?
+  overrideConflicts Boolean            @default(false)
   createdAt        DateTime           @default(now())
+
   updatedAt        DateTime           @updatedAt
 
   manager          User               @relation("UserManagedTeachers", fields: [managerId], references: [id])

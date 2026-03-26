@@ -24,8 +24,10 @@ export async function POST(req: NextRequest) {
       address,
       weeklySchedule,
       subjects,
+      overrideConflicts,
       encryptedData,
     } = body;
+
 
     // If E2EE encrypted data is present, skip strict validation
     const isEncrypted = !!encryptedData || name === "ENCRYPTED";
@@ -78,7 +80,9 @@ export async function POST(req: NextRequest) {
           phone: phone || null,
           address: address || null,
           weeklySchedule: scheduleArray, // Pass array directly
+          overrideConflicts: overrideConflicts === true,
           managerId: session.user.id,
+
           ...(isEncrypted && encryptedData && { encryptedData }),
         },
       });

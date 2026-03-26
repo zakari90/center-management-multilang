@@ -667,6 +667,7 @@
     "weeklyScheduleReadOnly": "الجدول الأسبوعي (للقراءة فقط)",
     "weeklyScheduleDescription": "انقر على أي فترة زمنية لإضافة فئة",
     "time": "الوقت",
+    "day": "اليوم",
     "addClassSchedule": "إضافة جدول الفئة",
     "teacher": "المعلم",
     "subject": "المادة",
@@ -690,7 +691,9 @@
     "teacherConflict": "المعلم لديه بالفعل فئة في هذا الوقت",
     "roomConflict": "القاعة محجوزة بالفعل في هذا الوقت",
     "scheduleDetails": "تفاصيل الجدول",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "overwrite": "استبدال",
+    "overwritePrompt": "هل تريد استبدال الجدول الحالي؟"
   },
   "Program": {
     "title": "إدارة البرنامج",

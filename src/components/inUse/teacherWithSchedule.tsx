@@ -64,7 +64,9 @@ interface Teacher {
   email?: string;
   phone?: string;
   weeklySchedule?: WeeklyScheduleSlot[] | string | string[]; // ✅ Added string[]
+  overrideConflicts?: boolean;
 }
+
 
 interface Schedule {
   id: string;
@@ -670,11 +672,21 @@ export default function TeacherScheduleView({
 
   // Toggle conflict dismissal for a specific teacher
   const toggleDismissConflicts = useCallback(
-    (teacherId: string, dismissed: boolean) => {
+    async (teacherId: string, dismissed: boolean) => {
       setDismissedConflicts((prev) => ({ ...prev, [teacherId]: dismissed }));
+      try {
+        await teacherActions.update(teacherId, {
+          overrideConflicts: dismissed,
+          status: "w",
+          updatedAt: Date.now(),
+        } as any);
+      } catch (err) {
+        console.error("Failed to persist conflict dismissal:", err);
+      }
     },
     [],
   );
+
 
   const fetchTeacherSchedules = useCallback(async () => {
     try {
@@ -1035,11 +1047,16 @@ export default function TeacherScheduleView({
               <TeacherInfoCard
                 teacher={teacher}
                 isAdmin={isAdmin}
-                dismissed={dismissedConflicts[teacher.id] || false}
+                dismissed={
+                  dismissedConflicts[teacher.id] !== undefined
+                    ? dismissedConflicts[teacher.id]
+                    : (teacher as any).overrideConflicts || false
+                }
                 onDismissChange={(dismissed) =>
                   toggleDismissConflicts(teacher.id, dismissed)
                 }
               />
+
               {isAdmin && (
                 <AvailabilityCard teacher={teacher} tCommon={tCommon} />
               )}

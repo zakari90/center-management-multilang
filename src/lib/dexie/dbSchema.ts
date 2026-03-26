@@ -81,7 +81,9 @@ export interface Teacher extends SyncEntity {
   phone?: string;
   address?: string;
   weeklySchedule?: string[] | Record<string, any>;
+  overrideConflicts?: boolean;
   managerId: string;
+
 }
 
 export interface Student extends SyncEntity {
