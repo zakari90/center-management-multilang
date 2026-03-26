@@ -72,16 +72,52 @@ export async function PATCH(
       );
     }
 
+    // Sanitize body to only include allowed fields for Prisma
+    const { 
+      name, 
+      grade, 
+      price, 
+      duration, 
+      centerId, 
+      encryptedData, 
+      createdAt, 
+      updatedAt 
+    } = body;
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (grade !== undefined) updateData.grade = grade;
+    if (price !== undefined) updateData.price = typeof price === 'string' ? parseFloat(price) : price;
+    if (duration !== undefined) updateData.duration = typeof duration === 'string' ? parseInt(duration) : duration;
+    if (centerId !== undefined) updateData.centerId = centerId;
+    if (encryptedData !== undefined) updateData.encryptedData = encryptedData;
+    
+    // Handle Date conversions for sync
+    if (createdAt) updateData.createdAt = new Date(createdAt);
+    if (updatedAt) updateData.updatedAt = new Date(updatedAt);
+
     const subject = await db.subject.update({
       where: { id },
-      data: body
+      data: updateData
     });
 
     return NextResponse.json(subject);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[UPDATE_SUBJECT]', error);
+    
+    // Handle Prisma "Record not found" error
+    if (error?.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Subject not found' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to update subject' },
+      { 
+        error: 'Failed to update subject',
+        details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      },
       { status: 500 }
     );
   }
