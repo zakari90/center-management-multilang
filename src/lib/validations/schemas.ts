@@ -121,13 +121,13 @@ export const ScheduleSchema = SyncEntitySchema.extend({
 
 // --- Form Schemas ---
 export const StudentFormSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters"),
-  email: z.string().trim().email().optional().or(z.literal("")),
-  phone: z.string().trim().optional().or(z.literal("")),
-  parentName: z.string().trim().optional().or(z.literal("")),
-  parentPhone: z.string().trim().optional().or(z.literal("")),
-  parentEmail: z.string().trim().email().optional().or(z.literal("")),
-  grade: z.string().trim().optional().or(z.literal("")),
+  name: z.string().trim().min(1, "Name is required"),
+  email: z.string().trim().email().nullish().or(z.literal("")),
+  phone: z.string().trim().nullish().or(z.literal("")),
+  parentName: z.string().trim().nullish().or(z.literal("")),
+  parentPhone: z.string().trim().nullish().or(z.literal("")),
+  parentEmail: z.string().trim().email().nullish().or(z.literal("")),
+  grade: z.string().trim().nullish().or(z.literal("")),
 });
 
 export const SubjectFormSchema = z.object({
@@ -148,13 +148,13 @@ export const CenterInputSchema = z.object({
 });
 
 export const StudentInputSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters"),
-  email: z.string().trim().email().optional().or(z.literal("")),
-  phone: z.string().trim().optional().or(z.literal("")),
-  parentName: z.string().trim().optional().or(z.literal("")),
-  parentPhone: z.string().trim().optional().or(z.literal("")),
-  parentEmail: z.string().trim().email().optional().or(z.literal("")),
-  grade: z.string().trim().optional().or(z.literal("")),
+  name: z.string().trim().min(1, "Name is required"),
+  email: z.string().trim().email().nullish().or(z.literal("")),
+  phone: z.string().trim().nullish().or(z.literal("")),
+  parentName: z.string().trim().nullish().or(z.literal("")),
+  parentPhone: z.string().trim().nullish().or(z.literal("")),
+  parentEmail: z.string().trim().email().nullish().or(z.literal("")),
+  grade: z.string().trim().nullish().or(z.literal("")),
   enrollments: z
     .array(
       z.object({
