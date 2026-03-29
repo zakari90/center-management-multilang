@@ -48,6 +48,7 @@ import {
   User,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import PageHeader from "../page-header";
 
 // ==================== TYPES & INTERFACES ====================
@@ -700,11 +701,7 @@ export default function TeacherScheduleView({
   const { user, isLoading: authLoading } = useAuth();
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
-  const [teachers, setTeachers] = useState<TeacherWithSchedule[]>([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-
   const [searchQuery, setSearchQuery] = useState("");
   const [dismissedConflicts, setDismissedConflicts] = useState<
     Record<string, boolean>
@@ -712,31 +709,9 @@ export default function TeacherScheduleView({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const toggleDismissConflicts = useCallback(
-    async (teacherId: string, dismissed: boolean) => {
-      setDismissedConflicts((prev) => ({ ...prev, [teacherId]: dismissed }));
-      try {
-        await teacherActions.update(teacherId, {
-          overrideConflicts: dismissed,
-          status: "w",
-          updatedAt: Date.now(),
-        } as any);
-      } catch (err) {
-        console.error("Failed to persist conflict dismissal:", err);
-      }
-    },
-    [],
-  );
-
-  const fetchTeacherSchedules = useCallback(async () => {
+  const queryData = useLiveQuery(async () => {
     try {
-      setIsLoading(true);
-      setError("");
-
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
+      if (!user) return null;
 
       const isAdmin = user.role?.toUpperCase() === "ADMIN";
       const isManager = user.role?.toUpperCase() === "MANAGER";
@@ -798,97 +773,47 @@ export default function TeacherScheduleView({
 
         const teacherWeeklySchedule = teacher?.weeklySchedule
           ? typeof teacher.weeklySchedule === "string"
-            ? teacher.weeklySchedule
-            : Array.isArray(teacher.weeklySchedule)
-              ? (teacher.weeklySchedule as WeeklyScheduleSlot[])
-              : undefined
-          : undefined;
+            ? JSON.parse(teacher.weeklySchedule)
+            : teacher.weeklySchedule
+          : [];
 
         return {
-          id: schedule.id,
-          day: normalizeDayKey(schedule.day),
-          startTime: schedule.startTime,
-          endTime: schedule.endTime,
-          roomId: schedule.roomId,
-          teacherId: schedule.teacherId,
-          subjectId: schedule.subjectId,
-          teacher: teacher
-            ? {
-                id: teacher.id,
-                name: teacher.name,
-                email: teacher.email,
-                weeklySchedule: teacherWeeklySchedule,
-              }
-            : {
-                id: schedule.teacherId,
-                name: "Unknown Teacher",
-                weeklySchedule: undefined,
-              },
-          subject: subject
-            ? { id: subject.id, name: subject.name, grade: subject.grade }
-            : { id: schedule.subjectId, name: "Unknown Subject", grade: "N/A" },
+          ...schedule,
+          teacher: {
+            id: teacher?.id || schedule.teacherId,
+            name: teacher?.name || "Unknown Teacher",
+            email: teacher?.email,
+            weeklySchedule: teacherWeeklySchedule,
+          },
+          subject: {
+            id: subject?.id || schedule.subjectId,
+            name: subject?.name || "Unknown Subject",
+            grade: subject?.grade || "N/A",
+          },
         };
       });
 
-      const teachersData: Teacher[] = activeTeachers.map((teacher) => {
-        const weeklySchedule = teacher.weeklySchedule
-          ? typeof teacher.weeklySchedule === "string"
-            ? teacher.weeklySchedule
-            : Array.isArray(teacher.weeklySchedule)
-              ? (teacher.weeklySchedule as any[])
-              : undefined
-          : undefined;
-
-        return {
-          id: teacher.id,
-          name: teacher.name,
-          email: teacher.email,
-          phone: teacher.phone,
-          weeklySchedule,
-          overrideConflicts: teacher.overrideConflicts,
-        };
-      });
-
-      const teachersWithSchedules: TeacherWithSchedule[] = teachersData.map(
+      const teachersWithDetails: TeacherWithSchedule[] = activeTeachers.map(
         (teacher) => {
           const teacherSchedules = schedulesWithData.filter(
             (s) => s.teacherId === teacher.id,
           );
-
           const weeklySchedule = parseWeeklySchedule(teacher.weeklySchedule);
 
-          const availableHours = weeklySchedule.reduce((acc, slot) => {
-            return acc + calculateHoursDifference(slot.startTime, slot.endTime);
+          const totalHours = teacherSchedules.reduce((sum, s) => {
+            return sum + calculateHoursDifference(s.startTime, s.endTime);
           }, 0);
 
-          const totalHours = teacherSchedules.reduce((acc, schedule) => {
-            return (
-              acc +
-              calculateHoursDifference(schedule.startTime, schedule.endTime)
-            );
+          const availableHours = weeklySchedule.reduce((sum, slot) => {
+            return sum + calculateHoursDifference(slot.startTime, slot.endTime);
           }, 0);
 
-          const subjectPrices = teacherSchedules
-            .map((s) => {
-              const subject = activeSubjects.find(
-                (sub) => sub.id === s.subjectId,
-              );
-              return subject?.price || 0;
-            })
-            .filter((price) => price > 0);
-
-          const costPerSubject =
-            subjectPrices.length > 0
-              ? subjectPrices.reduce((sum, price) => sum + price, 0) /
-                subjectPrices.length
-              : 0;
-
-          const uniqueSubjects = new Set(
+          const teacherSubjectsSet = new Set(
             teacherSchedules.map((s) => s.subjectId),
           );
 
           const conflicts = teacherSchedules.filter(
-            (schedule) => !isWithinAvailability(schedule, weeklySchedule),
+            (s) => !isWithinAvailability(s, weeklySchedule),
           );
 
           return {
@@ -896,30 +821,60 @@ export default function TeacherScheduleView({
             weeklySchedule,
             schedules: teacherSchedules,
             totalHours,
+            subjectsCount: teacherSubjectsSet.size,
             availableHours,
-            costPerSubject,
-            subjectsCount: uniqueSubjects.size,
+            costPerSubject: 0, // Placeholder
             conflicts,
           };
         },
       );
 
-      setTeachers(teachersWithSchedules);
-
-      if (teachersWithSchedules.length > 0) {
-        setSelectedTeacherId(teachersWithSchedules[0].id);
-      }
+      return {
+        teachers: teachersWithDetails,
+      };
     } catch (err) {
-      console.error("Failed to fetch teacher schedules from local DB:", err);
-      setError(t("errorLoadSchedules"));
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to fetch teacher schedules:", err);
+      return null;
     }
-  }, [t, user, centerId]);
+  }, [user?.id, user?.role, centerId, refreshKey]);
+
+  const teachers = queryData?.teachers || [];
+  const isLoading = queryData === undefined;
+  const [error, setError] = useState("");
+
+  const toggleDismissConflicts = useCallback(
+    async (teacherId: string, dismissed: boolean) => {
+      setDismissedConflicts((prev) => ({ ...prev, [teacherId]: dismissed }));
+      try {
+        await teacherActions.update(teacherId, {
+          overrideConflicts: dismissed,
+          status: "w",
+          updatedAt: Date.now(),
+        } as any);
+      } catch (err) {
+        console.error("Failed to persist conflict dismissal:", err);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    fetchTeacherSchedules();
-  }, [fetchTeacherSchedules, refreshKey]);
+    if (teachers.length > 0 && !selectedTeacherId) {
+      setSelectedTeacherId(teachers[0].id);
+    }
+  }, [teachers, selectedTeacherId]);
+
+  useEffect(() => {
+    if (teachers.length > 0) {
+      const initialDismissed: Record<string, boolean> = {};
+      teachers.forEach((t) => {
+        if (t.overrideConflicts) {
+          initialDismissed[t.id] = true;
+        }
+      });
+      setDismissedConflicts(initialDismissed);
+    }
+  }, [teachers]);
 
   const filteredTeachers = teachers.filter((teacher) =>
     teacher.name.toLowerCase().includes(searchQuery.toLowerCase()),

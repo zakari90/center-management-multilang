@@ -3,7 +3,7 @@
 // Minimal custom Service Worker (no Serwist/Workbox precache)
 // Runtime caching only.
 
-const SW_VERSION = "v1.1.0"; // Bumped: network-first with timeout strategy
+const SW_VERSION = "v1.2.0"; // Bumped for update
 const PAGES_CACHE = `pages-${SW_VERSION}`;
 const ASSETS_CACHE = `assets-${SW_VERSION}`;
 const OFFLINE_URL = "/offline.html";

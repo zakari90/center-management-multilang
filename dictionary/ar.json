@@ -22,8 +22,16 @@
   },
   "OfflineBanner": {
     "title": "أنت غير متصل بالإنترنت",
+    "shortMessage": "العمل في وضع عدم الاتصال",
     "message": "يتم حفظ البيانات محلياً ويمكنك متابعة العمل. لا تقم بمسح ذاكرة التخزين المؤقت للمتصفح.",
     "waitingForConnection": "في انتظار الاتصال..."
+  },
+  "CacheStatusIndicator": {
+    "offlineReady": "جاهز للعمل بدون اتصال",
+    "live": "مباشرة",
+    "syncing": "جاري المزامنة...",
+    "notCached": "مباشرة فقط",
+    "offline": "بدون اتصال"
   },
   "deleteALL": {
     "allDataDeletedSuccessfully": "تم الحذف",

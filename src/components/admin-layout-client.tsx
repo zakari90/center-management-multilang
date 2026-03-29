@@ -40,6 +40,7 @@ import {
   importAllFromServerForRole,
 } from "@/lib/dexie/serverActions";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { CacheStatusIndicator } from "@/components/cache-status-indicator";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -178,7 +179,8 @@ export default function AdminLayoutClient({
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mx-1 h-4" />
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 px-2">
+              <CacheStatusIndicator isSyncing={isSyncing} />
               <Button
                 variant="ghost"
                 size="icon"

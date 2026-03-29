@@ -11,6 +11,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Download, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { PAGES_CACHE_NAME, ASSETS_CACHE_NAME } from "@/lib/pwa-constants";
 
 // Pages to precache for offline-first experience
 const BASE_PAGES_TO_PRECACHE = [
@@ -130,8 +131,8 @@ export default function PagePrecacheHandler() {
       }
 
       // Use the same caches as the service worker
-      const cache = await caches.open("pages-v1");
-      const assetsCache = await caches.open("assets-v1");
+      const cache = await caches.open(PAGES_CACHE_NAME);
+      const assetsCache = await caches.open(ASSETS_CACHE_NAME);
       const beforeKeys = await cache.keys().catch(() => []);
       const beforeAssetKeys = await assetsCache.keys().catch(() => []);
       const visitedPages = readVisitedPages();

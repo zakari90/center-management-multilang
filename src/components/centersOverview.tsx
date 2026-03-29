@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Building2, Coins, Eye, Loader2, MapPin, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState, useCallback } from "react";
 import {
   centerActions,
@@ -37,11 +38,7 @@ interface Center {
 
 export default function CenterOverview() {
   const t = useTranslations("centerOverview");
-  const [centers, setCenters] = useState<Center[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchCenters = useCallback(async () => {
-    setIsLoading(true);
+  const queryData = useLiveQuery(async () => {
     try {
       // ✅ Fetch from local DB
       const [
@@ -49,13 +46,11 @@ export default function CenterOverview() {
         allStudents,
         allTeachers,
         allReceipts,
-        //  allUsers
       ] = await Promise.all([
         centerActions.getAll(),
         studentActions.getAll(),
         teacherActions.getAll(),
         receiptActions.getAll(),
-        userActions.getAll(),
       ]);
 
       // ✅ Filter active entities
@@ -63,7 +58,6 @@ export default function CenterOverview() {
       const activeStudents = allStudents.filter((s) => s.status !== "0");
       const activeTeachers = allTeachers.filter((t) => t.status !== "0");
       const activeReceipts = allReceipts.filter((r) => r.status !== "0");
-      // const activeUsers = allUsers.filter(u => u.status !== '0')
 
       // ✅ Build centers data with stats
       const centersData: Center[] = activeCenters.map((center) => {
@@ -101,21 +95,15 @@ export default function CenterOverview() {
         };
       });
 
-      setCenters(centersData);
-
-      // ✅ Commented out API call
-      // const { data } = await axios.get('/api/centers?stats=true')
-      // setCenters(data)
+      return centersData;
     } catch (err) {
       console.error("Failed to fetch centers from local DB:", err);
-    } finally {
-      setIsLoading(false);
+      return [];
     }
   }, []);
 
-  useEffect(() => {
-    fetchCenters();
-  }, [fetchCenters]);
+  const centers = queryData || [];
+  const isLoading = queryData === undefined;
 
   const totalRevenue = centers.reduce((sum, c) => sum + c.revenue, 0);
 

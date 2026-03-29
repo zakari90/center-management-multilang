@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 // import axios from 'axios' // ✅ Commented out - using local DB instead
 import { TrendingUp, UserCheck, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useState } from "react";
 import {
   userActions,
@@ -26,13 +27,7 @@ interface AdminStats {
 
 export default function AdminStatsCards() {
   const t = useTranslations("adminStats");
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchStats = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const queryData = useLiveQuery(async () => {
     try {
       // ✅ Fetch from local DB
       const [allUsers, allStudents, allTeachers, allReceipts] =
@@ -98,7 +93,7 @@ export default function AdminStatsCards() {
             100
           : 0;
 
-      setStats({
+      return {
         totalCenters: 0, // Centers are managed separately
         totalManagers,
         totalStudents,
@@ -106,22 +101,22 @@ export default function AdminStatsCards() {
         totalRevenue,
         monthlyRevenue,
         revenueGrowth,
-      });
-
-      // ✅ Commented out API call
-      // const { data } = await axios.get('/api/admin/dashboard/stats')
-      // setStats(data)
+      };
     } catch (err) {
       console.error("Failed to fetch stats from local DB:", err);
-      setError("Failed to load statistics");
-    } finally {
-      setIsLoading(false);
+      return null;
     }
   }, []);
 
+  const stats = queryData || null;
+  const isLoading = queryData === undefined;
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    if (queryData === null) {
+      setError("Failed to load statistics");
+    }
+  }, [queryData]);
 
   if (isLoading) {
     return (

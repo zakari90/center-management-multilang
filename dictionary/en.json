@@ -22,8 +22,16 @@
   },
   "OfflineBanner": {
     "title": "You're offline",
+    "shortMessage": "Working in offline mode",
     "message": "Data is saved locally, and you can keep working. Do not clear your browser cache.",
     "waitingForConnection": "Waiting for connection..."
+  },
+  "CacheStatusIndicator": {
+    "offlineReady": "Offline Ready",
+    "live": "Live",
+    "syncing": "Syncing...",
+    "notCached": "Live Only",
+    "offline": "Offline"
   },
   "deleteALL": {
     "allDataDeletedSuccessfully": "All data deleted successfully!",

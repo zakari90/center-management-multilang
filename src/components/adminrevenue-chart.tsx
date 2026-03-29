@@ -18,6 +18,7 @@ import {
   YAxis
 } from 'recharts'
 import { useTranslations } from 'next-intl'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { receiptActions } from '@/lib/dexie/dexieActions'
 import { ReceiptType } from '@/lib/dexie/dbSchema'
 import { eachDayOfInterval, eachMonthOfInterval, format, startOfYear, subDays } from 'date-fns'
@@ -31,24 +32,11 @@ interface RevenueData {
 }
 
 export default function AdminRevenueChart() {
-  const [data, setData] = useState<RevenueData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month')
   const [chartColors, setChartColors] = useState({ success: '#22c55e', destructive: '#ef4444' })
   const t = useTranslations('adminRevenueChart')
 
-  // Get computed theme colors for SVG elements
-  useEffect(() => {
-    const colors = getSemanticColors()
-    setChartColors({ success: colors.success, destructive: colors.destructive })
-  }, [])
-
-  useEffect(() => {
-    fetchRevenueData()
-  }, [period])
-
-  const fetchRevenueData = async () => {
-    setIsLoading(true)
+  const data = useLiveQuery(async () => {
     try {
       // ✅ Fetch from localDB instead of API
       const receipts = await receiptActions.getAll()
@@ -115,17 +103,20 @@ export default function AdminRevenueChart() {
         net: values.income - values.expense
       }))
 
-      setData(chartData)
-
-      // ✅ Old API call - commented out
-      // const { data } = await axios.get(`/api/admin/dashboard/revenue?period=${period}`)
-      // setData(data)
+      return chartData
     } catch (err) {
       console.error('Failed to fetch revenue data:', err)
-    } finally {
-      setIsLoading(false)
+      return []
     }
-  }
+  }, [period])
+
+  const isLoading = data === undefined
+
+  // Get computed theme colors for SVG elements
+  useEffect(() => {
+    const colors = getSemanticColors()
+    setChartColors({ success: colors.success, destructive: colors.destructive })
+  }, [])
 
   return (
     <Card>

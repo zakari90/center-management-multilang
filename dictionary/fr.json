@@ -22,8 +22,16 @@
   },
   "OfflineBanner": {
     "title": "Vous êtes hors ligne",
+    "shortMessage": "Travail en mode hors ligne",
     "message": "Les données sont enregistrées localement et vous pouvez continuer à travailler. Ne videz pas le cache de votre navigateur.",
     "waitingForConnection": "En attente de connexion..."
+  },
+  "CacheStatusIndicator": {
+    "offlineReady": "Prêt hors ligne",
+    "live": "En direct",
+    "syncing": "Synchronisation...",
+    "notCached": "Direct uniquement",
+    "offline": "Hors ligne"
   },
   "deleteALL": {
     "allDataDeletedSuccessfully": "Supprimé",

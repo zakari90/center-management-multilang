@@ -49,6 +49,7 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AddStudentPaymentDialog from "../AddStudentPaymentDialog";
 import AddTeacherPaymentDialog from "../AddTeacherPaymentDialog";
@@ -86,14 +87,6 @@ export default function AdminReceiptsTable() {
   const t = useTranslations("AdminReceiptsTable");
   const { user } = useAuth();
 
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [students, setStudents] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [studentSubjects, setStudentSubjects] = useState<any[]>([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [centers, setCenters] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [methodFilter, setMethodFilter] = useState<string>("all");
@@ -103,16 +96,9 @@ export default function AdminReceiptsTable() {
   const [currentPageTeachers, setCurrentPageTeachers] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
-  const fetchReceipts = useCallback(async () => {
+  const queryData = useLiveQuery(async () => {
     try {
-      setIsLoading(true);
-      setError("");
-
-      if (!user) {
-        setError("Unauthorized: Please log in again");
-        setIsLoading(false);
-        return;
-      }
+      if (!user) return null;
 
       // ✅ Fetch from local DB (all entities in parallel)
       const [
@@ -133,11 +119,13 @@ export default function AdminReceiptsTable() {
         centerActions.getAll(),
       ]);
 
-      setStudents(allStudents.filter((s) => s.status !== "0"));
-      setTeachers(allTeachers.filter((t) => t.status !== "0"));
-      setStudentSubjects(allStudentSubjects.filter((ss) => ss.status !== "0"));
-      setSubjects(allSubjects.filter((s) => s.status !== "0"));
-      setCenters(allCenters.filter((c) => c.status !== "0"));
+      const filteredStudents = allStudents.filter((s) => s.status !== "0");
+      const filteredTeachers = allTeachers.filter((t) => t.status !== "0");
+      const filteredStudentSubjects = allStudentSubjects.filter(
+        (ss) => ss.status !== "0",
+      );
+      const filteredSubjects = allSubjects.filter((s) => s.status !== "0");
+      const filteredCenters = allCenters.filter((c) => c.status !== "0");
 
       // ✅ Filter receipts by status (exclude deleted)
       const activeReceipts = allReceipts.filter((r) => r.status !== "0");
@@ -192,18 +180,33 @@ export default function AdminReceiptsTable() {
         };
       });
 
-      setReceipts(receiptsWithData);
+      return {
+        receipts: receiptsWithData,
+        students: filteredStudents,
+        teachers: filteredTeachers,
+        studentSubjects: filteredStudentSubjects,
+        subjects: filteredSubjects,
+        centers: filteredCenters,
+      };
     } catch (err) {
-      console.error("Error fetching receipts from local DB:", err);
-      setError(t("errorFetchReceipts") || "Failed to fetch receipts");
-    } finally {
-      setIsLoading(false);
+      console.error("Error fetching data from local DB:", err);
+      return null;
     }
-  }, [user, t]);
+  }, [user?.id]);
 
-  useEffect(() => {
-    fetchReceipts();
-  }, [fetchReceipts]);
+  const receipts = queryData?.receipts || [];
+  const students = queryData?.students || [];
+  const teachers = queryData?.teachers || [];
+  const studentSubjects = queryData?.studentSubjects || [];
+  const subjects = queryData?.subjects || [];
+  const centers = queryData?.centers || [];
+  const isLoading = queryData === undefined;
+  const [error, setError] = useState("");
+
+  const fetchReceipts = useCallback(async () => {
+    // legacy fetchReceipts kept for prop compatibility in dialogs if needed,
+    // but data is now reactive via useLiveQuery.
+  }, []);
 
   const filteredReceipts = receipts.filter((receipt) => {
     const matchesSearch =
