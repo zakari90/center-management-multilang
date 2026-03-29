@@ -40,18 +40,37 @@ export async function POST(req: NextRequest) {
     // Check for conflicts - skip or be lenient for encrypted dummy values
     const isDummyTime = startTime === "ENCRYPTED" || day === "ENCRYPTED";
 
-    let teacherConflict = null;
-    let roomConflict = null;
+    let teacherConflict: any = null;
+    let roomConflict: any = null;
 
     if (!isEncrypted || !isDummyTime) {
-      // Only check for conflicts if we have real time data
-      teacherConflict = await db.schedule.findFirst({
-        where: {
-          teacherId,
-          day,
-          startTime,
-        },
+      // Fetch teacher to respect their overrideConflicts setting
+      const teacher = await db.teacher.findUnique({
+        where: { id: teacherId }
       });
+
+      // Fetch possible conflicting schedules for the target teacher and room on that day
+      const daySchedules = await db.schedule.findMany({
+        where: {
+          day,
+          OR: [
+            { teacherId },
+            { roomId, centerId: centerId || null }
+          ]
+        }
+      });
+
+      // Filter in memory for time overlaps
+      const overlappingSchedules = daySchedules.filter(
+        (s) => s.startTime < endTime && s.endTime > startTime
+      );
+
+      teacherConflict = overlappingSchedules.find(s => s.teacherId === teacherId);
+
+      // If teacher explicitly allows conflicts, ignore the teacher constraint 
+      if ((teacher as any)?.overrideConflicts) {
+        teacherConflict = undefined;
+      }
 
       if (teacherConflict && !body.allowOverwrite) {
         return NextResponse.json(
@@ -59,21 +78,17 @@ export async function POST(req: NextRequest) {
             error: {
               message: "Teacher already has a class at this time",
               code: "TEACHER_CONFLICT",
-              details: { day, startTime, teacherId },
+              details: { day, startTime, endTime, teacherId },
             },
           },
           { status: 409 },
         );
       }
 
-      roomConflict = await db.schedule.findFirst({
-        where: {
-          roomId,
-          day,
-          startTime,
-          centerId: centerId || null,
-        },
-      });
+      roomConflict = overlappingSchedules.find(s => 
+        s.roomId === roomId &&
+        (s.centerId === (centerId || null))
+      );
 
       if (roomConflict && !body.allowOverwrite) {
         return NextResponse.json(
@@ -81,7 +96,7 @@ export async function POST(req: NextRequest) {
             error: {
               message: "Room is already booked at this time",
               code: "ROOM_CONFLICT",
-              details: { day, startTime, roomId, centerId },
+              details: { day, startTime, endTime, roomId, centerId },
             },
           },
           { status: 409 },

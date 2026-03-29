@@ -88,12 +88,22 @@ export function AddClassDialog({
       // 1. Check Conflicts (Optimized check)
       const baseConflict = existingSchedules.filter(
         (s) =>
-          s.day === initialData.day && s.startTime === initialData.startTime,
+          s.day === initialData.day &&
+          s.startTime < initialData.endTime &&
+          s.endTime > initialData.startTime,
       );
 
-      const teacherConflict = baseConflict.find(
+      const teacher = teachers.find((t) => t.id === formData.teacherId);
+
+      let teacherConflict = baseConflict.find(
         (s) => s.teacherId === formData.teacherId,
       );
+
+      // If teacher explicitly allows conflicts, ignore the teacher constraint
+      if ((teacher as any)?.overrideConflicts) {
+        teacherConflict = undefined;
+      }
+
       const roomConflict = baseConflict.find(
         (s) => s.roomId === formData.roomId,
       );
