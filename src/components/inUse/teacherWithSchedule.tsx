@@ -1,5 +1,5 @@
 "use client";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 // import axios from 'axios' // ✅ Commented out - using local DB instead
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -22,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/authContext";
 import {
   centerActions,
@@ -63,7 +63,7 @@ interface Teacher {
   name: string;
   email?: string;
   phone?: string;
-  weeklySchedule?: WeeklyScheduleSlot[] | string | string[]; // ✅ Added string[]
+  weeklySchedule?: WeeklyScheduleSlot[] | string | string[];
   overrideConflicts?: boolean;
 }
 
@@ -107,7 +107,6 @@ const DAYS = [
 const normalizeDayKey = (day: string): string => {
   if (!day) return "";
   const d = day.toLowerCase().trim();
-  // English
   if (d === "monday" || d === "mon") return "monday";
   if (d === "tuesday" || d === "tue") return "tuesday";
   if (d === "wednesday" || d === "wed") return "wednesday";
@@ -115,8 +114,6 @@ const normalizeDayKey = (day: string): string => {
   if (d === "friday" || d === "fri") return "friday";
   if (d === "saturday" || d === "sat") return "saturday";
   if (d === "sunday" || d === "sun") return "sunday";
-
-  // French
   if (d === "lundi") return "monday";
   if (d === "mardi") return "tuesday";
   if (d === "mercredi") return "wednesday";
@@ -124,8 +121,6 @@ const normalizeDayKey = (day: string): string => {
   if (d === "vendredi") return "friday";
   if (d === "samedi") return "saturday";
   if (d === "dimanche") return "sunday";
-
-  // Arabic (with and without hamza)
   if (d === "الاثنين" || d === "الإثنين") return "monday";
   if (d === "الثلاثاء") return "tuesday";
   if (d === "الأربعاء" || d === "الاربعاء") return "wednesday";
@@ -133,7 +128,6 @@ const normalizeDayKey = (day: string): string => {
   if (d === "الجمعة") return "friday";
   if (d === "السبت") return "saturday";
   if (d === "الأحد" || d === "الاحد") return "sunday";
-
   return d;
 };
 
@@ -149,7 +143,6 @@ const parseWeeklySchedule = (
 ): WeeklyScheduleSlot[] => {
   if (!schedule) return [];
   if (Array.isArray(schedule)) {
-    // ✅ Check if it's an array of strings (JSON strings)
     if (schedule.length > 0 && typeof schedule[0] === "string") {
       try {
         return schedule.map((slot) =>
@@ -175,7 +168,6 @@ const calculateHoursDifference = (
   startTime: string,
   endTime: string,
 ): number => {
-  // Defensive check for undefined or invalid time values
   if (
     !startTime ||
     !endTime ||
@@ -186,14 +178,11 @@ const calculateHoursDifference = (
   }
   const startParts = startTime.split(":");
   const endParts = endTime.split(":");
-  if (startParts.length < 2 || endParts.length < 2) {
-    return 0;
-  }
+  if (startParts.length < 2 || endParts.length < 2) return 0;
   const [startHour, startMin] = startParts.map(Number);
   const [endHour, endMin] = endParts.map(Number);
-  if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
+  if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin))
     return 0;
-  }
   return (endHour * 60 + endMin - startHour * 60 - startMin) / 60;
 };
 
@@ -201,14 +190,12 @@ const isWithinAvailability = (
   schedule: Schedule,
   availability: WeeklyScheduleSlot[],
 ): boolean => {
-  // Defensive check for missing schedule times
   if (!schedule?.startTime || !schedule?.endTime) return false;
   const availableSlot = availability.find(
     (slot) => normalizeDayKey(slot.day) === normalizeDayKey(schedule.day),
   );
   if (!availableSlot || !availableSlot.startTime || !availableSlot.endTime)
     return false;
-
   return (
     schedule.startTime >= availableSlot.startTime &&
     schedule.endTime <= availableSlot.endTime
@@ -216,18 +203,11 @@ const isWithinAvailability = (
 };
 
 const timeToPosition = (time: string): number => {
-  // Defensive check for undefined or invalid time values
-  if (!time || typeof time !== "string") {
-    return 0;
-  }
+  if (!time || typeof time !== "string") return 0;
   const parts = time.split(":");
-  if (parts.length < 2) {
-    return 0;
-  }
+  if (parts.length < 2) return 0;
   const [hours, minutes] = parts.map(Number);
-  if (isNaN(hours) || isNaN(minutes)) {
-    return 0;
-  }
+  if (isNaN(hours) || isNaN(minutes)) return 0;
   const totalMinutes = hours * 60 + minutes;
   const dayStart = 360;
   const dayEnd = 1200;
@@ -235,7 +215,6 @@ const timeToPosition = (time: string): number => {
   return Math.max(0, Math.min(100, position));
 };
 
-// Export functions with translations
 const exportTeacherSchedule = (
   teacher: TeacherWithSchedule,
   t: ReturnType<typeof useTranslations<"TeacherScheduleView">>,
@@ -321,22 +300,17 @@ const exportTeacherScheduleToExcel = async (
 ) => {
   const workbook = new ExcelJS.Workbook();
 
-  // ==================== Sheet 1: Teacher Info ====================
   const infoSheet = workbook.addWorksheet("Teacher Info");
-
   infoSheet.columns = [
     { header: "Field", key: "field", width: 25 },
     { header: "Value", key: "value", width: 30 },
   ];
-
-  // Add header style
   infoSheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
   infoSheet.getRow(1).fill = {
     type: "pattern" as const,
     pattern: "solid",
     fgColor: { argb: "FF4472C4" },
   };
-
   const infoData = [
     { field: t("title"), value: teacher.name },
     { field: "Email", value: teacher.email || "N/A" },
@@ -355,19 +329,15 @@ const exportTeacherScheduleToExcel = async (
     { field: t("subjects"), value: teacher.subjectsCount },
     { field: t("conflict"), value: teacher.conflicts.length },
   ];
-
   infoSheet.addRows(infoData);
 
-  // ==================== Sheet 2: Availability ====================
   const availabilitySheet = workbook.addWorksheet(t("availableHours"));
-
   availabilitySheet.columns = [
     { header: "Day", key: "day", width: 15 },
     { header: "Start Time", key: "startTime", width: 12 },
     { header: "End Time", key: "endTime", width: 12 },
     { header: `Duration (${t("hours")})`, key: "duration", width: 15 },
   ];
-
   availabilitySheet.getRow(1).font = {
     bold: true,
     color: { argb: "FFFFFFFF" },
@@ -377,17 +347,13 @@ const exportTeacherScheduleToExcel = async (
     pattern: "solid",
     fgColor: { argb: "FF4472C4" },
   };
-
   const availabilityData = teacher.weeklySchedule.map((slot) => ({
     day: slot.day,
     startTime: slot.startTime,
     endTime: slot.endTime,
     duration: calculateHoursDifference(slot.startTime, slot.endTime).toFixed(1),
   }));
-
   availabilitySheet.addRows(availabilityData);
-
-  // Add total row
   availabilitySheet.addRow({});
   const totalRow = availabilitySheet.addRow({
     day: `Total ${t("available")} ${t("hours")}:`,
@@ -400,9 +366,7 @@ const exportTeacherScheduleToExcel = async (
     fgColor: { argb: "FFF2F2F2" },
   };
 
-  // ==================== Sheet 3: Scheduled Classes ====================
   const schedulesSheet = workbook.addWorksheet(t("classes"));
-
   schedulesSheet.columns = [
     { header: "Day", key: "day", width: 12 },
     { header: "Start Time", key: "startTime", width: 12 },
@@ -413,14 +377,12 @@ const exportTeacherScheduleToExcel = async (
     { header: `Duration (${t("hours")})`, key: "duration", width: 12 },
     { header: "Status", key: "status", width: 12 },
   ];
-
   schedulesSheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
   schedulesSheet.getRow(1).fill = {
     type: "pattern" as const,
     pattern: "solid",
     fgColor: { argb: "FF4472C4" },
   };
-
   const sortedSchedules = [...teacher.schedules].sort((a, b) => {
     const dayCompare =
       DAYS.indexOf(normalizeDayKey(a.day)) -
@@ -428,7 +390,6 @@ const exportTeacherScheduleToExcel = async (
     if (dayCompare !== 0) return dayCompare;
     return a.startTime.localeCompare(b.startTime);
   });
-
   const schedulesData = sortedSchedules.map((schedule) => {
     const duration = calculateHoursDifference(
       schedule.startTime,
@@ -439,7 +400,6 @@ const exportTeacherScheduleToExcel = async (
       teacher.weeklySchedule,
     );
     const status = withinAvailability ? "✓ OK" : `⚠ ${t("conflict")}`;
-
     return {
       day: schedule.day,
       startTime: schedule.startTime,
@@ -451,10 +411,7 @@ const exportTeacherScheduleToExcel = async (
       status,
     };
   });
-
   schedulesSheet.addRows(schedulesData);
-
-  // Add total row
   schedulesSheet.addRow({});
   const schedulesTotalRow = schedulesSheet.addRow({
     day: `Total ${t("scheduled")} ${t("hours")}:`,
@@ -466,8 +423,6 @@ const exportTeacherScheduleToExcel = async (
     pattern: "solid",
     fgColor: { argb: "FFF2F2F2" },
   };
-
-  // Color code status column
   schedulesSheet.eachRow((row, rowNumber) => {
     if (rowNumber > 1) {
       const statusCell = row.getCell("status");
@@ -489,10 +444,8 @@ const exportTeacherScheduleToExcel = async (
     }
   });
 
-  // ==================== Sheet 4: Conflicts ====================
   if (teacher.conflicts.length > 0) {
     const conflictsSheet = workbook.addWorksheet(t("conflict"));
-
     conflictsSheet.columns = [
       { header: "Day", key: "day", width: 12 },
       { header: "Scheduled Time", key: "scheduledTime", width: 18 },
@@ -502,14 +455,15 @@ const exportTeacherScheduleToExcel = async (
       { header: `${t("available")} Time`, key: "availableTime", width: 18 },
       { header: "Issue", key: "issue", width: 40 },
     ];
-
-    conflictsSheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
+    conflictsSheet.getRow(1).font = {
+      bold: true,
+      color: { argb: "FFFFFFFF" },
+    };
     conflictsSheet.getRow(1).fill = {
       type: "pattern" as const,
       pattern: "solid",
       fgColor: { argb: "FFC00000" },
     };
-
     const conflictsData = teacher.conflicts.map((conflict) => {
       const availability = teacher.weeklySchedule.find(
         (s) => normalizeDayKey(s.day) === normalizeDayKey(conflict.day),
@@ -517,7 +471,6 @@ const exportTeacherScheduleToExcel = async (
       const issue = availability
         ? `${t("outsideAvailableHours")} (${availability.startTime}-${availability.endTime})`
         : `${t("notAvailableOn")} ${conflict.day}`;
-
       return {
         day: conflict.day,
         scheduledTime: `${conflict.startTime} - ${conflict.endTime}`,
@@ -530,10 +483,7 @@ const exportTeacherScheduleToExcel = async (
         issue,
       };
     });
-
     conflictsSheet.addRows(conflictsData);
-
-    // Highlight conflict rows
     conflictsSheet.eachRow((row, rowNumber) => {
       if (rowNumber > 1) {
         row.fill = {
@@ -545,9 +495,7 @@ const exportTeacherScheduleToExcel = async (
     });
   }
 
-  // ==================== Sheet 5: Weekly Overview ====================
   const weeklySheet = workbook.addWorksheet(t("weeklyTimeline"));
-
   const timeSlots = [
     "06:00",
     "07:00",
@@ -574,22 +522,18 @@ const exportTeacherScheduleToExcel = async (
     "04:00",
     "05:00",
   ];
-
   weeklySheet.columns = [
     { header: "Time", key: "time", width: 8 },
     ...DAYS.map((day) => ({ header: day, key: day, width: 18 })),
   ];
-
   weeklySheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
   weeklySheet.getRow(1).fill = {
     type: "pattern" as const,
     pattern: "solid",
     fgColor: { argb: "FF4472C4" },
   };
-
   timeSlots.forEach((time) => {
     const row: Record<string, string> = { time };
-
     DAYS.forEach((dayKey) => {
       const schedule = teacher.schedules.find(
         (s) =>
@@ -597,7 +541,6 @@ const exportTeacherScheduleToExcel = async (
           s.startTime <= time &&
           s.endTime > time,
       );
-
       if (schedule) {
         row[dayKey] = `${schedule.subject.name} (${schedule.roomId})`;
       } else {
@@ -610,11 +553,8 @@ const exportTeacherScheduleToExcel = async (
         row[dayKey] = isAvailable ? t("available") : "-";
       }
     });
-
     weeklySheet.addRow(row);
   });
-
-  // Color code weekly overview
   weeklySheet.eachRow((row, rowNumber) => {
     if (rowNumber > 1) {
       DAYS.forEach((dayKey) => {
@@ -636,10 +576,113 @@ const exportTeacherScheduleToExcel = async (
     }
   });
 
-  // Save file
   const fileName = `${teacher.name.replace(/\s+/g, "_")}_schedule_${new Date().toISOString().split("T")[0]}.xlsx`;
   await workbook.xlsx.writeFile(fileName);
 };
+
+// ==================== HELPERS (INITIALS + HUE) ====================
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
+function nameToHue(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+}
+
+// ==================== SCROLL FADE ====================
+// Wraps the horizontally-scrollable tab row and fades the edges when there
+// is overflow content in that direction, signalling that the list scrolls.
+
+function ScrollFade({
+  children,
+  bgVar = "hsl(var(--muted))",
+}: {
+  children: React.ReactNode;
+  bgVar?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [fades, setFades] = useState({ left: false, right: false });
+
+  const update = () => {
+    const el = ref.current;
+    if (!el) return;
+    setFades({
+      left: el.scrollLeft > 4,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 4,
+    });
+  };
+
+  useEffect(() => {
+    update();
+    const el = ref.current;
+    el?.addEventListener("scroll", update, { passive: true });
+    const ro = new ResizeObserver(update);
+    if (el) ro.observe(el);
+    return () => {
+      el?.removeEventListener("scroll", update);
+      ro.disconnect();
+    };
+  }, []);
+
+  return (
+    <div style={{ position: "relative" }}>
+      {/* Left fade */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 40,
+          pointerEvents: "none",
+          zIndex: 2,
+          background: `linear-gradient(to right, ${bgVar} 0%, transparent 100%)`,
+          opacity: fades.left ? 1 : 0,
+          transition: "opacity 0.2s",
+        }}
+      />
+      {/* Right fade */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: 40,
+          pointerEvents: "none",
+          zIndex: 2,
+          background: `linear-gradient(to left, ${bgVar} 0%, transparent 100%)`,
+          opacity: fades.right ? 1 : 0,
+          transition: "opacity 0.2s",
+        }}
+      />
+      {/* Scrollable inner row */}
+      <div
+        ref={ref}
+        style={{
+          overflowX: "auto",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          padding: "4px 8px",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 // ==================== MAIN COMPONENT ====================
 
@@ -650,7 +693,7 @@ export default function TeacherScheduleView({
 }: {
   centerId?: string;
   refreshKey?: number;
-  readOnly?: boolean; // Translations
+  readOnly?: boolean;
 }) {
   const t = useTranslations("TeacherScheduleView");
   const tCommon = useTranslations("Common");
@@ -669,7 +712,6 @@ export default function TeacherScheduleView({
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Toggle conflict dismissal for a specific teacher
   const toggleDismissConflicts = useCallback(
     async (teacherId: string, dismissed: boolean) => {
       setDismissedConflicts((prev) => ({ ...prev, [teacherId]: dismissed }));
@@ -699,7 +741,6 @@ export default function TeacherScheduleView({
       const isAdmin = user.role?.toUpperCase() === "ADMIN";
       const isManager = user.role?.toUpperCase() === "MANAGER";
 
-      // ✅ Fetch from local DB (all entities in parallel)
       const [allTeachers, allSchedules, allSubjects, allCenters] =
         await Promise.all([
           teacherActions.getAll(),
@@ -708,7 +749,6 @@ export default function TeacherScheduleView({
           centerActions.getAll(),
         ]);
 
-      // 1. Determine accessible centers
       const accessibleCenters = allCenters
         .filter((c) => {
           if (isAdmin) return c.adminId === user.id;
@@ -725,13 +765,11 @@ export default function TeacherScheduleView({
           : []
         : accessibleCenterIds;
 
-      // 2. Determine relevant managers (for teacher lookup)
       const relevantManagerIds = new Set([
         ...accessibleCenters.flatMap((c) => [c.adminId, ...(c.managers || [])]),
         user.id,
       ]);
 
-      // 3. Filter teachers
       let activeTeachers = allTeachers.filter(
         (t) =>
           t.status !== "0" &&
@@ -739,7 +777,6 @@ export default function TeacherScheduleView({
             !t.managerId),
       );
 
-      // 4. Filter schedules
       let activeSchedules = allSchedules.filter(
         (s) =>
           s.status !== "0" &&
@@ -755,12 +792,10 @@ export default function TeacherScheduleView({
           targetCenterIds.includes(s.centerId),
       );
 
-      // ✅ Build schedules with related data (teacher and subject)
       const schedulesWithData: Schedule[] = activeSchedules.map((schedule) => {
         const teacher = activeTeachers.find((t) => t.id === schedule.teacherId);
         const subject = activeSubjects.find((s) => s.id === schedule.subjectId);
 
-        // ✅ Convert weeklySchedule to proper type
         const teacherWeeklySchedule = teacher?.weeklySchedule
           ? typeof teacher.weeklySchedule === "string"
             ? teacher.weeklySchedule
@@ -790,27 +825,17 @@ export default function TeacherScheduleView({
                 weeklySchedule: undefined,
               },
           subject: subject
-            ? {
-                id: subject.id,
-                name: subject.name,
-                grade: subject.grade,
-              }
-            : {
-                id: schedule.subjectId,
-                name: "Unknown Subject",
-                grade: "N/A",
-              },
+            ? { id: subject.id, name: subject.name, grade: subject.grade }
+            : { id: schedule.subjectId, name: "Unknown Subject", grade: "N/A" },
         };
       });
 
-      // ✅ Build teachers data (matching API structure)
       const teachersData: Teacher[] = activeTeachers.map((teacher) => {
-        // ✅ Convert weeklySchedule to proper type
         const weeklySchedule = teacher.weeklySchedule
           ? typeof teacher.weeklySchedule === "string"
             ? teacher.weeklySchedule
             : Array.isArray(teacher.weeklySchedule)
-              ? (teacher.weeklySchedule as any[]) // Relaxed type assertion
+              ? (teacher.weeklySchedule as any[])
               : undefined
           : undefined;
 
@@ -824,7 +849,6 @@ export default function TeacherScheduleView({
         };
       });
 
-      // ✅ Build teachers with schedules and calculations
       const teachersWithSchedules: TeacherWithSchedule[] = teachersData.map(
         (teacher) => {
           const teacherSchedules = schedulesWithData.filter(
@@ -844,7 +868,6 @@ export default function TeacherScheduleView({
             );
           }, 0);
 
-          // Calculate cost per subject (average price of subjects taught)
           const subjectPrices = teacherSchedules
             .map((s) => {
               const subject = activeSubjects.find(
@@ -886,14 +909,6 @@ export default function TeacherScheduleView({
       if (teachersWithSchedules.length > 0) {
         setSelectedTeacherId(teachersWithSchedules[0].id);
       }
-
-      // ✅ Commented out API calls
-      // const [teachersRes, schedulesRes] = await Promise.all([
-      //   axios.get('/api/admin/teachers'),
-      //   axios.get(`/api/admin/schedule`)
-      // ])
-      // const teachersData: Teacher[] = teachersRes.data
-      // const schedulesData: Schedule[] = schedulesRes.data
     } catch (err) {
       console.error("Failed to fetch teacher schedules from local DB:", err);
       setError(t("errorLoadSchedules"));
@@ -906,12 +921,10 @@ export default function TeacherScheduleView({
     fetchTeacherSchedules();
   }, [fetchTeacherSchedules, refreshKey]);
 
-  // Filter teachers based on search query
   const filteredTeachers = teachers.filter((teacher) =>
     teacher.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  // Carousel navigation functions
   const scrollToNext = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: 300, behavior: "smooth" });
@@ -936,7 +949,6 @@ export default function TeacherScheduleView({
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />
-
         <div className="flex flex-col items-stretch gap-2 md:items-end">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -975,8 +987,9 @@ export default function TeacherScheduleView({
         </Card>
       ) : (
         <Tabs value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+          {/* ── Tab bar ── */}
           <div className="relative border rounded-lg p-2 bg-muted/30">
-            {/* Carousel Navigation Buttons */}
+            {/* Carousel nav — only shown when there are many teachers */}
             {filteredTeachers.length > 3 && (
               <>
                 <Button
@@ -998,45 +1011,121 @@ export default function TeacherScheduleView({
               </>
             )}
 
-            {/* Teacher Tabs with Horizontal Scroll */}
-            <div
-              ref={scrollContainerRef}
-              className="overflow-x-auto scrollbar-hide px-8"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              <TabsList className="w-full justify-start flex-nowrap h-auto gap-2">
-                {filteredTeachers.map((teacher) => (
-                  <TabsTrigger
-                    key={teacher.id}
-                    value={teacher.id}
-                    className="flex flex-col items-start px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:text-foreground/70 data-[state=inactive]:hover:text-foreground transition-colors whitespace-nowrap"
-                  >
-                    <div className="flex items-center gap-2 w-fit">
+            {/*
+             * ScrollFade replaces the bare overflow-x div.
+             * It fades edges reactively so users can see the list scrolls,
+             * and passes the bg color so the gradient blends seamlessly.
+             */}
+            <ScrollFade bgVar="hsl(var(--muted) / 0.3)">
+              <TabsList className="h-auto bg-transparent gap-1 p-0 flex flex-nowrap">
+                {filteredTeachers.map((teacher) => {
+                  const showConflict =
+                    isAdmin &&
+                    teacher.conflicts.length > 0 &&
+                    !dismissedConflicts[teacher.id];
+
+                  const hue = nameToHue(teacher.name);
+
+                  return (
+                    <TabsTrigger
+                      key={teacher.id}
+                      value={teacher.id}
+                      className={cn(
+                        // base layout
+                        "relative flex items-center gap-2 px-3 h-10",
+                        "rounded-md rounded-b-none whitespace-nowrap text-sm",
+                        // border skeleton — bottom edge handled by active state
+                        "border border-transparent border-b-0",
+                        "transition-all duration-150",
+                        // inactive
+                        "text-muted-foreground bg-transparent",
+                        "hover:text-foreground hover:bg-background/60",
+                        // active — card surface merges with content panel below
+                        "data-[state=active]:bg-background",
+                        "data-[state=active]:border-border",
+                        "data-[state=active]:border-b-background",
+                        "data-[state=active]:text-foreground",
+                        "data-[state=active]:font-medium",
+                        // pull 1px down to visually connect to the panel
+                        "data-[state=active]:translate-y-px",
+                        "data-[state=active]:shadow-none",
+                        // extra right room so the badge doesn't overlap the name
+                        showConflict ? "pr-7" : "",
+                      )}
+                    >
+                      {/* Avatar initials circle */}
+                      <span
+                        aria-hidden
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: "50%",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 8,
+                          fontWeight: 600,
+                          flexShrink: 0,
+                          background: `hsl(${hue} 40% 88%)`,
+                          color: `hsl(${hue} 55% 35%)`,
+                          transition: "background 0.15s, color 0.15s",
+                        }}
+                      >
+                        {getInitials(teacher.name)}
+                      </span>
+
+                      {/* Teacher name */}
                       <span className="font-medium">{teacher.name}</span>
-                      {isAdmin &&
-                        teacher.conflicts.length > 0 &&
-                        !dismissedConflicts[teacher.id] && (
-                          <Badge
-                            variant="destructive"
-                            className="h-5 px-1.5 text-xs"
-                          >
-                            {teacher.conflicts.length}
-                          </Badge>
-                        )}
-                    </div>
-                    {/* <span className="text-xs opacity-80">
-                      {teacher.totalHours.toFixed(1)}
-                      {t("hours")}
-                      {isAdmin &&
-                        `/${teacher.availableHours.toFixed(1)}${t("hours")}`}
-                      {isAdmin && ` • ${teacher.costPerSubject.toFixed(2)} MAD`}
-                    </span> */}
-                  </TabsTrigger>
-                ))}
+
+                      {/*
+                       * Conflict badge — absolutely positioned so it never
+                       * shifts tab widths. Clicking it dismisses without
+                       * switching the active tab (stopPropagation).
+                       */}
+                      {showConflict && (
+                        <span
+                          role="status"
+                          aria-label={`${teacher.conflicts.length} conflict${
+                            teacher.conflicts.length !== 1 ? "s" : ""
+                          }`}
+                          title="Click to dismiss conflicts"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDismissConflicts(teacher.id, true);
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: 3,
+                            right: 3,
+                            minWidth: 16,
+                            height: 16,
+                            borderRadius: 999,
+                            background: "hsl(0 72% 51%)",
+                            color: "#fff",
+                            fontSize: 9,
+                            fontWeight: 700,
+                            lineHeight: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "0 3px",
+                            cursor: "pointer",
+                            zIndex: 1,
+                          }}
+                        >
+                          {teacher.conflicts.length > 9
+                            ? "9+"
+                            : teacher.conflicts.length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
               </TabsList>
-            </div>
+            </ScrollFade>
           </div>
 
+          {/* ── Tab content panels ── */}
           {filteredTeachers.map((teacher) => {
             const isDismissed =
               dismissedConflicts[teacher.id] !== undefined
@@ -1310,7 +1399,6 @@ function TableScheduleView({
 }) {
   const t = useTranslations("TeacherScheduleView");
 
-  // Sort schedules by day order, then by start time
   const sortedSchedules = [...teacher.schedules].sort((a, b) => {
     const dayOrder = DAYS.indexOf(a.day) - DAYS.indexOf(b.day);
     if (dayOrder !== 0) return dayOrder;
@@ -1360,7 +1448,6 @@ function TableScheduleView({
                     schedule,
                     teacher.weeklySchedule,
                   );
-
                   const showAsNormal = withinAvailability || dismissed;
 
                   return (
@@ -1452,7 +1539,6 @@ function GridScheduleView({
           a.startTime.localeCompare(b.startTime),
         );
         const dayAvailability = availabilityByDay[dayKey] || [];
-
         const hasContent =
           daySchedules.length > 0 || dayAvailability.length > 0;
 
@@ -1479,7 +1565,6 @@ function GridScheduleView({
                       schedule,
                       teacher.weeklySchedule,
                     );
-
                     const showAsNormal = withinAvailability || dismissed;
 
                     return (
@@ -1572,7 +1657,6 @@ function ListScheduleView({
         const daySchedules = (schedulesByDay[day] || []).sort((a, b) =>
           a.startTime.localeCompare(b.startTime),
         );
-
         if (daySchedules.length === 0) return null;
 
         const dayAvailability = teacher.weeklySchedule.find(
@@ -1628,7 +1712,6 @@ function ListScheduleView({
                             {schedule.startTime} - {schedule.endTime}
                           </span>
                         </div>
-
                         <div className="flex items-center gap-2 flex-1">
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">
@@ -1638,7 +1721,6 @@ function ListScheduleView({
                             {schedule.subject.grade}
                           </Badge>
                         </div>
-
                         <div className="flex items-center gap-2 min-w-[120px]">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
                           <span className="text-muted-foreground">
@@ -1646,7 +1728,6 @@ function ListScheduleView({
                           </span>
                         </div>
                       </div>
-
                       <div>
                         {withinAvailability ? (
                           <CheckCircle className="h-5 w-5 text-green-600" />
@@ -1714,7 +1795,6 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
         {DAYS.map((day) => {
           const availability = availabilityByDay[day] || [];
           const schedules = schedulesByDay[day] || [];
-
           const hasContent = availability.length > 0 || schedules.length > 0;
           if (!hasContent) return null;
 
@@ -1737,7 +1817,6 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                 {availability.map((slot, idx) => {
                   const start = timeToPosition(slot.startTime);
                   const width = timeToPosition(slot.endTime) - start;
-
                   return (
                     <div
                       key={`avail-${idx}`}
@@ -1759,7 +1838,6 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
                     schedule,
                     availability,
                   );
-
                   const topOffset = (idx % 2) * 6 + 2;
 
                   return (
@@ -1876,19 +1954,19 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
           <div className="text-sm font-medium mb-2">{t("legend")}</div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-green-200/50 border border-green-400 rounded"></div>
+              <div className="w-8 h-4 bg-green-200/50 border border-green-400 rounded" />
               <span>{t("availableTime")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-blue-500 border-2 border-blue-700 rounded"></div>
+              <div className="w-8 h-4 bg-blue-500 border-2 border-blue-700 rounded" />
               <span>{t("scheduledClass")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-red-500 border-2 border-red-700 rounded"></div>
+              <div className="w-8 h-4 bg-red-500 border-2 border-red-700 rounded" />
               <span>{t("conflict")}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-gray-300/40 rounded"></div>
+              <div className="w-8 h-4 bg-gray-300/40 rounded" />
               <span>{t("unavailable")}</span>
             </div>
           </div>
@@ -1906,7 +1984,7 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
   );
 }
 
-// ==================== EXPORT OPTIONS COMPONENT ====================
+// ==================== EXPORT BUTTON ====================
 
 function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
   const t = useTranslations("TeacherScheduleView");
@@ -1926,16 +2004,6 @@ function ExportButton({ teacher }: { teacher: TeacherWithSchedule }) {
             onClick={() => setIsOpen(false)}
           />
           <div className="absolute right-0 mt-2 w-48 bg-popover rounded-lg shadow-lg border z-20 overflow-hidden">
-            {/* <button
-              onClick={() => {
-                exportTeacherScheduleToExcel(teacher, t);
-                setIsOpen(false);
-              }}
-              className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              {t("exportToExcel")}
-            </button> */}
             <button
               onClick={() => {
                 exportTeacherSchedule(teacher, t);
