@@ -18,8 +18,9 @@ export async function GET(
     const teacher = await db.teacher.findUnique({
       where: { 
         id,
-        managerId: session.user.id 
+        ...(session.user.role !== 'ADMIN' && { managerId: session.user.id })
       },
+
       include: {
         teacherSubjects: {
           include: {
@@ -64,9 +65,10 @@ export async function DELETE(
     const teacher = await db.teacher.findUnique({
       where: { 
         id,
-        managerId: session.user.id 
+        ...(session.user.role !== 'ADMIN' && { managerId: session.user.id })
       }
     })
+
 
     if (!teacher) {
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
@@ -107,9 +109,10 @@ export async function PATCH(
     const existingTeacher = await db.teacher.findUnique({
       where: { 
         id: id,
-        managerId: session.user.id 
+        ...(session.user.role !== 'ADMIN' && { managerId: session.user.id })
       }
     })
+
 
     if (!existingTeacher) {
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
