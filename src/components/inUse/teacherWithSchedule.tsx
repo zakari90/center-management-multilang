@@ -67,7 +67,6 @@ interface Teacher {
   overrideConflicts?: boolean;
 }
 
-
 interface Schedule {
   id: string;
   day: string;
@@ -687,7 +686,6 @@ export default function TeacherScheduleView({
     [],
   );
 
-
   const fetchTeacherSchedules = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -824,7 +822,6 @@ export default function TeacherScheduleView({
           weeklySchedule,
           overrideConflicts: teacher.overrideConflicts,
         };
-
       });
 
       // ✅ Build teachers with schedules and calculations
@@ -1027,13 +1024,13 @@ export default function TeacherScheduleView({
                           </Badge>
                         )}
                     </div>
-                    <span className="text-xs opacity-80">
+                    {/* <span className="text-xs opacity-80">
                       {teacher.totalHours.toFixed(1)}
                       {t("hours")}
                       {isAdmin &&
                         `/${teacher.availableHours.toFixed(1)}${t("hours")}`}
                       {isAdmin && ` • ${teacher.costPerSubject.toFixed(2)} MAD`}
-                    </span>
+                    </span> */}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -1065,7 +1062,11 @@ export default function TeacherScheduleView({
                   <AvailabilityCard teacher={teacher} tCommon={tCommon} />
                 )}
 
-                <TableScheduleView teacher={teacher} tCommon={tCommon} dismissed={isDismissed} />
+                <TableScheduleView
+                  teacher={teacher}
+                  tCommon={tCommon}
+                  dismissed={isDismissed}
+                />
               </TabsContent>
             );
           })}
