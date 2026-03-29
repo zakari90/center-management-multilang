@@ -83,7 +83,6 @@ export interface Teacher extends SyncEntity {
   weeklySchedule?: string[] | Record<string, any>;
   overrideConflicts?: boolean;
   managerId: string;
-
 }
 
 export interface Student extends SyncEntity {
@@ -156,15 +155,6 @@ export interface DeleteRequest extends SyncEntity {
   reviewedBy?: string; // Admin user ID
 }
 
-export interface AppNotification extends SyncEntity {
-  userId: string; // Recipient
-  type: string; // "new_user" | "payment" | "delete_request" | "delete_approved" | "delete_rejected"
-  title: string;
-  body: string;
-  isRead: boolean;
-  data?: Record<string, any>;
-}
-
 // Local authentication storage for offline login
 export interface LocalAuthUser {
   id: string; // MongoDB ObjectId from server
@@ -199,7 +189,6 @@ export class AppDatabase extends Dexie {
   receipts!: Table<Receipt>;
   schedules!: Table<Schedule>;
   deleteRequests!: Table<DeleteRequest>;
-  appNotifications!: Table<AppNotification>;
   localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
   syncMeta!: Table<SyncMeta>; // For tracking data epochs
 
@@ -293,8 +282,6 @@ export class AppDatabase extends Dexie {
 
       deleteRequests:
         "id, status, entityType, entityId, requestStatus, requestedBy, [requestedBy+requestStatus], [status+updatedAt], updatedAt",
-      appNotifications:
-        "id, status, userId, type, isRead, [userId+isRead], [userId+type], [status+updatedAt], updatedAt, createdAt",
       localAuthUsers:
         "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",

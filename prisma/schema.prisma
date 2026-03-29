@@ -229,15 +229,3 @@ model DeleteRequest {
   updatedAt   DateTime            @updatedAt
   encryptedData String?
 }
-
-model AppNotification {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  type      String
-  title     String
-  body      String
-  isRead    Boolean  @default(false)
-  data      Json?
-  createdAt DateTime @default(now())
-}
-

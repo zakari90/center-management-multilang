@@ -232,7 +232,7 @@ export function AdminRegistrationDialog({
             />
           </div>
 
-          {/* Encryption Toggle */}
+          {/* Encryption Toggle - Temporarily Disabled 
           <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-0.5">
@@ -277,6 +277,7 @@ export function AdminRegistrationDialog({
               </Alert>
             )}
           </div>
+          */}
 
           <DialogFooter>
             <Button
