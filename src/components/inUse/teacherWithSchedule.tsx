@@ -822,7 +822,9 @@ export default function TeacherScheduleView({
           email: teacher.email,
           phone: teacher.phone,
           weeklySchedule,
+          overrideConflicts: teacher.overrideConflicts,
         };
+
       });
 
       // ✅ Build teachers with schedules and calculations
@@ -1038,32 +1040,35 @@ export default function TeacherScheduleView({
             </div>
           </div>
 
-          {filteredTeachers.map((teacher) => (
-            <TabsContent
-              key={teacher.id}
-              value={teacher.id}
-              className="space-y-4 mt-4"
-            >
-              <TeacherInfoCard
-                teacher={teacher}
-                isAdmin={isAdmin}
-                dismissed={
-                  dismissedConflicts[teacher.id] !== undefined
-                    ? dismissedConflicts[teacher.id]
-                    : (teacher as any).overrideConflicts || false
-                }
-                onDismissChange={(dismissed) =>
-                  toggleDismissConflicts(teacher.id, dismissed)
-                }
-              />
+          {filteredTeachers.map((teacher) => {
+            const isDismissed =
+              dismissedConflicts[teacher.id] !== undefined
+                ? dismissedConflicts[teacher.id]
+                : (teacher as any).overrideConflicts || false;
 
-              {isAdmin && (
-                <AvailabilityCard teacher={teacher} tCommon={tCommon} />
-              )}
+            return (
+              <TabsContent
+                key={teacher.id}
+                value={teacher.id}
+                className="space-y-4 mt-4"
+              >
+                <TeacherInfoCard
+                  teacher={teacher}
+                  isAdmin={isAdmin}
+                  dismissed={isDismissed}
+                  onDismissChange={(dismissed) =>
+                    toggleDismissConflicts(teacher.id, dismissed)
+                  }
+                />
 
-              <TableScheduleView teacher={teacher} tCommon={tCommon} />
-            </TabsContent>
-          ))}
+                {isAdmin && (
+                  <AvailabilityCard teacher={teacher} tCommon={tCommon} />
+                )}
+
+                <TableScheduleView teacher={teacher} tCommon={tCommon} dismissed={isDismissed} />
+              </TabsContent>
+            );
+          })}
         </Tabs>
       )}
     </div>
@@ -1296,9 +1301,11 @@ function AvailabilityCard({
 function TableScheduleView({
   teacher,
   tCommon,
+  dismissed,
 }: {
   teacher: TeacherWithSchedule;
   tCommon: ReturnType<typeof useTranslations>;
+  dismissed?: boolean;
 }) {
   const t = useTranslations("TeacherScheduleView");
 
@@ -1353,11 +1360,13 @@ function TableScheduleView({
                     teacher.weeklySchedule,
                   );
 
+                  const showAsNormal = withinAvailability || dismissed;
+
                   return (
                     <TableRow
                       key={schedule.id}
                       className={cn(
-                        withinAvailability
+                        showAsNormal
                           ? ""
                           : "bg-destructive/5 hover:bg-destructive/10",
                       )}
@@ -1386,7 +1395,7 @@ function TableScheduleView({
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
-                        {withinAvailability ? (
+                        {showAsNormal ? (
                           <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-destructive mx-auto" />
@@ -1409,9 +1418,11 @@ function TableScheduleView({
 function GridScheduleView({
   teacher,
   tCommon,
+  dismissed,
 }: {
   teacher: TeacherWithSchedule;
   tCommon: ReturnType<typeof useTranslations>;
+  dismissed?: boolean;
 }) {
   const t = useTranslations("TeacherScheduleView");
 
@@ -1468,12 +1479,14 @@ function GridScheduleView({
                       teacher.weeklySchedule,
                     );
 
+                    const showAsNormal = withinAvailability || dismissed;
+
                     return (
                       <div
                         key={schedule.id}
                         className={cn(
                           "p-3 rounded-md border space-y-2 transition-colors",
-                          withinAvailability
+                          showAsNormal
                             ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10 dark:bg-green-500/10 dark:border-green-500/30"
                             : "bg-destructive/5 border-destructive/20 hover:bg-destructive/10 dark:bg-destructive/10 dark:border-destructive/30",
                         )}
@@ -1483,7 +1496,7 @@ function GridScheduleView({
                             <Clock className="h-3 w-3" />
                             {schedule.startTime} - {schedule.endTime}
                           </div>
-                          {withinAvailability ? (
+                          {showAsNormal ? (
                             <CheckCircle className="h-4 w-4 text-green-600" />
                           ) : (
                             <AlertCircle className="h-4 w-4 text-red-600" />
