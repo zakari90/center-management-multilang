@@ -656,8 +656,8 @@ export default function AddTeacherPaymentDialog({
 
       <DialogContent className="max-w-[95vw] md:max-w-[700px] lg:max-w-[800px] w-full h-auto flex flex-col overflow-hidden p-1">
         <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="hidden md:block">
+          <DialogTitle className="p-2">{t("title")}</DialogTitle>
+          <DialogDescription className="p-2 hidden md:block">
             {t("description")}
           </DialogDescription>
         </DialogHeader>
