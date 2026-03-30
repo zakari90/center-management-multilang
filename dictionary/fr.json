@@ -40,6 +40,7 @@
     "deleteAllData": "Supprimer toutes les données",
     "cannotBeUndone": "Ceci est irréversible",
     "yesDeleteEverything": "Oui, supprimer",
+    "deleting": "Suppression en cours...",
     "cancel": "Annuler",
     "passwordLabel": "Entrez le mot de passe pour confirmer",
     "passwordPlaceholder": "Mot de passe administrateur",

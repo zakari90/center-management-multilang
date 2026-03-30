@@ -89,7 +89,6 @@ export function DeleteAllDataButton() {
         localDb.receipts.clear(),
         localDb.schedules.clear(),
         localDb.deleteRequests.clear(),
-        localDb.appNotifications.clear(),
       ]);
 
       toast.success(

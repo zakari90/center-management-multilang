@@ -196,11 +196,6 @@ export const deleteRequestActions = generateDexieActions(
   false,
   true,
 );
-export const appNotificationActions = generateDexieActions(
-  localDb.appNotifications,
-  false,
-  false,
-);
 
 // ✅ Cascade delete helper for center with all related entities
 export async function deleteCenterWithRelations(

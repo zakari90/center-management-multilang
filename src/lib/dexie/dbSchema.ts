@@ -261,7 +261,7 @@ export class AppDatabase extends Dexie {
       syncMeta: "id, userId, dataEpoch",
     });
 
-    // Version 4: Add deleteRequests and appNotifications tables
+    // Version 4: Add deleteRequests table
     this.version(4).stores({
       centers: "id, status, adminId, [status+updatedAt], updatedAt",
       users: "id, &email, status, role, [status+updatedAt], updatedAt",
