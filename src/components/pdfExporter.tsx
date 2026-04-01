@@ -25,17 +25,41 @@ export default function PdfExporter({
     if (!contentRef.current) return
     setIsExporting(true)
 
+    // html2canvas cannot parse modern oklch()/lab() color functions.
+    // We temporarily inject a style block that overrides all theme CSS
+    // variables with hex equivalents on the capture target.
+    const hexOverrides = document.createElement('style')
+    hexOverrides.textContent = `
+      [data-pdf-export] {
+        --background: #f5f7fa !important;
+        --foreground: #2d3555 !important;
+        --card: #ffffff !important;
+        --card-foreground: #2d3555 !important;
+        --primary: #2bb673 !important;
+        --primary-foreground: #ffffff !important;
+        --secondary: #e8ecf4 !important;
+        --secondary-foreground: #53596e !important;
+        --muted: #f0f1f4 !important;
+        --muted-foreground: #6e7385 !important;
+        --accent: #d6f5e4 !important;
+        --accent-foreground: #2d3555 !important;
+        --destructive: #e5484d !important;
+        --border: #e2e4ea !important;
+        --input: #e2e4ea !important;
+        --ring: #2bb673 !important;
+        color: #2d3555 !important;
+      }
+    `
+    document.head.appendChild(hexOverrides)
+    contentRef.current.setAttribute('data-pdf-export', '')
+
     try {
       const element = contentRef.current
-
-      // html2canvas doesn't support modern CSS color functions (lab, oklch)
-      // Use a safe fallback for the export background
-      const bgColor = '#ffffff'
 
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        backgroundColor: bgColor,
+        backgroundColor: '#ffffff',
         logging: false,
       })
 
@@ -50,6 +74,9 @@ export default function PdfExporter({
       console.error('PDF export failed:', error)
       toast.error('Failed to export PDF. Please try again.')
     } finally {
+      // Clean up overrides
+      document.head.removeChild(hexOverrides)
+      contentRef.current?.removeAttribute('data-pdf-export')
       setIsExporting(false)
     }
   }
