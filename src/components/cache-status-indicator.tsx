@@ -56,7 +56,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                 variant="outline"
                 className="bg-orange-50 text-orange-700 border-orange-200 gap-1"
               >
-                <CloudOff className="h-3 w-3" />
+                <CloudOff className="hidden md:block h-3 w-3" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
                   {t("offline")}
                 </span>
@@ -66,7 +66,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                 variant="secondary"
                 className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 gap-1 animate-pulse"
               >
-                <RefreshCcw className="h-3 w-3 animate-spin" />
+                <RefreshCcw className="hidden md:block h-3 w-3 animate-spin" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
                   {t("syncing")}
                 </span>
@@ -80,7 +80,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                   <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                <Database className="h-3 w-3" />
+                <Database className="hidden md:block h-3 w-3" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
                   {t("offlineReady")}
                 </span>
@@ -93,7 +93,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                 <span className="relative flex h-2 w-2">
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
                 </span>
-                <ShieldAlert className="h-3 w-3" />
+                <ShieldAlert className="hidden md:block h-3 w-3" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
                   {t("notCached")}
                 </span>
