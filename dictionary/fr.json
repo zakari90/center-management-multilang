@@ -30,7 +30,8 @@
     "offlineReady": "Prêt hors ligne",
     "live": "En direct",
     "syncing": "Synchronisation...",
-    "notCached": "Direct uniquement",
+    "notCached": "Non mise en cache",
+    "notCachedTooltip": "Cette page n'est pas disponible hors ligne. Connectez-vous pour la mettre en cache.",
     "offline": "Hors ligne"
   },
   "deleteALL": {

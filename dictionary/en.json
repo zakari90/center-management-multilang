@@ -30,7 +30,8 @@
     "offlineReady": "Offline Ready",
     "live": "Live",
     "syncing": "Syncing...",
-    "notCached": "Live Only",
+    "notCached": "Not Cached",
+    "notCachedTooltip": "This page is not available offline. Connect to cache it.",
     "offline": "Offline"
   },
   "deleteALL": {
