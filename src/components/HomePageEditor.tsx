@@ -63,7 +63,7 @@ export function HomePageEditor({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/center`, {
+      const response = await fetch(`/api/centers`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

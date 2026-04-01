@@ -1981,7 +1981,7 @@
     "modalDescription": "View and manage all {table} in your database"
   },
   "homePageEditor": {
-    "title": "Homepage Settings",
+    "title": "Home page Settings",
     "description": "Customize your public homepage content",
     "preview": "Preview",
     "hidePreview": "Hide Preview",

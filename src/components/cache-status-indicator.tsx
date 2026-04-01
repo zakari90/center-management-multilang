@@ -51,17 +51,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1.5 cursor-default select-none">
-            {isSyncing ? (
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 gap-1 animate-pulse"
-              >
-                <RefreshCcw className="h-3 w-3 animate-spin" />
-                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
-                  {t("syncing")}
-                </span>
-              </Badge>
-            ) : !isOnline ? (
+            {!isOnline ? (
               <Badge
                 variant="outline"
                 className="bg-orange-50 text-orange-700 border-orange-200 gap-1"
@@ -69,6 +59,16 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                 <CloudOff className="h-3 w-3" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
                   {t("offline")}
+                </span>
+              </Badge>
+            ) : isSyncing ? (
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 gap-1 animate-pulse"
+              >
+                <RefreshCcw className="h-3 w-3 animate-spin" />
+                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
+                  {t("syncing")}
                 </span>
               </Badge>
             ) : isCached ? (
@@ -107,10 +107,10 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
           className="text-xs max-w-[200px]"
         >
           <p>
-            {isSyncing
-              ? t("syncing")
-              : !isOnline
-                ? t("offline")
+            {!isOnline
+              ? t("offline")
+              : isSyncing
+                ? t("syncing")
                 : isCached
                   ? t("offlineReady")
                   : t("notCachedTooltip")}
