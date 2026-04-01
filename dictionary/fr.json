@@ -848,7 +848,8 @@
     "errorSomethingWrong": "Quelque chose s'est mal passé",
     "errorCamera": "Impossible d'accéder à la caméra",
     "studentNotFound": "Élève introuvable",
-    "studentAlreadyPaid": "Cet élève a déjà payé pour cette période de facturation."
+    "studentAlreadyPaid": "Cet élève a déjà payé pour cette période de facturation.",
+    "paymentCreatedSuccess": "Paiement créé avec succès !"
   },
   "Dashboard": {
     "title": "Tableau de bord",

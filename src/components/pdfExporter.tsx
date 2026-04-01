@@ -1,10 +1,11 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import { Button } from '@/components/ui/button'
-import { FileDown } from 'lucide-react'
+import { FileDown, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface PdfExporterProps {
   children: React.ReactNode
@@ -18,29 +19,52 @@ export default function PdfExporter({
   buttonText = '',
 }: PdfExporterProps) {
   const contentRef = useRef<HTMLDivElement>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   const handleDownloadPDF = async () => {
     if (!contentRef.current) return
+    setIsExporting(true)
 
-    const element = contentRef.current
-    // Get background color from theme
-    const bgColor = typeof window !== 'undefined' 
-      ? getComputedStyle(document.documentElement).getPropertyValue('--background').trim() || '#ffffff'
-      : '#ffffff'
-    
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: bgColor,
-    })
+    try {
+      const element = contentRef.current
 
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    const pdfWidth = pdf.internal.pageSize.getWidth()
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      // Resolve the background color properly
+      // shadcn/ui --background returns raw HSL values like "0 0% 100%"
+      let bgColor = '#ffffff'
+      if (typeof window !== 'undefined') {
+        const rawBg = getComputedStyle(document.documentElement)
+          .getPropertyValue('--background')
+          .trim()
+        if (rawBg) {
+          // If it looks like a raw HSL value (no hsl() wrapper), wrap it
+          if (/^\d/.test(rawBg) && !rawBg.startsWith('hsl') && !rawBg.startsWith('#') && !rawBg.startsWith('rgb')) {
+            bgColor = `hsl(${rawBg})`
+          } else {
+            bgColor = rawBg
+          }
+        }
+      }
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-    pdf.save(fileName)
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: bgColor,
+        logging: false,
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save(fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`)
+    } catch (error) {
+      console.error('PDF export failed:', error)
+      toast.error('Failed to export PDF. Please try again.')
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   return (
@@ -50,11 +74,16 @@ export default function PdfExporter({
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
-          <FileDown className="h-4 w-4" />
+        <Button onClick={handleDownloadPDF} disabled={isExporting} className="flex items-center gap-2">
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileDown className="h-4 w-4" />
+          )}
           {buttonText}
         </Button>
       </div>
     </div>
   )
 }
+

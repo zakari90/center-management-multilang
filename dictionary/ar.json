@@ -850,7 +850,8 @@
     "errorSomethingWrong": "حدث خطأ ما",
     "errorCamera": "لا يمكن الوصول إلى الكاميرا",
     "studentNotFound": "لم يتم العثور على الطالب",
-    "studentAlreadyPaid": "لقد قام هذا الطالب بالفعل بالدفع لهذه الفترة."
+    "studentAlreadyPaid": "لقد قام هذا الطالب بالفعل بالدفع لهذه الفترة.",
+    "paymentCreatedSuccess": "تم إنشاء الدفع بنجاح!"
   },
   "Dashboard": {
     "title": "لوحة التحكم",

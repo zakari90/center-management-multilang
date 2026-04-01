@@ -16,6 +16,7 @@ import { useAuth } from "@/context/authContext";
 import { ReceiptType } from "@/lib/dexie/dbSchema";
 import ServerActionReceipts from "@/lib/dexie/receiptServerAction";
 import { isOnline } from "@/lib/utils/network";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
@@ -458,17 +459,12 @@ export default function AddStudentPaymentDialog({
     (data: string) => {
       const student = students.find((s) => s.id === data);
       if (student) {
-        setSelectedStudent(student);
+        handleStudentSelect(student);
         setShowQrScanner(false);
         setQrError(null);
-        setSearchTerm("");
-        setFormData((prev) => ({
-          ...prev,
-          selectedSubjects: student.studentSubjects.map((ss) => ss.subject.id),
-        }));
       } else setQrError(`Student not found for ID: ${data.slice(0, 8)}...`);
     },
-    [students],
+    [students, handleStudentSelect],
   );
 
   const nextStep = () => {
@@ -477,7 +473,7 @@ export default function AddStudentPaymentDialog({
       return;
     }
     if (currentStep === 2 && formData.selectedSubjects.length === 0) {
-      setError("Please select at least one subject");
+      setError(t("errorSelectSubject"));
       return;
     }
     setError("");
@@ -570,6 +566,7 @@ export default function AddStudentPaymentDialog({
             console.error("Sync failed:", syncError);
           }
         }
+        toast.success(t("paymentCreatedSuccess") || "Payment created successfully!");
         setOpen(false);
         onPaymentCreated?.();
         router.refresh();
@@ -665,7 +662,7 @@ export default function AddStudentPaymentDialog({
               </p>
               {selectedStudent.grade && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Grade: {selectedStudent.grade}
+                  {selectedStudent.grade}
                 </p>
               )}
             </div>
@@ -758,7 +755,7 @@ export default function AddStudentPaymentDialog({
       {formData.selectedSubjects.length > 0 && (
         <div className="flex justify-between items-center pt-2 border-t md:hidden">
           <span className="text-sm text-muted-foreground">
-            {formData.selectedSubjects.length} subject(s)
+            {formData.selectedSubjects.length} {t("subjects")}
           </span>
           <span className="text-lg font-bold text-primary">
             MAD {totalAmount.toFixed(2)}
@@ -848,7 +845,15 @@ export default function AddStudentPaymentDialog({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t("method")}:</span>
-              <span className="font-medium">{formData.paymentMethod}</span>
+              <span className="font-medium">
+                {{
+                  CASH: t("cash"),
+                  CARD: t("card"),
+                  BANK_TRANSFER: t("bankTransfer"),
+                  CHECK: t("check"),
+                  MOBILE_PAYMENT: t("mobilePayment"),
+                }[formData.paymentMethod]}
+              </span>
             </div>
             <Separator className="my-2" />
             <div className="flex justify-between items-center pt-2">
@@ -908,15 +913,7 @@ export default function AddStudentPaymentDialog({
                   <Card
                     className={`border-0 shadow-none md:border md:shadow-sm ${currentStep !== 1 ? "hidden md:block" : ""}`}
                   >
-                    <CardHeader className="hidden md:flex">
-                      {/* <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        {t("findStudent")}
-                      </CardTitle>
-                      <CardDescription>
-                        {t("searchOrScanStudent")}
-                      </CardDescription> */}
-                    </CardHeader>
+                    <CardHeader className="hidden md:flex" />
                     <CardContent className="p-0 md:p-6">
                       {renderStep1()}
                     </CardContent>
@@ -927,7 +924,6 @@ export default function AddStudentPaymentDialog({
                     className={`border-0 shadow-none md:border md:shadow-sm ${!selectedStudent ? "opacity-60 pointer-events-none" : ""} ${currentStep !== 2 ? "hidden md:block" : ""}`}
                   >
                     <CardHeader className="hidden md:flex">
-                      {/* <CardTitle>{t("selectSubjects")}</CardTitle> */}
                       {!selectedStudent && (
                         <CardDescription className="text-xs mt-1">
                           {t("selectStudentFirst")}
@@ -944,7 +940,6 @@ export default function AddStudentPaymentDialog({
                     className={`border-0 shadow-none md:border md:shadow-sm ${formData.selectedSubjects.length === 0 ? "opacity-60 pointer-events-none" : ""} ${currentStep !== 3 ? "hidden md:block" : ""}`}
                   >
                     <CardHeader className="hidden md:flex">
-                      {/* <CardTitle>{t("paymentDetails")}</CardTitle> */}
                       {formData.selectedSubjects.length === 0 && (
                         <CardDescription className="text-xs">
                           {t("selectSubjectsFirst")}

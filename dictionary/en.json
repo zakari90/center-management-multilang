@@ -885,7 +885,8 @@
     "errorSomethingWrong": "Something went wrong",
     "errorCamera": "Unable to access camera.",
     "studentNotFound": "Student not found",
-    "studentAlreadyPaid": "This student has already paid for this billing period."
+    "studentAlreadyPaid": "This student has already paid for this billing period.",
+    "paymentCreatedSuccess": "Payment created successfully!"
   },
   "Dashboard": {
     "title": "Dashboard",
