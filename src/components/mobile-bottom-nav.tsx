@@ -16,15 +16,22 @@ export default function MobileBottomNav({
   items,
   menu,
   ariaLabel,
+  statusIndicator,
 }: {
   items: BottomNavItem[];
   menu: React.ReactNode;
   ariaLabel: string;
+  statusIndicator?: React.ReactNode;
 }) {
   const pathname = usePathname();
 
   return (
     <nav className="app-bottom-nav" aria-label={ariaLabel} role="navigation">
+      {statusIndicator && (
+        <div className="flex justify-center py-1 border-b border-border/40">
+          {statusIndicator}
+        </div>
+      )}
       <div className="app-bottom-nav__inner">
         {items.map((item) => {
           const isActive = pathname === item.href;
@@ -54,3 +61,4 @@ export default function MobileBottomNav({
     </nav>
   );
 }
+

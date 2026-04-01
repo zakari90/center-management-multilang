@@ -28,22 +28,9 @@ export default function PdfExporter({
     try {
       const element = contentRef.current
 
-      // Resolve the background color properly
-      // shadcn/ui --background returns raw HSL values like "0 0% 100%"
-      let bgColor = '#ffffff'
-      if (typeof window !== 'undefined') {
-        const rawBg = getComputedStyle(document.documentElement)
-          .getPropertyValue('--background')
-          .trim()
-        if (rawBg) {
-          // If it looks like a raw HSL value (no hsl() wrapper), wrap it
-          if (/^\d/.test(rawBg) && !rawBg.startsWith('hsl') && !rawBg.startsWith('#') && !rawBg.startsWith('rgb')) {
-            bgColor = `hsl(${rawBg})`
-          } else {
-            bgColor = rawBg
-          }
-        }
-      }
+      // html2canvas doesn't support modern CSS color functions (lab, oklch)
+      // Use a safe fallback for the export background
+      const bgColor = '#ffffff'
 
       const canvas = await html2canvas(element, {
         scale: 2,

@@ -214,6 +214,7 @@ export default function AdminLayoutClient({
 
         <MobileBottomNav
           ariaLabel={t("dashboard")}
+          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
           items={[
             {
               label: t("dashboard"),

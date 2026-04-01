@@ -211,6 +211,7 @@ export default function ManagerLayoutClient({
 
         <MobileBottomNav
           ariaLabel={t("dashboard")}
+          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
           items={[
             {
               label: t("dashboard"),
