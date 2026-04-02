@@ -27,11 +27,6 @@ export default function MobileBottomNav({
 
   return (
     <nav className="app-bottom-nav" aria-label={ariaLabel} role="navigation">
-      {statusIndicator && (
-        <div className="flex justify-center py-1 border-b border-border/40">
-          {statusIndicator}
-        </div>
-      )}
       <div className="app-bottom-nav__inner">
         {items.map((item) => {
           const isActive = pathname === item.href;
@@ -45,6 +40,11 @@ export default function MobileBottomNav({
                 isActive ? "app-bottom-nav__item--active" : "",
               )}
             >
+              {statusIndicator && (
+                <div className="flex justify-center py-1 border-b border-border/40">
+                  {statusIndicator}
+                </div>
+              )}
               <span className="app-bottom-nav__icon" aria-hidden="true">
                 {item.icon}
               </span>
