@@ -126,6 +126,7 @@ export default function ManagerLayoutClient({
     name: user.name,
     email: user.email,
     avatar: "/school.svg",
+    role: user.role,
   };
 
   const base = `/${locale}`;
