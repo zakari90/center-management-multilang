@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { CacheStatusDot } from "./cache-status-indicator";
 
 type BottomNavItem = {
   label: string;
@@ -40,11 +41,9 @@ export default function MobileBottomNav({
                 isActive ? "app-bottom-nav__item--active" : "",
               )}
             >
-              {statusIndicator && (
-                <div className="flex justify-center py-1 border-b border-border/40">
-                  {statusIndicator}
-                </div>
-              )}
+              <div className="absolute top-2 right-2">
+                <CacheStatusDot href={item.href} />
+              </div>
               <span className="app-bottom-nav__icon" aria-hidden="true">
                 {item.icon}
               </span>

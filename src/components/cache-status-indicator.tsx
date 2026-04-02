@@ -1,10 +1,8 @@
 "use client";
 
 import { useIsOnline } from "@/hooks/useOnlineStatus";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { CloudOff, Database, RefreshCcw, ShieldAlert } from "lucide-react";
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -12,74 +10,52 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PAGES_CACHE_NAME } from "@/lib/pwa-constants";
+import { useCacheStatusStore, type CacheStatusState } from "@/stores/useCacheStatusStore";
+import { cn } from "@/lib/utils";
 
-// Same list used by page-precache-handler
-const BASE_PAGES = [
-  "/",
-  "/login",
-  "/loginmanager",
-  "/register",
-  "/admin",
-  "/admin/center",
-  "/admin/receipts",
-  "/admin/schedule",
-  "/admin/users",
-  "/admin/test",
-  "/manager",
-  "/manager/receipts",
-  "/manager/schedule",
-  "/manager/students",
-  "/manager/teachers",
-];
+/**
+ * A small dot indicator for individual navigation items.
+ * Shows green if cached, amber if not.
+ * Hides if everything is cached (global allCached state).
+ */
+export function CacheStatusDot({ href }: { href: string }) {
+  const isOnline = useIsOnline();
+  const allCached = useCacheStatusStore((state: CacheStatusState) => state.allCached);
+  const isCached = useCacheStatusStore((state: CacheStatusState) => state.pageStatuses[href]);
+  const isInitialCheckDone = useCacheStatusStore((state: CacheStatusState) => state.isInitialCheckDone);
 
+  // Don't show dots if online and everything is cached
+  if (isOnline && allCached) return null;
+  
+  // Wait for initial check to avoid flickering
+  if (!isInitialCheckDone) return null;
+
+  return (
+    <div 
+      className={cn(
+        "h-2 w-2 rounded-full border border-background shadow-sm",
+        isCached ? "bg-emerald-500" : "bg-amber-500 animate-pulse"
+      )} 
+    />
+  );
+}
+
+/**
+ * Global status indicator (badge).
+ * Shows offline or syncing status.
+ * Now respects the centralized store's allCached state for hiding.
+ */
 interface CacheStatusIndicatorProps {
   isSyncing?: boolean;
 }
 
 export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
   const isOnline = useIsOnline();
+  const allCached = useCacheStatusStore((state: CacheStatusState) => state.allCached);
   const t = useTranslations("CacheStatusIndicator");
-  const pathname = usePathname();
-  const locale = useLocale();
-  const [isCurrentPageCached, setIsCurrentPageCached] = useState<boolean | null>(null);
-  const [allPagesCached, setAllPagesCached] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    async function checkCache() {
-      if (typeof window === "undefined" || !("caches" in window)) {
-        setIsCurrentPageCached(false);
-        setAllPagesCached(false);
-        return;
-      }
-
-      try {
-        const cache = await caches.open(PAGES_CACHE_NAME);
-
-        // Check current page
-        const currentMatch = await cache.match(pathname);
-        setIsCurrentPageCached(!!currentMatch);
-
-        // Check all pages for current locale
-        const localizedPages = BASE_PAGES.map((p) => `/${locale}${p === "/" ? "" : p}`);
-        const results = await Promise.all(
-          localizedPages.map((page) => cache.match(page).then((m) => !!m))
-        );
-        setAllPagesCached(results.every(Boolean));
-      } catch (error) {
-        console.error("Error checking cache:", error);
-        setIsCurrentPageCached(false);
-        setAllPagesCached(false);
-      }
-    }
-
-    checkCache();
-  }, [pathname, locale]);
-
-  if (isCurrentPageCached === null || allPagesCached === null) return null;
 
   // Only hide when ALL pages are cached, online, and not syncing
-  if (isOnline && !isSyncing && allPagesCached) return null;
+  if (isOnline && !isSyncing && allCached) return null;
 
   return (
     <TooltipProvider>
@@ -106,34 +82,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                   {t("syncing")}
                 </span>
               </Badge>
-            ) : isCurrentPageCached ? (
-              <Badge
-                variant="secondary"
-                className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200 gap-1"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <Database className="hidden md:block h-3 w-3" />
-                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
-                  {t("offlineReady")}
-                </span>
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="bg-amber-50 text-amber-700 border-amber-300 gap-1"
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-                </span>
-                <ShieldAlert className="hidden md:block h-3 w-3" />
-                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
-                  {t("notCached")}
-                </span>
-              </Badge>
-            )}
+            ) : null}
           </div>
         </TooltipTrigger>
         <TooltipContent
@@ -142,17 +91,12 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
           className="text-xs max-w-[200px]"
         >
           <p>
-            {!isOnline
-              ? t("offline")
-              : isSyncing
-                ? t("syncing")
-                : isCurrentPageCached
-                  ? t("offlineReady")
-                  : t("notCachedTooltip")}
+            {!isOnline ? t("offline") : t("syncing")}
           </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 }
+
 

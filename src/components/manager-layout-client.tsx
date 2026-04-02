@@ -41,6 +41,7 @@ import {
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { CacheStatusIndicator } from "@/components/cache-status-indicator";
+import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 
 interface ManagerLayoutClientProps {
   children: React.ReactNode;
@@ -57,6 +58,10 @@ export default function ManagerLayoutClient({
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    useCacheStatusStore.getState().checkAllPages(locale);
+  }, [locale]);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -168,7 +173,6 @@ export default function ManagerLayoutClient({
           variant="inset"
           items={navItems}
           user={userData}
-          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
         />
         <AutoSyncProvider />
         <SidebarInset>
@@ -211,7 +215,6 @@ export default function ManagerLayoutClient({
 
         <MobileBottomNav
           ariaLabel={t("dashboard")}
-          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
           items={[
             {
               label: t("dashboard"),

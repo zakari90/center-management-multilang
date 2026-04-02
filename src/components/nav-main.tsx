@@ -15,16 +15,16 @@ import {
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "./ui/avatar";
 
+import { CacheStatusDot } from "./cache-status-indicator";
+
 export function NavMain({
   items,
-  statusIndicator,
 }: {
   items: {
     title: string;
     url: string;
     icon?: string;
   }[];
-  statusIndicator?: React.ReactNode;
 }) {
   const pathname = usePathname();
 
@@ -49,11 +49,9 @@ export function NavMain({
                   )}
                 >
                   <Link href={item.url} className="flex items-center gap-2.5">
-                    {statusIndicator && (
-                      <div className="flex justify-center px-2 py-1">
-                        {statusIndicator}
-                      </div>
-                    )}
+                    <div className="ml-auto">
+                      <CacheStatusDot href={item.url} />
+                    </div>
                     {/* Active accent bar */}
                     {isActive && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary transition-all" />

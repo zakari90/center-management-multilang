@@ -41,6 +41,7 @@ import {
 } from "@/lib/dexie/serverActions";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { CacheStatusIndicator } from "@/components/cache-status-indicator";
+import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -57,6 +58,10 @@ export default function AdminLayoutClient({
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    useCacheStatusStore.getState().checkAllPages(locale);
+  }, [locale]);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -172,7 +177,6 @@ export default function AdminLayoutClient({
           variant="inset"
           items={navItems}
           user={userData}
-          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
         />
         <SidebarInset>
           <header className="hidden md:flex h-14 shrink-0 items-center justify-between border-b px-4">
@@ -214,7 +218,6 @@ export default function AdminLayoutClient({
 
         <MobileBottomNav
           ariaLabel={t("dashboard")}
-          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
           items={[
             {
               label: t("dashboard"),

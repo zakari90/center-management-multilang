@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { CacheStatusDot } from "./cache-status-indicator";
 import { School2Icon } from "lucide-react";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -24,13 +25,11 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     email: string;
     avatar: string;
   };
-  statusIndicator?: React.ReactNode;
 }
 
 export function AppSidebar({
   items,
   user,
-  statusIndicator,
   ...props
 }: AppSidebarProps) {
   return (
@@ -54,7 +53,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={items} statusIndicator={statusIndicator} />
+        <NavMain items={items} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
