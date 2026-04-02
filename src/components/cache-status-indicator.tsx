@@ -46,6 +46,9 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
 
   if (isCached === null) return null;
 
+  // If online, not syncing, and page is cached — everything is fine, hide indicator
+  if (isOnline && !isSyncing && isCached) return null;
+
   return (
     <TooltipProvider>
       <Tooltip>
