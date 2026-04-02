@@ -27,7 +27,12 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   statusIndicator?: React.ReactNode;
 }
 
-export function AppSidebar({ items, user, statusIndicator, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  items,
+  user,
+  statusIndicator,
+  ...props
+}: AppSidebarProps) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -49,14 +54,9 @@ export function AppSidebar({ items, user, statusIndicator, ...props }: AppSideba
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={items} />
+        <NavMain items={items} statusIndicator={statusIndicator} />
       </SidebarContent>
       <SidebarFooter>
-        {statusIndicator && (
-          <div className="flex justify-center px-2 py-1">
-            {statusIndicator}
-          </div>
-        )}
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

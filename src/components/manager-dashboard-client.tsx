@@ -26,10 +26,10 @@ export default function ManagerDashboardClient() {
           <ManagerStatsCards />
         </section>
 
-        {/* Quick Actions */}
-        <section>
+        {/* Quick Actions - temporarily disabled */}
+        {/* <section>
           <QuickActions />
-        </section>
+        </section> */}
 
         {/* Charts Section */}
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">

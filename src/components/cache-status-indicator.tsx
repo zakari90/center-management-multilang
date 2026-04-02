@@ -1,7 +1,7 @@
 "use client";
 
 import { useIsOnline } from "@/hooks/useOnlineStatus";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { CloudOff, Database, RefreshCcw, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -14,6 +14,25 @@ import {
 } from "@/components/ui/tooltip";
 import { PAGES_CACHE_NAME } from "@/lib/pwa-constants";
 
+// Same list used by page-precache-handler
+const BASE_PAGES = [
+  "/",
+  "/login",
+  "/loginmanager",
+  "/register",
+  "/admin",
+  "/admin/center",
+  "/admin/receipts",
+  "/admin/schedule",
+  "/admin/users",
+  "/admin/test",
+  "/manager",
+  "/manager/receipts",
+  "/manager/schedule",
+  "/manager/students",
+  "/manager/teachers",
+];
+
 interface CacheStatusIndicatorProps {
   isSyncing?: boolean;
 }
@@ -22,32 +41,45 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
   const isOnline = useIsOnline();
   const t = useTranslations("CacheStatusIndicator");
   const pathname = usePathname();
-  const [isCached, setIsCached] = useState<boolean | null>(null);
+  const locale = useLocale();
+  const [isCurrentPageCached, setIsCurrentPageCached] = useState<boolean | null>(null);
+  const [allPagesCached, setAllPagesCached] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function checkCache() {
       if (typeof window === "undefined" || !("caches" in window)) {
-        setIsCached(false);
+        setIsCurrentPageCached(false);
+        setAllPagesCached(false);
         return;
       }
 
       try {
         const cache = await caches.open(PAGES_CACHE_NAME);
-        const match = await cache.match(pathname);
-        setIsCached(!!match);
+
+        // Check current page
+        const currentMatch = await cache.match(pathname);
+        setIsCurrentPageCached(!!currentMatch);
+
+        // Check all pages for current locale
+        const localizedPages = BASE_PAGES.map((p) => `/${locale}${p === "/" ? "" : p}`);
+        const results = await Promise.all(
+          localizedPages.map((page) => cache.match(page).then((m) => !!m))
+        );
+        setAllPagesCached(results.every(Boolean));
       } catch (error) {
         console.error("Error checking cache:", error);
-        setIsCached(false);
+        setIsCurrentPageCached(false);
+        setAllPagesCached(false);
       }
     }
 
     checkCache();
-  }, [pathname]);
+  }, [pathname, locale]);
 
-  if (isCached === null) return null;
+  if (isCurrentPageCached === null || allPagesCached === null) return null;
 
-  // If online, not syncing, and page is cached — everything is fine, hide indicator
-  if (isOnline && !isSyncing && isCached) return null;
+  // Only hide when ALL pages are cached, online, and not syncing
+  if (isOnline && !isSyncing && allPagesCached) return null;
 
   return (
     <TooltipProvider>
@@ -74,7 +106,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                   {t("syncing")}
                 </span>
               </Badge>
-            ) : isCached ? (
+            ) : isCurrentPageCached ? (
               <Badge
                 variant="secondary"
                 className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200 gap-1"
@@ -114,7 +146,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
               ? t("offline")
               : isSyncing
                 ? t("syncing")
-                : isCached
+                : isCurrentPageCached
                   ? t("offlineReady")
                   : t("notCachedTooltip")}
           </p>
@@ -123,3 +155,4 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
     </TooltipProvider>
   );
 }
+

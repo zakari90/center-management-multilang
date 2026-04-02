@@ -79,6 +79,10 @@
   color: var(--primary);
 }
 
+.app-bottom-nav__item--inactive {
+  background: color-mix(in oklch, var(--warning) 12%, transparent);
+  color: var(--warning);
+}
 .app-bottom-nav__label {
   font-size: 0.625rem;
   line-height: 0.75rem;
