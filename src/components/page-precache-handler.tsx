@@ -276,8 +276,6 @@ export default function PagePrecacheHandler() {
       setIsComplete(true);
 
       // Re-scan cache status so navigation dots update immediately
-      const currentLocale =
-        LOCALES.find((l) => window.location.pathname.startsWith(`/${l}`)) || "en";
       useCacheStatusStore.getState().checkAllPages(currentLocale);
 
       // Auto-hide after 5 seconds
