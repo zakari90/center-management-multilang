@@ -172,6 +172,7 @@ export default function AdminLayoutClient({
           variant="inset"
           items={navItems}
           user={userData}
+          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
         />
         <SidebarInset>
           <header className="hidden md:flex h-14 shrink-0 items-center justify-between border-b px-4">
@@ -180,7 +181,6 @@ export default function AdminLayoutClient({
               <Separator orientation="vertical" className="mx-1 h-4" />
             </div>
             <div className="flex items-center gap-2 px-2">
-              <CacheStatusIndicator isSyncing={isSyncing} />
               <Button
                 variant="ghost"
                 size="icon"

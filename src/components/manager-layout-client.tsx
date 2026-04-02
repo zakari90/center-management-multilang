@@ -168,6 +168,7 @@ export default function ManagerLayoutClient({
           variant="inset"
           items={navItems}
           user={userData}
+          statusIndicator={<CacheStatusIndicator isSyncing={isSyncing} />}
         />
         <AutoSyncProvider />
         <SidebarInset>
@@ -177,7 +178,6 @@ export default function ManagerLayoutClient({
               <Separator orientation="vertical" className="mx-1 h-4" />
             </div>
             <div className="flex items-center gap-2 px-2">
-              <CacheStatusIndicator isSyncing={isSyncing} />
               <Button
                 variant="ghost"
                 size="icon"
