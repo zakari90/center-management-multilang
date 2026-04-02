@@ -11,33 +11,11 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Download, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { PAGES_CACHE_NAME, ASSETS_CACHE_NAME } from "@/lib/pwa-constants";
+import { PAGES_CACHE_NAME, ASSETS_CACHE_NAME, BASE_PAGES } from "@/lib/pwa-constants";
+import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 
 // Pages to precache for offline-first experience
-const BASE_PAGES_TO_PRECACHE = [
-  // Home
-  "/",
-
-  // Auth pages
-  "/login",
-  "/loginmanager",
-  "/register",
-
-  // Admin pages
-  "/admin",
-  "/admin/center",
-  "/admin/receipts",
-  "/admin/schedule",
-  "/admin/users",
-  "/admin/test",
-
-  // Manager pages
-  "/manager",
-  "/manager/receipts",
-  "/manager/schedule",
-  "/manager/students",
-  "/manager/teachers",
-];
+const BASE_PAGES_TO_PRECACHE = BASE_PAGES;
 
 const LOCALES = ["en", "ar", "fr"];
 
@@ -296,6 +274,11 @@ export default function PagePrecacheHandler() {
       }
 
       setIsComplete(true);
+
+      // Re-scan cache status so navigation dots update immediately
+      const currentLocale =
+        LOCALES.find((l) => window.location.pathname.startsWith(`/${l}`)) || "en";
+      useCacheStatusStore.getState().checkAllPages(currentLocale);
 
       // Auto-hide after 5 seconds
       setTimeout(() => {

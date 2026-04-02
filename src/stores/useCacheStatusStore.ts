@@ -1,24 +1,5 @@
 import { create } from "zustand";
-import { PAGES_CACHE_NAME } from "@/lib/pwa-constants";
-
-// The same list used by page-precache-handler
-const BASE_PAGES = [
-  "/",
-  "/login",
-  "/loginmanager",
-  "/register",
-  "/admin",
-  "/admin/center",
-  "/admin/receipts",
-  "/admin/schedule",
-  "/admin/users",
-  "/admin/test",
-  "/manager",
-  "/manager/receipts",
-  "/manager/schedule",
-  "/manager/students",
-  "/manager/teachers",
-];
+import { PAGES_CACHE_NAME, BASE_PAGES } from "@/lib/pwa-constants";
 
 export interface CacheStatusState {
   pageStatuses: Record<string, boolean>; // { "/en/manager/students": true }

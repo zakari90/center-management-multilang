@@ -49,9 +49,6 @@ export function NavMain({
                   )}
                 >
                   <Link href={item.url} className="flex items-center gap-2.5">
-                    <div className="ml-auto">
-                      <CacheStatusDot href={item.url} />
-                    </div>
                     {/* Active accent bar */}
                     {isActive && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary transition-all" />
@@ -71,6 +68,9 @@ export function NavMain({
                       </Avatar>
                     )}
                     <span>{item.title}</span>
+                    <div className="ml-auto">
+                      <CacheStatusDot href={item.url} />
+                    </div>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

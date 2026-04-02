@@ -17,12 +17,10 @@ export default function MobileBottomNav({
   items,
   menu,
   ariaLabel,
-  statusIndicator,
 }: {
   items: BottomNavItem[];
   menu: React.ReactNode;
   ariaLabel: string;
-  statusIndicator?: React.ReactNode;
 }) {
   const pathname = usePathname();
 
