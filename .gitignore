@@ -72,6 +72,7 @@ mongodb.log
 /used_apis.txt
 /multilingualPWABlueprint.txt
 .multilingualPWABlueprint.txt
+/localversion.txt
 encreptstep.txt
 setup-mongodb-replica-set.sh
 setup-mongodb-replica-set.ps1
@@ -79,7 +80,7 @@ start-mongodb-replica.ps
 setup-mongodb-replica-set.md
 .hash.js
 /hash.js
-
+/encreptstep.txt
 # platform apps
 /electron-app
 /ionic-app
