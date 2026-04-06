@@ -192,8 +192,8 @@ export class AppDatabase extends Dexie {
   localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
   syncMeta!: Table<SyncMeta>; // For tracking data epochs
 
-  constructor() {
-    super("EducationAppDatabase");
+  constructor(dbName: string = "EducationAppDatabase") {
+    super(dbName);
 
     this.version(1).stores({
       centers: "id, status, adminId, [status+updatedAt], updatedAt",
@@ -291,3 +291,5 @@ export class AppDatabase extends Dexie {
 
 // Export singleton instance
 export const localDb = new AppDatabase();
+// Export isolated Free tier database
+export const freeLocalDb = new AppDatabase("FreeEducationAppDatabase");
