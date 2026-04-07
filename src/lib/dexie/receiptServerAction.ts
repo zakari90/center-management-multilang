@@ -37,7 +37,6 @@ function transformServerReceipt(serverReceipt: any): Receipt {
     studentId: serverReceipt.studentId || undefined,
     teacherId: serverReceipt.teacherId || undefined,
     managerId: serverReceipt.managerId,
-    encryptedData: serverReceipt.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverReceipt.createdAt === "string"
@@ -54,13 +53,7 @@ const ServerActionReceipts = {
   // ✅ Save receipt to server using direct amount (no subjectIds lookup needed)
   async SaveToServer(receipt: Receipt) {
     try {
-      // Read the raw Dexie record to reliably get encryptedData blob
-      const rawRecord = await localDb.receipts.get(receipt.id);
-      const encryptedData = rawRecord?.encryptedData || receipt.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      const requestBody = {
         id: receipt.id,
         receiptNumber: receipt.receiptNumber,
         type: receipt.type,
@@ -69,23 +62,10 @@ const ServerActionReceipts = {
         managerId: receipt.managerId,
         status: receipt.status,
         date: new Date(receipt.date).toISOString().split("T")[0],
-        ...(encryptedData && { encryptedData }),
+        amount: receipt.amount,
+        paymentMethod: receipt.paymentMethod,
+        description: receipt.description,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            amount: 0,
-            paymentMethod: receipt.paymentMethod ? "ENCRYPTED" : undefined,
-            description: receipt.description ? "ENCRYPTED" : undefined,
-          }
-        : {
-            ...basePayload,
-            amount: receipt.amount,
-            paymentMethod: receipt.paymentMethod,
-            description: receipt.description,
-          };
 
       const response = await fetch(api_url, {
         method: "POST",

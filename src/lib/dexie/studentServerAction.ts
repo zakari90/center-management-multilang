@@ -28,7 +28,6 @@ function transformServerStudent(serverStudent: any): Student {
     parentEmail: serverStudent.parentEmail || undefined,
     grade: serverStudent.grade || undefined,
     managerId: serverStudent.managerId,
-    encryptedData: serverStudent.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverStudent.createdAt === "string"
@@ -54,44 +53,19 @@ const ServerActionStudents = {
           teacherId: ss.teacherId,
         }));
 
-      // Read the raw Dexie record to reliably get encryptedData blob
-      // (decryptEntity may have removed it from the in-memory object)
-      const rawRecord = await localDb.students.get(student.id);
-      const encryptedData = rawRecord?.encryptedData || student.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      const requestBody = {
         id: student.id,
         managerId: student.managerId,
         status: student.status,
         enrollments,
-        ...(encryptedData && { encryptedData }),
+        name: student.name,
+        email: student.email,
+        phone: student.phone,
+        parentName: student.parentName,
+        parentPhone: student.parentPhone,
+        parentEmail: student.parentEmail,
+        grade: student.grade,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      // If NOT encrypted, send the full student object
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            name: "ENCRYPTED",
-            email: student.email ? "ENCRYPTED" : undefined,
-            phone: student.phone ? "ENCRYPTED" : undefined,
-            parentName: student.parentName ? "ENCRYPTED" : undefined,
-            parentPhone: student.parentPhone ? "ENCRYPTED" : undefined,
-            parentEmail: student.parentEmail ? "ENCRYPTED" : undefined,
-            grade: student.grade ? "ENCRYPTED" : undefined,
-          }
-        : {
-            ...basePayload,
-            name: student.name,
-            email: student.email,
-            phone: student.phone,
-            parentName: student.parentName,
-            parentPhone: student.parentPhone,
-            parentEmail: student.parentEmail,
-            grade: student.grade,
-          };
 
       // Try POST first (create)
       let response = await fetch(api_url, {
@@ -316,7 +290,6 @@ const ServerActionStudents = {
                   studentId: ss.studentId,
                   subjectId: ss.subjectId,
                   teacherId: ss.teacherId,
-                  encryptedData: ss.encryptedData || undefined,
                   managerId: ss.managerId || student.managerId,
                   enrolledAt:
                     typeof ss.enrolledAt === "string"

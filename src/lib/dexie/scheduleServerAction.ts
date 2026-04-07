@@ -28,7 +28,6 @@ function transformServerSchedule(serverSchedule: any): Schedule {
     subjectId: serverSchedule.subjectId,
     managerId: serverSchedule.managerId,
     centerId: serverSchedule.centerId || undefined,
-    encryptedData: serverSchedule.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverSchedule.createdAt === "string"
@@ -45,13 +44,7 @@ const ServerActionSchedules = {
   // ✅ Save schedule to server
   async SaveToServer(schedule: Schedule) {
     try {
-      // Read the raw Dexie record to reliably get encryptedData blob
-      const rawRecord = await localDb.schedules.get(schedule.id);
-      const encryptedData = rawRecord?.encryptedData || schedule.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      const requestBody = {
         id: schedule.id,
         teacherId: schedule.teacherId,
         subjectId: schedule.subjectId,
@@ -59,25 +52,11 @@ const ServerActionSchedules = {
         centerId: schedule.centerId || null,
         status: schedule.status,
         allowOverwrite: schedule.allowOverwrite,
-        ...(encryptedData && { encryptedData }),
+        day: schedule.day,
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
+        roomId: schedule.roomId,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            day: "ENCRYPTED",
-            startTime: "ENCRYPTED",
-            endTime: "ENCRYPTED",
-            roomId: "ENCRYPTED",
-          }
-        : {
-            ...basePayload,
-            day: schedule.day,
-            startTime: schedule.startTime,
-            endTime: schedule.endTime,
-            roomId: schedule.roomId,
-          };
 
       const response = await fetch(api_url, {
         method: "POST",

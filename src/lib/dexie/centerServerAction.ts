@@ -31,7 +31,6 @@ function transformServerCenter(serverCenter: any): Center {
       : [],
     managers: Array.isArray(serverCenter.managers) ? serverCenter.managers : [],
     adminId: serverCenter.adminId,
-    encryptedData: serverCenter.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverCenter.createdAt === "string"
@@ -58,15 +57,9 @@ const ServerActionCenters = {
           grade: s.grade,
           price: s.price,
           duration: s.duration,
-          encryptedData: s.encryptedData || undefined,
           createdAt: new Date(s.createdAt).toISOString(),
           updatedAt: new Date(s.updatedAt).toISOString(),
         }));
-
-      // Read the raw Dexie record to reliably get encryptedData blob
-      const rawRecord = await localDb.centers.get(center.id);
-      const encryptedData = rawRecord?.encryptedData || center.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
 
       // Base payload with non-sensitive fields
       const basePayload = {
@@ -77,25 +70,16 @@ const ServerActionCenters = {
         classrooms: center.classrooms || [],
         workingDays: center.workingDays || [],
         subjects: centerSubjects,
-        ...(encryptedData && { encryptedData }),
         createdAt: new Date(center.createdAt).toISOString(),
         updatedAt: new Date(center.updatedAt).toISOString(),
       };
 
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            name: "ENCRYPTED",
-            address: center.address ? "ENCRYPTED" : undefined,
-            phone: center.phone ? "ENCRYPTED" : undefined,
-          }
-        : {
-            ...basePayload,
-            name: center.name,
-            address: center.address,
-            phone: center.phone,
-          };
+      const requestBody = {
+        ...basePayload,
+        name: center.name,
+        address: center.address,
+        phone: center.phone,
+      };
 
       // Validate ObjectId format before sending
       if (!/^[0-9a-fA-F]{24}$/.test(center.id)) {
@@ -169,7 +153,6 @@ const ServerActionCenters = {
             workingDays: center.workingDays || [],
             paymentStartDay: center.paymentStartDay,
             paymentEndDay: center.paymentEndDay,
-            encryptedData: center.encryptedData || undefined,
             updatedAt: new Date(center.updatedAt).toISOString(),
           }),
         });
@@ -190,7 +173,6 @@ const ServerActionCenters = {
                     grade: subject.grade,
                     price: subject.price,
                     duration: subject.duration,
-                    encryptedData: subject.encryptedData || undefined,
                     createdAt: subject.createdAt,
                     updatedAt: subject.updatedAt,
                   }),
