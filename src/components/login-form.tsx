@@ -112,13 +112,8 @@ export function LoginForm({
 
   useEffect(() => {
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
-      // Capture the raw password from the form for E2EE key derivation
-      const rawPassword = formRef.current
-        ? (new FormData(formRef.current).get("password") as string) || undefined
-        : undefined;
       login(
         state.data.user,
-        rawPassword,
         state.data.passwordHash,
         state.data.dataEpoch,
       );
