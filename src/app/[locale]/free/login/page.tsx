@@ -1,5 +1,5 @@
 // src/app/[locale]/(auth)/login/page.tsx
-import { LoginForm } from "@/components/login-form";
+import { FreeLoginForm } from "@/components/free-login-form";
 import OfflineNotificationBanner from "@/components/offline-notification-banner";
 
 // Disable static generation for this page since it uses client-side auth
@@ -11,7 +11,7 @@ export default function LoginPage() {
       <OfflineNotificationBanner />
 
       <div className="w-full lg:max-w-sm">
-        <LoginForm isFree={true} />
+        <FreeLoginForm />
       </div>
     </div>
   );

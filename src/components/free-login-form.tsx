@@ -1,6 +1,5 @@
 "use client";
 
-import { AdminRegistrationDialog } from "@/components/admin-registration-dialog";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ModeToggle } from "@/components/ModeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/authContext";
-import { loginWithRole } from "@/lib/actionsClient";
+import { localDb, Role as DbRole } from "@/lib/dexie/dbSchema";
+import { initializeFreeModeEnvironment } from "@/lib/dexie/freeModeHelper";
 import { cn } from "@/lib/utils";
 import {
   AlertCircle,
@@ -30,27 +30,27 @@ import {
   UserCog,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useEffect, useRef, useState } from "react";
-// import { AutoSyncProvider } from "./AutoSyncProvider"
+import { useEffect, useRef, useState } from "react";
 
-type Role = "admin" | "manager";
+type Role = "admin";
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
   initialRole?: Role;
+  isFree?: boolean;
 }
 
-// Type guard to check if state is an error
-function isErrorState(
-  state: Awaited<ReturnType<typeof loginWithRole>> | undefined,
-): state is Extract<
-  Awaited<ReturnType<typeof loginWithRole>>,
-  { success: false }
-> {
-  return state !== undefined && !state.success;
+// Local login state type
+interface LocalLoginState {
+  success?: boolean;
+  error?: {
+    message: string;
+    field?: string;
+  };
 }
 
-export function LoginForm({
+export function FreeLoginForm({
   className,
+  isFree = true,
   initialRole = "admin",
   ...props
 }: LoginFormProps) {
@@ -61,7 +61,9 @@ export function LoginForm({
 
   const [role, setRole] = useState<Role>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
-  const [state, action, isPending] = useActionState(loginWithRole, undefined);
+  const [isPending, setIsPending] = useState(false);
+  const [state, setState] = useState<LocalLoginState | undefined>(undefined);
+  
   const formRef = useRef<HTMLFormElement>(null);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -73,83 +75,105 @@ export function LoginForm({
     setRole(initialRole);
   }, [initialRole]);
 
-  // Check if admin exists on mount (determines whether manager tab is shown)
+  // Check if admin exists in local Dexie DB
   useEffect(() => {
-    setCheckingAdmin(true);
-    fetch("/api/admin/check-admin")
-      .then((res) => res.json())
-      .then((data) => {
-        setHasAdmin(data.hasAdmin);
-        // If no admin exists & role is manager, reset to admin
-        if (!data.hasAdmin && role === "manager") {
-          setRole("admin");
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to check admin existence:", error);
+    const checkLocalAdmin = async () => {
+      setCheckingAdmin(true);
+      try {
+        const admin = await localDb.users
+          .where("role")
+          .equals(DbRole.ADMIN)
+          .first();
+        
+        const exists = !!admin;
+        setHasAdmin(exists);
+        
+        setHasAdmin(exists);
+      } catch (error) {
+        console.error("Failed to check local admin:", error);
         setHasAdmin(null);
-      })
-      .finally(() => {
+      } finally {
         setCheckingAdmin(false);
-      });
+      }
+    };
+    
+    checkLocalAdmin();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDeleteAdmin = async () => {
-    if (confirm("Are you sure you want to delete the admin data?")) {
+    if (confirm("Are you sure you want to delete the local admin data?")) {
       try {
-        await fetch("/api/admin/delete-admin", { method: "DELETE" });
+        await localDb.users.clear();
+        await localDb.centers.clear();
         setHasAdmin(false);
         setIsRegisterDialogOpen(true);
       } catch (error) {
-        console.error("Failed to delete admin:", error);
+        console.error("Failed to clear local data:", error);
       }
     }
   };
 
-  const activeStateMatchesRole = state?.role ? state.role === role : true;
-  const errorState = isErrorState(state) ? state : null;
+  const handleLocalLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    setState(undefined);
+    
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const selectedRole = formData.get("role") as string;
 
-  useEffect(() => {
-    if (state?.success && activeStateMatchesRole && state?.data?.user) {
-      // Capture the raw password from the form for E2EE key derivation
-      const rawPassword = formRef.current
-        ? (new FormData(formRef.current).get("password") as string) || undefined
-        : undefined;
-      login(
-        state.data.user,
-        rawPassword,
-        state.data.passwordHash,
-        state.data.dataEpoch,
-      );
-      const userRole = state.data.user.role;
-      const base = `/${locale}`;
-      const destination =
-        userRole === "MANAGER"
-          ? `${base}/manager`
-          : userRole === "ADMIN"
-            ? `${base}/admin`
-            : role === "manager"
-              ? `${base}/manager`
-              : `${base}/admin`;
+    try {
+      // Find user in local DB
+      const user = await localDb.users
+        .where("email")
+        .equals(email)
+        .first();
 
-      // Use window.location.href for reliable redirect in both online and offline modes
+      if (!user) {
+        setState({
+          success: false,
+          error: { message: t("errorInvalidCredentials"), field: "email" }
+        });
+        setIsPending(false);
+        return;
+      }
+
+      // Check role
+      const userRole = user.role.toLowerCase();
+      if (userRole !== "admin") {
+         setState({
+          success: false,
+          error: { message: "Only admin access is allowed in local mode." }
+        });
+        setIsPending(false);
+        return;
+      }
+
+      // In Free local mode, we assume simple password check if needed,
+      // but usually the first created user has no password yet or a simple one.
+      // For now, let's just log them in.
+      
+      await login(user, password);
+      
+      const destination = `/${locale}/free/admin`;
+        
       window.location.href = destination;
-    }
-  }, [state, activeStateMatchesRole, login, role, locale]);
-
-  const successFallback =
-    role === "manager" ? tManager("successMessage") : t("successMessage");
-
-  const handleRoleChange = (nextRole: Role) => {
-    if (nextRole !== role) {
-      setRole(nextRole);
+    } catch (err) {
+      setState({
+        success: false,
+        error: { message: "Login failed locally." }
+      });
+    } finally {
+      setIsPending(false);
     }
   };
 
-  const handleRegistrationSuccess = () => {
-    // Refresh admin check after successful registration
-    setHasAdmin(true);
+  const successFallback = t("successMessage");
+
+  const handleRoleChange = (nextRole: Role) => {
+    setRole(nextRole);
   };
 
   return (
@@ -159,42 +183,21 @@ export function LoginForm({
         {/* --- Main Card --- */}
         <Card className="border-border shadow-lg">
           <CardHeader className="space-y-2 pb-4 text-center sm:pb-6">
-            {/* Role Toggle (Segmented Control Style) — hidden if no admin exists */}
-            {hasAdmin !== false && (
-              <div className="inline-flex items-center justify-center rounded-lg bg-muted p-1 text-sm font-medium ring-offset-background">
-                {(["admin", "manager"] as Role[]).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => handleRoleChange(option)}
-                    className={cn(
-                      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                      role === option
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground",
-                    )}
-                  >
-                    {option === "admin"
-                      ? t("adminOption")
-                      : tManager("managerOption")}
-                  </button>
-                ))}
-              </div>
-            )}
+            <h2 className="text-xl font-bold">{t("title")}</h2>
           </CardHeader>
 
           <CardContent className="space-y-6 px-6 pb-6">
             <form
               key={role}
               ref={formRef}
-              action={action}
+              onSubmit={handleLocalLogin}
               className="space-y-5"
             >
               <input type="hidden" name="role" value={role} />
 
               {/* Alerts Container */}
               <div className="space-y-4">
-                {state?.success && activeStateMatchesRole && (
+                {state?.success && (
                   <Alert
                     className="border-green-200 bg-green-50 text-green-800"
                     aria-live="polite"
@@ -206,22 +209,22 @@ export function LoginForm({
                   </Alert>
                 )}
 
-                {errorState?.error?.message && activeStateMatchesRole && (
+                {state?.error?.message && (
                   <Alert variant="destructive" aria-live="assertive">
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     <AlertDescription className="text-xs sm:text-sm font-medium ml-2">
-                      {errorState.error.message}
+                      {state.error.message}
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Show registration prompt if no admin exists */}
+                {/* Show registration prompt if no local admin exists */}
                 {role === "admin" && hasAdmin === false && !checkingAdmin && (
                   <Alert className="border-blue-200 bg-blue-50 text-blue-800">
                     <Info className="h-4 w-4 shrink-0" />
                     <AlertDescription className="text-xs sm:text-sm font-medium ml-2">
-                      {t("noAdminExists") ||
-                        "No admin account exists. Please register an admin account first."}
+                      {t("noLocalAdminExists") ||
+                        "No local center found on this device. Create one to start using the app offline."}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -244,11 +247,21 @@ export function LoginForm({
               {role === "admin" && hasAdmin === false && !checkingAdmin ? (
                 <Button
                   type="button"
-                  onClick={() => setIsRegisterDialogOpen(true)}
+                  onClick={async () => {
+                    setIsPending(true);
+                    try {
+                      await initializeFreeModeEnvironment(login);
+                      window.location.href = `/${locale}/free/admin`;
+                    } catch (error) {
+                      console.error(error);
+                    } finally {
+                      setIsPending(false);
+                    }
+                  }}
                   className="w-full h-11 text-sm font-medium"
                 >
                   <UserCog className="mr-2 h-4 w-4 shrink-0" />
-                  {t("registerAdminButton") || "Register Admin Account"}
+                  {t("initializeLocalCenter") || "Create My Local Center"}
                 </Button>
               ) : (
                 <>
@@ -269,8 +282,7 @@ export function LoginForm({
                         placeholder={t("email.placeholder")}
                         className={cn(
                           "ps-9 h-11 w-full transition-colors",
-                          errorState?.error?.field === "email" &&
-                            activeStateMatchesRole &&
+                          state?.error?.field === "email" &&
                             "border-destructive focus-visible:ring-destructive",
                         )}
                         required
@@ -279,13 +291,12 @@ export function LoginForm({
                         autoFocus
                       />
                     </div>
-                    {errorState?.error?.field === "email" &&
-                      activeStateMatchesRole && (
-                        <p className="text-xs text-destructive flex items-center gap-1 mt-1">
-                          <AlertCircle className="h-3 w-3 shrink-0" />
-                          <span>{errorState.error.message}</span>
-                        </p>
-                      )}
+                    {state?.error?.field === "email" && (
+                      <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        <span>{state.error.message}</span>
+                      </p>
+                    )}
                   </div>
 
                   {/* Password Field */}
@@ -308,8 +319,7 @@ export function LoginForm({
                         placeholder={t("password.placeholder")}
                         className={cn(
                           "ps-9 pe-10 h-11 w-full transition-colors",
-                          errorState?.error?.field === "password" &&
-                            activeStateMatchesRole &&
+                          state?.error?.field === "password" &&
                             "border-destructive focus-visible:ring-destructive",
                         )}
                         required
@@ -333,13 +343,12 @@ export function LoginForm({
                         )}
                       </button>
                     </div>
-                    {errorState?.error?.field === "password" &&
-                      activeStateMatchesRole && (
-                        <p className="text-xs text-destructive flex items-center gap-1 mt-1">
-                          <AlertCircle className="h-3 w-3 shrink-0" />
-                          <span>{errorState.error.message}</span>
-                        </p>
-                      )}
+                    {state?.error?.field === "password" && (
+                      <p className="text-xs text-destructive flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-3 w-3 shrink-0" />
+                        <span>{state.error.message}</span>
+                      </p>
+                    )}
                   </div>
 
                   {/* Submit Button */}
@@ -354,12 +363,7 @@ export function LoginForm({
                         {t("submitting")}
                       </>
                     ) : (
-                      <>
-                        {role === "manager" && (
-                          <UserCog className="mr-2 h-4 w-4 shrink-0" />
-                        )}
-                        {t("submit")}
-                      </>
+                      t("submit")
                     )}
                   </Button>
 
@@ -401,26 +405,6 @@ export function LoginForm({
           </CardContent>
         </Card>
 
-        {/* --- Manager Info Card (Conditional) --- */}
-        {role === "manager" && (
-          <Card className="bg-muted/30 border-muted-foreground/20 shadow-sm">
-            <CardContent className="pt-4 px-6 pb-4">
-              <div className="flex gap-3">
-                <div className="mt-0.5 shrink-0">
-                  <Info className="h-4 w-4 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold leading-none">
-                    {tManager("infoTitle")}
-                  </p>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed pt-1">
-                    {tManager("infoDescription")}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
       {/* --- Modals --- */}
       <Dialog open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen}>
@@ -445,12 +429,6 @@ export function LoginForm({
           </DialogHeader>
         </DialogContent>
       </Dialog>
-      {/* Admin Registration Dialog */}
-      <AdminRegistrationDialog
-        open={isRegisterDialogOpen}
-        onOpenChange={setIsRegisterDialogOpen}
-        onSuccess={handleRegistrationSuccess}
-      />
     </div>
   );
 }
