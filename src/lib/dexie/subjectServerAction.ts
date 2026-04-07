@@ -25,7 +25,6 @@ function transformServerSubject(serverSubject: any): Subject {
     price: serverSubject.price,
     duration: serverSubject.duration || undefined,
     centerId: serverSubject.centerId,
-    encryptedData: serverSubject.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverSubject.createdAt === "string"
@@ -42,10 +41,7 @@ const ServerActionSubjects = {
   // ✅ Save subject to server (handles both create and update)
   async SaveToServer(subject: Subject) {
     try {
-      // Read the raw Dexie record to reliably get encryptedData blob
-      const rawRecord = await localDb.subjects.get(subject.id);
-      const encryptedData = rawRecord?.encryptedData || subject.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
+      const isRecordEncrypted = false;
 
       // Base payload with non-sensitive fields
       const basePayload = {
@@ -54,7 +50,6 @@ const ServerActionSubjects = {
         price: subject.price,
         duration: subject.duration,
         status: subject.status,
-        ...(encryptedData && { encryptedData }),
       };
 
       // If encrypted, only send base payload + dummy sensitive fields

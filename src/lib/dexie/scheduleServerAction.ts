@@ -27,8 +27,6 @@ function transformServerSchedule(serverSchedule: any): Schedule {
     teacherId: serverSchedule.teacherId,
     subjectId: serverSchedule.subjectId,
     managerId: serverSchedule.managerId,
-    centerId: serverSchedule.centerId || undefined,
-    encryptedData: serverSchedule.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverSchedule.createdAt === "string"
@@ -45,10 +43,7 @@ const ServerActionSchedules = {
   // ✅ Save schedule to server
   async SaveToServer(schedule: Schedule) {
     try {
-      // Read the raw Dexie record to reliably get encryptedData blob
-      const rawRecord = await localDb.schedules.get(schedule.id);
-      const encryptedData = rawRecord?.encryptedData || schedule.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
+      const isRecordEncrypted = false;
 
       // Base payload with non-sensitive fields
       const basePayload = {
@@ -59,7 +54,6 @@ const ServerActionSchedules = {
         centerId: schedule.centerId || null,
         status: schedule.status,
         allowOverwrite: schedule.allowOverwrite,
-        ...(encryptedData && { encryptedData }),
       };
 
       // If encrypted, only send base payload + dummy sensitive fields

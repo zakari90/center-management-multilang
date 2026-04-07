@@ -28,7 +28,6 @@ function transformServerStudent(serverStudent: any): Student {
     parentEmail: serverStudent.parentEmail || undefined,
     grade: serverStudent.grade || undefined,
     managerId: serverStudent.managerId,
-    encryptedData: serverStudent.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverStudent.createdAt === "string"
@@ -54,11 +53,7 @@ const ServerActionStudents = {
           teacherId: ss.teacherId,
         }));
 
-      // Read the raw Dexie record to reliably get encryptedData blob
-      // (decryptEntity may have removed it from the in-memory object)
-      const rawRecord = await localDb.students.get(student.id);
-      const encryptedData = rawRecord?.encryptedData || student.encryptedData;
-      const isRecordEncrypted = !!encryptedData;
+      const isRecordEncrypted = false;
 
       // Base payload with non-sensitive fields
       const basePayload = {
@@ -66,7 +61,6 @@ const ServerActionStudents = {
         managerId: student.managerId,
         status: student.status,
         enrollments,
-        ...(encryptedData && { encryptedData }),
       };
 
       // If encrypted, only send base payload + dummy sensitive fields
@@ -316,7 +310,6 @@ const ServerActionStudents = {
                   studentId: ss.studentId,
                   subjectId: ss.subjectId,
                   teacherId: ss.teacherId,
-                  encryptedData: ss.encryptedData || undefined,
                   managerId: ss.managerId || student.managerId,
                   enrolledAt:
                     typeof ss.enrolledAt === "string"
