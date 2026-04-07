@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/authContext";
 import { localDb, Role } from "@/lib/dexie/dbSchema";
+import { initializeFreeModeEnvironment } from "@/lib/dexie/freeModeHelper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useLocale, useTranslations } from "next-intl";
@@ -18,49 +19,10 @@ export default function FreeModePage() {
   const handleStartFree = async () => {
     setIsInitializing(true);
     try {
-      // 1. Set free mode flag
-      localStorage.setItem("isFreeMode", "true");
+      // Use the newly created helper to initialize the free mode environment
+      await initializeFreeModeEnvironment(login);
       
-      // 2. Initialize the database (Dexie initializes on first access)
-      // We need to create a default center and a default admin user
-      const centerId = crypto.randomUUID();
-      const adminId = crypto.randomUUID();
-      
-      const now = Date.now();
-      
-      // Create Center
-      await localDb.centers.put({
-        id: centerId,
-        name: "My Local Center",
-        address: "Offline Mode",
-        phone: "0000000000",
-        classrooms: ["Classroom 1"],
-        workingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        managers: [],
-        adminId: adminId,
-        status: "1",
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      // Create Local Admin User
-      const adminUser = {
-        id: adminId,
-        email: "free@local.app",
-        password: "", // Not needed for free mode local access
-        name: "Local Admin",
-        role: Role.ADMIN,
-        status: "1" as const,
-        createdAt: now,
-        updatedAt: now,
-      };
-      
-      await localDb.users.put(adminUser);
-
-      // 3. Login the user
-      await login(adminUser);
-
-      // 4. Redirect to admin dashboard
+      // Redirect to admin dashboard
       window.location.href = `/${locale}/admin`;
     } catch (error) {
       console.error("Failed to initialize free mode:", error);

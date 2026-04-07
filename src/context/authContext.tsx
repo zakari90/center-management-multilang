@@ -42,6 +42,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isOfflineMode: boolean;
+  isFreeMode: boolean;
   epochMismatchPending: EpochMismatchInfo | null;
   login: (
     user: User,
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [isFreeMode, setIsFreeMode] = useState(false);
   const [epochMismatchPending, setEpochMismatchPending] =
     useState<EpochMismatchInfo | null>(null);
   const t = useTranslations("auth"); // Use 'auth' namespace
@@ -84,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check if user is authenticated on mount
   useEffect(() => {
+    setIsFreeMode(localStorage.getItem("isFreeMode") === "true");
     checkAuth();
   }, []);
 
@@ -369,6 +372,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     isAuthenticated: !!user,
     isOfflineMode,
+    isFreeMode,
     epochMismatchPending,
     login,
     loginWithCredentials,

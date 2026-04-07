@@ -9,6 +9,7 @@ import ServerActionSubjects from "./subjectServerAction";
 import ServerActionReceipts from "./receiptServerAction";
 import ServerActionSchedules from "./scheduleServerAction";
 import ServerActionDeleteRequests from "./deleteRequestServerAction";
+import { isFreeModeActive } from "./freeModeHelper";
 
 // ✅ Export all server actions for easy importing
 export {
@@ -24,6 +25,17 @@ export {
 
 // ✅ Convenience function to sync all entities
 export async function syncAllEntities() {
+  if (isFreeModeActive()) {
+    return {
+      users: { status: "fulfilled", value: { success: true, synced: 0 } },
+      centers: { status: "fulfilled", value: { success: true, synced: 0 } },
+      teachers: { status: "fulfilled", value: { success: true, synced: 0 } },
+      students: { status: "fulfilled", value: { success: true, synced: 0 } },
+      subjects: { status: "fulfilled", value: { success: true, synced: 0 } },
+      receipts: { status: "fulfilled", value: { success: true, synced: 0 } },
+      schedules: { status: "fulfilled", value: { success: true, synced: 0 } },
+    };
+  }
   const results = await Promise.allSettled([
     ServerActionUsers.Sync(),
     ServerActionCenters.Sync(),
@@ -47,6 +59,17 @@ export async function syncAllEntities() {
 
 // ✅ Convenience function to import all entities from server
 export async function importAllFromServer() {
+  if (isFreeModeActive()) {
+    return {
+      users: { status: "fulfilled", value: { success: true, imported: 0 } },
+      centers: { status: "fulfilled", value: { success: true, imported: 0 } },
+      teachers: { status: "fulfilled", value: { success: true, imported: 0 } },
+      students: { status: "fulfilled", value: { success: true, imported: 0 } },
+      subjects: { status: "fulfilled", value: { success: true, imported: 0 } },
+      receipts: { status: "fulfilled", value: { success: true, imported: 0 } },
+      schedules: { status: "fulfilled", value: { success: true, imported: 0 } },
+    };
+  }
   const results = await Promise.allSettled([
     ServerActionUsers.ImportFromServer(),
     ServerActionCenters.ImportFromServer(),

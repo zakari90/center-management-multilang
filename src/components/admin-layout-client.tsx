@@ -50,7 +50,7 @@ interface AdminLayoutClientProps {
 export default function AdminLayoutClient({
   children,
 }: AdminLayoutClientProps) {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, isFreeMode } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("AdminLayout");
@@ -186,18 +186,20 @@ export default function AdminLayoutClient({
               <Separator orientation="vertical" className="mx-1 h-4" />
             </div>
             <div className="flex items-center gap-2 px-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleSync}
-                disabled={isSyncing}
-                title={isSyncing ? "..." : "Sync Data"}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
-                />
-              </Button>
+              {!isFreeMode && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                  title={isSyncing ? "..." : "Sync Data"}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                  />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -263,13 +265,17 @@ export default function AdminLayoutClient({
                 align={isArabic ? "start" : "end"}
                 className="w-48"
               >
-                <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
-                  <RefreshCw
-                    className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
-                  />
-                  {isSyncing ? "..." : "Sync Data"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+                {!isFreeMode && (
+                  <>
+                    <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
+                      <RefreshCw
+                        className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                      />
+                      {isSyncing ? "..." : "Sync Data"}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={() =>
                     router.push(`/ar${window.location.pathname.substring(3)}`)

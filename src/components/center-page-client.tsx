@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 export default function CenterPageClient() {
   const [centerId, setCenterId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isFreeMode } = useAuth();
 
   const fetchCenterId = useCallback(async () => {
     try {
@@ -71,7 +71,7 @@ export default function CenterPageClient() {
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : centerId ? (
-        <CenterPresentation centerId={centerId} />
+        <CenterPresentation centerId={centerId} isFree={isFreeMode} />
       ) : (
         <NewCenterForm onCenterCreated={handleCenterCreated} />
       )}
