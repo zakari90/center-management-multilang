@@ -55,11 +55,13 @@ export interface TeacherSubject {
 
 interface ProgramViewProps {
   onScheduleChangeAction?: () => void;
+  isFree?: boolean;
 }
 
-export function ProgramView({ onScheduleChangeAction }: ProgramViewProps) {
+export function ProgramView({ onScheduleChangeAction, isFree = false }: ProgramViewProps) {
   const t = useTranslations("Program");
-  const { user } = useAuth();
+  const { user, isFreeMode: contextIsFree } = useAuth();
+  const isFreeMode = isFree || contextIsFree;
 
   const [isLoading, setIsLoading] = useState(true);
   const [schedules, setSchedules] = useState<ScheduleSlot[]>([]);
@@ -230,12 +232,14 @@ export function ProgramView({ onScheduleChangeAction }: ProgramViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Sync Issues Panel */}
-      <SyncIssuesPanel
-        onResolved={fetchData}
-        teachers={teachers}
-        subjects={subjects}
-      />
+      {/* Sync Issues Panel - hide in Free Mode */}
+      {!isFreeMode && (
+        <SyncIssuesPanel
+          onResolved={fetchData}
+          teachers={teachers}
+          subjects={subjects}
+        />
+      )}
 
       <Tabs defaultValue="schedule" className="w-full">
         <div className="flex justify-between items-center mb-4">
@@ -298,6 +302,7 @@ export function ProgramView({ onScheduleChangeAction }: ProgramViewProps) {
         existingSchedules={schedules}
         onSuccess={handleSuccess}
         userId={user?.id || ""}
+        isFreeMode={isFreeMode}
       />
     </div>
   );

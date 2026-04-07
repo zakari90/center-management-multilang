@@ -182,16 +182,19 @@ export default function TimetableManagement({
   refreshKey,
   onScheduleChangeAction,
   readOnly = false,
+  isFree = false,
 }: {
   centerId?: string;
   refreshKey?: number;
   onScheduleChangeAction?: () => void;
   readOnly?: boolean;
+  isFree?: boolean;
 }) {
   // Translate using the 'TimetableManagement' namespace
   const t = useTranslations("TimetableManagement");
   const { daysOfWeek } = useLocalizedConstants();
-  const { user, isLoading: authLoading } = useAuth(); // ✅ Get current user and loading state from AuthContext
+  const { user, isLoading: authLoading, isFreeMode: contextIsFree } = useAuth(); // ✅ Get current user and loading state from AuthContext
+  const isFreeMode = isFree || contextIsFree;
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
   const isManager = user?.role?.toUpperCase() === "MANAGER";
   const effectiveReadOnly = readOnly || isManager;
@@ -635,7 +638,7 @@ export default function TimetableManagement({
               {t("exportExcel") || "Export Excel"}
             </span>
           </Button>
-          {!readOnly && <EntitySyncControls entity="schedules" />}
+          {!readOnly && !isFreeMode && <EntitySyncControls entity="schedules" />}
         </div>
       </div>
 

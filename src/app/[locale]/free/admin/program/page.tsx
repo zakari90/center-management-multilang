@@ -25,8 +25,8 @@ export default function ProgramPage() {
           </p>
         </div>
       </div>
-      <TeacherScheduleView refreshKey={refreshKey} />
-      <ProgramView onScheduleChangeAction={handleScheduleChange} />
+      <TeacherScheduleView refreshKey={refreshKey} isFree={true} />
+      <ProgramView onScheduleChangeAction={handleScheduleChange} isFree={true} />
     </div>
   );
 }

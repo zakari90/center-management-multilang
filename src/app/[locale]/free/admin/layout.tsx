@@ -9,5 +9,5 @@ interface DashboardLayoutProps {
 }
 
 export default async function AdminLayout({ children }: DashboardLayoutProps) {
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return <AdminLayoutClient isFree={true}>{children}</AdminLayoutClient>;
 }

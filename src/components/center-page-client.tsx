@@ -7,10 +7,11 @@ import { centerActions } from "@/lib/dexie/dexieActions";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-export default function CenterPageClient() {
+export default function CenterPageClient({ isFree = false }: { isFree?: boolean }) {
   const [centerId, setCenterId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user, isFreeMode } = useAuth();
+  const { user, isFreeMode: contextIsFree } = useAuth();
+  const isFreeMode = isFree || contextIsFree;
 
   const fetchCenterId = useCallback(async () => {
     try {

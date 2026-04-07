@@ -86,7 +86,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check if user is authenticated on mount
   useEffect(() => {
-    setIsFreeMode(localStorage.getItem("isFreeMode") === "true");
+    // Auto-detect free mode from URL or localStorage
+    const isFreePath = window.location.pathname.includes("/free/");
+    const wasFreeMode = localStorage.getItem("isFreeMode") === "true";
+    
+    if (isFreePath && !wasFreeMode) {
+      localStorage.setItem("isFreeMode", "true");
+      setIsFreeMode(true);
+    } else {
+      setIsFreeMode(wasFreeMode);
+    }
+    
     checkAuth();
   }, []);
 

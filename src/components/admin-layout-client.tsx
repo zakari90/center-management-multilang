@@ -45,12 +45,15 @@ import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
+  isFree?: boolean;
 }
 
 export default function AdminLayoutClient({
   children,
+  isFree = false,
 }: AdminLayoutClientProps) {
-  const { user, isLoading, logout, isFreeMode } = useAuth();
+  const { user, isLoading, logout, isFreeMode: contextIsFree } = useAuth();
+  const isFreeMode = isFree || contextIsFree;
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("AdminLayout");
@@ -76,11 +79,11 @@ export default function AdminLayoutClient({
       return;
     }
 
-    if (user.role !== "ADMIN") {
+    if (!isFreeMode && user.role !== "ADMIN") {
       router.push(`/${locale}/manager`);
       return;
     }
-  }, [user, isLoading, mounted, router, locale]);
+  }, [user, isLoading, mounted, router, locale, isFreeMode]);
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -128,37 +131,38 @@ export default function AdminLayoutClient({
     role: user.role,
   };
 
-  const base = `/${locale}`;
+  const base = isFreeMode ? `/${locale}/free` : `/${locale}`;
+  const adminBase = `${base}/admin`;
 
   const navItems = [
     {
       title: t("dashboard"),
-      url: `${base}/admin`,
+      url: adminBase,
       icon: "/dashboard.svg",
     },
     {
       title: t("center"),
-      url: `${base}/admin/center`,
+      url: `${adminBase}/center`,
       icon: "/school.svg",
     },
     {
       title: t("users"),
-      url: `${base}/admin/users`,
+      url: `${adminBase}/users`,
       icon: "/manager.svg",
     },
     {
       title: t("receipts"),
-      url: `${base}/admin/receipts`,
+      url: `${adminBase}/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: `${base}/admin/schedule`,
+      url: `${adminBase}/schedule`,
       icon: "/calendar.svg",
     },
     {
       title: t("database"),
-      url: `${base}/admin/database`,
+      url: `${adminBase}/database`,
       icon: "/database.svg",
     },
   ];
@@ -224,32 +228,32 @@ export default function AdminLayoutClient({
           items={[
             {
               label: t("dashboard"),
-              href: `${base}/admin`,
+              href: adminBase,
               icon: <Home className="size-5" />,
             },
             {
               label: t("center"),
-              href: `${base}/admin/center`,
+              href: `${adminBase}/center`,
               icon: <LayoutGrid className="size-5" />,
             },
             {
               label: t("users"),
-              href: `${base}/admin/users`,
+              href: `${adminBase}/users`,
               icon: <Users className="size-5" />,
             },
             {
               label: t("receipts"),
-              href: `${base}/admin/receipts`,
+              href: `${adminBase}/receipts`,
               icon: <FileText className="size-5" />,
             },
             {
               label: t("schedule"),
-              href: `${base}/admin/schedule`,
+              href: `${adminBase}/schedule`,
               icon: <CalendarDays className="size-5" />,
             },
             {
               label: t("database"),
-              href: `${base}/admin/database`,
+              href: `${adminBase}/database`,
               icon: <Database className="size-5" />,
             },
           ]}

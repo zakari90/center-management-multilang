@@ -22,8 +22,8 @@ export default function FreeModePage() {
       // Use the newly created helper to initialize the free mode environment
       await initializeFreeModeEnvironment(login);
       
-      // Redirect to admin dashboard
-      window.location.href = `/${locale}/admin`;
+      // Redirect to dedicated free admin dashboard
+      window.location.href = `/${locale}/free/admin`;
     } catch (error) {
       console.error("Failed to initialize free mode:", error);
       setIsInitializing(false);
