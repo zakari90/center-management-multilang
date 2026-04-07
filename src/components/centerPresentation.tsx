@@ -46,12 +46,10 @@ import { useLocalizedConstants } from "./useLocalizedConstants";
 
 interface CenterPresentationProps {
   centerId: string;
-  isFree?: boolean;
 }
 
 export default function CenterPresentation({
   centerId,
-  isFree = false,
 }: CenterPresentationProps) {
   const t = useTranslations("CenterPresentation");
   const {
@@ -111,7 +109,7 @@ export default function CenterPresentation({
 
   // ✅ Auto-sync function when online
   const syncWhenOnline = useCallback(async () => {
-    if (isFree || !isOnline() || isAutoSyncing) {
+    if (!isOnline() || isAutoSyncing) {
       return;
     }
 
@@ -257,7 +255,7 @@ export default function CenterPresentation({
       await subjectActions.putLocal(newSubject);
 
       // ✅ Auto-sync to server if online
-      if (!isFree && isOnline()) {
+      if (isOnline()) {
         try {
           await ServerActionSubjects.SaveToServer(newSubject);
           await subjectActions.markSynced(subjectId);
@@ -310,7 +308,7 @@ export default function CenterPresentation({
       await subjectActions.putLocal(updatedSubject);
 
       // ✅ Auto-sync to server if online
-      if (!isFree && isOnline()) {
+      if (isOnline()) {
         try {
           await ServerActionSubjects.SaveToServer(updatedSubject);
           await subjectActions.markSynced(subjectId);

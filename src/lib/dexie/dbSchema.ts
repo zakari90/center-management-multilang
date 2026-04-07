@@ -189,8 +189,8 @@ export class AppDatabase extends Dexie {
   localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
   syncMeta!: Table<SyncMeta>; // For tracking data epochs
 
-  constructor(databaseName: string = "centerManagementDatabase") {
-    super(databaseName);
+  constructor() {
+    super("EducationAppDatabase");
 
     this.version(1).stores({
       centers: "id, status, adminId, [status+updatedAt], updatedAt",
@@ -286,16 +286,5 @@ export class AppDatabase extends Dexie {
   }
 }
 
-
-// Helper to determine which database to use
-const getDatabaseName = () => {
-  if (typeof window !== "undefined") {
-    // If we're in the browser, check for a 'free mode' flag
-    const isFree = localStorage.getItem("isFreeMode") === "true";
-    return isFree ? "freeCenterManagementDatabase" : "centerManagementDatabase";
-  }
-  return "centerManagementDatabase";
-};
-
 // Export singleton instance
-export const localDb = new AppDatabase(getDatabaseName());
+export const localDb = new AppDatabase();

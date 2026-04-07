@@ -14,7 +14,6 @@ import ServerActionUsers from "@/lib/dexie/userServerAction";
 import { generateObjectId } from "@/lib/utils/generateObjectId";
 import { isOnline } from "@/lib/utils/network";
 import { Loader2, Plus } from "lucide-react";
-import { useAuth } from "@/context/authContext";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -30,10 +29,8 @@ import { ItemToDelete, UserData, UserFormData } from "./types";
 import { useAllUsers } from "./useAllUsers";
 import { UserDialogs } from "./UserDialogs";
 
-export default function AllUsersTable({ isFree = false }: { isFree?: boolean }) {
+export default function AllUsersTable() {
   const t = useTranslations("AllUsersTable");
-  const { isFreeMode: contextIsFree } = useAuth();
-  const isFreeMode = isFree || contextIsFree;
 
   const { users, teachers, students, isLoading, refreshData } = useAllUsers(
     t("unknownManager"),
@@ -64,7 +61,7 @@ export default function AllUsersTable({ isFree = false }: { isFree?: boolean }) 
       if (itemToDelete.type === "user") {
         const id = itemToDelete.id;
         await userActions.markForDelete(id);
-        if (!isFreeMode && isOnline()) {
+        if (isOnline()) {
           try {
             await ServerActionUsers.softDeleteUser(id);
           } catch (error) {
@@ -76,7 +73,7 @@ export default function AllUsersTable({ isFree = false }: { isFree?: boolean }) 
       } else if (itemToDelete.type === "teacher") {
         const id = itemToDelete.id;
         await teacherActions.markForDelete(id);
-        if (!isFreeMode && isOnline()) {
+        if (isOnline()) {
           try {
             await ServerActionTeachers.softDeleteTeacher(id);
           } catch (error) {
@@ -88,7 +85,7 @@ export default function AllUsersTable({ isFree = false }: { isFree?: boolean }) 
       } else if (itemToDelete.type === "student") {
         const id = itemToDelete.id;
         await studentActions.markForDelete(id);
-        if (!isFreeMode && isOnline()) {
+        if (isOnline()) {
           try {
             await ServerActionStudents.softDeleteStudent(id);
           } catch (error) {
@@ -129,9 +126,11 @@ export default function AllUsersTable({ isFree = false }: { isFree?: boolean }) 
 
       await userActions.create(newUser);
 
-      if (!isFreeMode && isOnline()) {
+      if (isOnline()) {
         try {
           // createOrUpdateUser likely expects the same User type or a compatible one.
+          // If ServerActionUsers.createOrUpdateUser expects dates as strings, we might need a transformation.
+          // But based on recent conversations, we are standardizing on Dexie types.
           await ServerActionUsers.createOrUpdateUser(newUser);
           await userActions.markSynced(newUser.id);
         } catch (error) {
@@ -177,7 +176,7 @@ export default function AllUsersTable({ isFree = false }: { isFree?: boolean }) 
 
       await userActions.update(editingUser.id, userToUpdate);
 
-      if (!isFreeMode && isOnline()) {
+      if (isOnline()) {
         try {
           await ServerActionUsers.createOrUpdateUser(userToUpdate);
           await userActions.markSynced(editingUser.id);

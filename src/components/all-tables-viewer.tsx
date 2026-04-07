@@ -15,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/context/authContext";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -72,13 +71,7 @@ const HIDDEN_TABLES = new Set<string>([]);
 // Tables to exclude from export/import (admin-sensitive data)
 const EXCLUDED_TABLES = new Set(["users", "localAuthUsers", "syncMeta"]);
 
-interface AllTablesViewerProps {
-  isFree?: boolean;
-}
-
-export function AllTablesViewer({ isFree = false }: AllTablesViewerProps) {
-  const { isFreeMode: contextIsFree } = useAuth();
-  const isFreeMode = isFree || contextIsFree;
+export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
   const locale = useLocale();
   const direction = locale === "ar" ? "rtl" : "ltr";
@@ -681,13 +674,6 @@ export function AllTablesViewer({ isFree = false }: AllTablesViewerProps) {
       fetchData: () => localDb.centers.toArray(),
     },
   };
-
-  // ✅ Systematically hide sync-related columns in Free Mode
-  if (isFreeMode) {
-    Object.values(TABLE_CONFIGS).forEach((config: any) => {
-      config.columns = config.columns.filter((c: any) => c.key !== "status" && c.key !== "dataEpoch");
-    });
-  }
 
   const [selectedTable, setSelectedTable] = useState<
     keyof typeof TABLE_CONFIGS | null

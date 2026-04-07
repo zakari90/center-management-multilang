@@ -228,7 +228,6 @@ export function AdminRegistrationDialog({
             />
           </div>
 
-
           <DialogFooter>
             <Button
               type="button"

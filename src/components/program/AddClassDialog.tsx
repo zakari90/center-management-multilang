@@ -37,7 +37,6 @@ interface AddClassDialogProps {
   existingSchedules: ScheduleSlot[];
   onSuccess: () => void;
   userId: string;
-  isFreeMode?: boolean;
 }
 
 export function AddClassDialog({
@@ -50,7 +49,6 @@ export function AddClassDialog({
   existingSchedules,
   onSuccess,
   userId,
-  isFreeMode = false,
 }: AddClassDialogProps) {
   const t = useTranslations("Program");
 
@@ -157,7 +155,7 @@ export function AddClassDialog({
       await scheduleActions.putLocal(newRecord);
 
       // 4. Try immediate sync if online
-      if (!isFreeMode && isOnline()) {
+      if (isOnline()) {
         try {
           const result = await ServerActionSchedules.SaveToServer(newRecord);
           if (result?.id) {

@@ -7,11 +7,10 @@ import { centerActions } from "@/lib/dexie/dexieActions";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-export default function CenterPageClient({ isFree = false }: { isFree?: boolean }) {
+export default function CenterPageClient() {
   const [centerId, setCenterId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user, isFreeMode: contextIsFree } = useAuth();
-  const isFreeMode = isFree || contextIsFree;
+  const { user } = useAuth();
 
   const fetchCenterId = useCallback(async () => {
     try {
@@ -72,7 +71,7 @@ export default function CenterPageClient({ isFree = false }: { isFree?: boolean 
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : centerId ? (
-        <CenterPresentation centerId={centerId} isFree={isFreeMode} />
+        <CenterPresentation centerId={centerId} />
       ) : (
         <NewCenterForm onCenterCreated={handleCenterCreated} />
       )}

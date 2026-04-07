@@ -65,20 +65,24 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       description,
       date,
+      encryptedData,
     } = body;
 
-    if (!amount || amount <= 0) {
+    // If E2EE encrypted data is present, skip strict validation
+    const isEncrypted = !!encryptedData || description === "ENCRYPTED";
+
+    if (!isEncrypted && (!amount || amount <= 0)) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
 
-    if (type === "STUDENT_PAYMENT" && !studentId) {
+    if (!isEncrypted && type === "STUDENT_PAYMENT" && !studentId) {
       return NextResponse.json(
         { error: "Student ID required for student payment" },
         { status: 400 },
       );
     }
 
-    if (type === "TEACHER_PAYMENT" && !teacherId) {
+    if (!isEncrypted && type === "TEACHER_PAYMENT" && !teacherId) {
       return NextResponse.json(
         { error: "Teacher ID required for teacher payment" },
         { status: 400 },
@@ -97,6 +101,7 @@ export async function POST(req: NextRequest) {
         studentId: studentId || null,
         teacherId: teacherId || null,
         managerId: session.user.id,
+        ...(isEncrypted && encryptedData && { encryptedData }),
       },
       include: {
         student: true,

@@ -28,6 +28,7 @@ function transformServerTeacher(serverTeacher: any): Teacher {
     overrideConflicts: serverTeacher.overrideConflicts || false,
     managerId: serverTeacher.managerId,
 
+    encryptedData: serverTeacher.encryptedData || undefined,
     status: "1" as const,
     createdAt:
       typeof serverTeacher.createdAt === "string"
@@ -53,13 +54,14 @@ const ServerActionTeachers = {
           hourlyRate: ts.hourlyRate ?? null,
         }));
 
-      // Base payload with teacher fields
-      const requestBody = {
+      // Read the raw Dexie record to reliably get encryptedData blob
+      const rawRecord = await localDb.teachers.get(teacher.id);
+      const encryptedData = rawRecord?.encryptedData || teacher.encryptedData;
+      const isRecordEncrypted = !!encryptedData;
+
+      // Base payload with non-sensitive fields
+      const basePayload = {
         id: teacher.id,
-        name: teacher.name,
-        email: teacher.email,
-        phone: teacher.phone,
-        address: teacher.address,
         managerId: teacher.managerId,
         status: teacher.status,
         subjects,
@@ -69,7 +71,26 @@ const ServerActionTeachers = {
             : Object.values(teacher.weeklySchedule)
           : [],
         overrideConflicts: teacher.overrideConflicts || false,
+        ...(encryptedData && { encryptedData }),
       };
+
+
+      // If encrypted, only send base payload + dummy sensitive fields
+      const requestBody = isRecordEncrypted
+        ? {
+            ...basePayload,
+            name: "ENCRYPTED",
+            email: teacher.email ? "ENCRYPTED" : undefined,
+            phone: teacher.phone ? "ENCRYPTED" : undefined,
+            address: teacher.address ? "ENCRYPTED" : undefined,
+          }
+        : {
+            ...basePayload,
+            name: teacher.name,
+            email: teacher.email,
+            phone: teacher.phone,
+            address: teacher.address,
+          };
 
       // Try POST first (create)
       let response = await fetch(api_url, {
@@ -179,6 +200,9 @@ const ServerActionTeachers = {
                 }),
                 ...(result.weeklySchedule && {
                   weeklySchedule: result.weeklySchedule,
+                }),
+                ...(result.encryptedData !== undefined && {
+                  encryptedData: result.encryptedData,
                 }),
                 status: "1" as const,
                 updatedAt: Date.now(),
@@ -291,6 +315,7 @@ const ServerActionTeachers = {
                   subjectId: ts.subjectId,
                   percentage: ts.percentage ?? null,
                   hourlyRate: ts.hourlyRate ?? null,
+                  encryptedData: ts.encryptedData || undefined,
                   assignedAt:
                     typeof ts.assignedAt === "string"
                       ? new Date(ts.assignedAt).getTime()

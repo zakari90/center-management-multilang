@@ -691,17 +691,14 @@ export default function TeacherScheduleView({
   centerId,
   refreshKey,
   readOnly = false,
-  isFree = false,
 }: {
   centerId?: string;
   refreshKey?: number;
   readOnly?: boolean;
-  isFree?: boolean;
 }) {
   const t = useTranslations("TeacherScheduleView");
   const tCommon = useTranslations("Common");
-  const { user, isLoading: authLoading, isFreeMode: contextIsFree } = useAuth();
-  const isFreeMode = isFree || contextIsFree;
+  const { user, isLoading: authLoading } = useAuth();
   const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");

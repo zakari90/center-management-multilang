@@ -83,10 +83,9 @@ interface Receipt {
   };
 }
 
-export default function AdminReceiptsTable({ isFree = false }: { isFree?: boolean }) {
+export default function AdminReceiptsTable() {
   const t = useTranslations("AdminReceiptsTable");
-  const { user, isFreeMode: contextIsFree } = useAuth();
-  const isFreeMode = isFree || contextIsFree;
+  const { user } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");

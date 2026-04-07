@@ -45,15 +45,12 @@ import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
-  isFree?: boolean;
 }
 
 export default function AdminLayoutClient({
   children,
-  isFree = false,
 }: AdminLayoutClientProps) {
-  const { user, isLoading, logout, isFreeMode: contextIsFree } = useAuth();
-  const isFreeMode = isFree || contextIsFree;
+  const { user, isLoading, logout } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("AdminLayout");
@@ -79,11 +76,11 @@ export default function AdminLayoutClient({
       return;
     }
 
-    if (!isFreeMode && user.role !== "ADMIN") {
+    if (user.role !== "ADMIN") {
       router.push(`/${locale}/manager`);
       return;
     }
-  }, [user, isLoading, mounted, router, locale, isFreeMode]);
+  }, [user, isLoading, mounted, router, locale]);
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -131,38 +128,37 @@ export default function AdminLayoutClient({
     role: user.role,
   };
 
-  const base = isFreeMode ? `/${locale}/free` : `/${locale}`;
-  const adminBase = `${base}/admin`;
+  const base = `/${locale}`;
 
   const navItems = [
     {
       title: t("dashboard"),
-      url: adminBase,
+      url: `${base}/admin`,
       icon: "/dashboard.svg",
     },
     {
       title: t("center"),
-      url: `${adminBase}/center`,
+      url: `${base}/admin/center`,
       icon: "/school.svg",
     },
     {
       title: t("users"),
-      url: `${adminBase}/users`,
+      url: `${base}/admin/users`,
       icon: "/manager.svg",
     },
     {
       title: t("receipts"),
-      url: `${adminBase}/receipts`,
+      url: `${base}/admin/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: `${adminBase}/schedule`,
+      url: `${base}/admin/schedule`,
       icon: "/calendar.svg",
     },
     {
       title: t("database"),
-      url: `${adminBase}/database`,
+      url: `${base}/admin/database`,
       icon: "/database.svg",
     },
   ];
@@ -190,20 +186,18 @@ export default function AdminLayoutClient({
               <Separator orientation="vertical" className="mx-1 h-4" />
             </div>
             <div className="flex items-center gap-2 px-2">
-              {!isFreeMode && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={handleSync}
-                  disabled={isSyncing}
-                  title={isSyncing ? "..." : "Sync Data"}
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
-                  />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleSync}
+                disabled={isSyncing}
+                title={isSyncing ? "..." : "Sync Data"}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -228,32 +222,32 @@ export default function AdminLayoutClient({
           items={[
             {
               label: t("dashboard"),
-              href: adminBase,
+              href: `${base}/admin`,
               icon: <Home className="size-5" />,
             },
             {
               label: t("center"),
-              href: `${adminBase}/center`,
+              href: `${base}/admin/center`,
               icon: <LayoutGrid className="size-5" />,
             },
             {
               label: t("users"),
-              href: `${adminBase}/users`,
+              href: `${base}/admin/users`,
               icon: <Users className="size-5" />,
             },
             {
               label: t("receipts"),
-              href: `${adminBase}/receipts`,
+              href: `${base}/admin/receipts`,
               icon: <FileText className="size-5" />,
             },
             {
               label: t("schedule"),
-              href: `${adminBase}/schedule`,
+              href: `${base}/admin/schedule`,
               icon: <CalendarDays className="size-5" />,
             },
             {
               label: t("database"),
-              href: `${adminBase}/database`,
+              href: `${base}/admin/database`,
               icon: <Database className="size-5" />,
             },
           ]}
@@ -269,17 +263,13 @@ export default function AdminLayoutClient({
                 align={isArabic ? "start" : "end"}
                 className="w-48"
               >
-                {!isFreeMode && (
-                  <>
-                    <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
-                      <RefreshCw
-                        className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
-                      />
-                      {isSyncing ? "..." : "Sync Data"}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
+                <DropdownMenuItem onClick={handleSync} disabled={isSyncing}>
+                  <RefreshCw
+                    className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                  />
+                  {isSyncing ? "..." : "Sync Data"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() =>
                     router.push(`/ar${window.location.pathname.substring(3)}`)

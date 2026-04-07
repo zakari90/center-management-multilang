@@ -42,11 +42,9 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isOfflineMode: boolean;
-  isFreeMode: boolean;
   epochMismatchPending: EpochMismatchInfo | null;
   login: (
     user: User,
-    rawPassword?: string,
     passwordHash?: string,
     dataEpoch?: string,
   ) => Promise<void>;
@@ -68,7 +66,6 @@ interface EpochMismatchInfo {
   pendingChangesCount: number;
   serverEpoch: string;
   userData: User;
-  rawPassword?: string;
   passwordHash?: string;
 }
 
@@ -78,7 +75,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
-  const [isFreeMode, setIsFreeMode] = useState(false);
   const [epochMismatchPending, setEpochMismatchPending] =
     useState<EpochMismatchInfo | null>(null);
   const t = useTranslations("auth"); // Use 'auth' namespace
@@ -86,17 +82,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check if user is authenticated on mount
   useEffect(() => {
-    // Auto-detect free mode from URL or localStorage
-    const isFreePath = window.location.pathname.includes("/free/");
-    const wasFreeMode = localStorage.getItem("isFreeMode") === "true";
-    
-    if (isFreePath && !wasFreeMode) {
-      localStorage.setItem("isFreeMode", "true");
-      setIsFreeMode(true);
-    } else {
-      setIsFreeMode(wasFreeMode);
-    }
-    
     checkAuth();
   }, []);
 
@@ -175,7 +160,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (
       userData: User,
-      rawPassword?: string,
       passwordHash?: string,
       dataEpoch?: string,
     ) => {
@@ -192,7 +176,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             pendingChangesCount: total,
             serverEpoch: dataEpoch,
             userData,
-            rawPassword,
             passwordHash,
           });
 
@@ -227,7 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const confirmEpochReset = useCallback(async () => {
     if (!epochMismatchPending) return;
 
-    const { userData, rawPassword, passwordHash, serverEpoch } =
+    const { userData, passwordHash, serverEpoch } =
       epochMismatchPending;
 
     // Clear all local entity data
@@ -239,7 +222,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear pending state
     setEpochMismatchPending(null);
 
-    // Complete login
     setUser(userData);
     setIsOfflineMode(false);
 
@@ -286,7 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const passwordHash = result.data.passwordHash;
             const dataEpoch = result.data.dataEpoch;
 
-            await login(userData, password, passwordHash, dataEpoch);
+            await login(userData, passwordHash, dataEpoch);
             options.onSuccess?.(userData, false);
             return true;
           }
@@ -325,16 +307,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     options: LoginWithServerOptions,
   ): Promise<boolean> => {
-    // We need to get translations here too, but this function is in a hook, so we can't easily use async getClientTranslations inside it
-    // if it wasn't already passed down.
-    // However, this is inside AuthContext, so we can use useTranslations?
-    // Wait, AuthContext is a client component ('use client').
-    // But getClientTranslations is for async actions.
-    // Inside a component we should use useTranslations from next-intl.
-
-    // Let's check imports in AuthContext.
-    // It doesn't import useTranslations. Let's add it.
-
     const hasCredentials = await hasLocalCredentials(email);
 
     if (!hasCredentials) {
@@ -382,7 +354,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     isAuthenticated: !!user,
     isOfflineMode,
-    isFreeMode,
     epochMismatchPending,
     login,
     loginWithCredentials,

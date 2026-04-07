@@ -271,7 +271,7 @@ export default function AddStudentPaymentDialog({
   trigger,
 }: AddStudentPaymentDialogProps) {
   const t = useTranslations("CreateStudentPaymentForm");
-  const { user, isFreeMode } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -556,7 +556,7 @@ export default function AddStudentPaymentDialog({
           updatedAt: now,
         };
         await receiptActions.putLocal(newReceipt);
-        if (!isFreeMode && isOnline()) {
+        if (isOnline()) {
           try {
             const result = await ServerActionReceipts.SaveToServer(
               newReceipt as any,

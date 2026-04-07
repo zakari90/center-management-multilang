@@ -130,7 +130,7 @@ export default function AddTeacherPaymentDialog({
   trigger,
 }: AddTeacherPaymentDialogProps) {
   const t = useTranslations("TeacherPayment");
-  const { user, isFreeMode } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -381,7 +381,7 @@ export default function AddTeacherPaymentDialog({
         updatedAt: now,
       };
       await receiptActions.putLocal(newReceipt);
-      if (!isFreeMode && isOnline()) {
+      if (isOnline()) {
         try {
           const result = await ServerActionReceipts.SaveToServer(
             newReceipt as any,
