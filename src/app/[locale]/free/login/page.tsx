@@ -11,7 +11,7 @@ export default function LoginPage() {
       <OfflineNotificationBanner />
 
       <div className="w-full lg:max-w-sm">
-        <LoginForm />
+        <LoginForm isFree={true} />
       </div>
     </div>
   );

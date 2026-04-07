@@ -4,10 +4,17 @@ import { useAuth } from "@/context/authContext";
 import { localDb, Role } from "@/lib/dexie/dbSchema";
 import { initializeFreeModeEnvironment } from "@/lib/dexie/freeModeHelper";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Loader2, Rocket, ShieldCheck, Zap } from "lucide-react";
+import Link from "next/link";
 // import { cn } from "@/lib/utils";
 
 export default function FreeModePage() {
@@ -21,7 +28,7 @@ export default function FreeModePage() {
     try {
       // Use the newly created helper to initialize the free mode environment
       await initializeFreeModeEnvironment(login);
-      
+
       // Redirect to dedicated free admin dashboard
       window.location.href = `/${locale}/free/admin`;
     } catch (error) {
@@ -41,51 +48,63 @@ export default function FreeModePage() {
             </div>
             <div className="space-y-2">
               <CardTitle className="text-3xl font-bold tracking-tight">
-                {locale === 'ar' ? 'البدء مجاناً' : 'Get Started for Free'}
+                {locale === "ar" ? "البدء مجاناً" : "Get Started for Free"}
               </CardTitle>
               <CardDescription className="text-base text-slate-600 dark:text-slate-400">
-                {locale === 'ar' 
-                  ? 'استخدم جميع المميزات محلياً دون الحاجة لحساب.' 
-                  : 'Use all features locally without needing a server account.'}
+                {locale === "ar"
+                  ? "استخدم جميع المميزات محلياً دون الحاجة لحساب."
+                  : "Use all features locally without needing a server account."}
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-8 px-8 pb-10">
             <div className="grid gap-4">
-              <FeatureItem 
+              <FeatureItem
                 icon={<Zap className="w-5 h-5 text-amber-500" />}
-                title={locale === 'ar' ? 'دخول فوري' : 'Instant Access'}
-                desc={locale === 'ar' ? 'لا حاجة للتسجيل أو الإنترنت.' : 'No registration or internet required.'}
+                title={locale === "ar" ? "دخول فوري" : "Instant Access"}
+                desc={
+                  locale === "ar"
+                    ? "لا حاجة للتسجيل أو الإنترنت."
+                    : "No registration or internet required."
+                }
               />
-              <FeatureItem 
+              <FeatureItem
                 icon={<ShieldCheck className="w-5 h-5 text-emerald-500" />}
-                title={locale === 'ar' ? 'خصوصية تامة' : 'Total Privacy'}
-                desc={locale === 'ar' ? 'بياناتك محفوظة فقط على جهازك.' : 'Your data stays only on your device.'}
+                title={locale === "ar" ? "خصوصية تامة" : "Total Privacy"}
+                desc={
+                  locale === "ar"
+                    ? "بياناتك محفوظة فقط على جهازك."
+                    : "Your data stays only on your device."
+                }
               />
             </div>
 
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="w-full h-14 text-lg font-semibold shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 text-white"
               onClick={handleStartFree}
               disabled={isInitializing}
             >
-              {isInitializing ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {locale === 'ar' ? 'جاري التحضير...' : 'Initializing...'}
-                </>
-              ) : (
-                <>
-                  {locale === 'ar' ? 'إنشاء مركز محلي' : 'Create Local Center'}
-                </>
-              )}
+              <Link href={`/${locale}/free/login`}>
+                {isInitializing ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    {locale === "ar" ? "جاري التحضير..." : "Initializing..."}
+                  </>
+                ) : (
+                  <>
+                    {locale === "ar"
+                      ? "إنشاء مركز محلي"
+                      : "Create Local Center"}
+                  </>
+                )}
+              </Link>
             </Button>
 
             <p className="text-center text-xs text-muted-foreground italic">
-              {locale === 'ar' 
-                ? 'يمكنك دائماً الترقية للحصول على المزامنة السحابية لاحقاً.' 
-                : 'You can always upgrade to cloud sync later.'}
+              {locale === "ar"
+                ? "يمكنك دائماً الترقية للحصول على المزامنة السحابية لاحقاً."
+                : "You can always upgrade to cloud sync later."}
             </p>
           </CardContent>
         </Card>
@@ -94,13 +113,23 @@ export default function FreeModePage() {
   );
 }
 
-function FeatureItem({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+function FeatureItem({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) {
   return (
     <div className="flex gap-4 p-4 rounded-xl border border-border/50 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
       <div className="shrink-0 pt-0.5">{icon}</div>
       <div className="space-y-1 text-slate-800 dark:text-slate-200">
         <h4 className="font-semibold text-sm leading-none">{title}</h4>
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed pt-1">{desc}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed pt-1">
+          {desc}
+        </p>
       </div>
     </div>
   );
