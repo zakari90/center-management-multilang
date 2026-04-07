@@ -61,12 +61,13 @@ const ServerActionCenters = {
           updatedAt: new Date(s.updatedAt).toISOString(),
         }));
 
+      // Base payload with center fields
       const requestBody = {
         id: center.id,
-        adminId: center.adminId,
         name: center.name,
         address: center.address,
         phone: center.phone,
+        adminId: center.adminId,
         status: center.status,
         paymentEndDay: center.paymentEndDay,
         classrooms: center.classrooms || [],

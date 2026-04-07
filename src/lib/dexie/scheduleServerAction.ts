@@ -27,6 +27,7 @@ function transformServerSchedule(serverSchedule: any): Schedule {
     teacherId: serverSchedule.teacherId,
     subjectId: serverSchedule.subjectId,
     managerId: serverSchedule.managerId,
+    centerId: serverSchedule.centerId || undefined,
     status: "1" as const,
     createdAt:
       typeof serverSchedule.createdAt === "string"
@@ -43,11 +44,13 @@ const ServerActionSchedules = {
   // ✅ Save schedule to server
   async SaveToServer(schedule: Schedule) {
     try {
-      const isRecordEncrypted = false;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      // Base payload with schedule fields
+      const requestBody = {
         id: schedule.id,
+        day: schedule.day,
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
+        roomId: schedule.roomId,
         teacherId: schedule.teacherId,
         subjectId: schedule.subjectId,
         managerId: schedule.managerId,
@@ -55,23 +58,6 @@ const ServerActionSchedules = {
         status: schedule.status,
         allowOverwrite: schedule.allowOverwrite,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            day: "ENCRYPTED",
-            startTime: "ENCRYPTED",
-            endTime: "ENCRYPTED",
-            roomId: "ENCRYPTED",
-          }
-        : {
-            ...basePayload,
-            day: schedule.day,
-            startTime: schedule.startTime,
-            endTime: schedule.endTime,
-            roomId: schedule.roomId,
-          };
 
       const response = await fetch(api_url, {
         method: "POST",

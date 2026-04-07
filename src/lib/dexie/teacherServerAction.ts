@@ -53,11 +53,13 @@ const ServerActionTeachers = {
           hourlyRate: ts.hourlyRate ?? null,
         }));
 
-      const isRecordEncrypted = false;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      // Base payload with teacher fields
+      const requestBody = {
         id: teacher.id,
+        name: teacher.name,
+        email: teacher.email,
+        phone: teacher.phone,
+        address: teacher.address,
         managerId: teacher.managerId,
         status: teacher.status,
         subjects,
@@ -68,24 +70,6 @@ const ServerActionTeachers = {
           : [],
         overrideConflicts: teacher.overrideConflicts || false,
       };
-
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            name: "ENCRYPTED",
-            email: teacher.email ? "ENCRYPTED" : undefined,
-            phone: teacher.phone ? "ENCRYPTED" : undefined,
-            address: teacher.address ? "ENCRYPTED" : undefined,
-          }
-        : {
-            ...basePayload,
-            name: teacher.name,
-            email: teacher.email,
-            phone: teacher.phone,
-            address: teacher.address,
-          };
 
       // Try POST first (create)
       let response = await fetch(api_url, {

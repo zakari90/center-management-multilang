@@ -41,29 +41,16 @@ const ServerActionSubjects = {
   // ✅ Save subject to server (handles both create and update)
   async SaveToServer(subject: Subject) {
     try {
-      const isRecordEncrypted = false;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      // Base payload with subject fields
+      const requestBody = {
         id: subject.id,
+        name: subject.name,
+        grade: subject.grade,
         centerId: subject.centerId,
         price: subject.price,
         duration: subject.duration,
         status: subject.status,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            name: "ENCRYPTED",
-            grade: "ENCRYPTED",
-          }
-        : {
-            ...basePayload,
-            name: subject.name,
-            grade: subject.grade,
-          };
 
       // Try POST first (create)
       let response = await fetch(api_url, {

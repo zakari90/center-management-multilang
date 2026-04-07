@@ -37,6 +37,7 @@ type Role = "admin" | "manager";
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
   initialRole?: Role;
+  isFree?: boolean;
 }
 
 // Type guard to check if state is an error
@@ -51,6 +52,7 @@ function isErrorState(
 
 export function LoginForm({
   className,
+  isFree = false,
   initialRole = "admin",
   ...props
 }: LoginFormProps) {

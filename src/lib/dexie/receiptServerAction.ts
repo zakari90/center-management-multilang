@@ -53,10 +53,8 @@ const ServerActionReceipts = {
   // ✅ Save receipt to server using direct amount (no subjectIds lookup needed)
   async SaveToServer(receipt: Receipt) {
     try {
-      const isRecordEncrypted = false;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      // Base payload with receipt fields
+      const requestBody = {
         id: receipt.id,
         receiptNumber: receipt.receiptNumber,
         type: receipt.type,
@@ -65,22 +63,10 @@ const ServerActionReceipts = {
         managerId: receipt.managerId,
         status: receipt.status,
         date: new Date(receipt.date).toISOString().split("T")[0],
+        amount: receipt.amount,
+        paymentMethod: receipt.paymentMethod,
+        description: receipt.description,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            amount: 0,
-            paymentMethod: receipt.paymentMethod ? "ENCRYPTED" : undefined,
-            description: receipt.description ? "ENCRYPTED" : undefined,
-          }
-        : {
-            ...basePayload,
-            amount: receipt.amount,
-            paymentMethod: receipt.paymentMethod,
-            description: receipt.description,
-          };
 
       const response = await fetch(api_url, {
         method: "POST",

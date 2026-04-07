@@ -53,39 +53,20 @@ const ServerActionStudents = {
           teacherId: ss.teacherId,
         }));
 
-      const isRecordEncrypted = false;
-
-      // Base payload with non-sensitive fields
-      const basePayload = {
+      // Base payload with student fields
+      const requestBody = {
         id: student.id,
+        name: student.name,
+        email: student.email,
+        phone: student.phone,
+        parentName: student.parentName,
+        parentPhone: student.parentPhone,
+        parentEmail: student.parentEmail,
+        grade: student.grade,
         managerId: student.managerId,
         status: student.status,
         enrollments,
       };
-
-      // If encrypted, only send base payload + dummy sensitive fields
-      // If NOT encrypted, send the full student object
-      const requestBody = isRecordEncrypted
-        ? {
-            ...basePayload,
-            name: "ENCRYPTED",
-            email: student.email ? "ENCRYPTED" : undefined,
-            phone: student.phone ? "ENCRYPTED" : undefined,
-            parentName: student.parentName ? "ENCRYPTED" : undefined,
-            parentPhone: student.parentPhone ? "ENCRYPTED" : undefined,
-            parentEmail: student.parentEmail ? "ENCRYPTED" : undefined,
-            grade: student.grade ? "ENCRYPTED" : undefined,
-          }
-        : {
-            ...basePayload,
-            name: student.name,
-            email: student.email,
-            phone: student.phone,
-            parentName: student.parentName,
-            parentPhone: student.parentPhone,
-            parentEmail: student.parentEmail,
-            grade: student.grade,
-          };
 
       // Try POST first (create)
       let response = await fetch(api_url, {
