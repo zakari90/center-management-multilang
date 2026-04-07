@@ -25,14 +25,10 @@ export async function POST(req: NextRequest) {
       weeklySchedule,
       subjects,
       overrideConflicts,
-      encryptedData,
     } = body;
 
 
-    // If E2EE encrypted data is present, skip strict validation
-    const isEncrypted = !!encryptedData || name === "ENCRYPTED";
-
-    if (!name && !isEncrypted) {
+    if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
@@ -82,8 +78,6 @@ export async function POST(req: NextRequest) {
           weeklySchedule: scheduleArray, // Pass array directly
           overrideConflicts: overrideConflicts === true,
           managerId: session.user.id,
-
-          ...(isEncrypted && encryptedData && { encryptedData }),
         },
       });
 

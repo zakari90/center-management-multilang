@@ -14,11 +14,6 @@ import {
 } from "@/lib/offlineAuth";
 import { useTranslations } from "next-intl";
 import { isOnline } from "@/lib/utils/network";
-import {
-  deriveKey,
-  setGlobalCryptoKey,
-  getGlobalCryptoKey,
-} from "@/lib/utils/crypto";
 import { localDb } from "@/lib/dexie/dbSchema";
 import {
   checkEpochMismatch,
@@ -32,8 +27,6 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  isEncrypted?: boolean;
-  encryptionSalt?: string;
 }
 
 const LAST_USER_KEY = "last-auth-user";
@@ -50,7 +43,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isOfflineMode: boolean;
   epochMismatchPending: EpochMismatchInfo | null;
-  encryptionKey: CryptoKey | null;
   login: (
     user: User,
     rawPassword?: string,
@@ -85,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
-  const [encryptionKey, setEncryptionKey] = useState<CryptoKey | null>(null);
   const [epochMismatchPending, setEpochMismatchPending] =
     useState<EpochMismatchInfo | null>(null);
   const t = useTranslations("auth"); // Use 'auth' namespace
@@ -99,8 +90,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     // Client-side logout - keep local credentials for future offline login
     setUser(null);
-    setEncryptionKey(null);
-    setGlobalCryptoKey(null, false);
     setIsOfflineMode(false);
     try {
       localStorage.removeItem(LAST_USER_KEY);
@@ -152,16 +141,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             setUser(maybeUser);
-
-            // Check if user should be encrypted but key is missing
-            const { isEncrypted } = getGlobalCryptoKey();
-            if (maybeUser.isEncrypted && !isEncrypted) {
-              console.warn(
-                "User is encrypted but E2EE key is missing (likely page refresh).",
-              );
-              // We could potentially trigger a re-auth dialog here if we had the UI
-            }
-
             return;
           }
         }
@@ -212,16 +191,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await updateSyncMeta(userData.id, dataEpoch);
       }
 
-      if (userData.isEncrypted && rawPassword && userData.encryptionSalt) {
-        try {
-          const key = await deriveKey(rawPassword, userData.encryptionSalt);
-          setEncryptionKey(key);
-          setGlobalCryptoKey(key, true);
-        } catch (e) {
-          console.error("Failed to derive encryption key:", e);
-        }
-      }
-
       setUser(userData);
       setIsOfflineMode(false);
 
@@ -258,15 +227,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setEpochMismatchPending(null);
 
     // Complete login
-    if (userData.isEncrypted && rawPassword && userData.encryptionSalt) {
-      try {
-        const key = await deriveKey(rawPassword, userData.encryptionSalt);
-        setEncryptionKey(key);
-        setGlobalCryptoKey(key, true);
-      } catch (e) {
-        console.error("Failed to derive encryption key on reset:", e);
-      }
-    }
     setUser(userData);
     setIsOfflineMode(false);
 
@@ -374,16 +334,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (result.success && result.user) {
       const userData = result.user as User;
 
-      if (userData.isEncrypted && password && userData.encryptionSalt) {
-        try {
-          const key = await deriveKey(password, userData.encryptionSalt);
-          setEncryptionKey(key);
-          setGlobalCryptoKey(key, true);
-        } catch (e) {
-          console.error("Failed to derive offline encryption key:", e);
-        }
-      }
-
       setUser(userData);
       setIsOfflineMode(true);
 
@@ -420,7 +370,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     isOfflineMode,
     epochMismatchPending,
-    encryptionKey,
     login,
     loginWithCredentials,
     logout,

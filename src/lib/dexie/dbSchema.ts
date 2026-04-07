@@ -29,7 +29,6 @@ export interface SyncEntity {
   status: SyncStatus;
   createdAt: number;
   updatedAt: number;
-  encryptedData?: string;
 }
 
 // Entity Interfaces
@@ -162,8 +161,6 @@ export interface LocalAuthUser {
   passwordHash: string; // bcrypt hash (same as server)
   name: string;
   role: Role;
-  isEncrypted: boolean;
-  encryptionSalt?: string;
   lastOnlineLogin: number; // Timestamp of last successful online login
   createdAt: number;
   updatedAt: number;
@@ -192,8 +189,8 @@ export class AppDatabase extends Dexie {
   localAuthUsers!: Table<LocalAuthUser>; // For offline authentication
   syncMeta!: Table<SyncMeta>; // For tracking data epochs
 
-  constructor(dbName: string = "EducationAppDatabase") {
-    super(dbName);
+  constructor() {
+    super("EducationAppDatabase");
 
     this.version(1).stores({
       centers: "id, status, adminId, [status+updatedAt], updatedAt",
@@ -234,7 +231,7 @@ export class AppDatabase extends Dexie {
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
 
       localAuthUsers:
-        "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
+        "id, &email, role, lastOnlineLogin, updatedAt",
     });
 
     // Version 3: Add syncMeta table for tracking data epochs
@@ -257,7 +254,7 @@ export class AppDatabase extends Dexie {
         "id, status, teacherId, subjectId, managerId, centerId, day, [centerId+day], [teacherId+day], [subjectId+day], [managerId+centerId], [status+updatedAt], updatedAt",
 
       localAuthUsers:
-        "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
+        "id, &email, role, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",
     });
 
@@ -283,7 +280,7 @@ export class AppDatabase extends Dexie {
       deleteRequests:
         "id, status, entityType, entityId, requestStatus, requestedBy, [requestedBy+requestStatus], [status+updatedAt], updatedAt",
       localAuthUsers:
-        "id, &email, role, isEncrypted, lastOnlineLogin, updatedAt",
+        "id, &email, role, lastOnlineLogin, updatedAt",
       syncMeta: "id, userId, dataEpoch",
     });
   }
@@ -291,5 +288,3 @@ export class AppDatabase extends Dexie {
 
 // Export singleton instance
 export const localDb = new AppDatabase();
-// Export isolated Free tier database
-export const freeLocalDb = new AppDatabase("FreeEducationAppDatabase");

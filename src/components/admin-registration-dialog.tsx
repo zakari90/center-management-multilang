@@ -33,7 +33,6 @@ export function AdminRegistrationDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [isEncrypted, setIsEncrypted] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -78,7 +77,6 @@ export function AdminRegistrationDialog({
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          isEncrypted,
           locale,
         }),
       });
@@ -99,7 +97,6 @@ export function AdminRegistrationDialog({
         password: "",
         confirmPassword: "",
       });
-      setIsEncrypted(false);
 
       // Close dialog after a short delay
       setTimeout(() => {
@@ -127,7 +124,6 @@ export function AdminRegistrationDialog({
         password: "",
         confirmPassword: "",
       });
-      setIsEncrypted(false);
       setError(null);
       setSuccess(false);
       onOpenChange(false);
@@ -232,52 +228,6 @@ export function AdminRegistrationDialog({
             />
           </div>
 
-          {/* Encryption Toggle - Temporarily Disabled 
-          <div className="space-y-3 rounded-lg border p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <Label className="text-base text-destructive">
-                  {t("e2eeTitle")}
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  {t("e2eeDescription")}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center space-x-4 rtl:space-x-reverse">
-                <label className="flex cursor-pointer items-center gap-1.5 text-sm font-medium">
-                  <input
-                    type="radio"
-                    name="encryption_mode"
-                    className="h-4 w-4 cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-                    checked={!isEncrypted}
-                    onChange={() => setIsEncrypted(false)}
-                    disabled={isSubmitting || success}
-                  />
-                  <span>{t("e2eeNo")}</span>
-                </label>
-                <label className="flex cursor-pointer items-center gap-1.5 text-sm font-medium text-destructive">
-                  <input
-                    type="radio"
-                    name="encryption_mode"
-                    className="h-4 w-4 cursor-pointer accent-destructive disabled:cursor-not-allowed disabled:opacity-50"
-                    checked={isEncrypted}
-                    onChange={() => setIsEncrypted(true)}
-                    disabled={isSubmitting || success}
-                  />
-                  <span>{t("e2eeYes")}</span>
-                </label>
-              </div>
-            </div>
-            {isEncrypted && (
-              <Alert variant="destructive" className="mt-2 py-2">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                <AlertDescription className="ml-2 text-xs font-semibold leading-relaxed">
-                  {t("e2eeWarning")}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-          */}
 
           <DialogFooter>
             <Button

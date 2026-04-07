@@ -2,7 +2,6 @@ import db from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { getTranslations } from "next-intl/server";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 
 /**
  * POST /api/admin/register-admin
@@ -15,7 +14,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     if (body.locale) locale = body.locale;
 
-    const { name, email, password, isEncrypted } = body;
+    const { name, email, password } = body;
 
     const t = await getTranslations({
       locale,
@@ -75,10 +74,6 @@ export async function POST(request: Request) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate salt if encryption is enabled
-    const encryptionSalt = isEncrypted
-      ? crypto.randomBytes(16).toString("base64")
-      : null;
 
     // Create the admin user
     const admin = await db.user.create({
@@ -87,8 +82,6 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         role: "ADMIN",
-        isEncrypted: !!isEncrypted,
-        encryptionSalt,
       },
     });
 

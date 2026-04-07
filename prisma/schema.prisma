@@ -63,7 +63,6 @@ model Center {
   adminId       String     
   schedules     Schedule[]
   subjects      Subject[]
-  encryptedData String?
 }
 
 
@@ -74,8 +73,6 @@ model User {
   name                String
   role                Role
   dataEpoch           String             @default("1")  // Incremented on data reset by admin
-  isEncrypted         Boolean            @default(false)
-  encryptionSalt      String?
 
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
@@ -107,7 +104,6 @@ model Teacher {
   teacherSubjects  TeacherSubject[]
   studentSubjects  StudentSubject[]   @relation("StudentTeacher")
   receipts         Receipt[]
-  encryptedData    String?
 }
 
 model Student {
@@ -126,7 +122,6 @@ model Student {
   managerId        String             @db.ObjectId
   studentSubjects  StudentSubject[]
   receipts         Receipt[]
-  encryptedData    String?
 }
 
 model Subject {
@@ -143,7 +138,6 @@ model Subject {
   schedules        Schedule[]
   teacherSubjects  TeacherSubject[]
   studentSubjects  StudentSubject[]
-  encryptedData    String?
 }
 
 model TeacherSubject {
@@ -156,7 +150,6 @@ model TeacherSubject {
   teacherId        String             @db.ObjectId
   subject          Subject            @relation(fields: [subjectId], references: [id])
   subjectId        String             @db.ObjectId
-  encryptedData    String?
 }
 
 model StudentSubject {
@@ -169,7 +162,6 @@ model StudentSubject {
   subjectId        String             @db.ObjectId
   teacher          Teacher            @relation("StudentTeacher", fields: [teacherId], references: [id])
   teacherId        String             @db.ObjectId
-  encryptedData    String?
 }
 
 model Receipt {
@@ -190,7 +182,6 @@ model Receipt {
 
   manager          User               @relation("UserManagedReceipts", fields: [managerId], references: [id])
   managerId        String             @db.ObjectId
-  encryptedData    String?
 }
 
 model Schedule {
@@ -213,7 +204,6 @@ model Schedule {
 
   center           Center?            @relation(fields: [centerId], references: [id])
   centerId         String?            @db.ObjectId
-  encryptedData    String?
 }
 
 model DeleteRequest {
@@ -227,5 +217,4 @@ model DeleteRequest {
   reviewedBy  String?             @db.ObjectId // Admin user ID
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
-  encryptedData String?
 }

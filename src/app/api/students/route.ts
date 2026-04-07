@@ -52,56 +52,17 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // If E2EE encrypted data is present, skip strict validation
-    // because the real field values are inside the encrypted blob
-    // Also check if name is 'ENCRYPTED' which is a strong hint
-    const isEncrypted = !!body.encryptedData || body.name === "ENCRYPTED";
-
-    let validatedData: any;
-
-    if (isEncrypted) {
-      // Minimal validation — just ensure an ID exists or fallback to ENCRYPTED
-      // We prioritize any real data sent, but allow dummy values
-      validatedData = {
-        name: body.name || "ENCRYPTED",
-        email:
-          body.email &&
-          !["ENCRYPTED", "encrypted@e2ee.local", ""].includes(body.email)
-            ? body.email
-            : undefined,
-        phone:
-          body.phone && body.phone !== "ENCRYPTED" ? body.phone : undefined,
-        parentName:
-          body.parentName && body.parentName !== "ENCRYPTED"
-            ? body.parentName
-            : undefined,
-        parentPhone:
-          body.parentPhone && body.parentPhone !== "ENCRYPTED"
-            ? body.parentPhone
-            : undefined,
-        parentEmail:
-          body.parentEmail &&
-          !["ENCRYPTED", "encrypted@e2ee.local", ""].includes(body.parentEmail)
-            ? body.parentEmail
-            : undefined,
-        grade:
-          body.grade && body.grade !== "ENCRYPTED" ? body.grade : undefined,
-        enrollments: body.enrollments || [],
-      };
-    } else {
-      // Normal validation
-      const result = StudentInputSchema.safeParse(body);
-      if (!result.success) {
-        return NextResponse.json(
-          {
-            error: "Validation failed",
-            details: result.error.flatten().fieldErrors,
-          },
-          { status: 400 },
-        );
-      }
-      validatedData = result.data;
+    const result = StudentInputSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: result.error.flatten().fieldErrors,
+        },
+        { status: 400 },
+      );
     }
+    const validatedData = result.data;
 
     const {
       name,
@@ -129,8 +90,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if email already exists (skip for encrypted dummy emails)
-    if (email && !isEncrypted) {
+    // Check if email already exists
+    if (email) {
       const existingStudent = await db.student.findUnique({
         where: { email },
       });
@@ -157,8 +118,6 @@ export async function POST(req: NextRequest) {
           parentEmail: parentEmail || null,
           grade: grade || null,
           managerId: session.user.id,
-          ...(isEncrypted &&
-            body.encryptedData && { encryptedData: body.encryptedData }),
         },
       });
 
