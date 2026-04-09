@@ -9,8 +9,7 @@ import ManagersList from "@/components/managersList";
 import { DeleteAllDataButton } from "@/components/masterDelete";
 import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
-// import { AutoSyncProvider } from "@/components/AutoSyncProvider";
-// import { FirstLoginImport } from "@/components/FirstLoginImport";
+import { InstallAppButton } from "@/components/install-app-button";
 import { useTranslations } from "next-intl";
 import { AutoSyncProvider } from "./AutoSyncProvider";
 import PageHeader from "./page-header";
@@ -51,8 +50,11 @@ export default function AdminDashboardClient() {
           <SystemActivityLog />
         </div>
 
-        {/* Danger Zone */}
-        <DeleteAllDataButton />
+        {/* Actions Zone */}
+        <div className="flex flex-wrap items-center gap-4">
+          <DeleteAllDataButton />
+          <InstallAppButton />
+        </div>
       </div>
     </>
   );

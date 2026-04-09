@@ -19,6 +19,11 @@ export default function InstallPWA() {
   const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
+    // Check if user previously dismissed the install prompt
+    if (localStorage.getItem('pwa-prompt-dismissed') === 'true') {
+      return
+    }
+
     const userAgent = window.navigator.userAgent.toLowerCase()
     const iOS = /iphone|ipad|ipod/.test(userAgent)
     setIsIOS(iOS)
@@ -60,6 +65,11 @@ export default function InstallPWA() {
     }
   }
 
+  const handleDismiss = () => {
+    setShowInstall(false)
+    localStorage.setItem('pwa-prompt-dismissed', 'true')
+  }
+
   if (isStandalone) return null
   if (!showInstall) return null
 
@@ -84,7 +94,7 @@ export default function InstallPWA() {
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => setShowInstall(false)}
+            onClick={handleDismiss}
           >
             <X className="h-4 w-4" />
           </Button>

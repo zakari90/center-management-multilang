@@ -9,8 +9,6 @@ export const BASE_PAGES = [
 
   // Auth pages
   "/login",
-  "/loginmanager",
-  "/register",
 
   // Admin pages
   "/admin",
@@ -19,7 +17,6 @@ export const BASE_PAGES = [
   "/admin/schedule",
   "/admin/users",
   "/admin/database",
-  "/admin/test",
 
   // Manager pages
   "/manager",
@@ -28,4 +25,3 @@ export const BASE_PAGES = [
   "/manager/students",
   "/manager/teachers",
 ] as const;
-
