@@ -126,6 +126,23 @@ sw.addEventListener("fetch", (event: any) => {
 
   if (request.mode !== "navigate") return;
 
+  // Registration links shared with visitors must NEVER be served from cache.
+  // The ?register= query param is read client-side to open the registration dialog;
+  // if the SW serves a cached page the param is lost and the dialog never opens.
+  if (url.searchParams.has("register")) {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cache = await caches.open(PAGES_CACHE);
+        const shell = await matchAppShell(cache, url.origin);
+        return shell || new Response("Offline", {
+          status: 503,
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }),
+    );
+    return;
+  }
+
   event.respondWith(
     (async () => {
       // Local redirect for root path to mirror server behavior (vital for offline)
