@@ -18,6 +18,7 @@ export const BASE_PAGES = [
   "/admin/receipts",
   "/admin/schedule",
   "/admin/users",
+  "/admin/database",
   "/admin/test",
 
   // Manager pages

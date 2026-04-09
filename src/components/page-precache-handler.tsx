@@ -11,7 +11,11 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Download, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { PAGES_CACHE_NAME, ASSETS_CACHE_NAME, BASE_PAGES } from "@/lib/pwa-constants";
+import {
+  PAGES_CACHE_NAME,
+  ASSETS_CACHE_NAME,
+  BASE_PAGES,
+} from "@/lib/pwa-constants";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 
 // Pages to precache for offline-first experience
