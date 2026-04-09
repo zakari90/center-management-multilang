@@ -91,6 +91,10 @@ sw.addEventListener("fetch", (event: any) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
 
+  // Never intercept API calls — visitors must always hit the server for fresh data.
+  // This is critical for /api/public/subjects, /api/public/center, etc.
+  if (url.pathname.startsWith("/api/")) return;
+
   // Automatically cache Next.js static assets (JS/CSS/fonts/etc) so the app can hydrate offline.
   // We keep this independent from Serwist precache to avoid install failures.
   if (

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/exhaustive-deps */
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -20,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, CheckCircle2, GraduationCap, Users } from "lucide-react";
 import { toast } from "sonner";
 
@@ -59,18 +61,20 @@ export function PublicRegistrationDialog({
     selectedSubjects: [] as string[],
   });
 
-  // Fetch available subjects when dialog opens
+  // Fetch available subjects when dialog opens — always from server, never cached
   useEffect(() => {
-    if (open && centerId && type === "student") {
+    if (open) {
       fetchSubjects();
     }
-  }, [open, centerId, type]);
+  }, [open]);
 
   const fetchSubjects = async () => {
-    if (!centerId) return;
     setLoadingSubjects(true);
     try {
-      const response = await fetch(`/api/public/subjects?centerId=${centerId}`);
+      const url = centerId
+        ? `/api/public/subjects?centerId=${centerId}`
+        : `/api/public/subjects`;
+      const response = await fetch(url, { cache: "no-store" });
       if (response.ok) {
         const data = await response.json();
         setSubjects(data);
@@ -152,6 +156,20 @@ export function PublicRegistrationDialog({
 
   // Get unique grades from subjects
   const availableGrades = [...new Set(subjects.map((s) => s.grade))];
+
+  // Filter subjects by selected grade
+  const filteredSubjects = formData.grade
+    ? subjects.filter((s) => s.grade === formData.grade)
+    : [];
+
+  const toggleSubject = (subjectId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedSubjects: prev.selectedSubjects.includes(subjectId)
+        ? prev.selectedSubjects.filter((id) => id !== subjectId)
+        : [...prev.selectedSubjects, subjectId],
+    }));
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -235,27 +253,71 @@ export function PublicRegistrationDialog({
                 {/* Grade Selection */}
                 <div className="space-y-2">
                   <Label htmlFor="grade">{t("grade") || "Grade"} *</Label>
-                  <Select
-                    value={formData.grade}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, grade: value }))
-                    }
-                    disabled={isSubmitting || loadingSubjects}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={t("selectGrade") || "Select grade"}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableGrades.map((grade) => (
-                        <SelectItem key={grade} value={grade}>
-                          {grade}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {loadingSubjects ? (
+                    <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t("loadingGrades") || "Loading grades..."}
+                    </div>
+                  ) : availableGrades.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-2">
+                      {t("noGradesAvailable") || "No grades available yet."}
+                    </p>
+                  ) : (
+                    <Select
+                      value={formData.grade}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          grade: value,
+                          selectedSubjects: [], // reset subjects when grade changes
+                        }))
+                      }
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t("selectGrade") || "Select grade"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableGrades.map((grade) => (
+                          <SelectItem key={grade} value={grade}>
+                            {grade}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
+
+                {/* Subjects Selection (shown after grade is picked) */}
+                {formData.grade && filteredSubjects.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>{t("subjects") || "Subjects"}</Label>
+                    <div className="grid gap-2 max-h-48 overflow-y-auto rounded-md border p-3">
+                      {filteredSubjects.map((subject) => (
+                        <label
+                          key={subject.id}
+                          className="flex items-center gap-3 cursor-pointer rounded-md p-2 hover:bg-accent transition-colors"
+                        >
+                          <Checkbox
+                            checked={formData.selectedSubjects.includes(
+                              subject.id,
+                            )}
+                            onCheckedChange={() => toggleSubject(subject.id)}
+                            disabled={isSubmitting}
+                          />
+                          <span className="flex-1 text-sm font-medium">
+                            {subject.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {subject.price} DH
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Parent Name */}
                 <div className="space-y-2">
@@ -288,6 +350,56 @@ export function PublicRegistrationDialog({
                   />
                 </div>
               </>
+            )}
+
+            {/* Teacher-specific: Subject selection */}
+            {type === "teacher" && (
+              <div className="space-y-2">
+                <Label>
+                  {t("subjectsToTeach") || "Subjects you can teach"}
+                </Label>
+                {loadingSubjects ? (
+                  <div className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("loadingSubjects") || "Loading subjects..."}
+                  </div>
+                ) : subjects.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-2">
+                    {t("noSubjectsAvailable") || "No subjects available yet."}
+                  </p>
+                ) : (
+                  <div className="grid gap-1 max-h-56 overflow-y-auto rounded-md border p-3">
+                    {availableGrades.map((grade) => (
+                      <div key={grade}>
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-2 mb-1 first:mt-0">
+                          {grade}
+                        </p>
+                        {subjects
+                          .filter((s) => s.grade === grade)
+                          .map((subject) => (
+                            <label
+                              key={subject.id}
+                              className="flex items-center gap-3 cursor-pointer rounded-md p-2 hover:bg-accent transition-colors"
+                            >
+                              <Checkbox
+                                checked={formData.selectedSubjects.includes(
+                                  subject.id,
+                                )}
+                                onCheckedChange={() =>
+                                  toggleSubject(subject.id)
+                                }
+                                disabled={isSubmitting}
+                              />
+                              <span className="flex-1 text-sm font-medium">
+                                {subject.name}
+                              </span>
+                            </label>
+                          ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Submit Button */}
