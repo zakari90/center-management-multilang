@@ -161,7 +161,7 @@ export default async function RootLayout({
               {/* <ServiceWorkerRegister /> */}
               {children}
               {/* <PWADebug /> */}
-              <InstallPWA />
+              {/* <InstallPWA /> */}
               <PWAUpdateHandler />
               <EpochMismatchDialog />
               {/* <CacheDebugOverlay /> */}
