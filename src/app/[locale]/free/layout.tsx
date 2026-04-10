@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@/freelib/context/authContext";
+import { AuthProvider, useAuth } from "@/freelib/context/authContext";
 import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Role } from "@/freelib/dexie/dbSchema";
 
-export default function AuthLayout({
+function AuthLayoutInner({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -14,6 +14,7 @@ export default function AuthLayout({
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const locale = useLocale();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -25,28 +26,40 @@ export default function AuthLayout({
     if (!mounted || isLoading) return;
 
     if (user?.role === Role.ADMIN) {
-      router.push(`/${locale}/free/admin`);
+      if (!pathname.startsWith(`/${locale}/free/admin`)) {
+        router.push(`/${locale}/free/admin`);
+      }
       return;
     }
-  }, [user, isLoading, mounted, router, locale]);
+  }, [user, isLoading, mounted, router, locale, pathname]);
 
   // Show loading state while checking authentication
   if (!mounted || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">{/* Loading... */}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="flex min-h-svh flex-col items-center justify-center gap-2 p-2 md:p-10">
-        <div className="flex w-full flex-col md:gap-6">{children}</div>
-      </div>
+    <div className="w-full h-full min-h-svh">
+      {children}
     </div>
+  );
+}
+
+export default function FreeLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <AuthProvider>
+      <AuthLayoutInner>{children}</AuthLayoutInner>
+    </AuthProvider>
   );
 }
