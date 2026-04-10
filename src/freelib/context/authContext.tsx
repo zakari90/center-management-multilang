@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useTranslations } from "next-intl";
 import { localDb } from "@/freelib/dexie/dbSchema";
+import { userActions } from "@/freelib/dexie/freedexieaction";
 
 export interface User {
   id: string;
@@ -71,8 +72,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (raw) {
         const maybeUser = JSON.parse(raw) as User;
         if (maybeUser?.id && maybeUser?.role) {
-          setUser(maybeUser);
-          return;
+          
+          // Verify against freecenterdb to ensure the user actually exists
+          const dbUser = await userActions.getLocal(maybeUser.id);
+          
+          if (dbUser) {
+            setUser({
+              id: dbUser.id,
+              name: dbUser.name,
+              email: dbUser.email,
+              role: dbUser.role as string,
+            });
+            return;
+          } else {
+            console.warn("User found in localStorage but missing from freecenterdb. Session invalid.");
+            try {
+              localStorage.removeItem(LAST_USER_KEY);
+            } catch {}
+          }
         }
       }
       setUser(null);
