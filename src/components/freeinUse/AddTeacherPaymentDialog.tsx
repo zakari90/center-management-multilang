@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
 import {
   receiptActions,

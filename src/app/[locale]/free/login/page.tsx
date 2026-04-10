@@ -1,4 +1,4 @@
-// src/app/[locale]/(auth)/login/page.tsx
+// src/app/[locale]/free/login/page.tsx
 import { LoginForm } from "@/components/freeinUse/login-form";
 import OfflineNotificationBanner from "@/components/freeinUse/offline-notification-banner";
 

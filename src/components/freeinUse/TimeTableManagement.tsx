@@ -53,7 +53,7 @@ import {
   teacherSubjectActions,
 } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 
 interface Teacher {
   id: string;

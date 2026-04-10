@@ -11,7 +11,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import {
   subjectActions,
   studentSubjectActions,

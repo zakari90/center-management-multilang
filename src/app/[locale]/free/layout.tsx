@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthProvider, useAuth } from "@/freelib/context/authContext";
+import { AuthProvider, useAuth } from "@/freelib/context/freeauthContext";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -45,11 +45,7 @@ function AuthLayoutInner({
     );
   }
 
-  return (
-    <div className="w-full h-full min-h-svh">
-      {children}
-    </div>
-  );
+  return <div className="w-full h-full min-h-svh">{children}</div>;
 }
 
 export default function FreeLayout({

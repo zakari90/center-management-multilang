@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
 import { receiptActions } from "@/freelib/dexie/freedexieaction";
 import { useLiveQuery } from "dexie-react-hooks";

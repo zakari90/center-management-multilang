@@ -1,170 +1,76 @@
-# Dexie-Based Offline Storage System
+# Dexie-Based Local-First Storage System
 
-This directory contains the unified offline-first storage system using Dexie.js (IndexedDB wrapper).
+This directory contains the unified local-first storage system using Dexie.js (IndexedDB wrapper).
 
 ## Overview
 
-All entities are stored locally in IndexedDB using Dexie, with automatic synchronization to the server when online.
+All entities are stored locally in IndexedDB using Dexie. This system provides a standalone, offline-first experience with zero server dependencies for the "Free Mode" version of the application.
 
 ## Key Concepts
 
-### Status System
-- `'w'` - Waiting for sync (new/updated records)
-- `'1'` - Synced (successfully synced to server)
-- `'0'` - Marked for deletion (pending deletion on server)
-
-### Data Flow
-
-1. **Save Locally First**: All data is saved to `localDb` with status `'w'`
-2. **Sync When Online**: When internet is available, sync worker syncs all pending items
-3. **Mark as Synced**: After successful sync, status changes to `'1'`
+### Data Privacy
+- **Local Only**: Data is strictly stored on the device.
+- **No Sync**: This version does not synchronize with any cloud backend.
+- **Full Control**: Users can backup (export) and restore (import) their data manually.
 
 ## Files
 
 ### `dbSchema.ts`
 Defines the database schema and all entity interfaces:
-- `User` - Admins and managers
-- `Center` - Education centers
-- `Teacher` - Teachers
-- `Student` - Students
+- `User` - Local admin user
+- `Center` - Education center details
+- `Teacher` - Teachers list
+- `Student` - Students list
 - `Subject` - Subjects/courses
 - `Receipt` - Payment receipts
 - `Schedule` - Class schedules
 - `TeacherSubject` - Teacher-subject assignments
 - `StudentSubject` - Student enrollments
-- `PushSubscription` - Push notification subscriptions
 
-### `dexieActions.ts`
-Provides generic CRUD operations for all entities:
-- `putLocal(item)` - Save/update entity
-- `getAll()` - Get all entities
+### `freedexieaction.ts`
+Provides generic CRUD operations for all entities using a factory pattern:
+- `putLocal(item)` - Save or update entity
+- `create(item)` - Add new entity (will fail if ID exists)
+- `update(id, updates)` - Update specific fields
+- `getAll()` - Get all entities for the table
 - `getLocal(id)` - Get entity by ID
-- `getLocalByEmail(email)` - Get user by email
-- `deleteLocal(id)` - Delete entity
-- `markForDelete(id)` - Mark entity for deletion (status '0')
-- `markSynced(id)` - Mark entity as synced (status '1')
-- `getSyncTargets()` - Get entities waiting for sync or deletion
-
-### `syncWorker.ts`
-Handles synchronization of all entities to the server:
-- `syncPendingEntities()` - Sync all pending entities
-- `syncPendingUsers()` - Sync users (admins/managers)
-- `syncPendingCenters()` - Sync centers
-- `syncPendingTeachers()` - Sync teachers
-- `syncPendingStudents()` - Sync students
-- `syncPendingSubjects()` - Sync subjects
-- `syncPendingReceipts()` - Sync receipts
-- `syncPendingSchedules()` - Sync schedules
+- `deleteLocal(id)` - Delete entity from local storage
+- `clearAllLocalData()` - Helper to wipe the database
 
 ## Usage
 
 ### Saving Entities
 
 ```typescript
-import { saveStudentToLocalDb } from '@/lib/utils/saveToLocalDb';
-import { syncPendingEntities } from '@/lib/dexie/syncWorker';
+import { studentActions } from '@/freelib/dexie/freedexieaction';
 
-// Save student locally (status 'w')
-const student = await saveStudentToLocalDb({
-  id:"2asa5s75as4a"
-  name: 'zakaria zine',
+// Save student locally
+await studentActions.create({
+  id: "...",
+  name: 'Zakaria Zine',
   email: 'john@example.com',
-  managerId: 'manager-id',
+  createdAt: Date.now(),
+  updatedAt: Date.now(),
 });
-
-// Trigger sync if online
-if (navigator.onLine) {
-  await syncPendingEntities();
-}
 ```
 
 ### Reading Entities
 
 ```typescript
-import { studentActions } from '@/lib/dexie/dexieActions';
+import { studentActions } from '@/freelib/dexie/freedexieaction';
 
 // Get all students
 const students = await studentActions.getAll();
 
 // Get student by ID
 const student = await studentActions.getLocal('student-id');
-
-// Get students by manager
-const managerStudents = students.filter(s => s.managerId === 'manager-id');
 ```
-
-### Updating Entities
-
-```typescript
-import { studentActions } from '@/lib/dexie/dexieActions';
-
-// Update student (status becomes 'w' automatically)
-await studentActions.putLocal({
-  ...existingStudent,
-  name: 'Updated Name',
-  updatedAt: Date.now(),
-});
-
-// Sync changes
-await syncPendingEntities();
-```
-
-### Deleting Entities
-
-```typescript
-import { studentActions } from '@/lib/dexie/dexieActions';
-
-// Mark for deletion (status '0')
-await studentActions.markForDelete('student-id');
-
-// Sync deletion
-await syncPendingEntities();
-
-// Or delete immediately (removes from localDb)
-await studentActions.deleteLocal('student-id');
-```
-
-## Utility Functions
-
-### `saveToLocalDb.ts`
-Contains utility functions to save all entity types:
-- `saveCenterToLocalDb(centerData)`
-- `saveTeacherToLocalDb(teacherData)`
-- `saveStudentToLocalDb(studentData)`
-- `saveSubjectToLocalDb(subjectData)`
-- `saveReceiptToLocalDb(receiptData)`
-- `saveScheduleToLocalDb(scheduleData)`
-
-### `saveManagerToLocalDb.ts`
-Special utility for saving users (admins/managers) with password hashing:
-- `saveManagerToLocalDb(userData, plainPassword)`
-- `getPlainPasswordForSync(email)` - Get plain password for sync
-- `clearPlainPasswordForSync(email)` - Clear password after sync
-
-## Auto-Sync
-
-The sync worker automatically syncs when:
-- Connection is restored (online event)
-- Manually triggered via `syncPendingEntities()`
 
 ## ID Generation
 
-All entities use MongoDB-compatible ObjectId format (24-character hex string) generated by `generateObjectId()`. This ensures consistency between client and server IDs.
+All entities should use consistent IDs. For the local-only mode, we recommend generating 24-character hex strings or UUIDs to ensure compatibility if data is ever migrated to a managed version.
 
-## Migration from Old System
+## Backup and Export
 
-The old `offlineStore` (localStorage-based) system is deprecated. To migrate:
-
-1. Replace `offlineStore` imports with `dexieActions`
-2. Replace `offlineApi` functions with `saveToLocalDb` utilities
-3. Replace `syncEngine` with `syncWorker`
-4. Update status from `'pending'/'synced'/'failed'` to `'w'/'1'/'0'`
-
-## Best Practices
-
-1. **Always save locally first** - Save to `localDb` with status `'w'` before syncing
-2. **Trigger sync after save** - If online, trigger sync immediately after saving
-3. **Handle sync errors** - Sync failures keep status as `'w'` for retry
-4. **Use consistent IDs** - Generate IDs on client using `generateObjectId()`
-5. **Store passwords temporarily** - For users, store plain passwords in sessionStorage for sync
+The system supports exporting the entire database to a JSON file for backup purposes, available in the database management section of the dashboard.
 

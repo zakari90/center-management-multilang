@@ -11,7 +11,7 @@ import {
   subjectActions,
 } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {

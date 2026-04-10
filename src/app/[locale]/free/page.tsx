@@ -107,9 +107,43 @@ export default function FreeVersionIntro() {
       btn: "الذهاب لتسجيل الدخول",
       footer: "ببساطة، هذه هي النسخة المجانية من التطبيق الحالي.",
     },
+    fr: {
+      title: "Version Locale Gratuite",
+      subtitle: "Contrôle total, zéro serveur.",
+      description:
+        "Il s'agit de la version gratuite et autonome de l'application. Elle offre des fonctionnalités de gestion essentielles conçues pour une confidentialité totale et une capacité hors ligne fluide.",
+      features: [
+        {
+          title: "Stockage Local Uniquement",
+          desc: "Toutes vos données restent exclusivement sur cet appareil. Rien ne quitte votre navigateur.",
+          icon: <Database className="w-6 h-6 text-indigo-500" />,
+          color: "bg-indigo-500/10 border-indigo-500/20",
+        },
+        {
+          title: "Pas d'Internet Requis",
+          desc: "Après la mise en cache initiale de la page, toute l'application fonctionne à 100 % hors ligne.",
+          icon: <WifiOff className="w-6 h-6 text-emerald-500" />,
+          color: "bg-emerald-500/10 border-emerald-500/20",
+        },
+        {
+          title: "Aucun Serveur",
+          desc: "Pas de bases de données back-end, pas d'abonnements et pas de configurations cloud compliquées.",
+          icon: <ServerOff className="w-6 h-6 text-rose-500" />,
+          color: "bg-rose-500/10 border-rose-500/20",
+        },
+        {
+          title: "Confidentialité Absolue",
+          desc: "Nous n'avons pas accès à vos données locales. Vous avez un contrôle total hors ligne.",
+          icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
+          color: "bg-blue-500/10 border-blue-500/20",
+        },
+      ],
+      btn: "Aller à la connexion",
+      footer: "En gros, c'est la version gratuite de l'application actuelle.",
+    },
   };
 
-  const t = locale === "ar" ? content.ar : content.en;
+  const t = locale === "ar" ? content.ar : locale === "fr" ? content.fr : content.en;
 
   if (isChecking) {
     return (

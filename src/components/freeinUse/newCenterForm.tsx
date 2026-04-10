@@ -18,7 +18,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { SubjectFormMultipleChoices } from "./subjectForm";
 import { useLocalizedConstants } from "./useLocalizedConstants";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 
 // ✅ Form-only subject data (before creating Subject entity)
 type SubjectFormData = {

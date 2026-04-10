@@ -32,7 +32,7 @@ import {
   centerActions,
   userActions,
 } from "@/freelib/dexie/freedexieaction";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { StudentFormSchema } from "@/freelib/validations/schemas";
 import { z } from "zod";
 

@@ -48,21 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(LAST_USER_KEY);
     } catch {}
 
-    // Clear local Dexie database for privacy/security
-    try {
-      await Promise.all([
-        localDb.centers.clear(),
-        localDb.teachers.clear(),
-        localDb.students.clear(),
-        localDb.subjects.clear(),
-        localDb.teacherSubjects.clear(),
-        localDb.studentSubjects.clear(),
-        localDb.receipts.clear(),
-        localDb.schedules.clear(),
-        localDb.users.clear(),
-      ]);
-    } catch (e) {}
-
+    // Logout should only clear the session, not the data
+    // Data remains in IndexedDB for the local-only version
     window.location.href = "/";
   }, []);
 

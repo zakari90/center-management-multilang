@@ -15,7 +15,7 @@ import {
   centerActions,
   teacherSubjectActions,
 } from "@/freelib/dexie/freedexieaction";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { TeacherList } from "./TeacherList";
 
 // Detailed types for the new implementation

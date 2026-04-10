@@ -16,7 +16,7 @@ import {
   calculateHoursDifference,
   isWithinAvailability,
 } from "./utils";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { useTranslations } from "next-intl";
 
 export function useTeacherSchedule(centerId?: string) {

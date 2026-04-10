@@ -2,7 +2,7 @@
 
 import CenterPresentation from "@/components/freeinUse/centerPresentation";
 import { NewCenterForm } from "@/components/freeinUse/newCenterForm";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { centerActions } from "@/freelib/dexie/freedexieaction";
 import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";

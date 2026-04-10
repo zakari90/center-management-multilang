@@ -6,7 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import MobileBottomNav from "@/components/freeinUse/mobile-bottom-nav";
 import {
   CalendarDays,
@@ -19,8 +19,8 @@ import {
   Globe,
   Moon,
   Sun,
-  RefreshCw,
   Database,
+  Calendar,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -53,8 +53,6 @@ export default function AdminLayoutClient({
   const tNav = useTranslations("NavUser");
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-
   useEffect(() => {
     useCacheStatusStore.getState().checkAllPages(locale);
   }, [locale]);
@@ -142,6 +140,11 @@ export default function AdminLayoutClient({
       icon: "/calendar.svg",
     },
     {
+      title: "Program",
+      url: `${base}/free/admin/program`,
+      icon: "/calendar.svg",
+    },
+    {
       title: t("database"),
       url: `${base}/free/admin/database`,
       icon: "/database.svg",
@@ -218,6 +221,11 @@ export default function AdminLayoutClient({
               label: t("schedule"),
               href: `${base}/free/admin/schedule`,
               icon: <CalendarDays className="size-5" />,
+            },
+            {
+              label: "Program",
+              href: `${base}/free/admin/program`,
+              icon: <Calendar className="size-5" />,
             },
             {
               label: t("database"),

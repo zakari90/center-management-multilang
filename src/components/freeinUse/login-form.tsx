@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { loginWithRole } from "@/freelib/actionsClient";
 import { cn } from "@/freelib/utils";
 import { Role } from "@/freelib/dexie/dbSchema";

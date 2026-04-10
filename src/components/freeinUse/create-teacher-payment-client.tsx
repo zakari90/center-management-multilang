@@ -10,7 +10,7 @@ import {
   subjectActions,
   receiptActions,
 } from "@/freelib/dexie/freedexieaction";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
 import { Button } from "@/components/ui/button";

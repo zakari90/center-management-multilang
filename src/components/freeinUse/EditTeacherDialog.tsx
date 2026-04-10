@@ -11,7 +11,7 @@ import {
   userActions,
 } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

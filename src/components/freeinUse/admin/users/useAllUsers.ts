@@ -9,7 +9,7 @@ import {
   receiptActions,
 } from "@/freelib/dexie/freedexieaction";
 import { Role } from "@/freelib/dexie/dbSchema";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { UserData, TeacherData, StudentData } from "./types";
 
 export function useAllUsers(unknownAdminText: string = "Unknown Admin") {

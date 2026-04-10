@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 // import axios from 'axios' // ✅ Commented out - using local DB
 
 import { StatCard } from "@/components/ui/stat-card";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import {
   centerActions,
   receiptActions,

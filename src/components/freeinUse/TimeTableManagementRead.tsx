@@ -23,7 +23,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { localDb } from "@/freelib/dexie/dbSchema";
-import { useAuth } from "@/freelib/context/authContext";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { useLocalizedConstants } from "@/components/freeinUse/useLocalizedConstants";
 
 interface Teacher {
