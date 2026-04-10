@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { ShieldCheck, WifiOff, ServerOff, Database, ArrowRight, ArrowLeft } from "lucide-react";
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
@@ -189,9 +189,9 @@ export default function FreeVersionIntro() {
                   <div 
                     key={index} 
                     className="flex gap-4 p-5 rounded-2xl border border-border/40 bg-white/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/5 group"
-                    style={{ animationDelay: \`\${index * 100}ms\` }}
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className={\`shrink-0 p-3 rounded-xl border \${feature.color} group-hover:scale-110 transition-transform duration-300\`}>
+                    <div className={`shrink-0 p-3 rounded-xl border ${feature.color} group-hover:scale-110 transition-transform duration-300`}>
                       {feature.icon}
                     </div>
                     <div className="space-y-1.5 mt-0.5">
