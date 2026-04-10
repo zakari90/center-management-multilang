@@ -37,7 +37,9 @@ const content = {
     featuresList: [
       "واجهة عصرية، احترافية وسهلة الاستخدام جداً.",
       "متعدد اللغات بالكامل (العربية، الإنجليزية، الفرنسية).",
-      "سرعة فائقة في التعامل مع البيانات لاستخراج التقارير والبحث."
+      "سرعة فائقة في التعامل مع البيانات لاستخراج التقارير والبحث.",
+      "🌐 يعمل بسلاسة أونلاين وأوفلاين: التطبيق مصمم ليعمل بكفاءة سواء كنت متصلاً بالإنترنت أو غير متصل.",
+      "✅ مؤشر الكاش الذكي: بمجرد ظهور 'الدائرة الخضراء' (Green Bubble)، فهذا يعني اكتمال حفظ النظام استعدادًا للعمل بدون إنترنت بكل أمان!"
     ],
     ctaTitle: "لا تدع المهام الإدارية تستهلك وقتك!",
     ctaDesc: "ابدأ الآن فوراً مع النظام المجاني، أو تواصل معنا للاشتراك في الباقة المدفوعة.",
@@ -61,7 +63,9 @@ const content = {
     featuresList: [
       "Modern, professional, and highly intuitive interface.",
       "Fully multilingual (Arabic, English, French).",
-      "Lightning-fast data processing for reports and search."
+      "Lightning-fast data processing for reports and search.",
+      "🌐 Works seamlessly online & offline: Designed to work efficiently whether you are connected or not.",
+      "✅ Smart Cache Indicator: Once the 'Green Bubble' appears, the system is fully cached and ready for safe offline use!"
     ],
     ctaTitle: "Don't let admin tasks consume your time!",
     ctaDesc: "Start instantly with the free version, or contact us to subscribe to the cloud plan.",
@@ -85,7 +89,9 @@ const content = {
     featuresList: [
       "Interface moderne, professionnelle et très intuitive.",
       "Entièrement multilingue (Arabe, Anglais, Français).",
-      "Traitement ultra-rapide des données pour les rapports et recherches."
+      "Traitement ultra-rapide des données pour les rapports et recherches.",
+      "🌐 Fonctionne fluidement en ligne et hors ligne : Conçu pour être efficace avec ou sans connexion internet.",
+      "✅ Indicateur de Cache Intelligent : Dès que la 'Bulle Verte' apparaît, le système est entièrement mis en cache pour une utilisation hors ligne en toute sécurité !"
     ],
     ctaTitle: "Ne laissez pas les tâches administratives vous consommer !",
     ctaDesc: "Commencez instantanément avec la version gratuite, ou contactez-nous pour le plan cloud.",
@@ -101,11 +107,13 @@ const freeFeaturesAr = [
   { text: "إدارة شاملة للطلاب والمعلمين", icon: <Users className="w-5 h-5" /> },
   { text: "تثبيت كتطبيق (PWA) على أي جهاز", icon: <MonitorSmartphone className="w-5 h-5" /> },
   { text: "خصوصية تامة: بياناتك محلياً فقط", icon: <ShieldCheck className="w-5 h-5" /> },
+  { text: "دعم فني مجاني مع 3 صفحات ويب لمركزك", icon: <Globe className="w-5 h-5" /> },
 ];
 
 const paidFeaturesAr = [
   { text: "مزامنة سحابية: وصول من أي مكان", icon: <Cloud className="w-5 h-5" /> },
   { text: "تعدد المستخدمين والصلاحيات", icon: <Users className="w-5 h-5" /> },
+  { text: "برنامج حاسوب أوفلاين 100%", icon: <Laptop className="w-5 h-5" /> },
   { text: "روابط تسجيل عامة للطلاب", icon: <Globe className="w-5 h-5" /> },
   { text: "نسخ احتياطي وتأمين مستمر", icon: <Database className="w-5 h-5" /> },
   { text: "متابعة الإحصائيات عن بُعد", icon: <Laptop className="w-5 h-5" /> },
@@ -117,14 +125,34 @@ const freeFeaturesEn = [
   { text: "Full student & teacher management", icon: <Users className="w-5 h-5" /> },
   { text: "Install as a PWA anywhere", icon: <MonitorSmartphone className="w-5 h-5" /> },
   { text: "Total privacy: Local data only", icon: <ShieldCheck className="w-5 h-5" /> },
+  { text: "Free tech support + 3 landing pages", icon: <Globe className="w-5 h-5" /> },
 ];
 
 const paidFeaturesEn = [
   { text: "Cloud sync: Access from anywhere", icon: <Cloud className="w-5 h-5" /> },
   { text: "Multi-user & roles support", icon: <Users className="w-5 h-5" /> },
+  { text: "100% Offline Desktop Application", icon: <Laptop className="w-5 h-5" /> },
   { text: "Public registration links for students", icon: <Globe className="w-5 h-5" /> },
   { text: "Continuous automated backups", icon: <Database className="w-5 h-5" /> },
   { text: "Remote dashboard monitoring", icon: <Laptop className="w-5 h-5" /> },
+];
+
+const freeFeaturesFr = [
+  { text: "100% Gratuit : Aucun frais caché", icon: <Rocket className="w-5 h-5" /> },
+  { text: "Fonctionne entièrement Hors Ligne", icon: <WifiOff className="w-5 h-5" /> },
+  { text: "Gestion complète élèves & profs", icon: <Users className="w-5 h-5" /> },
+  { text: "Installation PWA sur tout support", icon: <MonitorSmartphone className="w-5 h-5" /> },
+  { text: "Vie privée : Données locales uniquement", icon: <ShieldCheck className="w-5 h-5" /> },
+  { text: "Support gratuit + 3 pages de centre", icon: <Globe className="w-5 h-5" /> },
+];
+
+const paidFeaturesFr = [
+  { text: "Sync Cloud : Accès partout", icon: <Cloud className="w-5 h-5" /> },
+  { text: "Multi-utilisateurs & rôles", icon: <Users className="w-5 h-5" /> },
+  { text: "Application Bureau 100% Hors Ligne", icon: <Laptop className="w-5 h-5" /> },
+  { text: "Liens publics pour inscriptions", icon: <Globe className="w-5 h-5" /> },
+  { text: "Sauvegardes auto continues", icon: <Database className="w-5 h-5" /> },
+  { text: "Suivi des stats à distance", icon: <Laptop className="w-5 h-5" /> },
 ];
 
 export default function SaaSMarketingPage() {
@@ -135,8 +163,16 @@ export default function SaaSMarketingPage() {
   // Use English as fallback for missing locales
   const t = content[locale as keyof typeof content] || content.en;
   
-  const freeFeatures = locale === "ar" ? freeFeaturesAr : freeFeaturesEn;
-  const paidFeatures = locale === "ar" ? paidFeaturesAr : paidFeaturesEn;
+  let freeFeatures = freeFeaturesEn;
+  let paidFeatures = paidFeaturesEn;
+
+  if (locale === "ar") {
+    freeFeatures = freeFeaturesAr;
+    paidFeatures = paidFeaturesAr;
+  } else if (locale === "fr") {
+    freeFeatures = freeFeaturesFr;
+    paidFeatures = paidFeaturesFr;
+  }
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
