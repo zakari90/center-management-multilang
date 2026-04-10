@@ -2,24 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/freecomponents/ui/dialog";
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
+} from "@/components/ui/select";
 import { Loader2, CheckCircle2, GraduationCap, Users } from "lucide-react";
 import { toast } from "sonner";
 

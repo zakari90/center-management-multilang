@@ -6,8 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Badge } from "@/freecomponents/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/freelib/context/authContext";
 import {
   studentActions,

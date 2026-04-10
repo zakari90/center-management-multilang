@@ -5,10 +5,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/freecomponents/ui/table";
-import { Button } from "@/freecomponents/ui/button";
-import { Badge } from "@/freecomponents/ui/badge";
-import { Avatar, AvatarFallback } from "@/freecomponents/ui/avatar";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Mail, Trash2, Calendar, Edit } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";

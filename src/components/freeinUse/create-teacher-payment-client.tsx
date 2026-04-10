@@ -13,17 +13,17 @@ import {
 import { useAuth } from "@/freelib/context/authContext";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
-import { Button } from "@/freecomponents/ui/button";
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
-import { Textarea } from "@/freecomponents/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -31,10 +31,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Badge } from "@/freecomponents/ui/badge";
-import { Separator } from "@/freecomponents/ui/separator";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 

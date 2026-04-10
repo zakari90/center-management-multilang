@@ -8,10 +8,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Button } from "@/freecomponents/ui/button";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
-import { Badge } from "@/freecomponents/ui/badge";
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Loader2, Printer } from "lucide-react";
 import {
   receiptActions,

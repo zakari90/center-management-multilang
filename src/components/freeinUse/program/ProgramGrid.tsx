@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { ScheduleSlot, Teacher, Subject } from "./ProgramView";
 import { cn } from "@/freelib/utils";
-import { Badge } from "@/freecomponents/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { User, MapPin, Clock } from "lucide-react";
 
 interface ProgramGridProps {

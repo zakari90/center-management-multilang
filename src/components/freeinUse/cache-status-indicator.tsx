@@ -3,13 +3,13 @@
 import { useIsOnline } from "@/hooks/useOnlineStatus";
 import { useTranslations } from "next-intl";
 import { CloudOff, Database, RefreshCcw, ShieldAlert } from "lucide-react";
-import { Badge } from "@/freecomponents/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/freecomponents/ui/tooltip";
+} from "@/components/ui/tooltip";
 import {
   useCacheStatusStore,
   type CacheStatusState,

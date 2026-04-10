@@ -2,17 +2,17 @@
 import { FileText } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 // import axios from 'axios' // ✅ Commented out - using local DB instead
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
-import { Badge } from "@/freecomponents/ui/badge";
-import { Button } from "@/freecomponents/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Input } from "@/freecomponents/ui/input";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,13 +20,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/freecomponents/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/freecomponents/ui/tabs";
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/freelib/context/authContext";
 import {
   centerActions,

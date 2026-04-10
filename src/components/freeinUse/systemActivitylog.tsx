@@ -9,9 +9,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Avatar, AvatarFallback } from "@/freecomponents/ui/avatar";
-import { Badge } from "@/freecomponents/ui/badge";
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Loader2, Activity } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";

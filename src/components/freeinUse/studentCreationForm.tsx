@@ -2,18 +2,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
-import { Button } from "@/freecomponents/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/freecomponents/ui/card";
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
-import { Badge } from "@/freecomponents/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import type React from "react";

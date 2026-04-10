@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,9 +8,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/freecomponents/ui/dialog";
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { localDb } from "@/freelib/dexie/dbSchema";
 import { AlertTriangle, Loader2, Trash } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";

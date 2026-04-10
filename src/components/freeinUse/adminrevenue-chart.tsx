@@ -8,8 +8,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/freecomponents/ui/tabs";
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // import axios from 'axios' // ✅ Commented out - using localDB instead
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";

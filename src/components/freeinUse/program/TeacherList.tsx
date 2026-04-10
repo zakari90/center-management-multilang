@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/freecomponents/ui/card";
-import { Badge } from "@/freecomponents/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   User,
   Mail,

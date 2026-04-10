@@ -1,11 +1,11 @@
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
+} from "@/components/ui/card";
 import { cn } from "@/freelib/utils"; // Assuming this exists as per original file
 import { AlertCircle, Mail, Phone, User } from "lucide-react";
 import { useTranslations } from "next-intl";

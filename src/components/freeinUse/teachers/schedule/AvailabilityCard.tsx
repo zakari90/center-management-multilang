@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/freecomponents/ui/card";
+} from "@/components/ui/card";
 import { Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TeacherWithSchedule } from "./types";

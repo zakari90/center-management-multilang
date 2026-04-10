@@ -9,17 +9,17 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from "@/freecomponents/ui/dialog";
-import { Button } from "@/freecomponents/ui/button";
-import { Label } from "@/freecomponents/ui/label";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/freecomponents/ui/alert";
+} from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2, X, Clock } from "lucide-react";
 import { Teacher, Subject, ScheduleSlot } from "./ProgramView";
 import { scheduleActions } from "@/freelib/dexie/freedexieaction";

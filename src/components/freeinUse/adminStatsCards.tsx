@@ -1,12 +1,7 @@
 // components/admin/admin-stats-cards.tsx
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/freecomponents/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, UserCheck, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useLiveQuery } from "dexie-react-hooks";

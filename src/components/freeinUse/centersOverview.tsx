@@ -1,16 +1,16 @@
 // components/admin/centers-overview.tsx
 "use client";
 
-import { Badge } from "@/freecomponents/ui/badge";
-import { Button } from "@/freecomponents/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Progress } from "@/freecomponents/ui/progress";
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 // import axios from 'axios' // ✅ Commented out - using local DB instead
 import { Building2, Coins, Eye, Loader2, MapPin, Users } from "lucide-react";
 import { useTranslations } from "next-intl";

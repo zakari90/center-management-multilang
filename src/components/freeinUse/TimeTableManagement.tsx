@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
-import { Badge } from "@/freecomponents/ui/badge";
-import { Button } from "@/freecomponents/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -18,15 +18,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/freecomponents/ui/dialog";
-import { Label } from "@/freecomponents/ui/label";
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
+} from "@/components/ui/select";
 import { Role } from "@/freelib/dexie/dbSchema";
 import { cn } from "@/freelib/utils";
 // import axios from 'axios' // ✅ Commented out - using local DB

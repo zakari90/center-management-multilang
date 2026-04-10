@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import { Download, X, Share } from "lucide-react";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useTranslations } from "next-intl";
 
 interface BeforeInstallPromptEvent extends Event {

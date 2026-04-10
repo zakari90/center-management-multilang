@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/freecomponents/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 const LanguageSwitcher = () => {
   const router = useRouter();

@@ -2,14 +2,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
+} from "@/components/ui/card";
 import { Download, RefreshCw, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";

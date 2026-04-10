@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +10,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/freecomponents/ui/dialog";
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { localDb, Role } from "@/freelib/dexie/dbSchema";

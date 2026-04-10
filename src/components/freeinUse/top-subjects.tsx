@@ -1,14 +1,14 @@
 "use client";
 
-import { Badge } from "@/freecomponents/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Progress } from "@/freecomponents/ui/progress";
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/freelib/context/authContext";

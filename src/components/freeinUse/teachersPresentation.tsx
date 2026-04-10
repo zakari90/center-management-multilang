@@ -2,24 +2,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/freecomponents/ui/dropdown-menu";
-import { Input } from "@/freecomponents/ui/input";
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 // import axios from 'axios' // ✅ Commented out - using local DB
 
-import { StatCard } from "@/freecomponents/ui/stat-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { useAuth } from "@/freelib/context/authContext";
 import {
   centerActions,
@@ -37,7 +37,7 @@ import { useCallback, useEffect, useState } from "react";
 import AddTeacherDialog from "./AddTeacherDialog";
 import PageHeader from "./page-header";
 import { TeachersTableView } from "./teachers/TeachersTableView";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export interface TeacherSubject {
   id: string;

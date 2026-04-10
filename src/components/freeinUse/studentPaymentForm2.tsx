@@ -13,7 +13,7 @@ import {
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 import { useAuth } from "@/freelib/context/authContext";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Card,
   CardContent,
@@ -21,19 +21,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
-import { Textarea } from "@/freecomponents/ui/textarea";
-import { Separator } from "@/freecomponents/ui/separator";
-import { Button } from "@/freecomponents/ui/button";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
+} from "@/components/ui/select";
 import {
   AlertCircle,
   CheckCircle2,

@@ -4,8 +4,8 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/freecomponents/ui/card";
-import { Badge } from "@/freecomponents/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Calendar, AlertCircle, CheckCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { TeacherWithSchedule, Schedule, WeeklyScheduleSlot } from "./types";

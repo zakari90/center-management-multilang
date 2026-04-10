@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Card } from "@/freecomponents/ui/card";
-import { Badge } from "@/freecomponents/ui/badge";
-import { Button } from "@/freecomponents/ui/button";
-import { Input } from "@/freecomponents/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Search, Pencil, Trash2, Coins, Clock } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Subject } from "@/freelib/dexie/dbSchema";
@@ -18,8 +18,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/freecomponents/ui/alert-dialog";
-import { Label } from "@/freecomponents/ui/label";
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 import { EditDialog } from "./editDialog";
 import { ItemInputList } from "./itemInputList";
 import { SubjectFormSchema } from "@/freelib/validations/schemas";

@@ -1,22 +1,22 @@
 "use client";
 
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
-import { Badge } from "@/freecomponents/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Input } from "@/freecomponents/ui/input";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -24,7 +24,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/freecomponents/ui/table";
+} from "@/components/ui/table";
 import { useAuth } from "@/freelib/context/authContext";
 import {
   receiptActions,
@@ -45,7 +45,7 @@ import { useState } from "react";
 import AddStudentPaymentDialog from "./AddStudentPaymentDialog";
 import PageHeader from "./page-header";
 import AddTeacherPaymentDialog from "./AddTeacherPaymentDialog";
-import { PaginationControls } from "@/freecomponents/ui/pagination-controls";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface Receipt {
   admin?: {

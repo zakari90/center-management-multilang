@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/freecomponents/ui/card";
-import { Skeleton } from "@/freecomponents/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/freelib/context/authContext";
 import { ReceiptType } from "@/freelib/dexie/dbSchema";
 import { receiptActions } from "@/freelib/dexie/freedexieaction";

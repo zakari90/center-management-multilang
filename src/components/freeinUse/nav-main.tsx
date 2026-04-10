@@ -11,9 +11,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/freecomponents/ui/sidebar";
+} from "@/components/ui/sidebar";
 import { Avatar } from "@radix-ui/react-avatar";
-import { AvatarFallback, AvatarImage } from "@/freecomponents/ui/avatar";
+import { AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { CacheStatusDot } from "./cache-status-indicator";
 

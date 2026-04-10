@@ -2,8 +2,8 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Dialog, DialogContent } from "@/freecomponents/ui/dialog";
-import { Button } from "@/freecomponents/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
 interface ModalContentWrapperProps {

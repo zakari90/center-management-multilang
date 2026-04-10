@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import { FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 

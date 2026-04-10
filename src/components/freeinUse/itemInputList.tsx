@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/freecomponents/ui/button";
-import { Checkbox } from "@/freecomponents/ui/checkbox"; // Fixed import
-import { Input } from "@/freecomponents/ui/input";
-import { Label } from "@/freecomponents/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox"; // Fixed import
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 
-import { Badge } from "@/freecomponents/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { cn, getItemColor } from "@/freelib/utils";
 
 interface ItemInputListProps {

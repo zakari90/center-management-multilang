@@ -13,24 +13,19 @@ import {
 } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 import { useAuth } from "@/freelib/context/authContext";
-import { Button } from "@/freecomponents/ui/button";
-import { Input } from "@/freecomponents/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/freecomponents/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/freecomponents/ui/card";
-import { Alert, AlertDescription } from "@/freecomponents/ui/alert";
-import { Checkbox } from "@/freecomponents/ui/checkbox";
-import { Label } from "@/freecomponents/ui/label";
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 
 // ==================== INTERFACES ====================

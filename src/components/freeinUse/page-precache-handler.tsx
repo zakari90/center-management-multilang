@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/freecomponents/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Progress } from "@/freecomponents/ui/progress";
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Download, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {

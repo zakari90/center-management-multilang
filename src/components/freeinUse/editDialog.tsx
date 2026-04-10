@@ -7,8 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/freecomponents/ui/dialog";
-import { Button } from "@/freecomponents/ui/button";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 

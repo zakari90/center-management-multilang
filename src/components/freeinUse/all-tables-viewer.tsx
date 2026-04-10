@@ -5,16 +5,16 @@ import {
   GenericDataTable,
   GenericDataTableModal,
   ColumnDef,
-} from "@/freecomponents/ui/generic-data-table";
-import { Button } from "@/freecomponents/ui/button";
+} from "@/components/ui/generic-data-table";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/freecomponents/ui/card";
-import { Badge } from "@/freecomponents/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogCancel,
-} from "@/freecomponents/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 import {
   Database,
   Users,

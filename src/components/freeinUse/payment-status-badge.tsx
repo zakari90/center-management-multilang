@@ -1,4 +1,4 @@
-import { Badge } from "@/freecomponents/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { PaymentStatus } from "@/freelib/payment-utils";
 import { format } from "date-fns";
 import { CheckCircle2, AlertCircle, Clock } from "lucide-react";
