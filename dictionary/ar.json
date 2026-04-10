@@ -2018,6 +2018,7 @@
   "publicRegistration": {
     "studentTitle": "تسجيل الطلاب",
     "teacherTitle": "تسجيل المعلمين",
+    "noGradesAvailable": "لا توجد مستويات متاحة حاليا",
     "description": "املأ بياناتك للتسجيل",
     "name": "الاسم الكامل",
     "namePlaceholder": "أدخل اسمك الكامل",

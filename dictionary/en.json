@@ -2037,6 +2037,7 @@
   "publicRegistration": {
     "studentTitle": "Student Registration",
     "teacherTitle": "Teacher Registration",
+    "noGradesAvailable": "No grades available at the moment",
     "description": "Fill in your details to register",
     "name": "Full Name",
     "namePlaceholder": "Enter your full name",

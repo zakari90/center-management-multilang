@@ -2010,6 +2010,7 @@
   "publicRegistration": {
     "studentTitle": "Inscription élève",
     "teacherTitle": "Inscription enseignant",
+    "noGradesAvailable": "Aucun niveau disponible pour le moment",
     "description": "Remplissez vos coordonnées pour vous inscrire",
     "name": "Nom complet",
     "namePlaceholder": "Entrez votre nom complet",
