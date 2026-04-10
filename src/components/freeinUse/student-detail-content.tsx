@@ -1,0 +1,450 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { ModalLink } from "@/components/freeinUse/modal-link";
+import { useTranslations } from "next-intl";
+import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  studentActions,
+  studentSubjectActions,
+  subjectActions,
+  receiptActions,
+  centerActions,
+} from "@/freelib/dexie/freedexieaction";
+import { paymentService } from "@/freelib/services/paymentService";
+import { PaymentStatus } from "@/freelib/payment-utils";
+import { PaymentStatusBadge } from "@/components/freeinUse/payment-status-badge";
+
+interface StudentSubject {
+  id: string;
+  subject: {
+    id: string;
+    name: string;
+    grade: string;
+    price: number;
+    duration: number | null;
+  };
+  enrolledAt: string;
+}
+
+interface Receipt {
+  id: string;
+  receiptNumber: string;
+  amount: number;
+  date: string;
+  paymentMethod: string | null;
+  description: string | null;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  parentName: string | null;
+  parentPhone: string | null;
+  parentEmail: string | null;
+  grade: string | null;
+  createdAt: string;
+  studentSubjects: StudentSubject[];
+  receipts: Receipt[];
+}
+
+interface StudentDetailContentProps {
+  studentId: string;
+  isModal?: boolean;
+}
+
+export function StudentDetailContent({
+  studentId,
+  isModal = false,
+}: StudentDetailContentProps) {
+  const t = useTranslations("StudentDetailPage");
+  const [student, setStudent] = useState<Student | null>(null);
+  const [academicYearStatus, setAcademicYearStatus] = useState<
+    (PaymentStatus & { month: string })[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchStudent = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      // ✅ Fetch from local DB
+      const [
+        allStudents,
+        allStudentSubjects,
+        allSubjects,
+        allReceipts,
+        allCenters,
+      ] = await Promise.all([
+        studentActions.getAll(),
+        studentSubjectActions.getAll(),
+        subjectActions.getAll(),
+        receiptActions.getAll(),
+        centerActions.getAll(),
+      ]);
+
+      // ✅ Find student by ID
+      const studentData = allStudents.find((s) => s.id === studentId);
+
+      if (!studentData) {
+        throw new Error(t("studentNotFound"));
+      }
+
+      // Find center
+      const center = allCenters[0];
+
+      if (center) {
+        const yearStatus = await paymentService.getStudentAcademicYearStatus(
+          studentId,
+          center.id,
+        );
+        setAcademicYearStatus(yearStatus);
+      }
+
+      // ✅ Get student subjects
+      const studentSubjectsData = allStudentSubjects
+        .filter((ss) => ss.studentId === studentId)
+        .map((ss) => {
+          const subject = allSubjects.find((s) => s.id === ss.subjectId);
+          if (!subject) return null;
+
+          return {
+            id: ss.id,
+            subject: {
+              id: subject.id,
+              name: subject.name,
+              grade: subject.grade,
+              price: subject.price,
+              duration: subject.duration ?? null,
+            },
+            enrolledAt: new Date(ss.createdAt).toISOString(),
+          };
+        })
+        .filter((ss) => ss !== null) as StudentSubject[];
+
+      // ✅ Get student receipts
+      const studentReceipts = allReceipts
+        .filter((r) => r.studentId === studentId)
+        .map((r) => ({
+          id: r.id,
+          receiptNumber: r.receiptNumber,
+          amount: r.amount,
+          date: new Date(r.date).toISOString(),
+          paymentMethod: r.paymentMethod ?? null,
+          description: r.description ?? null,
+        }));
+
+      // ✅ Build student data matching the interface
+      const studentResult: Student = {
+        id: studentData.id,
+        name: studentData.name,
+        email: studentData.email ?? null,
+        phone: studentData.phone ?? null,
+        parentName: studentData.parentName ?? null,
+        parentPhone: studentData.parentPhone ?? null,
+        parentEmail: studentData.parentEmail ?? null,
+        grade: studentData.grade ?? null,
+        createdAt: new Date(studentData.createdAt).toISOString(),
+        studentSubjects: studentSubjectsData,
+        receipts: studentReceipts,
+      };
+
+      setStudent(studentResult);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("somethingWentWrong"));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [studentId, t]);
+
+  useEffect(() => {
+    fetchStudent();
+  }, [fetchStudent]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (error || !student) {
+    return (
+      <div className={isModal ? "p-4" : "max-w-4xl mx-auto p-6"}>
+        <Alert variant="destructive">
+          <AlertDescription>{error || t("studentNotFound")}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  const totalRevenue = student.studentSubjects.reduce(
+    (total, ss) => total + ss.subject.price,
+    0,
+  );
+  const totalPaid = student.receipts.reduce(
+    (total, receipt) => total + receipt.amount,
+    0,
+  );
+
+  const content = (
+    <>
+      <div className={isModal ? "mb-4" : "mb-6"}>
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <h1
+              className={
+                isModal
+                  ? "text-2xl font-bold text-foreground"
+                  : "text-3xl font-bold text-foreground"
+              }
+            >
+              {student.name}
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {t("studentSince")}{" "}
+              {new Date(student.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+          <Button
+            asChild
+            size={isModal ? "sm" : "default"}
+            className="shrink-0"
+          >
+            <ModalLink href={`/admin/students/${student.id}/edit`}>
+              {t("editStudent")}
+            </ModalLink>
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div
+        className={`grid grid-cols-1 md:grid-cols-3 gap-4 ${isModal ? "mb-4" : "mb-6"}`}
+      >
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">
+              {t("enrolledSubjects")}
+            </p>
+            <p className="text-3xl font-bold text-primary">
+              {student.studentSubjects.length}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">
+              {t("totalRevenue")}
+            </p>
+            <p className="text-3xl font-bold text-green-600">
+              {totalRevenue.toFixed(2)} MAD
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground mb-1">
+              {t("totalPaid")}
+            </p>
+            <p className="text-3xl font-bold text-purple-600">
+              {totalPaid.toFixed(2)} MAD
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div
+        className={`grid grid-cols-1 lg:grid-cols-3 ${isModal ? "gap-4" : "gap-6"}`}
+      >
+        {/* Left Column */}
+        <div className={`lg:col-span-2 ${isModal ? "space-y-4" : "space-y-6"}`}>
+          {/* Contact Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("contactInformation")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("email")}</p>
+                  <p className="text-foreground">
+                    {student.email || t("notProvided")}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("phone")}</p>
+                  <p className="text-foreground">
+                    {student.phone || t("notProvided")}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {t("gradeLevel")}
+                  </p>
+                  <p className="text-foreground">
+                    {student.grade || t("notProvided")}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Parent Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("parentGuardian")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("name")}</p>
+                  <p className="text-foreground">
+                    {student.parentName || t("notProvided")}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("phone")}</p>
+                  <p className="text-foreground">
+                    {student.parentPhone || t("notProvided")}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm text-muted-foreground">{t("email")}</p>
+                  <p className="text-foreground">
+                    {student.parentEmail || t("notProvided")}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment State Grid */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("paymentState") || "Payment State"}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                {academicYearStatus.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center p-2 bg-muted/50 rounded-lg border text-center"
+                  >
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground mb-1">
+                      {item.month.split(" ")[0]}
+                    </span>
+                    <PaymentStatusBadge status={item} />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Enrolled Subjects */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("enrolledSubjects")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {student.studentSubjects.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  {t("noSubjectsEnrolled")}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {student.studentSubjects.map((ss) => (
+                    <div
+                      key={ss.id}
+                      className="p-4 bg-muted rounded-md flex justify-between items-center"
+                    >
+                      <div>
+                        <h3 className="font-semibold text-foreground">
+                          {ss.subject.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {ss.subject.grade}
+                          {ss.subject.duration &&
+                            ` • ${ss.subject.duration} ${t("minutes")}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {t("enrolledOn")}{" "}
+                          {new Date(ss.enrolledAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          {ss.subject.price.toFixed(2)} MAD
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Payment History */}
+        <div className={isModal ? "space-y-4" : "space-y-6"}>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("paymentHistory")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {student.receipts.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  {t("noPaymentsYet")}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {student.receipts.map((receipt) => (
+                    <div key={receipt.id} className="p-3 bg-muted rounded-md">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {receipt.amount.toFixed(2)} MAD
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {receipt.receiptNumber}
+                          </p>
+                        </div>
+                        {receipt.paymentMethod && (
+                          <Badge variant="secondary">
+                            {receipt.paymentMethod}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(receipt.date).toLocaleDateString()}
+                      </p>
+                      {receipt.description && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {receipt.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+
+  if (isModal) {
+    return <div className="p-2">{content}</div>;
+  }
+
+  return <div className="max-w-6xl mx-auto p-6">{content}</div>;
+}

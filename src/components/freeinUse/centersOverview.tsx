@@ -1,0 +1,239 @@
+// components/admin/centers-overview.tsx
+"use client";
+
+import { Badge } from "@/freecomponents/ui/badge";
+import { Button } from "@/freecomponents/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/freecomponents/ui/card";
+import { Progress } from "@/freecomponents/ui/progress";
+// import axios from 'axios' // ✅ Commented out - using local DB instead
+import { Building2, Coins, Eye, Loader2, MapPin, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useState, useCallback } from "react";
+import {
+  centerActions,
+  studentActions,
+  teacherActions,
+  receiptActions,
+  userActions,
+} from "@/freelib/dexie/freedexieaction";
+import { ReceiptType } from "@/freelib/dexie/dbSchema";
+
+interface Center {
+  id: string;
+  name: string;
+  address: string | null;
+  studentsCount: number;
+  teachersCount: number;
+  revenue: number;
+  adminsCount: number;
+}
+
+export default function CenterOverview() {
+  const t = useTranslations("centerOverview");
+  const queryData = useLiveQuery(async () => {
+    try {
+      // ✅ Fetch from local DB
+      const [allCenters, allStudents, allTeachers, allReceipts] =
+        await Promise.all([
+          centerActions.getAll(),
+          studentActions.getAll(),
+          teacherActions.getAll(),
+          receiptActions.getAll(),
+        ]);
+
+      // ✅ Filter active entities
+      const activeCenters = allCenters;
+      const activeStudents = allStudents;
+      const activeTeachers = allTeachers;
+      const activeReceipts = allReceipts;
+
+      // ✅ Build centers data with stats
+      const centersData: Center[] = activeCenters.map((center) => {
+        // Count all students and teachers (assuming local-only single center management for now)
+        // Adjust this if you want to filter by centerId if added to other schemas
+        const studentsCount = activeStudents.length;
+        const teachersCount = activeTeachers.length;
+
+        // Calculate revenue from all receipts
+        const centerReceipts = activeReceipts.filter(
+          (r) => r.type === ReceiptType.STUDENT_PAYMENT,
+        );
+        const revenue = centerReceipts.reduce((sum, r) => sum + r.amount, 0);
+
+        // Count admins (just the current user in local mode)
+        const adminsCount = 1;
+
+        return {
+          id: center.id,
+          name: center.name,
+          address: center.address || null,
+          studentsCount,
+          teachersCount,
+          revenue,
+          adminsCount,
+        };
+      });
+
+      return centersData;
+    } catch (err) {
+      console.error("Failed to fetch centers from local DB:", err);
+      return [];
+    }
+  }, []);
+
+  const centers = queryData || [];
+  const isLoading = queryData === undefined;
+
+  const totalRevenue = centers.reduce((sum, c) => sum + c.revenue, 0);
+
+  return (
+    <Card className="col-span-4">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : centers.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>{t("noCenters")}</p>
+            {/* <Button asChild className="mt-4">
+              <Link href="/admin/center">{t('createFirstCenter')}</Link>
+            </Button> */}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {centers.map((center) => (
+              <Card
+                key={center.id}
+                className="border-2 hover:border-primary/50 transition-all duration-200"
+              >
+                <CardContent className="p-4 sm:p-6">
+                  {/* Main Container - Stack on mobile, horizontal on larger screens */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    {/* Left Section - Content */}
+                    <div className="flex-1 space-y-3 sm:space-y-4">
+                      {/* Header - Name, Badge, Address */}
+                      <div className="space-y-2">
+                        {/* Name and Badge - Stack on very small screens */}
+                        <div className="flex flex-col xs:flex-row xs:items-center xs:flex-wrap gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Building2 className="h-5 w-5 text-primary shrink-0" />
+                            <span className="text-base sm:text-lg font-semibold truncate">
+                              {center.name}
+                            </span>
+                          </div>
+                          <Badge variant="secondary" className="w-fit text-xs">
+                            {center.adminsCount} {t("admins")}
+                          </Badge>
+                        </div>
+
+                        {/* Address */}
+                        {center.address && (
+                          <div className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground">
+                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 shrink-0" />
+                            <span className="line-clamp-2">
+                              {center.address}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stats Grid - Responsive  */}
+                      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                        {/* Students */}
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Users className="h-3 w-3 shrink-0" />
+                            <span>{t("students")}</span>
+                          </div>
+                          <div className="text-xl sm:text-2xl font-bold text-primary">
+                            {center.studentsCount.toLocaleString()}
+                          </div>
+                        </div>
+
+                        {/* Teachers */}
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Users className="h-3 w-3 shrink-0" />
+                            <span>{t("teachers")}</span>
+                          </div>
+                          <div className="text-xl sm:text-2xl font-bold text-primary">
+                            {center.teachersCount.toLocaleString()}
+                          </div>
+                        </div>
+
+                        {/* Revenue - Full width on mobile if needed */}
+                        <div className="space-y-1 xs:col-span-2 sm:col-span-1">
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Coins className="h-3 w-3 shrink-0" />
+                            <span>{t("revenue")}</span>
+                          </div>
+                          <div className="text-xl sm:text-2xl font-bold text-green-600">
+                            {center.revenue.toLocaleString("ar-MA", {
+                              style: "currency",
+                              currency: "MAD",
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Performance Progress Bar */}
+                      {totalRevenue > 0 && (
+                        <div className="space-y-1.5 w-full">
+                          <div className="flex flex-col xs:flex-row xs:justify-between gap-1 text-xs text-muted-foreground">
+                            <span>{t("performance")}</span>
+                            <span className="font-medium">
+                              {((center.revenue / totalRevenue) * 100).toFixed(
+                                1,
+                              )}
+                              % {t("ofTotal")}
+                            </span>
+                          </div>
+                          <Progress
+                            value={(center.revenue / totalRevenue) * 100}
+                            className="h-2"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Button - Full width on mobile, auto on larger */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="w-full sm:w-auto sm:shrink-0 order-first sm:order-last"
+                    >
+                      <Link href={`/admin/center`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
