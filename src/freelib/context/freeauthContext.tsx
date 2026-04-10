@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { useTranslations } from "next-intl";
-import { localDb } from "@/freelib/dexie/dbSchema";
+import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 import { userActions } from "@/freelib/dexie/freedexieaction";
 
 export interface User {
@@ -60,6 +60,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const maybeUser = JSON.parse(raw) as User;
         if (maybeUser?.id && maybeUser?.role) {
           
+          // Only verify against DB if the database actually exists
+          const dbExists = await isDatabaseCreated();
+          if (!dbExists) {
+            // No database yet — cached session is stale
+            try {
+              localStorage.removeItem(LAST_USER_KEY);
+            } catch {}
+            setUser(null);
+            setIsLoading(false);
+            return;
+          }
+
           // Verify against freecenterdb to ensure the user actually exists
           const dbUser = await userActions.getLocal(maybeUser.id);
           

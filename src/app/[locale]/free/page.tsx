@@ -8,8 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ShieldCheck, WifiOff, ServerOff, Database, ArrowRight, ArrowLeft } from "lucide-react";
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
-import { userActions } from "@/freelib/dexie/freedexieaction";
-import { Role } from "@/freelib/dexie/dbSchema";
+import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 
 export default function FreeVersionIntro() {
   const locale = useLocale();
@@ -18,15 +17,23 @@ export default function FreeVersionIntro() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    userActions
-      .getAll()
-      .then((users) => {
-        const hasAdminUser = users.some((u) => u.role === Role.ADMIN);
-        if (hasAdminUser) {
-          router.push(`/${locale}/free/admin`);
-        } else {
-          setIsChecking(false);
+    // Check if the database even exists before trying to query it.
+    // This prevents creating an empty IndexedDB for first-time visitors.
+    isDatabaseCreated()
+      .then(async (exists) => {
+        if (exists) {
+          // DB exists — dynamically import the heavy Dexie actions only when needed
+          const { userActions } = await import("@/freelib/dexie/freedexieaction");
+          const { Role } = await import("@/freelib/dexie/dbSchema");
+          const users = await userActions.getAll();
+          const hasAdminUser = users.some((u) => u.role === Role.ADMIN);
+          if (hasAdminUser) {
+            router.push(`/${locale}/free/admin`);
+            return;
+          }
         }
+        // No DB or no admin — show the intro page
+        setIsChecking(false);
       })
       .catch((error) => {
         console.error("Dexie check failed:", error);

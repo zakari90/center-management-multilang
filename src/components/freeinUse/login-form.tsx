@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/freelib/context/freeauthContext";
 import { loginWithRole } from "@/freelib/actionsClient";
 import { cn } from "@/freelib/utils";
-import { Role } from "@/freelib/dexie/dbSchema";
+import { Role, isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 import { userActions } from "@/freelib/dexie/freedexieaction";
 import {
   AlertCircle,
@@ -60,12 +60,18 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(false);
 
-  // Check if admin exists on mount
+  // Check if admin exists on mount — only touch DB if it already exists
   useEffect(() => {
     setCheckingAdmin(true);
-    userActions
-      .getAll()
-      .then((users) => {
+    isDatabaseCreated()
+      .then(async (exists) => {
+        if (!exists) {
+          // DB doesn't exist yet — no admin for sure
+          setHasAdmin(false);
+          return;
+        }
+        // DB exists, check for admin user
+        const users = await userActions.getAll();
         const hasAdminUser = users.some((u) => u.role === Role.ADMIN);
         setHasAdmin(hasAdminUser);
       })

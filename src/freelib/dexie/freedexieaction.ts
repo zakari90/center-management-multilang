@@ -14,68 +14,72 @@ export interface freedexieaction<T extends BaseEntity> {
   getLocalByEmail?: (email: string) => Promise<T | undefined>;
 }
 
+/**
+ * Factory to generate CRUD actions using a lazy table getter.
+ * This ensures IndexedDB is NOT initialized until a method is called.
+ */
 export function generatefreedexieaction<T extends BaseEntity>(
-  table: Table<T>,
+  getTable: () => Table<T>,
   hasEmailField = false,
 ): freedexieaction<T> {
   const actions: freedexieaction<T> = {
     putLocal: async (item: T): Promise<string> => {
-      const key = await table.put(item);
+      const key = await getTable().put(item);
       return key as string;
     },
 
     create: async (item: T): Promise<string> => {
-      const key = await table.add(item);
+      const key = await getTable().add(item);
       return key as string;
     },
 
     update: async (id: string, changes: Partial<T>): Promise<number> => {
-      return await table.update(id, changes as any);
+      return await getTable().update(id, changes as any);
     },
 
     bulkPutLocal: async (items: T[]): Promise<string[]> => {
       if (items.length === 0) return [];
-      const keys = await table.bulkPut(items, { allKeys: true });
+      const keys = await getTable().bulkPut(items, { allKeys: true });
       return keys as string[];
     },
 
     getAll: async (): Promise<T[]> => {
-      return await table.orderBy("updatedAt").reverse().toArray();
+      return await getTable().orderBy("updatedAt").reverse().toArray();
     },
 
     getLocal: async (id: string): Promise<T | undefined> => {
-      return await table.get(id);
+      return await getTable().get(id);
     },
 
     deleteLocal: async (id: string): Promise<void> => {
-      await table.delete(id);
+      await getTable().delete(id);
     },
 
     bulkDeleteLocal: async (ids: string[]): Promise<void> => {
       if (ids.length === 0) return;
-      await table.bulkDelete(ids);
+      await getTable().bulkDelete(ids);
     },
   };
 
   if (hasEmailField) {
     actions.getLocalByEmail = async (email: string): Promise<T | undefined> => {
-      return await table.where("email").equals(email).first();
+      return await getTable().where("email").equals(email).first();
     };
   }
 
   return actions;
 }
 
-// Export actions
-export const centerActions = generatefreedexieaction(localDb.centers, false);
-export const userActions = generatefreedexieaction(localDb.users, true); 
-export const teacherActions = generatefreedexieaction(localDb.teachers, true);
-export const studentActions = generatefreedexieaction(localDb.students, true);
-export const subjectActions = generatefreedexieaction(localDb.subjects, false);
-export const teacherSubjectActions = generatefreedexieaction(localDb.teacherSubjects, false);
-export const studentSubjectActions = generatefreedexieaction(localDb.studentSubjects, false);
-export const receiptActions = generatefreedexieaction(localDb.receipts, false);
-export const scheduleActions = generatefreedexieaction(localDb.schedules, false);
+// Export actions with lazy getters to prevent eager initialization
+export const centerActions = generatefreedexieaction(() => localDb.centers, false);
+export const userActions = generatefreedexieaction(() => localDb.users, true); 
+export const teacherActions = generatefreedexieaction(() => localDb.teachers, true);
+export const studentActions = generatefreedexieaction(() => localDb.students, true);
+export const subjectActions = generatefreedexieaction(() => localDb.subjects, false);
+export const teacherSubjectActions = generatefreedexieaction(() => localDb.teacherSubjects, false);
+export const studentSubjectActions = generatefreedexieaction(() => localDb.studentSubjects, false);
+export const receiptActions = generatefreedexieaction(() => localDb.receipts, false);
+export const scheduleActions = generatefreedexieaction(() => localDb.schedules, false);
 
 // ✅ Cascade delete helper for center with all related entities
 export async function deleteCenterWithRelations(centerId: string): Promise<void> {

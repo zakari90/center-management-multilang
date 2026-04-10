@@ -125,6 +125,9 @@ export interface Schedule extends BaseEntity {
   adminId?: string;
 }
 
+// Database name constant
+export const DB_NAME = "freecenterdb";
+
 // Main Database Class
 export class AppDatabase extends Dexie {
   centers!: Table<Center>;
@@ -138,7 +141,7 @@ export class AppDatabase extends Dexie {
   schedules!: Table<Schedule>;
 
   constructor() {
-    super("freecenterdb");
+    super(DB_NAME);
 
     this.version(1).stores({
       centers: "id, adminId, updatedAt",
@@ -154,5 +157,35 @@ export class AppDatabase extends Dexie {
   }
 }
 
-// Export singleton instance
-export const localDb = new AppDatabase();
+// Lazy singleton — database is NOT created until first access
+let _localDb: AppDatabase | null = null;
+
+/**
+ * Get the database instance (creates it on first call).
+ * Use this instead of accessing `localDb` directly when you need
+ * to guarantee the database exists.
+ */
+export function getDb(): AppDatabase {
+  if (!_localDb) {
+    _localDb = new AppDatabase();
+  }
+  return _localDb;
+}
+
+/**
+ * Check whether the IndexedDB database has been created yet,
+ * WITHOUT triggering its creation.
+ */
+export async function isDatabaseCreated(): Promise<boolean> {
+  return await Dexie.exists(DB_NAME);
+}
+
+/**
+ * @deprecated Use `getDb()` instead. Kept for backward compatibility
+ * but now lazily initialized.
+ */
+export const localDb = new Proxy({} as AppDatabase, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getDb(), prop, receiver);
+  },
+});
