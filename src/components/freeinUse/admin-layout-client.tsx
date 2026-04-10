@@ -68,19 +68,19 @@ export default function AdminLayoutClient({
     if (!mounted || isLoading) return;
 
     if (!user) {
-      router.push(`/${locale}/login`);
+      router.push(`/${locale}/free/login`);
       return;
     }
 
     if (user.role !== "ADMIN") {
-      router.push(`/${locale}/admin`);
+      router.push(`/${locale}/free/admin`);
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
 
   const handleLogout = useCallback(async () => {
     await logout();
-    router.push(`/${locale}/login`);
+    router.push(`/${locale}/free/login`);
   }, [logout, router, locale]);
 
   // Removed manual sync function
@@ -118,32 +118,32 @@ export default function AdminLayoutClient({
   const navItems = [
     {
       title: t("dashboard"),
-      url: `${base}/admin`,
+      url: `${base}/free/admin`,
       icon: "/dashboard.svg",
     },
     {
       title: t("center"),
-      url: `${base}/admin/center`,
+      url: `${base}/free/admin/center`,
       icon: "/school.svg",
     },
     {
       title: t("users"),
-      url: `${base}/admin/users`,
+      url: `${base}/free/admin/users`,
       icon: "/admin.svg",
     },
     {
       title: t("receipts"),
-      url: `${base}/admin/receipts`,
+      url: `${base}/free/admin/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: `${base}/admin/schedule`,
+      url: `${base}/free/admin/schedule`,
       icon: "/calendar.svg",
     },
     {
       title: t("database"),
-      url: `${base}/admin/database`,
+      url: `${base}/free/admin/database`,
       icon: "/database.svg",
     },
   ];
@@ -196,32 +196,32 @@ export default function AdminLayoutClient({
           items={[
             {
               label: t("dashboard"),
-              href: `${base}/admin`,
+              href: `${base}/free/admin`,
               icon: <Home className="size-5" />,
             },
             {
               label: t("center"),
-              href: `${base}/admin/center`,
+              href: `${base}/free/admin/center`,
               icon: <LayoutGrid className="size-5" />,
             },
             {
               label: t("users"),
-              href: `${base}/admin/users`,
+              href: `${base}/free/admin/users`,
               icon: <Users className="size-5" />,
             },
             {
               label: t("receipts"),
-              href: `${base}/admin/receipts`,
+              href: `${base}/free/admin/receipts`,
               icon: <FileText className="size-5" />,
             },
             {
               label: t("schedule"),
-              href: `${base}/admin/schedule`,
+              href: `${base}/free/admin/schedule`,
               icon: <CalendarDays className="size-5" />,
             },
             {
               label: t("database"),
-              href: `${base}/admin/database`,
+              href: `${base}/free/admin/database`,
               icon: <Database className="size-5" />,
             },
           ]}

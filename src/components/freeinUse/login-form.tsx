@@ -84,7 +84,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
     if (state?.success && state?.data?.user) {
       login(state.data.user);
       const base = `/${locale}`;
-      const destination = `${base}/admin`;
+      const destination = `${base}/free/admin`;
       window.location.href = destination;
     }
   }, [state, login, locale]);

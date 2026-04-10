@@ -25,7 +25,7 @@ export default function AuthLayout({
     if (!mounted || isLoading) return;
 
     if (user?.role === Role.ADMIN) {
-      router.push(`/${locale}/admin`);
+      router.push(`/${locale}/free/admin`);
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
