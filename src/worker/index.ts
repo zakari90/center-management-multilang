@@ -11,8 +11,9 @@ sw.addEventListener("error", (event: any) => {
 
 sw.addEventListener("unhandledrejection", (event: any) => {});
 
-const PAGES_CACHE = "pages-v1";
-const ASSETS_CACHE = "assets-v1";
+const SW_VERSION = "v1.2.0";
+const PAGES_CACHE = `pages-${SW_VERSION}`;
+const ASSETS_CACHE = `assets-${SW_VERSION}`;
 
 sw.addEventListener("install", (event: any) => {
   // Activate new SW immediately.

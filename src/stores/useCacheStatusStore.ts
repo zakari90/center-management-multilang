@@ -29,14 +29,19 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
     try {
       const cache = await caches.open(PAGES_CACHE_NAME);
       const newStatuses: Record<string, boolean> = {};
+      const origin = window.location.origin;
 
       const localizedPages = BASE_PAGES.map((p) => `/${locale}${p === "/" ? "" : p}`);
       
       const results = await Promise.all(
-        localizedPages.map(async (url) => {
-          const match = await cache.match(url);
+        localizedPages.map(async (pagePath) => {
+          // The SW stores pages with a __sw_locale query param as the cache key,
+          // e.g. "http://localhost:3000/ar/admin?__sw_locale=ar"
+          const cacheKeyUrl = `${origin}${pagePath}?__sw_locale=${encodeURIComponent(locale)}`;
+          const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
+          const match = await cache.match(cacheKey);
           const isCached = !!match;
-          newStatuses[url] = isCached;
+          newStatuses[pagePath] = isCached;
           return isCached;
         })
       );
