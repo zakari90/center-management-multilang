@@ -14,6 +14,7 @@ import { PaginationControls } from "@/components/ui/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { ReceiptText } from "lucide-react";
 import { RequestDeleteDialog } from "@/components/RequestDeleteDialog";
+import { DirectDeleteDialog } from "@/components/DirectDeleteDialog";
 
 interface StudentsTableViewProps {
   students: Student[];
@@ -204,11 +205,18 @@ export function StudentsTableView({
                           onStudentUpdated={onUpdate}
                           adminMode={adminMode}
                         />
-                        {!adminMode && (
+                        {!adminMode ? (
                           <RequestDeleteDialog
                             entityId={student.id}
                             entityType="student"
                             entityName={student.name}
+                          />
+                        ) : (
+                          <DirectDeleteDialog
+                            entityId={student.id}
+                            entityType="student"
+                            entityName={student.name}
+                            onDelete={onUpdate}
                           />
                         )}
                       </div>

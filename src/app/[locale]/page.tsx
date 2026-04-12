@@ -1,6 +1,7 @@
 "use client";
 
 import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
+import { PublicOfferings } from "@/components/PublicOfferings";
 import { useAuth } from "@/context/authContext";
 import { useLocale, useTranslations } from "next-intl";
 import Lottie from "lottie-react";
@@ -86,9 +87,9 @@ function HomePageContent() {
     address: center?.homeAddress || "حي وريدة",
   };
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = (type: "student" | "teacher" = "student") => {
     if (center && center.publicRegistrationEnabled !== false) {
-      setRegisterType("student");
+      setRegisterType(type);
       setShowRegisterDialog(true);
     }
   };
@@ -185,7 +186,7 @@ function HomePageContent() {
             {center?.publicRegistrationEnabled !== false && (
               <div className="animate-fade-in-up mt-10" style={{ animationDelay: '300ms' }}>
                 <button 
-                  onClick={handleRegisterClick}
+                  onClick={() => handleRegisterClick("student")}
                   className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-[0_8px_30px_rgb(79,70,229,0.3)] transition-all duration-300 hover:shadow-[0_12px_40px_rgb(79,70,229,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-95"
                 >
                   <span className="transform translate-y-px">{content.ctaText}</span>
@@ -212,6 +213,12 @@ function HomePageContent() {
           </div>
         </div>
       </div>
+
+      {/* Public Offerings (Subjects, Grades, Teachers) */}
+      <PublicOfferings 
+        centerId={center?.id} 
+        onRegisterClick={handleRegisterClick}
+      />
 
       {/* Floating Glassmorphic Contact Dock */}
       <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 animate-fade-in-up" style={{ animationDelay: '500ms' }}>

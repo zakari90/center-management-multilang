@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ReceiptText } from "lucide-react";
 import AddTeacherPaymentDialog from "../AddTeacherPaymentDialog";
 import { RequestDeleteDialog } from "@/components/RequestDeleteDialog";
+import { DirectDeleteDialog } from "@/components/DirectDeleteDialog";
 
 interface TeachersTableViewProps {
   teachers: Teacher[];
@@ -235,11 +236,18 @@ export function TeachersTableView({
                           onTeacherUpdated={onUpdate}
                           adminMode={adminMode}
                         />
-                        {!adminMode && (
+                        {!adminMode ? (
                           <RequestDeleteDialog
                             entityId={teacher.id}
                             entityType="teacher"
                             entityName={teacher.name}
+                          />
+                        ) : (
+                          <DirectDeleteDialog
+                            entityId={teacher.id}
+                            entityType="teacher"
+                            entityName={teacher.name}
+                            onDelete={onUpdate}
                           />
                         )}
                       </div>

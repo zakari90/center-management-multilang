@@ -2032,6 +2032,22 @@
     "register": "تسجيل",
     "submitting": "جاري الإرسال...",
     "success": "تم إرسال التسجيل بنجاح!",
-    "successDescription": "سنتصل بك قريباً لإتمام الخطوات التالية."
+    "successDescription": "سنتصل بك قريباً لإتمام الخطوات التالية.",
+    "totalPrice": "إجمالي الرسوم الشهرية"
+  },
+  "PublicOfferings": {
+    "subjectsBadge": "البرامج الأكاديمية",
+    "subjectsTitle": "المواد والمستويات المتاحة",
+    "subjectsSubtitle": "استكشف مجموعتنا الواسعة من المواد المصممة لكل مستوى.",
+    "subjectsCount": "مواد متاحة",
+    "registerNow": "تسجيل",
+    "teachersBadge": "فريقنا",
+    "teachersTitle": "تعرف على أساتذتنا الخبراء",
+    "teachersSubtitle": "تعلم من محترفين متخصصين وشغوفين بالتعليم.",
+    "verified": "خبير معتمد",
+    "ctaTitle": "هل أنت مستعد لبدء رحلتك؟",
+    "ctaDescription": "انضم إلى مئات الطلاب الذين يتفوقون بالفعل من خلال برامج الدعم المتخصصة لدينا.",
+    "ctaStudentButton": "انضم كطالب",
+    "ctaTeacherButton": "انضم كأستاذ"
   }
 }

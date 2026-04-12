@@ -2024,6 +2024,23 @@
     "register": "S'inscrire",
     "submitting": "Envoi en cours...",
     "success": "Inscription soumise avec succès !",
-    "successDescription": "Nous vous contacterons bientôt pour les prochaines étapes."
+    "successDescription": "Nous vous contacterons bientôt pour les prochaines étapes.",
+    "centerOverview": "Aperçu du centre",
+    "totalPrice": "Total des frais mensuels"
+  },
+  "PublicOfferings": {
+    "subjectsBadge": "Programmes Académiques",
+    "subjectsTitle": "Matières et Niveaux Disponibles",
+    "subjectsSubtitle": "Explorez notre large gamme de matières adaptées à chaque niveau.",
+    "subjectsCount": "Matières Disponibles",
+    "registerNow": "S'inscrire",
+    "teachersBadge": "Notre Équipe",
+    "teachersTitle": "Rencontrez nos Enseignants Experts",
+    "teachersSubtitle": "Apprenez auprès de professionnels dévoués et passionnés par l'éducation.",
+    "verified": "Expert Vérifié",
+    "ctaTitle": "Prêt à commencer votre voyage ?",
+    "ctaDescription": "Rejoignez des centaines d'étudiants qui excellent déjà grâce à nos programmes de soutien spécialisés.",
+    "ctaStudentButton": "Rejoindre en tant qu'Étudiant",
+    "ctaTeacherButton": "Rejoindre en tant qu'Enseignant"
   }
 }

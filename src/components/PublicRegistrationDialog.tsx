@@ -61,6 +61,11 @@ export function PublicRegistrationDialog({
     selectedSubjects: [] as string[],
   });
 
+  const totalPrice = formData.selectedSubjects.reduce((acc, id) => {
+    const subject = subjects.find((s) => s.id === id);
+    return acc + (subject?.price || 0);
+  }, 0);
+
   // Fetch available subjects when dialog opens — always from server, never cached
   useEffect(() => {
     if (open) {
@@ -316,6 +321,18 @@ export function PublicRegistrationDialog({
                         </label>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Total Price Summary */}
+                {type === "student" && formData.selectedSubjects.length > 0 && (
+                  <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100 flex justify-between items-center animate-in fade-in zoom-in duration-300">
+                    <span className="text-sm font-bold text-indigo-700">
+                      {t("totalPrice") || "Total Monthly Fees"}:
+                    </span>
+                    <span className="text-lg font-black text-indigo-800">
+                      {totalPrice} MAD
+                    </span>
                   </div>
                 )}
 

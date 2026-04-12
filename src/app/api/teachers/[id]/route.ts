@@ -61,14 +61,15 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Verify teacher belongs to this manager
-    const teacher = await db.teacher.findUnique({
-      where: { 
-        id,
-        ...(session.user.role !== 'ADMIN' && { managerId: session.user.id })
-      }
-    })
+    // Check if user is Admin
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Only administrators can delete records directly' }, { status: 403 })
+    }
 
+    // Verify teacher exists
+    const teacher = await db.teacher.findUnique({
+      where: { id }
+    })
 
     if (!teacher) {
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })

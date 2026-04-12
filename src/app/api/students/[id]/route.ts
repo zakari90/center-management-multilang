@@ -72,11 +72,13 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if user is Admin
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Only administrators can delete records directly' }, { status: 403 })
+    }
+
     const student = await db.student.findUnique({
-      where: {
-        id,
-        managerId: session.user.id,
-      },
+      where: { id },
     });
 
     if (!student) {

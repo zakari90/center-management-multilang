@@ -2052,6 +2052,43 @@
     "submitting": "Submitting...",
     "success": "Registration submitted successfully!",
     "successDescription": "We will contact you soon with next steps.",
-    "centerOverview": "Center Overview"
+    "centerOverview": "Center Overview",
+    "totalPrice": "Total Monthly Fees"
+  },
+  "PublicOfferings": {
+    "subjectsBadge": "Academic Programs",
+    "subjectsTitle": "Available Subjects & Grades",
+    "subjectsSubtitle": "Explore our wide range of subjects tailored for every level.",
+    "subjectsCount": "Subjects Available",
+    "registerNow": "Register",
+    "teachersBadge": "Our Team",
+    "teachersTitle": "Meet Our Expert Teachers",
+    "teachersSubtitle": "Learn from dedicated professionals who are passionate about education.",
+    "verified": "Verified Expert",
+    "ctaTitle": "Ready to start your journey?",
+    "ctaDescription": "Join hundreds of students who are already excelling with our specialized support programs.",
+    "ctaStudentButton": "Join as a Student",
+    "ctaTeacherButton": "Join as a Teacher"
+  },
+  "DirectDelete": {
+    "delete": "Delete",
+    "confirmDelete": "Confirm Deletion",
+    "warningDescription": "You are about to permanently delete {name} ({type}). This may affect related data.",
+    "undoWarning": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Confirm Delete",
+    "deleting": "Deleting...",
+    "markingDeleted": "Marking for deletion...",
+    "syncingWithServer": "Syncing with server.",
+    "deletedSuccessfully": "Deleted successfully",
+    "entityDeleted": "{name} has been deleted.",
+    "deleteFailed": "Deletion failed",
+    "errorOccurred": "An error occurred during deletion.",
+    "types": {
+      "teacher": "Teacher",
+      "student": "Student",
+      "subject": "Subject",
+      "schedule": "Schedule"
+    }
   }
 }
