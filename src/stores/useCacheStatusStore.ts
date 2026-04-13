@@ -18,8 +18,9 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
     const newStatuses = { ...get().pageStatuses, [url]: isCached };
     set({
       pageStatuses: newStatuses,
-      allCached: Object.values(newStatuses).every(Boolean) && 
-                 Object.keys(newStatuses).length >= BASE_PAGES.length
+      allCached:
+        Object.values(newStatuses).every(Boolean) &&
+        Object.keys(newStatuses).length >= BASE_PAGES.length,
     });
   },
 
@@ -40,7 +41,7 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
         }
         pagesToCheck.push(`/${locale}${p === "/" ? "" : p}`); // Localized page
       });
-      
+
       const results = await Promise.all(
         pagesToCheck.map(async (pagePath) => {
           // The SW stores pages with a __sw_locale query param as the cache key,
@@ -51,13 +52,13 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
           const isCached = !!match;
           newStatuses[pagePath] = isCached;
           return isCached;
-        })
+        }),
       );
 
       set({
         pageStatuses: newStatuses,
         allCached: results.every(Boolean),
-        isInitialCheckDone: true
+        isInitialCheckDone: true,
       });
     } catch (error) {
       console.error("Error checking cache store:", error);
