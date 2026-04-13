@@ -18,6 +18,13 @@ export const BASE_PAGES = [
   "/admin/users",
   "/admin/database",
 
+  // Manager pages
+  "/manager",
+  "/manager/teachers",
+  "/manager/students",
+  "/manager/receipts",
+  "/manager/schedule",
+
   // Free Mode pages
   "/free",
   "/free/login",

@@ -150,10 +150,7 @@ sw.addEventListener("fetch", (event: any) => {
 
   event.respondWith(
     (async () => {
-      // Local redirect for root path to mirror server behavior (vital for offline)
-      if (url.pathname === "/") {
-        return Response.redirect(`${url.origin}/ar${url.search}`, 302);
-      }
+      // Standard locale-aware caching logic...
 
       // Locale-aware caching:
       // If you include a locale in the URL (recommended), caching is naturally separated.

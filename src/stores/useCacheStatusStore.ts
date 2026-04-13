@@ -31,10 +31,18 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
       const newStatuses: Record<string, boolean> = {};
       const origin = window.location.origin;
 
-      const localizedPages = BASE_PAGES.map((p) => `/${locale}${p === "/" ? "" : p}`);
+      // Construct the list of URLs to check.
+      // We check both the localized versions AND the root shell if present.
+      const pagesToCheck: string[] = [];
+      BASE_PAGES.forEach((p) => {
+        if (p === "/") {
+          pagesToCheck.push("/"); // Root shell
+        }
+        pagesToCheck.push(`/${locale}${p === "/" ? "" : p}`); // Localized page
+      });
       
       const results = await Promise.all(
-        localizedPages.map(async (pagePath) => {
+        pagesToCheck.map(async (pagePath) => {
           // The SW stores pages with a __sw_locale query param as the cache key,
           // e.g. "http://localhost:3000/ar/admin?__sw_locale=ar"
           const cacheKeyUrl = `${origin}${pagePath}?__sw_locale=${encodeURIComponent(locale)}`;
