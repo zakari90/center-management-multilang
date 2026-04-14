@@ -265,6 +265,25 @@
     "e2eeYes": "Yes",
     "e2eeNo": "No"
   },
+  "AttendanceRegister": {
+    "morning": "Morning",
+    "evening": "Evening",
+    "viewMode": "View",
+    "editMode": "Edit",
+    "addName": "Add Name",
+    "uploadNames": "Upload Names",
+    "deleteAll": "Delete All",
+    "confirmDeleteAll": "Are you sure you want to delete all records for this session?",
+    "confirmDeleteAllDesc": "This action cannot be undone.",
+    "columns": {
+      "date": "Date",
+      "name": "Name",
+      "morning": "Morning",
+      "evening": "Evening",
+      "status": "Status",
+      "remarks": "Remarks"
+    }
+  },
   "register": {
     "successMessage": "Account created successfully! Redirecting...",
     "title": "Create an Account",
@@ -2093,7 +2112,7 @@
   },
   "AttendanceRegister": {
     "title": "Attendance Register",
-    "institution": "Institution/Organization",
+    "title": "Title",
     "month": "Month",
     "year": "Year",
     "columns": {

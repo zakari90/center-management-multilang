@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { studentActions, centerActions } from "@/freelib/dexie/freedexieaction";
+import { studentActions, centerActions, teacherActions } from "@/freelib/dexie/freedexieaction";
 import { attendanceActions, AttendanceSession, AttendanceRecord } from "@/freelib/dexie/attendanceDb";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -23,10 +25,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Printer, Users, Plus, Trash2, Home, Save, History, ChevronDown } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Printer, Users, Plus, Trash2, Home, Save, History, ChevronDown, Eye, Edit3, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Student } from "@/freelib/dexie/dbSchema";
 import { toast } from "sonner";
+import { Student } from "@/freelib/dexie/dbSchema";
 
 export default function AttendancePage() {
   const t = useTranslations("AttendanceRegister");
@@ -34,204 +48,154 @@ export default function AttendancePage() {
   const router = useRouter();
   const isRtl = locale === "ar";
   
+  // -- State --
+  const [mode, setMode] = useState<"view" | "edit">("edit");
   const [sessionId, setSessionId] = useState<string>("");
   const [institution, setInstitution] = useState("");
-  const [month, setMonth] = useState("");
-  const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [shift, setShift] = useState<"morning" | "evening">("morning");
+  const [currentDate] = useState(new Date().setHours(0, 0, 0, 0));
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pastSessions, setPastSessions] = useState<AttendanceSession[]>([]);
+  const [availableNames, setAvailableNames] = useState<{id: string, name: string}[]>([]);
 
-  // Initialize with 31 rows (days of the month)
+  // -- Initialization --
   useEffect(() => {
-    const initialRows = Array.from({ length: 31 }, (_, i) => ({
-      id: `blank-${i}`,
-      date: (i + 1).toString(),
-      name: "",
-      morning: "",
-      evening: "",
-      status: "",
-      remarks: "",
-    }));
-    setRows(initialRows);
-    setSessionId(crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
+    // 1. Auto-detect shift
+    const hour = new Date().getHours();
+    const detectedShift = (hour >= 6 && hour < 12) ? "morning" : "evening";
+    setShift(detectedShift);
 
-    // Try to load center name
+    // 2. Load center info
     centerActions.getAll().then((centers) => {
-      if (centers.length > 0) {
-        setInstitution(centers[0].name);
-      }
+      if (centers.length > 0) setInstitution(centers[0].name);
     });
 
-    // Auto-set current month
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    setMonth(monthNames[new Date().getMonth()]);
+    // 3. Load available students & teachers
+    loadAvailableNames();
 
-    // Load past sessions
+    // 4. Initial Load for today's detected shift
+    syncWithDatabase(currentDate, detectedShift);
+
+    // 5. Load history list
     loadPastSessions();
   }, []);
+
+  const loadAvailableNames = async () => {
+    try {
+      const [students, teachers] = await Promise.all([
+        studentActions.getAll(),
+        teacherActions.getAll()
+      ]);
+      const combined = [
+        ...students.map(s => ({ id: s.id, name: s.name })),
+        ...teachers.map(t => ({ id: t.id, name: t.name }))
+      ];
+      setAvailableNames(combined);
+    } catch (error) {
+      console.error("Failed to load names:", error);
+    }
+  };
+
+  const syncWithDatabase = async (date: number, selectedShift: "morning" | "evening") => {
+    setLoading(true);
+    try {
+      const { session, records } = await attendanceActions.getDailySession(date, selectedShift);
+      if (session) {
+        setSessionId(session.id);
+        setInstitution(session.institution);
+        setRows(records.map(r => ({
+          id: r.id,
+          externalId: r.externalId,
+          name: r.name,
+          morning: r.morning,
+          evening: r.evening,
+          status: r.status,
+          remarks: r.remarks,
+        })));
+        setMode("view"); // Default to view if session exists
+      } else {
+        // New session for today/shift
+        setSessionId(crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
+        setRows([]); // Start empty for Daily Log
+        setMode("edit"); // Default to edit for new session
+      }
+    } catch (error) {
+      console.error("Sync failed:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadPastSessions = async () => {
     const sessions = await attendanceActions.getAllSessions();
     setPastSessions(sessions);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
+  // -- Actions --
   const handleSave = async () => {
     setLoading(true);
     try {
       const session: AttendanceSession = {
         id: sessionId,
         institution,
-        month,
-        year,
+        month: new Date(currentDate).toLocaleString(locale, { month: 'long' }),
+        year: new Date(currentDate).getFullYear().toString(),
+        date: currentDate,
+        shift,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
       const records: AttendanceRecord[] = rows
-        .filter(r => r.name || r.status || r.remarks || r.morning || r.evening)
+        .filter(r => r.name || r.status || r.remarks)
         .map(r => ({
-          id: r.id.startsWith("blank-") ? crypto.randomUUID() : r.id,
+          id: r.id.includes("new-") ? (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36)) : r.id,
           sessionId: sessionId,
-          studentId: r.studentId || "",
-          studentName: r.name,
-          morning: r.morning,
-          evening: r.evening,
+          externalId: r.externalId || "",
+          name: r.name,
+          morning: r.morning || "",
+          evening: r.evening || "",
           status: r.status,
           remarks: r.remarks,
           updatedAt: Date.now(),
         }));
 
       await attendanceActions.saveSession(session, records);
-      toast.success(isRtl ? "تم حفظ السجل بنجاح" : "Attendance record saved successfully");
+      toast.success(isRtl ? "تم حفظ السجل" : "Attendance saved");
       loadPastSessions();
+      setMode("view");
     } catch (error) {
-      console.error("Failed to save attendance:", error);
-      toast.error(isRtl ? "فشل حفظ السجل" : "Failed to save attendance record");
+      console.error("Save failed:", error);
+      toast.error(isRtl ? "فشل الحفظ" : "Failed to save");
     } finally {
       setLoading(false);
     }
   };
 
-  const loadSession = async (id: string) => {
-    setLoading(true);
+  const handleDeleteAll = async () => {
     try {
-      const { session, records } = await attendanceActions.getSession(id);
-      if (session) {
-        setSessionId(session.id);
-        setInstitution(session.institution);
-        setMonth(session.month);
-        setYear(session.year);
-        
-        const loadedRows = records.map(r => ({
-          id: r.id,
-          studentId: r.studentId,
-          date: "", // User fills this
-          name: r.studentName,
-          morning: r.morning,
-          evening: r.evening,
-          status: r.status,
-          remarks: r.remarks,
-        }));
-        
-        // Match Loaded records to 31 rows if possible, or just append
-        if (loadedRows.length < 31) {
-          const blanks = Array.from({ length: 31 - loadedRows.length }, (_, i) => ({
-            id: `blank-${Date.now()}-${i}`,
-            date: (loadedRows.length + i + 1).toString(),
-            name: "",
-            morning: "",
-            evening: "",
-            status: "",
-            remarks: "",
-          }));
-          setRows([...loadedRows, ...blanks]);
-        } else {
-          setRows(loadedRows);
-        }
-        
-        toast.success(isRtl ? "تم تحميل السجل" : "Session loaded");
+      setRows([]);
+      if (sessionId) {
+        await attendanceActions.clearSessionRecords(sessionId);
       }
+      toast.info(isRtl ? "تم مسح جميع السجلات" : "All records cleared");
     } catch (error) {
-      console.error("Failed to load session:", error);
-    } finally {
-      setLoading(false);
+      toast.error("Error clearing records");
     }
   };
 
-  const createNewSession = () => {
-    setSessionId(crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
-    const initialRows = Array.from({ length: 31 }, (_, i) => ({
-      id: `blank-${i}`,
-      date: (i + 1).toString(),
-      name: "",
+  const addRow = (selectedPerson?: {id: string, name: string}) => {
+    const newRow = {
+      id: `new-${Date.now()}`,
+      externalId: selectedPerson?.id || "",
+      name: selectedPerson?.name || "",
       morning: "",
       evening: "",
-      status: "",
+      status: "P", // Default to present for new entries
       remarks: "",
-    }));
-    setRows(initialRows);
-    toast.info(isRtl ? "بدء سجل جديد" : "New session started");
-  };
-
-  const loadFromDatabase = async () => {
-    setLoading(true);
-    try {
-      const students = await studentActions.getAll();
-      const studentRows = students.map((s: Student, i) => ({
-        id: crypto.randomUUID ? crypto.randomUUID() : `db-${s.id}-${Date.now()}`,
-        studentId: s.id,
-        date: (i + 1).toString(),
-        name: s.name,
-        morning: "",
-        evening: "",
-        status: "",
-        remarks: "",
-      }));
-      
-      if (studentRows.length < 31) {
-        const blanks = Array.from({ length: 31 - studentRows.length }, (_, i) => ({
-          id: `blank-${Date.now()}-${i}`,
-          date: (studentRows.length + i + 1).toString(),
-          name: "",
-          morning: "",
-          evening: "",
-          status: "",
-          remarks: "",
-        }));
-        setRows([...studentRows, ...blanks]);
-      } else {
-        setRows(studentRows);
-      }
-      toast.success(isRtl ? "تم تحميل قائمة الطلاب" : "Students loaded from database");
-    } catch (error) {
-      console.error("Failed to load students:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addRow = () => {
-    const nextDate = rows.length + 1;
-    setRows([
-      ...rows,
-      {
-        id: `blank-${Date.now()}`,
-        date: nextDate.toString(),
-        name: "",
-        morning: "",
-        evening: "",
-        status: "",
-        remarks: "",
-      },
-    ]);
+    };
+    setRows([...rows, newRow]);
   };
 
   const removeRow = (id: string) => {
@@ -239,242 +203,269 @@ export default function AttendancePage() {
   };
 
   const updateRow = (id: string, field: string, value: string) => {
-    setRows(
-      rows.map((r) => (r.id === id ? { ...r, [field]: value } : r))
-    );
+    setRows(rows.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
+
+  const formattedDate = new Date(currentDate).toLocaleDateString(locale, {
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-8 print:bg-white print:p-0" dir={isRtl ? "rtl" : "ltr"}>
-      {/* Action Bar - Hidden on Print */}
+      
+      {/* --- Action Bar --- */}
       <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-4 items-center justify-between print:hidden">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => router.back()}>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => router.back()} className="rounded-full">
             <Home size={18} />
           </Button>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">{t("title")}</h1>
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-800">
+            <Button 
+              variant={mode === "view" ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => setMode("view")}
+              className={`rounded-full gap-2 ${mode === "view" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            >
+              <Eye size={16} /> {t("viewMode")}
+            </Button>
+            <Button 
+              variant={mode === "edit" ? "default" : "ghost"} 
+              size="sm" 
+              onClick={() => setMode("edit")}
+              className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            >
+              <Edit3 size={16} /> {t("editMode")}
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-3">
           <DropdownMenu dir={isRtl ? "rtl" : "ltr"}>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 rounded-full">
                 <History size={18} />
-                {isRtl ? "السجلات السابقة" : "History"}
                 <ChevronDown size={14} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[250px]">
-              <DropdownMenuLabel>{isRtl ? "الجلسات الأخيرة" : "Recent Sessions"}</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuLabel>{isRtl ? "سجلات سابقة" : "History"}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={createNewSession}>
-                <Plus size={14} className="mr-2 rtl:ml-2 rtl:mr-0" />
-                {isRtl ? "سجل جديد" : "New Session"}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {pastSessions.length === 0 ? (
-                <div className="p-2 text-xs text-center text-muted-foreground">
-                  {isRtl ? "لا توجد سجلات محفوظة" : "No saved sessions"}
-                </div>
-              ) : (
-                pastSessions.map(s => (
-                  <DropdownMenuItem key={s.id} onClick={() => loadSession(s.id)}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{s.institution || "Unnamed"}</span>
-                      <span className="text-[10px] text-muted-foreground">{s.month} {s.year}</span>
-                    </div>
-                  </DropdownMenuItem>
-                ))
-              )}
+              {pastSessions.map(s => (
+                <DropdownMenuItem key={s.id} onClick={() => syncWithDatabase(s.date, s.shift)}>
+                   <div className="flex flex-col">
+                      <span className="text-xs font-bold">{new Date(s.date).toLocaleDateString(locale)}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase">{t(s.shift)}</span>
+                   </div>
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Button variant="outline" onClick={loadFromDatabase} disabled={loading} className="gap-2">
-            <Users size={18} />
-            {t("loadStudents")}
-          </Button>
-          <Button variant="outline" onClick={addRow} className="gap-2">
-            <Plus size={18} />
-            {t("blankRows")}
-          </Button>
-          <Button onClick={handleSave} disabled={loading} className="gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200">
-            <Save size={18} />
-            {isRtl ? "حفظ" : "Save"}
-          </Button>
-          <Button onClick={handlePrint} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+          {mode === "edit" && (
+            <>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                   <Button variant="destructive" size="sm" className="gap-2 rounded-full">
+                      <Trash size={16} />
+                      {t("deleteAll")}
+                   </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("confirmDeleteAll")}</AlertDialogTitle>
+                    <AlertDialogDescription>{t("confirmDeleteAllDesc")}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel>{isRtl ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive hover:bg-destructive/90">
+                      {isRtl ? "حذف" : "Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <Button onClick={handleSave} disabled={loading} className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700">
+                <Save size={18} />
+                {isRtl ? "حفظ" : "Save"}
+              </Button>
+            </>
+          )}
+          
+          <Button onClick={() => window.print()} variant="outline" className="gap-2 rounded-full">
             <Printer size={18} />
             {t("print")}
           </Button>
         </div>
       </div>
 
-      {/* Attendance Register Card */}
-      <Card className="max-w-6xl mx-auto shadow-xl border-none print:shadow-none print:border-none overflow-hidden bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800">
-        {/* Register Header */}
-        <div className="p-8 border-b dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20 space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-4xl font-black uppercase tracking-widest text-slate-900 dark:text-white print:text-black">
-              {t("title")}
-            </h2>
-            <div className="h-1 w-24 bg-indigo-600 mx-auto print:bg-black"></div>
-            <p className="text-[10px] text-muted-foreground print:hidden">ID: {sessionId}</p>
-          </div>
+      {/* --- Attendance Register Card --- */}
+      <Card className="max-w-6xl mx-auto shadow-2xl border-none print:shadow-none print:bg-white overflow-hidden bg-white dark:bg-slate-900">
+        
+        {/* Card Header */}
+        <div className="p-8 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-center md:text-start space-y-1">
+              <h2 className="text-3xl font-black uppercase text-slate-900 dark:text-white print:text-black">
+                {t("title")}
+              </h2>
+              <p className="text-indigo-600 font-bold tracking-widest text-sm uppercase">{institution}</p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 print:text-black">
-                {t("institution")}
-              </label>
-              <Input
-                value={institution}
-                onChange={(e) => setInstitution(e.target.value)}
-                placeholder="Name of school / Company"
-                className="font-semibold text-lg border-0 border-b rounded-none focus-visible:ring-0 bg-transparent px-0 border-slate-200 dark:border-slate-700 print:border-black"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 print:text-black">
-                {t("month")}
-              </label>
-              <Input
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                placeholder="e.g. September"
-                className="font-semibold text-lg border-0 border-b rounded-none focus-visible:ring-0 bg-transparent px-0 border-slate-200 dark:border-slate-700 print:border-black"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400 print:text-black">
-                {t("year")}
-              </label>
-              <Input
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                placeholder="2024"
-                className="font-semibold text-lg border-0 border-b rounded-none focus-visible:ring-0 bg-transparent px-0 border-slate-200 dark:border-slate-700 print:border-black"
-              />
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">{isRtl ? "التاريخ" : "Date"}</p>
+                <p className="text-xl font-black text-slate-800 dark:text-white print:text-black">{formattedDate}</p>
+              </div>
+              <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block" />
+              <div className="text-center">
+                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">{isRtl ? "الفترة" : "Shift"}</p>
+                <p className="text-xl font-black text-indigo-600 uppercase">{t(shift)}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Register Table */}
-        <div className="overflow-x-auto">
+        {/* --- Entry Form (Edit Mode) --- */}
+        {mode === "edit" && (
+          <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/5 border-b dark:border-slate-800 print:hidden flex flex-wrap items-end gap-4">
+            <div className="space-y-2 flex-1 min-w-[300px]">
+              <Label className="text-xs font-bold uppercase text-slate-500">{t("addName")}</Label>
+              <Select onValueChange={(val) => {
+                const person = availableNames.find(p => p.id === val);
+                if (person) addRow(person);
+              }}>
+                <SelectTrigger className="w-full bg-white dark:bg-slate-950 border-slate-200">
+                  <SelectValue placeholder={isRtl ? "اختر من القائمة..." : "Select student/teacher..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableNames.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <Button variant="ghost" className="w-full justify-start text-xs text-indigo-600" onClick={() => addRow()}>
+                    <Plus size={12} className="mr-2" /> {isRtl ? "إضافة يدوي" : "Add Manually"}
+                  </Button>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-slate-500">{isRtl ? "الفترة" : "Shift"}</Label>
+              <div className="flex items-center gap-2 h-10 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md">
+                 <button onClick={() => setShift("morning")} className={`text-[10px] font-bold px-2 py-1 rounded ${shift === "morning" ? "bg-indigo-600 text-white" : "text-slate-400"}`}>{t("morning")}</button>
+                 <button onClick={() => setShift("evening")} className={`text-[10px] font-bold px-2 py-1 rounded ${shift === "evening" ? "bg-indigo-600 text-white" : "text-slate-400"}`}>{t("evening")}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- Register Table --- */}
+        <div className="overflow-x-auto min-h-[400px]">
           <Table className="border-collapse">
             <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 print:bg-slate-100">
-                <TableHead className="w-24 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.date")}</TableHead>
-                <TableHead className="min-w-[200px] font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black">{t("columns.name")}</TableHead>
-                <TableHead className="w-32 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.morning")}</TableHead>
-                <TableHead className="w-32 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.evening")}</TableHead>
-                <TableHead className="w-48 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.status")}</TableHead>
-                <TableHead className="font-bold text-slate-900 dark:text-white print:text-black">{t("columns.remarks")}</TableHead>
-                <TableHead className="w-12 print:hidden"></TableHead>
+              <TableRow className="bg-slate-50 dark:bg-slate-800/50 print:bg-slate-100">
+                <TableHead className="w-16 text-center font-bold">#</TableHead>
+                <TableHead className="min-w-[250px] font-bold">{t("columns.name")}</TableHead>
+                <TableHead className="w-48 text-center font-bold">{t("columns.status")}</TableHead>
+                <TableHead className="font-bold">{t("columns.remarks")}</TableHead>
+                {mode === "edit" && <TableHead className="w-12 print:hidden"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors border-b dark:border-slate-800 print:border-black">
-                  <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
-                    <input
-                      type="text"
-                      value={row.date}
-                      onChange={(e) => updateRow(row.id, "date", e.target.value)}
-                      className="w-full h-12 bg-transparent text-center focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0 font-bold"
-                    />
-                  </TableCell>
-                  <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
-                    <input
-                      type="text"
-                      value={row.name}
-                      onChange={(e) => updateRow(row.id, "name", e.target.value)}
-                      className="w-full h-12 px-3 bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
-                    />
-                  </TableCell>
-                  <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
-                    <input
-                      type="text"
-                      value={row.morning}
-                      onChange={(e) => updateRow(row.id, "morning", e.target.value)}
-                      className="w-full h-12 text-center bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
-                    />
-                  </TableCell>
-                  <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
-                    <input
-                      type="text"
-                      value={row.evening}
-                      onChange={(e) => updateRow(row.id, "evening", e.target.value)}
-                      className="w-full h-12 text-center bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
-                    />
-                  </TableCell>
-                  <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
-                    <div className="flex justify-center items-center h-12 gap-2 px-1">
-                       <StatusBox label="P" value="P" current={row.status} onClick={() => updateRow(row.id, "status", row.status === "P" ? "" : "P")} />
-                       <StatusBox label="A" value="A" current={row.status} onClick={() => updateRow(row.id, "status", row.status === "A" ? "" : "A")} />
-                       <StatusBox label="L" value="L" current={row.status} onClick={() => updateRow(row.id, "status", row.status === "L" ? "" : "L")} />
-                       <StatusBox label="LV" value="LV" current={row.status} onClick={() => updateRow(row.id, "status", row.status === "LV" ? "" : "LV")} />
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-0">
-                    <input
-                      type="text"
-                      value={row.remarks}
-                      onChange={(e) => updateRow(row.id, "remarks", e.target.value)}
-                      className="w-full h-12 px-3 bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
-                    />
-                  </TableCell>
-                  <TableCell className="p-0 print:hidden text-center">
-                    <button
-                      onClick={() => removeRow(row.id)}
-                      className="text-slate-400 hover:text-rose-500 transition-colors"
-                      title="Remove row"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+              {rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-48 text-center text-slate-400 italic">
+                    {mode === "edit" ? (isRtl ? "أضف أسماء لبدء التحضير" : "Add names to start marking") : (isRtl ? "لا توجد سجلات بعد" : "No records yet")}
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                rows.map((row, idx) => (
+                  <TableRow key={row.id} className="hover:bg-indigo-50/20 dark:hover:bg-indigo-900/5 transition-colors border-b dark:border-slate-800 print:border-black">
+                    <TableCell className="text-center font-medium text-slate-400">{idx + 1}</TableCell>
+                    <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
+                      {mode === "edit" ? (
+                        <Select 
+                          value={row.externalId} 
+                          onValueChange={(val) => {
+                            const person = availableNames.find(p => p.id === val);
+                            if (person) {
+                              updateRow(row.id, "externalId", person.id);
+                              updateRow(row.id, "name", person.name);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full h-12 border-0 rounded-none focus:ring-0 px-4 bg-transparent">
+                            <SelectValue placeholder={isRtl ? "اختر..." : "Select..."}>
+                              {row.name}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableNames.map(p => (
+                              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="px-4 py-3 block font-semibold text-slate-800 dark:text-slate-200">{row.name}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="p-0">
+                      <div className="flex justify-center items-center h-12 gap-2 px-1">
+                         <StatusBox label="P" value="P" current={row.status} disabled={mode === "view"} onClick={() => updateRow(row.id, "status", row.status === "P" ? "" : "P")} />
+                         <StatusBox label="A" value="A" current={row.status} disabled={mode === "view"} onClick={() => updateRow(row.id, "status", row.status === "A" ? "" : "A")} />
+                         <StatusBox label="L" value="L" current={row.status} disabled={mode === "view"} onClick={() => updateRow(row.id, "status", row.status === "L" ? "" : "L")} />
+                         <StatusBox label="LV" value="LV" current={row.status} disabled={mode === "view"} onClick={() => updateRow(row.id, "status", row.status === "LV" ? "" : "LV")} />
+                      </div>
+                    </TableCell>
+                    <TableCell className="p-0">
+                      {mode === "edit" ? (
+                        <input
+                          type="text"
+                          value={row.remarks}
+                          onChange={(e) => updateRow(row.id, "remarks", e.target.value)}
+                          className="w-full h-12 px-4 bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 font-light text-sm"
+                        />
+                      ) : (
+                        <span className="px-4 py-3 block text-sm text-slate-500">{row.remarks}</span>
+                      )}
+                    </TableCell>
+                    {mode === "edit" && (
+                      <TableCell className="p-0 print:hidden text-center">
+                        <button onClick={() => removeRow(row.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                          <Trash2 size={16} />
+                        </button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
 
-        {/* Legend Section */}
-        <div className="px-8 py-4 bg-slate-50/50 dark:bg-slate-800/10 border-t dark:border-slate-800 flex flex-wrap gap-6 text-[10px] items-center print:bg-transparent print:border-black">
-          <span className="font-bold uppercase text-slate-400 dark:text-slate-500 print:text-black">
-            {t("legend")}:
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-sm border border-indigo-600 bg-indigo-600 flex items-center justify-center text-[8px] text-white print:border-black print:bg-transparent print:text-black">P</span>
-            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.present")}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[8px] print:border-black">A</span>
-            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.absent")}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[8px] print:border-black">L</span>
-            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.late")}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[8px] print:border-black">LV</span>
-            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.leave")}</span>
-          </div>
+        {/* Legend */}
+        <div className="px-8 py-4 bg-slate-50/50 dark:bg-slate-800/20 border-t dark:border-slate-800 flex flex-wrap gap-6 text-[10px] items-center print:bg-transparent print:border-black">
+          <span className="font-bold uppercase text-slate-400">{t("legend")}:</span>
+          {["present", "absent", "late", "leave"].map((st) => (
+             <div key={st} className="flex items-center gap-1.5 capitalize">
+               <span className={`w-4 h-4 rounded-sm border flex items-center justify-center text-[8px] ${st === 'present' ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300'}`}>{st.charAt(0).toUpperCase()}</span>
+               <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t(`status.${st}`)}</span>
+             </div>
+          ))}
         </div>
 
-        {/* Footer info for print */}
-        <div className="hidden print:block p-8 mt-auto">
-          <div className="grid grid-cols-2 gap-8 border-t border-black pt-8">
-            <div className="space-y-6">
-              <div className="flex gap-2 items-end">
-                <span className="font-bold whitespace-nowrap">Teacher/Supervisor Signature:</span>
-                <div className="w-full border-b border-black border-dotted"></div>
+        {/* Footer for print */}
+        <div className="hidden print:block p-12 mt-auto border-t border-black">
+          <div className="grid grid-cols-2 gap-12">
+            <div className="space-y-8">
+              <div className="border-b border-black border-dotted pb-2 flex justify-between">
+                <span className="font-bold">Signature:</span>
               </div>
-              <div className="flex gap-2 items-end">
-                <span className="font-bold whitespace-nowrap">Date:</span>
-                <div className="w-full border-b border-black border-dotted"></div>
+              <div className="border-b border-black border-dotted pb-2 flex justify-between">
+                <span className="font-bold">Date:</span>
               </div>
             </div>
-            <div className="flex flex-col justify-end items-end text-[10px] text-slate-500 print:text-black italic">
-              Generated by Center Management System
+            <div className="flex flex-col justify-end items-end text-[10px] italic opacity-50">
+              Center Management System - Daily Attendance Report
             </div>
           </div>
         </div>
@@ -482,43 +473,33 @@ export default function AttendancePage() {
 
       <style jsx global>{`
         @media print {
-          @page {
-            size: A4;
-            margin: 1cm;
-          }
-          body {
-            background-color: white !important;
-          }
-          .dark {
-            color-scheme: light;
-          }
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
+          @page { size: A4; margin: 1.5cm; }
+          body { background-color: white !important; }
+          .dark { color-scheme: light; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}</style>
     </div>
   );
 }
 
-function StatusBox({ label, value, current, onClick }: { label: string, value: string, current: string, onClick: () => void }) {
+function StatusBox({ label, value, current, onClick, disabled }: { label: string, value: string, current: string, onClick: () => void, disabled?: boolean }) {
   const active = current === value;
   return (
     <div 
-      className="flex flex-col items-center cursor-pointer group print:cursor-default"
+      className={`flex flex-col items-center group ${disabled ? 'pointer-events-none' : 'cursor-pointer'}`}
       onClick={onClick}
     >
-      <span className={`text-[8px] uppercase font-bold transition-colors ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 print:text-black'}`}>
+      <span className={`text-[8px] uppercase font-bold transition-colors ${active ? 'text-indigo-600' : 'text-slate-400'}`}>
         {label}
       </span>
-      <div className={`w-4 h-4 border rounded-sm transition-all ${
+      <div className={`w-4 h-4 border rounded-sm transition-all flex items-center justify-center ${
         active 
-          ? 'bg-indigo-600 border-indigo-600 dark:bg-indigo-500 dark:border-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.4)]' 
-          : 'border-slate-300 dark:border-slate-600 print:border-black group-hover:border-indigo-400'
+          ? 'bg-indigo-600 border-indigo-600 shadow-sm' 
+          : 'border-slate-300 dark:border-slate-600 group-hover:border-indigo-400'
       }`}>
         {active && (
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full p-0.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
