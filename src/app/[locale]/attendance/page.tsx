@@ -327,68 +327,28 @@ export default function AttendancePage() {
     >
       {/* --- Action Bar --- */}
       <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-4 items-center justify-between print:hidden">
-        <div className="flex items-center gap-4">
+        {/* Left Side (End in RTL): Actions */}
+        <div className="flex flex-wrap gap-3 order-2 md:order-1">
           <Button
+            onClick={() => window.print()}
             variant="outline"
-            size="icon"
-            onClick={() => router.back()}
-            className="rounded-full"
+            className="gap-2 rounded-full"
           >
-            <Home size={18} />
+            <Printer size={18} />
+            {t("print")}
           </Button>
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-800">
-            <Button
-              variant={mode === "view" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setMode("view")}
-              className={`rounded-full gap-2 ${mode === "view" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
-            >
-              <Eye size={16} /> {t("viewMode")}
-            </Button>
-            <Button
-              variant={mode === "edit" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setMode("edit")}
-              className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
-            >
-              <Edit3 size={16} /> {t("editMode")}
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <DropdownMenu dir={isRtl ? "rtl" : "ltr"}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2 rounded-full">
-                <History size={18} />
-                <ChevronDown size={14} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuLabel>
-                {isRtl ? "سجلات سابقة" : "History"}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {pastSessions.map((s) => (
-                <DropdownMenuItem
-                  key={s.id}
-                  onClick={() => syncWithDatabase(s.date, s.shift)}
-                >
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold">
-                      {new Date(s.date).toLocaleDateString(locale)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground uppercase">
-                      {t(s.shift)}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           {mode === "edit" && (
             <>
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Save size={18} />
+                {isRtl ? "حفظ" : "Save"}
+              </Button>
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -420,25 +380,66 @@ export default function AttendancePage() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-
-              <Button
-                onClick={handleSave}
-                disabled={loading}
-                className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700"
-              >
-                <Save size={18} />
-                {isRtl ? "حفظ" : "Save"}
-              </Button>
             </>
           )}
 
+          <DropdownMenu dir={isRtl ? "rtl" : "ltr"}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <History size={18} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-[200px]">
+              <DropdownMenuLabel>
+                {t("history") || (isRtl ? "سجلات سابقة" : "History")}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {pastSessions.map((s) => (
+                <DropdownMenuItem
+                  key={s.id}
+                  onClick={() => syncWithDatabase(s.date, s.shift)}
+                >
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold">
+                      {new Date(s.date).toLocaleDateString(locale)}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground uppercase">
+                      {t(s.shift)}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Right Side (Start in RTL): Navigation & Modes */}
+        <div className="flex items-center gap-4 order-1 md:order-2">
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-800">
+            <Button
+              variant={mode === "view" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setMode("view")}
+              className={`rounded-full gap-2 ${mode === "view" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            >
+              <Eye size={16} /> {t("viewMode")}
+            </Button>
+            <Button
+              variant={mode === "edit" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setMode("edit")}
+              className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            >
+              <Edit3 size={16} /> {t("editMode")}
+            </Button>
+          </div>
           <Button
-            onClick={() => window.print()}
             variant="outline"
-            className="gap-2 rounded-full"
+            size="icon"
+            onClick={() => router.back()}
+            className="rounded-full"
           >
-            <Printer size={18} />
-            {t("print")}
+            <Home size={18} />
           </Button>
         </div>
       </div>

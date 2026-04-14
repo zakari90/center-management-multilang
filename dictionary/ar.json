@@ -2081,6 +2081,9 @@
     "print": "طباعة السجل",
     "loadStudents": "تحميل الطلاب",
     "blankRows": "إضافة صفوف فارغة",
-    "legend": "مفتاح الرموز"
+    "legend": "مفتاح الرموز",
+    "exportNames": "تصدير الأسماء",
+    "filterNames": "فلترة الأسماء",
+    "uploadFileInstruction": "تحميل ملف يحتوي على أسماء"
   }
 }

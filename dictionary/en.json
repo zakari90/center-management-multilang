@@ -2110,14 +2110,18 @@
       "schedule": "Schedule"
     }
   },
-  "AttendanceRegister": {
-    "title": "Attendance Register",
-    "title": "Title",
-    "month": "Month",
-    "year": "Year",
+    "morning": "Morning",
+    "evening": "Evening",
+    "viewMode": "View",
+    "editMode": "Edit",
+    "addName": "Add Name",
+    "uploadNames": "Upload Names",
+    "deleteAll": "Delete All",
+    "confirmDeleteAll": "Are you sure you want to delete all records for this session?",
+    "confirmDeleteAllDesc": "This action cannot be undone.",
     "columns": {
       "date": "Date",
-      "name": "Student/Employee Name",
+      "name": "Name",
       "morning": "Morning",
       "evening": "Evening",
       "status": "Status",
@@ -2132,6 +2136,9 @@
     "print": "Print Register",
     "loadStudents": "Load Students",
     "blankRows": "Add Blank Rows",
-    "legend": "Legend"
+    "legend": "Legend",
+    "exportNames": "export names",
+    "filterNames": "filtre names",
+    "uploadFileInstruction": "upload file that containe names"
   }
 }
