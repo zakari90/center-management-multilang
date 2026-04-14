@@ -2051,8 +2051,8 @@
     "columns": {
       "date": "Date",
       "name": "Nom de l'étudiant / employé",
-      "rollNumber": "ID / Numéro d'ordre",
-      "department": "Département / Classe",
+      "morning": "Matin",
+      "evening": "Soir",
       "status": "Statut",
       "remarks": "Remarques"
     },
@@ -2064,6 +2064,7 @@
     },
     "print": "Imprimer le Registre",
     "loadStudents": "Charger les Étudiants",
-    "blankRows": "Ajouter des lignes vides"
+    "blankRows": "Ajouter des lignes vides",
+    "legend": "Légende"
   }
 }

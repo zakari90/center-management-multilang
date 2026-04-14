@@ -2099,8 +2099,8 @@
     "columns": {
       "date": "Date",
       "name": "Student/Employee Name",
-      "rollNumber": "ID / Roll Number",
-      "department": "Department / Class",
+      "morning": "Morning",
+      "evening": "Evening",
       "status": "Status",
       "remarks": "Remarks"
     },
@@ -2112,6 +2112,7 @@
     },
     "print": "Print Register",
     "loadStudents": "Load Students",
-    "blankRows": "Add Blank Rows"
+    "blankRows": "Add Blank Rows",
+    "legend": "Legend"
   }
 }

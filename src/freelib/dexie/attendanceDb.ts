@@ -14,9 +14,9 @@ export interface AttendanceRecord {
   sessionId: string;
   studentId: string; // From freecenterdb
   studentName: string; // Snapshot for history
-  rollNumber: string;
-  department: string;
-  status: string; // P, A, L, LV etc.
+  morning: string;     // Renamed from rollNumber
+  evening: string;     // Renamed from department
+  status: string;      // P, A, L, LV etc.
   remarks: string;
   updatedAt: number;
 }

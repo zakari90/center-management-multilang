@@ -42,14 +42,14 @@ export default function AttendancePage() {
   const [loading, setLoading] = useState(false);
   const [pastSessions, setPastSessions] = useState<AttendanceSession[]>([]);
 
-  // Initialize with some blank rows
+  // Initialize with 31 rows (days of the month)
   useEffect(() => {
-    const initialRows = Array.from({ length: 15 }, (_, i) => ({
+    const initialRows = Array.from({ length: 31 }, (_, i) => ({
       id: `blank-${i}`,
-      date: "",
+      date: (i + 1).toString(),
       name: "",
-      rollNumber: "",
-      department: "",
+      morning: "",
+      evening: "",
       status: "",
       remarks: "",
     }));
@@ -96,14 +96,14 @@ export default function AttendancePage() {
       };
 
       const records: AttendanceRecord[] = rows
-        .filter(r => r.name || r.date) // Only save rows with some data
+        .filter(r => r.name || r.status || r.remarks || r.morning || r.evening)
         .map(r => ({
           id: r.id.startsWith("blank-") ? crypto.randomUUID() : r.id,
           sessionId: sessionId,
           studentId: r.studentId || "",
           studentName: r.name,
-          rollNumber: r.rollNumber,
-          department: r.department,
+          morning: r.morning,
+          evening: r.evening,
           status: r.status,
           remarks: r.remarks,
           updatedAt: Date.now(),
@@ -133,22 +133,22 @@ export default function AttendancePage() {
         const loadedRows = records.map(r => ({
           id: r.id,
           studentId: r.studentId,
-          date: "", // Date is usually per-day, but records are snapshots
+          date: "", // User fills this
           name: r.studentName,
-          rollNumber: r.rollNumber,
-          department: r.department,
+          morning: r.morning,
+          evening: r.evening,
           status: r.status,
           remarks: r.remarks,
         }));
         
-        // Ensure at least some blank rows
-        if (loadedRows.length < 15) {
-          const blanks = Array.from({ length: 15 - loadedRows.length }, (_, i) => ({
+        // Match Loaded records to 31 rows if possible, or just append
+        if (loadedRows.length < 31) {
+          const blanks = Array.from({ length: 31 - loadedRows.length }, (_, i) => ({
             id: `blank-${Date.now()}-${i}`,
-            date: "",
+            date: (loadedRows.length + i + 1).toString(),
             name: "",
-            rollNumber: "",
-            department: "",
+            morning: "",
+            evening: "",
             status: "",
             remarks: "",
           }));
@@ -168,12 +168,12 @@ export default function AttendancePage() {
 
   const createNewSession = () => {
     setSessionId(crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
-    const initialRows = Array.from({ length: 15 }, (_, i) => ({
+    const initialRows = Array.from({ length: 31 }, (_, i) => ({
       id: `blank-${i}`,
-      date: "",
+      date: (i + 1).toString(),
       name: "",
-      rollNumber: "",
-      department: "",
+      morning: "",
+      evening: "",
       status: "",
       remarks: "",
     }));
@@ -185,25 +185,24 @@ export default function AttendancePage() {
     setLoading(true);
     try {
       const students = await studentActions.getAll();
-      const studentRows = students.map((s: Student) => ({
+      const studentRows = students.map((s: Student, i) => ({
         id: crypto.randomUUID ? crypto.randomUUID() : `db-${s.id}-${Date.now()}`,
         studentId: s.id,
-        date: "",
+        date: (i + 1).toString(),
         name: s.name,
-        rollNumber: s.id.slice(0, 8),
-        department: s.grade || "",
+        morning: "",
+        evening: "",
         status: "",
         remarks: "",
       }));
       
-      // Keep previous non-blank data if any? No, replace for clarity.
-      if (studentRows.length < 15) {
-        const blanks = Array.from({ length: 15 - studentRows.length }, (_, i) => ({
+      if (studentRows.length < 31) {
+        const blanks = Array.from({ length: 31 - studentRows.length }, (_, i) => ({
           id: `blank-${Date.now()}-${i}`,
-          date: "",
+          date: (studentRows.length + i + 1).toString(),
           name: "",
-          rollNumber: "",
-          department: "",
+          morning: "",
+          evening: "",
           status: "",
           remarks: "",
         }));
@@ -220,14 +219,15 @@ export default function AttendancePage() {
   };
 
   const addRow = () => {
+    const nextDate = rows.length + 1;
     setRows([
       ...rows,
       {
         id: `blank-${Date.now()}`,
-        date: "",
+        date: nextDate.toString(),
         name: "",
-        rollNumber: "",
-        department: "",
+        morning: "",
+        evening: "",
         status: "",
         remarks: "",
       },
@@ -362,10 +362,10 @@ export default function AttendancePage() {
           <Table className="border-collapse">
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 print:bg-slate-100">
-                <TableHead className="w-24 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black">{t("columns.date")}</TableHead>
+                <TableHead className="w-24 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.date")}</TableHead>
                 <TableHead className="min-w-[200px] font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black">{t("columns.name")}</TableHead>
-                <TableHead className="w-32 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black">{t("columns.rollNumber")}</TableHead>
-                <TableHead className="w-40 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black">{t("columns.department")}</TableHead>
+                <TableHead className="w-32 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.morning")}</TableHead>
+                <TableHead className="w-32 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.evening")}</TableHead>
                 <TableHead className="w-48 font-bold text-slate-900 dark:text-white border-e print:border-black print:text-black text-center">{t("columns.status")}</TableHead>
                 <TableHead className="font-bold text-slate-900 dark:text-white print:text-black">{t("columns.remarks")}</TableHead>
                 <TableHead className="w-12 print:hidden"></TableHead>
@@ -379,7 +379,7 @@ export default function AttendancePage() {
                       type="text"
                       value={row.date}
                       onChange={(e) => updateRow(row.id, "date", e.target.value)}
-                      className="w-full h-12 bg-transparent text-center focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
+                      className="w-full h-12 bg-transparent text-center focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0 font-bold"
                     />
                   </TableCell>
                   <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
@@ -393,16 +393,16 @@ export default function AttendancePage() {
                   <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
                     <input
                       type="text"
-                      value={row.rollNumber}
-                      onChange={(e) => updateRow(row.id, "rollNumber", e.target.value)}
+                      value={row.morning}
+                      onChange={(e) => updateRow(row.id, "morning", e.target.value)}
                       className="w-full h-12 text-center bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
                     />
                   </TableCell>
                   <TableCell className="p-0 border-e dark:border-slate-800 print:border-black">
                     <input
                       type="text"
-                      value={row.department}
-                      onChange={(e) => updateRow(row.id, "department", e.target.value)}
+                      value={row.evening}
+                      onChange={(e) => updateRow(row.id, "evening", e.target.value)}
                       className="w-full h-12 text-center bg-transparent focus:outline-none focus:ring-1 focus:ring-inset focus:ring-indigo-500/30 print:focus:ring-0"
                     />
                   </TableCell>
@@ -435,6 +435,29 @@ export default function AttendancePage() {
               ))}
             </TableBody>
           </Table>
+        </div>
+
+        {/* Legend Section */}
+        <div className="px-8 py-4 bg-slate-50/50 dark:bg-slate-800/10 border-t dark:border-slate-800 flex flex-wrap gap-6 text-[10px] items-center print:bg-transparent print:border-black">
+          <span className="font-bold uppercase text-slate-400 dark:text-slate-500 print:text-black">
+            {t("legend")}:
+          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-sm border border-indigo-600 bg-indigo-600 flex items-center justify-center text-[8px] text-white print:border-black print:bg-transparent print:text-black">P</span>
+            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.present")}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[8px] print:border-black">A</span>
+            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.absent")}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[8px] print:border-black">L</span>
+            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.late")}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 flex items-center justify-center text-[8px] print:border-black">LV</span>
+            <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">{t("status.leave")}</span>
+          </div>
         </div>
 
         {/* Footer info for print */}
