@@ -81,6 +81,12 @@ export default function AttendancePage() {
     loadPastSessions();
   }, []);
 
+  // Sync when shift or date changes
+  useEffect(() => {
+    if (loading) return; // Prevent infinite loops or redundant calls during initial load
+    syncWithDatabase(currentDate, shift);
+  }, [shift, currentDate]);
+
   const loadAvailableNames = async () => {
     try {
       const [students, teachers] = await Promise.all([
@@ -206,6 +212,55 @@ export default function AttendancePage() {
     setRows(rows.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
 
+  const loadAllMembers = async () => {
+    setLoading(true);
+    try {
+      const existingIds = new Set(rows.map(r => r.externalId).filter(id => !!id));
+      const newRows = [...rows];
+      
+      availableNames.forEach(p => {
+        if (!existingIds.has(p.id)) {
+          newRows.push({
+            id: `new-${p.id}-${Date.now()}`,
+            externalId: p.id,
+            name: p.name,
+            morning: "",
+            evening: "",
+            status: "P",
+            remarks: "",
+          });
+        }
+      });
+      
+      setRows(newRows);
+      toast.info(isRtl ? `تمت إضافة ${availableNames.length - existingIds.size} اسماً` : `Added ${availableNames.length - existingIds.size} names`);
+    } catch (error) {
+      toast.error("Failed to load all members");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBulkUpload = (text: string) => {
+    const names = text.split('\n').map(n => n.trim()).filter(n => !!n);
+    if (names.length === 0) return;
+
+    const newRows = [...rows];
+    names.forEach(name => {
+      newRows.push({
+        id: `bulk-${Date.now()}-${Math.random()}`,
+        externalId: "",
+        name: name,
+        morning: "",
+        evening: "",
+        status: "P",
+        remarks: "",
+      });
+    });
+    setRows(newRows);
+    toast.success(isRtl ? `تمت إضافة ${names.length} اسماً` : `Added ${names.length} names`);
+  };
+
   const formattedDate = new Date(currentDate).toLocaleDateString(locale, {
     year: 'numeric', month: '2-digit', day: '2-digit'
   });
@@ -327,14 +382,16 @@ export default function AttendancePage() {
 
         {/* --- Entry Form (Edit Mode) --- */}
         {mode === "edit" && (
-          <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/5 border-b dark:border-slate-800 print:hidden flex flex-wrap items-end gap-4">
+          <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/5 border-b dark:border-slate-800 print:hidden flex flex-wrap items-center gap-6">
+            
+            {/* Add Name Dropdown (Right side in RTL) */}
             <div className="space-y-2 flex-1 min-w-[300px]">
               <Label className="text-xs font-bold uppercase text-slate-500">{t("addName")}</Label>
               <Select onValueChange={(val) => {
                 const person = availableNames.find(p => p.id === val);
                 if (person) addRow(person);
               }}>
-                <SelectTrigger className="w-full bg-white dark:bg-slate-950 border-slate-200">
+                <SelectTrigger className="w-full bg-white dark:bg-slate-950 border-slate-200 hover:border-indigo-400 transition-colors">
                   <SelectValue placeholder={isRtl ? "اختر من القائمة..." : "Select student/teacher..."} />
                 </SelectTrigger>
                 <SelectContent>
@@ -348,13 +405,57 @@ export default function AttendancePage() {
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block self-end mb-2" />
+
+            {/* Actions (Load All / Bulk) */}
+            <div className="flex items-center gap-2 self-end mb-1">
+               <Button variant="outline" size="sm" onClick={loadAllMembers} className="rounded-full gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                 <Users size={14} /> {t("loadStudents")}
+               </Button>
+
+               <AlertDialog>
+                 <AlertDialogTrigger asChild>
+                   <Button variant="outline" size="sm" className="rounded-full gap-2 border-slate-200">
+                     <Plus size={14} /> {t("uploadNames")}
+                   </Button>
+                 </AlertDialogTrigger>
+                 <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
+                   <AlertDialogHeader>
+                     <AlertDialogTitle>{t("uploadNames")}</AlertDialogTitle>
+                     <AlertDialogDescription>
+                       {isRtl ? "أدخل الأسماء (اسم واحد في كل سطر)" : "Enter names (one per line)"}
+                     </AlertDialogDescription>
+                   </AlertDialogHeader>
+                   <div className="py-4">
+                     <textarea 
+                        id="bulk-names"
+                        className="w-full h-40 p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-sm"
+                        placeholder={isRtl ? "أحمد المحمد\nفاطمة الزهراء..." : "John Doe\nJane Smith..."}
+                     />
+                   </div>
+                   <AlertDialogFooter className="gap-2">
+                     <AlertDialogCancel>{isRtl ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+                     <AlertDialogAction onClick={() => {
+                        const textarea = document.getElementById('bulk-names') as HTMLTextAreaElement;
+                        if (textarea) handleBulkUpload(textarea.value);
+                     }} className="bg-indigo-600 hover:bg-indigo-700">
+                       {isRtl ? "إضافة" : "Add"}
+                     </AlertDialogAction>
+                   </AlertDialogFooter>
+                 </AlertDialogContent>
+               </AlertDialog>
+            </div>
+
+            {/* Shift Toggle (Left side in RTL) */}
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase text-slate-500">{isRtl ? "الفترة" : "Shift"}</Label>
               <div className="flex items-center gap-2 h-10 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md">
-                 <button onClick={() => setShift("morning")} className={`text-[10px] font-bold px-2 py-1 rounded ${shift === "morning" ? "bg-indigo-600 text-white" : "text-slate-400"}`}>{t("morning")}</button>
-                 <button onClick={() => setShift("evening")} className={`text-[10px] font-bold px-2 py-1 rounded ${shift === "evening" ? "bg-indigo-600 text-white" : "text-slate-400"}`}>{t("evening")}</button>
+                 <button onClick={() => setShift("morning")} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-all ${shift === "morning" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-indigo-600"}`}>{t("morning")}</button>
+                 <button onClick={() => setShift("evening")} className={`text-[10px] font-bold px-3 py-1.5 rounded transition-all ${shift === "evening" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-indigo-600"}`}>{t("evening")}</button>
               </div>
             </div>
+
           </div>
         )}
 

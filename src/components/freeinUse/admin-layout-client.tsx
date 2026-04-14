@@ -139,11 +139,7 @@ export default function AdminLayoutClient({
       url: `${base}/free/admin/schedule`,
       icon: "/calendar.svg",
     },
-    {
-      title: "Program",
-      url: `${base}/free/admin/program`,
-      icon: "/calendar.svg",
-    },
+
     {
       title: t("database"),
       url: `${base}/free/admin/database`,
@@ -222,11 +218,7 @@ export default function AdminLayoutClient({
               href: `${base}/free/admin/schedule`,
               icon: <CalendarDays className="size-5" />,
             },
-            {
-              label: "Program",
-              href: `${base}/free/admin/program`,
-              icon: <Calendar className="size-5" />,
-            },
+
             {
               label: t("database"),
               href: `${base}/free/admin/database`,

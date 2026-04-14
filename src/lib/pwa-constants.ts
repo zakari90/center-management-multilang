@@ -34,5 +34,4 @@ export const BASE_PAGES = [
   "/free/admin/schedule",
   "/free/admin/users",
   "/free/admin/database",
-  "/free/admin/program",
 ] as const;
