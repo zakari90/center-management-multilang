@@ -2042,5 +2042,28 @@
     "ctaDescription": "Rejoignez des centaines d'étudiants qui excellent déjà grâce à nos programmes de soutien spécialisés.",
     "ctaStudentButton": "Rejoindre en tant qu'Étudiant",
     "ctaTeacherButton": "Rejoindre en tant qu'Enseignant"
+  },
+  "AttendanceRegister": {
+    "title": "Registre d'Appel",
+    "institution": "Institution / Organisation",
+    "month": "Mois",
+    "year": "Année",
+    "columns": {
+      "date": "Date",
+      "name": "Nom de l'étudiant / employé",
+      "rollNumber": "ID / Numéro d'ordre",
+      "department": "Département / Classe",
+      "status": "Statut",
+      "remarks": "Remarques"
+    },
+    "status": {
+      "present": "Présent",
+      "absent": "Absent",
+      "late": "En retard",
+      "leave": "Congé"
+    },
+    "print": "Imprimer le Registre",
+    "loadStudents": "Charger les Étudiants",
+    "blankRows": "Ajouter des lignes vides"
   }
 }

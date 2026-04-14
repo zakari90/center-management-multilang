@@ -2049,5 +2049,28 @@
     "ctaDescription": "انضم إلى مئات الطلاب الذين يتفوقون بالفعل من خلال برامج الدعم المتخصصة لدينا.",
     "ctaStudentButton": "انضم كطالب",
     "ctaTeacherButton": "انضم كأستاذ"
+  },
+  "AttendanceRegister": {
+    "title": "سجل الحضور",
+    "institution": "المؤسسة / المنظمة",
+    "month": "الشهر",
+    "year": "السنة",
+    "columns": {
+      "date": "التاريخ",
+      "name": "اسم الطالب / الموظف",
+      "rollNumber": "رقم التعريف",
+      "department": "القسم / الفصل",
+      "status": "الحالة",
+      "remarks": "ملاحظات"
+    },
+    "status": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر",
+      "leave": "إجازة"
+    },
+    "print": "طباعة السجل",
+    "loadStudents": "تحميل الطلاب",
+    "blankRows": "إضافة صفوف فارغة"
   }
 }

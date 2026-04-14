@@ -2090,5 +2090,28 @@
       "subject": "Subject",
       "schedule": "Schedule"
     }
+  },
+  "AttendanceRegister": {
+    "title": "Attendance Register",
+    "institution": "Institution/Organization",
+    "month": "Month",
+    "year": "Year",
+    "columns": {
+      "date": "Date",
+      "name": "Student/Employee Name",
+      "rollNumber": "ID / Roll Number",
+      "department": "Department / Class",
+      "status": "Status",
+      "remarks": "Remarks"
+    },
+    "status": {
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "leave": "Leave"
+    },
+    "print": "Print Register",
+    "loadStudents": "Load Students",
+    "blankRows": "Add Blank Rows"
   }
 }
