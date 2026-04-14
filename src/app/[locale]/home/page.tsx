@@ -1,466 +1,330 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
-import {
-  CheckCircle2,
-  Cloud,
-  Database,
-  Globe,
-  Laptop,
-  Lock,
-  MonitorSmartphone,
-  Rocket,
-  ShieldCheck,
-  Sparkles,
-  Users,
-  WifiOff,
-} from "lucide-react";
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { PublicRegistrationDialog } from "@/components/PublicRegistrationDialog";
+import { PublicOfferings } from "@/components/PublicOfferings";
+import { useAuth } from "@/context/authContext";
+import { useLocale, useTranslations } from "next-intl";
+import Lottie from "lottie-react";
+import studentAnimation from "../../Student-transparent.json";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight, Phone } from "lucide-react";
 
-// In-file translations to avoid polluting global dictionaries for this specific marketing page
-const content = {
-  ar: {
-    heroTag: "إعلان إطلاق",
-    heroTitle: "نظام للإدارة الذكية للمراكز التعليمية",
-    heroSubtitle:
-      "هل تبحث عن النظام المثالي لإدارة مركزك التعليمي (مركز لغات، دروس خصوصية، أو تدريب)؟ سواء كنت تبحث عن حل مجاني يعمل بدون إنترنت، أو نظام سحابي متكامل يربط فريق عملك بأكمله، لدينا الحل الأنسب لك!",
-    pricingTitle: "اختر الباقة المناسبة لمركزك",
-    pricingSubtitle: "لقد صممنا النظام بخيارين ليناسب حجم وطبيعة عمل مركزك",
-    freePlan: "الباقة المجانية",
-    freePlanDesc: "وضع عدم الاتصال - Offline Mode",
-    freePlanTarget:
-      "مصممة للمراكز التي تفضل العمل محلياً وبدون اشتراكات أو تكاليف إضافية!",
-    paidPlan: "الباقة المدفوعة",
-    paidPlanDesc: "النظام السحابي الشامل - Cloud Mode",
-    paidPlanTarget:
-      "مصممة للمراكز المتوسطة والكبرى التي تحتاج إلى إدارة متقدمة، عمل جماعي، ومتابعة عن بُعد.",
-    featuresTitle: "مميزات عامة في كلا النظامين",
-    featuresList: [
-      "واجهة عصرية، احترافية وسهلة الاستخدام جداً.",
-      "متعدد اللغات بالكامل (العربية، الإنجليزية، الفرنسية).",
-      "سرعة فائقة في التعامل مع البيانات لاستخراج التقارير والبحث.",
-      "🌐 يعمل بسلاسة أونلاين وأوفلاين: التطبيق مصمم ليعمل بكفاءة سواء كنت متصلاً بالإنترنت أو غير متصل.",
-      "✅ مؤشر الكاش الذكي: بمجرد ظهور 'الدائرة الخضراء' (Green Bubble)، فهذا يعني اكتمال حفظ النظام استعدادًا للعمل بدون إنترنت بكل أمان!",
-    ],
-    ctaTitle: "لا تدع المهام الإدارية تستهلك وقتك!",
-    ctaDesc:
-      "ابدأ الآن فوراً مع النظام المجاني، أو تواصل معنا للاشتراك في الباقة المدفوعة.",
-    btnFree: "ابدأ الآن مجاناً 🚀",
-    btnPaid: "تواصل معنا للحجز 💬",
-    contactUs: "للحجز أو الاستفسار: contact@centermanager.ma",
-  },
-  en: {
-    heroTag: "Launch Announcement",
-    heroTitle: "Smart Management System for Educational Centers",
-    heroSubtitle:
-      "Looking for the perfect system to manage your center? Whether you need a simple free offline tool or a comprehensive cloud system for your entire team, we have the right solution for you!",
-    pricingTitle: "Choose the Right Plan",
-    pricingSubtitle:
-      "We designed two powerful options to fit your center's size and needs",
-    freePlan: "Free Plan",
-    freePlanDesc: "Offline-First Mode",
-    freePlanTarget:
-      "Designed for small centers that prefer local work with zero subscriptions or extra costs!",
-    paidPlan: "Premium Plan",
-    paidPlanDesc: "Comprehensive Cloud SaaS",
-    paidPlanTarget:
-      "Designed for medium to large centers needing advanced management, team collaboration, and remote access.",
-    featuresTitle: "Shared Features",
-    featuresList: [
-      "Modern, professional, and highly intuitive interface.",
-      "Fully multilingual (Arabic, English, French).",
-      "Lightning-fast data processing for reports and search.",
-      "🌐 Works seamlessly online & offline: Designed to work efficiently whether you are connected or not.",
-      "✅ Smart Cache Indicator: Once the 'Green Bubble' appears, the system is fully cached and ready for safe offline use!",
-    ],
-    ctaTitle: "Don't let admin tasks consume your time!",
-    ctaDesc:
-      "Start instantly with the free version, or contact us to subscribe to the cloud plan.",
-    btnFree: "Start for Free 🚀",
-    btnPaid: "Contact Us to Subscribe 💬",
-    contactUs: "For inquiries: contact@centermanager.ma",
-  },
-  fr: {
-    heroTag: "Annonce de Lancement",
-    heroTitle: "Système de Gestion Intelligent pour Centres Éducatifs",
-    heroSubtitle:
-      "Vous cherchez le système idéal pour gérer votre centre ? Que vous ayez besoin d'un outil gratuit hors ligne ou d'un système cloud complet pour toute votre équipe, nous avons la solution !",
-    pricingTitle: "Choisissez le Bon Plan",
-    pricingSubtitle:
-      "Nous avons conçu deux options puissantes adaptées à la taille de votre centre",
-    freePlan: "Plan Gratuit",
-    freePlanDesc: "Mode Hors Ligne",
-    freePlanTarget:
-      "Conçu pour les centres qui préfèrent le travail local sans abonnement ni frais supplémentaires !",
-    paidPlan: "Plan Premium",
-    paidPlanDesc: "SaaS Cloud Complet",
-    paidPlanTarget:
-      "Conçu pour les centres moyens à grands nécessitant une gestion avancée, un travail d'équipe et un accès à distance.",
-    featuresTitle: "Fonctionnalités Communes",
-    featuresList: [
-      "Interface moderne, professionnelle et très intuitive.",
-      "Entièrement multilingue (Arabe, Anglais, Français).",
-      "Traitement ultra-rapide des données pour les rapports et recherches.",
-      "🌐 Fonctionne fluidement en ligne et hors ligne : Conçu pour être efficace avec ou sans connexion internet.",
-      "✅ Indicateur de Cache Intelligent : Dès que la 'Bulle Verte' apparaît, le système est entièrement mis en cache pour une utilisation hors ligne en toute sécurité !",
-    ],
-    ctaTitle: "Ne laissez pas les tâches administratives vous consommer !",
-    ctaDesc:
-      "Commencez instantanément avec la version gratuite, ou contactez-nous pour le plan cloud.",
-    btnFree: "Commencer Gratuitement 🚀",
-    btnPaid: "Contactez-nous 💬",
-    contactUs: "Pour toute demande: contact@centermanager.ma",
-  },
-};
+interface CenterContent {
+  id: string;
+  name: string;
+  homeTitle?: string | null;
+  homeSubtitle?: string | null;
+  homeBadge?: string | null;
+  homeDescription?: string | null;
+  homeCtaText?: string | null;
+  homePhone?: string | null;
+  homeAddress?: string | null;
+  publicRegistrationEnabled?: boolean;
+}
 
-const freeFeaturesAr = [
-  { text: "مجانية 100%: بدون رسوم خفية", icon: <Rocket className="w-5 h-5" /> },
-  {
-    text: "تعمل بدون إنترنت (Offline-First)",
-    icon: <WifiOff className="w-5 h-5" />,
-  },
-  { text: "إدارة شاملة للطلاب والمعلمين", icon: <Users className="w-5 h-5" /> },
-  {
-    text: "تثبيت كتطبيق (PWA) على أي جهاز",
-    icon: <MonitorSmartphone className="w-5 h-5" />,
-  },
-  {
-    text: "خصوصية تامة: بياناتك محلياً فقط",
-    icon: <ShieldCheck className="w-5 h-5" />,
-  },
-  {
-    text: "دعم فني مجاني مع 3 صفحات ويب لمركزك",
-    icon: <Globe className="w-5 h-5" />,
-  },
-];
-
-const paidFeaturesAr = [
-  {
-    text: "مزامنة سحابية: وصول من أي مكان",
-    icon: <Cloud className="w-5 h-5" />,
-  },
-  { text: "تعدد المستخدمين والصلاحيات", icon: <Users className="w-5 h-5" /> },
-  { text: "برنامج حاسوب أوفلاين 100%", icon: <Laptop className="w-5 h-5" /> },
-  { text: "روابط تسجيل عامة للطلاب", icon: <Globe className="w-5 h-5" /> },
-  { text: "نسخ احتياطي وتأمين مستمر", icon: <Database className="w-5 h-5" /> },
-  { text: "متابعة الإحصائيات عن بُعد", icon: <Laptop className="w-5 h-5" /> },
-];
-
-const freeFeaturesEn = [
-  { text: "100% Free: No hidden fees", icon: <Rocket className="w-5 h-5" /> },
-  { text: "Works completely Offline", icon: <WifiOff className="w-5 h-5" /> },
-  {
-    text: "Full student & teacher management",
-    icon: <Users className="w-5 h-5" />,
-  },
-  {
-    text: "Install as a PWA anywhere",
-    icon: <MonitorSmartphone className="w-5 h-5" />,
-  },
-  {
-    text: "Total privacy: Local data only",
-    icon: <ShieldCheck className="w-5 h-5" />,
-  },
-  {
-    text: "Free tech support + 3 landing pages",
-    icon: <Globe className="w-5 h-5" />,
-  },
-];
-
-const paidFeaturesEn = [
-  {
-    text: "Cloud sync: Access from anywhere",
-    icon: <Cloud className="w-5 h-5" />,
-  },
-  { text: "Multi-user & roles support", icon: <Users className="w-5 h-5" /> },
-  {
-    text: "100% Offline Desktop Application",
-    icon: <Laptop className="w-5 h-5" />,
-  },
-  {
-    text: "Public registration links for students",
-    icon: <Globe className="w-5 h-5" />,
-  },
-  {
-    text: "Continuous automated backups",
-    icon: <Database className="w-5 h-5" />,
-  },
-  { text: "Remote dashboard monitoring", icon: <Laptop className="w-5 h-5" /> },
-];
-
-const freeFeaturesFr = [
-  {
-    text: "100% Gratuit : Aucun frais caché",
-    icon: <Rocket className="w-5 h-5" />,
-  },
-  {
-    text: "Fonctionne entièrement Hors Ligne",
-    icon: <WifiOff className="w-5 h-5" />,
-  },
-  {
-    text: "Gestion complète élèves & profs",
-    icon: <Users className="w-5 h-5" />,
-  },
-  {
-    text: "Installation PWA sur tout support",
-    icon: <MonitorSmartphone className="w-5 h-5" />,
-  },
-  {
-    text: "Vie privée : Données locales uniquement",
-    icon: <ShieldCheck className="w-5 h-5" />,
-  },
-  {
-    text: "Support gratuit + 3 pages de centre",
-    icon: <Globe className="w-5 h-5" />,
-  },
-];
-
-const paidFeaturesFr = [
-  { text: "Sync Cloud : Accès partout", icon: <Cloud className="w-5 h-5" /> },
-  { text: "Multi-utilisateurs & rôles", icon: <Users className="w-5 h-5" /> },
-  {
-    text: "Application Bureau 100% Hors Ligne",
-    icon: <Laptop className="w-5 h-5" />,
-  },
-  {
-    text: "Liens publics pour inscriptions",
-    icon: <Globe className="w-5 h-5" />,
-  },
-  {
-    text: "Sauvegardes auto continues",
-    icon: <Database className="w-5 h-5" />,
-  },
-  { text: "Suivi des stats à distance", icon: <Laptop className="w-5 h-5" /> },
-];
-
-export default function SaaSMarketingPage() {
-  const locale = useLocale();
+function HomePageContent() {
+  const { user, isLoading } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
+  const searchParams = useSearchParams();
+  const t = useTranslations("homePage");
+  const [mounted, setMounted] = useState(false);
+  const [center, setCenter] = useState<CenterContent | null>(null);
+  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [registerType, setRegisterType] = useState<"student" | "teacher">(
+    "student",
+  );
+
   const isRtl = locale === "ar";
 
-  // Use English as fallback for missing locales
-  const t = content[locale as keyof typeof content] || content.en;
+  useEffect(() => {
+    const regType = searchParams.get("register");
+    if (regType === "student" || regType === "teacher") {
+      setRegisterType(regType);
+      setShowRegisterDialog(true);
+    }
+  }, [searchParams]);
 
-  let freeFeatures = freeFeaturesEn;
-  let paidFeatures = paidFeaturesEn;
+  useEffect(() => {
+    const fetchCenter = async () => {
+      try {
+        const response = await fetch("/api/public/center");
+        if (response.ok) {
+          const data = await response.json();
+          setCenter(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch center:", error);
+      }
+    };
+    fetchCenter();
+  }, []);
 
-  if (locale === "ar") {
-    freeFeatures = freeFeaturesAr;
-    paidFeatures = paidFeaturesAr;
-  } else if (locale === "fr") {
-    freeFeatures = freeFeaturesFr;
-    paidFeatures = paidFeaturesFr;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+        </div>
+      </div>
+    );
   }
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const content = {
+    title: center?.homeTitle || "مركز دروس الدعم و التقوية",
+    subtitle: center?.homeSubtitle || "جميع المواد",
+    badge: center?.homeBadge || "التسجيل مفتوح",
+    description:
+      center?.homeDescription ||
+      "مركز دروس الدعم و التقوية يقدم لكم عرض بأثمنة جد مناسبة",
+    ctaText: center?.homeCtaText || "سارعوا للتسجيل",
+    phone: center?.homePhone || "0880275000",
+    address: center?.homeAddress || "حي وريدة",
+  };
 
-  if (!mounted) return null;
+  const handleRegisterClick = (type: "student" | "teacher" = "student") => {
+    if (center && center.publicRegistrationEnabled !== false) {
+      setRegisterType(type);
+      setShowRegisterDialog(true);
+    }
+  };
+
+  const dashboardLink = user
+    ? user.role === "ADMIN"
+      ? `/${locale}/admin`
+      : `/${locale}/manager`
+    : `/${locale}/login`;
 
   return (
     <main
-      className="min-h-screen bg-[#0A0A0A] text-white selection:bg-indigo-500/30 overflow-x-hidden font-sans"
+      className="min-h-screen flex flex-col relative overflow-hidden bg-slate-50 selection:bg-indigo-500/30"
       dir={isRtl ? "rtl" : "ltr"}
     >
-      {/* Background ambient glows */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[120px] mix-blend-screen" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-violet-600/10 blur-[120px] mix-blend-screen" />
+      {/* Modern Background Effects */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Animated Gradient Orbs */}
+        <div className="absolute -top-[40%] -right-[10%] w-[80vw] h-[80vw] rounded-full bg-indigo-400/20 mix-blend-multiply filter blur-[100px] animate-pulse-slow"></div>
+        <div
+          className="absolute top-[20%] -left-[20%] w-[70vw] h-[70vw] rounded-full bg-blue-400/20 mix-blend-multiply filter blur-[120px] animate-pulse-slow"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="absolute -bottom-[20%] left-[20%] w-[60vw] h-[60vw] rounded-full bg-violet-400/20 mix-blend-multiply filter blur-[100px] animate-pulse-slow"
+          style={{ animationDelay: "4s" }}
+        ></div>
+        {/* Subtle grid texture overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]"></div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md mb-8"
+      {/* Top Bar Navigation */}
+      <nav className="absolute top-0 left-0 right-0 z-50 p-6 flex justify-between items-center bg-transparent">
+        {/* Empty div for flex layout spacing */}
+        <div></div>
+
+        <button
+          onClick={() => router.push(dashboardLink)}
+          className="group relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden bg-white/40 backdrop-blur-md border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:bg-white/60 transition-all duration-300 ease-out active:scale-95"
         >
-          <Sparkles className="w-4 h-4 text-indigo-400" />
-          <span className="text-sm font-semibold text-indigo-300 tracking-wide uppercase">
-            {t.heroTag}
+          <span className="relative z-10 font-semibold text-slate-700 tracking-wide text-sm">
+            {user ? t("dashboard") : t("ownerDashboard")}
           </span>
-        </motion.div>
+          <div className="relative z-10 text-slate-700 group-hover:translate-x-1 transition-transform duration-300">
+            {isRtl ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+          </div>
+        </button>
+      </nav>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight"
-        >
-          <span className="bg-linear-to-br from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent">
-            {t.heroTitle}
-          </span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed mb-12"
-        >
-          {t.heroSubtitle}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
-        >
-          <button
-            onClick={() => router.push(`/${locale}/login`)}
-            className="px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.3)]"
+      {/* Main Hero Content */}
+      <div className="flex-1 flex flex-col lg:flex-row relative z-10 container mx-auto px-6 pt-24 pb-32">
+        <div className="flex-1 flex justify-center lg:items-center">
+          <div
+            className="w-full max-w-xl flex flex-col mt-4 lg:mt-0 items-center lg:items-start text-center lg:text-start"
+            style={{
+              alignItems: isRtl ? "flex-start" : "flex-end",
+              textAlign: isRtl ? "right" : "left",
+            }}
           >
-            {t.btnFree}
-          </button>
-          <button
-            onClick={() => window.open("https://wa.me/212600000000", "_blank")}
-            className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all hover:scale-105 active:scale-95 backdrop-blur-sm"
-          >
-            {t.btnPaid}
-          </button>
-        </motion.div>
-      </section>
+            {/* Status Badge */}
+            {content.badge && (
+              <div className="animate-fade-in-up md:hover:scale-105 transition-transform duration-300 mb-8 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-200/50 bg-white/50 backdrop-blur-md shadow-sm">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span className="text-sm font-bold bg-linear-to-r from-indigo-700 to-blue-600 bg-clip-text text-transparent transform translate-y-px">
+                  {content.badge}
+                </span>
+              </div>
+            )}
 
-      {/* Pricing/Tiers Section */}
-      <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            {t.pricingTitle}
-          </h2>
-          <p className="text-slate-400">{t.pricingSubtitle}</p>
-        </div>
+            {/* Typography Section */}
+            <div
+              className="space-y-4 w-full animate-fade-in-up"
+              style={{ animationDelay: "100ms" }}
+            >
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-slate-800 tracking-tight leading-[1.1]">
+                {content.title}
+              </h1>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold bg-linear-to-br from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent pb-2 uppercase tracking-wide">
+                {content.subtitle}
+              </h2>
+            </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {/* Free Tier Card */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-indigo-500/50 transition-all duration-300 group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Glassmorphic Description Card */}
+            <div
+              className="animate-fade-in-up w-full mt-8"
+              style={{ animationDelay: "200ms" }}
+            >
+              <div className="relative p-px rounded-2xl bg-linear-to-b from-white/60 to-white/10 overflow-hidden group">
+                <div className="absolute inset-0 bg-white/40 backdrop-blur-xl transition-all duration-500 group-hover:bg-white/50"></div>
 
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    {t.freePlan}
-                  </h3>
-                  <div className="text-indigo-400 font-medium">
-                    {t.freePlanDesc}
-                  </div>
-                </div>
-                <div className="bg-white/10 p-3 rounded-2xl">
-                  <WifiOff className="w-6 h-6 text-indigo-300" />
+                {/* Decorative Side Blur */}
+                <div
+                  className={`absolute top-0 bottom-0 w-2 ${isRtl ? "right-0" : "left-0"} bg-linear-to-b from-indigo-500 to-blue-500`}
+                ></div>
+
+                <div className="relative p-6 sm:p-8">
+                  <p className="text-lg sm:text-xl text-slate-700 leading-relaxed font-medium">
+                    {content.description}
+                  </p>
                 </div>
               </div>
-
-              <p className="text-sm text-slate-400 mb-8 pb-8 border-b border-white/10">
-                {t.freePlanTarget}
-              </p>
-
-              <ul className="space-y-4 mb-8">
-                {freeFeatures.map((feat, i) => (
-                  <li key={i} className="flex gap-3 text-slate-300">
-                    <div className="text-indigo-400 mt-0.5">{feat.icon}</div>
-                    <span>{feat.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => router.push(`/${locale}/login`)}
-                className="w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all active:scale-95"
-              >
-                {t.btnFree}
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Premium Tier Card */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative p-8 rounded-3xl bg-gradient-to-br from-indigo-900/40 to-violet-900/40 border border-indigo-500/30 backdrop-blur-xl shadow-[0_0_40px_rgba(79,70,229,0.15)] hover:shadow-[0_0_60px_rgba(79,70,229,0.25)] transition-all duration-300"
-          >
-            <div className="absolute top-0 right-10 transform -translate-y-1/2 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-              RECOMMENDED
             </div>
 
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    {t.paidPlan}
-                  </h3>
-                  <div className="text-violet-300 font-medium">
-                    {t.paidPlanDesc}
-                  </div>
-                </div>
-                <div className="bg-indigo-500/20 p-3 rounded-2xl">
-                  <Cloud className="w-6 h-6 text-indigo-300" />
-                </div>
-              </div>
-
-              <p className="text-sm text-indigo-200/70 mb-8 pb-8 border-b border-indigo-500/20">
-                {t.paidPlanTarget}
-              </p>
-
-              <ul className="space-y-4 mb-8">
-                {paidFeatures.map((feat, i) => (
-                  <li key={i} className="flex gap-3 text-indigo-100">
-                    <div className="text-indigo-400 mt-0.5">{feat.icon}</div>
-                    <span>{feat.text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() =>
-                  window.open("https://wa.me/212600000000", "_blank")
-                }
-                className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)]"
-              >
-                {t.btnPaid}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Universal Features Section */}
-      <section className="relative z-10 py-24 px-6 bg-white/5 border-y border-white/10 mt-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-10 text-white">
-            {t.featuresTitle}
-          </h2>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {t.featuresList.map((feat: string, i: number) => (
+            {/* Call to Action Register Button (If enabled) */}
+            {center?.publicRegistrationEnabled !== false && (
               <div
-                key={i}
-                className="flex flex-col items-center text-center p-6 bg-white/5 rounded-2xl border border-white/5"
+                className="animate-fade-in-up mt-10"
+                style={{ animationDelay: "300ms" }}
               >
-                <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-4" />
-                <p className="text-slate-300 text-sm leading-relaxed">{feat}</p>
+                <button
+                  onClick={() => handleRegisterClick("student")}
+                  className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-[0_8px_30px_rgb(79,70,229,0.3)] transition-all duration-300 hover:shadow-[0_12px_40px_rgb(79,70,229,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-95"
+                >
+                  <span className="transform translate-y-px">
+                    {content.ctaText}
+                  </span>
+                  <div className="bg-white/20 p-1.5 rounded-full group-hover:scale-110 transition-transform duration-300">
+                    {isRtl ? <ArrowLeft size={20} /> : <ArrowRight size={20} />}
+                  </div>
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
-      </section>
 
-      {/* Footer / CTA */}
-      <section className="relative z-10 py-32 px-6 text-center max-w-3xl mx-auto">
-        <h2 className="text-4xl font-bold mb-6">{t.ctaTitle}</h2>
-        <p className="text-xl text-slate-400 mb-10">{t.ctaDesc}</p>
-        <p className="text-sm text-indigo-400 font-mono flex items-center justify-center gap-2">
-          <Lock className="w-4 h-4" /> {t.contactUs}
-        </p>
-      </section>
+        {/* Hero Image / Animation */}
+        <div
+          className="flex-1 relative flex items-center justify-center mt-12 lg:mt-0 animate-fade-in-up"
+          style={{ animationDelay: "400ms" }}
+        >
+          <div className="relative w-full max-w-[400px] lg:max-w-[550px] aspect-square rounded-[3rem] overflow-hidden drop-shadow-2xl">
+            {/* Soft Glow behind animation */}
+            <div className="absolute inset-10 bg-indigo-500/20 blur-3xl rounded-full"></div>
+            <Lottie
+              animationData={studentAnimation}
+              loop={true}
+              autoplay={true}
+              className="w-full h-full object-contain relative z-10"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Public Offerings (Subjects, Grades, Teachers) */}
+      <PublicOfferings
+        centerId={center?.id}
+        onRegisterClick={handleRegisterClick}
+      />
+
+      {/* Floating Glassmorphic Contact Dock */}
+      <div
+        className="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 animate-fade-in-up"
+        style={{ animationDelay: "500ms" }}
+      >
+        <div className="flex items-center gap-6 px-6 sm:px-8 py-3.5 bg-white/70 backdrop-blur-2xl border border-white/60 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.2)] rounded-full hover:bg-white/80 transition-colors duration-300">
+          {/* WhatsApp Button */}
+          {content.phone && (
+            <button
+              onClick={() =>
+                window.open(
+                  `https://wa.me/${content.phone?.replace(/\D/g, "")}`,
+                  "_blank",
+                )
+              }
+              className="group flex flex-row-reverse items-center gap-3 hover:scale-105 active:scale-95 transition-all duration-300"
+            >
+              <div className="bg-[#25D366]/10 p-2.5 rounded-full group-hover:bg-[#25D366]/20 transition-colors">
+                <svg fill="#25D366" viewBox="0 0 32 32" className="w-6 h-6">
+                  <path d="M26.576 5.363c-2.69-2.69-6.406-4.354-10.511-4.354-8.209 0-14.865 6.655-14.865 14.865 0 2.732 0.737 5.291 2.022 7.491l-0.038-0.070-2.109 7.702 7.879-2.067c2.051 1.139 4.498 1.809 7.102 1.809h0.006c8.209-0.003 14.862-6.659 14.862-14.868 0-4.103-1.662-7.817-4.349-10.507l0 0zM16.062 28.228h-0.005c-0 0-0.001 0-0.001 0-2.319 0-4.489-0.64-6.342-1.753l0.056 0.031-0.451-0.267-4.675 1.227 1.247-4.559-0.294-0.467c-1.185-1.862-1.889-4.131-1.889-6.565 0-6.822 5.531-12.353 12.353-12.353s12.353 5.531 12.353 12.353c0 6.822-5.53 12.353-12.353 12.353h-0zM22.838 18.977c-0.371-0.186-2.197-1.083-2.537-1.208-0.341-0.124-0.589-0.185-0.837 0.187-0.246 0.371-0.958 1.207-1.175 1.455-0.216 0.249-0.434 0.279-0.805 0.094-1.15-0.466-2.138-1.087-2.997-1.852l0.010 0.009c-0.799-0.74-1.484-1.587-2.037-2.521l-0.028-0.052c-0.216-0.371-0.023-0.572 0.162-0.757 0.167-0.166 0.372-0.434 0.557-0.65 0.146-0.179 0.271-0.384 0.366-0.604l0.006-0.017c0.043-0.087 0.068-0.188 0.068-0.296 0-0.131-0.037-0.253-0.101-0.357l0.002 0.003c-0.094-0.186-0.836-2.014-1.145-2.758-0.302-0.724-0.609-0.625-0.836-0.637-0.216-0.010-0.464-0.012-0.712-0.012-0.395 0.010-0.746 0.188-0.988 0.463l-0.001 0.002c-0.802 0.761-1.3 1.834-1.3 3.023 0 0.026 0 0.053 0.001 0.079l-0-0.004c0.131 1.467 0.681 2.784 1.527 3.857l-0.012-0.015c1.604 2.379 3.742 4.282 6.251 5.564l0.094 0.043c0.548 0.248 1.25 0.513 1.968 0.74l0.149 0.041c0.442 0.14 0.951 0.221 1.479 0.221 0.303 0 0.601-0.027 0.889-0.078l-0.031 0.004c1.069-0.223 1.956-0.868 2.497-1.749l0.009-0.017c0.165-0.366 0.261-0.793 0.261-1.242 0-0.185-0.016-0.366-0.047-0.542l0.003 0.019c-0.092-0.155-0.34-0.247-0.712-0.434z"></path>
+                </svg>
+              </div>
+              <span className="text-xl font-bold font-mono text-slate-700 tracking-wider transform translate-y-px">
+                {content.phone}
+              </span>
+            </button>
+          )}
+
+          {/* Divider */}
+          {content.phone && content.address && (
+            <div className="w-[1.5px] h-10 bg-slate-200"></div>
+          )}
+
+          {/* Location Badge */}
+          {content.address && (
+            <div className="hidden sm:flex items-center gap-2 group cursor-default">
+              <div className="bg-indigo-100 p-2.5 rounded-full text-indigo-600 transition-colors group-hover:bg-indigo-200 group-hover:text-indigo-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <span className="text-[15px] font-bold text-slate-600 whitespace-nowrap transform translate-y-px">
+                {content.address}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Public Registration Dialog */}
+      <PublicRegistrationDialog
+        open={showRegisterDialog}
+        onOpenChange={setShowRegisterDialog}
+        type={registerType}
+        centerId={center?.id}
+      />
     </main>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
+          </div>
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 }
