@@ -2139,6 +2139,9 @@
     "legend": "Legend",
     "exportNames": "export names",
     "filterNames": "filtre names",
-    "uploadFileInstruction": "upload file that containe names"
+    "uploadFileInstruction": "upload file that containe names",
+    "searchTable": "Search Table",
+    "searchPlaceholder": "Search by name...",
+    "noResults": "No results found for your search"
   }
 }

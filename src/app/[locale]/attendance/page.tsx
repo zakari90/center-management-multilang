@@ -63,6 +63,7 @@ import {
   Eye,
   Edit3,
   Trash,
+  Search,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -81,11 +82,19 @@ export default function AttendancePage() {
   const [shift, setShift] = useState<"morning" | "evening">("morning");
   const [currentDate] = useState(new Date().setHours(0, 0, 0, 0));
   const [rows, setRows] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [pastSessions, setPastSessions] = useState<AttendanceSession[]>([]);
   const [availableNames, setAvailableNames] = useState<
     { id: string; name: string }[]
   >([]);
+
+  // -- Derived State --
+  const filteredRows = useMemo(() => {
+    if (!searchQuery.trim()) return rows;
+    const query = searchQuery.toLowerCase();
+    return rows.filter((row) => row.name.toLowerCase().includes(query));
+  }, [rows, searchQuery]);
 
   // -- Initialization --
   useEffect(() => {
@@ -449,44 +458,70 @@ export default function AttendancePage() {
         {/* Card Header */}
         <div className="p-8 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-center md:text-start space-y-1">
-              <h2 className="text-3xl font-black uppercase text-slate-900 dark:text-white print:text-black">
-                {t("title")}
-              </h2>
-              <p className="text-indigo-600 font-bold tracking-widest text-sm uppercase">
-                {institution}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-8">
-              <div className="text-center">
-                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+            {/* Metadata (Left in RTL, Right in LTR) */}
+            <div className={`flex items-center gap-8 order-2 ${isRtl ? "md:order-1" : "md:order-2"}`}>
+              <div className="text-center group">
+                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1">
+                  {isRtl ? "الفترة" : "Shift"}
+                </p>
+                <p className="text-xl font-black text-indigo-600 uppercase transition-colors">
+                  {t(shift)}
+                </p>
+              </div>
+              <div className="h-12 w-[1.5px] bg-slate-200 dark:bg-slate-800 hidden md:block" />
+              <div className="text-center group">
+                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1">
                   {isRtl ? "التاريخ" : "Date"}
                 </p>
                 <p className="text-xl font-black text-slate-800 dark:text-white print:text-black">
                   {formattedDate}
                 </p>
               </div>
-              <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block" />
-              <div className="text-center">
-                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
-                  {isRtl ? "الفترة" : "Shift"}
-                </p>
-                <p className="text-xl font-black text-indigo-600 uppercase">
-                  {t(shift)}
-                </p>
-              </div>
+            </div>
+
+            {/* Title (Right in RTL, Left in LTR) */}
+            <div className={`text-center md:text-end space-y-1 order-1 ${isRtl ? "md:order-2" : "md:order-1"}`}>
+              <h2 className="text-4xl font-black uppercase text-slate-900 dark:text-white print:text-black">
+                {t("title")}
+              </h2>
+              <p className="text-indigo-600 font-bold tracking-widest text-sm uppercase opacity-80">
+                {institution}
+              </p>
             </div>
           </div>
         </div>
 
         {/* --- Entry Form (Edit Mode) --- */}
         {mode === "edit" && (
-          <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/5 border-b dark:border-slate-800 print:hidden flex flex-wrap items-center gap-6">
-            {/* Add Name Dropdown (Right side in RTL) */}
-            <div className="space-y-2 flex-1 min-w-[300px]">
-              <Label className="text-xs font-bold uppercase text-slate-500">
-                {t("addName")}
+          <div className="p-8 bg-slate-50/50 dark:bg-slate-800/10 border-b dark:border-slate-800 print:hidden flex flex-wrap items-end justify-between gap-8">
+            {/* 0. Search Table (Filter current rows) */}
+            <div className={`space-y-3 flex-1 min-w-[200px] order-0`}>
+              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
+                {t("searchTable")}
+              </Label>
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("searchPlaceholder")}
+                  className={`h-12 bg-white dark:bg-slate-950 border-slate-200/60 shadow-sm hover:border-indigo-400 transition-all rounded-xl ${isRtl ? "pr-10" : "pl-10"}`}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className={`absolute ${isRtl ? "left-3" : "right-3"} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600`}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 1. Filter Names (Right in RTL) */}
+            <div className={`space-y-3 flex-1 min-w-[280px] order-1 ${isRtl ? "md:order-4" : "md:order-1"}`}>
+              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
+                {t("filterNames")}
               </Label>
               <Select
                 onValueChange={(val) => {
@@ -494,12 +529,8 @@ export default function AttendancePage() {
                   if (person) addRow(person);
                 }}
               >
-                <SelectTrigger className="w-full bg-white dark:bg-slate-950 border-slate-200 hover:border-indigo-400 transition-colors">
-                  <SelectValue
-                    placeholder={
-                      isRtl ? "اختر من القائمة..." : "Select student/teacher..."
-                    }
-                  />
+                <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-200/60 shadow-sm hover:border-indigo-400 transition-all rounded-xl">
+                  <SelectValue placeholder={isRtl ? "...اختر من القائمة" : "Select from list..."} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableNames.map((p) => (
@@ -507,97 +538,71 @@ export default function AttendancePage() {
                       {p.name}
                     </SelectItem>
                   ))}
-                  <DropdownMenuSeparator />
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-xs text-indigo-600"
-                    onClick={() => addRow()}
-                  >
-                    <Plus size={12} className="mr-2" />{" "}
-                    {isRtl ? "إضافة يدوي" : "Add Manually"}
-                  </Button>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block self-end mb-2" />
+            {/* 2. Export Names */}
+            <div className={`space-y-3 order-2 ${isRtl ? "md:order-3" : "md:order-2"}`}>
+              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
+                {t("exportNames")}
+              </Label>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="w-full h-12 rounded-xl border-slate-200/60 bg-white dark:bg-slate-950 text-slate-400 cursor-not-allowed italic"
+              >
+                {isRtl ? "قريباً..." : "Coming Soon..."}
+              </Button>
+            </div>
 
-            {/* Actions (Load All / Bulk) */}
-            <div className="flex items-center gap-2 self-end mb-1">
+            {/* 3. Upload Names */}
+            <div className={`space-y-3 order-3 ${isRtl ? "md:order-2" : "md:order-3"}`}>
+              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
+                {t("uploadFileInstruction")}
+              </Label>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={loadAllMembers}
-                className="rounded-full gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                className="w-full h-12 rounded-xl gap-2 border-indigo-200 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition-all shadow-sm"
               >
-                <Users size={14} /> {t("uploadNames")}
+                <Users size={16} /> {t("loadStudents")}
               </Button>
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full gap-2 border-slate-200"
-                  >
-                    <Plus size={14} /> {t("addNames")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("addNames")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {isRtl
-                        ? "أدخل الأسماء (اسم واحد في كل سطر)"
-                        : "Enter names (one per line)"}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <div className="py-4">
-                    <textarea
-                      id="bulk-names"
-                      className="w-full h-40 p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-sm"
-                      placeholder={
-                        isRtl
-                          ? "أحمد المحمد\nفاطمة الزهراء..."
-                          : "John Doe\nJane Smith..."
-                      }
-                    />
-                  </div>
-                  <AlertDialogFooter className="gap-2">
-                    <AlertDialogCancel>
-                      {isRtl ? "إلغاء" : "Cancel"}
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        const textarea = document.getElementById(
-                          "bulk-names",
-                        ) as HTMLTextAreaElement;
-                        if (textarea) handleBulkAdd(textarea.value);
-                      }}
-                      className="bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      {isRtl ? "إضافة" : "Add"}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
             </div>
 
-            {/* Shift Toggle (Left side in RTL) */}
-            <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase text-slate-500">
+            {/* 4. Add Name Manually */}
+            <div className={`flex items-end gap-2 order-4 ${isRtl ? "md:order-1" : "md:order-4"}`}>
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter invisible">
+                  {t("addName")}
+                </Label>
+                <Button
+                  onClick={() => addRow()}
+                  className="h-12 px-6 rounded-xl gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-indigo-200 transition-all"
+                >
+                  <Plus size={18} />
+                  <span className="font-bold">{isRtl ? "ت إضافة اسم" : "Add Name"}</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* 5. Shift Toggle */}
+            <div className={`space-y-3 order-5`}>
+              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter text-center block">
                 {isRtl ? "الفترة" : "Shift"}
               </Label>
-              <div className="flex items-center gap-2 h-10 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md">
+              <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 hover:border-slate-300 transition-all rounded-xl h-12">
                 <button
                   onClick={() => setShift("morning")}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded transition-all ${shift === "morning" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-indigo-600"}`}
+                  className={`text-[10px] font-black px-4 h-full rounded-lg transition-all ${shift === "morning" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-indigo-600"}`}
                 >
                   {t("morning")}
                 </button>
                 <button
                   onClick={() => setShift("evening")}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded transition-all ${shift === "evening" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-indigo-600"}`}
+                  className={`text-[10px] font-black px-4 h-full rounded-lg transition-all ${shift === "evening" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-indigo-600"}`}
                 >
                   {t("evening")}
                 </button>
@@ -627,23 +632,21 @@ export default function AttendancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.length === 0 ? (
+              {filteredRows.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="h-48 text-center text-slate-400 italic"
+                    className="h-40 text-center text-slate-400 font-medium"
                   >
-                    {mode === "edit"
+                    {rows.length === 0
                       ? isRtl
                         ? "أضف أسماء لبدء التحضير"
                         : "Add names to start marking"
-                      : isRtl
-                        ? "لا توجد سجلات بعد"
-                        : "No records yet"}
+                      : t("noResults")}
                   </TableCell>
                 </TableRow>
               ) : (
-                rows.map((row, idx) => (
+                filteredRows.map((row, idx) => (
                   <TableRow
                     key={row.id}
                     className="hover:bg-indigo-50/20 dark:hover:bg-indigo-900/5 transition-colors border-b dark:border-slate-800 print:border-black"
@@ -776,18 +779,22 @@ export default function AttendancePage() {
         </div>
 
         {/* Legend */}
-        <div className="px-8 py-4 bg-slate-50/50 dark:bg-slate-800/20 border-t dark:border-slate-800 flex flex-wrap gap-6 text-[10px] items-center print:bg-transparent print:border-black">
-          <span className="font-bold uppercase text-slate-400">
+        <div className="px-8 py-6 bg-slate-50/30 dark:bg-slate-800/5 border-t dark:border-slate-800 flex flex-wrap gap-8 text-[11px] items-center print:bg-transparent print:border-black">
+          <span className="font-black uppercase text-indigo-600/50 tracking-widest">
             {t("legend")}:
           </span>
           {["present", "absent", "late", "leave"].map((st) => (
-            <div key={st} className="flex items-center gap-1.5 capitalize">
+            <div key={st} className="flex items-center gap-2 group cursor-default">
               <span
-                className={`w-4 h-4 rounded-sm border flex items-center justify-center text-[8px] ${st === "present" ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300"}`}
+                className={`w-5 h-5 rounded-md border flex items-center justify-center text-[10px] font-black transition-all ${
+                  st === "present" 
+                    ? "bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-200" 
+                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-400"
+                }`}
               >
                 {st.charAt(0).toUpperCase()}
               </span>
-              <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">
+              <span className="font-bold text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">
                 {t(`status.${st}`)}
               </span>
             </div>

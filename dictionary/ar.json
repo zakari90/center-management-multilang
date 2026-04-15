@@ -2084,6 +2084,9 @@
     "legend": "مفتاح الرموز",
     "exportNames": "تصدير الأسماء",
     "filterNames": "فلترة الأسماء",
-    "uploadFileInstruction": "تحميل ملف يحتوي على أسماء"
+    "uploadFileInstruction": "تحميل ملف يحتوي على أسماء",
+    "searchTable": "بحث في الجدول",
+    "searchPlaceholder": "ابحث بالاسم...",
+    "noResults": "لم يتم العثور على نتائج لبحثك"
   }
 }
