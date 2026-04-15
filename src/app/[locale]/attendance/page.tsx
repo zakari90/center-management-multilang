@@ -1,38 +1,5 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useTranslations, useLocale } from "next-intl";
-import {
-  studentActions,
-  centerActions,
-  teacherActions,
-} from "@/freelib/dexie/freedexieaction";
-import {
-  attendanceActions,
-  AttendanceSession,
-  AttendanceRecord,
-} from "@/freelib/dexie/attendanceDb";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +11,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -52,22 +31,41 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Printer,
-  Users,
-  Plus,
-  Trash2,
-  Home,
-  Save,
-  History,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  attendanceActions,
+  AttendanceRecord,
+  AttendanceSession,
+} from "@/freelib/dexie/attendanceDb";
+import {
+  centerActions,
+  studentActions,
+  teacherActions,
+} from "@/freelib/dexie/freedexieaction";
+import ExcelJS from "exceljs";
+import {
   ChevronDown,
-  Eye,
   Edit3,
+  Eye,
+  History,
+  Home,
+  Plus,
+  Printer,
+  Save,
   Trash,
-  Search,
+  Trash2,
+  Users,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Student } from "@/freelib/dexie/dbSchema";
 
 export default function AttendancePage() {
   const t = useTranslations("AttendanceRegister");
@@ -82,19 +80,12 @@ export default function AttendancePage() {
   const [shift, setShift] = useState<"morning" | "evening">("morning");
   const [currentDate] = useState(new Date().setHours(0, 0, 0, 0));
   const [rows, setRows] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [pastSessions, setPastSessions] = useState<AttendanceSession[]>([]);
   const [availableNames, setAvailableNames] = useState<
     { id: string; name: string }[]
   >([]);
-
-  // -- Derived State --
-  const filteredRows = useMemo(() => {
-    if (!searchQuery.trim()) return rows;
-    const query = searchQuery.toLowerCase();
-    return rows.filter((row) => row.name.toLowerCase().includes(query));
-  }, [rows, searchQuery]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // -- Initialization --
   useEffect(() => {
@@ -123,6 +114,13 @@ export default function AttendancePage() {
     if (loading) return; // Prevent infinite loops or redundant calls during initial load
     syncWithDatabase(currentDate, shift);
   }, [shift, currentDate]);
+
+  const filteredAvailableNames = useMemo(() => {
+    if (!searchTerm) return availableNames;
+    return availableNames.filter((p) =>
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [availableNames, searchTerm]);
 
   const loadAvailableNames = async () => {
     try {
@@ -219,12 +217,12 @@ export default function AttendancePage() {
         }));
 
       await attendanceActions.saveSession(session, records);
-      toast.success(isRtl ? "تم حفظ السجل" : "Attendance saved");
+      toast.success(t("messages.saved"));
       loadPastSessions();
       setMode("view");
     } catch (error) {
       console.error("Save failed:", error);
-      toast.error(isRtl ? "فشل الحفظ" : "Failed to save");
+      toast.error(t("messages.saveFailed"));
     } finally {
       setLoading(false);
     }
@@ -236,7 +234,7 @@ export default function AttendancePage() {
       if (sessionId) {
         await attendanceActions.clearSessionRecords(sessionId);
       }
-      toast.info(isRtl ? "تم مسح جميع السجلات" : "All records cleared");
+      toast.info(t("messages.cleared"));
     } catch (error) {
       toast.error("Error clearing records");
     }
@@ -286,11 +284,7 @@ export default function AttendancePage() {
       });
 
       setRows(newRows);
-      toast.info(
-        isRtl
-          ? `تمت إضافة ${availableNames.length - existingIds.size} اسماً`
-          : `Added ${availableNames.length - existingIds.size} names`,
-      );
+      toast.info(t("messages.namesAdded", { count: availableNames.length - existingIds.size }));
     } catch (error) {
       toast.error("Failed to load all members");
     } finally {
@@ -298,7 +292,7 @@ export default function AttendancePage() {
     }
   };
 
-  const handleBulkAdd = (text: string) => {
+  const handleBulkUpload = (text: string) => {
     const names = text
       .split("\n")
       .map((n) => n.trim())
@@ -318,9 +312,80 @@ export default function AttendancePage() {
       });
     });
     setRows(newRows);
-    toast.success(
-      isRtl ? `تمت إضافة ${names.length} اسماً` : `Added ${names.length} names`,
-    );
+    toast.success(t("messages.namesAdded", { count: names.length }));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const arrayBuffer = await file.arrayBuffer();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const worksheet = workbook.getWorksheet(1);
+      const newNames: string[] = [];
+      worksheet?.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // skip header
+        const nameCell = row.getCell(1).value;
+        if (nameCell) newNames.push(nameCell.toString());
+      });
+
+      if (newNames.length > 0) {
+        handleBulkUpload(newNames.join("\n"));
+      } else {
+        toast.info(t("messages.noNamesFound"));
+      }
+    } catch (error) {
+      console.error("File upload failed:", error);
+      toast.error("File load failed");
+    } finally {
+      setLoading(false);
+      e.target.value = ""; // reset input
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Attendance");
+
+      // Headers
+      worksheet.columns = [
+        { header: "#", key: "index", width: 5 },
+        { header: t("columns.name"), key: "name", width: 30 },
+        { header: t("columns.status"), key: "status", width: 10 },
+        { header: t("columns.remarks"), key: "remarks", width: 40 },
+      ];
+
+      // Rows
+      rows.forEach((r, idx) => {
+        worksheet.addRow({
+          index: idx + 1,
+          name: r.name,
+          status: r.status,
+          remarks: r.remarks,
+        });
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `attendance-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success(t("messages.exportSuccess"));
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error(t("messages.exportFailed"));
+    }
   };
 
   const formattedDate = new Date(currentDate).toLocaleDateString(locale, {
@@ -336,28 +401,74 @@ export default function AttendancePage() {
     >
       {/* --- Action Bar --- */}
       <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-4 items-center justify-between print:hidden">
-        {/* Left Side (End in RTL): Actions */}
-        <div className="flex flex-wrap gap-3 order-2 md:order-1">
+        <div className="flex items-center gap-4">
           <Button
-            onClick={() => window.print()}
             variant="outline"
-            className="gap-2 rounded-full"
+            size="icon"
+            onClick={() => router.back()}
+            className="rounded-full"
           >
-            <Printer size={18} />
-            {t("print")}
+            <Home size={18} />
           </Button>
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-800">
+            <Button
+              variant={mode === "view" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setMode("view")}
+              className={`rounded-full gap-2 ${mode === "view" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            >
+              <Eye size={16} /> {t("viewMode")}
+            </Button>
+            <Button
+              variant={mode === "edit" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setMode("edit")}
+              className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            >
+              <Edit3 size={16} /> {t("editMode")}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <DropdownMenu dir={isRtl ? "rtl" : "ltr"}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2 rounded-full px-4">
+                <History size={18} />
+                <span className="hidden sm:inline">{t("history")}</span>
+                <ChevronDown size={14} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuLabel>
+                {t("history")}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {pastSessions.length === 0 && (
+                <div className="p-4 text-center text-xs text-muted-foreground italic">
+                  {t("noRecords")}
+                </div>
+              )}
+              {pastSessions.map((s) => (
+                <DropdownMenuItem
+                  key={s.id}
+                  onClick={() => syncWithDatabase(s.date, s.shift)}
+                >
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold">
+                      {new Date(s.date).toLocaleDateString(locale)}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground uppercase">
+                      {t(s.shift)}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {mode === "edit" && (
             <>
-              <Button
-                onClick={handleSave}
-                disabled={loading}
-                className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700"
-              >
-                <Save size={18} />
-                {isRtl ? "حفظ" : "Save"}
-              </Button>
-
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -378,77 +489,36 @@ export default function AttendancePage() {
                   </AlertDialogHeader>
                   <AlertDialogFooter className="gap-2">
                     <AlertDialogCancel>
-                      {isRtl ? "إلغاء" : "Cancel"}
+                      {t("cancel") || (isRtl ? "إلغاء" : "Cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAll}
                       className="bg-destructive hover:bg-destructive/90"
                     >
-                      {isRtl ? "حذف" : "Delete"}
+                      {t("deleteAll")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Save size={18} />
+                {t("save")}
+              </Button>
             </>
           )}
 
-          <DropdownMenu dir={isRtl ? "rtl" : "ltr"}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full">
-                <History size={18} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-[200px]">
-              <DropdownMenuLabel>
-                {t("history") || (isRtl ? "سجلات سابقة" : "History")}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {pastSessions.map((s) => (
-                <DropdownMenuItem
-                  key={s.id}
-                  onClick={() => syncWithDatabase(s.date, s.shift)}
-                >
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold">
-                      {new Date(s.date).toLocaleDateString(locale)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground uppercase">
-                      {t(s.shift)}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Right Side (Start in RTL): Navigation & Modes */}
-        <div className="flex items-center gap-4 order-1 md:order-2">
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-800">
-            <Button
-              variant={mode === "view" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setMode("view")}
-              className={`rounded-full gap-2 ${mode === "view" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
-            >
-              <Eye size={16} /> {t("viewMode")}
-            </Button>
-            <Button
-              variant={mode === "edit" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setMode("edit")}
-              className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
-            >
-              <Edit3 size={16} /> {t("editMode")}
-            </Button>
-          </div>
           <Button
+            onClick={() => window.print()}
             variant="outline"
-            size="icon"
-            onClick={() => router.back()}
-            className="rounded-full"
+            className="gap-2 rounded-full"
           >
-            <Home size={18} />
+            <Printer size={18} />
+            {t("print")}
           </Button>
         </div>
       </div>
@@ -458,154 +528,169 @@ export default function AttendancePage() {
         {/* Card Header */}
         <div className="p-8 border-b dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            {/* Metadata (Left in RTL, Right in LTR) */}
-            <div className={`flex items-center gap-8 order-2 ${isRtl ? "md:order-1" : "md:order-2"}`}>
-              <div className="text-center group">
-                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1">
-                  {isRtl ? "الفترة" : "Shift"}
-                </p>
-                <p className="text-xl font-black text-indigo-600 uppercase transition-colors">
-                  {t(shift)}
-                </p>
-              </div>
-              <div className="h-12 w-[1.5px] bg-slate-200 dark:bg-slate-800 hidden md:block" />
-              <div className="text-center group">
-                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 mb-1">
-                  {isRtl ? "التاريخ" : "Date"}
+            <div className="text-center md:text-start space-y-1">
+              <h1 className="text-3xl font-black uppercase text-slate-900 dark:text-white print:text-black">
+                {t("title")}
+              </h1>
+              <p className="text-indigo-600 font-bold tracking-widest text-sm uppercase">
+                {institution}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-8">
+              <div className="text-center">
+                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                  {t("columns.date") || "Date"}
                 </p>
                 <p className="text-xl font-black text-slate-800 dark:text-white print:text-black">
                   {formattedDate}
                 </p>
               </div>
-            </div>
-
-            {/* Title (Right in RTL, Left in LTR) */}
-            <div className={`text-center md:text-end space-y-1 order-1 ${isRtl ? "md:order-2" : "md:order-1"}`}>
-              <h2 className="text-4xl font-black uppercase text-slate-900 dark:text-white print:text-black">
-                {t("title")}
-              </h2>
-              <p className="text-indigo-600 font-bold tracking-widest text-sm uppercase opacity-80">
-                {institution}
-              </p>
+              <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block" />
+              <div className="text-center">
+                <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                  {isRtl ? "الفترة" : "Shift"}
+                </p>
+                <p className="text-xl font-black text-indigo-600 uppercase">
+                  {t(shift)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* --- Entry Form (Edit Mode) --- */}
         {mode === "edit" && (
-          <div className="p-8 bg-slate-50/50 dark:bg-slate-800/10 border-b dark:border-slate-800 print:hidden flex flex-wrap items-end justify-between gap-8">
-            {/* 0. Search Table (Filter current rows) */}
-            <div className={`space-y-3 flex-1 min-w-[200px] order-0`}>
-              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
-                {t("searchTable")}
-              </Label>
-              <div className="relative">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t("searchPlaceholder")}
-                  className={`h-12 bg-white dark:bg-slate-950 border-slate-200/60 shadow-sm hover:border-indigo-400 transition-all rounded-xl ${isRtl ? "pr-10" : "pl-10"}`}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className={`absolute ${isRtl ? "left-3" : "right-3"} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600`}
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* 1. Filter Names (Right in RTL) */}
-            <div className={`space-y-3 flex-1 min-w-[280px] order-1 ${isRtl ? "md:order-4" : "md:order-1"}`}>
-              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
-                {t("filterNames")}
-              </Label>
-              <Select
-                onValueChange={(val) => {
-                  const person = availableNames.find((p) => p.id === val);
-                  if (person) addRow(person);
-                }}
-              >
-                <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-200/60 shadow-sm hover:border-indigo-400 transition-all rounded-xl">
-                  <SelectValue placeholder={isRtl ? "...اختر من القائمة" : "Select from list..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableNames.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* 2. Export Names */}
-            <div className={`space-y-3 order-2 ${isRtl ? "md:order-3" : "md:order-2"}`}>
-              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
-                {t("exportNames")}
-              </Label>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled
-                className="w-full h-12 rounded-xl border-slate-200/60 bg-white dark:bg-slate-950 text-slate-400 cursor-not-allowed italic"
-              >
-                {isRtl ? "قريباً..." : "Coming Soon..."}
-              </Button>
-            </div>
-
-            {/* 3. Upload Names */}
-            <div className={`space-y-3 order-3 ${isRtl ? "md:order-2" : "md:order-3"}`}>
-              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter">
-                {t("uploadFileInstruction")}
-              </Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadAllMembers}
-                className="w-full h-12 rounded-xl gap-2 border-indigo-200 bg-indigo-50/50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition-all shadow-sm"
-              >
-                <Users size={16} /> {t("loadStudents")}
-              </Button>
-            </div>
-
-            {/* 4. Add Name Manually */}
-            <div className={`flex items-end gap-2 order-4 ${isRtl ? "md:order-1" : "md:order-4"}`}>
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter invisible">
-                  {t("addName")}
-                </Label>
-                <Button
-                  onClick={() => addRow()}
-                  className="h-12 px-6 rounded-xl gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-indigo-200 transition-all"
-                >
-                  <Plus size={18} />
-                  <span className="font-bold">{isRtl ? "ت إضافة اسم" : "Add Name"}</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* 5. Shift Toggle */}
-            <div className={`space-y-3 order-5`}>
-              <Label className="text-[10px] font-black uppercase text-indigo-600/70 tracking-tighter text-center block">
+          <div className="p-6 bg-indigo-50/30 dark:bg-indigo-900/5 border-b dark:border-slate-800 print:hidden flex flex-wrap items-center gap-6">
+            {/* Shift Toggle */}
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-slate-500">
                 {isRtl ? "الفترة" : "Shift"}
               </Label>
-              <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 hover:border-slate-300 transition-all rounded-xl h-12">
+              <div className="flex items-center gap-2 h-10 px-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md">
                 <button
                   onClick={() => setShift("morning")}
-                  className={`text-[10px] font-black px-4 h-full rounded-lg transition-all ${shift === "morning" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-indigo-600"}`}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded transition-all ${shift === "morning" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-indigo-600"}`}
                 >
                   {t("morning")}
                 </button>
                 <button
                   onClick={() => setShift("evening")}
-                  className={`text-[10px] font-black px-4 h-full rounded-lg transition-all ${shift === "evening" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-indigo-600"}`}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded transition-all ${shift === "evening" ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-indigo-600"}`}
                 >
                   {t("evening")}
                 </button>
+              </div>
+            </div>
+
+            <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block self-end mb-2" />
+
+            {/* Upload Section */}
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase text-slate-400">
+                {t("uploadInstruction")}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addRow()}
+                  className="rounded-full gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 h-9"
+                >
+                  <Plus size={14} /> {t("addManual")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadAllMembers}
+                  className="rounded-full gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 h-9"
+                >
+                  <Users size={14} /> {t("loadStudents")}
+                </Button>
+
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    accept=".xlsx,.csv"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      document.getElementById("file-upload")?.click()
+                    }
+                    className="rounded-full gap-2 border-slate-200 h-9"
+                  >
+                    <Plus size={14} /> {t("uploadFile")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block self-end mb-2" />
+
+            {/* Export Section */}
+            <div className="flex flex-col items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase text-slate-400">
+                {t("exportNames")}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                className="rounded-full gap-2 border-slate-200 h-9 px-6"
+              >
+                <ChevronDown size={14} /> {t("export")}
+              </Button>
+            </div>
+
+            <div className="h-10 w-[1px] bg-slate-200 dark:bg-slate-800 hidden md:block self-end mb-2" />
+
+            {/* Filter & Add Dropdown */}
+            <div className="flex-1 min-w-[300px] flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase text-slate-400">
+                  {t("filterNames")}
+                </span>
+                <span className="text-[10px] font-bold uppercase text-slate-400">
+                  {t("addName")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  className="h-9 text-xs"
+                  placeholder={t("search")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Select
+                  onValueChange={(val) => {
+                    const person = availableNames.find((p) => p.id === val);
+                    if (person) addRow(person);
+                  }}
+                >
+                  <SelectTrigger className="flex-1 bg-white dark:bg-slate-900 border-slate-200 h-9 text-xs">
+                    <SelectValue
+                      placeholder={t("selectFromList")}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredAvailableNames.length === 0 ? (
+                      <div className="p-4 text-center text-xs text-muted-foreground italic">
+                        {t("noRecords")}
+                      </div>
+                    ) : (
+                      filteredAvailableNames.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -632,21 +717,17 @@ export default function AttendancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRows.length === 0 ? (
+              {rows.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="h-40 text-center text-slate-400 font-medium"
+                    className="h-48 text-center text-slate-400 italic"
                   >
-                    {rows.length === 0
-                      ? isRtl
-                        ? "أضف أسماء لبدء التحضير"
-                        : "Add names to start marking"
-                      : t("noResults")}
+                    {t("noRecords")}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredRows.map((row, idx) => (
+                rows.map((row, idx) => (
                   <TableRow
                     key={row.id}
                     className="hover:bg-indigo-50/20 dark:hover:bg-indigo-900/5 transition-colors border-b dark:border-slate-800 print:border-black"
@@ -670,7 +751,7 @@ export default function AttendancePage() {
                         >
                           <SelectTrigger className="w-full h-12 border-0 rounded-none focus:ring-0 px-4 bg-transparent">
                             <SelectValue
-                              placeholder={isRtl ? "اختر..." : "Select..."}
+                              placeholder={t("selectPlaceholder")}
                             >
                               {row.name}
                             </SelectValue>
@@ -779,23 +860,24 @@ export default function AttendancePage() {
         </div>
 
         {/* Legend */}
-        <div className="px-8 py-6 bg-slate-50/30 dark:bg-slate-800/5 border-t dark:border-slate-800 flex flex-wrap gap-8 text-[11px] items-center print:bg-transparent print:border-black">
-          <span className="font-black uppercase text-indigo-600/50 tracking-widest">
+        <div className="px-8 py-4 bg-slate-50/50 dark:bg-slate-800/20 border-t dark:border-slate-800 flex flex-wrap gap-6 text-[10px] items-center print:bg-transparent print:border-black">
+          <span className="font-bold uppercase text-slate-400">
             {t("legend")}:
           </span>
-          {["present", "absent", "late", "leave"].map((st) => (
-            <div key={st} className="flex items-center gap-2 group cursor-default">
+          {[
+            { key: "present", char: "P" },
+            { key: "absent", char: "A" },
+            { key: "late", char: "L" },
+            { key: "leave", char: "LV" }
+          ].map((st) => (
+            <div key={st.key} className="flex items-center gap-1.5 capitalize">
               <span
-                className={`w-5 h-5 rounded-md border flex items-center justify-center text-[10px] font-black transition-all ${
-                  st === "present" 
-                    ? "bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-200" 
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-400"
-                }`}
+                className={`w-4 h-4 rounded-sm border flex items-center justify-center text-[8px] ${st.key === "present" ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300"}`}
               >
-                {st.charAt(0).toUpperCase()}
+                {st.char}
               </span>
-              <span className="font-bold text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">
-                {t(`status.${st}`)}
+              <span className="font-medium text-slate-600 dark:text-slate-400 print:text-black">
+                {t(`status.${st.key}`)}
               </span>
             </div>
           ))}

@@ -225,6 +225,52 @@
     "e2eeYes": "نعم",
     "e2eeNo": "لا"
   },
+  "AttendanceRegister": {
+    "title": "سجل الحضور",
+    "morning": "صباحي",
+    "evening": "مسائي",
+    "viewMode": "عرض",
+    "editMode": "تعديل",
+    "history": "سجلات سابقة",
+    "deleteAll": "حذف الكل",
+    "confirmDeleteAll": "هل أنت متأكد من حذف جميع السجلات؟",
+    "confirmDeleteAllDesc": "لا يمكن التراجع عن هذا الإجراء.",
+    "save": "حفظ",
+    "print": "طباعة",
+    "loadStudents": "تحميل جميع الأعضاء",
+    "addName": "اسم الطالب",
+    "addManual": "إضافة يدوية",
+    "uploadFile": "تحميل ملف",
+    "uploadInstruction": "تحميل ملف يضم الأسماء",
+    "exportNames": "تصدير الأسماء",
+    "export": "تصدير",
+    "filterNames": "فلترة الأسماء",
+    "search": "بحث...",
+    "selectFromList": "اختر من القائمة...",
+    "noRecords": "لا توجد سجلات بعد. أضف أسماء لبدء التحضير.",
+    "selectPlaceholder": "اختر...",
+    "legend": "المفتاح",
+    "status": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر",
+      "leave": "إجازة"
+    },
+    "columns": {
+      "name": "الاسم",
+      "status": "الحالة",
+      "remarks": "ملاحظات"
+    },
+    "messages": {
+      "saved": "تم حفظ السجل بنجاح",
+      "saveFailed": "فشل الحفظ",
+      "cleared": "تم مسح جميع السجلات",
+      "namesAdded": "تمت إضافة {count} اسماً",
+      "noNamesFound": "لم يتم العثور على أسماء في الملف",
+      "exportSuccess": "تم التصدير بنجاح",
+      "exportFailed": "فشل التصدير"
+    }
+  },
 
   "register": {
     "successMessage": "تم إنشاء الحساب بنجاح! جارٍ إعادة التوجيه...",
