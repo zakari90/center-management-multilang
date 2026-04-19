@@ -11,7 +11,7 @@ import {
   AttendanceRecord,
   AttendanceSession,
 } from "@/freelib/dexie/scheduleDb";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { CalendarDays, TrendingUp, User } from "lucide-react";
 
@@ -151,9 +151,7 @@ export function MemberHistorySheet({
         ) : total === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3 text-slate-400">
             <CalendarDays className="w-10 h-10 opacity-30" />
-            <p className="text-sm italic">
-              {t("noSavedSessions")}
-            </p>
+            <p className="text-sm italic">{t("noSavedSessions")}</p>
           </div>
         ) : (
           <div className="p-6 space-y-6">
@@ -196,8 +194,7 @@ export function MemberHistorySheet({
               <div className="flex flex-col gap-2 flex-1">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  {total}{" "}
-                  {total === 1 ? t("session") : t("sessions")}
+                  {total} {total === 1 ? t("session") : t("sessions")}
                 </div>
                 {(["P", "A", "L", "LV"] as const).map((s) => (
                   <div key={s} className="flex items-center justify-between">

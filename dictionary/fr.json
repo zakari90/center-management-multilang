@@ -2114,5 +2114,24 @@
       "status": "Statut",
       "remarks": "Remarques"
     }
+  },
+  "Contact": {
+    "description": "Vous avez des questions ou besoin d'une démonstration personnalisée ? Notre équipe est là pour vous aider à choisir le meilleur plan pour votre centre.",
+    "email": "E-mail",
+    "address": "Adresse",
+    "name": "Nom complet",
+    "message": "Message",
+    "name_placeholder": "Jean Dupont",
+    "email_placeholder": "jean@example.com",
+    "message_placeholder": "Comment pouvons-nous vous aider ?",
+    "send": "Envoyer le message",
+    "contact_title": "Contactez-nous",
+    "err_name_min": "Le nom doit comporter au moins 2 caractères",
+    "err_email_invalid": "Adresse e-mail invalide",
+    "err_message_min": "Le message doit comporter au moins 10 caractères",
+    "err_api_failed": "Échec de l'envoi du message. Veuillez réessayer ou nous contacter directement.",
+    "success_title": "Message envoyé !",
+    "success_msg": "Merci de nous avoir contactés. Nous vous répondrons dès que possible.",
+    "send_another": "Envoyer un autre message"
   }
 }

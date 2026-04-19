@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import Contact from "@/components/Contact";
 
 // In-file translations to avoid polluting global dictionaries for this specific marketing page
 const content = {
@@ -452,6 +453,9 @@ export default function SaaSMarketingPage() {
           </div>
         </div>
       </section>
+
+      {/* Contact Section */}
+      <Contact />
 
       {/* Footer / CTA */}
       <section className="relative z-10 py-32 px-6 text-center max-w-3xl mx-auto">

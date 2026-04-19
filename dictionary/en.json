@@ -2162,5 +2162,24 @@
       "subject": "Subject",
       "schedule": "Schedule"
     }
+  },
+  "Contact": {
+    "description": "Have questions or need a personalized demo? Our team is here to help you choose the best plan for your center.",
+    "email": "Email",
+    "address": "Address",
+    "name": "Full Name",
+    "message": "Message",
+    "name_placeholder": "John Doe",
+    "email_placeholder": "john@example.com",
+    "message_placeholder": "How can we help you?",
+    "send": "Send Message",
+    "contact_title": "Get in Touch",
+    "err_name_min": "Name must be at least 2 characters",
+    "err_email_invalid": "Invalid email address",
+    "err_message_min": "Message must be at least 10 characters",
+    "err_api_failed": "Failed to send message. Please try again or contact us directly.",
+    "success_title": "Message Sent!",
+    "success_msg": "Thank you for reaching out. We'll get back to you as soon as possible.",
+    "send_another": "Send Another Message"
   }
 }
