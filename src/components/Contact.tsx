@@ -79,7 +79,10 @@ export default function Contact() {
   };
 
   return (
-    <div id="contact" className="relative z-10 py-20 px-4 md:px-6 max-w-7xl mx-auto">
+    <div
+      id="contact"
+      className="relative z-10 py-20 px-4 md:px-6 max-w-7xl mx-auto"
+    >
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
           {t("contact_title")}
@@ -142,7 +145,7 @@ export default function Contact() {
                     <p className="text-xs font-bold text-violet-400 uppercase tracking-widest mb-1">
                       {t("address")}
                     </p>
-                    <p className="text-base md:text-lg font-medium text-white break-words">
+                    <p className="text-base md:text-lg font-medium text-white wrap-break-word">
                       Sale, Morocco
                     </p>
                   </div>

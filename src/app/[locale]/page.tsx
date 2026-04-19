@@ -486,7 +486,7 @@ export default function SaaSMarketingPage() {
           {/* Schedule Tool Card */}
           <motion.div
             whileHover={{ y: -5 }}
-            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300"
+            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/8 transition-all duration-300"
           >
             <div className="flex flex-col h-full">
               <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
@@ -495,9 +495,7 @@ export default function SaaSMarketingPage() {
               <h3 className="text-2xl font-bold text-white mb-4">
                 {t.scheduleToolTitle}
               </h3>
-              <p className="text-slate-400 mb-8 flex-grow">
-                {t.scheduleToolDesc}
-              </p>
+              <p className="text-slate-400 mb-8 grow">{t.scheduleToolDesc}</p>
               <button
                 onClick={() => router.push(`/${locale}/schedule?tab=schedule`)}
                 className="inline-flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
@@ -510,7 +508,7 @@ export default function SaaSMarketingPage() {
           {/* Attendance Tool Card */}
           <motion.div
             whileHover={{ y: -5 }}
-            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300"
+            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/8 transition-all duration-300"
           >
             <div className="flex flex-col h-full">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
