@@ -23,6 +23,7 @@ interface AttendanceHeaderProps {
   mode: "view" | "edit";
   locale: string;
   scheduledRegisterNames?: { id: string; label: string }[];
+  canEdit?: boolean;
 }
 
 export function AttendanceHeader({
@@ -39,6 +40,7 @@ export function AttendanceHeader({
   mode,
   locale,
   scheduledRegisterNames = [],
+  canEdit = false,
 }: AttendanceHeaderProps) {
   const tSchedule = useTranslations("AttendanceRegister");
 
@@ -58,11 +60,11 @@ export function AttendanceHeader({
         <div className="text-center md:text-start space-y-2 flex-1 max-w-md">
           <div className="space-y-1">
             <p className="text-[10px] uppercase font-bold text-slate-400 px-1">
-              {isRtl ? "اسم السجل" : "Register Name"} : {institution}
+              {tSchedule("institution_label")} : {institution}
             </p>
             <div className="w-full max-w-sm space-y-2">
               {/* Banner: shown when no group is matched for the current day/time */}
-              {!registerName && (
+              {!registerName && canEdit && (
                 <div className="flex items-center gap-3 w-[300px] h-12 px-4 rounded-md border border-dashed border-amber-300 dark:border-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 select-none">
                   <CalendarX2 className="h-5 w-5 shrink-0 opacity-70" />
                   <p className="text-xs font-semibold leading-tight">
@@ -114,7 +116,7 @@ export function AttendanceHeader({
           {sessionCreatedAt && (
             <div className="flex items-center justify-center md:justify-start gap-2 text-[10px] text-slate-400 font-medium italic">
               <span className="opacity-70">
-                {isRtl ? "أنشئ في:" : "Created:"}
+                {tSchedule("created_label")}
               </span>
               <span>{creationDateText}</span>
             </div>
@@ -124,7 +126,7 @@ export function AttendanceHeader({
         <div className="flex items-center gap-8">
           <div className="text-center">
             <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
-              {isRtl ? "التاريخ" : "Date"}
+              {tSchedule("date_label")}
             </p>
             <p className="text-xl font-black text-slate-800 dark:text-white print:text-black">
               {formattedDate}
@@ -133,7 +135,7 @@ export function AttendanceHeader({
           <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 hidden md:block" />
           <div className="text-center">
             <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
-              {isRtl ? "الفترة" : "Shift"}
+              {tSchedule("shift_label")}
             </p>
             <p className="text-xl font-black text-indigo-600 uppercase">
               {t(shift)}

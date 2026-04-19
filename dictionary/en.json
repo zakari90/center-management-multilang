@@ -306,7 +306,18 @@
       "absent": "Absent",
       "late": "Late",
       "leave": "On Leave"
-    }
+    },
+    "noGroupsForPeriod": "No groups found for this period",
+    "addNames": "Add Names",
+    "registerNamePlaceholder": "Select Register",
+    "institution_label": "Register",
+    "created_label": "Created:",
+    "manageNames": "Manage Names",
+    "uploadFile": "Upload File",
+    "bulkAddInstruction": "Enter names (one per line)",
+    "bulkAddPlaceholder": "John Doe\nJane Smith...",
+    "searchPlaceholder": "Search...",
+    "selectPersonPlaceholder": "Select student/teacher..."
   },
   "register": {
     "successMessage": "Account created successfully! Redirecting...",
@@ -789,7 +800,10 @@
     "scheduleDetails": "Schedule Details",
     "close": "Close",
     "overwrite": "Overwrite",
-    "overwritePrompt": "Overwrite existing schedule?"
+    "overwritePrompt": "Overwrite existing schedule?",
+    "registerName": "Register Name",
+    "registerNamePlaceholder": "Enter Register Name",
+    "roomPlaceholder": "Enter Room"
   },
   "Program": {
     "title": "Program Management",

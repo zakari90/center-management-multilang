@@ -17,6 +17,7 @@ import {
   Eye,
   Save,
   Trash,
+  LogIn,
 } from "lucide-react";
 
 interface AttendanceActionsProps {
@@ -32,6 +33,8 @@ interface AttendanceActionsProps {
   registerName: string;
   selectedScheduleId: string;
   sessionCreatedAt: number | null;
+  canEdit?: boolean;
+  isAuthenticated?: boolean;
 }
 
 export function AttendanceActions({
@@ -44,6 +47,8 @@ export function AttendanceActions({
   loading,
   registerName,
   sessionCreatedAt,
+  canEdit,
+  isAuthenticated,
 }: AttendanceActionsProps) {
   return (
     <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-4 items-center justify-between print:hidden">
@@ -61,7 +66,8 @@ export function AttendanceActions({
             variant={mode === "edit" ? "default" : "ghost"}
             size="sm"
             onClick={() => setMode("edit")}
-            className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
+            disabled={!canEdit}
+            className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""} ${!canEdit ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <Edit3 size={16} /> {t("editMode")}
           </Button>
@@ -69,8 +75,9 @@ export function AttendanceActions({
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {mode === "edit" && (
+        {mode === "edit" && canEdit && (
           <>
+            {/* Existing Save/Delete buttons */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
@@ -145,6 +152,13 @@ export function AttendanceActions({
               </Button>
             )}
           </>
+        )}
+
+        {!isAuthenticated && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+            <LogIn size={14} />
+            {isRtl ? "قم بتسجيل الدخول كمدير لتتمكن من التعديل" : "Log in as manager to enable editing"}
+          </div>
         )}
       </div>
     </div>

@@ -1,13 +1,25 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { PublicHeader } from "@/components/PublicHeader";
+import { centerActions } from "@/freelib/dexie/freedexieaction";
+import { useEffect, useState, Suspense } from "react";
 import FreeTimeTableManagement from "./attendance/components/FreeTimeTableManagement";
 import { AttendanceModule } from "./attendance/components/AttendanceModule";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useAuth } from "@/context/authContext";
 
 function SchedulePageContent() {
+  const [institution, setInstitution] = useState("");
+  const { user, isAuthenticated } = useAuth();
+  const canEdit = isAuthenticated && (user?.role === "MANAGER" || user?.role === "ADMIN");
+
+  useEffect(() => {
+    centerActions.getAll().then((centers) => {
+      if (centers.length > 0) setInstitution(centers[0].name);
+    });
+  }, []);
   const tAttendance = useTranslations("AttendanceRegister");
   const tTimetable = useTranslations("TimetableManagement");
   const router = useRouter();
@@ -28,7 +40,9 @@ function SchedulePageContent() {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <PublicHeader institution={institution} />
+      <div className="container mx-auto p-4 sm:p-6 space-y-6">
       <Tabs
         value={currentTab}
         onValueChange={handleTabChange}
@@ -47,6 +61,7 @@ function SchedulePageContent() {
           <FreeTimeTableManagement
             refreshKey={refreshKey}
             onScheduleChangeAction={handleScheduleChange}
+            readOnly={!canEdit}
           />
         </TabsContent>
 
@@ -55,6 +70,7 @@ function SchedulePageContent() {
         </TabsContent>
       </Tabs>
     </div>
+  </div>
   );
 }
 

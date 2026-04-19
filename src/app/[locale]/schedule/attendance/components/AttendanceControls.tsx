@@ -54,7 +54,7 @@ export function AttendanceControls({
       {/* --- Name Management Section --- */}
       <div className="flex flex-col items-center gap-1.5">
         <span className="text-[10px] font-bold uppercase text-slate-400">
-          {isRtl ? "إدارة الأسماء" : "Manage Names"}
+          {t("manageNames")}
         </span>
         <div className="flex items-center gap-2 self-end mb-1">
           <input
@@ -70,7 +70,7 @@ export function AttendanceControls({
             onClick={() => document.getElementById("file-upload")?.click()}
             className="rounded-full gap-2 border-slate-200 h-9"
           >
-            <Plus size={14} /> {isRtl ? "تحميل ملف" : "Upload File"}
+            <Plus size={14} /> {t("uploadFile")}
           </Button>
 
           <AlertDialog>
@@ -87,25 +87,19 @@ export function AttendanceControls({
               <AlertDialogHeader>
                 <AlertDialogTitle>{t("addNames")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {isRtl
-                    ? "أدخل الأسماء (اسم واحد في كل سطر)"
-                    : "Enter names (one per line)"}
+                  {t("bulkAddInstruction")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="py-4">
                 <textarea
                   id="bulk-names"
                   className="w-full h-40 p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-sm"
-                  placeholder={
-                    isRtl
-                      ? "أحمد المحمد\nفاطمة الزهراء..."
-                      : "John Doe\nJane Smith..."
-                  }
+                  placeholder={t("bulkAddPlaceholder")}
                 />
               </div>
               <AlertDialogFooter className="gap-2">
                 <AlertDialogCancel>
-                  {isRtl ? "إلغاء" : "Cancel"}
+                  {t("cancel")}
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
@@ -116,7 +110,7 @@ export function AttendanceControls({
                   }}
                   className="bg-indigo-600 hover:bg-indigo-700"
                 >
-                  {isRtl ? "إضافة" : "Add"}
+                  {t("save")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -129,7 +123,7 @@ export function AttendanceControls({
       {/* Export Section */}
       <div className="flex flex-col items-center gap-1.5">
         <span className="text-[10px] font-bold uppercase text-slate-400">
-          {isRtl ? "تصدير الأسماء" : "export names"}
+          {t("exportNames")}
         </span>
         <Button
           variant="outline"
@@ -137,7 +131,7 @@ export function AttendanceControls({
           onClick={handleExport}
           className="rounded-full gap-2 border-slate-200 h-9 px-6"
         >
-          <ChevronDown size={14} /> {isRtl ? "تصدير" : "Export"}
+          <ChevronDown size={14} /> {t("exportNames")}
         </Button>
       </div>
 
@@ -147,7 +141,7 @@ export function AttendanceControls({
       <div className="flex-1 min-w-[300px] flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase text-slate-400">
-            {isRtl ? "فلترة الأسماء" : "filtre names"}
+            {t("filterNames")}
           </span>
           <span className="text-[10px] font-bold uppercase text-slate-400">
             {t("addName")}
@@ -156,7 +150,7 @@ export function AttendanceControls({
         <div className="flex items-center gap-2">
           <Input
             className="h-9 text-xs"
-            placeholder={isRtl ? "بحث..." : "Search..."}
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -168,9 +162,7 @@ export function AttendanceControls({
           >
             <SelectTrigger className="flex-1 bg-white dark:bg-slate-900 border-slate-200 h-9 text-xs">
               <SelectValue
-                placeholder={
-                  isRtl ? "اختر من القائمة..." : "Select student/teacher..."
-                }
+                placeholder={t("selectPersonPlaceholder")}
               />
             </SelectTrigger>
             <SelectContent>

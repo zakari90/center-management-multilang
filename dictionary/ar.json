@@ -266,7 +266,18 @@
       "absent": "غائب",
       "late": "متأخر",
       "leave": "في رخصة"
-    }
+    },
+    "noGroupsForPeriod": "لا توجد مجموعات مجدولة لهذه الفترة",
+    "addNames": "إضافة أسماء",
+    "registerNamePlaceholder": "اختر السجل",
+    "institution_label": "السجل",
+    "created_label": "أنشئ في:",
+    "manageNames": "إدارة الأسماء",
+    "uploadFile": "تحميل ملف",
+    "bulkAddInstruction": "أدخل الأسماء (اسم واحد في كل سطر)",
+    "bulkAddPlaceholder": "أحمد المحمد\nفاطمة الزهراء...",
+    "searchPlaceholder": "بحث...",
+    "selectPersonPlaceholder": "اختر من القائمة..."
   },
 
   "register": {
@@ -754,7 +765,10 @@
     "scheduleDetails": "تفاصيل الجدول",
     "close": "إغلاق",
     "overwrite": "استبدال",
-    "overwritePrompt": "هل تريد استبدال الجدول الحالي؟"
+    "overwritePrompt": "هل تريد استبدال الجدول الحالي؟",
+    "registerName": "اسم السجل",
+    "registerNamePlaceholder": "أدخل اسم السجل",
+    "roomPlaceholder": "أدخل القاعة"
   },
   "Program": {
     "title": "إدارة البرنامج",

@@ -224,6 +224,61 @@
     "e2eeYes": "Oui",
     "e2eeNo": "Non"
   },
+  "AttendanceRegister": {
+    "title": "Registre de présence",
+    "morning": "Matin",
+    "evening": "Soir",
+    "viewMode": "Voir",
+    "editMode": "Modifier",
+    "addName": "Ajouter un nom",
+    "filterNames": "Filtrer les noms",
+    "exportNames": "Exporter les noms",
+    "uploadFileInstruction": "Télécharger les noms",
+    "loadStudents": "Charger tous les membres",
+    "print": "Imprimer",
+    "history": "Historique",
+    "deleteAll": "Supprimer tout",
+    "confirmDeleteAll": "Êtes-vous sûr de vouloir supprimer tous les enregistrements de cette session ?",
+    "confirmDeleteAllDesc": "Cette action est irréversible.",
+    "legend": "Légende",
+    "saveSuccess": "Présences enregistrées",
+    "saveError": "Échec de l'enregistrement",
+    "deleteAllSuccess": "Tous les enregistrements ont été effacés",
+    "noRecordsView": "Aucun enregistrement pour le moment",
+    "noRecordsEdit": "Ajoutez des noms pour commencer à marquer",
+    "selectPlaceholder": "Sélectionner dans la liste...",
+    "itemSelectPlaceholder": "Sélectionner...",
+    "comingSoon": "Bientôt disponible...",
+    "addedNames": "{count} noms ajoutés",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "shift_label": "Période",
+    "date_label": "Date",
+    "columns": {
+      "name": "Nom",
+      "status": "Statut",
+      "remarks": "Remarques"
+    },
+    "status": {
+      "present": "Présent",
+      "absent": "Absent",
+      "late": "En retard",
+      "leave": "En congé"
+    },
+    "noGroupsForPeriod": "Aucun groupe trouvé pour cette période",
+    "addNames": "Ajouter des noms",
+    "registerNamePlaceholder": "Choisir le registre",
+    "institution_label": "Registre",
+    "created_label": "Créé le :",
+    "manageNames": "Gérer les noms",
+    "uploadFile": "Télécharger le fichier",
+    "bulkAddInstruction": "Entrez les noms (un par ligne)",
+    "bulkAddPlaceholder": "Jean Dupont\nMarie Martin...",
+    "searchPlaceholder": "Rechercher...",
+    "selectPersonPlaceholder": "Sélectionner élève/enseignant..."
+  },
+
   "register": {
     "successMessage": "Compte créé avec succès ! Redirection en cours...",
     "title": "Créer un compte",
@@ -710,7 +765,10 @@
     "scheduleDetails": "Détails de l'horaire",
     "close": "Fermer",
     "overwrite": "Écraser",
-    "overwritePrompt": "Écraser l'horaire existant ?"
+    "overwritePrompt": "Écraser l'horaire existant ?",
+    "registerName": "Nom du registre",
+    "registerNamePlaceholder": "Entrez le nom du registre",
+    "roomPlaceholder": "Entrez la salle"
   },
   "Program": {
     "title": "Gestion du Programme",

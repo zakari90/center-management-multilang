@@ -16,6 +16,7 @@ import ExcelJS from "exceljs";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "@/context/authContext";
 import { toast } from "sonner";
 
 export interface AttendanceRowData {
@@ -32,11 +33,16 @@ export function useAttendance() {
   const t = useTranslations("AttendanceRegister");
   const locale = useLocale();
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
   const isRtl = locale === "ar";
   const { daysOfWeek } = useLocalizedConstants();
 
+  // Permissions
+  const canEdit = isAuthenticated && (user?.role === "MANAGER" || user?.role === "ADMIN");
+
+
   // -- State --
-  const [mode, setMode] = useState<"view" | "edit">("edit");
+  const [mode, setMode] = useState<"view" | "edit">(canEdit ? "edit" : "view");
   const [sessionId, setSessionId] = useState<string>("");
   const [registerName, setRegisterName] = useState("");
   const [selectedScheduleId, setSelectedScheduleId] = useState("");
@@ -240,7 +246,7 @@ export function useAttendance() {
         );
 
         if (!name) {
-          setMode("edit");
+          setMode(canEdit ? "edit" : "view");
         } else {
           setMode("view");
         }
@@ -284,7 +290,7 @@ export function useAttendance() {
           setRows([]);
         }
 
-        setMode("edit");
+        setMode(canEdit ? "edit" : "view");
       }
     } catch (error) {
       console.error("Sync failed:", error);
@@ -300,7 +306,7 @@ export function useAttendance() {
 
   // -- Actions --
   const handleSave = async () => {
-    if (loading) return;
+    if (loading || !canEdit) return;
     setLoading(true);
     try {
       const session: AttendanceSession = {
@@ -378,6 +384,7 @@ export function useAttendance() {
   };
 
   const handleDeleteAll = async () => {
+    if (!canEdit) return;
     try {
       setRows([]);
       if (sessionId) {
@@ -634,6 +641,9 @@ export function useAttendance() {
     isRtl,
     mode,
     setMode,
+    canEdit,
+    isAuthenticated,
+    user,
     sessionId,
     institution,
     shift,
