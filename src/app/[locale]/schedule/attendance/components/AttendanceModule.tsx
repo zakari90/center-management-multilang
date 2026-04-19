@@ -46,7 +46,6 @@ export function AttendanceModule() {
     currentMonthIndex,
     currentYear,
     getMonthlyData,
-    isAuthenticated,
   } = useAttendance();
 
   return (
@@ -68,8 +67,6 @@ export function AttendanceModule() {
         registerName={registerName}
         selectedScheduleId={selectedScheduleId}
         sessionCreatedAt={sessionCreatedAt}
-        canEdit={canEdit}
-        isAuthenticated={isAuthenticated}
       />
 
       {/* --- Attendance Register Card --- */}
@@ -88,7 +85,6 @@ export function AttendanceModule() {
           mode={mode}
           locale={locale}
           scheduledRegisterNames={scheduledRegisterNames}
-          canEdit={canEdit}
         />
 
         {/* --- Entry Form (Edit Mode) --- */}
