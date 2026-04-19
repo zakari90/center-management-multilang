@@ -211,6 +211,7 @@ export default function AdminLayoutClient({
                   <Moon className="h-4 w-4" />
                 )}
               </Button>
+              <CacheStatusIndicator isSyncing={isSyncing} />
               <LanguageSwitcher />
             </div>
           </header>

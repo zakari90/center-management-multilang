@@ -65,9 +65,7 @@ export function useAttendance() {
     }
     const dayKey = (entry.day || "").toLowerCase();
     const dayMatch = daysOfWeek.find((d) => d.key === dayKey);
-    const dayLabel = dayMatch
-      ? dayMatch.label
-      : dayKey.charAt(0).toUpperCase() + dayKey.slice(1);
+    const dayLabel = dayMatch ? dayMatch.label : dayKey.charAt(0).toUpperCase() + dayKey.slice(1);
     const time = `${entry.startTime}–${entry.endTime}`;
     const room = entry.roomId ? ` — ${entry.roomId}` : "";
     return `${dayLabel} (${time})${room}`;
@@ -144,21 +142,13 @@ export function useAttendance() {
       if (currentMatch) {
         const label = buildEntryLabel(currentMatch);
         setRegisterName(label);
-        const canonicalMatch = schedules.find(
-          (s: any) => buildEntryLabel(s) === label,
-        );
-        setSelectedScheduleId(
-          canonicalMatch ? canonicalMatch.id : currentMatch.id,
-        );
+        const canonicalMatch = schedules.find((s: any) => buildEntryLabel(s) === label);
+        setSelectedScheduleId(canonicalMatch ? canonicalMatch.id : currentMatch.id);
       } else if (todayRegisters.length > 0) {
         const label = buildEntryLabel(todayRegisters[0]);
         setRegisterName(label);
-        const canonicalMatch = schedules.find(
-          (s: any) => buildEntryLabel(s) === label,
-        );
-        setSelectedScheduleId(
-          canonicalMatch ? canonicalMatch.id : todayRegisters[0].id,
-        );
+        const canonicalMatch = schedules.find((s: any) => buildEntryLabel(s) === label);
+        setSelectedScheduleId(canonicalMatch ? canonicalMatch.id : todayRegisters[0].id);
       }
       // If today has no scheduled groups, leave registerName empty
       // so the "no groups for this period" banner shows
@@ -276,13 +266,11 @@ export function useAttendance() {
           let prefillRoster: any[] = [];
 
           if (scheduleIdFilter) {
-            prefillRoster =
-              await attendanceActions.getRegisterMembers(scheduleIdFilter);
+            prefillRoster = await attendanceActions.getRegisterMembers(scheduleIdFilter);
           }
-
+          
           if (prefillRoster.length === 0 && nameFilter) {
-            prefillRoster =
-              await attendanceActions.getLatestRosterByName(nameFilter);
+            prefillRoster = await attendanceActions.getLatestRosterByName(nameFilter);
           }
 
           if (prefillRoster.length > 0) {
@@ -361,18 +349,13 @@ export function useAttendance() {
         const registerMembers = rows
           .filter((r) => r.name)
           .map((r) => ({
-            id: r.externalId
-              ? `${selectedScheduleId}-${r.externalId}`
-              : `${selectedScheduleId}-${r.name}`,
+            id: r.externalId ? `${selectedScheduleId}-${r.externalId}` : `${selectedScheduleId}-${r.name}`,
             scheduleId: selectedScheduleId,
             externalId: r.externalId || "",
             name: r.name,
             updatedAt: Date.now(),
           }));
-        await attendanceActions.saveRegisterMembers(
-          selectedScheduleId,
-          registerMembers,
-        );
+        await attendanceActions.saveRegisterMembers(selectedScheduleId, registerMembers);
       }
 
       toast.success(t("saveSuccess"));
@@ -476,9 +459,7 @@ export function useAttendance() {
       });
 
       setRows(newRows);
-      toast.info(
-        t("addedNames", { count: availableNames.length - existingIds.size }),
-      );
+      toast.info(t("addedNames", { count: availableNames.length - existingIds.size }));
     } catch (error) {
       toast.error(t("loadError")); // Note: I didn't add loadError to JSON yet, let me use generic error or add it.
     } finally {
@@ -531,10 +512,8 @@ export function useAttendance() {
     if (newRowsToPush.length > 0) {
       setRows([...rows, ...newRowsToPush]);
       toast.success(
-        t("addedNames", { count: newRowsToPush.length }) +
-          (duplicateCount
-            ? t("duplicatesIgnored", { count: duplicateCount })
-            : ""),
+        t("addedNames", { count: newRowsToPush.length }) + 
+        (duplicateCount ? t("duplicatesIgnored", { count: duplicateCount }) : "")
       );
     } else if (duplicateCount > 0) {
       toast.info(t("allNamesExist"));
@@ -612,9 +591,7 @@ export function useAttendance() {
     }
   };
 
-  const currentMonth = new Date(currentDate).toLocaleString(locale, {
-    month: "long",
-  });
+  const currentMonth = new Date(currentDate).toLocaleString(locale, { month: "long" });
   const currentMonthIndex = new Date(currentDate).getMonth() + 1;
   const currentYear = new Date(currentDate).getFullYear().toString();
 

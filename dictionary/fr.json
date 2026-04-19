@@ -2054,6 +2054,7 @@
     "editMode": "Mode Édition",
     "morning": "Matin",
     "evening": "Soir",
+    "shift": "Période",
     "deleteAll": "Tout supprimer",
     "confirmDeleteAll": "Confirmer la suppression",
     "confirmDeleteAllDesc": "Cela supprimera définitivement tous les enregistrements de présence pour cette session.",

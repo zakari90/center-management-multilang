@@ -233,6 +233,7 @@
     "editMode": "وضع التعديل",
     "morning": "صباحي",
     "evening": "مسائي",
+    "shift": "الفترة",
     "deleteAll": "حذف الكل",
     "confirmDeleteAll": "تأكيد حذف الكل",
     "confirmDeleteAllDesc": "سيؤدي هذا إلى حذف جميع سجلات الحضور لهذه الجلسة نهائياً.",

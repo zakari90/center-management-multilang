@@ -273,6 +273,7 @@
     "editMode": "Edit Mode",
     "morning": "Morning",
     "evening": "Evening",
+    "shift": "Shift",
     "deleteAll": "Delete All",
     "confirmDeleteAll": "Confirm Delete All",
     "confirmDeleteAllDesc": "This will permanently delete all attendance records for this session.",
