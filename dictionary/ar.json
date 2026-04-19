@@ -2140,5 +2140,10 @@
     "success_title": "تم إرسال الرسالة!",
     "success_msg": "شكراً لتواصلك معنا. سنرد عليك في أقرب وقت ممكن.",
     "send_another": "إرسال رسالة أخرى"
+  },
+  "Footer": {
+    "bookingInquiry": "للحجز أو الاستفسار:",
+    "contactEmail": "zakariazinedine1@gmail.com",
+    "btnPaid": "تواصل معنا للحجز 💬"
   }
 }

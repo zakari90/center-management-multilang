@@ -20,6 +20,7 @@ import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
 import "../globals.css";
+import PublicFooter from "@/components/PublicFooter";
 import LoadWS from "./loadws";
 
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_URL || "";
@@ -159,9 +160,10 @@ export default async function RootLayout({
               <AutoImportFromServer />
               <AutoSyncProvider />
               {/* <ServiceWorkerRegister /> */}
-              {children}
-              {/* <PWADebug /> */}
-              {/* <InstallPWA /> */}
+              <div className="flex flex-col min-h-screen">
+                <div className="flex-1">{children}</div>
+                <PublicFooter />
+              </div>
               <PWAUpdateHandler />
               <EpochMismatchDialog />
               {/* <CacheDebugOverlay /> */}

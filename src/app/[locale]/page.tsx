@@ -3,7 +3,10 @@
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
+  ArrowUpRight,
+  CalendarDays,
   CheckCircle2,
+  ClipboardCheck,
   Cloud,
   Database,
   Globe,
@@ -51,6 +54,14 @@ const content = {
     btnFree: "ابدأ الآن مجاناً 🚀",
     btnPaid: "تواصل معنا للحجز 💬",
     contactUs: "للحجز أو الاستفسار: zakariazinedine1@gmail.com",
+    freeToolsTitle: "أدوات ذكية مجانية فورية",
+    freeToolsSubtitle:
+      "جرب أدواتنا الأساسية للإدارة فوراً وبدون أي تسجيل أو تعقيد.",
+    scheduleToolTitle: "مدير الجداول",
+    scheduleToolDesc: "نظم حصصك، القاعات والأساتذة في شبكة ذكية وبسيطة.",
+    attendanceToolTitle: "دفتر الحضور",
+    attendanceToolDesc: "سجل حضور الطلاب، تابع سجلاتهم واستخرج تقاريرك بسرعة.",
+    btnTryTool: "جرب الأداة الآن",
   },
   en: {
     heroTag: "Launch Announcement",
@@ -82,6 +93,16 @@ const content = {
     btnFree: "Start for Free 🚀",
     btnPaid: "Contact Us to Subscribe 💬",
     contactUs: "For inquiries: zakariazinedine1@gmail.com",
+    freeToolsTitle: "Instant Smart Free Tools",
+    freeToolsSubtitle:
+      "Try our core management tools instantly with zero registration.",
+    scheduleToolTitle: "Schedule Manager",
+    scheduleToolDesc:
+      "Organize your classes, rooms, and teachers in a simple smart grid.",
+    attendanceToolTitle: "Attendance Register",
+    attendanceToolDesc:
+      "Track student presence, history, and generate quick reports.",
+    btnTryTool: "Try Tool Now",
   },
   fr: {
     heroTag: "Annonce de Lancement",
@@ -113,6 +134,16 @@ const content = {
     btnFree: "Commencer Gratuitement 🚀",
     btnPaid: "Contactez-nous 💬",
     contactUs: "Pour toute demande: zakariazinedine1@gmail.com",
+    freeToolsTitle: "Outils Intelligents Gratuits",
+    freeToolsSubtitle:
+      "Essayez nos outils de gestion de base instantanément et sans inscription.",
+    scheduleToolTitle: "Gestionnaire d'Emploi du Temps",
+    scheduleToolDesc:
+      "Organisez vos cours, salles et professeurs dans une grille simple.",
+    attendanceToolTitle: "Registre de Présence",
+    attendanceToolDesc:
+      "Suivez les présences, l'historique et générez des rapports rapides.",
+    btnTryTool: "Essayer l'outil maintenant",
   },
 };
 
@@ -312,7 +343,7 @@ export default function SaaSMarketingPage() {
           className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
         >
           <button
-            onClick={() => router.push(`/${locale}/login`)}
+            onClick={() => router.push(`/${locale}/free`)}
             className="px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.3)]"
           >
             {t.btnFree}
@@ -374,7 +405,7 @@ export default function SaaSMarketingPage() {
               </ul>
 
               <button
-                onClick={() => router.push(`/${locale}/login`)}
+                onClick={() => router.push(`/${locale}/free`)}
                 className="w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all active:scale-95"
               >
                 {t.btnFree}
@@ -428,6 +459,74 @@ export default function SaaSMarketingPage() {
                 className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)]"
               >
                 {t.btnPaid}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Free Instant Tools Section */}
+      <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4"
+          >
+            <Sparkles className="w-3 h-3" /> FREE FOREVER
+          </motion.div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
+            {t.freeToolsTitle}
+          </h2>
+          <p className="text-slate-400 text-lg">{t.freeToolsSubtitle}</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Schedule Tool Card */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300"
+          >
+            <div className="flex flex-col h-full">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
+                <CalendarDays className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {t.scheduleToolTitle}
+              </h3>
+              <p className="text-slate-400 mb-8 flex-grow">
+                {t.scheduleToolDesc}
+              </p>
+              <button
+                onClick={() => router.push(`/${locale}/schedule?tab=schedule`)}
+                className="inline-flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
+              >
+                {t.btnTryTool} <ArrowUpRight className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Attendance Tool Card */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300"
+          >
+            <div className="flex flex-col h-full">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
+                <ClipboardCheck className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {t.attendanceToolTitle}
+              </h3>
+              <p className="text-slate-400 mb-8 grow">{t.attendanceToolDesc}</p>
+              <button
+                onClick={() =>
+                  router.push(`/${locale}/schedule?tab=attendance`)
+                }
+                className="inline-flex items-center gap-2 text-emerald-400 font-bold hover:text-emerald-300 transition-colors"
+              >
+                {t.btnTryTool} <ArrowUpRight className="w-5 h-5" />
               </button>
             </div>
           </motion.div>

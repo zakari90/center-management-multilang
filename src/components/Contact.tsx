@@ -79,17 +79,15 @@ export default function Contact() {
   };
 
   return (
-    <div id="contact" className="relative z-10 py-24 px-6 max-w-7xl mx-auto">
+    <div id="contact" className="relative z-10 py-20 px-4 md:px-6 max-w-7xl mx-auto">
       <div className="text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
           {t("contact_title")}
         </h2>
-        <p className="text-slate-400 max-w-2xl mx-auto">
-          {t("description")}
-        </p>
+        <p className="text-slate-400 max-w-2xl mx-auto">{t("description")}</p>
       </div>
 
-      <div className="bg-white/5 border border-white/10 p-6 md:p-12 rounded-[32px] backdrop-blur-xl shadow-2xl overflow-hidden">
+      <div className="bg-white/5 border border-white/10 p-5 md:p-12 rounded-[24px] md:rounded-[32px] backdrop-blur-xl shadow-2xl overflow-hidden">
         {isSuccess ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -113,38 +111,38 @@ export default function Contact() {
             </button>
           </motion.div>
         ) : (
-          <div className="grid lg:grid-cols-2 gap-16">
-            <div className="space-y-12">
-              <div className="space-y-6">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
+            <div className="space-y-10 lg:space-y-12">
+              {/* <div className="space-y-6">
                 <p className="text-slate-400 text-lg leading-relaxed">
                   {t("description")}
                 </p>
-              </div>
+              </div> */}
 
               {/* Contact Cards */}
               <div className="grid gap-6">
-                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-6 group hover:border-indigo-500/50 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <div className="p-5 md:p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group hover:border-indigo-500/50 transition-colors">
+                  <div className="w-12 h-12 shrink-0 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                     <Mail size={24} />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">
                       {t("email")}
                     </p>
-                    <p className="text-lg font-medium text-white">
+                    <p className="text-base md:text-lg font-medium text-white break-all">
                       zakariazinedine1@gmail.com
                     </p>
                   </div>
                 </div>
-                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-6 group hover:border-indigo-500/50 transition-colors">
-                  <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
+                <div className="p-5 md:p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group hover:border-indigo-500/50 transition-colors">
+                  <div className="w-12 h-12 shrink-0 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
                     <MapPin size={24} />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-violet-400 uppercase tracking-widest mb-1">
                       {t("address")}
                     </p>
-                    <p className="text-lg font-medium text-white">
+                    <p className="text-base md:text-lg font-medium text-white break-words">
                       Sale, Morocco
                     </p>
                   </div>
@@ -152,8 +150,8 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="bg-white/5 p-6 md:p-10 rounded-[24px] border border-white/10 shadow-2xl">
-              <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="bg-white/5 p-5 md:p-10 rounded-[20px] md:rounded-[24px] border border-white/10 shadow-2xl">
+              <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
                 {apiError && (
                   <div className="p-4 bg-red-500/10 text-red-400 rounded-xl text-sm font-medium border border-red-500/20">
                     {apiError}
@@ -163,7 +161,7 @@ export default function Contact() {
                   <div className="space-y-3">
                     <label
                       htmlFor="name"
-                      className="text-xs font-bold text-indigo-400 uppercase tracking-widest ml-1 block text-start"
+                      className="text-xs font-bold text-indigo-400 uppercase tracking-widest ps-1 block text-start"
                     >
                       {t("name")}
                     </label>
@@ -188,7 +186,7 @@ export default function Contact() {
                       />
                     </div>
                     {errors.name && (
-                      <p className="text-red-400 text-xs mt-2 ml-1 font-medium text-start">
+                      <p className="text-red-400 text-xs mt-2 ps-1 font-medium text-start">
                         {errors.name}
                       </p>
                     )}
@@ -197,7 +195,7 @@ export default function Contact() {
                   <div className="space-y-3">
                     <label
                       htmlFor="email"
-                      className="text-xs font-bold text-indigo-400 uppercase tracking-widest ml-1 block text-start"
+                      className="text-xs font-bold text-indigo-400 uppercase tracking-widest ps-1 block text-start"
                     >
                       {t("email")}
                     </label>
@@ -222,7 +220,7 @@ export default function Contact() {
                       />
                     </div>
                     {errors.email && (
-                      <p className="text-red-400 text-xs mt-2 ml-1 font-medium text-start">
+                      <p className="text-red-400 text-xs mt-2 ps-1 font-medium text-start">
                         {errors.email}
                       </p>
                     )}
@@ -231,7 +229,7 @@ export default function Contact() {
                   <div className="space-y-3">
                     <label
                       htmlFor="message"
-                      className="text-xs font-bold text-indigo-400 uppercase tracking-widest ml-1 block text-start"
+                      className="text-xs font-bold text-indigo-400 uppercase tracking-widest ps-1 block text-start"
                     >
                       {t("message")}
                     </label>
@@ -256,7 +254,7 @@ export default function Contact() {
                       />
                     </div>
                     {errors.message && (
-                      <p className="text-red-400 text-xs mt-2 ml-1 font-medium text-start">
+                      <p className="text-red-400 text-xs mt-2 ps-1 font-medium text-start">
                         {errors.message}
                       </p>
                     )}

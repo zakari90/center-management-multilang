@@ -2181,5 +2181,10 @@
     "success_title": "Message Sent!",
     "success_msg": "Thank you for reaching out. We'll get back to you as soon as possible.",
     "send_another": "Send Another Message"
+  },
+  "Footer": {
+    "bookingInquiry": "For bookings or inquiries:",
+    "contactEmail": "zakariazinedine1@gmail.com",
+    "btnPaid": "Contact Us to Subscribe 💬"
   }
 }
