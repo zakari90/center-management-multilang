@@ -54,7 +54,7 @@ export function AttendanceTable({
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] uppercase font-bold text-indigo-400 dark:text-indigo-500 tracking-wider leading-none mb-0.5">
-                {isRtl ? "السجل" : "Register"}
+                {t("register")}
               </span>
               <h3 className="text-base font-black text-indigo-700 dark:text-indigo-300 uppercase tracking-wide">
                 {registerName}
@@ -65,7 +65,7 @@ export function AttendanceTable({
             {formattedDate && (
               <div className="flex flex-col items-end mr-4 rtl:ml-4 rtl:mr-0 border-r rtl:border-l rtl:border-r-0 border-indigo-200 dark:border-indigo-800/50 pr-4 rtl:pl-4 rtl:pr-0">
                 <span className="text-[10px] uppercase font-bold text-indigo-400 dark:text-indigo-500 tracking-wider leading-none mb-0.5">
-                  {isRtl ? "التاريخ" : "Date"}
+                  {t("date")}
                 </span>
                 <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
                   {formattedDate}
@@ -81,7 +81,7 @@ export function AttendanceTable({
                 {rows.length}
               </span>
               <span className="text-[10px] text-indigo-400 dark:text-indigo-500 uppercase font-semibold">
-                {isRtl ? "عضو" : rows.length === 1 ? "member" : "members"}
+                {rows.length === 1 ? t("member") : t("members")}
               </span>
             </div>
           </div>
@@ -110,12 +110,8 @@ export function AttendanceTable({
                 className="h-48 text-center text-slate-400 italic"
               >
                 {mode === "edit"
-                  ? isRtl
-                    ? "أضف أسماء لبدء السجل"
-                    : "Add names to start marking"
-                  : isRtl
-                    ? "لا توجد سجلات بعد"
-                    : "No records yet"}
+                  ? t("addNamesToStart")
+                  : t("noRecordsYet")}
               </TableCell>
             </TableRow>
           ) : (
@@ -128,6 +124,7 @@ export function AttendanceTable({
                 updateRow={updateRow}
                 removeRow={removeRow}
                 onShowHistory={setHistoryRow}
+                t={t}
               />
             ))
           )}

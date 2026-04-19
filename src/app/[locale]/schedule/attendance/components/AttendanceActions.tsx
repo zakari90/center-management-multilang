@@ -17,24 +17,18 @@ import {
   Eye,
   Save,
   Trash,
-  LogIn,
 } from "lucide-react";
 
 interface AttendanceActionsProps {
   mode: "view" | "edit";
   setMode: (mode: "view" | "edit") => void;
-  router: any;
   isRtl: boolean;
   t: any;
   handleDeleteAll: () => Promise<void>;
   handleSave: () => Promise<void>;
   loading: boolean;
-  locale: string;
   registerName: string;
-  selectedScheduleId: string;
   sessionCreatedAt: number | null;
-  canEdit?: boolean;
-  isAuthenticated?: boolean;
 }
 
 export function AttendanceActions({
@@ -47,8 +41,6 @@ export function AttendanceActions({
   loading,
   registerName,
   sessionCreatedAt,
-  canEdit,
-  isAuthenticated,
 }: AttendanceActionsProps) {
   return (
     <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-4 items-center justify-between print:hidden">
@@ -66,8 +58,7 @@ export function AttendanceActions({
             variant={mode === "edit" ? "default" : "ghost"}
             size="sm"
             onClick={() => setMode("edit")}
-            disabled={!canEdit}
-            className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""} ${!canEdit ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`rounded-full gap-2 ${mode === "edit" ? "bg-indigo-600 hover:bg-indigo-700" : ""}`}
           >
             <Edit3 size={16} /> {t("editMode")}
           </Button>
@@ -75,9 +66,8 @@ export function AttendanceActions({
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {mode === "edit" && canEdit && (
+        {mode === "edit" && (
           <>
-            {/* Existing Save/Delete buttons */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
@@ -98,13 +88,13 @@ export function AttendanceActions({
                 </AlertDialogHeader>
                 <AlertDialogFooter className="gap-2">
                   <AlertDialogCancel>
-                    {isRtl ? "إلغاء" : "Cancel"}
+                    {t("cancel")}
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteAll}
                     className="bg-destructive hover:bg-destructive/90"
                   >
-                    {isRtl ? "حذف" : "Delete"}
+                    {t("delete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -118,25 +108,25 @@ export function AttendanceActions({
                     className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
                   >
                     <Save size={18} />
-                    {isRtl ? "حفظ" : "Save"}
+                    {t("save")}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent dir={isRtl ? "rtl" : "ltr"}>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{isRtl ? "تأكيد الحفظ" : "Confirm Save"}</AlertDialogTitle>
+                    <AlertDialogTitle>{t("confirmSave")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {isRtl ? "لديك بالفعل نسخة محفوظة لهذا السجل في هذا التوقيت. هل تريد استبدالها بالفعل؟" : "You already have a saved version of this register for this date. Do you want to overwrite it?"}
+                      {t("overwriteMessage")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="gap-2 mt-4">
                     <AlertDialogCancel>
-                      {isRtl ? "إلغاء" : "Cancel"}
+                      {t("cancel")}
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleSave}
                       className="bg-indigo-600 hover:bg-indigo-700"
                     >
-                      {isRtl ? "تأكيد واستبدال" : "Confirm Overwrite"}
+                      {t("confirmOverwrite")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -148,17 +138,10 @@ export function AttendanceActions({
                 className="gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
               >
                 <Save size={18} />
-                {isRtl ? "حفظ" : "Save"}
+                {t("save")}
               </Button>
             )}
           </>
-        )}
-
-        {!isAuthenticated && (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 text-xs font-semibold">
-            <LogIn size={14} />
-            {isRtl ? "قم بتسجيل الدخول كمدير لتتمكن من التعديل" : "Log in as manager to enable editing"}
-          </div>
         )}
       </div>
     </div>

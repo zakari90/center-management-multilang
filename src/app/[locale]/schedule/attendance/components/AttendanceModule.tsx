@@ -12,7 +12,6 @@ export function AttendanceModule() {
   const {
     t,
     locale,
-    router,
     isRtl,
     mode,
     setMode,
@@ -20,7 +19,6 @@ export function AttendanceModule() {
     shift,
     rows,
     loading,
-    pastSessions,
     availableNames,
     searchTerm,
     setSearchTerm,
@@ -33,7 +31,6 @@ export function AttendanceModule() {
     handleBulkAdd,
     handleFileUpload,
     handleExport,
-    syncWithDatabase,
     formattedDate,
     registerName,
     setRegisterName,
@@ -41,8 +38,6 @@ export function AttendanceModule() {
     setSelectedScheduleId,
     scheduledRegisterNames,
     sessionCreatedAt,
-    startNewRegister,
-    currentMonth,
     currentMonthIndex,
     currentYear,
     getMonthlyData,
@@ -57,15 +52,12 @@ export function AttendanceModule() {
       <AttendanceActions
         mode={mode}
         setMode={setMode}
-        router={router}
         isRtl={isRtl}
         t={t}
         handleDeleteAll={handleDeleteAll}
         handleSave={handleSave}
         loading={loading}
-        locale={locale}
         registerName={registerName}
-        selectedScheduleId={selectedScheduleId}
         sessionCreatedAt={sessionCreatedAt}
       />
 
@@ -82,7 +74,6 @@ export function AttendanceModule() {
           selectedScheduleId={selectedScheduleId}
           setSelectedScheduleId={setSelectedScheduleId}
           sessionCreatedAt={sessionCreatedAt}
-          mode={mode}
           locale={locale}
           scheduledRegisterNames={scheduledRegisterNames}
         />

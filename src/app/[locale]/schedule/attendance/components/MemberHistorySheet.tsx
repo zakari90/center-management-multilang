@@ -6,15 +6,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-
+import {
+  attendanceActions,
+  AttendanceRecord,
+  AttendanceSession,
+} from "@/freelib/dexie/scheduleDb";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { CalendarDays, TrendingUp, User } from "lucide-react";
-import {
-  AttendanceSession,
-  AttendanceRecord,
-  attendanceActions,
-} from "@/freelib/dexie/scheduleDb";
 
 interface HistoryEntry {
   session: AttendanceSession;
@@ -77,6 +76,7 @@ export function MemberHistorySheet({
   isRtl,
 }: MemberHistorySheetProps) {
   const locale = useLocale();
+  const t = useTranslations("AttendanceRegister");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -146,13 +146,13 @@ export function MemberHistorySheet({
 
         {loading ? (
           <div className="flex items-center justify-center h-48 text-slate-400 text-sm">
-            {isRtl ? "جاري التحميل…" : "Loading…"}
+            {t("loading")}
           </div>
         ) : total === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 gap-3 text-slate-400">
             <CalendarDays className="w-10 h-10 opacity-30" />
             <p className="text-sm italic">
-              {isRtl ? "لا توجد جلسات محفوظة بعد" : "No saved sessions yet"}
+              {t("noSavedSessions")}
             </p>
           </div>
         ) : (
@@ -187,7 +187,7 @@ export function MemberHistorySheet({
                     {attendanceRate}%
                   </span>
                   <span className="text-[10px] text-slate-400 uppercase font-bold">
-                    {isRtl ? "حضور" : "Rate"}
+                    {t("rate")}
                   </span>
                 </div>
               </div>
@@ -197,7 +197,7 @@ export function MemberHistorySheet({
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
                   <TrendingUp className="w-3.5 h-3.5" />
                   {total}{" "}
-                  {isRtl ? "جلسة" : total === 1 ? "session" : "sessions"}
+                  {total === 1 ? t("session") : t("sessions")}
                 </div>
                 {(["P", "A", "L", "LV"] as const).map((s) => (
                   <div key={s} className="flex items-center justify-between">
@@ -236,7 +236,7 @@ export function MemberHistorySheet({
             {/* ── Session Timeline ─────────────────────────────────────────── */}
             <div>
               <h4 className="text-[11px] uppercase font-black text-slate-400 tracking-widest mb-3">
-                {isRtl ? "سجل الجلسات" : "Session History"}
+                {t("sessionHistory")}
               </h4>
               <div className="space-y-2">
                 {history.map(({ session, record }) => {

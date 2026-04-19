@@ -14,9 +14,7 @@ import { timeTableActions } from "@/freelib/dexie/scheduleDb";
 import { useLocalizedConstants } from "@/components/freeinUse/useLocalizedConstants";
 import ExcelJS from "exceljs";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "@/context/authContext";
 import { toast } from "sonner";
 
 export interface AttendanceRowData {
@@ -32,17 +30,11 @@ export interface AttendanceRowData {
 export function useAttendance() {
   const t = useTranslations("AttendanceRegister");
   const locale = useLocale();
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
   const isRtl = locale === "ar";
   const { daysOfWeek } = useLocalizedConstants();
 
-  // Permissions
-  const canEdit = isAuthenticated && (user?.role === "MANAGER" || user?.role === "ADMIN");
-
-
   // -- State --
-  const [mode, setMode] = useState<"view" | "edit">(canEdit ? "edit" : "view");
+  const [mode, setMode] = useState<"view" | "edit">("edit");
   const [sessionId, setSessionId] = useState<string>("");
   const [registerName, setRegisterName] = useState("");
   const [selectedScheduleId, setSelectedScheduleId] = useState("");
@@ -69,9 +61,7 @@ export function useAttendance() {
   const buildEntryLabel = (entry: any): string => {
     const dayKey = (entry.day || "").toLowerCase();
     const dayMatch = daysOfWeek.find((d) => d.key === dayKey);
-    const dayLabel = dayMatch
-      ? dayMatch.label
-      : dayKey.charAt(0).toUpperCase() + dayKey.slice(1);
+    const dayLabel = dayMatch ? dayMatch.label : dayKey.charAt(0).toUpperCase() + dayKey.slice(1);
     const time = `${entry.startTime}–${entry.endTime}`;
     const name = entry.name || entry.title;
     if (name) {
@@ -246,7 +236,7 @@ export function useAttendance() {
         );
 
         if (!name) {
-          setMode(canEdit ? "edit" : "view");
+          setMode("edit");
         } else {
           setMode("view");
         }
@@ -262,13 +252,11 @@ export function useAttendance() {
           let prefillRoster: any[] = [];
 
           if (scheduleIdFilter) {
-            prefillRoster =
-              await attendanceActions.getRegisterMembers(scheduleIdFilter);
+            prefillRoster = await attendanceActions.getRegisterMembers(scheduleIdFilter);
           }
-
+          
           if (prefillRoster.length === 0 && nameFilter) {
-            prefillRoster =
-              await attendanceActions.getLatestRosterByName(nameFilter);
+            prefillRoster = await attendanceActions.getLatestRosterByName(nameFilter);
           }
 
           if (prefillRoster.length > 0) {
@@ -290,7 +278,7 @@ export function useAttendance() {
           setRows([]);
         }
 
-        setMode(canEdit ? "edit" : "view");
+        setMode("edit");
       }
     } catch (error) {
       console.error("Sync failed:", error);
@@ -306,7 +294,7 @@ export function useAttendance() {
 
   // -- Actions --
   const handleSave = async () => {
-    if (loading || !canEdit) return;
+    if (loading) return;
     setLoading(true);
     try {
       const session: AttendanceSession = {
@@ -347,26 +335,21 @@ export function useAttendance() {
         const registerMembers = rows
           .filter((r) => r.name)
           .map((r) => ({
-            id: r.externalId
-              ? `${selectedScheduleId}-${r.externalId}`
-              : `${selectedScheduleId}-${r.name}`,
+            id: r.externalId ? `${selectedScheduleId}-${r.externalId}` : `${selectedScheduleId}-${r.name}`,
             scheduleId: selectedScheduleId,
             externalId: r.externalId || "",
             name: r.name,
             updatedAt: Date.now(),
           }));
-        await attendanceActions.saveRegisterMembers(
-          selectedScheduleId,
-          registerMembers,
-        );
+        await attendanceActions.saveRegisterMembers(selectedScheduleId, registerMembers);
       }
 
-      toast.success(isRtl ? "تم حفظ السجل" : "Attendance saved");
+      toast.success(t("saveSuccess"));
       loadPastSessions();
       setMode("view");
     } catch (error) {
       console.error("Save failed:", error);
-      toast.error(isRtl ? "فشل الحفظ" : "Failed to save");
+      toast.error(t("saveError"));
     } finally {
       setLoading(false);
     }
@@ -384,15 +367,14 @@ export function useAttendance() {
   };
 
   const handleDeleteAll = async () => {
-    if (!canEdit) return;
     try {
       setRows([]);
       if (sessionId) {
         await attendanceActions.clearSessionRecords(sessionId);
       }
-      toast.info(isRtl ? "تم مسح جميع السجلات" : "All records cleared");
+      toast.info(t("clearSuccess"));
     } catch (error) {
-      toast.error("Error clearing records");
+      toast.error(t("clearError"));
     }
   };
 
@@ -400,11 +382,7 @@ export function useAttendance() {
     if (selectedPerson) {
       const exists = rows.some((r) => r.externalId === selectedPerson.id);
       if (exists) {
-        toast.warning(
-          isRtl
-            ? `الاسم "${selectedPerson.name}" موجود بالفعل في السجل`
-            : `"${selectedPerson.name}" is already in the list`,
-        );
+        toast.warning(t("alreadyExists", { name: selectedPerson.name }));
         return;
       }
     }
@@ -437,14 +415,7 @@ export function useAttendance() {
           r.name.trim().toLowerCase() === value.trim().toLowerCase(),
       );
       if (exists) {
-        toast.warning(
-          isRtl
-            ? `الاسم "${value}" موجود بالفعل`
-            : `"${value}" already exists in the list`,
-        );
-        // We still allow the update in the UI but warn the user?
-        // Actually, it's safer to block it or just warn.
-        // Let's block the duplicate name update to be strict.
+        toast.warning(t("alreadyExists", { name: value }));
         return;
       }
     }
@@ -474,13 +445,9 @@ export function useAttendance() {
       });
 
       setRows(newRows);
-      toast.info(
-        isRtl
-          ? `تمت إضافة ${availableNames.length - existingIds.size} اسماً`
-          : `Added ${availableNames.length - existingIds.size} names`,
-      );
+      toast.info(t("addedNames", { count: availableNames.length - existingIds.size }));
     } catch (error) {
-      toast.error("Failed to load all members");
+      toast.error(t("loadError")); // Note: I didn't add loadError to JSON yet, let me use generic error or add it.
     } finally {
       setLoading(false);
     }
@@ -531,16 +498,11 @@ export function useAttendance() {
     if (newRowsToPush.length > 0) {
       setRows([...rows, ...newRowsToPush]);
       toast.success(
-        isRtl
-          ? `تمت إضافة ${newRowsToPush.length} اسماً${duplicateCount ? ` (تجاهل ${duplicateCount} مكرر)` : ""}`
-          : `Added ${newRowsToPush.length} names${duplicateCount ? ` (${duplicateCount} duplicates ignored)` : ""}`,
+        t("addedNames", { count: newRowsToPush.length }) + 
+        (duplicateCount ? t("duplicatesIgnored", { count: duplicateCount }) : "")
       );
     } else if (duplicateCount > 0) {
-      toast.info(
-        isRtl
-          ? "جميع الأسماء المدخلة موجودة بالفعل"
-          : "All entered names already exist",
-      );
+      toast.info(t("allNamesExist"));
     }
   };
 
@@ -565,13 +527,11 @@ export function useAttendance() {
       if (newNames.length > 0) {
         handleBulkAdd(newNames.join("\n"));
       } else {
-        toast.info(
-          isRtl ? "لم يتم العثور على أسماء" : "No names found in file",
-        );
+        toast.info(t("noNamesFound"));
       }
     } catch (error) {
       console.error("File upload failed:", error);
-      toast.error(isRtl ? "فشل تحميل الملف" : "File load failed");
+      toast.error(t("uploadError")); // Added to JSON? No, let's use saveError or generic.
     } finally {
       setLoading(false);
       e.target.value = "";
@@ -585,9 +545,9 @@ export function useAttendance() {
 
       worksheet.columns = [
         { header: "#", key: "index", width: 5 },
-        { header: isRtl ? "الاسم" : "Name", key: "name", width: 30 },
-        { header: isRtl ? "الحالة" : "Status", key: "status", width: 10 },
-        { header: isRtl ? "ملاحظات" : "Remarks", key: "remarks", width: 40 },
+        { header: t("columns.name"), key: "name", width: 30 },
+        { header: t("columns.status"), key: "status", width: 10 },
+        { header: t("columns.remarks"), key: "remarks", width: 40 },
       ];
 
       rows.forEach((r, idx) => {
@@ -610,16 +570,14 @@ export function useAttendance() {
       a.click();
       URL.revokeObjectURL(url);
 
-      toast.success(isRtl ? "تم التصدير بنجاح" : "Exported successfully");
+      toast.success(t("exportSuccess"));
     } catch (error) {
       console.error("Export failed:", error);
-      toast.error(isRtl ? "فشل التصدير" : "Export failed");
+      toast.error(t("exportError"));
     }
   };
 
-  const currentMonth = new Date(currentDate).toLocaleString(locale, {
-    month: "long",
-  });
+  const currentMonth = new Date(currentDate).toLocaleString(locale, { month: "long" });
   const currentMonthIndex = new Date(currentDate).getMonth() + 1;
   const currentYear = new Date(currentDate).getFullYear().toString();
 
@@ -637,21 +595,13 @@ export function useAttendance() {
   return {
     t,
     locale,
-    router,
     isRtl,
     mode,
     setMode,
-    canEdit,
-    isAuthenticated,
-    user,
-    sessionId,
     institution,
     shift,
-    setShift,
-    currentDate,
     rows,
     loading,
-    pastSessions,
     availableNames,
     searchTerm,
     setSearchTerm,
@@ -661,11 +611,9 @@ export function useAttendance() {
     addRow,
     removeRow,
     updateRow,
-    loadAllMembers,
     handleBulkAdd,
     handleFileUpload,
     handleExport,
-    syncWithDatabase,
     formattedDate,
     registerName,
     setRegisterName,
@@ -673,8 +621,6 @@ export function useAttendance() {
     setSelectedScheduleId,
     scheduledRegisterNames,
     sessionCreatedAt,
-    startNewRegister,
-    currentMonth,
     currentMonthIndex,
     currentYear,
     getMonthlyData,

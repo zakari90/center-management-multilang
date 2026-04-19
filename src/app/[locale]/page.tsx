@@ -49,7 +49,7 @@ const content = {
       "ابدأ الآن فوراً مع النظام المجاني، أو تواصل معنا للاشتراك في الباقة المدفوعة.",
     btnFree: "ابدأ الآن مجاناً 🚀",
     btnPaid: "تواصل معنا للحجز 💬",
-    contactUs: "للحجز أو الاستفسار: contact@centermanager.ma",
+    contactUs: "للحجز أو الاستفسار: zakariazinedine1@gmail.com",
   },
   en: {
     heroTag: "Launch Announcement",
@@ -80,7 +80,7 @@ const content = {
       "Start instantly with the free version, or contact us to subscribe to the cloud plan.",
     btnFree: "Start for Free 🚀",
     btnPaid: "Contact Us to Subscribe 💬",
-    contactUs: "For inquiries: contact@centermanager.ma",
+    contactUs: "For inquiries: zakariazinedine1@gmail.com",
   },
   fr: {
     heroTag: "Annonce de Lancement",
@@ -111,7 +111,7 @@ const content = {
       "Commencez instantanément avec la version gratuite, ou contactez-nous pour le plan cloud.",
     btnFree: "Commencer Gratuitement 🚀",
     btnPaid: "Contactez-nous 💬",
-    contactUs: "Pour toute demande: contact@centermanager.ma",
+    contactUs: "Pour toute demande: zakariazinedine1@gmail.com",
   },
 };
 
@@ -317,7 +317,7 @@ export default function SaaSMarketingPage() {
             {t.btnFree}
           </button>
           <button
-            onClick={() => window.open("https://wa.me/212600000000", "_blank")}
+            onClick={() => window.open("https://wa.me/212768276772", "_blank")}
             className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all hover:scale-105 active:scale-95 backdrop-blur-sm"
           >
             {t.btnPaid}
@@ -342,7 +342,7 @@ export default function SaaSMarketingPage() {
             viewport={{ once: true }}
             className="relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:border-indigo-500/50 transition-all duration-300 group"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-6">
@@ -386,7 +386,7 @@ export default function SaaSMarketingPage() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative p-8 rounded-3xl bg-gradient-to-br from-indigo-900/40 to-violet-900/40 border border-indigo-500/30 backdrop-blur-xl shadow-[0_0_40px_rgba(79,70,229,0.15)] hover:shadow-[0_0_60px_rgba(79,70,229,0.25)] transition-all duration-300"
+            className="relative p-8 rounded-3xl bg-linear-to-br from-indigo-900/40 to-violet-900/40 border border-indigo-500/30 backdrop-blur-xl shadow-[0_0_40px_rgba(79,70,229,0.15)] hover:shadow-[0_0_60px_rgba(79,70,229,0.25)] transition-all duration-300"
           >
             <div className="absolute top-0 right-10 transform -translate-y-1/2 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
               RECOMMENDED
@@ -422,7 +422,7 @@ export default function SaaSMarketingPage() {
 
               <button
                 onClick={() =>
-                  window.open("https://wa.me/212600000000", "_blank")
+                  window.open("https://wa.me/212768276772", "_blank")
                 }
                 className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)]"
               >

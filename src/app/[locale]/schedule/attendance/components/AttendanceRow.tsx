@@ -8,9 +8,14 @@ interface AttendanceRowProps {
   row: AttendanceRowData;
   idx: number;
   mode: "view" | "edit";
-  updateRow: (id: string, field: keyof AttendanceRowData, value: string) => void;
+  updateRow: (
+    id: string,
+    field: keyof AttendanceRowData,
+    value: string,
+  ) => void;
   removeRow: (id: string) => void;
   onShowHistory: (row: AttendanceRowData) => void;
+  t: any;
 }
 
 export function AttendanceRow({
@@ -20,6 +25,7 @@ export function AttendanceRow({
   updateRow,
   removeRow,
   onShowHistory,
+  t,
 }: AttendanceRowProps) {
   return (
     <TableRow className="hover:bg-indigo-50/20 dark:hover:bg-indigo-900/5 transition-colors border-b dark:border-slate-800 print:border-black">
@@ -30,7 +36,7 @@ export function AttendanceRow({
           </span>
           {/* History trigger — always visible, small and unobtrusive */}
           <button
-            title="Attendance history"
+            title={t("history")}
             onClick={() => onShowHistory(row)}
             className="text-slate-300 hover:text-indigo-500 dark:text-slate-600 dark:hover:text-indigo-400 transition-colors print:hidden shrink-0"
           >
@@ -82,7 +88,7 @@ export function AttendanceRow({
         <button
           onClick={() => removeRow(row.id)}
           className="text-slate-400 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 transition-colors p-2"
-          title="Delete row"
+          title={t("delete")}
         >
           <Trash2 size={16} />
         </button>

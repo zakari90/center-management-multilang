@@ -87,14 +87,20 @@ export function AttendanceControls({
               <AlertDialogHeader>
                 <AlertDialogTitle>{t("addNames")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {t("bulkAddInstruction")}
+                  {isRtl
+                    ? "أدخل الأسماء (اسم واحد في كل سطر)"
+                    : "Enter names (one per line)"}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="py-4">
                 <textarea
                   id="bulk-names"
                   className="w-full h-40 p-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:ring-2 focus:ring-indigo-500 outline-none resize-none text-sm"
-                  placeholder={t("bulkAddPlaceholder")}
+                  placeholder={
+                    isRtl
+                      ? "أحمد المحمد\nفاطمة الزهراء..."
+                      : "John Doe\nJane Smith..."
+                  }
                 />
               </div>
               <AlertDialogFooter className="gap-2">
@@ -110,7 +116,7 @@ export function AttendanceControls({
                   }}
                   className="bg-indigo-600 hover:bg-indigo-700"
                 >
-                  {t("save")}
+                  {isRtl ? "إضافة" : "Add"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -131,7 +137,7 @@ export function AttendanceControls({
           onClick={handleExport}
           className="rounded-full gap-2 border-slate-200 h-9 px-6"
         >
-          <ChevronDown size={14} /> {t("exportNames")}
+          <ChevronDown size={14} /> {t("export")}
         </Button>
       </div>
 
@@ -150,7 +156,7 @@ export function AttendanceControls({
         <div className="flex items-center gap-2">
           <Input
             className="h-9 text-xs"
-            placeholder={t("searchPlaceholder")}
+            placeholder={t("search")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -162,7 +168,9 @@ export function AttendanceControls({
           >
             <SelectTrigger className="flex-1 bg-white dark:bg-slate-900 border-slate-200 h-9 text-xs">
               <SelectValue
-                placeholder={t("selectPersonPlaceholder")}
+                placeholder={
+                  t("selectFromList")
+                }
               />
             </SelectTrigger>
             <SelectContent>

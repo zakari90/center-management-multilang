@@ -5,9 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { CalendarX2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 interface AttendanceHeaderProps {
   t: any;
@@ -20,10 +18,8 @@ interface AttendanceHeaderProps {
   selectedScheduleId: string;
   setSelectedScheduleId: (id: string) => void;
   sessionCreatedAt: number | null;
-  mode: "view" | "edit";
   locale: string;
   scheduledRegisterNames?: { id: string; label: string }[];
-  canEdit?: boolean;
 }
 
 export function AttendanceHeader({
@@ -37,12 +33,10 @@ export function AttendanceHeader({
   selectedScheduleId,
   setSelectedScheduleId,
   sessionCreatedAt,
-  mode,
   locale,
   scheduledRegisterNames = [],
-  canEdit = false,
 }: AttendanceHeaderProps) {
-  const tSchedule = useTranslations("AttendanceRegister");
+  const tSchedule = t;
 
   const creationDateText = sessionCreatedAt
     ? new Date(sessionCreatedAt).toLocaleDateString(locale, {
@@ -60,15 +54,15 @@ export function AttendanceHeader({
         <div className="text-center md:text-start space-y-2 flex-1 max-w-md">
           <div className="space-y-1">
             <p className="text-[10px] uppercase font-bold text-slate-400 px-1">
-              {tSchedule("institution_label")} : {institution}
+              {t("registerName")} : {institution}
             </p>
             <div className="w-full max-w-sm space-y-2">
               {/* Banner: shown when no group is matched for the current day/time */}
-              {!registerName && canEdit && (
+              {!registerName && (
                 <div className="flex items-center gap-3 w-[300px] h-12 px-4 rounded-md border border-dashed border-amber-300 dark:border-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 select-none">
                   <CalendarX2 className="h-5 w-5 shrink-0 opacity-70" />
                   <p className="text-xs font-semibold leading-tight">
-                    {tSchedule("noGroupsForPeriod")}
+                    {t("noGroupsForPeriod")}
                   </p>
                 </div>
               )}
@@ -93,7 +87,7 @@ export function AttendanceHeader({
                   <SelectTrigger className="w-[300px] text-xl font-black uppercase h-12 bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-white dark:hover:bg-slate-900">
                     <SelectValue
                       placeholder={
-                        t("registerNamePlaceholder") || "Select Register"
+                        t("registerNamePlaceholder")
                       }
                     />
                   </SelectTrigger>
@@ -116,7 +110,7 @@ export function AttendanceHeader({
           {sessionCreatedAt && (
             <div className="flex items-center justify-center md:justify-start gap-2 text-[10px] text-slate-400 font-medium italic">
               <span className="opacity-70">
-                {tSchedule("created_label")}
+                {t("created")}
               </span>
               <span>{creationDateText}</span>
             </div>
@@ -126,7 +120,7 @@ export function AttendanceHeader({
         <div className="flex items-center gap-8">
           <div className="text-center">
             <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
-              {tSchedule("date_label")}
+              {t("date")}
             </p>
             <p className="text-xl font-black text-slate-800 dark:text-white print:text-black">
               {formattedDate}
@@ -135,7 +129,7 @@ export function AttendanceHeader({
           <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 hidden md:block" />
           <div className="text-center">
             <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
-              {tSchedule("shift_label")}
+              {t("shift")}
             </p>
             <p className="text-xl font-black text-indigo-600 uppercase">
               {t(shift)}
