@@ -1,30 +1,10 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/context/authContext";
+import { AutoSyncProvider } from "@/components/AutoSyncProvider";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
-import {
-  CalendarDays,
-  FileText,
-  Home,
-  LogOut,
-  MoreVertical,
-  RefreshCw,
-  Users,
-  Globe,
-  Moon,
-  Sun,
-  GraduationCap,
-} from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,16 +12,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  syncAllEntitiesForRole,
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { useAuth } from "@/context/authContext";
+import {
   importAllFromServerForRole,
+  syncAllEntitiesForRole,
 } from "@/lib/dexie/serverActions";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { AutoSyncProvider } from "@/components/AutoSyncProvider";
-import { CacheStatusIndicator } from "@/components/cache-status-indicator";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
+import {
+  CalendarDays,
+  FileText,
+  Globe,
+  GraduationCap,
+  Home,
+  LogOut,
+  Moon,
+  MoreVertical,
+  RefreshCw,
+  Sun,
+  Users,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 interface ManagerLayoutClientProps {
   children: React.ReactNode;
@@ -134,27 +133,27 @@ export default function ManagerLayoutClient({
   const navItems = [
     {
       title: t("dashboard"),
-      url: `${base}/manager`,
+      url: `${base}/pro/manager`,
       icon: "/dashboard.svg",
     },
     {
       title: t("teachers"),
-      url: `${base}/manager/teachers`,
+      url: `${base}/pro/manager/teachers`,
       icon: "/teacher.svg",
     },
     {
       title: t("students"),
-      url: `${base}/manager/students`,
+      url: `${base}/pro/manager/students`,
       icon: "/students.svg",
     },
     {
       title: t("receipts"),
-      url: `${base}/manager/receipts`,
+      url: `${base}/pro/manager/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: `${base}/manager/schedule`,
+      url: `${base}/pro/manager/schedule`,
       icon: "/calendar.svg",
     },
   ];

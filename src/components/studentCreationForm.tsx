@@ -277,7 +277,7 @@ export default function CreateStudentForm() {
       }
 
       // ✅ Navigate to students page
-      await router.push("/manager/students")
+      await router.push("/pro/manager/students")
       router.refresh()
 
       // ✅ Commented out online creation

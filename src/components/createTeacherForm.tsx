@@ -506,7 +506,7 @@ export default function CreateTeacherForm() {
     }
 
     // ✅ Navigate to teachers page
-    await router.push("/manager/teachers")
+    await router.push("/pro/manager/teachers")
     router.refresh()
 
     // ✅ Commented out online creation

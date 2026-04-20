@@ -345,7 +345,7 @@ export default function CreateTeacherPaymentFormClient({
         }
       }
 
-      router.push("/manager/receipts");
+      router.push("/pro/manager/receipts");
       router.refresh();
 
       // ✅ Commented out online creation

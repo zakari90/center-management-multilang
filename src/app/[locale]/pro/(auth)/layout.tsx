@@ -24,12 +24,12 @@ export default function AuthLayout({
     if (!mounted || isLoading) return;
 
     if (user?.role === "ADMIN") {
-      router.push(`/${locale}/admin`);
+      router.push(`/${locale}/pro/admin`);
       return;
     }
 
     if (user?.role === "MANAGER") {
-      router.push(`/${locale}/manager`);
+      router.push(`/${locale}/pro/manager`);
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
@@ -49,9 +49,7 @@ export default function AuthLayout({
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="flex min-h-svh flex-col items-center justify-center gap-2 p-2 md:p-10">
-        <div className="flex w-full flex-col md:gap-6">
-          {children}
-        </div>
+        <div className="flex w-full flex-col md:gap-6">{children}</div>
       </div>
     </div>
   );

@@ -236,7 +236,7 @@ export default function CenterOverview() {
                       asChild
                       className="w-full sm:w-auto sm:shrink-0 order-first sm:order-last"
                     >
-                      <Link href={`/admin/center`}>
+                      <Link href={`/pro/admin/center`}>
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>

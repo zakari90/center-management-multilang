@@ -132,7 +132,7 @@ export function DeleteAllDataButton() {
         }
 
         // Redirect to login page
-        window.location.href = `/${locale}/login`;
+        window.location.href = `/${locale}/pro/login`;
       }, 1000);
     } catch (error) {
       console.error("Failed to delete data:", error);

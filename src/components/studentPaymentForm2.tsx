@@ -471,8 +471,8 @@ export default function CreateStudentPaymentForm({
 
         await router.push(
           preSelectedStudentId
-            ? `/manager/students/${preSelectedStudentId}`
-            : "/manager/receipts",
+            ? `/pro/manager/students/${preSelectedStudentId}`
+            : "/pro/manager/receipts",
         );
         router.refresh();
       } catch (err) {

@@ -96,9 +96,9 @@ function HomePageContent() {
 
   const dashboardLink = user
     ? user.role === "ADMIN"
-      ? `/${locale}/admin`
-      : `/${locale}/manager`
-    : `/${locale}/login`;
+      ? `/${locale}/pro/admin`
+      : `/${locale}/pro/manager`
+    : `/${locale}/pro/login`;
 
   return (
     <main

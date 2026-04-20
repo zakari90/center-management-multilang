@@ -51,7 +51,7 @@ export function PublicHeader({ institution }: PublicHeaderProps) {
             <Button
               variant="default"
               size="sm"
-              onClick={() => router.push(`/${locale}/${user?.role?.toLowerCase()}`)}
+              onClick={() => router.push(`/${locale}/pro/${user?.role?.toLowerCase()}`)}
               className="rounded-full gap-2 bg-indigo-600 hover:bg-indigo-700"
             >
               <LayoutDashboard className="h-4 w-4" />
@@ -63,7 +63,7 @@ export function PublicHeader({ institution }: PublicHeaderProps) {
             <Button
               variant="default"
               size="sm"
-              onClick={() => router.push(`/${locale}/login`)}
+              onClick={() => router.push(`/${locale}/pro/login`)}
               className="rounded-full gap-2 bg-indigo-600 hover:bg-indigo-700"
             >
               <LogIn className="h-4 w-4" />

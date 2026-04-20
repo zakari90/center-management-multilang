@@ -112,21 +112,17 @@ export function LoginForm({
 
   useEffect(() => {
     if (state?.success && activeStateMatchesRole && state?.data?.user) {
-      login(
-        state.data.user,
-        state.data.passwordHash,
-        state.data.dataEpoch,
-      );
+      login(state.data.user, state.data.passwordHash, state.data.dataEpoch);
       const userRole = state.data.user.role;
       const base = `/${locale}`;
       const destination =
         userRole === "MANAGER"
-          ? `${base}/manager`
+          ? `${base}/pro/manager`
           : userRole === "ADMIN"
-            ? `${base}/admin`
+            ? `${base}/pro/admin`
             : role === "manager"
-              ? `${base}/manager`
-              : `${base}/admin`;
+              ? `${base}/pro/manager`
+              : `${base}/pro/admin`;
 
       // Use window.location.href for reliable redirect in both online and offline modes
       window.location.href = destination;

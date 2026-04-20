@@ -169,7 +169,7 @@ export default function StudentCard({
           {editable && (
             <Button 
               size="sm"
-              onClick={() => router.push(`/students/${student.id}/edit`)}
+              onClick={() => router.push(`/pro/manager/students/${student.id}/edit`)}
               className="text-xs sm:text-sm"
             >
               <Edit className="h-4 w-4 mr-1" />

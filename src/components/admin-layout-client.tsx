@@ -72,19 +72,19 @@ export default function AdminLayoutClient({
     if (!mounted || isLoading) return;
 
     if (!user) {
-      router.push(`/${locale}/login`);
+      router.push(`/${locale}/pro/login`);
       return;
     }
 
     if (user.role !== "ADMIN") {
-      router.push(`/${locale}/manager`);
+      router.push(`/${locale}/pro/manager`);
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
 
   const handleLogout = useCallback(async () => {
     await logout();
-    router.push(`/${locale}/login`);
+    router.push(`/${locale}/pro/login`);
   }, [logout, router, locale]);
 
   const handleSync = useCallback(async () => {
@@ -133,32 +133,32 @@ export default function AdminLayoutClient({
   const navItems = [
     {
       title: t("dashboard"),
-      url: `${base}/admin`,
+      url: `${base}/pro/admin`,
       icon: "/dashboard.svg",
     },
     {
       title: t("center"),
-      url: `${base}/admin/center`,
+      url: `${base}/pro/admin/center`,
       icon: "/school.svg",
     },
     {
       title: t("users"),
-      url: `${base}/admin/users`,
+      url: `${base}/pro/admin/users`,
       icon: "/manager.svg",
     },
     {
       title: t("receipts"),
-      url: `${base}/admin/receipts`,
+      url: `${base}/pro/admin/receipts`,
       icon: "/receipt.svg",
     },
     {
       title: t("schedule"),
-      url: `${base}/admin/schedule`,
+      url: `${base}/pro/admin/schedule`,
       icon: "/calendar.svg",
     },
     {
       title: t("database"),
-      url: `${base}/admin/database`,
+      url: `${base}/pro/admin/database`,
       icon: "/database.svg",
     },
   ];
