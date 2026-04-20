@@ -149,9 +149,10 @@ export function useAttendance() {
         setRegisterName(label);
         const canonicalMatch = schedules.find((s: any) => buildEntryLabel(s) === label);
         setSelectedScheduleId(canonicalMatch ? canonicalMatch.id : todayRegisters[0].id);
+      } else {
+        // If today has no scheduled groups, default the register name to the current time
+        setRegisterName(currentTimeStr);
       }
-      // If today has no scheduled groups, leave registerName empty
-      // so the "no groups for this period" banner shows
     });
 
     // 5. Load history list
