@@ -58,14 +58,20 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
             match = await cache.match(fullUrl);
           }
           
-          // 3. Last resort: relative match
+          // 3. Try with/without trailing slash fallback
+          if (!match) {
+            const alternativeUrl = fullUrl.endsWith("/") ? fullUrl.slice(0, -1) : `${fullUrl}/`;
+            match = await cache.match(alternativeUrl);
+          }
+          
+          // 4. Last resort: relative match
           if (!match) {
             match = await cache.match(normalizedPath);
           }
 
           const isCached = !!match;
           if (!isCached) {
-            console.warn(`[CacheStatus] Page NOT in cache: ${normalizedPath}`);
+            console.warn(`[CacheStatus] MISSING: ${normalizedPath} (Tried ${fullUrl} and variants)`);
           }
           
           newStatuses[pagePath] = isCached;

@@ -60,6 +60,9 @@ const PRECACHE_ROUTES = [
   "/ar/pro/admin/schedule",
   "/en/pro/admin/schedule",
   "/fr/pro/admin/schedule",
+  "/ar/pro/manager/schedule",
+  "/en/pro/manager/schedule",
+  "/fr/pro/manager/schedule",
   "/ar/pro/login",
   "/en/pro/login",
   "/fr/pro/login",
@@ -103,8 +106,8 @@ const NAVIGATION_TIMEOUT_MS = 3000;
 
 sw.addEventListener("install", (event) => {
   console.log("[SW] install", SW_VERSION);
-  // Do NOT call skipWaiting() here — let the UI show an update alert first.
-  // The waiting SW will be activated when the user clicks "Update" via SKIP_WAITING message.
+  // Force the new service worker to activate immediately
+  self.skipWaiting();
   event.waitUntil(
     (async () => {
       try {
