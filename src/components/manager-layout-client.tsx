@@ -72,19 +72,19 @@ export default function ManagerLayoutClient({
     if (!mounted || isLoading) return;
 
     if (!user) {
-      router.push(`/${locale}/login`);
+      router.push(`/${locale}/pro/login`);
       return;
     }
 
     if (user.role !== "MANAGER") {
-      router.push(`/${locale}/admin`);
+      router.push(`/${locale}/pro/admin`);
       return;
     }
   }, [user, isLoading, mounted, router, locale]);
 
   const handleLogout = useCallback(async () => {
     await logout();
-    router.push(`/${locale}/login`);
+    router.push(`/${locale}/pro/login`);
   }, [logout, router, locale]);
 
   const handleSync = useCallback(async () => {

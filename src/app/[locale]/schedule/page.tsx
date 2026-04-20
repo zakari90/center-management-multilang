@@ -10,19 +10,42 @@ import { CacheStatusIndicator } from "@/components/cache-status-indicator";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 import { useLocale } from "next-intl";
-import { useEffect } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2 } from "lucide-react";
+import { useEffect, useCallback } from "react";
+import { useAuth } from "@/context/authContext";
+import { useTheme } from "next-themes";
+import {
+  syncAllEntitiesForRole,
+  importAllFromServerForRole,
+} from "@/lib/dexie/serverActions";
+import { Button } from "@/components/ui/button";
+import { RefreshCw, Sun, Moon } from "lucide-react";
 
 function SchedulePageContent() {
   const locale = useLocale();
+  const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     useCacheStatusStore.getState().checkAllPages(locale);
   }, [locale]);
 
+  const handleSync = useCallback(async () => {
+    if (!user?.id) return;
+    setIsSyncing(true);
+    try {
+      const isAdmin = user.role === "ADMIN";
+      await syncAllEntitiesForRole(isAdmin);
+      await importAllFromServerForRole(isAdmin);
+    } catch (error) {
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [user?.id, user?.role]);
+
   const tAttendance = useTranslations("AttendanceRegister");
   const tTimetable = useTranslations("TimetableManagement");
+  const tManager = useTranslations("ManagerLayout");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -56,28 +79,41 @@ function SchedulePageContent() {
               {tAttendance("title") || "Attendance"}
             </TabsTrigger>
           </TabsList>
-          
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-2">
+            {user && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={handleSync}
+                disabled={isSyncing}
+                title={isSyncing ? tManager("syncing") : tManager("syncData")}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              title={theme === "dark" ? "Light Mode" : "Dark Mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
             <CacheStatusIndicator />
             <LanguageSwitcher />
           </div>
         </div>
 
-        <Alert className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300 py-3">
-          <div className="flex items-center gap-3">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            <AlertDescription className="text-xs font-semibold">
-              {locale === "ar" 
-                ? "✅ مؤشر التخزين الذكي: بمجرد ظهور 'الفقاعة الخضراء'، يكون النظام قد تم تخزينه بالكامل وهو جاهز للاستخدام الآمن بدون إنترنت!"
-                : locale === "fr"
-                ? "✅ Indicateur de Cache Intelligent: Une fois que la 'Bulle Verte' apparaît, le système est entièrement mis en cache et prêt pour une utilisation hors ligne sécurisée !"
-                : "✅ Smart Cache Indicator: Once the 'Green Bubble' appears, the system is fully cached and ready for safe offline use!"
-              }
-            </AlertDescription>
-          </div>
-        </Alert>
-
-        <TabsContent value="schedule" className="mt-6">
+        <TabsContent value="schedule" className="mt-0">
           <FreeTimeTableManagement
             refreshKey={refreshKey}
             onScheduleChangeAction={handleScheduleChange}

@@ -8,22 +8,26 @@ export const BASE_PAGES = [
   "/",
 
   // Auth pages
-  "/login",
+  "/pro/login",
 
   // Admin pages
-  "/admin",
-  "/admin/center",
-  "/admin/receipts",
-  "/admin/schedule",
-  "/admin/users",
-  "/admin/database",
+  "/pro/admin",
+  "/pro/admin/center",
+  "/pro/admin/receipts",
+  "/pro/admin/schedule",
+  "/pro/admin/users",
+  "/pro/admin/database",
 
   // Manager pages
-  "/manager",
-  "/manager/teachers",
-  "/manager/students",
-  "/manager/receipts",
-  "/manager/schedule",
+  "/pro/manager",
+  "/pro/manager/teachers",
+  "/pro/manager/students",
+  "/pro/manager/receipts",
+  "/pro/manager/schedule",
+
+  // Public / Schedule pages
+  "/schedule",
+  "/schedule/attendance",
 
   // Free Mode pages
   "/free",
