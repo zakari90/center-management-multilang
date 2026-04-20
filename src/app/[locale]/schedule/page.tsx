@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { AttendanceModule } from "./attendance/components/AttendanceModule";
+import { CacheStatusIndicator } from "@/components/cache-status-indicator";
 
 function SchedulePageContent() {
   const tAttendance = useTranslations("AttendanceRegister");
@@ -34,23 +35,27 @@ function SchedulePageContent() {
         onValueChange={handleTabChange}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-          <TabsTrigger value="schedule">
-            {tTimetable("title") || "Schedule"}
-          </TabsTrigger>
-          <TabsTrigger value="attendance">
-            {tAttendance("title") || "Attendance"}
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+            <TabsTrigger value="schedule">
+              {tTimetable("title") || "Schedule"}
+            </TabsTrigger>
+            <TabsTrigger value="attendance">
+              {tAttendance("title") || "Attendance"}
+            </TabsTrigger>
+          </TabsList>
+          
+          <CacheStatusIndicator />
+        </div>
 
-        <TabsContent value="schedule" className="mt-6">
+        <TabsContent value="schedule" className="mt-0">
           <FreeTimeTableManagement
             refreshKey={refreshKey}
             onScheduleChangeAction={handleScheduleChange}
           />
         </TabsContent>
 
-        <TabsContent value="attendance" className="mt-6">
+        <TabsContent value="attendance" className="mt-0">
           <AttendanceModule />
         </TabsContent>
       </Tabs>
