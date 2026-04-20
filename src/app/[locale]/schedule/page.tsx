@@ -11,6 +11,8 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 import { useLocale } from "next-intl";
 import { useEffect } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2 } from "lucide-react";
 
 function SchedulePageContent() {
   const locale = useLocale();
@@ -61,7 +63,21 @@ function SchedulePageContent() {
           </div>
         </div>
 
-        <TabsContent value="schedule" className="mt-0">
+        <Alert className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800/50 text-emerald-800 dark:text-emerald-300 py-3">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <AlertDescription className="text-xs font-semibold">
+              {locale === "ar" 
+                ? "✅ مؤشر التخزين الذكي: بمجرد ظهور 'الفقاعة الخضراء'، يكون النظام قد تم تخزينه بالكامل وهو جاهز للاستخدام الآمن بدون إنترنت!"
+                : locale === "fr"
+                ? "✅ Indicateur de Cache Intelligent: Une fois que la 'Bulle Verte' apparaît, le système est entièrement mis en cache et prêt pour une utilisation hors ligne sécurisée !"
+                : "✅ Smart Cache Indicator: Once the 'Green Bubble' appears, the system is fully cached and ready for safe offline use!"
+              }
+            </AlertDescription>
+          </div>
+        </Alert>
+
+        <TabsContent value="schedule" className="mt-6">
           <FreeTimeTableManagement
             refreshKey={refreshKey}
             onScheduleChangeAction={handleScheduleChange}
