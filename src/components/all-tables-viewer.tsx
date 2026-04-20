@@ -906,7 +906,7 @@ export function AllTablesViewer() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div
-                      className={`p-2 rounded-lg ${config.color} bg-opacity-10`}
+                      className={`p-2 rounded-lg ${config.color}/10`}
                     >
                       <Icon
                         className={`h-5 w-5 ${config.color.replace("bg-", "text-")}`}

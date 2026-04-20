@@ -9,7 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Users } from "lucide-react";
@@ -55,25 +54,32 @@ export function WelcomeDialog({
 
         <div className="py-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="first-register-name" className="text-xs font-bold uppercase text-slate-500">
+            <Label
+              htmlFor="first-register-name"
+              className="text-xs font-bold uppercase text-slate-500"
+            >
               {isRtl ? "اسم السجل" : "Register Name"}
             </Label>
             <Input
               id="first-register-name"
-              placeholder={isRtl ? "مثال: الفترة الصباحية - لغة عربية" : "e.g. Morning Shift - Arabic Class"}
+              placeholder={
+                isRtl
+                  ? "مثال: الفترة الصباحية - لغة عربية"
+                  : "e.g. Morning Shift - Arabic Class"
+              }
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="h-11 border-indigo-100 dark:border-indigo-900/50 focus:ring-indigo-500"
               autoFocus
             />
           </div>
-          
+
           <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg flex items-start gap-3">
             <div className="mt-0.5 text-indigo-600">
               <Users size={16} />
             </div>
             <div className="text-[11px] text-slate-500 leading-relaxed">
-              {isRtl 
+              {isRtl
                 ? "يمكنك لاحقاً إضافة الأسماء يدوياً، أو تحميلها من ملف Excel، أو استيرادها من قائمة الطلاب والمعلمين."
                 : "Later, you can add names manually, upload them from an Excel file, or import them from your student and teacher lists."}
             </div>

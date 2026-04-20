@@ -60,6 +60,21 @@ const PRECACHE_ROUTES = [
   "/ar/pro/admin/schedule",
   "/en/pro/admin/schedule",
   "/fr/pro/admin/schedule",
+  "/ar/schedule",
+  "/en/schedule",
+  "/fr/schedule",
+  "/ar/schedule/attendance",
+  "/en/schedule/attendance",
+  "/fr/schedule/attendance",
+  "/ar/free",
+  "/en/free",
+  "/fr/free",
+  "/ar/free/login",
+  "/en/free/login",
+  "/fr/free/login",
+  "/ar/free/admin",
+  "/en/free/admin",
+  "/fr/free/admin",
 ];
 
 // Network timeout for navigation requests (ms)

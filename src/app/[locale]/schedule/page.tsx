@@ -75,17 +75,13 @@ function SchedulePageContent() {
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-            <TabsTrigger value="schedule" className="relative">
-              <div className="absolute top-1 right-1">
-                <CacheStatusDot href={`${base}/schedule`} />
-              </div>
-              {tTimetable("title") || "Schedule"}
+            <TabsTrigger value="schedule" className="gap-2">
+              {tTimetable("title") || "Schedule Management"}
+              <CacheStatusDot href={`${base}/schedule`} />
             </TabsTrigger>
-            <TabsTrigger value="attendance" className="relative">
-              <div className="absolute top-1 right-1">
-                <CacheStatusDot href={`${base}/schedule/attendance`} />
-              </div>
-              {tAttendance("title") || "Attendance"}
+            <TabsTrigger value="attendance" className="gap-2">
+              {tAttendance("title") || "Attendance Register"}
+              <CacheStatusDot href={`${base}/schedule/attendance`} />
             </TabsTrigger>
           </TabsList>
 
