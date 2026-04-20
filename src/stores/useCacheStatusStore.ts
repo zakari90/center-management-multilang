@@ -34,8 +34,20 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
 
       // Construct the list of URLs to check.
       // We check both the localized versions AND the root shell if present.
+      const pathname = window.location.pathname;
+      const isAdmin = pathname.includes("/pro/admin");
+      const isManager = pathname.includes("/pro/manager");
+      const isFree = pathname.includes("/free");
+
       const pagesToCheck: string[] = [];
       BASE_PAGES.forEach((p) => {
+        // Filter out routes that are inaccessible/irrelevant based on current role
+        // This prevents the indicator from spinning forever due to 403s on protected routes
+        if (isAdmin && p.startsWith("/pro/manager")) return;
+        if (isManager && p.startsWith("/pro/admin")) return;
+        if (isFree && p.startsWith("/pro")) return;
+        if (!isFree && p.startsWith("/free")) return;
+
         if (p === "/") {
           pagesToCheck.push("/"); // Root shell
         }
