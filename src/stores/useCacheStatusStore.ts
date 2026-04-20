@@ -44,19 +44,30 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
 
       const results = await Promise.all(
         pagesToCheck.map(async (pagePath) => {
-          // The SW stores pages with a __sw_locale query param as the cache key,
-          // e.g. "http://localhost:3000/ar/admin?__sw_locale=ar"
-          const cacheKeyUrl = `${origin}${pagePath}?__sw_locale=${encodeURIComponent(locale)}`;
-          const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
-          const match = await cache.match(cacheKey);
+          // Normalize path to avoid double slashes
+          const normalizedPath = pagePath.startsWith("/") ? pagePath : `/${pagePath}`;
+          const fullUrl = `${origin}${normalizedPath}`;
           
-          let isCached = !!match;
-          if (!isCached) {
-            // Fallback for precached pages which don't have the query param yet
-            const plainMatch = await cache.match(pagePath);
-            isCached = !!plainMatch;
+          // 1. Try with locale query param (set by SW fetch)
+          const cacheKeyUrl = `${fullUrl}?__sw_locale=${encodeURIComponent(locale)}`;
+          const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
+          let match = await cache.match(cacheKey);
+          
+          // 2. Try plain URL (set by SW install/pre-cache)
+          if (!match) {
+            match = await cache.match(fullUrl);
+          }
+          
+          // 3. Last resort: relative match
+          if (!match) {
+            match = await cache.match(normalizedPath);
           }
 
+          const isCached = !!match;
+          if (!isCached) {
+            console.warn(`[CacheStatus] Page NOT in cache: ${normalizedPath}`);
+          }
+          
           newStatuses[pagePath] = isCached;
           return isCached;
         }),

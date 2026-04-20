@@ -1,45 +1,55 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 // import axios from "axios" // ✅ Commented out - using local DB
-import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { useEffect, useState } from "react"
-import { teacherActions, teacherSubjectActions, subjectActions } from "@/lib/dexie/dexieActions"
-import ServerActionTeachers from "@/lib/dexie/teacherServerAction"
-import { generateObjectId } from "@/lib/utils/generateObjectId"
-import { useAuth } from "@/context/authContext"
-import { isOnline } from "@/lib/utils/network"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { X } from "lucide-react"
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import {
+  teacherActions,
+  teacherSubjectActions,
+  subjectActions,
+} from "@/lib/dexie/dexieActions";
+import ServerActionTeachers from "@/lib/dexie/teacherServerAction";
+import { generateObjectId } from "@/lib/utils/generateObjectId";
+import { useAuth } from "@/context/authContext";
+import { isOnline } from "@/lib/utils/network";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { X } from "lucide-react";
 
 // ==================== INTERFACES ====================
 interface DaySchedule {
-  day: string
-  startTime: string
-  endTime: string
-  isAvailable: boolean
+  day: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
 }
 
 interface Subject {
-  id: string
-  name: string
-  grade: string
-  price: number
+  id: string;
+  name: string;
+  grade: string;
+  price: number;
 }
 
 interface TeacherSubject {
-  subjectId: string
-  percentage?: number
-  hourlyRate?: number
-  compensationType: "percentage" | "hourly"
+  subjectId: string;
+  percentage?: number;
+  hourlyRate?: number;
+  compensationType: "percentage" | "hourly";
 }
 
 // ==================== SUB-COMPONENTS ====================
@@ -47,18 +57,18 @@ interface TeacherSubject {
 // Basic Information Section
 const BasicInfoSection = ({
   formData,
-  onChange
+  onChange,
 }: {
-  formData: { name: string; email: string; phone: string; address: string }
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  formData: { name: string; email: string; phone: string; address: string };
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  const t = useTranslations("CreateTeacherForm")
+  const t = useTranslations("CreateTeacherForm");
   const fields = [
     { name: "name", type: "text", required: true },
     { name: "email", type: "email", required: false },
     { name: "phone", type: "text", required: false },
     { name: "address", type: "text", required: false },
-  ] as const
+  ] as const;
 
   return (
     <div className="border-b pb-6">
@@ -68,7 +78,9 @@ const BasicInfoSection = ({
           <div key={field.name} className="space-y-2">
             <Label htmlFor={field.name}>
               {t(field.name)}
-              {field.required && <span className="text-destructive ml-1">*</span>}
+              {field.required && (
+                <span className="text-destructive ml-1">*</span>
+              )}
             </Label>
             <Input
               type={field.type}
@@ -84,8 +96,8 @@ const BasicInfoSection = ({
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Subject Compensation Card
 const SubjectCompensationCard = ({
@@ -96,35 +108,45 @@ const SubjectCompensationCard = ({
   onUpdate,
   onRemove,
 }: {
-  teacherSubject: TeacherSubject
-  index: number
-  subjects: Subject[]
-  assignedSubjects: TeacherSubject[]
-  onUpdate: (index: number, field: keyof TeacherSubject, value: any) => void
-  onRemove: (index: number) => void
+  teacherSubject: TeacherSubject;
+  index: number;
+  subjects: Subject[];
+  assignedSubjects: TeacherSubject[];
+  onUpdate: (index: number, field: keyof TeacherSubject, value: any) => void;
+  onRemove: (index: number) => void;
 }) => {
-  const t = useTranslations("CreateTeacherForm")
+  const t = useTranslations("CreateTeacherForm");
 
   const availableSubjects = subjects.filter(
-    (s) => !assignedSubjects.some((ts, i) => i !== index && ts.subjectId === s.id)
-  )
+    (s) =>
+      !assignedSubjects.some((ts, i) => i !== index && ts.subjectId === s.id),
+  );
 
-  const selectedSubject = subjects.find((s) => s.id === teacherSubject.subjectId)
+  const selectedSubject = subjects.find(
+    (s) => s.id === teacherSubject.subjectId,
+  );
 
   const calculateEstimatedEarnings = () => {
-    if (!selectedSubject) return "MAD 0.00"
+    if (!selectedSubject) return "MAD 0.00";
 
-    if (teacherSubject.compensationType === "percentage" && teacherSubject.percentage) {
-      const earnings = (selectedSubject.price * teacherSubject.percentage) / 100
-      return `MAD ${earnings.toFixed(2)}`
+    if (
+      teacherSubject.compensationType === "percentage" &&
+      teacherSubject.percentage
+    ) {
+      const earnings =
+        (selectedSubject.price * teacherSubject.percentage) / 100;
+      return `MAD ${earnings.toFixed(2)}`;
     }
 
-    if (teacherSubject.compensationType === "hourly" && teacherSubject.hourlyRate) {
-      return `MAD ${teacherSubject.hourlyRate.toFixed(2)}/hr`
+    if (
+      teacherSubject.compensationType === "hourly" &&
+      teacherSubject.hourlyRate
+    ) {
+      return `MAD ${teacherSubject.hourlyRate.toFixed(2)}/hr`;
     }
 
-    return "MAD 0.00"
-  }
+    return "MAD 0.00";
+  };
 
   return (
     <Card>
@@ -142,21 +164,25 @@ const SubjectCompensationCard = ({
               <SelectTrigger id={`subject-${index}`} className="w-full">
                 <SelectValue placeholder={t("subject")} />
               </SelectTrigger>
-              <SelectContent 
+              <SelectContent
                 className="max-h-[200px] sm:max-h-[300px] overflow-y-auto"
                 position="popper"
                 sideOffset={5}
               >
                 {availableSubjects.map((subject) => (
-                  <SelectItem 
-                    key={subject.id} 
+                  <SelectItem
+                    key={subject.id}
                     value={subject.id}
                     className="text-xs sm:text-sm"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 max-w-[250px] sm:max-w-none">
-                      <span className="truncate font-medium">{subject.name}</span>
+                      <span className="truncate font-medium">
+                        {subject.name}
+                      </span>
                       <span className="text-muted-foreground truncate">
-                        {subject.grade} <span className="hidden sm:inline">·</span> MAD {subject.price}
+                        {subject.grade}{" "}
+                        <span className="hidden sm:inline">·</span> MAD{" "}
+                        {subject.price}
                       </span>
                     </div>
                   </SelectItem>
@@ -170,7 +196,7 @@ const SubjectCompensationCard = ({
             variant="ghost"
             size="icon"
             onClick={() => onRemove(index)}
-            className="mt-0 sm:mt-7 text-destructive hover:text-destructive flex-shrink-0"
+            className="mt-0 sm:mt-7 text-destructive hover:text-destructive shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -183,16 +209,14 @@ const SubjectCompensationCard = ({
             <Label htmlFor={`payment-type-${index}`}>{t("paymentType")}</Label>
             <Select
               value={teacherSubject.compensationType}
-              onValueChange={(value) => onUpdate(index, "compensationType", value)}
+              onValueChange={(value) =>
+                onUpdate(index, "compensationType", value)
+              }
             >
               <SelectTrigger id={`payment-type-${index}`}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent
-                position="popper"
-                sideOffset={5}
-                align="start"
-              >
+              <SelectContent position="popper" sideOffset={5} align="start">
                 <SelectItem value="percentage">{t("percentage")}</SelectItem>
                 <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
               </SelectContent>
@@ -212,14 +236,17 @@ const SubjectCompensationCard = ({
                 max={100}
                 step={0.1}
                 value={teacherSubject.percentage || ""}
-                onChange={(e) => onUpdate(index, "percentage", parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
+                }
                 placeholder="50"
               />
             </div>
           ) : (
             <div className="space-y-2">
               <Label htmlFor={`hourly-rate-${index}`}>
-                {t("hourlyRate")} (MAD) <span className="text-destructive">*</span>
+                {t("hourlyRate")} (MAD){" "}
+                <span className="text-destructive">*</span>
               </Label>
               <Input
                 id={`hourly-rate-${index}`}
@@ -227,7 +254,9 @@ const SubjectCompensationCard = ({
                 min={0}
                 step={0.01}
                 value={teacherSubject.hourlyRate || ""}
-                onChange={(e) => onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
+                }
                 placeholder="25.00"
               />
             </div>
@@ -235,7 +264,9 @@ const SubjectCompensationCard = ({
 
           {/* Estimated Earnings */}
           <div className="space-y-2">
-            <Label className="text-xs sm:text-sm">{t("estimatedEarnings")}</Label>
+            <Label className="text-xs sm:text-sm">
+              {t("estimatedEarnings")}
+            </Label>
             <div className="h-10 flex items-center justify-center bg-primary/5 rounded-md border px-3">
               <p className="text-sm sm:text-base font-semibold text-center truncate">
                 {calculateEstimatedEarnings()}
@@ -245,23 +276,29 @@ const SubjectCompensationCard = ({
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 // Weekly Schedule Section
 const WeeklyScheduleSection = ({
   weeklySchedule,
-  onChange
+  onChange,
 }: {
-  weeklySchedule: DaySchedule[]
-  onChange: (index: number, field: keyof DaySchedule, value: string | boolean) => void
+  weeklySchedule: DaySchedule[];
+  onChange: (
+    index: number,
+    field: keyof DaySchedule,
+    value: string | boolean,
+  ) => void;
 }) => {
-  const t = useTranslations("CreateTeacherForm")
+  const t = useTranslations("CreateTeacherForm");
 
   return (
     <div className="border-b pb-6">
       <h2 className="text-xl font-semibold mb-4">{t("weeklySchedule")}</h2>
-      <p className="text-sm text-muted-foreground mb-4">{t("selectAvailable")}</p>
+      <p className="text-sm text-muted-foreground mb-4">
+        {t("selectAvailable")}
+      </p>
 
       <div className="space-y-3">
         {weeklySchedule.map((schedule, index) => (
@@ -274,7 +311,9 @@ const WeeklyScheduleSection = ({
               <Checkbox
                 id={`day-${schedule.day}`}
                 checked={schedule.isAvailable}
-                onCheckedChange={(checked) => onChange(index, "isAvailable", checked as boolean)}
+                onCheckedChange={(checked) =>
+                  onChange(index, "isAvailable", checked as boolean)
+                }
               />
               <Label
                 htmlFor={`day-${schedule.day}`}
@@ -288,11 +327,15 @@ const WeeklyScheduleSection = ({
             {schedule.isAvailable && (
               <div className="flex flex-wrap gap-3 flex-1 w-full sm:w-auto">
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm whitespace-nowrap">{t("from")}</Label>
+                  <Label className="text-sm whitespace-nowrap">
+                    {t("from")}
+                  </Label>
                   <Input
                     type="time"
                     value={schedule.startTime}
-                    onChange={(e) => onChange(index, "startTime", e.target.value)}
+                    onChange={(e) =>
+                      onChange(index, "startTime", e.target.value)
+                    }
                     className="w-32"
                   />
                 </div>
@@ -311,18 +354,18 @@ const WeeklyScheduleSection = ({
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 // ==================== MAIN COMPONENT ====================
 export default function CreateTeacherForm() {
-  const router = useRouter()
-  const t = useTranslations("CreateTeacherForm")
-  const { user } = useAuth() // ✅ Get current user from AuthContext
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [loadingSubjects, setLoadingSubjects] = useState(true)
+  const router = useRouter();
+  const t = useTranslations("CreateTeacherForm");
+  const { user } = useAuth(); // ✅ Get current user from AuthContext
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
 
   const DAYS = [
     t("monday"),
@@ -331,15 +374,15 @@ export default function CreateTeacherForm() {
     t("thursday"),
     t("friday"),
     t("saturday"),
-    t("sunday")
-  ]
+    t("sunday"),
+  ];
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
-  })
+  });
 
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
     DAYS.map((day) => ({
@@ -347,187 +390,214 @@ export default function CreateTeacherForm() {
       startTime: "09:00",
       endTime: "17:00",
       isAvailable: false,
-    }))
-  )
+    })),
+  );
 
-  const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([])
+  const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
 
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         // ✅ Fetch from local DB
-        const allSubjects = await subjectActions.getAll()
+        const allSubjects = await subjectActions.getAll();
         const activeSubjects = allSubjects
-          .filter(s => s.status !== '0')
-          .map(s => ({
+          .filter((s) => s.status !== "0")
+          .map((s) => ({
             id: s.id,
             name: s.name,
             grade: s.grade,
             price: s.price,
-          }))
-        setSubjects(activeSubjects)
+          }));
+        setSubjects(activeSubjects);
 
         // ✅ Commented out online fetch
         // const response = await axios.get("/api/subjects")
         // if (response) setSubjects(response.data)
       } catch (err) {
-        console.error("Failed to fetch subjects:", err)
+        console.error("Failed to fetch subjects:", err);
       } finally {
-        setLoadingSubjects(false)
+        setLoadingSubjects(false);
       }
-    }
-    fetchSubjects()
-  }, [])
+    };
+    fetchSubjects();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleScheduleChange = (index: number, field: keyof DaySchedule, value: string | boolean) => {
+  const handleScheduleChange = (
+    index: number,
+    field: keyof DaySchedule,
+    value: string | boolean,
+  ) => {
     setWeeklySchedule((prev) => {
-      const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
-      return updated
-    })
-  }
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
 
   const addSubject = () => {
     setTeacherSubjects((prev) => [
       ...prev,
-      { subjectId: "", compensationType: "percentage", percentage: 0, hourlyRate: 0 },
-    ])
-  }
+      {
+        subjectId: "",
+        compensationType: "percentage",
+        percentage: 0,
+        hourlyRate: 0,
+      },
+    ]);
+  };
 
   const removeSubject = (index: number) => {
-    setTeacherSubjects((prev) => prev.filter((_, i) => i !== index))
-  }
+    setTeacherSubjects((prev) => prev.filter((_, i) => i !== index));
+  };
 
-  const updateSubject = (index: number, field: keyof TeacherSubject, value: any) => {
+  const updateSubject = (
+    index: number,
+    field: keyof TeacherSubject,
+    value: any,
+  ) => {
     setTeacherSubjects((prev) => {
-      const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
-      return updated
-    })
-  }
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setIsLoading(true)
-  setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-  if (!user) {
-    setError("Unauthorized: Please log in again")
-    setIsLoading(false)
-    return
-  }
-
-  try {
-    const validSubjects = teacherSubjects.filter((ts) => ts.subjectId)
-
-    for (const ts of validSubjects) {
-      if (ts.compensationType === "percentage" && (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)) {
-        throw new Error("Percentage must be between 1 and 100")
-      }
-      if (ts.compensationType === "hourly" && (!ts.hourlyRate || ts.hourlyRate <= 0)) {
-        throw new Error("Hourly rate must be greater than 0")
-      }
+    if (!user) {
+      setError("Unauthorized: Please log in again");
+      setIsLoading(false);
+      return;
     }
 
-    // ✅ Check if email already exists in local DB
-    if (formData.email) {
-      const existingTeacher = await teacherActions.getLocalByEmail?.(formData.email)
-      if (existingTeacher) {
-        setError("Email already in use")
-        setIsLoading(false)
-        return
+    try {
+      const validSubjects = teacherSubjects.filter((ts) => ts.subjectId);
+
+      for (const ts of validSubjects) {
+        if (
+          ts.compensationType === "percentage" &&
+          (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)
+        ) {
+          throw new Error("Percentage must be between 1 and 100");
+        }
+        if (
+          ts.compensationType === "hourly" &&
+          (!ts.hourlyRate || ts.hourlyRate <= 0)
+        ) {
+          throw new Error("Hourly rate must be greater than 0");
+        }
       }
-    }
 
-    // ✅ Prepare weekly schedule as array of JSON strings (matching API format)
-    const activeSchedule = weeklySchedule
-      .filter((day) => day.isAvailable)
-      .map(({ day, startTime, endTime }) => 
-        JSON.stringify({ day, startTime, endTime })
-      )
+      // ✅ Check if email already exists in local DB
+      if (formData.email) {
+        const existingTeacher = await teacherActions.getLocalByEmail?.(
+          formData.email,
+        );
+        if (existingTeacher) {
+          setError("Email already in use");
+          setIsLoading(false);
+          return;
+        }
+      }
 
-    // ✅ Create teacher in local DB
-    const now = Date.now()
-    const teacherId = generateObjectId()
-    const newTeacher = {
-      id: teacherId,
-      name: formData.name,
-      email: formData.email || undefined,
-      phone: formData.phone || undefined,
-      address: formData.address || undefined,
-      weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
-      managerId: user.id,
-      status: 'w' as const, // Waiting for sync
-      createdAt: now,
-      updatedAt: now,
-    }
+      // ✅ Prepare weekly schedule as array of JSON strings (matching API format)
+      const activeSchedule = weeklySchedule
+        .filter((day) => day.isAvailable)
+        .map(({ day, startTime, endTime }) =>
+          JSON.stringify({ day, startTime, endTime }),
+        );
 
-    await teacherActions.putLocal(newTeacher)
-
-    // ✅ Create teacher-subject associations in local DB
-    if (validSubjects.length > 0) {
-      const teacherSubjectEntities = validSubjects.map((ts) => ({
-        id: generateObjectId(),
-        teacherId: teacherId,
-        subjectId: ts.subjectId,
-        percentage: ts.compensationType === "percentage" ? ts.percentage : undefined,
-        hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
-        assignedAt: now,
-        status: 'w' as const, // Waiting for sync
+      // ✅ Create teacher in local DB
+      const now = Date.now();
+      const teacherId = generateObjectId();
+      const newTeacher = {
+        id: teacherId,
+        name: formData.name,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+        address: formData.address || undefined,
+        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
+        managerId: user.id,
+        status: "w" as const, // Waiting for sync
         createdAt: now,
         updatedAt: now,
-      }))
+      };
 
-      await teacherSubjectActions.bulkPutLocal(teacherSubjectEntities)
-    }
+      await teacherActions.putLocal(newTeacher);
 
-    // ✅ Immediate sync to server if online
-    if (isOnline()) {
-      try {
-        const result = await ServerActionTeachers.SaveToServer(newTeacher as any)
-        if (result) {
-          await teacherActions.markSynced(teacherId)
-          const teacherSubjectsToMark = await teacherSubjectActions.getAll()
-          const idsToMark = teacherSubjectsToMark
-            .filter(ts => ts.teacherId === teacherId)
-            .map(ts => ts.id)
-          if (idsToMark.length > 0) {
-            await teacherSubjectActions.bulkMarkSynced(idsToMark)
-          }
-        }
-      } catch (syncError) {
-        console.error("Teacher immediate sync failed, will retry later:", syncError)
+      // ✅ Create teacher-subject associations in local DB
+      if (validSubjects.length > 0) {
+        const teacherSubjectEntities = validSubjects.map((ts) => ({
+          id: generateObjectId(),
+          teacherId: teacherId,
+          subjectId: ts.subjectId,
+          percentage:
+            ts.compensationType === "percentage" ? ts.percentage : undefined,
+          hourlyRate:
+            ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
+          assignedAt: now,
+          status: "w" as const, // Waiting for sync
+          createdAt: now,
+          updatedAt: now,
+        }));
+
+        await teacherSubjectActions.bulkPutLocal(teacherSubjectEntities);
       }
+
+      // ✅ Immediate sync to server if online
+      if (isOnline()) {
+        try {
+          const result = await ServerActionTeachers.SaveToServer(
+            newTeacher as any,
+          );
+          if (result) {
+            await teacherActions.markSynced(teacherId);
+            const teacherSubjectsToMark = await teacherSubjectActions.getAll();
+            const idsToMark = teacherSubjectsToMark
+              .filter((ts) => ts.teacherId === teacherId)
+              .map((ts) => ts.id);
+            if (idsToMark.length > 0) {
+              await teacherSubjectActions.bulkMarkSynced(idsToMark);
+            }
+          }
+        } catch (syncError) {
+          console.error(
+            "Teacher immediate sync failed, will retry later:",
+            syncError,
+          );
+        }
+      }
+
+      // ✅ Navigate to teachers page
+      await router.push("/pro/manager/teachers");
+      router.refresh();
+
+      // ✅ Commented out online creation
+      // const payload = {
+      //   ...formData,
+      //   weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
+      //   subjects: validSubjects.map((ts) => ({
+      //     subjectId: ts.subjectId,
+      //     percentage: ts.compensationType === "percentage" ? ts.percentage : null,
+      //     hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
+      //   })),
+      // }
+      // await axios.post("/api/teachers", payload)
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else setError(t("genericError"));
+    } finally {
+      setIsLoading(false);
     }
-
-    // ✅ Navigate to teachers page
-    await router.push("/pro/manager/teachers")
-    router.refresh()
-
-    // ✅ Commented out online creation
-    // const payload = {
-    //   ...formData,
-    //   weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
-    //   subjects: validSubjects.map((ts) => ({
-    //     subjectId: ts.subjectId,
-    //     percentage: ts.compensationType === "percentage" ? ts.percentage : null,
-    //     hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
-    //   })),
-    // }
-    // await axios.post("/api/teachers", payload)
-  } catch (err) {
-    if (err instanceof Error) setError(err.message)
-    else setError(t("genericError"))
-  } finally {
-    setIsLoading(false)
-  }
-}
-
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
@@ -544,14 +614,21 @@ export default function CreateTeacherForm() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
-            <BasicInfoSection formData={formData} onChange={handleInputChange} />
+            <BasicInfoSection
+              formData={formData}
+              onChange={handleInputChange}
+            />
 
             {/* Subjects & Compensation */}
             <div className="border-b pb-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                 <div>
-                  <h2 className="text-xl font-semibold">{t("subjectsCompensation")}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">{t("assignSubjects")}</p>
+                  <h2 className="text-xl font-semibold">
+                    {t("subjectsCompensation")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("assignSubjects")}
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -564,7 +641,9 @@ export default function CreateTeacherForm() {
               </div>
 
               {loadingSubjects ? (
-                <p className="text-muted-foreground text-center py-8">{t("loadingSubjects")}</p>
+                <p className="text-muted-foreground text-center py-8">
+                  {t("loadingSubjects")}
+                </p>
               ) : subjects.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8 bg-muted/50 rounded-md">
                   {t("noSubjects")}
@@ -619,5 +698,5 @@ export default function CreateTeacherForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
