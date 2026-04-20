@@ -7,8 +7,18 @@ import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { AttendanceModule } from "./attendance/components/AttendanceModule";
 import { CacheStatusIndicator } from "@/components/cache-status-indicator";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
+import { useLocale } from "next-intl";
+import { useEffect } from "react";
 
 function SchedulePageContent() {
+  const locale = useLocale();
+
+  useEffect(() => {
+    useCacheStatusStore.getState().checkAllPages(locale);
+  }, [locale]);
+
   const tAttendance = useTranslations("AttendanceRegister");
   const tTimetable = useTranslations("TimetableManagement");
   const router = useRouter();
@@ -45,7 +55,10 @@ function SchedulePageContent() {
             </TabsTrigger>
           </TabsList>
           
-          <CacheStatusIndicator />
+          <div className="flex items-center gap-4">
+            <CacheStatusIndicator />
+            <LanguageSwitcher />
+          </div>
         </div>
 
         <TabsContent value="schedule" className="mt-0">
