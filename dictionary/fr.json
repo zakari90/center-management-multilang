@@ -32,7 +32,9 @@
     "syncing": "Synchronisation...",
     "notCached": "Non mise en cache",
     "notCachedTooltip": "Cette page n'est pas disponible hors ligne. Connectez-vous pour la mettre en cache.",
-    "offline": "Hors ligne"
+    "offline": "Hors ligne",
+    "ready": "Prêt",
+    "caching": "Mise en cache..."
   },
   "deleteALL": {
     "allDataDeletedSuccessfully": "Supprimé",

@@ -49,7 +49,14 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
           const cacheKeyUrl = `${origin}${pagePath}?__sw_locale=${encodeURIComponent(locale)}`;
           const cacheKey = new Request(cacheKeyUrl, { method: "GET" });
           const match = await cache.match(cacheKey);
-          const isCached = !!match;
+          
+          let isCached = !!match;
+          if (!isCached) {
+            // Fallback for precached pages which don't have the query param yet
+            const plainMatch = await cache.match(pagePath);
+            isCached = !!plainMatch;
+          }
+
           newStatuses[pagePath] = isCached;
           return isCached;
         }),

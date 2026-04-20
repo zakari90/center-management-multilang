@@ -23,8 +23,9 @@ import {
   Database,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import PublicFooter from "@/components/PublicFooter";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
@@ -52,6 +53,7 @@ export default function AdminLayoutClient({
 }: AdminLayoutClientProps) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("AdminLayout");
   const tNav = useTranslations("NavUser");
@@ -216,6 +218,7 @@ export default function AdminLayoutClient({
             </div>
           </header>
           <main className="app-content flex-1 overflow-auto">{children}</main>
+          <PublicFooter />
         </SidebarInset>
 
         <MobileBottomNav
@@ -223,32 +226,32 @@ export default function AdminLayoutClient({
           items={[
             {
               label: t("dashboard"),
-              href: `${base}/admin`,
+              href: `${base}/pro/admin`,
               icon: <Home className="size-5" />,
             },
             {
               label: t("center"),
-              href: `${base}/admin/center`,
+              href: `${base}/pro/admin/center`,
               icon: <LayoutGrid className="size-5" />,
             },
             {
               label: t("users"),
-              href: `${base}/admin/users`,
+              href: `${base}/pro/admin/users`,
               icon: <Users className="size-5" />,
             },
             {
               label: t("receipts"),
-              href: `${base}/admin/receipts`,
+              href: `${base}/pro/admin/receipts`,
               icon: <FileText className="size-5" />,
             },
             {
               label: t("schedule"),
-              href: `${base}/admin/schedule`,
+              href: `${base}/pro/admin/schedule`,
               icon: <CalendarDays className="size-5" />,
             },
             {
               label: t("database"),
-              href: `${base}/admin/database`,
+              href: `${base}/pro/admin/database`,
               icon: <Database className="size-5" />,
             },
           ]}
@@ -273,7 +276,7 @@ export default function AdminLayoutClient({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/ar${window.location.pathname.substring(3)}`)
+                    router.push(`/ar${pathname.substring(3)}`)
                   }
                 >
                   <Globe className="mr-2 h-4 w-4" />
@@ -281,7 +284,7 @@ export default function AdminLayoutClient({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/en${window.location.pathname.substring(3)}`)
+                    router.push(`/en${pathname.substring(3)}`)
                   }
                 >
                   <Globe className="mr-2 h-4 w-4" />
@@ -289,7 +292,7 @@ export default function AdminLayoutClient({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/fr${window.location.pathname.substring(3)}`)
+                    router.push(`/fr${pathname.substring(3)}`)
                   }
                 >
                   <Globe className="mr-2 h-4 w-4" />

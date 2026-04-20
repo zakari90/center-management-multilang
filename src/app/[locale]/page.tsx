@@ -22,6 +22,7 @@ import {
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Contact from "@/components/Contact";
+import PublicFooter from "@/components/PublicFooter";
 
 // In-file translations to avoid polluting global dictionaries for this specific marketing page
 const content = {
@@ -562,6 +563,7 @@ export default function SaaSMarketingPage() {
           <Lock className="w-4 h-4" /> {t.contactUs}
         </p>
       </section>
+      <PublicFooter />
     </main>
   );
 }

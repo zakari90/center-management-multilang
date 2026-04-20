@@ -32,7 +32,9 @@
     "syncing": "Syncing...",
     "notCached": "Not Cached",
     "notCachedTooltip": "This page is not available offline. Connect to cache it.",
-    "offline": "Offline"
+    "offline": "Offline",
+    "ready": "Ready",
+    "caching": "Caching..."
   },
   "deleteALL": {
     "allDataDeletedSuccessfully": "All data deleted successfully!",

@@ -19,6 +19,8 @@ import {
 } from "@/lib/dexie/serverActions";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Sun, Moon } from "lucide-react";
+import PublicFooter from "@/components/PublicFooter";
+import { CacheStatusDot } from "@/components/cache-status-indicator";
 
 function SchedulePageContent() {
   const locale = useLocale();
@@ -49,6 +51,7 @@ function SchedulePageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const base = `/${locale}`;
 
   const currentTab = searchParams.get("tab") || "schedule";
   const [refreshKey, setRefreshKey] = useState(0);
@@ -72,10 +75,16 @@ function SchedulePageContent() {
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-            <TabsTrigger value="schedule">
+            <TabsTrigger value="schedule" className="relative">
+              <div className="absolute top-1 right-1">
+                <CacheStatusDot href={`${base}/schedule`} />
+              </div>
               {tTimetable("title") || "Schedule"}
             </TabsTrigger>
-            <TabsTrigger value="attendance">
+            <TabsTrigger value="attendance" className="relative">
+              <div className="absolute top-1 right-1">
+                <CacheStatusDot href={`${base}/schedule/attendance`} />
+              </div>
               {tAttendance("title") || "Attendance"}
             </TabsTrigger>
           </TabsList>
@@ -124,6 +133,7 @@ function SchedulePageContent() {
           <AttendanceModule />
         </TabsContent>
       </Tabs>
+      <PublicFooter />
     </div>
   );
 }

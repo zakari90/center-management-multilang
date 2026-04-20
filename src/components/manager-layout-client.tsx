@@ -39,8 +39,9 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import PublicFooter from "@/components/PublicFooter";
 
 interface ManagerLayoutClientProps {
   children: React.ReactNode;
@@ -51,6 +52,7 @@ export default function ManagerLayoutClient({
 }: ManagerLayoutClientProps) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("ManagerLayout");
   const tNav = useTranslations("NavUser");
@@ -211,6 +213,7 @@ export default function ManagerLayoutClient({
             </div>
           </header>
           <main className="app-content flex-1 overflow-auto">{children}</main>
+          <PublicFooter />
         </SidebarInset>
 
         <MobileBottomNav
@@ -218,27 +221,27 @@ export default function ManagerLayoutClient({
           items={[
             {
               label: t("dashboard"),
-              href: `${base}/manager`,
+              href: `${base}/pro/manager`,
               icon: <Home className="size-5" />,
             },
             {
               label: t("teachers"),
-              href: `${base}/manager/teachers`,
+              href: `${base}/pro/manager/teachers`,
               icon: <Users className="size-5" />,
             },
             {
               label: t("students"),
-              href: `${base}/manager/students`,
+              href: `${base}/pro/manager/students`,
               icon: <GraduationCap className="size-5" />,
             },
             {
               label: t("receipts"),
-              href: `${base}/manager/receipts`,
+              href: `${base}/pro/manager/receipts`,
               icon: <FileText className="size-5" />,
             },
             {
               label: t("schedule"),
-              href: `${base}/manager/schedule`,
+              href: `${base}/pro/manager/schedule`,
               icon: <CalendarDays className="size-5" />,
             },
           ]}
@@ -263,7 +266,7 @@ export default function ManagerLayoutClient({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/ar${window.location.pathname.substring(3)}`)
+                    router.push(`/ar${pathname.substring(3)}`)
                   }
                 >
                   <Globe className="mr-2 h-4 w-4" />
@@ -271,7 +274,7 @@ export default function ManagerLayoutClient({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/en${window.location.pathname.substring(3)}`)
+                    router.push(`/en${pathname.substring(3)}`)
                   }
                 >
                   <Globe className="mr-2 h-4 w-4" />
@@ -279,7 +282,7 @@ export default function ManagerLayoutClient({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(`/fr${window.location.pathname.substring(3)}`)
+                    router.push(`/fr${pathname.substring(3)}`)
                   }
                 >
                   <Globe className="mr-2 h-4 w-4" />

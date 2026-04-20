@@ -9,6 +9,7 @@ import { ShieldCheck, WifiOff, ServerOff, Database, ArrowRight, ArrowLeft } from
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
 import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
+import PublicFooter from "@/components/PublicFooter";
 
 export default function FreeVersionIntro() {
   const locale = useLocale();
@@ -251,6 +252,7 @@ export default function FreeVersionIntro() {
           </div>
         </Card>
       </div>
+      <PublicFooter />
     </div>
   );
 }

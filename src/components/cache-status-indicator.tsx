@@ -24,8 +24,8 @@ export function CacheStatusDot({ href }: { href: string }) {
   const isCached = useCacheStatusStore((state: CacheStatusState) => state.pageStatuses[href]);
   const isInitialCheckDone = useCacheStatusStore((state: CacheStatusState) => state.isInitialCheckDone);
 
-  // Don't show dots if online and everything is cached
-  if (isOnline && allCached) return null;
+  // Optional: hide dots if everything is perfect, but the user wants to see the green bubble
+  // if (isOnline && allCached) return null;
   
   // Wait for initial check to avoid flickering
   if (!isInitialCheckDone) return null;
@@ -54,8 +54,8 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
   const allCached = useCacheStatusStore((state: CacheStatusState) => state.allCached);
   const t = useTranslations("CacheStatusIndicator");
 
-  // Only hide when ALL pages are cached, online, and not syncing
-  if (isOnline && !isSyncing && allCached) return null;
+  // Show success state if everything is cached
+  // if (isOnline && !isSyncing && allCached) return null;
 
   return (
     <TooltipProvider>
@@ -72,17 +72,27 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                   {t("offline")}
                 </span>
               </Badge>
-            ) : isSyncing ? (
+            ) : allCached ? (
               <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 gap-1 animate-pulse"
+                variant="outline"
+                className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1"
+              >
+                <Database className="hidden md:block h-3 w-3" />
+                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
+                  {t("ready") || "Ready"}
+                </span>
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="bg-amber-50 text-amber-700 border-amber-200 gap-1 animate-pulse"
               >
                 <RefreshCcw className="hidden md:block h-3 w-3 animate-spin" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
-                  {t("syncing")}
+                  {t("caching") || "Caching"}
                 </span>
               </Badge>
-            ) : null}
+            )}
           </div>
         </TooltipTrigger>
         <TooltipContent
@@ -91,7 +101,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
           className="text-xs max-w-[200px]"
         >
           <p>
-            {!isOnline ? t("offline") : t("syncing")}
+            {!isOnline ? t("offline") : allCached ? t("ready") || "Ready for offline" : t("caching") || "Caching for offline"}
           </p>
         </TooltipContent>
       </Tooltip>
