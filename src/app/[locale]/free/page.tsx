@@ -5,7 +5,14 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ShieldCheck, WifiOff, ServerOff, Database, ArrowRight, ArrowLeft } from "lucide-react";
+import {
+  ShieldCheck,
+  WifiOff,
+  ServerOff,
+  Database,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
 import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
@@ -24,7 +31,8 @@ export default function FreeVersionIntro() {
       .then(async (exists) => {
         if (exists) {
           // DB exists — dynamically import the heavy Dexie actions only when needed
-          const { userActions } = await import("@/freelib/dexie/freedexieaction");
+          const { userActions } =
+            await import("@/freelib/dexie/freedexieaction");
           const { Role } = await import("@/freelib/dexie/dbSchema");
           const users = await userActions.getAll();
           const hasAdminUser = users.some((u) => u.role === Role.ADMIN);
@@ -151,7 +159,8 @@ export default function FreeVersionIntro() {
     },
   };
 
-  const t = locale === "ar" ? content.ar : locale === "fr" ? content.fr : content.en;
+  const t =
+    locale === "ar" ? content.ar : locale === "fr" ? content.fr : content.en;
 
   if (isChecking) {
     return (
@@ -169,7 +178,10 @@ export default function FreeVersionIntro() {
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-indigo-500/10 mix-blend-multiply blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-blue-500/10 mix-blend-multiply blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div
+          className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-blue-500/10 mix-blend-multiply blur-[100px] animate-pulse"
+          style={{ animationDelay: "2s" }}
+        ></div>
       </div>
 
       <div className="w-full max-w-4xl relative z-10 animate-fade-in-up">
@@ -187,9 +199,8 @@ export default function FreeVersionIntro() {
         {/* Main Card */}
         <Card className="border-border/40 shadow-2xl backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 overflow-hidden ring-1 ring-white/20 dark:ring-white/10">
           <div className="h-2 w-full bg-linear-to-r from-indigo-500 via-blue-500 to-indigo-500"></div>
-          
+
           <div className="grid lg:grid-cols-2 gap-0">
-            
             {/* Left Side: Title & Description */}
             <div className="p-8 sm:p-12 flex flex-col justify-center border-b lg:border-b-0 lg:border-e border-border/50">
               <div className="space-y-6">
@@ -201,7 +212,7 @@ export default function FreeVersionIntro() {
                     {t.subtitle}
                   </p>
                 </div>
-                
+
                 <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
                   {t.description}
                 </p>
@@ -210,14 +221,18 @@ export default function FreeVersionIntro() {
                   <p className="text-sm italic text-muted-foreground mb-8">
                     {t.footer}
                   </p>
-                  
-                  <Button 
+
+                  <Button
                     onClick={handleStart}
                     className="w-full h-14 text-lg font-bold rounded-2xl shadow-[0_8px_30px_rgb(79,70,229,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.3)] hover:-translate-y-0.5 transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 text-white group"
                   >
                     <span>{t.btn}</span>
                     <div className="bg-white/20 p-1.5 rounded-full ml-3 group-hover:scale-110 transition-transform duration-300 rtl:mr-3 rtl:ml-0">
-                      {isRtl ? <ArrowLeft size={18} strokeWidth={3} /> : <ArrowRight size={18} strokeWidth={3} />}
+                      {isRtl ? (
+                        <ArrowLeft size={18} strokeWidth={3} />
+                      ) : (
+                        <ArrowRight size={18} strokeWidth={3} />
+                      )}
                     </div>
                   </Button>
                 </div>
@@ -228,12 +243,14 @@ export default function FreeVersionIntro() {
             <div className="p-8 sm:p-12 bg-slate-50/50 dark:bg-slate-950/50 flex items-center">
               <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-4 w-full">
                 {t.features.map((feature, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="flex gap-4 p-5 rounded-2xl border border-border/40 bg-white/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/5 group"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className={`shrink-0 p-3 rounded-xl border ${feature.color} group-hover:scale-110 transition-transform duration-300`}>
+                    <div
+                      className={`shrink-0 p-3 rounded-xl border ${feature.color} group-hover:scale-110 transition-transform duration-300`}
+                    >
                       {feature.icon}
                     </div>
                     <div className="space-y-1.5 mt-0.5">
@@ -248,7 +265,6 @@ export default function FreeVersionIntro() {
                 ))}
               </div>
             </div>
-
           </div>
         </Card>
       </div>

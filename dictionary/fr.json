@@ -2106,11 +2106,21 @@
     "loading": "Chargement...",
     "noSavedSessions": "Aucune session enregistrée pour le moment",
     "created": "Créé le :",
+    "legend": "Légende",
+    "loadingMonthlyTracker": "Chargement du suivi mensuel...",
+    "exportPdf": "Exporter PDF",
+    "monthlyTrackerTitle": "Suivi de présence mensuel",
+    "today": "Aujourd'hui",
+    "noRecordsForMonth": "Aucun enregistrement trouvé pour ce mois",
     "status": {
       "P": "Présent",
       "A": "Absent",
       "L": "Retard",
-      "LV": "Congé"
+      "LV": "Congé",
+      "present": "Présent",
+      "absent": "Absent",
+      "late": "Retard",
+      "leave": "Congé"
     },
     "columns": {
       "name": "Nom",

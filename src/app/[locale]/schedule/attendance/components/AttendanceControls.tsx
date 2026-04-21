@@ -143,45 +143,17 @@ export function AttendanceControls({
 
       <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 hidden md:block self-end mb-2" />
 
-      {/* Filter & Add Dropdown */}
-      <div className="flex-1 min-w-[300px] flex flex-col gap-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase text-slate-400">
-            {t("filterNames")}
-          </span>
-          <span className="text-[10px] font-bold uppercase text-slate-400">
-            {t("addName")}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Input
-            className="h-9 text-xs"
-            placeholder={t("search")}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Select
-            onValueChange={(val) => {
-              const person = availableNames.find((p) => p.id === val);
-              if (person) addRow(person);
-            }}
-          >
-            <SelectTrigger className="flex-1 bg-white dark:bg-slate-900 border-slate-200 h-9 text-xs">
-              <SelectValue
-                placeholder={
-                  t("selectFromList")
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredAvailableNames.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Filter Section */}
+      <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+        <span className="text-[10px] font-bold uppercase text-slate-400">
+          {t("filterNames")}
+        </span>
+        <Input
+          className="h-9 text-xs bg-white dark:bg-slate-950 border-slate-200"
+          placeholder={t("search")}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
     </div>
   );

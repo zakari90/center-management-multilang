@@ -108,7 +108,7 @@ export function MonthlyTracker({
   if (loading) {
     return (
       <div className="p-8 text-center text-slate-400 animate-pulse">
-        {isRtl ? "جاري تحميل سجل الشهر..." : "Loading monthly tracker..."}
+        {t("loadingMonthlyTracker")}
       </div>
     );
   }
@@ -152,7 +152,7 @@ export function MonthlyTracker({
   return (
     <PdfExporter 
       fileName={`Attendance-Tracker-${viewMonthName}-${viewYear}.pdf`} 
-      buttonText={isRtl ? "تصدير PDF" : "Export PDF"}
+      buttonText={t("exportPdf")}
     >
       <Card className="mt-8 mb-12 overflow-hidden border-none shadow-xl bg-white dark:bg-slate-900 mx-4 print:shadow-none print:mt-4">
         <div className="bg-slate-900 dark:bg-slate-950 p-6 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -162,7 +162,7 @@ export function MonthlyTracker({
             </div>
             <div>
               <h2 className="text-xl font-black tracking-tight uppercase">
-                {isRtl ? "سجل الحضور الشهري" : "Monthly Attendance Tracker"}
+                {t("monthlyTrackerTitle")}
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 <button 
@@ -185,7 +185,7 @@ export function MonthlyTracker({
                     onClick={handleBackToToday}
                     className="text-[10px] bg-indigo-500 hover:bg-indigo-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ml-2"
                   >
-                    {isRtl ? "اليوم" : "Today"}
+                    {t("today")}
                   </button>
                 )}
               </div>
@@ -194,7 +194,7 @@ export function MonthlyTracker({
           <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/10 self-start md:self-center">
             <Users className="w-4 h-4 text-indigo-400" />
             <span className="text-sm font-bold uppercase tracking-wider">
-              {data?.members.length || 0} {isRtl ? "عضو" : "Members"}
+              {data?.members.length || 0} {t("members")}
             </span>
           </div>
         </div>
@@ -203,9 +203,7 @@ export function MonthlyTracker({
           <div className="p-20 text-center bg-slate-50 dark:bg-slate-900/50">
             <Info className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-500 italic">
-              {isRtl
-                ? "لا توجد سجلات لهذا الشهر"
-                : "No records found for this month"}
+              {t("noRecordsForMonth")}
             </p>
           </div>
         ) : (
@@ -214,7 +212,7 @@ export function MonthlyTracker({
               <TableHeader>
                 <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <TableHead className="sticky left-0 z-20 bg-slate-50 dark:bg-slate-800 min-w-[200px] font-black uppercase text-[11px] text-slate-500 tracking-widest border-r dark:border-slate-700">
-                    {isRtl ? "الاسم" : "Member Name"}
+                    {t("columns.name")}
                   </TableHead>
                   {daysInMonth.map((day) => (
                     <TableHead

@@ -285,11 +285,21 @@
     "loading": "جاري التحميل…",
     "noSavedSessions": "لا توجد جلسات محفوظة بعد",
     "created": "أنشئ في:",
+    "legend": "دليل الرموز",
+    "loadingMonthlyTracker": "جاري تحميل سجل الشهر...",
+    "exportPdf": "تصدير PDF",
+    "monthlyTrackerTitle": "سجل الحضور الشهري",
+    "today": "اليوم",
+    "noRecordsForMonth": "لا توجد سجلات لهذا الشهر",
     "status": {
       "P": "حاضر",
       "A": "غائب",
       "L": "متأخر",
-      "LV": "مغادر"
+      "LV": "مغادر",
+      "present": "حاضر",
+      "absent": "غائب",
+      "late": "متأخر",
+      "leave": "مغادر"
     },
     "columns": {
       "name": "الاسم",

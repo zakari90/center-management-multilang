@@ -325,11 +325,21 @@
     "loading": "Loading...",
     "noSavedSessions": "No saved sessions yet",
     "created": "Created:",
+    "legend": "Legend",
+    "loadingMonthlyTracker": "Loading monthly tracker...",
+    "exportPdf": "Export PDF",
+    "monthlyTrackerTitle": "Monthly Attendance Tracker",
+    "today": "Today",
+    "noRecordsForMonth": "No records found for this month",
     "status": {
       "P": "Present",
       "A": "Absent",
       "L": "Late",
-      "LV": "Leave"
+      "LV": "Leave",
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late",
+      "leave": "Leave"
     },
     "columns": {
       "name": "Name",
