@@ -169,10 +169,11 @@ export function useAttendance() {
   useEffect(() => {
     if (loading) return;
 
+    const effectiveScheduleId = selectedScheduleId || registerName;
     const prevId = prevScheduleIdRef.current;
 
     // If we're switching to a different register, save the current rows first
-    if (prevId && prevId !== selectedScheduleId && rowsRef.current.length > 0) {
+    if (prevId && prevId !== effectiveScheduleId && rowsRef.current.length > 0) {
       const members = rowsRef.current
         .filter((r) => r.name)
         .map((r) => ({
@@ -188,7 +189,7 @@ export function useAttendance() {
       attendanceActions.saveRegisterMembers(prevId, members);
     }
 
-    prevScheduleIdRef.current = selectedScheduleId;
+    prevScheduleIdRef.current = effectiveScheduleId;
     syncWithDatabase(currentDate, shift, registerName, selectedScheduleId);
   }, [shift, currentDate, registerName, selectedScheduleId]);
 
@@ -315,7 +316,7 @@ export function useAttendance() {
       const session: AttendanceSession = {
         id: sessionId,
         name: registerName || t("title"),
-        scheduleId: selectedScheduleId || undefined,
+        scheduleId: selectedScheduleId || registerName || undefined,
         institution,
         month: new Date(currentDate).toLocaleString(locale, { month: "long" }),
         year: new Date(currentDate).getFullYear().toString(),
@@ -607,6 +608,14 @@ export function useAttendance() {
     return attendanceActions.getMonthlyData(selectedScheduleId, monthIdx, year);
   };
 
+  const pastRegisterNames = useMemo(() => {
+    const names = new Set<string>();
+    pastSessions.forEach(s => {
+      if (s.name) names.add(s.name);
+    });
+    return Array.from(names);
+  }, [pastSessions]);
+
   return {
     t,
     locale,
@@ -639,5 +648,6 @@ export function useAttendance() {
     currentMonthIndex,
     currentYear,
     getMonthlyData,
+    pastRegisterNames,
   };
 }

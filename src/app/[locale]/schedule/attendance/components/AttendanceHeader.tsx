@@ -20,6 +20,7 @@ interface AttendanceHeaderProps {
   sessionCreatedAt: number | null;
   locale: string;
   scheduledRegisterNames?: { id: string; label: string }[];
+  pastRegisterNames?: string[];
 }
 
 export function AttendanceHeader({
@@ -35,6 +36,7 @@ export function AttendanceHeader({
   sessionCreatedAt,
   locale,
   scheduledRegisterNames = [],
+  pastRegisterNames = [],
 }: AttendanceHeaderProps) {
   const tSchedule = t;
 
@@ -65,8 +67,14 @@ export function AttendanceHeader({
                     value={registerName}
                     onChange={(e) => setRegisterName(e.target.value)}
                     placeholder={t("registerNamePlaceholder")}
+                    list="past-register-names"
                     className="w-[300px] text-xl font-black uppercase h-12 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-white dark:hover:bg-slate-900 rounded-md px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
+                  <datalist id="past-register-names">
+                    {pastRegisterNames.map((name, i) => (
+                      <option key={i} value={name} />
+                    ))}
+                  </datalist>
                   <div className="absolute top-14 left-0 flex items-center gap-2 w-[300px] px-2 py-1.5 rounded border border-dashed border-amber-300 dark:border-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 select-none">
                     <CalendarX2 className="h-4 w-4 shrink-0 opacity-70" />
                     <p className="text-[10px] font-semibold leading-tight">

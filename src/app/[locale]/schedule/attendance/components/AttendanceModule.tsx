@@ -41,6 +41,7 @@ export function AttendanceModule() {
     currentMonthIndex,
     currentYear,
     getMonthlyData,
+    pastRegisterNames,
   } = useAttendance();
 
   return (
@@ -76,6 +77,7 @@ export function AttendanceModule() {
           sessionCreatedAt={sessionCreatedAt}
           locale={locale}
           scheduledRegisterNames={scheduledRegisterNames}
+          pastRegisterNames={pastRegisterNames}
         />
 
         {/* --- Entry Form (Edit Mode) --- */}
@@ -112,9 +114,9 @@ export function AttendanceModule() {
       </Card>
 
       {/* --- Monthly History Summary --- */}
-      {selectedScheduleId && (
+      {(selectedScheduleId || registerName) && (
         <MonthlyTracker
-          scheduleId={selectedScheduleId}
+          scheduleId={selectedScheduleId || registerName}
           currentMonthIndex={currentMonthIndex}
           currentYear={currentYear}
           isRtl={isRtl}
