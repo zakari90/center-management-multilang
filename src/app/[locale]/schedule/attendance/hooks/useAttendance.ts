@@ -9,6 +9,7 @@ import {
   centerActions,
   studentActions,
   teacherActions,
+  subjectActions,
 } from "@/freelib/dexie/freedexieaction";
 import { timeTableActions } from "@/freelib/dexie/scheduleDb";
 import { useLocalizedConstants } from "@/components/freeinUse/useLocalizedConstants";
@@ -46,6 +47,7 @@ export function useAttendance() {
   const [loading, setLoading] = useState(false);
   const [pastSessions, setPastSessions] = useState<AttendanceSession[]>([]);
   const [allScheduledRegisters, setAllScheduledRegisters] = useState<any[]>([]);
+  const [allSubjects, setAllSubjects] = useState<any[]>([]);
   const [availableNames, setAvailableNames] = useState<
     { id: string; name: string }[]
   >([]);
@@ -105,6 +107,11 @@ export function useAttendance() {
 
     // 3. Load available students & teachers
     loadAvailableNames();
+
+    // 3.5 Load all subjects (groups)
+    subjectActions.getAll().then((subjects) => {
+      setAllSubjects(subjects);
+    });
 
     // 4. Load all registers from schedule
     timeTableActions.getAll().then((schedules) => {
@@ -613,8 +620,11 @@ export function useAttendance() {
     pastSessions.forEach(s => {
       if (s.name) names.add(s.name);
     });
+    allSubjects.forEach(s => {
+      if (s.name) names.add(s.name);
+    });
     return Array.from(names);
-  }, [pastSessions]);
+  }, [pastSessions, allSubjects]);
 
   return {
     t,

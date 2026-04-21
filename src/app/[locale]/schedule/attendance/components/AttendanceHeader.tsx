@@ -155,7 +155,7 @@ export function AttendanceHeader({
                     {pastRegisterNames.length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          {t("recent") || "Recent"}
+                          {t("allRegisters") || "All Registers"}
                         </div>
                         {pastRegisterNames.filter(name => !scheduledRegisterNames.some(s => s.label === name)).map((name, i) => (
                           <SelectItem
