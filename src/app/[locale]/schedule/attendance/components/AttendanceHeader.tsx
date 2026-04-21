@@ -130,7 +130,7 @@ export function AttendanceHeader({
                     }
                   }}
                 >
-                  <SelectTrigger className="w-[300px] text-xl font-black uppercase h-12 bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-white dark:hover:bg-slate-900">
+                  <SelectTrigger className="w-[300px] text-xl font-black uppercase h-12 bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-white dark:hover:bg-slate-900 cursor-pointer">
                     <SelectValue
                       placeholder={t("registerNamePlaceholder")}
                     />

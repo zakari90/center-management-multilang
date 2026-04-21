@@ -167,7 +167,7 @@ export function MonthlyTracker({
               <div className="flex items-center gap-2 mt-1">
                 <button 
                   onClick={handlePrevMonth}
-                  className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                  className="p-1 hover:bg-white/10 rounded-md transition-colors cursor-pointer"
                 >
                   {isRtl ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                 </button>
@@ -176,14 +176,14 @@ export function MonthlyTracker({
                 </p>
                 <button 
                   onClick={handleNextMonth}
-                  className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                  className="p-1 hover:bg-white/10 rounded-md transition-colors cursor-pointer"
                 >
                   {isRtl ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
                 {(viewMonthIndex !== currentMonthIndex || viewYear !== currentYear) && (
                   <button 
                     onClick={handleBackToToday}
-                    className="text-[10px] bg-indigo-500 hover:bg-indigo-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ml-2"
+                    className="text-[10px] bg-indigo-500 hover:bg-indigo-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ml-2 cursor-pointer"
                   >
                     {t("today")}
                   </button>

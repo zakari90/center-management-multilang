@@ -108,7 +108,7 @@ export default function Contact() {
             </p>
             <button
               onClick={() => setIsSuccess(false)}
-              className="mt-8 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+              className="mt-8 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20 cursor-pointer"
             >
               {t("send_another")}
             </button>
@@ -267,7 +267,7 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-5 rounded-xl shadow-xl shadow-indigo-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-5 rounded-xl shadow-xl shadow-indigo-500/20 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-3 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />

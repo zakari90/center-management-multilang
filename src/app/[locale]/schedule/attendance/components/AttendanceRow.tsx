@@ -38,7 +38,7 @@ export function AttendanceRow({
           <button
             title={t("history")}
             onClick={() => onShowHistory(row)}
-            className="text-slate-300 hover:text-indigo-500 dark:text-slate-600 dark:hover:text-indigo-400 transition-colors print:hidden shrink-0"
+            className="text-slate-300 hover:text-indigo-500 dark:text-slate-600 dark:hover:text-indigo-400 transition-colors print:hidden shrink-0 cursor-pointer"
           >
             <BarChart2 size={15} />
           </button>
@@ -87,7 +87,7 @@ export function AttendanceRow({
       <TableCell className="p-0 print:hidden text-center border-s dark:border-slate-800">
         <button
           onClick={() => removeRow(row.id)}
-          className="text-slate-400 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 transition-colors p-2"
+          className="text-slate-400 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 transition-colors p-2 cursor-pointer"
           title={t("delete")}
         >
           <Trash2 size={16} />

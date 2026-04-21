@@ -345,13 +345,13 @@ export default function SaaSMarketingPage() {
         >
           <button
             onClick={() => router.push(`/${locale}/free`)}
-            className="px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.3)]"
+            className="px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.3)] cursor-pointer"
           >
             {t.btnFree}
           </button>
           <button
             onClick={() => window.open("https://wa.me/212768276772", "_blank")}
-            className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all hover:scale-105 active:scale-95 backdrop-blur-sm"
+            className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all hover:scale-105 active:scale-95 backdrop-blur-sm cursor-pointer"
           >
             {t.btnPaid}
           </button>
@@ -407,7 +407,7 @@ export default function SaaSMarketingPage() {
 
               <button
                 onClick={() => router.push(`/${locale}/free`)}
-                className="w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all active:scale-95"
+                className="w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all active:scale-95 cursor-pointer"
               >
                 {t.btnFree}
               </button>
@@ -457,7 +457,7 @@ export default function SaaSMarketingPage() {
                 onClick={() =>
                   window.open("https://wa.me/212768276772", "_blank")
                 }
-                className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)]"
+                className="w-full py-4 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)] cursor-pointer"
               >
                 {t.btnPaid}
               </button>
@@ -499,7 +499,7 @@ export default function SaaSMarketingPage() {
               <p className="text-slate-400 mb-8 grow">{t.scheduleToolDesc}</p>
               <button
                 onClick={() => router.push(`/${locale}/schedule?tab=schedule`)}
-                className="inline-flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
+                className="inline-flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors cursor-pointer"
               >
                 {t.btnTryTool} <ArrowUpRight className="w-5 h-5" />
               </button>
@@ -523,7 +523,7 @@ export default function SaaSMarketingPage() {
                 onClick={() =>
                   router.push(`/${locale}/schedule?tab=attendance`)
                 }
-                className="inline-flex items-center gap-2 text-emerald-400 font-bold hover:text-emerald-300 transition-colors"
+                className="inline-flex items-center gap-2 text-emerald-400 font-bold hover:text-emerald-300 transition-colors cursor-pointer"
               >
                 {t.btnTryTool} <ArrowUpRight className="w-5 h-5" />
               </button>

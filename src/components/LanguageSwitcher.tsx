@@ -88,13 +88,13 @@ const LanguageSwitcher = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => changeLanguage("ar")}>
+        <DropdownMenuItem onClick={() => changeLanguage("ar")} className="cursor-pointer">
           العربية
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => changeLanguage("en")}>
+        <DropdownMenuItem onClick={() => changeLanguage("en")} className="cursor-pointer">
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => changeLanguage("fr")}>
+        <DropdownMenuItem onClick={() => changeLanguage("fr")} className="cursor-pointer">
           Français
         </DropdownMenuItem>
       </DropdownMenuContent>

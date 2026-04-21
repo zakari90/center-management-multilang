@@ -15,7 +15,7 @@ export default function PublicFooter() {
 
       <button
         onClick={() => window.open("https://wa.me/212768276772", "_blank")}
-        className="px-10 py-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all transform hover:scale-105 active:scale-95 backdrop-blur-sm shadow-xl shadow-indigo-500/10"
+        className="px-10 py-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all transform hover:scale-105 active:scale-95 backdrop-blur-sm shadow-xl shadow-indigo-500/10 cursor-pointer"
       >
         {t("btnPaid")}
       </button>
