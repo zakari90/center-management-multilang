@@ -8,11 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AttendanceRowData } from "../hooks/useAttendance";
 import { AttendanceRow } from "./AttendanceRow";
 import { MemberHistorySheet } from "./MemberHistorySheet";
 import { ClipboardList, Users, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { AttendanceRowData } from "../hooks/useAttendance";
 
 interface AttendanceTableProps {
   rows: AttendanceRowData[];
@@ -109,9 +109,7 @@ export function AttendanceTable({
                 colSpan={3}
                 className="h-48 text-center text-slate-400 italic"
               >
-                {mode === "edit"
-                  ? t("addNamesToStart")
-                  : t("noRecordsYet")}
+                {mode === "edit" ? t("addNamesToStart") : t("noRecordsYet")}
               </TableCell>
             </TableRow>
           ) : (
