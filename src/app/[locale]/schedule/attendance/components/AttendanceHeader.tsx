@@ -54,20 +54,29 @@ export function AttendanceHeader({
         <div className="text-center md:text-start space-y-2 flex-1 max-w-md">
           <div className="space-y-1">
             <p className="text-[10px] uppercase font-bold text-slate-400 px-1">
-              {t("registerName")} : {institution}
+              {t("registerName")} : {registerName}
             </p>
             <div className="w-full max-w-sm space-y-2">
-              {/* Banner: shown when no group is matched for the current day/time */}
-              {!registerName && (
-                <div className="flex items-center gap-3 w-[300px] h-12 px-4 rounded-md border border-dashed border-amber-300 dark:border-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 select-none">
-                  <CalendarX2 className="h-5 w-5 shrink-0 opacity-70" />
-                  <p className="text-xs font-semibold leading-tight">
-                    {t("noGroupsForPeriod")}
-                  </p>
+              {/* If there are no groups, allow manual input of register name */}
+              {scheduledRegisterNames.length === 0 && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    placeholder={t("registerNamePlaceholder")}
+                    className="w-[300px] text-xl font-black uppercase h-12 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-white dark:hover:bg-slate-900 rounded-md px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <div className="absolute top-14 left-0 flex items-center gap-2 w-[300px] px-2 py-1.5 rounded border border-dashed border-amber-300 dark:border-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 select-none">
+                    <CalendarX2 className="h-4 w-4 shrink-0 opacity-70" />
+                    <p className="text-[10px] font-semibold leading-tight">
+                      {t("noGroupsForPeriod")}
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Dropdown: always shown when there are schedule entries */}
+              {/* Dropdown: shown when there are schedule entries */}
               {scheduledRegisterNames.length > 0 && (
                 <Select
                   value={selectedScheduleId || registerName}
@@ -85,7 +94,11 @@ export function AttendanceHeader({
                   }}
                 >
                   <SelectTrigger className="w-[300px] text-xl font-black uppercase h-12 bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:bg-white dark:hover:bg-slate-900">
-                    <SelectValue placeholder={t("registerNamePlaceholder")} />
+                    <SelectValue
+                      placeholder={
+                        t("registerNamePlaceholder")
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {scheduledRegisterNames.map((entry) => (
@@ -105,7 +118,9 @@ export function AttendanceHeader({
 
           {sessionCreatedAt && (
             <div className="flex items-center justify-center md:justify-start gap-2 text-[10px] text-slate-400 font-medium italic">
-              <span className="opacity-70">{t("created")}</span>
+              <span className="opacity-70">
+                {t("created")}
+              </span>
               <span>{creationDateText}</span>
             </div>
           )}

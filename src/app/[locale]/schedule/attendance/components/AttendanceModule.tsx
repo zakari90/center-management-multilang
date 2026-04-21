@@ -1,12 +1,12 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useAttendance } from "../hooks/useAttendance";
 import { AttendanceActions } from "./AttendanceActions";
 import { AttendanceControls } from "./AttendanceControls";
 import { AttendanceHeader } from "./AttendanceHeader";
 import { AttendanceTable } from "./AttendanceTable";
 import { MonthlyTracker } from "./MonthlyTracker";
-import { useAttendance } from "../hooks/useAttendance";
 
 export function AttendanceModule() {
   const {
