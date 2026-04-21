@@ -169,7 +169,7 @@ export function MonthlyTracker({
                   onClick={handlePrevMonth}
                   className="p-1 hover:bg-white/10 rounded-md transition-colors"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  {isRtl ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                 </button>
                 <p className="text-sm text-slate-400 font-bold min-w-[120px] text-center">
                   {viewMonthName} {viewYear}
@@ -178,7 +178,7 @@ export function MonthlyTracker({
                   onClick={handleNextMonth}
                   className="p-1 hover:bg-white/10 rounded-md transition-colors"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  {isRtl ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
                 {(viewMonthIndex !== currentMonthIndex || viewYear !== currentYear) && (
                   <button 

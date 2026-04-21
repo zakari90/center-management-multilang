@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarX2, Check, X } from "lucide-react";
+import { CalendarX2, Check, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -170,8 +170,15 @@ export function AttendanceHeader({
                       </>
                     )}
 
-                    <SelectItem value="CUSTOM_NAME" className="uppercase font-bold text-indigo-600 dark:text-indigo-400">
-                      {isRtl ? "+ اسم جديد" : "+ New Name"}
+                    <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+                    <SelectItem 
+                      value="CUSTOM_NAME" 
+                      className="uppercase font-bold text-indigo-600 dark:text-indigo-400 focus:bg-indigo-50 dark:focus:bg-indigo-900/30 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Plus size={14} />
+                        {isRtl ? "اسم جديد" : "New Name"}
+                      </div>
                     </SelectItem>
                   </SelectContent>
                 </Select>
