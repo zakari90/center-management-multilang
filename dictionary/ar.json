@@ -301,6 +301,16 @@
       "late": "متأخر",
       "leave": "مغادر"
     },
+    "scheduled": "المجموعات المجدولة",
+    "allRegisters": "جميع السجلات",
+    "recent": "السجلات الأخيرة",
+    "registerNamePlaceholder": "أدخل اسم السجل...",
+    "shift": "الفترة",
+    "morning": "صباحية",
+    "evening": "مسائية",
+    "registerName": "اسم السجل",
+    "created": "تاريخ الإنشاء",
+    "noGroupsForPeriod": "لا توجد مجموعات مجدولة لهذه الفترة",
     "columns": {
       "name": "الاسم",
       "status": "الحالة",

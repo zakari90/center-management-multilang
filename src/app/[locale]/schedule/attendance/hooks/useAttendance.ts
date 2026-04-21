@@ -48,6 +48,7 @@ export function useAttendance() {
   const [pastSessions, setPastSessions] = useState<AttendanceSession[]>([]);
   const [allScheduledRegisters, setAllScheduledRegisters] = useState<any[]>([]);
   const [allSubjects, setAllSubjects] = useState<any[]>([]);
+  const [isPeriodEmpty, setIsPeriodEmpty] = useState(false);
   const [availableNames, setAvailableNames] = useState<
     { id: string; name: string }[]
   >([]);
@@ -151,14 +152,17 @@ export function useAttendance() {
         setRegisterName(label);
         const canonicalMatch = schedules.find((s: any) => buildEntryLabel(s) === label);
         setSelectedScheduleId(canonicalMatch ? canonicalMatch.id : currentMatch.id);
+        setIsPeriodEmpty(false);
       } else if (todayRegisters.length > 0) {
         const label = buildEntryLabel(todayRegisters[0]);
         setRegisterName(label);
         const canonicalMatch = schedules.find((s: any) => buildEntryLabel(s) === label);
         setSelectedScheduleId(canonicalMatch ? canonicalMatch.id : todayRegisters[0].id);
+        setIsPeriodEmpty(true); // Matches today but not CURRENT period
       } else {
         // If today has no scheduled groups, default the register name to the current time
         setRegisterName(currentTimeStr);
+        setIsPeriodEmpty(true);
       }
     });
 
@@ -658,6 +662,7 @@ export function useAttendance() {
     currentMonthIndex,
     currentYear,
     getMonthlyData,
+    isPeriodEmpty,
     pastRegisterNames,
   };
 }

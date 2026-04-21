@@ -24,6 +24,7 @@ interface AttendanceHeaderProps {
   locale: string;
   scheduledRegisterNames?: { id: string; label: string }[];
   pastRegisterNames?: string[];
+  isPeriodEmpty?: boolean;
 }
 
 export function AttendanceHeader({
@@ -40,6 +41,7 @@ export function AttendanceHeader({
   locale,
   scheduledRegisterNames = [],
   pastRegisterNames = [],
+  isPeriodEmpty = false,
 }: AttendanceHeaderProps) {
   const [isCustomNaming, setIsCustomNaming] = useState(false);
   const [customName, setCustomName] = useState("");
@@ -184,7 +186,7 @@ export function AttendanceHeader({
                 </Select>
               )}
 
-              {scheduledRegisterNames.length === 0 && !isCustomNaming && (
+              {isPeriodEmpty && !isCustomNaming && (
                 <div className="flex items-center gap-2 w-[300px] px-2 py-1.5 rounded border border-dashed border-amber-300 dark:border-amber-600 bg-amber-50/60 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 select-none">
                   <CalendarX2 className="h-4 w-4 shrink-0 opacity-70" />
                   <p className="text-[10px] font-semibold leading-tight">

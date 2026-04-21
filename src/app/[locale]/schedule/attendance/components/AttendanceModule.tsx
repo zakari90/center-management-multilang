@@ -42,6 +42,7 @@ export function AttendanceModule() {
     currentYear,
     getMonthlyData,
     pastRegisterNames,
+    isPeriodEmpty,
   } = useAttendance();
 
   return (
@@ -78,6 +79,7 @@ export function AttendanceModule() {
           locale={locale}
           scheduledRegisterNames={scheduledRegisterNames}
           pastRegisterNames={pastRegisterNames}
+          isPeriodEmpty={isPeriodEmpty}
         />
 
         {/* --- Entry Form (Edit Mode) --- */}

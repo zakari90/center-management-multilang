@@ -2122,6 +2122,16 @@
       "late": "Retard",
       "leave": "Congé"
     },
+    "scheduled": "Registres programmés",
+    "allRegisters": "Tous les registres",
+    "recent": "Registres récents",
+    "registerNamePlaceholder": "Entrez le nom du registre...",
+    "shift": "Période",
+    "morning": "Matin",
+    "evening": "Soir",
+    "registerName": "Nom du registre",
+    "created": "Date de création",
+    "noGroupsForPeriod": "Aucun groupe programmé pour cette période",
     "columns": {
       "name": "Nom",
       "status": "Statut",

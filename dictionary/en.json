@@ -341,6 +341,16 @@
       "late": "Late",
       "leave": "Leave"
     },
+    "scheduled": "Scheduled Registers",
+    "allRegisters": "All Registers",
+    "recent": "Recent Registers",
+    "registerNamePlaceholder": "Enter register name...",
+    "shift": "Shift",
+    "morning": "Morning",
+    "evening": "Evening",
+    "registerName": "Register Name",
+    "created": "Created",
+    "noGroupsForPeriod": "No groups scheduled for this period",
     "columns": {
       "name": "Name",
       "status": "Status",
