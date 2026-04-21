@@ -479,7 +479,7 @@ export default function FreeTimetableManagement({
                             {slots[0] && (
                               <div
                                 key={slots[0].id || 0}
-                                className="p-1.5 bg-card border shadow-sm rounded text-xs space-y-1 group/card relative overflow-hidden hover:shadow-md transition-all border-l-2 border-l-primary"
+                                className="p-1.5 bg-card border shadow-sm rounded text-xs space-y-1 group/card relative overflow-hidden hover:shadow-md transition-all border-l-2 border-l-primary cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation(); // Prevent slot click
                                   handleViewDetails(slots[0]);

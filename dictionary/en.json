@@ -268,6 +268,7 @@
     "e2eeNo": "No"
   },
   "AttendanceRegister": {
+    "home": "Home",
     "title": "Attendance Register",
     "registerName": "Register Name",
     "registerNamePlaceholder": "Select Register Name",

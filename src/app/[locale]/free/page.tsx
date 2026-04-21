@@ -12,6 +12,8 @@ import {
   Database,
   ArrowRight,
   ArrowLeft,
+  CalendarDays,
+  ClipboardCheck,
 } from "lucide-react";
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
@@ -85,6 +87,18 @@ export default function FreeVersionIntro() {
           icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
           color: "bg-blue-500/10 border-blue-500/20",
         },
+        {
+          title: "Schedule Manager",
+          desc: "Organize your weekly classes, rooms, and groups in a simple, interactive grid.",
+          icon: <CalendarDays className="w-6 h-6 text-orange-500" />,
+          color: "bg-orange-500/10 border-orange-500/20",
+        },
+        {
+          title: "Attendance Register",
+          desc: "Track daily presence, late arrivals, and generate monthly reports for every student.",
+          icon: <ClipboardCheck className="w-6 h-6 text-cyan-500" />,
+          color: "bg-cyan-500/10 border-cyan-500/20",
+        },
       ],
       btn: "Go to Login",
       footer: "Basically, this is the free version of the current app.",
@@ -119,6 +133,18 @@ export default function FreeVersionIntro() {
           icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
           color: "bg-blue-500/10 border-blue-500/20",
         },
+        {
+          title: "مدير الجداول",
+          desc: "نظم حصصك الأسبوعية والقاعات والمجموعات في شبكة تفاعلية بسيطة.",
+          icon: <CalendarDays className="w-6 h-6 text-orange-500" />,
+          color: "bg-orange-500/10 border-orange-500/20",
+        },
+        {
+          title: "دفتر الحضور",
+          desc: "تابع الحضور اليومي، التأخيرات، واستخرج تقارير الحضور الشهرية لكل طالب.",
+          icon: <ClipboardCheck className="w-6 h-6 text-cyan-500" />,
+          color: "bg-cyan-500/10 border-cyan-500/20",
+        },
       ],
       btn: "الذهاب لتسجيل الدخول",
       footer: "ببساطة، هذه هي النسخة المجانية من التطبيق الحالي.",
@@ -152,6 +178,18 @@ export default function FreeVersionIntro() {
           desc: "Nous n'avons pas accès à vos données locales. Vous avez un contrôle total hors ligne.",
           icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
           color: "bg-blue-500/10 border-blue-500/20",
+        },
+        {
+          title: "Gestionnaire d'Emploi du Temps",
+          desc: "Organisez vos cours hebdomadaires, vos salles et vos groupes dans une grille simple.",
+          icon: <CalendarDays className="w-6 h-6 text-orange-500" />,
+          color: "bg-orange-500/10 border-orange-500/20",
+        },
+        {
+          title: "Registre de Présence",
+          desc: "Suivez les présences quotidiennes, les retards et générez des rapports mensuels.",
+          icon: <ClipboardCheck className="w-6 h-6 text-cyan-500" />,
+          color: "bg-cyan-500/10 border-cyan-500/20",
         },
       ],
       btn: "Aller à la connexion",

@@ -228,6 +228,7 @@
     "e2eeNo": "لا"
   },
   "AttendanceRegister": {
+    "home": "الرئيسية",
     "title": "سجل الحضور",
     "registerName": "اسم السجل",
     "registerNamePlaceholder": "اختر اسم السجل",

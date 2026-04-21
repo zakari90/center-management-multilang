@@ -9,10 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Sparkles, Users } from "lucide-react";
-import { useState } from "react";
+import { Sparkles, Users, ShieldCheck, WifiOff, Database, Info } from "lucide-react";
 
 interface WelcomeDialogProps {
   open: boolean;
@@ -27,10 +24,8 @@ export function WelcomeDialog({
   isRtl,
   t,
 }: WelcomeDialogProps) {
-  const [name, setName] = useState("");
-
   const handleConfirm = () => {
-    onConfirm(name);
+    onConfirm(isRtl ? "سجل الحضور" : "Attendance Register");
   };
 
   return (
@@ -43,36 +38,16 @@ export function WelcomeDialog({
             </div>
           </div>
           <AlertDialogTitle className="text-2xl text-center font-black">
-            {isRtl ? "تسمية سجل الحضور" : "Name your Attendance Register"}
+            {isRtl ? "مرحباً بك في نظام الحضور" : "Welcome to the Attendance System"}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-center">
             {isRtl
-              ? "يرجى إعطاء اسم لهذا السجل للمتابعة."
-              : "Please provide a name for this register to proceed."}
+              ? "نظام إدارة ذكي يعمل محلياً بالكامل لحماية خصوصيتك."
+              : "A smart management system that works fully locally to protect your privacy."}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="py-6 space-y-4">
-          <div className="space-y-2">
-            <Label
-              htmlFor="first-register-name"
-              className="text-xs font-bold uppercase text-slate-500"
-            >
-              {isRtl ? "اسم السجل" : "Register Name"}
-            </Label>
-            <Input
-              id="first-register-name"
-              placeholder={
-                isRtl
-                  ? "مثال: الفترة الصباحية - لغة عربية"
-                  : "e.g. Morning Shift - Arabic Class"
-              }
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="h-11 border-indigo-100 dark:border-indigo-900/50 focus:ring-indigo-500"
-              autoFocus
-            />
-          </div>
 
           <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg flex items-start gap-3">
             <div className="mt-0.5 text-indigo-600">
@@ -84,13 +59,42 @@ export function WelcomeDialog({
                 : "Later, you can add names manually, upload them from an Excel file, or import them from your student and teacher lists."}
             </div>
           </div>
+
+          <div className="space-y-3 pt-2 border-t dark:border-slate-800">
+            <p className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-2">
+              <Info size={12} />
+              {isRtl ? "معلومات هامة حول الخصوصية والعمل بدون إنترنت" : "Privacy & Offline Information"}
+            </p>
+            
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center gap-3 p-2 rounded-md bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400">
+                <Database size={14} className="shrink-0" />
+                <span className="text-[10px] font-medium leading-tight">
+                  {isRtl ? "بياناتك تُحفظ محلياً فقط ولا نجمع أي معلومات عنك." : "Data is saved locally. We do not collect or store your data."}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-3 p-2 rounded-md bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400">
+                <ShieldCheck size={14} className="shrink-0" />
+                <span className="text-[10px] font-medium leading-tight">
+                  {isRtl ? "تنبيه: لا تمسح ذاكرة التخزين المؤقت للمتصفح (Cache) لتجنب فقدان البيانات." : "Important: Do not clear your browser cache/site data to avoid losing progress."}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 p-2 rounded-md bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400">
+                <WifiOff size={14} className="shrink-0" />
+                <span className="text-[10px] font-medium leading-tight">
+                  {isRtl ? "سيعمل النظام 100% بدون إنترنت بمجرد اكتمال تحميل وحفظ الصفحة." : "Works 100% offline once the application is fully cached in your browser."}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <AlertDialogFooter>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={!name.trim()}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md transition-all shadow-lg hover:shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md transition-all shadow-lg hover:shadow-indigo-500/25"
           >
             {isRtl ? "ابدأ الآن" : "Get Started"}
           </AlertDialogAction>

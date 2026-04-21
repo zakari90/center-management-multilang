@@ -17,7 +17,10 @@ import {
   Eye,
   Save,
   Trash,
+  Home,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 interface AttendanceActionsProps {
   mode: "view" | "edit";
@@ -42,9 +45,21 @@ export function AttendanceActions({
   registerName,
   sessionCreatedAt,
 }: AttendanceActionsProps) {
+  const router = useRouter();
+  const locale = useLocale();
+
   return (
     <div className="max-w-6xl mx-auto mb-8 flex flex-wrap gap-4 items-center justify-between print:hidden">
       <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push(`/${locale}`)}
+          className="rounded-full hover:bg-white dark:hover:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800"
+          title={t("home") || "Home"}
+        >
+          <Home size={18} className="text-slate-600 dark:text-slate-400" />
+        </Button>
         <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-full shadow-sm border border-slate-200 dark:border-slate-800">
           <Button
             variant={mode === "view" ? "default" : "ghost"}

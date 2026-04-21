@@ -2049,6 +2049,7 @@
     "ctaTeacherButton": "Rejoindre en tant qu'Enseignant"
   },
   "AttendanceRegister": {
+    "home": "Accueil",
     "title": "Registre de Présence",
     "registerName": "Nom du Registre",
     "registerNamePlaceholder": "Sélectionner le Registre",

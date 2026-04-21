@@ -63,6 +63,8 @@ const content = {
     attendanceToolTitle: "دفتر الحضور",
     attendanceToolDesc: "سجل حضور الطلاب، تابع سجلاتهم واستخرج تقاريرك بسرعة.",
     btnTryTool: "جرب الأداة الآن",
+    freeBadge: "مجاني",
+    recommendedBadge: "موصى به",
   },
   en: {
     heroTag: "Launch Announcement",
@@ -104,6 +106,8 @@ const content = {
     attendanceToolDesc:
       "Track student presence, history, and generate quick reports.",
     btnTryTool: "Try Tool Now",
+    freeBadge: "FREE",
+    recommendedBadge: "RECOMMENDED",
   },
   fr: {
     heroTag: "Annonce de Lancement",
@@ -145,6 +149,8 @@ const content = {
     attendanceToolDesc:
       "Suivez les présences, l'historique et générez des rapports rapides.",
     btnTryTool: "Essayer l'outil maintenant",
+    freeBadge: "GRATUIT",
+    recommendedBadge: "RECOMMANDÉ",
   },
 };
 
@@ -422,7 +428,7 @@ export default function SaaSMarketingPage() {
             className="relative p-8 rounded-3xl bg-linear-to-br from-indigo-900/40 to-violet-900/40 border border-indigo-500/30 backdrop-blur-xl shadow-[0_0_40px_rgba(79,70,229,0.15)] hover:shadow-[0_0_60px_rgba(79,70,229,0.25)] transition-all duration-300"
           >
             <div className="absolute top-0 right-10 transform -translate-y-1/2 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-              RECOMMENDED
+              {t.recommendedBadge}
             </div>
 
             <div className="relative z-10">
@@ -475,7 +481,7 @@ export default function SaaSMarketingPage() {
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4"
           >
-            <Sparkles className="w-3 h-3" /> FREE FOREVER
+            <Sparkles className="w-3 h-3" /> {t.freeBadge}
           </motion.div>
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
             {t.freeToolsTitle}
@@ -559,9 +565,9 @@ export default function SaaSMarketingPage() {
       <section className="relative z-10 py-32 px-6 text-center max-w-3xl mx-auto">
         <h2 className="text-4xl font-bold mb-6">{t.ctaTitle}</h2>
         <p className="text-xl text-slate-400 mb-10">{t.ctaDesc}</p>
-        <p className="text-sm text-indigo-400 font-mono flex items-center justify-center gap-2">
+        {/* <p className="text-sm text-indigo-400 font-mono flex items-center justify-center gap-2">
           <Lock className="w-4 h-4" /> {t.contactUs}
-        </p>
+        </p> */}
       </section>
       <PublicFooter />
     </main>
