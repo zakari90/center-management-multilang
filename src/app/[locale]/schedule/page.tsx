@@ -21,12 +21,29 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Sun, Moon } from "lucide-react";
 import PublicFooter from "@/components/PublicFooter";
 import { CacheStatusDot } from "@/components/cache-status-indicator";
+import { WelcomeDialog } from "./attendance/components/WelcomeDialog";
+import { timeTableActions, attendanceActions, getScheduleDb } from "@/freelib/dexie/scheduleDb";
+import { centerActions } from "@/freelib/dexie/freedexieaction";
 
 function SchedulePageContent() {
   const locale = useLocale();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    // Check for first visit (empty state)
+    Promise.all([
+      centerActions.getAll(),
+      timeTableActions.getAll(),
+      attendanceActions.getPastSessions(),
+    ]).then(([centers, schedules, sessions]) => {
+      if (centers.length === 0 && schedules.length === 0 && sessions.length === 0) {
+        setShowWelcome(true);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     useCacheStatusStore.getState().checkAllPages(locale);
@@ -129,6 +146,17 @@ function SchedulePageContent() {
           <AttendanceModule />
         </TabsContent>
       </Tabs>
+
+      <WelcomeDialog
+        open={showWelcome}
+        isRtl={locale === "ar"}
+        t={tAttendance}
+        onConfirm={() => {
+          getScheduleDb().open();
+          setShowWelcome(false);
+        }}
+      />
+
       <PublicFooter />
     </div>
   );

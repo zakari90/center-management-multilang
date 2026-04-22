@@ -10,10 +10,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Sparkles, Users, ShieldCheck, WifiOff, Database, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 interface WelcomeDialogProps {
   open: boolean;
-  onConfirm: (name: string) => void;
+  onConfirm: () => void;
   isRtl: boolean;
   t: any;
 }
@@ -24,8 +26,12 @@ export function WelcomeDialog({
   isRtl,
   t,
 }: WelcomeDialogProps) {
+  const router = useRouter();
+  const locale = useLocale();
+
   const handleConfirm = () => {
-    onConfirm(isRtl ? "سجل الحضور" : "Attendance Register");
+    onConfirm();
+    router.push(`/${locale}`);
   };
 
   return (
@@ -96,7 +102,7 @@ export function WelcomeDialog({
             onClick={handleConfirm}
             className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md transition-all shadow-lg hover:shadow-indigo-500/25"
           >
-            {isRtl ? "ابدأ الآن" : "Get Started"}
+            {isRtl ? "أوافق وأفهم، ابدأ الآن" : "I Understand & Accept, Get Started"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

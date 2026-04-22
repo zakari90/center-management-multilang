@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { localDb, Role } from "@/freelib/dexie/dbSchema";
+import { localDb, Role, getDb } from "@/freelib/dexie/dbSchema";
 import { userActions } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 
@@ -81,6 +81,9 @@ export function AdminRegistrationDialog({
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
+
+      // Ensure center database is created/opened
+      await getDb().open();
 
       await userActions.create(newAdmin);
 
