@@ -65,6 +65,7 @@ const content = {
     btnTryTool: "جرب الأداة الآن",
     freeBadge: "مجاني",
     recommendedBadge: "موصى به",
+    copyright: "جميع الحقوق محفوظة",
   },
   en: {
     heroTag: "Launch Announcement",
@@ -107,6 +108,7 @@ const content = {
     btnTryTool: "Try Tool Now",
     freeBadge: "FREE",
     recommendedBadge: "RECOMMENDED",
+    copyright: "All rights reserved",
   },
   fr: {
     heroTag: "Annonce de Lancement",
@@ -149,6 +151,7 @@ const content = {
     btnTryTool: "Essayer l'outil maintenant",
     freeBadge: "GRATUIT",
     recommendedBadge: "RECOMMANDÉ",
+    copyright: "Tous droits réservés",
   },
 };
 
@@ -589,7 +592,9 @@ export default function SaaSMarketingPage() {
       {/* <PublicFooter /> */}
       <footer className="py-12 px-6 border-t border-white/5 text-center relative z-10">
         <p className="text-slate-500 text-sm tracking-wide">
-          © {new Date().getFullYear()} <span className="text-slate-400 font-medium">zakariazinedine</span>. All rights reserved.
+          © {new Date().getFullYear()}{" "}
+          <span className="text-slate-400 font-medium">zakariazinedine</span>.{" "}
+          {t.copyright}.
         </p>
       </footer>
     </main>
