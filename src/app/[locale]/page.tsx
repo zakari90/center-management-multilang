@@ -181,7 +181,11 @@ const paidFeaturesAr = [
     icon: <MonitorSmartphone className="w-5 h-5" />,
   },
   {
-    text: "دعم فني مجاني مع 3 صفحات ويب لمركزك",
+    text: "دعم فني",
+    icon: <ShieldCheck className="w-5 h-5" />,
+  },
+  {
+    text: "3 صفحات ويب حسب الطلب",
     icon: <Globe className="w-5 h-5" />,
   },
 ];
@@ -224,7 +228,11 @@ const paidFeaturesEn = [
     icon: <MonitorSmartphone className="w-5 h-5" />,
   },
   {
-    text: "Free tech support + 3 landing pages",
+    text: "Technical support",
+    icon: <ShieldCheck className="w-5 h-5" />,
+  },
+  {
+    text: "3 landing pages on demand",
     icon: <Globe className="w-5 h-5" />,
   },
 ];
@@ -270,7 +278,11 @@ const paidFeaturesFr = [
   },
 
   {
-    text: "Support gratuit + 3 pages de centre",
+    text: "Support technique",
+    icon: <ShieldCheck className="w-5 h-5" />,
+  },
+  {
+    text: "3 pages web sur demande",
     icon: <Globe className="w-5 h-5" />,
   },
 ];

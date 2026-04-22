@@ -176,9 +176,14 @@ export default function PWAUpdateHandler() {
   // Don't show if already installed and no update available
   if (isInstalled && !showUpdate && !deferredPrompt) return null;
 
-  // Don't show installation prompt on /free or /schedule pages
-  const isFreeOrSchedule = pathname.startsWith(`/${locale}/free`) || pathname.startsWith(`/${locale}/schedule`);
-  if (isFreeOrSchedule && deferredPrompt) {
+  // Don't show installation prompt on /free, /schedule, or home pages
+  const isExcludedPage = 
+    pathname.startsWith(`/${locale}/free`) || 
+    pathname.startsWith(`/${locale}/schedule`) ||
+    pathname === `/${locale}` || 
+    pathname === `/${locale}/`;
+
+  if (isExcludedPage && deferredPrompt) {
     return null;
   }
 
