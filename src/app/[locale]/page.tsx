@@ -30,7 +30,7 @@ const content = {
     heroTag: "إعلان إطلاق",
     heroTitle: "نظام للإدارة الذكية للمراكز التعليمية",
     heroSubtitle:
-      "هل تبحث عن النظام المثالي لإدارة مركزك التعليمي سواء كنت تبحث عن حل مجاني يعمل بدون إنترنت، أو نظام سحابي متكامل يربط فريق عملك بأكمله، لدينا الحل الأنسب لك!",
+      "هل تبحث عن النظام المثالي لإدارة مركزك التعليمي (مركز لغات، دروس خصوصية، أو تدريب)؟ سواء كنت تبحث عن حل مجاني يعمل بدون إنترنت، أو نظام سحابي متكامل يربط فريق عملك بأكمله، لدينا الحل الأنسب لك!",
     pricingTitle: "اختر الباقة المناسبة لمركزك",
     pricingSubtitle: "لقد صممنا النظام بخيارين ليناسب حجم وطبيعة عمل مركزك",
     freePlan: "الباقة المجانية",
@@ -159,8 +159,9 @@ const freeFeaturesAr = [
     icon: <WifiOff className="w-5 h-5" />,
   },
   { text: "إدارة شاملة للطلاب والمعلمين", icon: <Users className="w-5 h-5" /> },
+
   {
-    text: " بياناتك محلياً فقط",
+    text: "بياناتك محلياً فقط",
     icon: <ShieldCheck className="w-5 h-5" />,
   },
 ];
@@ -175,6 +176,14 @@ const paidFeaturesAr = [
   { text: "روابط تسجيل عامة للطلاب", icon: <Globe className="w-5 h-5" /> },
   { text: "نسخ احتياطي وتأمين مستمر", icon: <Database className="w-5 h-5" /> },
   { text: "متابعة الإحصائيات عن بُعد", icon: <Laptop className="w-5 h-5" /> },
+  {
+    text: "تثبيت كتطبيق (PWA) على أي جهاز",
+    icon: <MonitorSmartphone className="w-5 h-5" />,
+  },
+  {
+    text: "دعم فني مجاني مع 3 صفحات ويب لمركزك",
+    icon: <Globe className="w-5 h-5" />,
+  },
 ];
 
 const freeFeaturesEn = [
@@ -184,8 +193,9 @@ const freeFeaturesEn = [
     text: "Full student & teacher management",
     icon: <Users className="w-5 h-5" />,
   },
+
   {
-    text: "Total privacy: Local data only",
+    text: "Local data only",
     icon: <ShieldCheck className="w-5 h-5" />,
   },
 ];
@@ -209,6 +219,14 @@ const paidFeaturesEn = [
     icon: <Database className="w-5 h-5" />,
   },
   { text: "Remote dashboard monitoring", icon: <Laptop className="w-5 h-5" /> },
+  {
+    text: "Install as a PWA anywhere",
+    icon: <MonitorSmartphone className="w-5 h-5" />,
+  },
+  {
+    text: "Free tech support + 3 landing pages",
+    icon: <Globe className="w-5 h-5" />,
+  },
 ];
 
 const freeFeaturesFr = [
@@ -225,7 +243,7 @@ const freeFeaturesFr = [
     icon: <Users className="w-5 h-5" />,
   },
   {
-    text: "Vie privée : Données locales uniquement",
+    text: "Données locales uniquement",
     icon: <ShieldCheck className="w-5 h-5" />,
   },
 ];
@@ -246,6 +264,15 @@ const paidFeaturesFr = [
     icon: <Database className="w-5 h-5" />,
   },
   { text: "Suivi des stats à distance", icon: <Laptop className="w-5 h-5" /> },
+  {
+    text: "Installation PWA sur tout support",
+    icon: <MonitorSmartphone className="w-5 h-5" />,
+  },
+
+  {
+    text: "Support gratuit + 3 pages de centre",
+    icon: <Globe className="w-5 h-5" />,
+  },
 ];
 
 export default function SaaSMarketingPage() {
