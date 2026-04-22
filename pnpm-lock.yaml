@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@digicroz/react-floating-whatsapp':
+        specifier: ^1.0.2
+        version: 1.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@emailjs/browser':
         specifier: ^4.4.1
         version: 4.4.1
@@ -396,6 +399,13 @@ packages:
   '@csstools/css-tokenizer@4.0.0':
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
+
+  '@digicroz/react-floating-whatsapp@1.0.2':
+    resolution: {integrity: sha512-1YIq/2VmB7y9/OSBjXYXUVG1+98ujyY3RUUsizNulhMv66shJOrZw445Cf2HnxK9555aatSC2AsBXWqCfhYskQ==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   '@emailjs/browser@4.4.1':
     resolution: {integrity: sha512-DGSlP9sPvyFba3to2A50kDtZ+pXVp/0rhmqs2LmbMS3I5J8FSOgLwzY2Xb4qfKlOVHh29EAutLYwe5yuEZmEFg==}
@@ -5192,6 +5202,11 @@ snapshots:
       css-tree: 3.2.1
 
   '@csstools/css-tokenizer@4.0.0': {}
+
+  '@digicroz/react-floating-whatsapp@1.0.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   '@emailjs/browser@4.4.1': {}
 

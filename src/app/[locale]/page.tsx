@@ -23,6 +23,7 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import Contact from "@/components/Contact";
 import PublicFooter from "@/components/PublicFooter";
+import { FloatingWhatsApp } from "@digicroz/react-floating-whatsapp";
 
 // In-file translations to avoid polluting global dictionaries for this specific marketing page
 const content = {
@@ -66,6 +67,10 @@ const content = {
     freeBadge: "مجاني",
     recommendedBadge: "موصى به",
     copyright: "جميع الحقوق محفوظة",
+    waAccountName: "زكريا",
+    waStatusMessage: "متصل الآن",
+    waChatMessage: "مرحباً! كيف يمكنني مساعدتك في إدارة مركزك؟",
+    waPlaceholder: "اكتب رسالتك هنا...",
   },
   en: {
     heroTag: "Launch Announcement",
@@ -109,6 +114,10 @@ const content = {
     freeBadge: "FREE",
     recommendedBadge: "RECOMMENDED",
     copyright: "All rights reserved",
+    waAccountName: "Zakaria",
+    waStatusMessage: "Online",
+    waChatMessage: "Hello! How can I help you manage your center?",
+    waPlaceholder: "Type a message...",
   },
   fr: {
     heroTag: "Annonce de Lancement",
@@ -152,6 +161,10 @@ const content = {
     freeBadge: "GRATUIT",
     recommendedBadge: "RECOMMANDÉ",
     copyright: "Tous droits réservés",
+    waAccountName: "Zakaria",
+    waStatusMessage: "En ligne",
+    waChatMessage: "Bonjour ! Comment puis-je vous aider à gérer votre centre ?",
+    waPlaceholder: "Tapez votre message...",
   },
 };
 
@@ -597,6 +610,19 @@ export default function SaaSMarketingPage() {
           {t.copyright}.
         </p>
       </footer>
+
+      <FloatingWhatsApp
+        phoneNumber="212768276772"
+        accountName={t.waAccountName}
+        statusMessage={t.waStatusMessage}
+        chatMessage={t.waChatMessage}
+        placeholder={t.waPlaceholder}
+        darkMode={true}
+        allowClickAway={true}
+        allowEsc={true}
+        notification={true}
+        notificationSound={true}
+      />
     </main>
   );
 }
