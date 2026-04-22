@@ -587,6 +587,11 @@ export default function SaaSMarketingPage() {
         </p> 
       </section> */}
       {/* <PublicFooter /> */}
+      <footer className="py-12 px-6 border-t border-white/5 text-center relative z-10">
+        <p className="text-slate-500 text-sm tracking-wide">
+          © {new Date().getFullYear()} <span className="text-slate-400 font-medium">zakariazinedine</span>. All rights reserved.
+        </p>
+      </footer>
     </main>
   );
 }
