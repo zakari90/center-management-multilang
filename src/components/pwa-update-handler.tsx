@@ -2,6 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +23,8 @@ interface BeforeInstallPromptEvent extends Event {
 
 export default function PWAUpdateHandler() {
   const t = useTranslations("PWAUpdate");
+  const pathname = usePathname();
+  const locale = useLocale();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showUpdate, setShowUpdate] = useState(false);
@@ -171,6 +175,12 @@ export default function PWAUpdateHandler() {
 
   // Don't show if already installed and no update available
   if (isInstalled && !showUpdate && !deferredPrompt) return null;
+
+  // Don't show installation prompt on /free or /schedule pages
+  const isFreeOrSchedule = pathname.startsWith(`/${locale}/free`) || pathname.startsWith(`/${locale}/schedule`);
+  if (isFreeOrSchedule && deferredPrompt) {
+    return null;
+  }
 
   return (
     <>
