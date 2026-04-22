@@ -59,7 +59,7 @@ const content = {
     freeToolsSubtitle:
       "جرب أدواتنا الأساسية للإدارة فوراً وبدون أي تسجيل أو تعقيد.",
     scheduleToolTitle: "مدير الجداول",
-    scheduleToolDesc: "نظم حصصك، القاعات والأساتذة في شبكة ذكية وبسيطة.",
+    scheduleToolDesc: "نظم حصصك في شبكة ذكية وبسيطة.",
     attendanceToolTitle: "دفتر الحضور",
     attendanceToolDesc: "سجل حضور الطلاب، تابع سجلاتهم واستخرج تقاريرك بسرعة.",
     btnTryTool: "جرب الأداة الآن",
@@ -100,8 +100,7 @@ const content = {
     freeToolsSubtitle:
       "Try our core management tools instantly with zero registration.",
     scheduleToolTitle: "Schedule Manager",
-    scheduleToolDesc:
-      "Organize your classes, rooms, and teachers in a simple smart grid.",
+    scheduleToolDesc: "Organize your classes in a simple smart grid.",
     attendanceToolTitle: "Attendance Register",
     attendanceToolDesc:
       "Track student presence, history, and generate quick reports.",
@@ -143,8 +142,7 @@ const content = {
     freeToolsSubtitle:
       "Essayez nos outils de gestion de base instantanément et sans inscription.",
     scheduleToolTitle: "Gestionnaire d'Emploi du Temps",
-    scheduleToolDesc:
-      "Organisez vos cours, salles et professeurs dans une grille simple.",
+    scheduleToolDesc: "Organisez vos cours dans une grille simple.",
     attendanceToolTitle: "Registre de Présence",
     attendanceToolDesc:
       "Suivez les présences, l'historique et générez des rapports rapides.",
