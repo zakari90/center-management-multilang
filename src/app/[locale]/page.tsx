@@ -618,7 +618,7 @@ export default function SaaSMarketingPage() {
         chatMessage={t.waChatMessage}
         placeholder={t.waPlaceholder}
         darkMode={true}
-        allowClickAway={true}
+        allowClickAway={false}
         allowEsc={true}
         notification={true}
         notificationSound={true}
