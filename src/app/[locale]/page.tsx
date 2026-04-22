@@ -513,41 +513,11 @@ export default function SaaSMarketingPage() {
                 <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
                   <CalendarDays className="w-8 h-8" />
                 </div>
-                {/* Visual Mockup */}
-                <div className="flex gap-1">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-10 rounded-md bg-indigo-500/10 border border-indigo-500/20 flex flex-col gap-1 p-1"
-                    >
-                      <div className="w-full h-1 bg-indigo-500/40 rounded-full" />
-                      <div className="w-2/3 h-1 bg-indigo-500/20 rounded-full" />
-                    </div>
-                  ))}
-                </div>
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">
                 {t.scheduleToolTitle}
               </h3>
               <p className="text-slate-400 mb-8 grow">{t.scheduleToolDesc}</p>
-
-              {/* Premium Preview Section */}
-              <div className="mb-8 p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
-                <div className="flex gap-2">
-                  <div className="flex-1 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center px-2">
-                    <div className="w-2 h-2 rounded-full bg-indigo-400 mr-2" />
-                    <div className="w-12 h-2 bg-indigo-400/40 rounded-full" />
-                  </div>
-                  <div className="flex-1 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center px-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400 mr-2" />
-                    <div className="w-12 h-2 bg-emerald-400/40 rounded-full" />
-                  </div>
-                </div>
-                <div className="w-full h-8 rounded-lg bg-violet-500/20 border border-violet-500/30 flex items-center px-2">
-                  <div className="w-2 h-2 rounded-full bg-violet-400 mr-2" />
-                  <div className="w-24 h-2 bg-violet-400/40 rounded-full" />
-                </div>
-              </div>
 
               <button
                 onClick={() => router.push(`/${locale}/schedule?tab=schedule`)}
