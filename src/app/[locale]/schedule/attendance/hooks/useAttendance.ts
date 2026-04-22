@@ -174,7 +174,7 @@ export function useAttendance() {
     Promise.all([
       centerActions.getAll(),
       timeTableActions.getAll(),
-      attendanceActions.getPastSessions(),
+      attendanceActions.getAllSessions(),
     ]).then(([centers, schedules, sessions]) => {
       if (centers.length === 0 && schedules.length === 0 && sessions.length === 0) {
         setShowWelcome(true);
