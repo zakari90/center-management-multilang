@@ -53,6 +53,7 @@ export function useAttendance() {
     { id: string; name: string }[]
   >([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // Refs to track previous register so we can auto-save before switching
   const prevScheduleIdRef = useRef<string>("");
@@ -168,6 +169,17 @@ export function useAttendance() {
 
     // 5. Load history list
     loadPastSessions();
+
+    // 6. Check for first visit (empty state)
+    Promise.all([
+      centerActions.getAll(),
+      timeTableActions.getAll(),
+      attendanceActions.getPastSessions(),
+    ]).then(([centers, schedules, sessions]) => {
+      if (centers.length === 0 && schedules.length === 0 && sessions.length === 0) {
+        setShowWelcome(true);
+      }
+    });
   }, []);
 
   // Keep rows ref in sync so the switch-save effect always has fresh data
@@ -664,5 +676,7 @@ export function useAttendance() {
     getMonthlyData,
     isPeriodEmpty,
     pastRegisterNames,
+    showWelcome,
+    setShowWelcome,
   };
 }
