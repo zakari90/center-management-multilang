@@ -2204,7 +2204,8 @@
     "err_api_failed": "Failed to send message. Please try again or contact us directly.",
     "success_title": "Message Sent!",
     "success_msg": "Thank you for reaching out. We'll get back to you as soon as possible.",
-    "send_another": "Send Another Message"
+    "send_another": "Send Another Message",
+    "btnPaid": "Contact Us to Subscribe 💬"
   },
   "Footer": {
     "bookingInquiry": "For bookings or inquiries:",

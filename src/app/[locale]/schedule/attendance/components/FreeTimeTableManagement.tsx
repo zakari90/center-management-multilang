@@ -412,7 +412,7 @@ export default function FreeTimetableManagement({
       )}
 
       {/* Timetable Grid */}
-      <Card>
+      <Card className="border-none bg-black/20 backdrop-blur-xl shadow-2xl overflow-hidden rounded-3xl">
         <CardHeader>
           <CardTitle>{t("weeklySchedule")}</CardTitle>
           <CardDescription>
@@ -426,13 +426,12 @@ export default function FreeTimetableManagement({
             <div className="min-w-[1200px]">
               {/* Header Row */}
               <div className="grid grid-cols-8 gap-2 mb-2 ">
-                <div className="font-semibold text-sm text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
+                <div className="font-bold text-xs uppercase tracking-wider text-indigo-400 p-3 border border-indigo-500/20 rounded-xl sticky start-0 bg-black/80 backdrop-blur-md z-30">
                   {t("time")}
                 </div>
                 {daysOfWeek.map((day: any) => (
                   <div
-                    key={day.key}
-                    className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md sticky top-0 z-20"
+                    className="font-bold text-xs uppercase tracking-wider text-center p-3 bg-indigo-500/10 text-indigo-300 rounded-xl sticky top-0 z-20 border border-indigo-500/20 backdrop-blur-md"
                   >
                     {day.label}
                   </div>
@@ -444,8 +443,8 @@ export default function FreeTimetableManagement({
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
                   <div key={time} className="grid grid-cols-8 gap-2">
                     {/* Time Label - fixed on left */}
-                    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
-                      <Clock className="h-3 w-3 mr-1" />
+                    <div className="flex items-center justify-center text-xs font-bold text-indigo-200 p-2 border border-white/5 rounded-xl sticky start-0 bg-black/40 backdrop-blur-md z-10 shadow-sm">
+                      <Clock className="h-3.5 w-3.5 mr-1.5 text-indigo-400" />
                       {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
@@ -460,10 +459,10 @@ export default function FreeTimetableManagement({
                             !effectiveReadOnly && handleSlotClick(day.key, time)
                           }
                           className={cn(
-                            "min-h-[80px] p-1.5 border rounded-md transition-all flex flex-col relative group/cell",
-                            !effectiveReadOnly && "cursor-pointer",
-                            "bg-background hover:border-primary/50",
-                            slots.length === 0 && "bg-muted/10 opacity-60",
+                            "min-h-[90px] p-2 border-dashed border-2 border-transparent rounded-xl transition-all flex flex-col relative group/cell",
+                            !effectiveReadOnly && "cursor-pointer hover:border-indigo-500/30 hover:bg-indigo-500/5",
+                            "bg-white/5",
+                            slots.length === 0 && "opacity-40",
                           )}
                         >
                           {/* Hover Add Icon (if empty) */}
@@ -477,16 +476,21 @@ export default function FreeTimetableManagement({
 
                           <div className="space-y-1 z-20 relative h-full flex flex-col justify-center">
                             {slots[0] && (
-                              <div
-                                key={slots[0].id || 0}
-                                className="p-1.5 bg-card border shadow-sm rounded text-xs space-y-1 group/card relative overflow-hidden hover:shadow-md transition-all border-l-2 border-l-primary cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent slot click
-                                  handleViewDetails(slots[0]);
-                                }}
-                              >
-                                <div className="flex justify-between items-start">
-                                  <span className="font-semibold truncate pr-4 text-primary">
+                                <div
+                                  key={slots[0].id || 0}
+                                  className="p-2 bg-indigo-500/10 border border-indigo-500/20 shadow-lg rounded-xl text-xs space-y-1 group/card relative overflow-hidden hover:scale-105 hover:bg-indigo-500/20 transition-all cursor-pointer"
+                                  style={{
+                                    borderLeft: "4px solid #6366f1",
+                                    background: "rgba(99, 102, 241, 0.05)",
+                                    backdropFilter: "blur(4px)"
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent slot click
+                                    handleViewDetails(slots[0]);
+                                  }}
+                                >
+                                  <div className="flex justify-between items-start">
+                                    <span className="font-bold truncate pr-4 text-indigo-300">
                                     {slots[0].name}
                                   </span>
                                 </div>

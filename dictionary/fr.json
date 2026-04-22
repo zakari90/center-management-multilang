@@ -2156,7 +2156,8 @@
     "err_api_failed": "Échec de l'envoi du message. Veuillez réessayer ou nous contacter directement.",
     "success_title": "Message envoyé !",
     "success_msg": "Merci de nous avoir contactés. Nous vous répondrons dès que possible.",
-    "send_another": "Envoyer un autre message"
+    "send_another": "Envoyer un autre message",
+    "btnPaid": "Contactez-nous 💬"
   },
   "Footer": {
     "bookingInquiry": "Pour réservations ou demandes :",

@@ -58,8 +58,8 @@ const content = {
     freeToolsTitle: "أدوات ذكية مجانية فورية",
     freeToolsSubtitle:
       "جرب أدواتنا الأساسية للإدارة فوراً وبدون أي تسجيل أو تعقيد.",
-    scheduleToolTitle: "مدير الجداول",
-    scheduleToolDesc: "نظم حصصك في شبكة ذكية وبسيطة.",
+    scheduleToolTitle: "مدير الجداول (استعمال الزمن)",
+    scheduleToolDesc: "نظم حصصك ومجموعاتك في شبكة ذكية، احترافية وبسيطة.",
     attendanceToolTitle: "دفتر الحضور",
     attendanceToolDesc: "سجل حضور الطلاب، تابع سجلاتهم واستخرج تقاريرك بسرعة.",
     btnTryTool: "جرب الأداة الآن",
@@ -509,18 +509,52 @@ export default function SaaSMarketingPage() {
             className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/8 transition-all duration-300"
           >
             <div className="flex flex-col h-full">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
-                <CalendarDays className="w-8 h-8" />
+              <div className="flex items-center justify-between mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                  <CalendarDays className="w-8 h-8" />
+                </div>
+                {/* Visual Mockup */}
+                <div className="flex gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="w-8 h-10 rounded-md bg-indigo-500/10 border border-indigo-500/20 flex flex-col gap-1 p-1"
+                    >
+                      <div className="w-full h-1 bg-indigo-500/40 rounded-full" />
+                      <div className="w-2/3 h-1 bg-indigo-500/20 rounded-full" />
+                    </div>
+                  ))}
+                </div>
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">
                 {t.scheduleToolTitle}
               </h3>
               <p className="text-slate-400 mb-8 grow">{t.scheduleToolDesc}</p>
+
+              {/* Premium Preview Section */}
+              <div className="mb-8 p-4 rounded-2xl bg-black/40 border border-white/5 space-y-3">
+                <div className="flex gap-2">
+                  <div className="flex-1 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center px-2">
+                    <div className="w-2 h-2 rounded-full bg-indigo-400 mr-2" />
+                    <div className="w-12 h-2 bg-indigo-400/40 rounded-full" />
+                  </div>
+                  <div className="flex-1 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center px-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 mr-2" />
+                    <div className="w-12 h-2 bg-emerald-400/40 rounded-full" />
+                  </div>
+                </div>
+                <div className="w-full h-8 rounded-lg bg-violet-500/20 border border-violet-500/30 flex items-center px-2">
+                  <div className="w-2 h-2 rounded-full bg-violet-400 mr-2" />
+                  <div className="w-24 h-2 bg-violet-400/40 rounded-full" />
+                </div>
+              </div>
+
               <button
                 onClick={() => router.push(`/${locale}/schedule?tab=schedule`)}
-                className="inline-flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 text-indigo-400 font-bold hover:text-indigo-300 transition-colors cursor-pointer group/btn"
               >
-                {t.btnTryTool} <ArrowUpRight className="w-5 h-5" />
+                {t.btnTryTool}
+                <ArrowUpRight className="w-5 h-5 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
               </button>
             </div>
           </motion.div>
@@ -575,14 +609,14 @@ export default function SaaSMarketingPage() {
       <Contact />
 
       {/* Footer / CTA */}
-      <section className="relative z-10 py-32 px-6 text-center max-w-3xl mx-auto">
+      {/* <section className="relative z-10 py-32 px-6 text-center max-w-3xl mx-auto">
         <h2 className="text-4xl font-bold mb-6">{t.ctaTitle}</h2>
         <p className="text-xl text-slate-400 mb-10">{t.ctaDesc}</p>
-        {/* <p className="text-sm text-indigo-400 font-mono flex items-center justify-center gap-2">
+       <p className="text-sm text-indigo-400 font-mono flex items-center justify-center gap-2">
           <Lock className="w-4 h-4" /> {t.contactUs}
-        </p> */}
-      </section>
-      <PublicFooter />
+        </p> 
+      </section> */}
+      {/* <PublicFooter /> */}
     </main>
   );
 }
