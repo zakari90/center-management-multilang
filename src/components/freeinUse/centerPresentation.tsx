@@ -14,10 +14,7 @@ import {
   BookOpen,
   Building2,
   CalendarDays,
-  ChevronDown,
-  ChevronUp,
   Clock,
-  Home,
   Pencil,
   Plus,
 } from "lucide-react";
@@ -25,7 +22,6 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EditDialog } from "./editDialog";
-import { HomePageEditor } from "./HomePageEditor";
 import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
 import { SubjectsTableView } from "./SubjectsTableView";
@@ -94,7 +90,6 @@ export default function CenterPresentation({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCenterDebugSyncing, setIsCenterDebugSyncing] = useState(false);
   const [isAutoSyncing, setIsAutoSyncing] = useState(false);
-  const [showHomePageSettings, setShowHomePageSettings] = useState(false);
 
   // Removed online status and auto-sync logic
 
@@ -465,45 +460,6 @@ export default function CenterPresentation({
                 {center.paymentEndDay || 30}
               </span>
             </div>
-          </div>
-          {/* Homepage Settings Section (Collapsible) */}
-          <div className="space-y-2">
-            <button
-              onClick={() => setShowHomePageSettings(!showHomePageSettings)}
-              className="flex w-full items-center justify-between p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex items-center gap-2 text-muted-foreground font-semibold text-sm uppercase tracking-wide">
-                <Home className="h-4 w-4" />
-                <span>{t("homePageSettings") || "Homepage Settings"}</span>
-              </div>
-              {showHomePageSettings ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </button>
-
-            {showHomePageSettings && (
-              <div className="space-y-4 pt-2">
-                <HomePageEditor
-                  centerId={centerId}
-                  initialData={{
-                    homeTitle: center.homeTitle,
-                    homeSubtitle: center.homeSubtitle,
-                    homeBadge: center.homeBadge,
-                    homeDescription: center.homeDescription,
-                    homeCtaText: center.homeCtaText,
-                    homePhone: center.homePhone,
-                    homeAddress: center.homeAddress,
-                    publicRegistrationEnabled: center.publicRegistrationEnabled,
-                  }}
-                  onSave={() => {
-                    // Refresh handled by useLiveQuery
-                  }}
-                />
-                <ShareRegistrationLink />
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

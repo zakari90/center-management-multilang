@@ -19,19 +19,19 @@ export default function AdminQuickActions() {
     {
       title: t("myCenter.title"),
       icon: Building2,
-      href: "/admin/center",
+      href: "/free/admin/center",
       color: "text-blue-600 bg-blue-600",
     },
     {
       title: t("schedule.title"),
       icon: Calendar,
-      href: "/admin/schedule",
+      href: "/free/admin/schedule",
       color: "text-purple-600 bg-purple-600",
     },
     {
       title: t("allUsers.title"),
       icon: Users,
-      href: "/admin/users",
+      href: "/free/admin/users",
       color: "text-orange-600 bg-orange-600",
     },
   ];
