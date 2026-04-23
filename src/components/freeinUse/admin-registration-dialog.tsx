@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { localDb, Role, getDb } from "@/freelib/dexie/dbSchema";
+import { Role, getDb } from "@/freelib/dexie/dbSchema";
 import { userActions } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 

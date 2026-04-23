@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Table } from "dexie";
-import { BaseEntity, localDb } from "./dbSchema";
+import { BaseEntity, getDb } from "./dbSchema";
 
 export interface freedexieaction<T extends BaseEntity> {
   putLocal: (item: T) => Promise<string>;
@@ -71,15 +71,15 @@ export function generatefreedexieaction<T extends BaseEntity>(
 }
 
 // Export actions with lazy getters to prevent eager initialization
-export const centerActions = generatefreedexieaction(() => localDb.centers, false);
-export const userActions = generatefreedexieaction(() => localDb.users, true); 
-export const teacherActions = generatefreedexieaction(() => localDb.teachers, true);
-export const studentActions = generatefreedexieaction(() => localDb.students, true);
-export const subjectActions = generatefreedexieaction(() => localDb.subjects, false);
-export const teacherSubjectActions = generatefreedexieaction(() => localDb.teacherSubjects, false);
-export const studentSubjectActions = generatefreedexieaction(() => localDb.studentSubjects, false);
-export const receiptActions = generatefreedexieaction(() => localDb.receipts, false);
-export const scheduleActions = generatefreedexieaction(() => localDb.schedules, false);
+export const centerActions = generatefreedexieaction(() => getDb().centers, false);
+export const userActions = generatefreedexieaction(() => getDb().users, true); 
+export const teacherActions = generatefreedexieaction(() => getDb().teachers, true);
+export const studentActions = generatefreedexieaction(() => getDb().students, true);
+export const subjectActions = generatefreedexieaction(() => getDb().subjects, false);
+export const teacherSubjectActions = generatefreedexieaction(() => getDb().teacherSubjects, false);
+export const studentSubjectActions = generatefreedexieaction(() => getDb().studentSubjects, false);
+export const receiptActions = generatefreedexieaction(() => getDb().receipts, false);
+export const scheduleActions = generatefreedexieaction(() => getDb().schedules, false);
 
 // ✅ Cascade delete helper for center with all related entities
 export async function deleteCenterWithRelations(centerId: string): Promise<void> {
@@ -103,14 +103,14 @@ export async function deleteCenterWithRelations(centerId: string): Promise<void>
     .filter((ss) => subjectIds.includes(ss.subjectId))
     .map((ss) => ss.id);
 
-  await localDb.transaction(
+  await getDb().transaction(
     "rw",
     [
-      localDb.centers,
-      localDb.subjects,
-      localDb.schedules,
-      localDb.teacherSubjects,
-      localDb.studentSubjects,
+      getDb().centers,
+      getDb().subjects,
+      getDb().schedules,
+      getDb().teacherSubjects,
+      getDb().studentSubjects,
     ],
     async () => {
       await centerActions.deleteLocal(centerId);
@@ -128,15 +128,15 @@ export async function deleteCenterWithRelations(centerId: string): Promise<void>
 export async function clearAllLocalData(): Promise<void> {
   try {
     await Promise.all([
-      localDb.centers.clear(),
-      localDb.teachers.clear(),
-      localDb.students.clear(),
-      localDb.subjects.clear(),
-      localDb.teacherSubjects.clear(),
-      localDb.studentSubjects.clear(),
-      localDb.receipts.clear(),
-      localDb.schedules.clear(),
-      localDb.users.clear(),
+      getDb().centers.clear(),
+      getDb().teachers.clear(),
+      getDb().students.clear(),
+      getDb().subjects.clear(),
+      getDb().teacherSubjects.clear(),
+      getDb().studentSubjects.clear(),
+      getDb().receipts.clear(),
+      getDb().schedules.clear(),
+      getDb().users.clear(),
     ]);
   } catch (error) {
     console.error("[clearLocalData] Error clearing local data:", error);
@@ -171,14 +171,14 @@ export async function exportLocalDataAsJson(): Promise<{
       receipts,
       schedules,
     ] = await Promise.all([
-      localDb.centers.toArray(),
-      localDb.teachers.toArray(),
-      localDb.students.toArray(),
-      localDb.subjects.toArray(),
-      localDb.teacherSubjects.toArray(),
-      localDb.studentSubjects.toArray(),
-      localDb.receipts.toArray(),
-      localDb.schedules.toArray(),
+      getDb().centers.toArray(),
+      getDb().teachers.toArray(),
+      getDb().students.toArray(),
+      getDb().subjects.toArray(),
+      getDb().teacherSubjects.toArray(),
+      getDb().studentSubjects.toArray(),
+      getDb().receipts.toArray(),
+      getDb().schedules.toArray(),
     ]);
 
     return {

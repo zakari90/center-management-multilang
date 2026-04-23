@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { localDb } from "@/freelib/dexie/dbSchema";
+import { getDb } from "@/freelib/dexie/dbSchema";
 import { AlertTriangle, Loader2, Trash } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
@@ -46,15 +46,15 @@ export function DeleteAllDataButton() {
 
       // ✅ Clear all local tables regardless of server result
       await Promise.all([
-        localDb.users.clear(),
-        localDb.centers.clear(),
-        localDb.teachers.clear(),
-        localDb.students.clear(),
-        localDb.subjects.clear(),
-        localDb.teacherSubjects.clear(),
-        localDb.studentSubjects.clear(),
-        localDb.receipts.clear(),
-        localDb.schedules.clear(),
+        getDb().users.clear(),
+        getDb().centers.clear(),
+        getDb().teachers.clear(),
+        getDb().students.clear(),
+        getDb().subjects.clear(),
+        getDb().teacherSubjects.clear(),
+        getDb().studentSubjects.clear(),
+        getDb().receipts.clear(),
+        getDb().schedules.clear(),
       ]);
 
       toast.success(
@@ -90,7 +90,7 @@ export function DeleteAllDataButton() {
         }
 
         // Redirect to login page
-        window.location.href = `/${locale}/login`;
+        window.location.href = `/${locale}`;
       }, 1000);
     } catch (error) {
       console.error("Failed to delete data:", error);

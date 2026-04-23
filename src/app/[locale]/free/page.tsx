@@ -287,7 +287,7 @@ export default function FreeVersionIntro() {
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div
-                      className={`shrink-0 p-3 rounded-xl border ${feature.color} group-hover:scale-110 transition-transform duration-300`}
+                      className={`shrink-0 p-3 xl:rounded-xl xl:border xl:${feature.color} group-hover:scale-110 transition-transform duration-300`}
                     >
                       {feature.icon}
                     </div>

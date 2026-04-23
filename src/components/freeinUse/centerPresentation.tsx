@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Center, Subject, localDb } from "@/freelib/dexie/dbSchema";
+import { Center, Subject, getDb } from "@/freelib/dexie/dbSchema";
 import { centerActions, subjectActions } from "@/freelib/dexie/freedexieaction";
 import { cn, getItemColor } from "@/freelib/utils";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
@@ -66,7 +66,7 @@ export default function CenterPresentation({
 
     // Query subjects by centerId and exclude deleted ones (status !== '0')
     // Use indexed query for efficient filtering
-    const allSubjects = await localDb.subjects
+    const allSubjects = await getDb().subjects
       .where("centerId")
       .equals(centerId)
       .toArray();

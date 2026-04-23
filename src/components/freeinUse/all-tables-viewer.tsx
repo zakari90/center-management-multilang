@@ -35,7 +35,7 @@ import {
   Download,
   Upload,
 } from "lucide-react";
-import { localDb } from "@/freelib/dexie/dbSchema";
+import { getDb } from "@/freelib/dexie/dbSchema";
 import type {
   User,
   Teacher,
@@ -142,7 +142,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<User>[],
-      fetchData: () => localDb.users.toArray(),
+      fetchData: () => getDb().users.toArray(),
     },
 
     teachers: {
@@ -200,7 +200,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<Teacher>[],
-      fetchData: () => localDb.teachers.toArray(),
+      fetchData: () => getDb().teachers.toArray(),
     },
 
     students: {
@@ -256,7 +256,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<Student>[],
-      fetchData: () => localDb.students.toArray(),
+      fetchData: () => getDb().students.toArray(),
     },
 
     subjects: {
@@ -313,7 +313,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<Subject>[],
-      fetchData: () => localDb.subjects.toArray(),
+      fetchData: () => getDb().subjects.toArray(),
     },
 
     teacherSubjects: {
@@ -374,7 +374,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<TeacherSubject>[],
-      fetchData: () => localDb.teacherSubjects.toArray(),
+      fetchData: () => getDb().teacherSubjects.toArray(),
     },
 
     studentSubjects: {
@@ -427,7 +427,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<StudentSubject>[],
-      fetchData: () => localDb.studentSubjects.toArray(),
+      fetchData: () => getDb().studentSubjects.toArray(),
     },
 
     receipts: {
@@ -505,7 +505,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<ReceiptType>[],
-      fetchData: () => localDb.receipts.toArray(),
+      fetchData: () => getDb().receipts.toArray(),
     },
 
     schedules: {
@@ -572,9 +572,9 @@ export function AllTablesViewer() {
       >[],
       fetchData: async () => {
         const [schedules, teachers, subjects] = await Promise.all([
-          localDb.schedules.toArray(),
-          localDb.teachers.toArray(),
-          localDb.subjects.toArray(),
+          getDb().schedules.toArray(),
+          getDb().teachers.toArray(),
+          getDb().subjects.toArray(),
         ]);
 
         const teacherMap = new Map(teachers.map((t) => [t.id, t.name]));
@@ -671,7 +671,7 @@ export function AllTablesViewer() {
           render: (v: number) => formatDate(v),
         },
       ] as ColumnDef<Center>[],
-      fetchData: () => localDb.centers.toArray(),
+      fetchData: () => getDb().centers.toArray(),
     },
   };
 
@@ -788,7 +788,7 @@ export function AllTablesViewer() {
         if (!validTables.has(tableName)) continue;
         if (!Array.isArray(records) || records.length === 0) continue;
 
-        const table = (localDb as any)[tableName];
+        const table = (getDb() as any)[tableName];
         if (table) {
           if (mode === "replace") {
             await table.clear();

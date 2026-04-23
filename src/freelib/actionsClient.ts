@@ -4,7 +4,7 @@
 
 import { jwtVerify, SignJWT } from "jose";
 import Cookies from "js-cookie";
-import { Role, localDb } from "./dexie/dbSchema";
+import { Role, getDb } from "./dexie/dbSchema";
 import { userActions } from "./dexie/freedexieaction";
 
 const secretKey = "secret";
@@ -58,7 +58,7 @@ export async function getSession() {
 
 async function openLocalDbWithTimeout(timeoutMs = 2500) {
   await Promise.race([
-    localDb.open(),
+    getDb().open(),
     new Promise((_, reject) =>
       setTimeout(() => reject(new Error("IndexedDB open timeout")), timeoutMs),
     ),

@@ -22,7 +22,7 @@ import { Clock, Loader2, MapPin, User as UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { localDb } from "@/freelib/dexie/dbSchema";
+import { getDb } from "@/freelib/dexie/dbSchema";
 import { useAuth } from "@/freelib/context/freeauthContext";
 import { useLocalizedConstants } from "@/components/freeinUse/useLocalizedConstants";
 
@@ -115,10 +115,10 @@ export default function TimetableManagement({
 
     const [allSchedules, allTeachers, allSubjects, allCenters] =
       await Promise.all([
-        localDb.schedules.toArray(),
-        localDb.teachers.toArray(),
-        localDb.subjects.toArray(),
-        localDb.centers.toArray(),
+        getDb().schedules.toArray(),
+        getDb().teachers.toArray(),
+        getDb().subjects.toArray(),
+        getDb().centers.toArray(),
       ]);
 
     const isAdmin = user.role?.toUpperCase() === "ADMIN";
