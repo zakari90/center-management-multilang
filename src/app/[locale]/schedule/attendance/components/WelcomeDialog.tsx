@@ -96,7 +96,7 @@ export function WelcomeDialog({
                   {t("welcome_works_offline")}
                 </span>
               </div>
-              <div className="flex items-center gap-3 p-2 rounded-md bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400">
+              <div className="flex items-center gap-3 p-2 rounded-md bg-yellow-50/50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-400">
                 <Star size={14} className="shrink-0" />
                 <span className="text-[10px] font-medium leading-tight">
                   {t("welcome_add_favorites")}
