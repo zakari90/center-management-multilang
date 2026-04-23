@@ -2222,6 +2222,7 @@
     "welcome_dont_clear_cache": "Important: Do not clear your browser cache/site data to avoid losing progress.",
     "welcome_works_offline": "Works 100% offline once the application is fully cached in your browser.",
     "welcome_add_favorites": "Add this link to favorites / bookmarks for easy access.",
-    "welcome_confirm_btn": "I Understand & Accept, Get Started"
+    "welcome_confirm_btn": "Accept",
+    "welcome_cancel_btn": "Refuse"
   }
 }

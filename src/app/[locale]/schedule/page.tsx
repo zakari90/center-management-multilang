@@ -22,8 +22,14 @@ import { RefreshCw, Sun, Moon } from "lucide-react";
 import PublicFooter from "@/components/PublicFooter";
 import { CacheStatusDot } from "@/components/cache-status-indicator";
 import { WelcomeDialog } from "./attendance/components/WelcomeDialog";
-import { timeTableActions, attendanceActions, getScheduleDb } from "@/freelib/dexie/scheduleDb";
+import {
+  timeTableActions,
+  attendanceActions,
+  getScheduleDb,
+  isScheduleDatabaseCreated,
+} from "@/freelib/dexie/scheduleDb";
 import { centerActions } from "@/freelib/dexie/freedexieaction";
+import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 
 function SchedulePageContent() {
   const locale = useLocale();
@@ -33,16 +39,33 @@ function SchedulePageContent() {
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    // Check for first visit (empty state)
-    Promise.all([
-      centerActions.getAll(),
-      timeTableActions.getAll(),
-      attendanceActions.getAllSessions(),
-    ]).then(([centers, schedules, sessions]) => {
-      if (centers.length === 0 && schedules.length === 0 && sessions.length === 0) {
+    // Check for first visit (empty state) without triggering creation
+    const checkInitialState = async () => {
+      const dbExists = await isDatabaseCreated();
+      const scheduleDbExists = await isScheduleDatabaseCreated();
+
+      if (!dbExists && !scheduleDbExists) {
+        setShowWelcome(true);
+        return;
+      }
+
+      // If they exist, verify if they are actually empty
+      const [centers, schedules, sessions] = await Promise.all([
+        centerActions.getAll(),
+        timeTableActions.getAll(),
+        attendanceActions.getAllSessions(),
+      ]);
+
+      if (
+        centers.length === 0 &&
+        schedules.length === 0 &&
+        sessions.length === 0
+      ) {
         setShowWelcome(true);
       }
-    });
+    };
+
+    checkInitialState();
   }, []);
 
   useEffect(() => {
@@ -153,6 +176,9 @@ function SchedulePageContent() {
         t={tAttendance}
         onConfirm={() => {
           getScheduleDb().open();
+          setShowWelcome(false);
+        }}
+        onCancel={() => {
           setShowWelcome(false);
         }}
       />

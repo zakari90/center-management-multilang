@@ -2181,6 +2181,7 @@
     "welcome_dont_clear_cache": "هام: لا تمسح ذاكرة التخزين المؤقت للمتصفح لتجنب فقدان البيانات.",
     "welcome_works_offline": "يعمل النظام 100% بدون إنترنت بمجرد اكتمال تحميل التطبيق في متصفحك.",
     "welcome_add_favorites": "أضف هذا الرابط إلى المفضلة للوصول السريع والسهل.",
-    "welcome_confirm_btn": "أوافق وأفهم، ابدأ الآن"
+    "welcome_confirm_btn": "قبول",
+    "welcome_cancel_btn": "رفض"
   }
 }

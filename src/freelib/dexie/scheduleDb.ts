@@ -88,6 +88,13 @@ export const scheduleDb = new Proxy({} as ScheduleDatabase, {
   },
 });
 
+/**
+ * Check whether the schedule database has been created yet.
+ */
+export async function isScheduleDatabaseCreated(): Promise<boolean> {
+  return await Dexie.exists(SCHEDULE_DB_NAME);
+}
+
 export const timeTableActions = {
   save: async (entry: TimeTableEntry) => {
     return await scheduleDb.timetables.put(entry);

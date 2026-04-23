@@ -3,6 +3,7 @@
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -24,6 +25,7 @@ import { useLocale } from "next-intl";
 interface WelcomeDialogProps {
   open: boolean;
   onConfirm: () => void;
+  onCancel: () => void;
   isRtl: boolean;
   t: any;
 }
@@ -31,6 +33,7 @@ interface WelcomeDialogProps {
 export function WelcomeDialog({
   open,
   onConfirm,
+  onCancel,
   isRtl,
   t,
 }: WelcomeDialogProps) {
@@ -40,6 +43,11 @@ export function WelcomeDialog({
   const handleConfirm = () => {
     onConfirm();
     router.push(`/${locale}`);
+  };
+
+  const handleCancel = () => {
+    onCancel();
+    router.push(`/${locale}`); // Or wherever appropriate if they refuse
   };
 
   return (
@@ -106,10 +114,16 @@ export function WelcomeDialog({
           </div>
         </div>
 
-        <AlertDialogFooter>
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+          <AlertDialogCancel
+            onClick={handleCancel}
+            className="w-full sm:w-auto h-11 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold rounded-md transition-all"
+          >
+            {t("welcome_cancel_btn")}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md transition-all shadow-lg hover:shadow-indigo-500/25"
+            className="w-full sm:flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-md transition-all shadow-lg hover:shadow-indigo-500/25"
           >
             {t("welcome_confirm_btn")}
           </AlertDialogAction>

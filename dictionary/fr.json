@@ -2174,6 +2174,7 @@
     "welcome_dont_clear_cache": "Important : ne videz pas le cache de votre navigateur pour éviter de perdre votre progression.",
     "welcome_works_offline": "Fonctionne à 100 % hors ligne une fois l'application entièrement mise en cache dans votre navigateur.",
     "welcome_add_favorites": "Ajoutez ce lien à vos favoris pour un accès facile.",
-    "welcome_confirm_btn": "Je comprends et j'accepte, commencer"
+    "welcome_confirm_btn": "Accepter",
+    "welcome_cancel_btn": "Refuser"
   }
 }
