@@ -2163,5 +2163,17 @@
     "bookingInquiry": "Pour réservations ou demandes :",
     "contactEmail": "zakariazinedine1@gmail.com",
     "btnPaid": "Contactez-nous 💬"
+  },
+  "AttendanceRegister": {
+    "title": "Registre de Présence",
+    "welcome_title": "Bienvenue dans le système de présence",
+    "welcome_desc": "Un système de gestion intelligent qui fonctionne entièrement localement.",
+    "welcome_later_names": "Plus tard, vous pourrez ajouter des noms manuellement ou les charger depuis un fichier Excel.",
+    "welcome_privacy_title": "Confidentialité et Mode Hors Ligne",
+    "welcome_data_local": "Vos données sont enregistrées localement. Nous ne collectons pas vos données.",
+    "welcome_dont_clear_cache": "Important : ne videz pas le cache de votre navigateur pour éviter de perdre votre progression.",
+    "welcome_works_offline": "Fonctionne à 100 % hors ligne une fois l'application entièrement mise en cache dans votre navigateur.",
+    "welcome_add_favorites": "Ajoutez ce lien à vos favoris pour un accès facile.",
+    "welcome_confirm_btn": "Je comprends et j'accepte, commencer"
   }
 }
