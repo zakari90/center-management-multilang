@@ -75,6 +75,7 @@ export const SubjectSchema = SyncEntitySchema.extend({
 
 export const TeacherSubjectSchema = SyncEntitySchema.extend({
   percentage: z.number().min(0).max(100).optional().nullable(),
+  hourlyRate: z.number().min(0).optional().nullable(),
   assignedAt: z.number(),
   teacherId: z.string().min(1),
   subjectId: z.string().min(1),

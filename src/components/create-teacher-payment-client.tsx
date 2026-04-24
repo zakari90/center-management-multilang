@@ -493,9 +493,14 @@ export default function CreateTeacherPaymentFormClient({
                                       })}
                                     </Badge>
                                     <Badge variant="outline">
-                                      {t("subjectspercentage", {
-                                        percentage: subject.percentage,
-                                      })}
+                                      {subject.percentage
+                                        ? t("subjectspercentage", {
+                                            percentage: subject.percentage,
+                                          })
+                                        : t("subjectshourly", {
+                                            hourlyRate:
+                                              subject.hourlyRate || "",
+                                          })}
                                     </Badge>
                                     <Badge
                                       variant="secondary"
@@ -649,7 +654,7 @@ export default function CreateTeacherPaymentFormClient({
                         {t("summarytotal")}
                       </span>
                       <span className="text-2xl font-bold text-orange-600">
-                        ${totalAmount.toFixed(2)}
+                        MAD {totalAmount.toFixed(2)}
                       </span>
                     </div>
                   </CardContent>
