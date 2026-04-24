@@ -163,27 +163,7 @@ const parseWeeklySchedule = (
   return [];
 };
 
-const calculateHoursDifference = (
-  startTime: string,
-  endTime: string,
-): number => {
-  if (
-    !startTime ||
-    !endTime ||
-    typeof startTime !== "string" ||
-    typeof endTime !== "string"
-  ) {
-    return 0;
-  }
-  const startParts = startTime.split(":");
-  const endParts = endTime.split(":");
-  if (startParts.length < 2 || endParts.length < 2) return 0;
-  const [startHour, startMin] = startParts.map(Number);
-  const [endHour, endMin] = endParts.map(Number);
-  if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin))
-    return 0;
-  return (endHour * 60 + endMin - startHour * 60 - startMin) / 60;
-};
+
 
 const isWithinAvailability = (
   schedule: Schedule,
@@ -299,7 +279,6 @@ const exportTeacherScheduleToExcel = async (
     { header: "Subject", key: "subject", width: 20 },
     { header: "Grade", key: "grade", width: 10 },
     { header: t("room"), key: "room", width: 12 },
-    { header: `Duration (${t("hours")})`, key: "duration", width: 12 },
     { header: "Status", key: "status", width: 12 },
   ];
   schedulesSheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
@@ -316,10 +295,6 @@ const exportTeacherScheduleToExcel = async (
     return a.startTime.localeCompare(b.startTime);
   });
   const schedulesData = sortedSchedules.map((schedule) => {
-    const duration = calculateHoursDifference(
-      schedule.startTime,
-      schedule.endTime,
-    );
     const status = "OK";
     return {
       day: schedule.day,
@@ -328,22 +303,12 @@ const exportTeacherScheduleToExcel = async (
       subject: schedule.subject.name,
       grade: schedule.subject.grade,
       room: schedule.roomId,
-      duration: duration.toFixed(1),
       status,
     };
   });
   schedulesSheet.addRows(schedulesData);
   schedulesSheet.addRow({});
-  const schedulesTotalRow = schedulesSheet.addRow({
-    day: `Total ${t("scheduled")} ${t("hours")}:`,
-    duration: teacher.totalHours.toFixed(1),
-  });
-  schedulesTotalRow.font = { bold: true };
-  schedulesTotalRow.fill = {
-    type: "pattern" as const,
-    pattern: "solid",
-    fgColor: { argb: "FFF2F2F2" },
-  };
+
   schedulesSheet.eachRow((row, rowNumber) => {
     if (rowNumber > 1) {
       const statusCell = row.getCell("status");
