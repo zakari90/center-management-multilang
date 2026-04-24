@@ -165,16 +165,7 @@ const isTeacherAvailable = (
   startTime: string,
   endTime: string,
 ): boolean => {
-  const availability = parseWeeklySchedule(teacher?.weeklySchedule);
-  if (!availability || availability.length === 0) return false;
-
-  return availability.some((slot) => {
-    return (
-      normalizeDayKey(slot.day) === normalizeDayKey(dayKey) &&
-      startTime >= slot.startTime &&
-      endTime <= slot.endTime
-    );
-  });
+  return false;
 };
 
 export default function TimetableManagement({
@@ -731,26 +722,9 @@ export default function TimetableManagement({
                             "min-h-[80px] p-1.5 border rounded-md transition-all flex flex-col relative group/cell",
                             !effectiveReadOnly && "cursor-pointer",
                             "bg-background hover:border-primary/50",
-                            slots.length === 0 &&
-                              isAvailable &&
-                              "bg-green-50/60 hover:bg-green-100/50 border-green-200/50",
-                            slots.length === 0 &&
-                              currentTeacher &&
-                              !isAvailable &&
-                              "bg-muted/10 opacity-60",
                           )}
                         >
-                          {/* Availability Indicator */}
-                          {isAvailable && slots.length === 0 && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                              <div className="flex flex-col items-center opacity-40 group-hover/cell:opacity-100 transition-opacity">
-                                <CheckCircle className="h-4 w-4 text-green-600 mb-0.5" />
-                                <span className="text-[9px] font-bold text-green-700 uppercase tracking-wider">
-                                  {t("available") || "Available"}
-                                </span>
-                              </div>
-                            </div>
-                          )}
+
 
                           {/* Hover Add Icon (if empty) */}
                           {slots.length === 0 && !effectiveReadOnly && (

@@ -91,7 +91,6 @@ interface TeacherWithSchedule extends Teacher {
   schedules: Schedule[];
   totalHours: number;
   subjectsCount: number;
-  availableHours: number;
   costPerSubject: number;
   conflicts: Schedule[];
 }
@@ -192,16 +191,7 @@ const isWithinAvailability = (
   schedule: Schedule,
   availability: WeeklyScheduleSlot[],
 ): boolean => {
-  if (!schedule?.startTime || !schedule?.endTime) return false;
-  const availableSlot = availability.find(
-    (slot) => normalizeDayKey(slot.day) === normalizeDayKey(schedule.day),
-  );
-  if (!availableSlot || !availableSlot.startTime || !availableSlot.endTime)
-    return false;
-  return (
-    schedule.startTime >= availableSlot.startTime &&
-    schedule.endTime <= availableSlot.endTime
-  );
+  return true;
 };
 
 const timeToPosition = (time: string): number => {
@@ -225,34 +215,16 @@ const exportTeacherSchedule = (
   text += `${"=".repeat(50)}\n\n`;
   text += `Email: ${teacher.email || "N/A"}\n`;
   text += `${t("phone")}: ${teacher.phone || "N/A"}\n`;
-  text += `${t("available")} ${t("hours")}/Week: ${teacher.availableHours.toFixed(1)}${t("hours")}\n`;
   text += `${t("scheduled")} ${t("hours")}/Week: ${teacher.totalHours.toFixed(1)}${t("hours")}\n`;
   text += `${t("costPerSubject") || "Cost/Subject"}: ${teacher.costPerSubject.toFixed(2)} MAD\n\n`;
 
-  text += `${t("availableHours").toUpperCase()}:\n`;
-  text += `${"-".repeat(50)}\n`;
-  if (teacher.weeklySchedule.length > 0) {
-    teacher.weeklySchedule.forEach((slot) => {
-      text += `  ${slot.day.padEnd(12)} ${slot.startTime} - ${slot.endTime}\n`;
-    });
-  } else {
-    text += `  ${t("noAvailability")}\n`;
-  }
-  text += "\n";
+
 
   if (teacher.conflicts.length > 0) {
     text += `⚠️  ${t("conflictsAlert").toUpperCase()} (${teacher.conflicts.length}):\n`;
     text += `${"-".repeat(50)}\n`;
     teacher.conflicts.forEach((conflict) => {
-      const availability = teacher.weeklySchedule.find(
-        (s) => normalizeDayKey(s.day) === normalizeDayKey(conflict.day),
-      );
       text += `  ⚠️  ${conflict.day} ${conflict.startTime}-${conflict.endTime}: ${conflict.subject.name} (${conflict.subject.grade})\n`;
-      if (availability) {
-        text += `      ${t("available")}: ${availability.startTime}-${availability.endTime}\n`;
-      } else {
-        text += `      ${t("notAvailableOn")} ${conflict.day}\n`;
-      }
     });
     text += "\n";
   }
@@ -275,12 +247,7 @@ const exportTeacherSchedule = (
       daySchedules
         .sort((a, b) => a.startTime.localeCompare(b.startTime))
         .forEach((schedule) => {
-          const withinAvailability = isWithinAvailability(
-            schedule,
-            teacher.weeklySchedule,
-          );
-          const status = withinAvailability ? "✓" : "⚠";
-          text += `  ${status} ${schedule.startTime}-${schedule.endTime}: ${schedule.subject.name} (${schedule.subject.grade}) - ${t("room")}: ${schedule.roomId}\n`;
+          text += `  ✓ ${schedule.startTime}-${schedule.endTime}: ${schedule.subject.name} (${schedule.subject.grade}) - ${t("room")}: ${schedule.roomId}\n`;
         });
     }
   });
@@ -320,10 +287,6 @@ const exportTeacherScheduleToExcel = async (
     { field: "", value: "" },
     { field: "Statistics", value: "" },
     {
-      field: `${t("available")} ${t("hours")}/Week`,
-      value: `${teacher.availableHours.toFixed(1)} ${t("hours")}`,
-    },
-    {
       field: `${t("scheduled")} ${t("hours")}/Week`,
       value: `${teacher.totalHours.toFixed(1)} ${t("hours")}`,
     },
@@ -333,40 +296,6 @@ const exportTeacherScheduleToExcel = async (
   ];
   infoSheet.addRows(infoData);
 
-  const availabilitySheet = workbook.addWorksheet(t("availableHours"));
-  availabilitySheet.columns = [
-    { header: "Day", key: "day", width: 15 },
-    { header: "Start Time", key: "startTime", width: 12 },
-    { header: "End Time", key: "endTime", width: 12 },
-    { header: `Duration (${t("hours")})`, key: "duration", width: 15 },
-  ];
-  availabilitySheet.getRow(1).font = {
-    bold: true,
-    color: { argb: "FFFFFFFF" },
-  };
-  availabilitySheet.getRow(1).fill = {
-    type: "pattern" as const,
-    pattern: "solid",
-    fgColor: { argb: "FF4472C4" },
-  };
-  const availabilityData = teacher.weeklySchedule.map((slot) => ({
-    day: slot.day,
-    startTime: slot.startTime,
-    endTime: slot.endTime,
-    duration: calculateHoursDifference(slot.startTime, slot.endTime).toFixed(1),
-  }));
-  availabilitySheet.addRows(availabilityData);
-  availabilitySheet.addRow({});
-  const totalRow = availabilitySheet.addRow({
-    day: `Total ${t("available")} ${t("hours")}:`,
-    duration: teacher.availableHours.toFixed(1),
-  });
-  totalRow.font = { bold: true };
-  totalRow.fill = {
-    type: "pattern" as const,
-    pattern: "solid",
-    fgColor: { argb: "FFF2F2F2" },
-  };
 
   const schedulesSheet = workbook.addWorksheet(t("classes"));
   schedulesSheet.columns = [
@@ -397,11 +326,7 @@ const exportTeacherScheduleToExcel = async (
       schedule.startTime,
       schedule.endTime,
     );
-    const withinAvailability = isWithinAvailability(
-      schedule,
-      teacher.weeklySchedule,
-    );
-    const status = withinAvailability ? "✓ OK" : `⚠ ${t("conflict")}`;
+    const status = "OK";
     return {
       day: schedule.day,
       startTime: schedule.startTime,
@@ -435,13 +360,6 @@ const exportTeacherScheduleToExcel = async (
           fgColor: { argb: "FFC6EFCE" },
         };
         statusCell.font = { color: { argb: "FF006100" } };
-      } else if (statusCell.value?.toString().includes("⚠")) {
-        statusCell.fill = {
-          type: "pattern" as const,
-          pattern: "solid",
-          fgColor: { argb: "FFFFEB9C" },
-        };
-        statusCell.font = { color: { argb: "FF9C6500" } };
       }
     }
   });
@@ -454,7 +372,6 @@ const exportTeacherScheduleToExcel = async (
       { header: "Subject", key: "subject", width: 20 },
       { header: "Grade", key: "grade", width: 10 },
       { header: t("room"), key: "room", width: 12 },
-      { header: `${t("available")} Time`, key: "availableTime", width: 18 },
       { header: "Issue", key: "issue", width: 40 },
     ];
     conflictsSheet.getRow(1).font = {
@@ -467,21 +384,13 @@ const exportTeacherScheduleToExcel = async (
       fgColor: { argb: "FFC00000" },
     };
     const conflictsData = teacher.conflicts.map((conflict) => {
-      const availability = teacher.weeklySchedule.find(
-        (s) => normalizeDayKey(s.day) === normalizeDayKey(conflict.day),
-      );
-      const issue = availability
-        ? `${t("outsideAvailableHours")} (${availability.startTime}-${availability.endTime})`
-        : `${t("notAvailableOn")} ${conflict.day}`;
+      const issue = "Conflict";
       return {
         day: conflict.day,
         scheduledTime: `${conflict.startTime} - ${conflict.endTime}`,
         subject: conflict.subject.name,
         grade: conflict.subject.grade,
         room: conflict.roomId,
-        availableTime: availability
-          ? `${availability.startTime} - ${availability.endTime}`
-          : "N/A",
         issue,
       };
     });
@@ -546,13 +455,7 @@ const exportTeacherScheduleToExcel = async (
       if (schedule) {
         row[dayKey] = `${schedule.subject.name} (${schedule.roomId})`;
       } else {
-        const isAvailable = teacher.weeklySchedule.some(
-          (slot) =>
-            normalizeDayKey(slot.day) === dayKey &&
-            slot.startTime <= time &&
-            slot.endTime > time,
-        );
-        row[dayKey] = isAvailable ? t("available") : "-";
+        row[dayKey] = "-";
       }
     });
     weeklySheet.addRow(row);
@@ -561,13 +464,7 @@ const exportTeacherScheduleToExcel = async (
     if (rowNumber > 1) {
       DAYS.forEach((dayKey) => {
         const cell = row.getCell(dayKey);
-        if (cell.value === t("available")) {
-          cell.fill = {
-            type: "pattern" as const,
-            pattern: "solid",
-            fgColor: { argb: "FFC6EFCE" },
-          };
-        } else if (cell.value && cell.value !== "-") {
+        if (cell.value && cell.value !== "-") {
           cell.fill = {
             type: "pattern" as const,
             pattern: "solid",
@@ -790,10 +687,6 @@ export default function TeacherScheduleView({
             return sum + calculateHoursDifference(s.startTime, s.endTime);
           }, 0);
 
-          const availableHours = weeklySchedule.reduce((sum, slot) => {
-            return sum + calculateHoursDifference(slot.startTime, slot.endTime);
-          }, 0);
-
           const teacherSubjectsSet = new Set(
             teacherSchedules.map((s) => s.subjectId),
           );
@@ -808,7 +701,6 @@ export default function TeacherScheduleView({
             schedules: teacherSchedules,
             totalHours,
             subjectsCount: teacherSubjectsSet.size,
-            availableHours,
             costPerSubject: 0, // Placeholder
             conflicts,
           };
@@ -1088,9 +980,7 @@ export default function TeacherScheduleView({
                   }
                 />
 
-                {isAdmin && (
-                  <AvailabilityCard teacher={teacher} tCommon={tCommon} />
-                )}
+
 
                 <TableScheduleView
                   teacher={teacher}
@@ -1152,17 +1042,7 @@ function TeacherInfoCard({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {isAdmin && (
-            <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 dark:bg-blue-500/15 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {teacher.availableHours.toFixed(1)}
-                {t("hours")}
-              </div>
-              <div className="text-xs text-muted-foreground dark:text-foreground/60">
-                {t("available")}
-              </div>
-            </div>
-          )}
+
           <div className="text-center p-4 bg-green-500/10 border border-green-500/20 dark:bg-green-500/15 rounded-lg">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {teacher.totalHours.toFixed(1)}
@@ -1277,55 +1157,7 @@ function TeacherInfoCard({
   );
 }
 
-// ==================== AVAILABILITY CARD ====================
 
-function AvailabilityCard({
-  teacher,
-  tCommon,
-}: {
-  teacher: TeacherWithSchedule;
-  tCommon: ReturnType<typeof useTranslations>;
-}) {
-  const t = useTranslations("TeacherScheduleView");
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Clock className="h-5 w-5 text-blue-600" />
-          {t("availableHours")}
-        </CardTitle>
-        <CardDescription>{t("availableHoursDescription")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {teacher.weeklySchedule.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {teacher.weeklySchedule.map((slot, idx) => (
-              <div
-                key={idx}
-                className="p-3 bg-primary/10 border border-primary/20 rounded-lg"
-              >
-                <div className="font-semibold text-sm text-primary">
-                  {tCommon(`daysOfWeek.${normalizeDayKey(slot.day)}`)}
-                </div>
-                <div className="text-sm text-primary/80 mt-1 flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {slot.startTime} - {slot.endTime}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">{t("noAvailability")}</p>
-            <p className="text-xs mt-1">{t("noAvailabilityDescription")}</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
 
 // ==================== TABLE SCHEDULE VIEW ====================
 
@@ -1546,23 +1378,6 @@ function GridScheduleView({
                     );
                   })}
                 </div>
-              ) : dayAvailability.length > 0 ? (
-                <div className="text-center py-4 text-muted-foreground">
-                  <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-500" />
-                  <p className="text-sm mb-2">{t("availableButNoClasses")}</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {dayAvailability.map((slot, idx) => (
-                      <Badge
-                        key={idx}
-                        variant="outline"
-                        className="text-xs font-mono bg-green-50 text-green-700 border-green-200"
-                      >
-                        <Clock className="h-2.5 w-2.5 mr-1" />
-                        {slot.startTime} - {slot.endTime}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
               ) : null}
             </CardContent>
           </Card>
@@ -1613,12 +1428,7 @@ function ListScheduleView({
                   {tCommon(`daysOfWeek.${day}`)}
                 </CardTitle>
                 <div className="flex items-center gap-2">
-                  {dayAvailability && (
-                    <Badge variant="outline" className="text-xs">
-                      {t("available")}: {dayAvailability.startTime}-
-                      {dayAvailability.endTime}
-                    </Badge>
-                  )}
+
                   <Badge variant="secondary">
                     {daySchedules.length}{" "}
                     {daySchedules.length === 1
@@ -1755,22 +1565,7 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               </div>
 
               <div className="relative h-16 bg-gray-100 rounded-lg overflow-hidden border">
-                {availability.map((slot, idx) => {
-                  const start = timeToPosition(slot.startTime);
-                  const width = timeToPosition(slot.endTime) - start;
-                  return (
-                    <div
-                      key={`avail-${idx}`}
-                      className="absolute h-full bg-green-200/50 border-l-2 border-r-2 border-green-400"
-                      style={{ left: `${start}%`, width: `${width}%` }}
-                      title={`${t("available")}: ${slot.startTime} - ${slot.endTime}`}
-                    >
-                      <div className="text-xs p-1 text-green-800 font-medium truncate">
-                        {t("available")}
-                      </div>
-                    </div>
-                  );
-                })}
+
 
                 {schedules.map((schedule, idx) => {
                   const start = timeToPosition(schedule.startTime);
