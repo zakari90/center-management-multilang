@@ -163,8 +163,6 @@ const parseWeeklySchedule = (
   return [];
 };
 
-
-
 const isWithinAvailability = (
   schedule: Schedule,
   availability: WeeklyScheduleSlot[],
@@ -193,9 +191,6 @@ const exportTeacherSchedule = (
   text += `${"=".repeat(50)}\n\n`;
   text += `Email: ${teacher.email || "N/A"}\n`;
   text += `${t("phone")}: ${teacher.phone || "N/A"}\n`;
-
-
-
 
   if (teacher.conflicts.length > 0) {
     text += `⚠️  ${t("conflictsAlert").toUpperCase()} (${teacher.conflicts.length}):\n`;
@@ -269,7 +264,6 @@ const exportTeacherScheduleToExcel = async (
     { field: t("conflict"), value: teacher.conflicts.length },
   ];
   infoSheet.addRows(infoData);
-
 
   const schedulesSheet = workbook.addWorksheet(t("classes"));
   schedulesSheet.columns = [
@@ -642,8 +636,6 @@ export default function TeacherScheduleView({
           );
           const weeklySchedule = parseWeeklySchedule(teacher.weeklySchedule);
 
-
-
           const teacherSubjectsSet = new Set(
             teacherSchedules.map((s) => s.subjectId),
           );
@@ -935,8 +927,6 @@ export default function TeacherScheduleView({
                   }
                 />
 
-
-
                 <TableScheduleView
                   teacher={teacher}
                   tCommon={tCommon}
@@ -997,8 +987,6 @@ function TeacherInfoCard({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-
-
           <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {teacher.schedules.length}
@@ -1093,8 +1081,6 @@ function TeacherInfoCard({
     </Card>
   );
 }
-
-
 
 // ==================== TABLE SCHEDULE VIEW ====================
 
@@ -1365,7 +1351,6 @@ function ListScheduleView({
                   {tCommon(`daysOfWeek.${day}`)}
                 </CardTitle>
                 <div className="flex items-center gap-2">
-
                   <Badge variant="secondary">
                     {daySchedules.length}{" "}
                     {daySchedules.length === 1
@@ -1502,8 +1487,6 @@ function TimelineScheduleView({ teacher }: { teacher: TeacherWithSchedule }) {
               </div>
 
               <div className="relative h-16 bg-gray-100 rounded-lg overflow-hidden border">
-
-
                 {schedules.map((schedule, idx) => {
                   const start = timeToPosition(schedule.startTime);
                   const width = timeToPosition(schedule.endTime) - start;

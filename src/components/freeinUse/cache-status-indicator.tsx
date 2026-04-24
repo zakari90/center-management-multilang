@@ -1,8 +1,8 @@
 "use client";
 
-import { useIsOnline } from "@/hooks/useOnlineStatus";
+
 import { useTranslations } from "next-intl";
-import { CloudOff, Database, RefreshCcw, ShieldAlert } from "lucide-react";
+import { Database, RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -22,7 +22,7 @@ import { cn } from "@/freelib/utils";
  * Hides if everything is cached (global allCached state).
  */
 export function CacheStatusDot({ href }: { href: string }) {
-  const isOnline = useIsOnline();
+
   const allCached = useCacheStatusStore(
     (state: CacheStatusState) => state.allCached,
   );
@@ -33,8 +33,8 @@ export function CacheStatusDot({ href }: { href: string }) {
     (state: CacheStatusState) => state.isInitialCheckDone,
   );
 
-  // Don't show dots if online and everything is cached
-  if (isOnline && allCached) return null;
+  // Don't show dots if everything is cached
+  if (allCached) return null;
 
   // Wait for initial check to avoid flickering
   if (!isInitialCheckDone) return null;
@@ -59,7 +59,7 @@ interface CacheStatusIndicatorProps {
 }
 
 export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
-  const isOnline = useIsOnline();
+
   const allCached = useCacheStatusStore(
     (state: CacheStatusState) => state.allCached,
   );
@@ -70,17 +70,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1.5 cursor-default select-none">
-            {!isOnline ? (
-              <Badge
-                variant="outline"
-                className="bg-orange-50 text-orange-700 border-orange-200 gap-1"
-              >
-                <CloudOff className="hidden md:block h-3 w-3" />
-                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
-                  {t("offline")}
-                </span>
-              </Badge>
-            ) : allCached ? (
+            {allCached ? (
               <Badge
                 variant="outline"
                 className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1"
@@ -109,9 +99,7 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
           className="text-xs max-w-[200px]"
         >
           <p>
-            {!isOnline
-              ? t("offline")
-              : allCached
+            {allCached
                 ? t("ready") || "Ready for offline"
                 : t("caching") || "Caching for offline"}
           </p>

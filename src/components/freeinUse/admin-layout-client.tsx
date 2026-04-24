@@ -232,7 +232,7 @@ export default function AdminLayoutClient({
                 <Button variant="ghost" size="icon" className="h-12 w-12">
                   <div className="relative">
                     <MoreVertical className="h-5 w-5" />
-                    <OnlineStatusDot className="absolute -top-1 -right-1 h-2.5 w-2.5 border-2" />
+                    {/* <OnlineStatusDot className="absolute -top-1 -right-1 h-2.5 w-2.5 border-2" /> */}
                   </div>
                   <span className="sr-only">Menu</span>
                 </Button>
