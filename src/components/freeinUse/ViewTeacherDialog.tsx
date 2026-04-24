@@ -276,9 +276,6 @@ export default function ViewTeacherDialog({
                       className="flex justify-between items-center border rounded-md p-2"
                     >
                       <span className="font-medium text-sm">{day.day}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {day.startTime} – {day.endTime}
-                      </span>
                     </div>
                   ))}
                 </CardContent>

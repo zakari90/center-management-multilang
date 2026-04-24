@@ -3,12 +3,11 @@
 
 import type React from "react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   teacherActions,
   teacherSubjectActions,
   subjectActions,
-  userActions,
 } from "@/freelib/dexie/freedexieaction";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 import { useAuth } from "@/freelib/context/freeauthContext";
@@ -34,6 +33,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+// ==================== CONSTANTS ====================
+const DAYS = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
 
 // ==================== INTERFACES ====================
 interface DaySchedule {
@@ -76,11 +86,7 @@ const SubjectCompensationCard = ({
   index: number;
   subjects: Subject[];
   assignedSubjects: TeacherSubjectForm[];
-  onUpdate: (
-    index: number,
-    field: keyof TeacherSubjectForm,
-    value: any,
-  ) => void;
+  onUpdate: (index: number, field: keyof TeacherSubjectForm, value: any) => void;
   onRemove: (index: number) => void;
 }) => {
   const t = useTranslations("EditTeacherPage");
@@ -90,16 +96,44 @@ const SubjectCompensationCard = ({
       !assignedSubjects.some((ts, i) => i !== index && ts.subjectId === s.id),
   );
 
+  const selectedSubject = subjects.find(
+    (s) => s.id === teacherSubject.subjectId,
+  );
+
+  const calculateEstimatedEarnings = () => {
+    if (!selectedSubject) return "MAD 0.00";
+
+    if (
+      teacherSubject.compensationType === "percentage" &&
+      teacherSubject.percentage
+    ) {
+      const earnings = (selectedSubject.price * teacherSubject.percentage) / 100;
+      return `MAD ${earnings.toFixed(2)}`;
+    }
+
+    if (
+      teacherSubject.compensationType === "hourly" &&
+      teacherSubject.hourlyRate
+    ) {
+      return `MAD ${teacherSubject.hourlyRate.toFixed(2)}/hr`;
+    }
+
+    return "MAD 0.00";
+  };
+
   return (
-    <Card className="bg-muted/50">
-      <CardContent className="pt-3 pb-3 space-y-3">
+    <Card className="bg-muted/50 overflow-hidden mb-2">
+      <CardContent className="p-3 space-y-3">
         <div className="flex items-start gap-2">
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 min-w-0 space-y-1">
+            <Label htmlFor={`subject-${index}`} className="text-[10px] uppercase text-muted-foreground">
+              {t("subject")}
+            </Label>
             <Select
               value={teacherSubject.subjectId}
               onValueChange={(value) => onUpdate(index, "subjectId", value)}
             >
-              <SelectTrigger className="w-full h-9 text-sm">
+              <SelectTrigger id={`subject-${index}`} className="w-full h-9 text-sm">
                 <SelectValue placeholder={t("selectSubject")} />
               </SelectTrigger>
               <SelectContent position="popper" sideOffset={5}>
@@ -109,7 +143,7 @@ const SubjectCompensationCard = ({
                     value={subject.id}
                     className="text-sm"
                   >
-                    <span className="truncate max-w-[200px] sm:max-w-[300px] inline-block">
+                    <span className="truncate max-w-[250px] inline-block">
                       {subject.name} ({subject.grade}) - MAD {subject.price}
                     </span>
                   </SelectItem>
@@ -122,54 +156,75 @@ const SubjectCompensationCard = ({
             variant="ghost"
             size="icon"
             onClick={() => onRemove(index)}
-            className="h-9 w-9 text-destructive hover:text-destructive"
+            className="h-8 w-8 mt-6 text-destructive hover:text-destructive shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Select
-            value={teacherSubject.compensationType}
-            onValueChange={(value) =>
-              onUpdate(index, "compensationType", value)
-            }
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" sideOffset={5}>
-              <SelectItem value="percentage">{t("percentage")}</SelectItem>
-              <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+          <div className="space-y-1">
+            <Label className="text-[10px] uppercase text-muted-foreground">
+              {t("paymentType")}
+            </Label>
+            <Select
+              value={teacherSubject.compensationType}
+              onValueChange={(value) =>
+                onUpdate(index, "compensationType", value)
+              }
+            >
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent position="popper" sideOffset={5}>
+                <SelectItem value="percentage">{t("percentage")}</SelectItem>
+                <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {teacherSubject.compensationType === "percentage" ? (
-            <Input
-              type="number"
-              min={1}
-              max={100}
-              step={0.1}
-              value={teacherSubject.percentage || ""}
-              onChange={(e) =>
-                onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
-              }
-              placeholder="50%"
-              className="h-9 text-sm w-16"
-            />
-          ) : (
-            <Input
-              type="number"
-              min={0}
-              step={0.01}
-              value={teacherSubject.hourlyRate || ""}
-              onChange={(e) =>
-                onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
-              }
-              placeholder="MAD/hr"
-              className="h-9 text-sm"
-            />
-          )}
+          <div className="space-y-1">
+            <Label className="text-[10px] uppercase text-muted-foreground">
+              {teacherSubject.compensationType === "percentage" ? t("percentage") : t("hourlyRate")}
+            </Label>
+            {teacherSubject.compensationType === "percentage" ? (
+              <Input
+                type="number"
+                min={1}
+                max={100}
+                step={0.1}
+                value={teacherSubject.percentage || ""}
+                onChange={(e) =>
+                  onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
+                }
+                placeholder="50%"
+                className="h-9 text-sm"
+              />
+            ) : (
+              <Input
+                type="number"
+                min={0}
+                step={0.01}
+                value={teacherSubject.hourlyRate || ""}
+                onChange={(e) =>
+                  onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
+                }
+                placeholder="MAD/hr"
+                className="h-9 text-sm"
+              />
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-[10px] uppercase text-muted-foreground">
+              {t("estEarnings")}
+            </Label>
+            <div className="h-9 flex items-center justify-center bg-background rounded-md border px-2">
+              <p className="text-xs font-bold text-primary truncate">
+                {calculateEstimatedEarnings()}
+              </p>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -190,16 +245,6 @@ export default function EditTeacherDialog({
   const [error, setError] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
-  const DAYS = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-  ];
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -210,8 +255,8 @@ export default function EditTeacherDialog({
   const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
     DAYS.map((day) => ({
       day,
-      startTime: "19:00",
-      endTime: "21:00",
+      startTime: "09:00",
+      endTime: "17:00",
       isAvailable: false,
     })),
   );
@@ -279,52 +324,17 @@ export default function EditTeacherDialog({
             isAvailable: false,
           }));
 
-          const normalizeDayLocal = (day: string): string => {
-            if (!day) return "";
-            const d = day.toLowerCase().trim();
-            // English
-            if (
-              d === "monday" ||
-              d === "mon" ||
-              d === t("monday").toLowerCase()
-            )
-              return "monday";
-            if (
-              d === "tuesday" ||
-              d === "tue" ||
-              d === t("tuesday").toLowerCase()
-            )
-              return "tuesday";
-            if (
-              d === "wednesday" ||
-              d === "wed" ||
-              d === t("wednesday").toLowerCase()
-            )
-              return "wednesday";
-            if (
-              d === "thursday" ||
-              d === "thu" ||
-              d === t("thursday").toLowerCase()
-            )
-              return "thursday";
-            if (
-              d === "friday" ||
-              d === "fri" ||
-              d === t("friday").toLowerCase()
-            )
-              return "friday";
-            if (
-              d === "saturday" ||
-              d === "sat" ||
-              d === t("saturday").toLowerCase()
-            )
-              return "saturday";
-            if (
-              d === "sunday" ||
-              d === "sun" ||
-              d === t("sunday").toLowerCase()
-            )
-              return "sunday";
+          const normalizeDayLocal = (dayStr: string): string => {
+            if (!dayStr) return "";
+            const d = dayStr.toLowerCase().trim();
+            // Match against hardcoded DAYS and translated versions
+            if (d === "monday" || d === "mon" || d === t("monday").toLowerCase()) return "monday";
+            if (d === "tuesday" || d === "tue" || d === t("tuesday").toLowerCase()) return "tuesday";
+            if (d === "wednesday" || d === "wed" || d === t("wednesday").toLowerCase()) return "wednesday";
+            if (d === "thursday" || d === "thu" || d === t("thursday").toLowerCase()) return "thursday";
+            if (d === "friday" || d === "fri" || d === t("friday").toLowerCase()) return "friday";
+            if (d === "saturday" || d === "sat" || d === t("saturday").toLowerCase()) return "saturday";
+            if (d === "sunday" || d === "sun" || d === t("sunday").toLowerCase()) return "sunday";
             return d;
           };
 
@@ -385,7 +395,7 @@ export default function EditTeacherDialog({
       };
       fetchData();
     }
-  }, [open, teacherId, user, t, DAYS]);
+  }, [open, teacherId, user, t]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -461,6 +471,14 @@ export default function EditTeacherDialog({
         }
       }
 
+      // Check for email uniqueness if changed
+      if (formData.email) {
+        const existingWithEmail = await teacherActions.getLocalByEmail?.(formData.email);
+        if (existingWithEmail && existingWithEmail.id !== teacherId) {
+          throw new Error(t("emailAlreadyInUse") || "Email already in use");
+        }
+      }
+
       // Get existing teacher
       const existingTeacher = await teacherActions.getLocal(teacherId);
       if (!existingTeacher) {
@@ -471,9 +489,7 @@ export default function EditTeacherDialog({
       const now = Date.now();
       const activeSchedule = weeklySchedule
         .filter((day) => day.isAvailable)
-        .map(({ day, startTime, endTime }) =>
-          JSON.stringify({ day, startTime, endTime }),
-        );
+        .map(({ day }) => JSON.stringify({ day }));
 
       const updatedTeacher = {
         ...existingTeacher,
@@ -481,8 +497,7 @@ export default function EditTeacherDialog({
         email: formData.email || undefined,
         phone: formData.phone || undefined,
         address: formData.address || undefined,
-        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
-
+        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
         updatedAt: now,
       };
 
@@ -668,7 +683,7 @@ export default function EditTeacherDialog({
                     {t("noSubjectsAssigned")}
                   </p>
                 ) : (
-                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  <div className="space-y-1 max-h-[300px] overflow-y-auto pr-1">
                     {teacherSubjects.map((ts, index) => (
                       <SubjectCompensationCard
                         key={index}
@@ -720,58 +735,6 @@ export default function EditTeacherDialog({
                   ))}
                 </div>
 
-                {weeklySchedule.some((s) => s.isAvailable) && (
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-medium text-muted-foreground block mb-1">
-                        {t("from")}
-                      </span>
-                      <Input
-                        type="time"
-                        value={
-                          weeklySchedule.find((s) => s.isAvailable)
-                            ?.startTime || "09:00"
-                        }
-                        onChange={(e) => {
-                          weeklySchedule.forEach((s, i) => {
-                            if (s.isAvailable) {
-                              handleScheduleChange(
-                                i,
-                                "startTime",
-                                e.target.value,
-                              );
-                            }
-                          });
-                        }}
-                        className="h-9"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <span className="text-xs font-medium text-muted-foreground block mb-1">
-                        {t("to")}
-                      </span>
-                      <Input
-                        type="time"
-                        value={
-                          weeklySchedule.find((s) => s.isAvailable)?.endTime ||
-                          "17:00"
-                        }
-                        onChange={(e) => {
-                          weeklySchedule.forEach((s, i) => {
-                            if (s.isAvailable) {
-                              handleScheduleChange(
-                                i,
-                                "endTime",
-                                e.target.value,
-                              );
-                            }
-                          });
-                        }}
-                        className="h-9"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             </form>
           )}
@@ -786,11 +749,11 @@ export default function EditTeacherDialog({
             >
               {t("cancel")}
             </Button>
-            <Button form="edit-teacher-form" type="submit" disabled={isLoading}>
+            <Button form="edit-teacher-form" type="submit" disabled={isLoading || isFetching}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
+                  {t("saveChanges")}...
                 </>
               ) : (
                 t("saveChanges")

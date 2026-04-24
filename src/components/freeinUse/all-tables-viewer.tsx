@@ -82,6 +82,7 @@ export function AllTablesViewer() {
       name: t("tables.users"),
       icon: Users,
       color: "bg-blue-500",
+      iconColor: "text-blue-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         {
@@ -149,6 +150,7 @@ export function AllTablesViewer() {
       name: t("tables.teachers"),
       icon: GraduationCap,
       color: "bg-green-500",
+      iconColor: "text-green-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         {
@@ -207,6 +209,7 @@ export function AllTablesViewer() {
       name: t("tables.students"),
       icon: Users,
       color: "bg-purple-500",
+      iconColor: "text-purple-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         {
@@ -263,6 +266,7 @@ export function AllTablesViewer() {
       name: t("tables.subjects"),
       icon: BookOpen,
       color: "bg-orange-500",
+      iconColor: "text-orange-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         {
@@ -320,6 +324,7 @@ export function AllTablesViewer() {
       name: t("tables.teacherSubjects"),
       icon: GraduationCap,
       color: "bg-teal-500",
+      iconColor: "text-teal-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         { key: "teacherId", header: t("columns.teacherId"), sortable: true },
@@ -381,6 +386,7 @@ export function AllTablesViewer() {
       name: t("tables.studentSubjects"),
       icon: Users,
       color: "bg-indigo-500",
+      iconColor: "text-indigo-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         { key: "studentId", header: t("columns.studentId"), sortable: true },
@@ -434,6 +440,7 @@ export function AllTablesViewer() {
       name: t("tables.receipts"),
       icon: Receipt,
       color: "bg-red-500",
+      iconColor: "text-red-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         {
@@ -512,6 +519,7 @@ export function AllTablesViewer() {
       name: t("tables.schedules"),
       icon: Calendar,
       color: "bg-cyan-500",
+      iconColor: "text-cyan-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         { key: "day", header: t("columns.day"), sortable: true },
@@ -592,6 +600,7 @@ export function AllTablesViewer() {
       name: t("tables.centers"),
       icon: Building2,
       color: "bg-indigo-500",
+      iconColor: "text-indigo-500",
       columns: [
         { key: "id", header: t("columns.id"), sortable: true },
         {
@@ -908,9 +917,7 @@ export function AllTablesViewer() {
                     <div
                       className={`p-2 rounded-lg ${config.color} bg-opacity-10`}
                     >
-                      <Icon
-                        className={`h-5 w-5 ${config.color.replace("bg-", "text-")}`}
-                      />
+                      <Icon className={`h-5 w-5 ${config.iconColor}`} />
                     </div>
                     <Badge variant="secondary">{count}</Badge>
                   </div>

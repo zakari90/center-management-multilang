@@ -127,7 +127,7 @@ export default function AdminLayoutClient({
     {
       title: t("users"),
       url: `${base}/free/admin/users`,
-      icon: "/admin.svg",
+      icon: "/manager.svg",
     },
     {
       title: t("receipts"),

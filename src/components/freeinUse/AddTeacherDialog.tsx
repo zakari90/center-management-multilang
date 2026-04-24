@@ -457,9 +457,7 @@ export default function AddTeacherDialog({
       // Prepare weekly schedule
       const activeSchedule = weeklySchedule
         .filter((day) => day.isAvailable)
-        .map(({ day, startTime, endTime }) =>
-          JSON.stringify({ day, startTime, endTime }),
-        );
+        .map(({ day }) => JSON.stringify({ day }));
 
       // Create teacher in local DB
       const now = Date.now();
@@ -807,57 +805,6 @@ export default function AddTeacherDialog({
         ))}
       </div>
 
-      {/* Time inputs for selected days */}
-      {weeklySchedule.some((s) => s.isAvailable) && (
-        <div className="grid grid-cols-2 gap-3 pt-2">
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="bulk-start-time"
-              className="text-xs text-muted-foreground sr-only md:not-sr-only"
-            >
-              {t("from")}
-            </Label>
-            <Input
-              id="bulk-start-time"
-              type="time"
-              value={
-                weeklySchedule.find((s) => s.isAvailable)?.startTime || "09:00"
-              }
-              onChange={(e) => {
-                weeklySchedule.forEach((s, i) => {
-                  if (s.isAvailable) {
-                    handleScheduleChange(i, "startTime", e.target.value);
-                  }
-                });
-              }}
-              className="h-10 md:h-9"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="bulk-end-time"
-              className="text-xs text-muted-foreground sr-only md:not-sr-only"
-            >
-              {t("to")}
-            </Label>
-            <Input
-              id="bulk-end-time"
-              type="time"
-              value={
-                weeklySchedule.find((s) => s.isAvailable)?.endTime || "17:00"
-              }
-              onChange={(e) => {
-                weeklySchedule.forEach((s, i) => {
-                  if (s.isAvailable) {
-                    handleScheduleChange(i, "endTime", e.target.value);
-                  }
-                });
-              }}
-              className="h-10 md:h-9"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 

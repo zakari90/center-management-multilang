@@ -438,6 +438,7 @@
     "noCenters": "No centers created yet",
     "createFirstCenter": "Create First Center",
     "managers": "manager(s)",
+    "admins": "admins",
     "students": "Students",
     "teachers": "Teachers",
     "revenue": "Revenue",
@@ -1426,7 +1427,8 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday",
-    "unauthorized": "Unauthorized: Please log in again"
+    "unauthorized": "Unauthorized: Please log in again",
+    "emailAlreadyInUse": "Email already in use"
   },
   "StudentsTable": {
     "title": "Students",
@@ -2014,6 +2016,7 @@
       "email": "Email",
       "password": "Password",
       "role": "Role",
+      "admins": "Admins",
       "status": "Status",
       "phone": "Phone",
       "grade": "Grade",

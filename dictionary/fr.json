@@ -311,6 +311,7 @@
     "noCenters": "Aucun centre créé pour l'instant",
     "createFirstCenter": "Créer le premier centre",
     "managers": "gestionnaire(s)",
+    "admins": "administrateurs",
     "students": "Élèves",
     "teachers": "Enseignants",
     "revenue": "Revenu",
@@ -1281,7 +1282,8 @@
     "friday": "Vendredi",
     "saturday": "Samedi",
     "sunday": "Dimanche",
-    "unauthorized": "Non autorisé : Veuillez vous reconnecter"
+    "unauthorized": "Non autorisé : Veuillez vous reconnecter",
+    "emailAlreadyInUse": "L'email est déjà utilisé"
   },
   "StudentsTable": {
     "title": "Élèves",
@@ -1896,6 +1898,7 @@
       "email": "Email",
       "password": "Mot de passe",
       "role": "Rôle",
+      "admins": "Administrateurs",
       "status": "Statut",
       "phone": "Téléphone",
       "grade": "Niveau",
