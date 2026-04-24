@@ -466,7 +466,7 @@ export default function CreateTeacherPaymentFormClient({
                                     </Badge>
                                     <Badge variant="outline">
                                       {t("subjectspercentage", {
-                                        percentage: subject.percentage,
+                                        percentage: subject.percentage ?? 0,
                                       })}
                                     </Badge>
                                     <Badge
