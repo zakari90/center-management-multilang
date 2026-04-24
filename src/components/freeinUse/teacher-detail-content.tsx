@@ -261,8 +261,6 @@ export function TeacherDetailContent({
             )}
           </CardContent>
         </Card>
-
-        </Card>
       </PdfExporter>
       {!isModal && (
         <div className="mt-6">
