@@ -29,12 +29,7 @@ import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 
 // ==================== INTERFACES ====================
-interface DaySchedule {
-  day: string;
-  startTime: string;
-  endTime: string;
-  isAvailable: boolean;
-}
+
 
 interface Subject {
   id: string;
@@ -225,83 +220,7 @@ const SubjectCompensationCard = ({
   );
 };
 
-// Weekly Schedule Section
-const WeeklyScheduleSection = ({
-  weeklySchedule,
-  onChange,
-}: {
-  weeklySchedule: DaySchedule[];
-  onChange: (
-    index: number,
-    field: keyof DaySchedule,
-    value: string | boolean,
-  ) => void;
-}) => {
-  const t = useTranslations("CreateTeacherForm");
 
-  return (
-    <div className="border-b pb-6">
-      <h2 className="text-xl font-semibold mb-4">{t("weeklySchedule")}</h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        {t("selectAvailable")}
-      </p>
-
-      <div className="space-y-3">
-        {weeklySchedule.map((schedule, index) => (
-          <div
-            key={schedule.day}
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-muted rounded-md"
-          >
-            {/* Day Checkbox */}
-            <div className="flex items-center min-w-[120px]">
-              <Checkbox
-                id={`day-${schedule.day}`}
-                checked={schedule.isAvailable}
-                onCheckedChange={(checked) =>
-                  onChange(index, "isAvailable", checked as boolean)
-                }
-              />
-              <Label
-                htmlFor={`day-${schedule.day}`}
-                className="ml-3 cursor-pointer font-medium"
-              >
-                {schedule.day}
-              </Label>
-            </div>
-
-            {/* Time Inputs */}
-            {schedule.isAvailable && (
-              <div className="flex flex-wrap gap-3 flex-1 w-full sm:w-auto">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm whitespace-nowrap">
-                    {t("from")}
-                  </Label>
-                  <Input
-                    type="time"
-                    value={schedule.startTime}
-                    onChange={(e) =>
-                      onChange(index, "startTime", e.target.value)
-                    }
-                    className="w-32"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm whitespace-nowrap">{t("to")}</Label>
-                  <Input
-                    type="time"
-                    value={schedule.endTime}
-                    onChange={(e) => onChange(index, "endTime", e.target.value)}
-                    className="w-32"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // ==================== MAIN COMPONENT ====================
 export default function CreateTeacherForm() {
@@ -330,14 +249,7 @@ export default function CreateTeacherForm() {
     address: "",
   });
 
-  const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
-    DAYS.map((day) => ({
-      day,
-      startTime: "09:00",
-      endTime: "17:00",
-      isAvailable: false,
-    })),
-  );
+
 
   const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
 
@@ -371,17 +283,7 @@ export default function CreateTeacherForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleScheduleChange = (
-    index: number,
-    field: keyof DaySchedule,
-    value: string | boolean,
-  ) => {
-    setWeeklySchedule((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
+
 
   const addSubject = () => {
     setTeacherSubjects((prev) => [
@@ -441,12 +343,7 @@ export default function CreateTeacherForm() {
         }
       }
 
-      // ✅ Prepare weekly schedule as array of JSON strings (matching API format)
-      const activeSchedule = weeklySchedule
-        .filter((day) => day.isAvailable)
-        .map(({ day, startTime, endTime }) =>
-          JSON.stringify({ day, startTime, endTime }),
-        );
+
 
       // ✅ Create teacher in local DB
       const now = Date.now();
@@ -457,8 +354,6 @@ export default function CreateTeacherForm() {
         email: formData.email || undefined,
         phone: formData.phone || undefined,
         address: formData.address || undefined,
-        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
-
         createdAt: now,
         updatedAt: now,
       };
@@ -567,11 +462,7 @@ export default function CreateTeacherForm() {
               )}
             </div>
 
-            {/* Weekly Schedule */}
-            <WeeklyScheduleSection
-              weeklySchedule={weeklySchedule}
-              onChange={handleScheduleChange}
-            />
+
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">

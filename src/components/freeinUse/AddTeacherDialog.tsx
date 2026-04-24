@@ -216,7 +216,7 @@ export default function AddTeacherDialog({
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 4;
+  const totalSteps = 3;
 
   const DAYS = [
     t("monday"),
@@ -231,7 +231,6 @@ export default function AddTeacherDialog({
   const stepLabels = [
     t("basicInfo"),
     t("subjectsCompensation"),
-    t("weeklySchedule"),
     t("summary") || "Summary",
   ];
 
@@ -242,14 +241,7 @@ export default function AddTeacherDialog({
     address: "",
   });
 
-  const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
-    DAYS.map((day) => ({
-      day,
-      startTime: "09:00",
-      endTime: "17:00",
-      isAvailable: false,
-    })),
-  );
+
 
   const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
 
@@ -257,14 +249,7 @@ export default function AddTeacherDialog({
   useEffect(() => {
     if (!open) {
       setFormData({ name: "", email: "", phone: "", address: "" });
-      setWeeklySchedule(
-        DAYS.map((day) => ({
-          day,
-          startTime: "09:00",
-          endTime: "17:00",
-          isAvailable: false,
-        })),
-      );
+
       setTeacherSubjects([]);
       setError("");
       setCurrentStep(1);
@@ -304,17 +289,7 @@ export default function AddTeacherDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleScheduleChange = (
-    index: number,
-    field: keyof DaySchedule,
-    value: string | boolean,
-  ) => {
-    setWeeklySchedule((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
+
 
   const addSubject = () => {
     setTeacherSubjects((prev) => [
@@ -412,10 +387,7 @@ export default function AddTeacherDialog({
         }
       }
 
-      // Prepare weekly schedule
-      const activeSchedule = weeklySchedule
-        .filter((day) => day.isAvailable)
-        .map(({ day }) => JSON.stringify({ day }));
+
 
       // Create teacher in local DB
       const now = Date.now();
@@ -426,7 +398,6 @@ export default function AddTeacherDialog({
         email: formData.email || undefined,
         phone: formData.phone || undefined,
         address: formData.address || undefined,
-        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
 
         createdAt: now,
         updatedAt: now,
@@ -487,8 +458,6 @@ export default function AddTeacherDialog({
 
   // Step 4: Summary/Review
   const renderSummary = () => {
-    const activeDays = weeklySchedule.filter((s) => s.isAvailable);
-
     return (
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
@@ -570,36 +539,6 @@ export default function AddTeacherDialog({
                     </div>
                   );
                 })
-              )}
-            </div>
-          </div>
-
-          {/* Schedule */}
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {t("weeklySchedule")}
-            </p>
-            <div className="bg-muted/30 p-2 rounded-md border">
-              {activeDays.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic p-2 text-center">
-                  {t("noAvailability")}
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-1.5">
-                  {activeDays.map((s, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-col items-center px-3 py-1 bg-background rounded border shadow-sm"
-                    >
-                      <span className="text-[10px] font-bold text-primary uppercase">
-                        {s.day.substring(0, 3)}
-                      </span>
-                      <span className="text-xs font-medium">
-                        {s.startTime}-{s.endTime}
-                      </span>
-                    </div>
-                  ))}
-                </div>
               )}
             </div>
           </div>
@@ -723,40 +662,7 @@ export default function AddTeacherDialog({
     </div>
   );
 
-  // Step 3: Weekly Schedule
-  const renderStep3 = () => (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
-        {t("weeklySchedule")}
-      </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {weeklySchedule.map((schedule, index) => (
-          <div
-            key={schedule.day}
-            className={`flex items-center gap-2 p-2.5 md:p-2 rounded-md border ${
-              schedule.isAvailable
-                ? "bg-primary/5 border-primary/20"
-                : "bg-muted/50"
-            }`}
-          >
-            <Checkbox
-              id={`day-${schedule.day}`}
-              checked={schedule.isAvailable}
-              onCheckedChange={(checked) =>
-                handleScheduleChange(index, "isAvailable", checked as boolean)
-              }
-            />
-            <Label
-              htmlFor={`day-${schedule.day}`}
-              className="text-xs cursor-pointer truncate"
-            >
-              {schedule.day}
-            </Label>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -812,9 +718,6 @@ export default function AddTeacherDialog({
                 {renderStep2()}
               </div>
               <div className={currentStep !== 3 ? "hidden" : "block"}>
-                {renderStep3()}
-              </div>
-              <div className={currentStep !== 4 ? "hidden" : "block"}>
                 {renderSummary()}
               </div>
             </div>

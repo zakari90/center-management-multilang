@@ -262,35 +262,6 @@ export function TeacherDetailContent({
           </CardContent>
         </Card>
 
-        {/* Weekly Schedule */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("scheduleTitle")}</CardTitle>
-            <CardDescription>{t("scheduleDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent className={isModal ? "space-y-2" : ""}>
-            {teacher.weeklySchedule?.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("noSchedule")}</p>
-            ) : (
-              <div className="space-y-2">
-                {teacher.weeklySchedule.map((day) => (
-                  <div
-                    key={day.day}
-                    className="flex justify-between items-center border rounded-md p-3"
-                  >
-                    <span className="font-medium">{day.day}</span>
-                    {day.isAvailable ? (
-                      <span className="text-sm text-muted-foreground">
-                        {day.startTime} – {day.endTime}
-                      </span>
-                    ) : (
-                      <Badge variant="outline">{t("unavailable")}</Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
         </Card>
       </PdfExporter>
       {!isModal && (

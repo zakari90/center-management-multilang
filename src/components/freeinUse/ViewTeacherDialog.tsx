@@ -255,26 +255,7 @@ export default function ViewTeacherDialog({
               </CardContent>
             </Card>
 
-            {/* Schedule */}
-            {teacher.weeklySchedule?.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">
-                    {t("scheduleTitle")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {teacher.weeklySchedule.map((day) => (
-                    <div
-                      key={day.day}
-                      className="flex justify-between items-center border rounded-md p-2"
-                    >
-                      <span className="font-medium text-sm">{day.day}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+
 
             {/* Edit Button */}
             <div className="flex justify-end pt-2">

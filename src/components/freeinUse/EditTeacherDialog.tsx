@@ -35,23 +35,10 @@ import {
 } from "@/components/ui/dialog";
 
 // ==================== CONSTANTS ====================
-const DAYS = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
-];
+
 
 // ==================== INTERFACES ====================
-interface DaySchedule {
-  day: string;
-  startTime: string;
-  endTime: string;
-  isAvailable: boolean;
-}
+
 
 interface Subject {
   id: string;
@@ -217,14 +204,7 @@ export default function EditTeacherDialog({
     address: "",
   });
 
-  const [weeklySchedule, setWeeklySchedule] = useState<DaySchedule[]>(
-    DAYS.map((day) => ({
-      day,
-      startTime: "09:00",
-      endTime: "17:00",
-      isAvailable: false,
-    })),
-  );
+
 
   const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubjectForm[]>(
     [],
@@ -277,100 +257,7 @@ export default function EditTeacherDialog({
             price: s.price,
           }));
 
-          // Parse weekly schedule
-          let weeklyScheduleData = DAYS.map((day) => ({
-            day,
-            startTime: "09:00",
-            endTime: "17:00",
-            isAvailable: false,
-          }));
 
-          const normalizeDayLocal = (dayStr: string): string => {
-            if (!dayStr) return "";
-            const d = dayStr.toLowerCase().trim();
-            // Match against hardcoded DAYS and translated versions
-            if (
-              d === "monday" ||
-              d === "mon" ||
-              d === t("monday").toLowerCase()
-            )
-              return "monday";
-            if (
-              d === "tuesday" ||
-              d === "tue" ||
-              d === t("tuesday").toLowerCase()
-            )
-              return "tuesday";
-            if (
-              d === "wednesday" ||
-              d === "wed" ||
-              d === t("wednesday").toLowerCase()
-            )
-              return "wednesday";
-            if (
-              d === "thursday" ||
-              d === "thu" ||
-              d === t("thursday").toLowerCase()
-            )
-              return "thursday";
-            if (
-              d === "friday" ||
-              d === "fri" ||
-              d === t("friday").toLowerCase()
-            )
-              return "friday";
-            if (
-              d === "saturday" ||
-              d === "sat" ||
-              d === t("saturday").toLowerCase()
-            )
-              return "saturday";
-            if (
-              d === "sunday" ||
-              d === "sun" ||
-              d === t("sunday").toLowerCase()
-            )
-              return "sunday";
-            return d;
-          };
-
-          if (teacherData.weeklySchedule) {
-            try {
-              const schedule =
-                typeof teacherData.weeklySchedule === "string"
-                  ? JSON.parse(teacherData.weeklySchedule)
-                  : teacherData.weeklySchedule;
-
-              if (Array.isArray(schedule)) {
-                const scheduleMap = new Map();
-                schedule.forEach((s: any) => {
-                  const parsed = typeof s === "string" ? JSON.parse(s) : s;
-                  if (parsed && parsed.day) {
-                    scheduleMap.set(normalizeDayLocal(parsed.day), parsed);
-                  }
-                });
-
-                weeklyScheduleData = DAYS.map((day) => {
-                  const existing = scheduleMap.get(day);
-                  return existing
-                    ? {
-                        day,
-                        startTime: existing.startTime,
-                        endTime: existing.endTime,
-                        isAvailable: true,
-                      }
-                    : {
-                        day,
-                        startTime: "09:00",
-                        endTime: "17:00",
-                        isAvailable: false,
-                      };
-                });
-              }
-            } catch (e) {
-              console.error("Error parsing weekly schedule:", e);
-            }
-          }
 
           // Set state
           setSubjects(activeSubjects);
@@ -380,7 +267,6 @@ export default function EditTeacherDialog({
             phone: teacherData.phone || "",
             address: teacherData.address || "",
           });
-          setWeeklySchedule(weeklyScheduleData);
           setTeacherSubjects(teacherSubjectsData);
         } catch (err) {
           console.error("Failed to fetch teacher:", err);
@@ -398,17 +284,7 @@ export default function EditTeacherDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleScheduleChange = (
-    index: number,
-    field: keyof DaySchedule,
-    value: string | boolean,
-  ) => {
-    setWeeklySchedule((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], [field]: value };
-      return updated;
-    });
-  };
+
 
   const addSubject = () => {
     setTeacherSubjects((prev) => [
@@ -474,17 +350,12 @@ export default function EditTeacherDialog({
 
       // Update teacher in local DB
       const now = Date.now();
-      const activeSchedule = weeklySchedule
-        .filter((day) => day.isAvailable)
-        .map(({ day }) => JSON.stringify({ day }));
-
       const updatedTeacher = {
         ...existingTeacher,
         name: formData.name,
         email: formData.email || undefined,
         phone: formData.phone || undefined,
         address: formData.address || undefined,
-        weeklySchedule: activeSchedule.length > 0 ? activeSchedule : undefined,
         updatedAt: now,
       };
 
@@ -680,41 +551,6 @@ export default function EditTeacherDialog({
                 )}
               </div>
 
-              {/* Weekly Schedule */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground">
-                  {t("weeklySchedule")}
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {weeklySchedule.map((schedule, index) => (
-                    <div
-                      key={schedule.day}
-                      className={`flex items-center gap-2 p-2 rounded-md border ${
-                        schedule.isAvailable
-                          ? "bg-primary/5 border-primary/20"
-                          : "bg-muted/50"
-                      }`}
-                    >
-                      <Checkbox
-                        id={`edit-day-${schedule.day}`}
-                        checked={schedule.isAvailable}
-                        onCheckedChange={(checked) =>
-                          handleScheduleChange(
-                            index,
-                            "isAvailable",
-                            checked as boolean,
-                          )
-                        }
-                      />
-                      <Label
-                        htmlFor={`edit-day-${schedule.day}`}
-                        className="text-xs cursor-pointer truncate"
-                      >
-                        {t(schedule.day)}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
               </div>
             </form>
           )}

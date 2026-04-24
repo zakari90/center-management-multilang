@@ -32,7 +32,7 @@ interface TeachersTableViewProps {
     teacher: boolean;
     contact: boolean;
     subjects: boolean;
-    schedule: boolean;
+
     joined: boolean;
     actions: boolean;
     payment?: boolean;
@@ -57,10 +57,7 @@ export function TeachersTableView({
     currentPage * ITEMS_PER_PAGE,
   );
 
-  const getAvailableDays = (schedule: any) => {
-    if (!schedule || !Array.isArray(schedule)) return t("notSet");
-    return schedule.map((s: any) => s.day).join(", ") || t("notSet");
-  };
+
 
   return (
     <Card className="hidden md:block">
@@ -83,11 +80,7 @@ export function TeachersTableView({
                   {t("subjects")}
                 </th>
               )}
-              {columnVisibility.schedule && (
-                <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
-                  {t("schedule")}
-                </th>
-              )}
+
               {columnVisibility.joined && (
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider border-x">
                   {t("joined")}
@@ -179,11 +172,7 @@ export function TeachersTableView({
                       )}
                     </td>
                   )}
-                  {columnVisibility.schedule && (
-                    <td className="px-6 py-4 border-x text-sm">
-                      {getAvailableDays(teacher.weeklySchedule)}
-                    </td>
-                  )}
+
                   {columnVisibility.joined && (
                     <td className="px-6 py-4 text-sm text-muted-foreground border-x text-center">
                       {new Date(teacher.createdAt).toLocaleDateString()}
