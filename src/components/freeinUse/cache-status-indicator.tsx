@@ -65,9 +65,6 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
   );
   const t = useTranslations("CacheStatusIndicator");
 
-  // Only hide when ALL pages are cached, online, and not syncing
-  if (isOnline && !isSyncing && allCached) return null;
-
   return (
     <TooltipProvider>
       <Tooltip>
@@ -83,17 +80,27 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
                   {t("offline")}
                 </span>
               </Badge>
-            ) : isSyncing ? (
+            ) : allCached ? (
               <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200 gap-1 animate-pulse"
+                variant="outline"
+                className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1"
+              >
+                <Database className="hidden md:block h-3 w-3" />
+                <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
+                  {t("ready") || "Ready"}
+                </span>
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="bg-amber-50 text-amber-700 border-amber-200 gap-1 animate-pulse"
               >
                 <RefreshCcw className="hidden md:block h-3 w-3 animate-spin" />
                 <span className="hidden xs:inline text-[10px] font-medium uppercase tracking-wider">
-                  {t("syncing")}
+                  {t("caching") || "Caching"}
                 </span>
               </Badge>
-            ) : null}
+            )}
           </div>
         </TooltipTrigger>
         <TooltipContent
@@ -101,7 +108,13 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
           align="end"
           className="text-xs max-w-[200px]"
         >
-          <p>{!isOnline ? t("offline") : t("syncing")}</p>
+          <p>
+            {!isOnline
+              ? t("offline")
+              : allCached
+                ? t("ready") || "Ready for offline"
+                : t("caching") || "Caching for offline"}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
