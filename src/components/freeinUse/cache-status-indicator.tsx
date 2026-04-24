@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useTranslations } from "next-intl";
 import { Database, RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,6 @@ import { cn } from "@/freelib/utils";
  * Hides if everything is cached (global allCached state).
  */
 export function CacheStatusDot({ href }: { href: string }) {
-
   const allCached = useCacheStatusStore(
     (state: CacheStatusState) => state.allCached,
   );
@@ -59,7 +57,6 @@ interface CacheStatusIndicatorProps {
 }
 
 export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
-
   const allCached = useCacheStatusStore(
     (state: CacheStatusState) => state.allCached,
   );
@@ -100,8 +97,8 @@ export function CacheStatusIndicator({ isSyncing }: CacheStatusIndicatorProps) {
         >
           <p>
             {allCached
-                ? t("ready") || "Ready for offline"
-                : t("caching") || "Caching for offline"}
+              ? t("ready") || "Ready for offline"
+              : t("caching") || "Caching for offline"}
           </p>
         </TooltipContent>
       </Tooltip>
