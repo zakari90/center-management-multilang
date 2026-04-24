@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/freelib/utils";
 
 interface Subject {
   id: string;
@@ -45,12 +46,14 @@ interface StudentCardProps {
   };
   showQR?: boolean;
   editable?: boolean;
+  variant?: "default" | "ghost";
 }
 
 export default function StudentCard({
   student,
   showQR = true,
   editable = false,
+  variant = "default",
 }: StudentCardProps) {
   const t = useTranslations("StudentCard");
   const router = useRouter();
@@ -89,7 +92,13 @@ export default function StudentCard({
   }, [showQR, student.id, qrGenerated]);
   return (
     <div className="space-y-4">
-      <Card ref={cardRef} className="max-w-md mx-auto">
+      <Card
+        ref={cardRef}
+        className={cn(
+          "max-w-md mx-auto",
+          variant === "ghost" && "border-none shadow-none bg-transparent",
+        )}
+      >
         <CardHeader className="pb-3">
           <CardTitle className="text-xl sm:text-2xl">{t("title")}</CardTitle>
           <p className="text-xs sm:text-sm text-muted-foreground">

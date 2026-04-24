@@ -83,8 +83,8 @@ export default function ViewStudentCardDialog({
       }
 
       const studentSubjectsData = allStudentSubjects
-        .filter((ss) => ss.studentId === studentId)
-        .map((ss) => {
+         .filter((ss) => ss.studentId === studentId)
+         .map((ss) => {
           const subject = allSubjects.find((s) => s.id === ss.subjectId);
           const teacher = allTeachers.find((t) => t.id === ss.teacherId);
           if (!subject || !teacher) return null;
@@ -154,7 +154,7 @@ export default function ViewStudentCardDialog({
         ) : (
           <div className="p-2">
             <PdfExporter fileName={student.name}>
-              <StudentCard student={student} showQR={true} />
+              <StudentCard student={student} showQR={true} variant="ghost" />
             </PdfExporter>
           </div>
         )}

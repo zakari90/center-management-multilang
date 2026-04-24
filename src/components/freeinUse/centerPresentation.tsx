@@ -4,6 +4,13 @@ import { ItemInputList } from "@/components/freeinUse/itemInputList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Center, Subject, getDb } from "@/freelib/dexie/dbSchema";
 import { centerActions, subjectActions } from "@/freelib/dexie/freedexieaction";
@@ -19,19 +26,11 @@ import {
   Plus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { EditDialog } from "./editDialog";
-import { ShareRegistrationLink } from "./ShareRegistrationLink";
 import { SubjectForm } from "./subjectForm";
 import { SubjectsTableView } from "./SubjectsTableView";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useLocalizedConstants } from "./useLocalizedConstants";
 
 interface CenterPresentationProps {
@@ -62,8 +61,8 @@ export default function CenterPresentation({
 
     // Query subjects by centerId and exclude deleted ones (status !== '0')
     // Use indexed query for efficient filtering
-    const allSubjects = await getDb().subjects
-      .where("centerId")
+    const allSubjects = await getDb()
+      .subjects.where("centerId")
       .equals(centerId)
       .toArray();
 
