@@ -1,31 +1,11 @@
 "use client";
 
+import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { AppSidebar } from "@/components/freeinUse/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/freelib/context/freeauthContext";
+import { CacheStatusIndicator } from "@/components/freeinUse/cache-status-indicator";
 import MobileBottomNav from "@/components/freeinUse/mobile-bottom-nav";
-import {
-  CalendarDays,
-  FileText,
-  Home,
-  LayoutGrid,
-  Users,
-  MoreVertical,
-  LogOut,
-  Globe,
-  Moon,
-  Sun,
-  Database,
-  Calendar,
-} from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
-import { useTheme } from "next-themes";
+import { OnlineStatusDot } from "@/components/freeinUse/online-status-dot";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,12 +13,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
-import { CacheStatusIndicator } from "@/components/freeinUse/cache-status-indicator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { useAuth } from "@/freelib/context/freeauthContext";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
-import { OnlineStatusDot } from "@/components/freeinUse/online-status-dot";
+import {
+  CalendarDays,
+  Database,
+  FileText,
+  Globe,
+  Home,
+  LayoutGrid,
+  LogOut,
+  Moon,
+  MoreVertical,
+  Sun,
+  Users,
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -185,7 +184,6 @@ export default function AdminLayoutClient({
                   <Moon className="h-4 w-4" />
                 )}
               </Button>
-              <OnlineStatusDot />
               <CacheStatusIndicator isSyncing={false} />
               <LanguageSwitcher />
             </div>
