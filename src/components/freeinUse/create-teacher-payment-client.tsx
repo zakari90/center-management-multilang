@@ -44,7 +44,6 @@ interface SubjectStats {
   grade: string;
   price: number;
   percentage: number | null;
-  hourlyRate: number | null;
   enrolledStudents: number;
   calculatedAmount: number;
 }
@@ -177,8 +176,6 @@ export default function CreateTeacherPaymentFormClient({
           if (ts.percentage) {
             calculatedAmount =
               ((subject.price * ts.percentage) / 100) * enrolledStudents;
-          } else if (ts.hourlyRate) {
-            calculatedAmount = ts.hourlyRate * enrolledStudents;
           }
 
           return {
@@ -187,7 +184,6 @@ export default function CreateTeacherPaymentFormClient({
             grade: subject.grade,
             price: subject.price,
             percentage: ts.percentage ?? null,
-            hourlyRate: ts.hourlyRate ?? null,
             enrolledStudents,
             calculatedAmount,
           };
@@ -469,14 +465,9 @@ export default function CreateTeacherPaymentFormClient({
                                       })}
                                     </Badge>
                                     <Badge variant="outline">
-                                      {subject.percentage
-                                        ? t("subjectspercentage", {
-                                            percentage: subject.percentage,
-                                          })
-                                        : t("subjectshourly", {
-                                            hourlyRate:
-                                              subject.hourlyRate || "",
-                                          })}
+                                      {t("subjectspercentage", {
+                                        percentage: subject.percentage,
+                                      })}
                                     </Badge>
                                     <Badge
                                       variant="secondary"

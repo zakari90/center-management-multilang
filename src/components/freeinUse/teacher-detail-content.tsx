@@ -34,7 +34,6 @@ interface TeacherSubject {
   id: string;
   subjectId: string;
   percentage: number | null;
-  hourlyRate: number | null;
   subject: Subject;
 }
 
@@ -99,7 +98,6 @@ export function TeacherDetailContent({
             id: ts.id,
             subjectId: ts.subjectId,
             percentage: ts.percentage ?? null,
-            hourlyRate: ts.hourlyRate ?? null,
             subject: {
               id: subject.id,
               name: subject.name,
@@ -254,12 +252,6 @@ export function TeacherDetailContent({
                   <div className="mt-2 md:mt-0 space-x-2">
                     {ts.percentage ? (
                       <Badge variant="secondary">{ts.percentage}%</Badge>
-                    ) : ts.hourlyRate ? (
-                      <div className="flex gap-2">
-                        <Badge variant="secondary">
-                          {ts.hourlyRate} MAD/hr
-                        </Badge>
-                      </div>
                     ) : (
                       <Badge>{t("noCompensation")}</Badge>
                     )}

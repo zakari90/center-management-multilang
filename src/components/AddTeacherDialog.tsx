@@ -60,9 +60,7 @@ interface Subject {
 
 interface TeacherSubject {
   subjectId: string;
-  percentage?: number;
-  hourlyRate?: number;
-  compensationType: "percentage" | "hourly";
+  percentage: number;
 }
 
 interface AddTeacherDialogProps {
@@ -185,48 +183,19 @@ const SubjectCompensationCard = ({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Select
-            value={teacherSubject.compensationType}
-            onValueChange={(value) =>
-              onUpdate(index, "compensationType", value)
+        <div className="grid grid-cols-1 gap-2">
+          <Input
+            type="number"
+            min={1}
+            max={100}
+            step={0.1}
+            value={teacherSubject.percentage || ""}
+            onChange={(e) =>
+              onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
             }
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper" sideOffset={5}>
-              <SelectItem value="percentage">{t("percentage")}</SelectItem>
-              <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {teacherSubject.compensationType === "percentage" ? (
-            <Input
-              type="number"
-              min={1}
-              max={100}
-              step={0.1}
-              value={teacherSubject.percentage || ""}
-              onChange={(e) =>
-                onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
-              }
-              placeholder="50%"
-              className="h-9 text-sm"
-            />
-          ) : (
-            <Input
-              type="number"
-              min={0}
-              step={0.01}
-              value={teacherSubject.hourlyRate || ""}
-              onChange={(e) =>
-                onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
-              }
-              placeholder="MAD/hr"
-              className="h-9 text-sm"
-            />
-          )}
+            placeholder="50%"
+            className="h-9 text-sm"
+          />
         </div>
       </CardContent>
     </Card>
@@ -358,9 +327,7 @@ export default function AddTeacherDialog({
       ...prev,
       {
         subjectId: "",
-        compensationType: "percentage",
         percentage: 0,
-        hourlyRate: 0,
       },
     ]);
   };
@@ -433,17 +400,8 @@ export default function AddTeacherDialog({
       const validSubjects = teacherSubjects.filter((ts) => ts.subjectId);
 
       for (const ts of validSubjects) {
-        if (
-          ts.compensationType === "percentage" &&
-          (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)
-        ) {
+        if (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100) {
           throw new Error("Percentage must be between 1 and 100");
-        }
-        if (
-          ts.compensationType === "hourly" &&
-          (!ts.hourlyRate || ts.hourlyRate <= 0)
-        ) {
-          throw new Error("Hourly rate must be greater than 0");
         }
       }
 
@@ -491,10 +449,7 @@ export default function AddTeacherDialog({
           id: generateObjectId(),
           teacherId: teacherId,
           subjectId: ts.subjectId,
-          percentage:
-            ts.compensationType === "percentage" ? ts.percentage : undefined,
-          hourlyRate:
-            ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
+          percentage: ts.percentage,
           assignedAt: now,
           status: "w" as const,
           createdAt: now,
@@ -638,14 +593,10 @@ export default function AddTeacherDialog({
                       </div>
                       <div className="text-end">
                         <span className="font-mono text-primary">
-                          {ts.compensationType === "percentage"
-                            ? `${ts.percentage}%`
-                            : `MAD ${ts.hourlyRate}`}
+                          {ts.percentage}%
                         </span>
                         <p className="text-[10px] text-muted-foreground uppercase">
-                          {ts.compensationType === "percentage"
-                            ? t("percentage")
-                            : t("hourlyRate")}
+                          {t("percentage")}
                         </p>
                       </div>
                     </div>

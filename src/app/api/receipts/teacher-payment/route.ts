@@ -63,8 +63,6 @@ export async function POST(req: NextRequest) {
       if (ts.percentage) {
         subjectAmount =
           ((ts.subject.price * ts.percentage) / 100) * enrolledStudents;
-      } else if (ts.hourlyRate) {
-        subjectAmount = ts.hourlyRate * enrolledStudents;
       }
 
       totalAmount += subjectAmount;

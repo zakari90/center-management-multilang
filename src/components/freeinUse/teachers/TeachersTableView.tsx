@@ -164,9 +164,7 @@ export function TeachersTableView({
                                 {ts.subject.name}
                               </Badge>
                               <span className="text-xs text-muted-foreground">
-                                {ts.percentage
-                                  ? `${ts.percentage}%`
-                                  : `${ts.hourlyRate} MAD/hr`}
+                                {ts.percentage}%
                               </span>
                             </div>
                           ))}

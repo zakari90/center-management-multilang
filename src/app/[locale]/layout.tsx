@@ -19,6 +19,7 @@ import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "../globals.css";
 import LoadWS from "./loadws";
 
@@ -155,19 +156,21 @@ export default async function RootLayout({
           {/* <OfflineNotificationBanner /> */}
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AuthProvider>
-              <LoadWS />
-              <AutoImportFromServer />
-              <AutoSyncProvider />
-              {/* <ServiceWorkerRegister /> */}
-              <div className="flex flex-col min-h-screen">
-                <div className="flex-1">{children}</div>
-              </div>
-              <PWAUpdateHandler />
-              <EpochMismatchDialog />
-              {/* <CacheDebugOverlay /> */}
-              {/* <PWAPerformanceMonitor /> */}
-              {/* <PWATestingSuite /> */}
-              <Toaster />
+              <TooltipProvider>
+                <LoadWS />
+                <AutoImportFromServer />
+                <AutoSyncProvider />
+                {/* <ServiceWorkerRegister /> */}
+                <div className="flex flex-col min-h-screen">
+                  <div className="flex-1">{children}</div>
+                </div>
+                <PWAUpdateHandler />
+                <EpochMismatchDialog />
+                {/* <CacheDebugOverlay /> */}
+                {/* <PWAPerformanceMonitor /> */}
+                {/* <PWATestingSuite /> */}
+                <Toaster />
+              </TooltipProvider>
             </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>

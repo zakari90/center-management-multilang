@@ -44,7 +44,6 @@ interface TeacherSubject {
   id: string;
   teacherId: string;
   percentage: number | null;
-  hourlyRate: number | null;
   teacher: Teacher;
 }
 
@@ -207,7 +206,6 @@ export default function AddStudentDialog({
                     id: ts.id,
                     teacherId: ts.teacherId,
                     percentage: ts.percentage ?? null,
-                    hourlyRate: ts.hourlyRate ?? null,
                     teacher: teacher
                       ? {
                           id: teacher.id,

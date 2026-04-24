@@ -45,9 +45,7 @@ interface Subject {
 
 interface TeacherSubject {
   subjectId: string;
-  percentage?: number;
-  hourlyRate?: number;
-  compensationType: "percentage" | "hourly";
+  percentage: number;
 }
 
 // ==================== SUB-COMPONENTS ====================
@@ -127,20 +125,10 @@ const SubjectCompensationCard = ({
   const calculateEstimatedEarnings = () => {
     if (!selectedSubject) return "MAD 0.00";
 
-    if (
-      teacherSubject.compensationType === "percentage" &&
-      teacherSubject.percentage
-    ) {
+    if (teacherSubject.percentage) {
       const earnings =
         (selectedSubject.price * teacherSubject.percentage) / 100;
       return `MAD ${earnings.toFixed(2)}`;
-    }
-
-    if (
-      teacherSubject.compensationType === "hourly" &&
-      teacherSubject.hourlyRate
-    ) {
-      return `MAD ${teacherSubject.hourlyRate.toFixed(2)}/hr`;
     }
 
     return "MAD 0.00";
@@ -201,64 +189,24 @@ const SubjectCompensationCard = ({
         </div>
 
         {/* Compensation Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Payment Type */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor={`payment-type-${index}`}>{t("paymentType")}</Label>
-            <Select
-              value={teacherSubject.compensationType}
-              onValueChange={(value) =>
-                onUpdate(index, "compensationType", value)
+            <Label htmlFor={`percentage-${index}`}>
+              {t("percentage")} <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id={`percentage-${index}`}
+              type="number"
+              min={1}
+              max={100}
+              step={0.1}
+              value={teacherSubject.percentage || ""}
+              onChange={(e) =>
+                onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
               }
-            >
-              <SelectTrigger id={`payment-type-${index}`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper" sideOffset={5} align="start">
-                <SelectItem value="percentage">{t("percentage")}</SelectItem>
-                <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="50"
+            />
           </div>
-
-          {/* Percentage or Hourly Rate */}
-          {teacherSubject.compensationType === "percentage" ? (
-            <div className="space-y-2">
-              <Label htmlFor={`percentage-${index}`}>
-                {t("percentage")} <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id={`percentage-${index}`}
-                type="number"
-                min={1}
-                max={100}
-                step={0.1}
-                value={teacherSubject.percentage || ""}
-                onChange={(e) =>
-                  onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
-                }
-                placeholder="50"
-              />
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label htmlFor={`hourly-rate-${index}`}>
-                {t("hourlyRate")} (MAD){" "}
-                <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id={`hourly-rate-${index}`}
-                type="number"
-                min={0}
-                step={0.01}
-                value={teacherSubject.hourlyRate || ""}
-                onChange={(e) =>
-                  onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
-                }
-                placeholder="25.00"
-              />
-            </div>
-          )}
 
           {/* Estimated Earnings */}
           <div className="space-y-2">
@@ -440,9 +388,7 @@ export default function CreateTeacherForm() {
       ...prev,
       {
         subjectId: "",
-        compensationType: "percentage",
         percentage: 0,
-        hourlyRate: 0,
       },
     ]);
   };
@@ -478,17 +424,8 @@ export default function CreateTeacherForm() {
       const validSubjects = teacherSubjects.filter((ts) => ts.subjectId);
 
       for (const ts of validSubjects) {
-        if (
-          ts.compensationType === "percentage" &&
-          (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)
-        ) {
+        if (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100) {
           throw new Error("Percentage must be between 1 and 100");
-        }
-        if (
-          ts.compensationType === "hourly" &&
-          (!ts.hourlyRate || ts.hourlyRate <= 0)
-        ) {
-          throw new Error("Hourly rate must be greater than 0");
         }
       }
 
@@ -534,10 +471,7 @@ export default function CreateTeacherForm() {
           id: generateObjectId(),
           teacherId: teacherId,
           subjectId: ts.subjectId,
-          percentage:
-            ts.compensationType === "percentage" ? ts.percentage : undefined,
-          hourlyRate:
-            ts.compensationType === "hourly" ? ts.hourlyRate : undefined,
+          percentage: ts.percentage,
           assignedAt: now,
           status: "w" as const, // Waiting for sync
           createdAt: now,
@@ -554,15 +488,6 @@ export default function CreateTeacherForm() {
       router.refresh();
 
       // ✅ Commented out online creation
-      // const payload = {
-      //   ...formData,
-      //   weeklySchedule: activeSchedule.length > 0 ? activeSchedule : [],
-      //   subjects: validSubjects.map((ts) => ({
-      //     subjectId: ts.subjectId,
-      //     percentage: ts.compensationType === "percentage" ? ts.percentage : null,
-      //     hourlyRate: ts.compensationType === "hourly" ? ts.hourlyRate : null,
-      //   })),
-      // }
       // await axios.post("/api/teachers", payload)
     } catch (err) {
       if (err instanceof Error) setError(err.message);

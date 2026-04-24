@@ -38,6 +38,7 @@ import { Separator } from "@/components/ui/separator";
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { CacheStatusIndicator } from "@/components/freeinUse/cache-status-indicator";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
+import { OnlineStatusDot } from "@/components/freeinUse/online-status-dot";
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -184,6 +185,7 @@ export default function AdminLayoutClient({
                   <Moon className="h-4 w-4" />
                 )}
               </Button>
+              <OnlineStatusDot />
               <CacheStatusIndicator isSyncing={false} />
               <LanguageSwitcher />
             </div>
@@ -230,7 +232,10 @@ export default function AdminLayoutClient({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-12 w-12">
-                  <MoreVertical className="h-5 w-5" />
+                  <div className="relative">
+                    <MoreVertical className="h-5 w-5" />
+                    <OnlineStatusDot className="absolute -top-1 -right-1 h-2.5 w-2.5 border-2" />
+                  </div>
                   <span className="sr-only">Menu</span>
                 </Button>
               </DropdownMenuTrigger>

@@ -56,7 +56,6 @@ interface SubjectStats {
   grade: string;
   price: number;
   percentage: number | null;
-  hourlyRate: number | null;
   enrolledStudents: number;
   calculatedAmount: number;
 }
@@ -237,15 +236,12 @@ export default function AddTeacherPaymentDialog({
           if (ts.percentage)
             calculatedAmount =
               ((subject.price * ts.percentage) / 100) * enrolledStudents;
-          else if (ts.hourlyRate)
-            calculatedAmount = ts.hourlyRate * enrolledStudents;
           return {
             subjectId: ts.subjectId,
             subjectName: subject.name,
             grade: subject.grade,
             price: subject.price,
             percentage: ts.percentage ?? null,
-            hourlyRate: ts.hourlyRate ?? null,
             enrolledStudents,
             calculatedAmount,
           };

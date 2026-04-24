@@ -53,7 +53,6 @@ export const TeacherSchema = SyncEntitySchema.extend({
     .or(z.record(z.string(), z.any()))
     .optional()
     .nullable(),
-
 });
 
 export const StudentSchema = SyncEntitySchema.extend({
@@ -64,7 +63,6 @@ export const StudentSchema = SyncEntitySchema.extend({
   parentPhone: z.string().trim().optional().nullable(),
   parentEmail: z.string().trim().email().optional().nullable(),
   grade: z.string().trim().optional().nullable(),
-
 });
 
 export const SubjectSchema = SyncEntitySchema.extend({
@@ -77,7 +75,6 @@ export const SubjectSchema = SyncEntitySchema.extend({
 
 export const TeacherSubjectSchema = SyncEntitySchema.extend({
   percentage: z.number().min(0).max(100).optional().nullable(),
-  hourlyRate: z.number().min(0).optional().nullable(),
   assignedAt: z.number(),
   teacherId: z.string().min(1),
   subjectId: z.string().min(1),
@@ -88,7 +85,6 @@ export const StudentSubjectSchema = SyncEntitySchema.extend({
   studentId: z.string().min(1),
   subjectId: z.string().min(1),
   teacherId: z.string().min(1),
-
 });
 
 export const ReceiptSchema = SyncEntitySchema.extend({
@@ -103,7 +99,6 @@ export const ReceiptSchema = SyncEntitySchema.extend({
     .transform((v) => (v instanceof Date ? v.getTime() : v)),
   studentId: z.string().min(1).optional().nullable(),
   teacherId: z.string().min(1).optional().nullable(),
-
 });
 
 export const ScheduleSchema = SyncEntitySchema.extend({
@@ -142,7 +137,6 @@ export const CenterInputSchema = z.object({
   phone: z.string().trim().optional().nullable(),
   classrooms: z.array(z.string().trim()).default([]),
   workingDays: z.array(z.string().trim()).default([]),
-
 });
 
 export const StudentInputSchema = z.object({

@@ -89,7 +89,6 @@ export interface Subject extends BaseEntity {
 
 export interface TeacherSubject extends BaseEntity {
   percentage?: number;
-  hourlyRate?: number;
   assignedAt: number;
   teacherId: string;
   subjectId: string;

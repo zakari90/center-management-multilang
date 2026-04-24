@@ -335,11 +335,6 @@ export function AllTablesViewer() {
           render: (value?: number) => (value ? `${value}%` : "-"),
         },
         {
-          key: "hourlyRate",
-          header: t("columns.hourlyRate"),
-          render: (value?: number) => (value ? `${value.toFixed(2)} MAD` : "-"),
-        },
-        {
           key: "assignedAt",
           header: t("columns.assignedAt"),
           sortable: true,

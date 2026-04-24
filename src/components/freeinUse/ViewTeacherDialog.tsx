@@ -39,7 +39,6 @@ interface TeacherSubject {
   id: string;
   subjectId: string;
   percentage: number | null;
-  hourlyRate: number | null;
   subject: Subject;
 }
 
@@ -99,7 +98,6 @@ export default function ViewTeacherDialog({
             id: ts.id,
             subjectId: ts.subjectId,
             percentage: ts.percentage ?? null,
-            hourlyRate: ts.hourlyRate ?? null,
             subject: {
               id: subject.id,
               name: subject.name,
@@ -247,10 +245,6 @@ export default function ViewTeacherDialog({
                       <div>
                         {ts.percentage ? (
                           <Badge variant="secondary">{ts.percentage}%</Badge>
-                        ) : ts.hourlyRate ? (
-                          <Badge variant="secondary">
-                            MAD {ts.hourlyRate}/hr
-                          </Badge>
                         ) : (
                           <Badge>{t("noCompensation")}</Badge>
                         )}

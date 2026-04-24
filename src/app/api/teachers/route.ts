@@ -94,7 +94,6 @@ export async function POST(req: NextRequest) {
             teacherId: newTeacher.id,
             subjectId: subject.subjectId,
             percentage: subject.percentage,
-            hourlyRate: subject.hourlyRate,
           })),
         });
       }

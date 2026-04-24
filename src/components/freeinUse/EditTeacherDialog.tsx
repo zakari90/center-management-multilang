@@ -62,9 +62,7 @@ interface Subject {
 
 interface TeacherSubjectForm {
   subjectId: string;
-  percentage?: number;
-  hourlyRate?: number;
-  compensationType: "percentage" | "hourly";
+  percentage: number;
 }
 
 interface EditTeacherDialogProps {
@@ -86,7 +84,11 @@ const SubjectCompensationCard = ({
   index: number;
   subjects: Subject[];
   assignedSubjects: TeacherSubjectForm[];
-  onUpdate: (index: number, field: keyof TeacherSubjectForm, value: any) => void;
+  onUpdate: (
+    index: number,
+    field: keyof TeacherSubjectForm,
+    value: any,
+  ) => void;
   onRemove: (index: number) => void;
 }) => {
   const t = useTranslations("EditTeacherPage");
@@ -103,19 +105,10 @@ const SubjectCompensationCard = ({
   const calculateEstimatedEarnings = () => {
     if (!selectedSubject) return "MAD 0.00";
 
-    if (
-      teacherSubject.compensationType === "percentage" &&
-      teacherSubject.percentage
-    ) {
-      const earnings = (selectedSubject.price * teacherSubject.percentage) / 100;
+    if (teacherSubject.percentage) {
+      const earnings =
+        (selectedSubject.price * teacherSubject.percentage) / 100;
       return `MAD ${earnings.toFixed(2)}`;
-    }
-
-    if (
-      teacherSubject.compensationType === "hourly" &&
-      teacherSubject.hourlyRate
-    ) {
-      return `MAD ${teacherSubject.hourlyRate.toFixed(2)}/hr`;
     }
 
     return "MAD 0.00";
@@ -126,14 +119,20 @@ const SubjectCompensationCard = ({
       <CardContent className="p-3 space-y-3">
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0 space-y-1">
-            <Label htmlFor={`subject-${index}`} className="text-[10px] uppercase text-muted-foreground">
+            <Label
+              htmlFor={`subject-${index}`}
+              className="text-[10px] uppercase text-muted-foreground"
+            >
               {t("subject")}
             </Label>
             <Select
               value={teacherSubject.subjectId}
               onValueChange={(value) => onUpdate(index, "subjectId", value)}
             >
-              <SelectTrigger id={`subject-${index}`} className="w-full h-9 text-sm">
+              <SelectTrigger
+                id={`subject-${index}`}
+                className="w-full h-9 text-sm"
+              >
                 <SelectValue placeholder={t("selectSubject")} />
               </SelectTrigger>
               <SelectContent position="popper" sideOffset={5}>
@@ -162,57 +161,23 @@ const SubjectCompensationCard = ({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
           <div className="space-y-1">
             <Label className="text-[10px] uppercase text-muted-foreground">
-              {t("paymentType")}
+              {t("percentage")}
             </Label>
-            <Select
-              value={teacherSubject.compensationType}
-              onValueChange={(value) =>
-                onUpdate(index, "compensationType", value)
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              step={0.1}
+              value={teacherSubject.percentage || ""}
+              onChange={(e) =>
+                onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
               }
-            >
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper" sideOffset={5}>
-                <SelectItem value="percentage">{t("percentage")}</SelectItem>
-                <SelectItem value="hourly">{t("hourlyRate")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-[10px] uppercase text-muted-foreground">
-              {teacherSubject.compensationType === "percentage" ? t("percentage") : t("hourlyRate")}
-            </Label>
-            {teacherSubject.compensationType === "percentage" ? (
-              <Input
-                type="number"
-                min={1}
-                max={100}
-                step={0.1}
-                value={teacherSubject.percentage || ""}
-                onChange={(e) =>
-                  onUpdate(index, "percentage", parseFloat(e.target.value) || 0)
-                }
-                placeholder="50%"
-                className="h-9 text-sm"
-              />
-            ) : (
-              <Input
-                type="number"
-                min={0}
-                step={0.01}
-                value={teacherSubject.hourlyRate || ""}
-                onChange={(e) =>
-                  onUpdate(index, "hourlyRate", parseFloat(e.target.value) || 0)
-                }
-                placeholder="MAD/hr"
-                className="h-9 text-sm"
-              />
-            )}
+              placeholder="50%"
+              className="h-9 text-sm"
+            />
           </div>
 
           <div className="space-y-1">
@@ -299,11 +264,7 @@ export default function EditTeacherDialog({
               if (!subject) return null;
               return {
                 subjectId: ts.subjectId,
-                percentage: ts.percentage || undefined,
-                hourlyRate: ts.hourlyRate || undefined,
-                compensationType: ts.percentage
-                  ? "percentage"
-                  : ("hourly" as const),
+                percentage: ts.percentage || 0,
               };
             })
             .filter((ts) => ts !== null) as TeacherSubjectForm[];
@@ -328,13 +289,48 @@ export default function EditTeacherDialog({
             if (!dayStr) return "";
             const d = dayStr.toLowerCase().trim();
             // Match against hardcoded DAYS and translated versions
-            if (d === "monday" || d === "mon" || d === t("monday").toLowerCase()) return "monday";
-            if (d === "tuesday" || d === "tue" || d === t("tuesday").toLowerCase()) return "tuesday";
-            if (d === "wednesday" || d === "wed" || d === t("wednesday").toLowerCase()) return "wednesday";
-            if (d === "thursday" || d === "thu" || d === t("thursday").toLowerCase()) return "thursday";
-            if (d === "friday" || d === "fri" || d === t("friday").toLowerCase()) return "friday";
-            if (d === "saturday" || d === "sat" || d === t("saturday").toLowerCase()) return "saturday";
-            if (d === "sunday" || d === "sun" || d === t("sunday").toLowerCase()) return "sunday";
+            if (
+              d === "monday" ||
+              d === "mon" ||
+              d === t("monday").toLowerCase()
+            )
+              return "monday";
+            if (
+              d === "tuesday" ||
+              d === "tue" ||
+              d === t("tuesday").toLowerCase()
+            )
+              return "tuesday";
+            if (
+              d === "wednesday" ||
+              d === "wed" ||
+              d === t("wednesday").toLowerCase()
+            )
+              return "wednesday";
+            if (
+              d === "thursday" ||
+              d === "thu" ||
+              d === t("thursday").toLowerCase()
+            )
+              return "thursday";
+            if (
+              d === "friday" ||
+              d === "fri" ||
+              d === t("friday").toLowerCase()
+            )
+              return "friday";
+            if (
+              d === "saturday" ||
+              d === "sat" ||
+              d === t("saturday").toLowerCase()
+            )
+              return "saturday";
+            if (
+              d === "sunday" ||
+              d === "sun" ||
+              d === t("sunday").toLowerCase()
+            )
+              return "sunday";
             return d;
           };
 
@@ -419,9 +415,7 @@ export default function EditTeacherDialog({
       ...prev,
       {
         subjectId: "",
-        compensationType: "percentage",
         percentage: 0,
-        hourlyRate: 0,
       },
     ]);
   };
@@ -457,23 +451,16 @@ export default function EditTeacherDialog({
       const validSubjects = teacherSubjects.filter((ts) => ts.subjectId);
 
       for (const ts of validSubjects) {
-        if (
-          ts.compensationType === "percentage" &&
-          (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100)
-        ) {
+        if (!ts.percentage || ts.percentage <= 0 || ts.percentage > 100) {
           throw new Error(t("errorPercentage"));
-        }
-        if (
-          ts.compensationType === "hourly" &&
-          (!ts.hourlyRate || ts.hourlyRate <= 0)
-        ) {
-          throw new Error(t("errorHourlyRate"));
         }
       }
 
       // Check for email uniqueness if changed
       if (formData.email) {
-        const existingWithEmail = await teacherActions.getLocalByEmail?.(formData.email);
+        const existingWithEmail = await teacherActions.getLocalByEmail?.(
+          formData.email,
+        );
         if (existingWithEmail && existingWithEmail.id !== teacherId) {
           throw new Error(t("emailAlreadyInUse") || "Email already in use");
         }
@@ -526,10 +513,7 @@ export default function EditTeacherDialog({
         if (existing) {
           await teacherSubjectActions.putLocal({
             ...existing,
-            percentage:
-              vs.compensationType === "percentage" ? vs.percentage : undefined,
-            hourlyRate:
-              vs.compensationType === "hourly" ? vs.hourlyRate : undefined,
+            percentage: vs.percentage,
             updatedAt: now,
           });
         } else {
@@ -538,10 +522,7 @@ export default function EditTeacherDialog({
             id: teacherSubjectId,
             teacherId: teacherId,
             subjectId: vs.subjectId,
-            percentage:
-              vs.compensationType === "percentage" ? vs.percentage : undefined,
-            hourlyRate:
-              vs.compensationType === "hourly" ? vs.hourlyRate : undefined,
+            percentage: vs.percentage,
             assignedAt: now,
             createdAt: now,
             updatedAt: now,
@@ -734,7 +715,6 @@ export default function EditTeacherDialog({
                     </div>
                   ))}
                 </div>
-
               </div>
             </form>
           )}
@@ -749,7 +729,11 @@ export default function EditTeacherDialog({
             >
               {t("cancel")}
             </Button>
-            <Button form="edit-teacher-form" type="submit" disabled={isLoading || isFetching}>
+            <Button
+              form="edit-teacher-form"
+              type="submit"
+              disabled={isLoading || isFetching}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

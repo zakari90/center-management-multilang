@@ -493,14 +493,9 @@ export default function CreateTeacherPaymentFormClient({
                                       })}
                                     </Badge>
                                     <Badge variant="outline">
-                                      {subject.percentage
-                                        ? t("subjectspercentage", {
-                                            percentage: subject.percentage,
-                                          })
-                                        : t("subjectshourly", {
-                                            hourlyRate:
-                                              subject.hourlyRate || "",
-                                          })}
+                                      {t("subjectspercentage", {
+                                        percentage: subject.percentage,
+                                      })}
                                     </Badge>
                                     <Badge
                                       variant="secondary"

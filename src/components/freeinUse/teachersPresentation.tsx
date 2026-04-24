@@ -42,7 +42,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export interface TeacherSubject {
   id: string;
   percentage: number | null;
-  hourlyRate: number | null;
   subject: {
     id: string;
     name: string;
@@ -115,7 +114,6 @@ export default function TeachersTable() {
               ? {
                   id: ts.id,
                   percentage: ts.percentage ?? null,
-                  hourlyRate: ts.hourlyRate ?? null,
                   subject: {
                     id: subject.id,
                     name: subject.name,
@@ -157,8 +155,6 @@ export default function TeachersTable() {
           let amount = 0;
           if (ts.percentage) {
             amount = ((ts.subject.price * ts.percentage) / 100) * enrolledCount;
-          } else if (ts.hourlyRate) {
-            amount = ts.hourlyRate * enrolledCount;
           }
           return sum + amount;
         }, 0);

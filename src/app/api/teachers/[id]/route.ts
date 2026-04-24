@@ -150,7 +150,6 @@ export async function PATCH(
               teacherId: id,
               subjectId: subject.subjectId,
               percentage: subject.percentage,
-              hourlyRate: subject.hourlyRate,
             }))
           })
         }

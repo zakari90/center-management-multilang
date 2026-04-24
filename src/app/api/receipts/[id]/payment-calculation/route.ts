@@ -52,8 +52,6 @@ export async function GET(
       let calculatedAmount = 0
       if (ts.percentage) {
         calculatedAmount = (ts.subject.price * ts.percentage / 100) * enrolledStudents
-      } else if (ts.hourlyRate) {
-        calculatedAmount = ts.hourlyRate * enrolledStudents
       }
 
       return {
@@ -62,7 +60,6 @@ export async function GET(
         grade: ts.subject.grade,
         price: ts.subject.price,
         percentage: ts.percentage,
-        hourlyRate: ts.hourlyRate,
         enrolledStudents,
         calculatedAmount
       }
