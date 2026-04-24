@@ -25,30 +25,46 @@ export default function PdfExporter({
     if (!contentRef.current) return;
     setIsExporting(true);
 
-    // html2canvas cannot parse modern oklch()/lab() color functions.
+    // html2canvas cannot parse modern oklch()/lab() color functions or color-mix().
     // We temporarily inject a style block that overrides all theme CSS
-    // variables with hex equivalents on the capture target.
+    // variables with hex equivalents for the entire export subtree.
     const hexOverrides = document.createElement("style");
     hexOverrides.textContent = `
-      [data-pdf-export] {
-        --background: #f5f7fa !important;
-        --foreground: #2d3555 !important;
+      [data-pdf-export], [data-pdf-export] * {
+        --background: #ffffff !important;
+        --foreground: #1a1a1a !important;
         --card: #ffffff !important;
-        --card-foreground: #2d3555 !important;
-        --primary: #2bb673 !important;
+        --card-foreground: #1a1a1a !important;
+        --primary: #2563eb !important;
         --primary-foreground: #ffffff !important;
-        --secondary: #e8ecf4 !important;
-        --secondary-foreground: #53596e !important;
-        --muted: #f0f1f4 !important;
-        --muted-foreground: #6e7385 !important;
-        --accent: #d6f5e4 !important;
-        --accent-foreground: #2d3555 !important;
-        --destructive: #e5484d !important;
-        --border: #e2e4ea !important;
-        --input: #e2e4ea !important;
-        --ring: #2bb673 !important;
-        color: #2d3555 !important;
+        --secondary: #f3f4f6 !important;
+        --secondary-foreground: #1f2937 !important;
+        --muted: #f9fafb !important;
+        --muted-foreground: #6b7280 !important;
+        --accent: #eff6ff !important;
+        --accent-foreground: #1e40af !important;
+        --destructive: #dc2626 !important;
+        --destructive-foreground: #ffffff !important;
+        --border: #e5e7eb !important;
+        --input: #e5e7eb !important;
+        --ring: #2563eb !important;
+        --success: #16a34a !important;
+        --warning: #ca8a04 !important;
+        --info: #0284c7 !important;
+        --student: #0ea5e9 !important;
+        --teacher: #f59e0b !important;
+        --payment: #8b5cf6 !important;
+        
+        /* Fallback for any direct usage of modern colors */
+        outline-color: #2563eb !important;
+        border-color: #e5e7eb !important;
       }
+      
+      /* Target specifically problematic components like avatars or badges */
+      [data-pdf-export] .bg-primary { background-color: #2563eb !important; }
+      [data-pdf-export] .text-primary { color: #2563eb !important; }
+      [data-pdf-export] .bg-secondary { background-color: #f3f4f6 !important; }
+      [data-pdf-export] .text-secondary { color: #1f2937 !important; }
     `;
     document.head.appendChild(hexOverrides);
     contentRef.current.setAttribute("data-pdf-export", "");
@@ -61,6 +77,17 @@ export default function PdfExporter({
         useCORS: true,
         backgroundColor: "#ffffff",
         logging: false,
+        onclone: (clonedDoc) => {
+          // Additional sanitization on the cloned document
+          const clonedElement = clonedDoc.querySelector("[data-pdf-export]");
+          if (clonedElement) {
+            // Remove any elements that might cause issues but aren't needed for the PDF
+            const scripts = clonedDoc.getElementsByTagName("script");
+            for (let i = scripts.length - 1; i >= 0; i--) {
+              scripts[i].parentNode?.removeChild(scripts[i]);
+            }
+          }
+        },
       });
 
       const imgData = canvas.toDataURL("image/png");

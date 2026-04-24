@@ -35,6 +35,7 @@ import {
 import { useAuth } from "@/freelib/context/freeauthContext";
 import { StudentFormSchema } from "@/freelib/validations/schemas";
 import { z } from "zod";
+import { generateObjectId } from "@/freelib/utils/generateObjectId";
 
 interface Teacher {
   id: string;
@@ -146,7 +147,7 @@ export default function EditStudentDialog({
       const studentData = allStudents.find((s) => s.id === studentId);
 
       if (!studentData) {
-        throw new Error(t("studentInfo"));
+        throw new Error(t("fetchStudent"));
       }
 
       // Get student subjects with related data
@@ -336,7 +337,7 @@ export default function EditStudentDialog({
         parentName: validatedData.parentName || undefined,
         parentPhone: validatedData.parentPhone || undefined,
         parentEmail: validatedData.parentEmail || undefined,
-        grade: validatedData.grade || undefined,
+        grade: validatedData.grade || enrolledSubjects[0]?.grade || undefined,
 
         updatedAt: now,
       };
@@ -372,8 +373,6 @@ export default function EditStudentDialog({
       );
 
       for (const enrollment of enrollmentsToAdd) {
-        const { generateObjectId } =
-          await import("@/freelib/utils/generateObjectId");
         const enrollmentId = generateObjectId();
         await studentSubjectActions.putLocal({
           id: enrollmentId,
