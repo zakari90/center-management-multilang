@@ -550,8 +550,6 @@ export default function EditTeacherDialog({
                   </div>
                 )}
               </div>
-
-              </div>
             </form>
           )}
         </div>
