@@ -89,9 +89,7 @@ interface Schedule {
 interface TeacherWithSchedule extends Teacher {
   weeklySchedule: WeeklyScheduleSlot[];
   schedules: Schedule[];
-  totalHours: number;
   subjectsCount: number;
-  costPerSubject: number;
   conflicts: Schedule[];
 }
 
@@ -215,8 +213,7 @@ const exportTeacherSchedule = (
   text += `${"=".repeat(50)}\n\n`;
   text += `Email: ${teacher.email || "N/A"}\n`;
   text += `${t("phone")}: ${teacher.phone || "N/A"}\n`;
-  text += `${t("scheduled")} ${t("hours")}/Week: ${teacher.totalHours.toFixed(1)}${t("hours")}\n`;
-  text += `${t("costPerSubject") || "Cost/Subject"}: ${teacher.costPerSubject.toFixed(2)} MAD\n\n`;
+
 
 
 
@@ -286,10 +283,7 @@ const exportTeacherScheduleToExcel = async (
     { field: t("phone"), value: teacher.phone || "N/A" },
     { field: "", value: "" },
     { field: "Statistics", value: "" },
-    {
-      field: `${t("scheduled")} ${t("hours")}/Week`,
-      value: `${teacher.totalHours.toFixed(1)} ${t("hours")}`,
-    },
+
     { field: t("classes"), value: teacher.schedules.length },
     { field: t("subjects"), value: teacher.subjectsCount },
     { field: t("conflict"), value: teacher.conflicts.length },
@@ -683,9 +677,7 @@ export default function TeacherScheduleView({
           );
           const weeklySchedule = parseWeeklySchedule(teacher.weeklySchedule);
 
-          const totalHours = teacherSchedules.reduce((sum, s) => {
-            return sum + calculateHoursDifference(s.startTime, s.endTime);
-          }, 0);
+
 
           const teacherSubjectsSet = new Set(
             teacherSchedules.map((s) => s.subjectId),
@@ -699,9 +691,7 @@ export default function TeacherScheduleView({
             ...teacher,
             weeklySchedule,
             schedules: teacherSchedules,
-            totalHours,
             subjectsCount: teacherSubjectsSet.size,
-            costPerSubject: 0, // Placeholder
             conflicts,
           };
         },
@@ -1043,25 +1033,7 @@ function TeacherInfoCard({
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
 
-          <div className="text-center p-4 bg-green-500/10 border border-green-500/20 dark:bg-green-500/15 rounded-lg">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {teacher.totalHours.toFixed(1)}
-              {t("hours")}
-            </div>
-            <div className="text-xs text-muted-foreground dark:text-foreground/60">
-              {t("scheduled")}
-            </div>
-          </div>
-          {isAdmin && (
-            <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {teacher.costPerSubject.toFixed(2)} MAD
-              </div>
-              <div className="text-xs text-muted-foreground dark:text-foreground/60">
-                {t("costPerSubject") || "Cost/Subject"}
-              </div>
-            </div>
-          )}
+
           <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 dark:bg-purple-500/15 rounded-lg">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {teacher.schedules.length}
