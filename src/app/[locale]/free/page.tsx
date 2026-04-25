@@ -11,18 +11,16 @@ import { toast } from "sonner";
 import { useAutoBackup } from "@/hooks/useAutoBackup";
 import { performFreeAutoBackup } from "@/utils/backupUtils";
 
-
 import { Card } from "@/components/ui/card";
 import {
-  ShieldCheck,
   WifiOff,
-  ServerOff,
   Database,
   ArrowRight,
   ArrowLeft,
-  CalendarDays,
-  ClipboardCheck,
+  History,
+  Star,
 } from "lucide-react";
+
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
 import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
@@ -73,11 +71,9 @@ export default function FreeVersionIntro() {
     }
   };
 
-
   useAutoBackup(dbExists ? handleAutoSave : () => Promise.resolve());
 
   const handleStart = () => {
-
     router.push(`/${locale}/free/login`);
   };
 
@@ -101,33 +97,18 @@ export default function FreeVersionIntro() {
           color: "bg-emerald-500/10 border-emerald-500/20",
         },
         {
-          title: "No Server",
-          desc: "No backend databases, no subscriptions, and no complicated cloud setups.",
-          icon: <ServerOff className="w-6 h-6 text-rose-500" />,
-          color: "bg-rose-500/10 border-rose-500/20",
-        },
-        {
-          title: "Absolute Privacy",
-          desc: "We do not have access to your local data. You are in complete offline control.",
-          icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
-          color: "bg-blue-500/10 border-blue-500/20",
-        },
-        {
-          title: "Schedule Manager",
-          desc: "Organize your weekly classes, rooms, and groups in a simple, interactive grid.",
-          icon: <CalendarDays className="w-6 h-6 text-orange-500" />,
-          color: "bg-orange-500/10 border-orange-500/20",
-        },
-        {
-          title: "Attendance Register",
-          desc: "Track daily presence, late arrivals, and generate monthly reports for every student.",
-          icon: <ClipboardCheck className="w-6 h-6 text-cyan-500" />,
-          color: "bg-cyan-500/10 border-cyan-500/20",
+          title: "Monthly Auto Backup",
+          desc: "Automatically save your database to your device on the 1st of every month at 12:00.",
+          icon: <History className="w-6 h-6 text-purple-500" />,
+          color: "bg-purple-500/10 border-purple-500/20",
         },
       ],
+
       btn: "Go to Login",
-      footer: "Basically, this is the free version of the current app.",
+      bookmarkInfo:
+        "For easy access, add this page to your favorites or bookmarks.",
     },
+
     ar: {
       title: "النسخة المجانية المحلية",
       subtitle: "تحكم كامل، بدون خوادم.",
@@ -147,33 +128,18 @@ export default function FreeVersionIntro() {
           color: "bg-emerald-500/10 border-emerald-500/20",
         },
         {
-          title: "بدون خوادم",
-          desc: "لا توجد قواعد بيانات خلفية، ولا اشتراكات، ولا إعدادات سحابية معقدة.",
-          icon: <ServerOff className="w-6 h-6 text-rose-500" />,
-          color: "bg-rose-500/10 border-rose-500/20",
-        },
-        {
-          title: "خصوصية مطلقة",
-          desc: "ليس لدينا أي وصول إلى بياناتك المحلية. أنت تتحكم تحكماً كاملاً.",
-          icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
-          color: "bg-blue-500/10 border-blue-500/20",
-        },
-        {
-          title: "مدير الجداول",
-          desc: "نظم حصصك الأسبوعية والقاعات والمجموعات في شبكة تفاعلية بسيطة.",
-          icon: <CalendarDays className="w-6 h-6 text-orange-500" />,
-          color: "bg-orange-500/10 border-orange-500/20",
-        },
-        {
-          title: "دفتر الحضور",
-          desc: "تابع الحضور اليومي، التأخيرات، واستخرج تقارير الحضور الشهرية لكل طالب.",
-          icon: <ClipboardCheck className="w-6 h-6 text-cyan-500" />,
-          color: "bg-cyan-500/10 border-cyan-500/20",
+          title: "نسخ احتياطي تلقائي شهري",
+          desc: "يتم حفظ بياناتك تلقائياً على جهازك كل شهر.",
+          icon: <History className="w-6 h-6 text-purple-500" />,
+          color: "bg-purple-500/10 border-purple-500/20",
         },
       ],
+
       btn: "الذهاب لتسجيل الدخول",
-      footer: "ببساطة، هذه هي النسخة المجانية من التطبيق الحالي.",
+      bookmarkInfo:
+        "لسهولة الوصول، أضف هذه الصفحة إلى المفضلة أو العلامات المرجعية.",
     },
+
     fr: {
       title: "Version Locale Gratuite",
       subtitle: "Contrôle total, zéro serveur.",
@@ -193,32 +159,16 @@ export default function FreeVersionIntro() {
           color: "bg-emerald-500/10 border-emerald-500/20",
         },
         {
-          title: "Aucun Serveur",
-          desc: "Pas de bases de données back-end, pas d'abonnements et pas de configurations cloud compliquées.",
-          icon: <ServerOff className="w-6 h-6 text-rose-500" />,
-          color: "bg-rose-500/10 border-rose-500/20",
-        },
-        {
-          title: "Confidentialité Absolue",
-          desc: "Nous n'avons pas accès à vos données locales. Vous avez un contrôle total hors ligne.",
-          icon: <ShieldCheck className="w-6 h-6 text-blue-500" />,
-          color: "bg-blue-500/10 border-blue-500/20",
-        },
-        {
-          title: "Gestionnaire d'Emploi du Temps",
-          desc: "Organisez vos cours hebdomadaires, vos salles et vos groupes dans une grille simple.",
-          icon: <CalendarDays className="w-6 h-6 text-orange-500" />,
-          color: "bg-orange-500/10 border-orange-500/20",
-        },
-        {
-          title: "Registre de Présence",
-          desc: "Suivez les présences quotidiennes, les retards et générez des rapports mensuels.",
-          icon: <ClipboardCheck className="w-6 h-6 text-cyan-500" />,
-          color: "bg-cyan-500/10 border-cyan-500/20",
+          title: "Sauvegarde Auto Mensuelle",
+          desc: "Sauvegardez automatiquement votre base de données sur votre appareil le 1er de chaque mois à 12h00.",
+          icon: <History className="w-6 h-6 text-purple-500" />,
+          color: "bg-purple-500/10 border-purple-500/20",
         },
       ],
+
       btn: "Aller à la connexion",
-      footer: "En gros, c'est la version gratuite de l'application actuelle.",
+      bookmarkInfo:
+        "Pour un accès facile, ajoutez cette page à vos favoris ou marque-pages.",
     },
   };
 
@@ -255,7 +205,12 @@ export default function FreeVersionIntro() {
             <LanguageSwitcher />
           </div>
           <div className="flex items-center gap-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-            <Lottie animationData={starAnimation} loop={true} autoplay={true} className="w-5 h-5" />
+            <Lottie
+              animationData={starAnimation}
+              loop={true}
+              autoplay={true}
+              className="w-5 h-5"
+            />
             v1.0 Local Edition
           </div>
         </div>
@@ -282,10 +237,6 @@ export default function FreeVersionIntro() {
                 </p>
 
                 <div className="pt-4 border-t border-border/50">
-                  <p className="text-sm italic text-muted-foreground mb-8">
-                    {t.footer}
-                  </p>
-
                   <Button
                     onClick={handleStart}
                     className="w-full h-14 text-lg font-bold rounded-2xl shadow-[0_8px_30px_rgb(79,70,229,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.3)] hover:-translate-y-0.5 transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 text-white group"
@@ -299,6 +250,11 @@ export default function FreeVersionIntro() {
                       )}
                     </div>
                   </Button>
+
+                  <div className="mt-6 flex items-center justify-center gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-medium animate-pulse">
+                    <Star size={14} className="fill-current" />
+                    <span>{t.bookmarkInfo}</span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -24,8 +24,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+
 
 interface WelcomeDialogProps {
   open: boolean;
@@ -42,18 +41,15 @@ export function WelcomeDialog({
   isRtl,
   t,
 }: WelcomeDialogProps) {
-  const router = useRouter();
-  const locale = useLocale();
 
   const handleConfirm = () => {
     onConfirm();
-    router.push(`/${locale}`);
   };
 
   const handleCancel = () => {
     onCancel();
-    router.push(`/${locale}`); // Or wherever appropriate if they refuse
   };
+
 
   return (
     <AlertDialog open={open}>
