@@ -27,80 +27,81 @@ sw.addEventListener("unhandledrejection", (event) => {
   console.log("[SW] unhandledrejection", { reason: event && event.reason });
 });
 
+// No pre-cache list — pages are cached on-demand as the user visits them.
+// Only offline.html is pre-cached during install so the fallback is always available.
 // Critical routes to pre-cache for offline support
-const PRECACHE_ROUTES = [
-  "/",
-  "/ar",
-  "/en",
-  "/fr",
-  "/ar/pro/manager",
-  "/ar/pro/admin",
-  "/fr/pro/manager",
-  "/fr/pro/admin",
-  "/en/pro/manager",
-  "/en/pro/admin",
-  "/ar/pro/manager/teachers",
-  "/en/pro/manager/teachers",
-  "/fr/pro/manager/teachers",
-  "/ar/pro/manager/students",
-  "/en/pro/manager/students",
-  "/fr/pro/manager/students",
-  "/ar/pro/manager/receipts",
-  "/en/pro/manager/receipts",
-  "/fr/pro/manager/receipts",
-  "/ar/pro/admin/center",
-  "/en/pro/admin/center",
-  "/fr/pro/admin/center",
-  "/ar/pro/admin/users",
-  "/en/pro/admin/users",
-  "/fr/pro/admin/users",
-  "/ar/pro/admin/receipts",
-  "/en/pro/admin/receipts",
-  "/fr/pro/admin/receipts",
-  "/ar/pro/admin/schedule",
-  "/en/pro/admin/schedule",
-  "/fr/pro/admin/schedule",
-  "/ar/pro/manager/schedule",
-  "/en/pro/manager/schedule",
-  "/fr/pro/manager/schedule",
-  "/ar/pro/login",
-  "/en/pro/login",
-  "/fr/pro/login",
-  "/ar/pro/admin/database",
-  "/en/pro/admin/database",
-  "/fr/pro/admin/database",
-  "/ar/schedule",
-  "/en/schedule",
-  "/fr/schedule",
-  "/ar/schedule/attendance",
-  "/en/schedule/attendance",
-  "/fr/schedule/attendance",
-  "/ar/free",
-  "/en/free",
-  "/fr/free",
-  "/ar/free/login",
-  "/en/free/login",
-  "/fr/free/login",
-  "/ar/free/admin",
-  "/en/free/admin",
-  "/fr/free/admin",
-  "/ar/free/admin/center",
-  "/en/free/admin/center",
-  "/fr/free/admin/center",
-  "/ar/free/admin/users",
-  "/en/free/admin/users",
-  "/fr/free/admin/users",
-  "/ar/free/admin/receipts",
-  "/en/free/admin/receipts",
-  "/fr/free/admin/receipts",
-  "/ar/free/admin/schedule",
-  "/en/free/admin/schedule",
-  "/fr/free/admin/schedule",
-  "/ar/free/admin/database",
-  "/en/free/admin/database",
-  "/fr/free/admin/database",
-];
-
+// const PRECACHE_ROUTES = [
+//   "/",
+//   "/ar",
+//   "/en",
+//   "/fr",
+//   "/ar/pro/manager",
+//   "/ar/pro/admin",
+//   "/fr/pro/manager",
+//   "/fr/pro/admin",
+//   "/en/pro/manager",
+//   "/en/pro/admin",
+//   "/ar/pro/manager/teachers",
+//   "/en/pro/manager/teachers",
+//   "/fr/pro/manager/teachers",
+//   "/ar/pro/manager/students",
+//   "/en/pro/manager/students",
+//   "/fr/pro/manager/students",
+//   "/ar/pro/manager/receipts",
+//   "/en/pro/manager/receipts",
+//   "/fr/pro/manager/receipts",
+//   "/ar/pro/admin/center",
+//   "/en/pro/admin/center",
+//   "/fr/pro/admin/center",
+//   "/ar/pro/admin/users",
+//   "/en/pro/admin/users",
+//   "/fr/pro/admin/users",
+//   "/ar/pro/admin/receipts",
+//   "/en/pro/admin/receipts",
+//   "/fr/pro/admin/receipts",
+//   "/ar/pro/admin/schedule",
+//   "/en/pro/admin/schedule",
+//   "/fr/pro/admin/schedule",
+//   "/ar/pro/manager/schedule",
+//   "/en/pro/manager/schedule",
+//   "/fr/pro/manager/schedule",
+//   "/ar/pro/login",
+//   "/en/pro/login",
+//   "/fr/pro/login",
+//   "/ar/pro/admin/database",
+//   "/en/pro/admin/database",
+//   "/fr/pro/admin/database",
+//   "/ar/schedule",
+//   "/en/schedule",
+//   "/fr/schedule",
+//   "/ar/schedule/attendance",
+//   "/en/schedule/attendance",
+//   "/fr/schedule/attendance",
+//   "/ar/free",
+//   "/en/free",
+//   "/fr/free",
+//   "/ar/free/login",
+//   "/en/free/login",
+//   "/fr/free/login",
+//   "/ar/free/admin",
+//   "/en/free/admin",
+//   "/fr/free/admin",
+//   "/ar/free/admin/center",
+//   "/en/free/admin/center",
+//   "/fr/free/admin/center",
+//   "/ar/free/admin/users",
+//   "/en/free/admin/users",
+//   "/fr/free/admin/users",
+//   "/ar/free/admin/receipts",
+//   "/en/free/admin/receipts",
+//   "/fr/free/admin/receipts",
+//   "/ar/free/admin/schedule",
+//   "/en/free/admin/schedule",
+//   "/fr/free/admin/schedule",
+//   "/ar/free/admin/database",
+//   "/en/free/admin/database",
+//   "/fr/free/admin/database",
+// ];
 // Network timeout for navigation requests (ms)
 const NAVIGATION_TIMEOUT_MS = 3000;
 
@@ -111,22 +112,23 @@ sw.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       try {
+        // Only pre-cache the offline fallback page — everything else is
+        // cached lazily the first time the user actually navigates to it.
         const cache = await caches.open(PAGES_CACHE);
         await cache.add(OFFLINE_URL);
         console.log("[SW] cached offline.html");
-
         // Pre-cache critical routes
-        for (const route of PRECACHE_ROUTES) {
-          try {
-            const response = await fetch(route, { credentials: "same-origin" });
-            if (response.ok) {
-              await cache.put(route, response.clone());
-              console.log("[SW] pre-cached:", route);
-            }
-          } catch (e) {
-            console.log("[SW] failed to pre-cache:", route, e);
-          }
-        }
+        // for (const route of PRECACHE_ROUTES) {
+        //   try {
+        //     const response = await fetch(route, { credentials: "same-origin" });
+        //     if (response.ok) {
+        //       await cache.put(route, response.clone());
+        //       console.log("[SW] pre-cached:", route);
+        //     }
+        //   } catch (e) {
+        //     console.log("[SW] failed to pre-cache:", route, e);
+        //   }
+        // }
       } catch (e) {
         console.log("[SW] install failed", e);
       }
