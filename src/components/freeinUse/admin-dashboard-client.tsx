@@ -3,13 +3,11 @@
 import AdminQuickActions from "@/components/freeinUse/adminQuickActions";
 import AdminRevenueChart from "@/components/freeinUse/adminrevenue-chart";
 import AdminStatsCards from "@/components/freeinUse/adminStatsCards";
-import CentersOverview from "@/components/freeinUse/centersOverview";
 import EnrollmentChart from "@/components/freeinUse/enrollement-chart";
 import { DeleteAllDataButton } from "@/components/freeinUse/masterDelete";
-import SystemActivityLog from "@/components/freeinUse/systemActivitylog";
-import TopSubjects from "@/components/freeinUse/top-subjects";
-import { useTranslations } from "next-intl";
 import PageHeader from "@/components/freeinUse/page-header";
+import SystemActivityLog from "@/components/freeinUse/systemActivitylog";
+import { useTranslations } from "next-intl";
 
 export default function AdminDashboardClient() {
   const t = useTranslations("Dashboard");
@@ -28,15 +26,9 @@ export default function AdminDashboardClient() {
           <AdminRevenueChart />
         </section>
 
-        {/* Centers Overview */}
-        <section>
-          <CentersOverview />
-        </section>
-
         {/* Charts Section */}
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
           <EnrollmentChart />
-          <TopSubjects />
         </div>
 
         {/* Activity */}

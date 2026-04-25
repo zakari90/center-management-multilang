@@ -32,7 +32,7 @@ export function CacheStatusDot({ href }: { href: string }) {
   );
 
   // Don't show dots if everything is cached
-  if (allCached) return null;
+  // if (allCached) return null;
 
   // Wait for initial check to avoid flickering
   if (!isInitialCheckDone) return null;
