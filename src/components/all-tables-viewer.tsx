@@ -34,7 +34,9 @@ import {
   Building2,
   Download,
   Upload,
+  Clock,
 } from "lucide-react";
+
 import { localDb } from "@/lib/dexie/dbSchema";
 import type {
   User,
@@ -50,6 +52,10 @@ import type {
 import { useLocale, useTranslations } from "next-intl";
 import PageHeader from "./page-header";
 import { toast } from "sonner";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
+import { performProAutoBackup, performProDatabaseExport } from "@/utils/backupUtils";
+
+
 
 // Helper to format timestamps into human-friendly dates
 function formatDate(value: number | string | undefined | null): string {
@@ -75,6 +81,7 @@ export function AllTablesViewer() {
   const t = useTranslations("AllTablesViewer");
   const locale = useLocale();
   const direction = locale === "ar" ? "rtl" : "ltr";
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Table configurations for all entities
   const TABLE_CONFIGS = {
@@ -715,10 +722,31 @@ export function AllTablesViewer() {
     loadData();
   }, [selectedTable]);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
+  const [lastAutoSave, setLastAutoSave] = useState<string | null>(
+    () => localStorage.getItem("autosave_last_run")
+  );
+
+  const performExport = async (prefix: string = "database_export") => {
+    if (prefix === "database_autosave") {
+      await performProAutoBackup();
+    } else {
+      await performProDatabaseExport();
+    }
+  };
+
+
+  const handleAutoSave = async () => {
+    await performExport("database_autosave");
+    const now = String(Date.now());
+    setLastAutoSave(now);
+    toast.success(t("autoSave.savedToast"));
+  };
+
+  useAutoBackup(handleAutoSave);
+
 
   const handleExportAll = async () => {
     setIsLoading(true);
@@ -824,34 +852,46 @@ export function AllTablesViewer() {
     <div className="space-y-6" dir={direction}>
       <div className="flex flex-col md:flex-row items-center justify-between">
         <PageHeader title={t("title")} subtitle={t("description")} />
-        <div className="flex gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleFileSelected}
-            className="hidden"
-          />
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isImporting || isLoading}
-            variant="outline"
-            className="gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            {isImporting
-              ? t("importButton.loading")
-              : t("importButton.default")}
-          </Button>
-          <Button
-            onClick={handleExportAll}
-            disabled={isLoading || isImporting}
-            variant="outline"
-            className="gap-2"
-          >
-            <Download className="h-4 w-4" />
-            {isLoading ? t("exportButton.loading") : t("exportButton.default")}
-          </Button>
+        <div className="flex flex-col items-end gap-2">
+          {/* Last auto-save indicator */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>
+              {lastAutoSave
+                ? t("autoSave.lastSaved", { date: formatDate(Number(lastAutoSave)) })
+                : t("autoSave.neverSaved")}
+            </span>
+          </div>
+          <div className="flex gap-2">
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileSelected}
+              className="hidden"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isImporting || isLoading}
+              variant="outline"
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              {isImporting
+                ? t("importButton.loading")
+                : t("importButton.default")}
+            </Button>
+            <Button
+              onClick={handleExportAll}
+              disabled={isLoading || isImporting}
+              variant="outline"
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              {isLoading ? t("exportButton.loading") : t("exportButton.default")}
+            </Button>
+          </div>
         </div>
       </div>
 

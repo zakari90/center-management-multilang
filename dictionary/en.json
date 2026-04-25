@@ -417,7 +417,12 @@
     "schedule": {
       "title": "Schedule",
       "description": "View calendar"
+    },
+    "database": {
+      "title": "Database",
+      "description": "Backups & Tables"
     }
+
   },
   "adminRevenueChart": {
     "title": "Revenue Overview",
@@ -1968,6 +1973,11 @@
       "default": "Export All Data",
       "loading": "Exporting..."
     },
+    "autoSave": {
+      "lastSaved": "Last auto-save: {date}",
+      "neverSaved": "No auto-save yet",
+      "savedToast": "Monthly backup saved automatically"
+    },
     "importButton": {
       "default": "Import Data",
       "loading": "Importing..."
@@ -2224,7 +2234,9 @@
     "welcome_data_local": "Data is saved locally. We do not collect your data.",
     "welcome_dont_clear_cache": "Important: Do not clear your browser cache/site data to avoid losing progress.",
     "welcome_works_offline": "Works 100% offline once the application is fully cached in your browser.",
+    "welcome_auto_backup": "Monthly Auto-Backups: Your data is automatically saved to your device every month.",
     "welcome_add_favorites": "Add this link to favorites / bookmarks for easy access.",
+
     "welcome_confirm_btn": "Accept",
     "welcome_cancel_btn": "Refuse"
   }

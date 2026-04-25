@@ -38,6 +38,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
+import { performFreeAutoBackup } from "@/utils/backupUtils";
+import { toast } from "sonner";
+
+
 
 interface AdminLayoutClientProps {
   children: React.ReactNode;
@@ -50,7 +55,9 @@ export default function AdminLayoutClient({
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("AdminLayout");
+  const t_shared = useTranslations("AllTablesViewer");
   const tNav = useTranslations("NavUser");
+
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -81,7 +88,20 @@ export default function AdminLayoutClient({
     router.push(`/${locale}/free/login`);
   }, [logout, router, locale]);
 
+  const handleAutoSave = async () => {
+    try {
+      await performFreeAutoBackup();
+      toast.success(t_shared("autoSave.savedToast"));
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    }
+  };
+
+
+  useAutoBackup(handleAutoSave);
+
   // Removed manual sync function
+
 
   if (!mounted || isLoading) {
     return (

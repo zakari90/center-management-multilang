@@ -30,6 +30,10 @@ import {
 } from "@/freelib/dexie/scheduleDb";
 import { centerActions } from "@/freelib/dexie/freedexieaction";
 import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
+import { performCombinedScheduleBackup } from "@/utils/backupUtils";
+import { toast } from "sonner";
+
 
 function SchedulePageContent() {
   const locale = useLocale();
@@ -88,6 +92,8 @@ function SchedulePageContent() {
   const tAttendance = useTranslations("AttendanceRegister");
   const tTimetable = useTranslations("TimetableManagement");
   const tManager = useTranslations("ManagerLayout");
+  const t_shared = useTranslations("AllTablesViewer");
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -105,6 +111,18 @@ function SchedulePageContent() {
     params.set("tab", value);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
+  const handleAutoSave = async () => {
+    try {
+      await performCombinedScheduleBackup();
+      toast.success(t_shared("autoSave.savedToast"));
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    }
+  };
+
+  useAutoBackup(handleAutoSave);
+
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">

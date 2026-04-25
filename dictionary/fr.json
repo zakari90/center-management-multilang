@@ -1850,6 +1850,11 @@
       "default": "Exporter toutes les données",
       "loading": "Exportation..."
     },
+    "autoSave": {
+      "lastSaved": "Dernière sauvegarde automatique : {date}",
+      "neverSaved": "Aucune sauvegarde automatique pour l'instant",
+      "savedToast": "Sauvegarde mensuelle effectuée automatiquement"
+    },
     "importButton": {
       "default": "Importer des données",
       "loading": "Importation..."
@@ -2141,7 +2146,9 @@
     "welcome_data_local": "Vos données sont enregistrées localement. Nous ne collectons pas vos données.",
     "welcome_dont_clear_cache": "Important : ne videz pas le cache de votre navigateur pour éviter de perdre votre progression.",
     "welcome_works_offline": "Fonctionne à 100 % hors ligne une fois l'application entièrement mise en cache dans votre navigateur.",
+    "welcome_auto_backup": "Sauvegardes automatiques mensuelles : vos données sont automatiquement enregistrées sur votre appareil chaque mois.",
     "welcome_add_favorites": "Ajoutez ce lien à vos favoris pour un accès facile.",
+
     "welcome_confirm_btn": "Accepter",
     "welcome_cancel_btn": "Refuser"
   },

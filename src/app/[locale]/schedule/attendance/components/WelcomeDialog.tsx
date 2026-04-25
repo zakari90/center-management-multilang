@@ -1,5 +1,8 @@
 "use client";
 
+import Lottie from "lottie-react";
+import starAnimation from "../../../../../../public/Star.json";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +21,9 @@ import {
   Database,
   Info,
   Star,
+  RefreshCw,
 } from "lucide-react";
+
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 
@@ -55,8 +60,8 @@ export function WelcomeDialog({
       <AlertDialogContent dir={isRtl ? "rtl" : "ltr"} className="max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600">
-              <Sparkles size={32} />
+            <div className="w-24 h-24 flex items-center justify-center">
+              <Lottie animationData={starAnimation} loop={true} autoplay={true} />
             </div>
           </div>
           <AlertDialogTitle className="text-2xl text-center font-black">
@@ -104,12 +109,19 @@ export function WelcomeDialog({
                   {t("welcome_works_offline")}
                 </span>
               </div>
+              <div className="flex items-center gap-3 p-2 rounded-md bg-purple-50/50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400">
+                <RefreshCw size={14} className="shrink-0" />
+                <span className="text-[10px] font-medium leading-tight">
+                  {t("welcome_auto_backup")}
+                </span>
+              </div>
               <div className="flex items-center gap-3 p-2 rounded-md bg-yellow-50/50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-400">
                 <Star size={14} className="shrink-0" />
                 <span className="text-[10px] font-medium leading-tight">
                   {t("welcome_add_favorites")}
                 </span>
               </div>
+
             </div>
           </div>
         </div>

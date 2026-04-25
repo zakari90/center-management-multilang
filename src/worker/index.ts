@@ -139,10 +139,13 @@ sw.addEventListener("fetch", (event: any) => {
       fetch(request).catch(async () => {
         const cache = await caches.open(PAGES_CACHE);
         const shell = await matchAppShell(cache, url.origin);
-        return shell || new Response("Offline", {
-          status: 503,
-          headers: { "Content-Type": "text/plain; charset=utf-8" },
-        });
+        return (
+          shell ||
+          new Response("Offline", {
+            status: 503,
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+          })
+        );
       }),
     );
     return;

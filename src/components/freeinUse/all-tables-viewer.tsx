@@ -50,6 +50,12 @@ import type {
 import { useLocale, useTranslations } from "next-intl";
 import PageHeader from "./page-header";
 import { toast } from "sonner";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
+import { Clock } from "lucide-react";
+import { performFreeAutoBackup, performFreeDatabaseExport } from "@/utils/backupUtils";
+
+
+
 
 // Helper to format timestamps into human-friendly dates
 function formatDate(value: number | string | undefined | null): string {
@@ -719,35 +725,27 @@ export function AllTablesViewer() {
     loadData();
   }, [selectedTable]);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
+  const [lastAutoSave, setLastAutoSave] = useState<number | null>(null);
+
+  // Initialize lastAutoSave from localStorage
+  useEffect(() => {
+    const last = localStorage.getItem("autosave_last_run");
+    if (last) setLastAutoSave(Number(last));
+  }, []);
+
+  const performExport = async (prefix: string = "database_export") => {
+    if (prefix === "database_autosave") {
+      await performFreeAutoBackup();
+    } else {
+      await performFreeDatabaseExport();
+    }
+  };
+
 
   const handleExportAll = async () => {
     setIsLoading(true);
     try {
-      const allData: Record<string, any[]> = {};
-
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const filename = `database_export_${timestamp}.json`;
-
-      for (const [key, config] of Object.entries(TABLE_CONFIGS)) {
-        if (EXCLUDED_TABLES.has(key)) continue;
-        allData[key] = await config.fetchData();
-      }
-
-      const jsonString = JSON.stringify(allData, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      await performExport("database_export");
       toast.success(t("toast.exportSuccess"));
     } catch (error) {
       console.error("Failed to export data:", error);
@@ -756,6 +754,23 @@ export function AllTablesViewer() {
       setIsLoading(false);
     }
   };
+
+  const handleAutoSave = async () => {
+    try {
+      await performExport("database_autosave");
+      toast.success(t("autoSave.savedToast"));
+      setLastAutoSave(Date.now());
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    }
+  };
+
+  useAutoBackup(handleAutoSave);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
 
   const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -826,9 +841,24 @@ export function AllTablesViewer() {
 
   return (
     <div className="space-y-6" dir={direction}>
-      <div className="flex flex-col md:flex-row items-center justify-between">
-        <PageHeader title={t("title")} subtitle={t("description")} />
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="space-y-1">
+          <PageHeader title={t("title")} subtitle={t("description")} />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            {lastAutoSave ? (
+              <span>
+                {t("autoSave.lastSaved", {
+                  date: formatDate(lastAutoSave),
+                })}
+              </span>
+            ) : (
+              <span>{t("autoSave.neverSaved")}</span>
+            )}
+          </div>
+        </div>
         <div className="flex gap-2">
+
           <input
             ref={fileInputRef}
             type="file"

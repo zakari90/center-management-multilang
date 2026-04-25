@@ -27,6 +27,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import PublicFooter from "@/components/PublicFooter";
 import { useTheme } from "next-themes";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
+import { performProAutoBackup } from "@/utils/backupUtils";
+import { toast } from "sonner";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,7 +60,9 @@ export default function AdminLayoutClient({
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("AdminLayout");
+  const t_shared = useTranslations("AllTablesViewer");
   const tNav = useTranslations("NavUser");
+
   const isArabic = locale === "ar";
   const [mounted, setMounted] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -88,6 +94,18 @@ export default function AdminLayoutClient({
     await logout();
     router.push(`/${locale}/pro/login`);
   }, [logout, router, locale]);
+
+  const handleAutoSave = async () => {
+    try {
+      await performProAutoBackup();
+      toast.success(t_shared("autoSave.savedToast"));
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    }
+  };
+
+  useAutoBackup(handleAutoSave);
+
 
   const handleSync = useCallback(async () => {
     if (!user?.id) return;

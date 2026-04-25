@@ -1,9 +1,17 @@
 "use client";
 
+import Lottie from "lottie-react";
+import starAnimation from "../../../../public/Star.json";
+
 import { useEffect, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useAutoBackup } from "@/hooks/useAutoBackup";
+import { performFreeAutoBackup } from "@/utils/backupUtils";
+
+
 import { Card } from "@/components/ui/card";
 import {
   ShieldCheck,
@@ -22,9 +30,12 @@ import PublicFooter from "@/components/PublicFooter";
 
 export default function FreeVersionIntro() {
   const locale = useLocale();
+  const t_shared = useTranslations("AllTablesViewer");
   const router = useRouter();
+
   const isRtl = locale === "ar";
   const [isChecking, setIsChecking] = useState(true);
+  const [dbExists, setDbExists] = useState(false);
 
   useEffect(() => {
     // Check if the database even exists before trying to query it.
@@ -32,6 +43,7 @@ export default function FreeVersionIntro() {
     isDatabaseCreated()
       .then(async (exists) => {
         if (exists) {
+          setDbExists(true);
           // DB exists — dynamically import the heavy Dexie actions only when needed
           const { userActions } =
             await import("@/freelib/dexie/freedexieaction");
@@ -52,7 +64,20 @@ export default function FreeVersionIntro() {
       });
   }, [locale, router]);
 
+  const handleAutoSave = async () => {
+    try {
+      await performFreeAutoBackup();
+      toast.success(t_shared("autoSave.savedToast"));
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    }
+  };
+
+
+  useAutoBackup(dbExists ? handleAutoSave : () => Promise.resolve());
+
   const handleStart = () => {
+
     router.push(`/${locale}/free/login`);
   };
 
@@ -229,7 +254,8 @@ export default function FreeVersionIntro() {
             <ModeToggle />
             <LanguageSwitcher />
           </div>
-          <div className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+          <div className="flex items-center gap-2 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+            <Lottie animationData={starAnimation} loop={true} autoplay={true} className="w-5 h-5" />
             v1.0 Local Edition
           </div>
         </div>
