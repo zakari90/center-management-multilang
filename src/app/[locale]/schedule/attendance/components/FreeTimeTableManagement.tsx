@@ -421,36 +421,49 @@ export default function FreeTimetableManagement({
               : t("weeklyScheduleDescription")}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto relative">
-            <div className="min-w-[1200px]">
-              {/* Header Row */}
-              <div className="grid grid-cols-8 gap-2 mb-2 ">
-                <div className="font-bold text-xs uppercase tracking-wider text-indigo-400 p-3 border border-indigo-500/20 rounded-xl sticky start-0 bg-black/80 backdrop-blur-md z-30">
+        <CardContent className="p-0 sm:p-6">
+          <div className="w-full overflow-x-auto">
+            {/* Inner wrapper — wide enough to always show all 7 day columns */}
+            <div style={{ minWidth: `${7 * 140 + 110}px` }}>
+
+              {/* ── Header Row ── */}
+              <div
+                className="grid gap-1.5 mb-1.5"
+                style={{ gridTemplateColumns: `110px repeat(${daysOfWeek.length}, 1fr)` }}
+              >
+                {/* Time header */}
+                <div className="font-bold text-xs uppercase tracking-wider text-indigo-400 p-3 border border-indigo-500/20 rounded-xl bg-black/60">
                   {t("time")}
                 </div>
+                {/* Day headers */}
                 {daysOfWeek.map((day: any) => (
                   <div
-                    className="font-bold text-xs uppercase tracking-wider text-center p-3 bg-indigo-500/10 text-indigo-300 rounded-xl sticky top-0 z-20 border border-indigo-500/20 backdrop-blur-md"
+                    key={day.key}
+                    className="font-bold text-xs uppercase tracking-wider text-center p-3 bg-indigo-500/10 text-indigo-300 rounded-xl border border-indigo-500/20"
                   >
                     {day.label}
                   </div>
                 ))}
               </div>
 
-              {/* Time Slots */}
-              <div className="space-y-2 sticky">
+              {/* ── Time Slot Rows ── */}
+              <div className="flex flex-col gap-1.5">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
-                  <div key={time} className="grid grid-cols-8 gap-2">
-                    {/* Time Label - fixed on left */}
-                    <div className="flex items-center justify-center text-xs font-bold text-indigo-200 p-2 border border-white/5 rounded-xl sticky start-0 bg-black/40 backdrop-blur-md z-10 shadow-sm">
-                      <Clock className="h-3.5 w-3.5 mr-1.5 text-indigo-400" />
-                      {time} - {TIME_SLOTS[timeIndex + 1]}
+                  <div
+                    key={time}
+                    className="grid gap-1.5"
+                    style={{ gridTemplateColumns: `110px repeat(${daysOfWeek.length}, 1fr)` }}
+                  >
+                    {/* Time label */}
+                    <div className="flex items-center justify-center text-[11px] font-semibold text-indigo-200 p-2 border border-white/5 rounded-xl bg-black/40 shadow-sm shrink-0">
+                      <Clock className="h-3 w-3 mr-1 text-indigo-400 shrink-0" />
+                      <span className="whitespace-nowrap">{time}–{TIME_SLOTS[timeIndex + 1]}</span>
                     </div>
 
-                    {/* Day  */}
+                    {/* Day cells */}
                     {daysOfWeek.map((day: any) => {
                       const slots = getSlotsByDayAndTime(day.key, time);
+                      const hasSlot = slots.length > 0;
 
                       return (
                         <div
@@ -459,57 +472,54 @@ export default function FreeTimetableManagement({
                             !effectiveReadOnly && handleSlotClick(day.key, time)
                           }
                           className={cn(
-                            "min-h-[90px] p-2 border-dashed border-2 border-transparent rounded-xl transition-all flex flex-col relative group/cell",
-                            !effectiveReadOnly && "cursor-pointer hover:border-indigo-500/30 hover:bg-indigo-500/5",
-                            "bg-white/5",
-                            slots.length === 0 && "opacity-40",
+                            "min-h-[80px] p-1.5 rounded-xl transition-all flex flex-col relative group/cell border",
+                            hasSlot
+                              ? "bg-indigo-500/5 border-indigo-500/20"
+                              : "bg-white/[0.03] border-dashed border-white/10",
+                            !effectiveReadOnly && !hasSlot &&
+                              "cursor-pointer hover:border-indigo-500/40 hover:bg-indigo-500/5",
+                            !effectiveReadOnly && hasSlot && "cursor-pointer",
                           )}
                         >
-                          {/* Hover Add Icon (if empty) */}
-                          {slots.length === 0 && !effectiveReadOnly && (
+                          {/* Hover add icon (empty cell) */}
+                          {!hasSlot && !effectiveReadOnly && (
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity z-10">
-                              <div className="bg-primary/10 p-1.5 rounded-full backdrop-blur-[2px]">
-                                <Clock className="h-4 w-4 text-primary" />
+                              <div className="bg-indigo-500/10 p-1.5 rounded-full">
+                                <Clock className="h-3.5 w-3.5 text-indigo-400" />
                               </div>
                             </div>
                           )}
 
-                          <div className="space-y-1 z-20 relative h-full flex flex-col justify-center">
-                            {slots[0] && (
-                                <div
-                                  key={slots[0].id || 0}
-                                  className="p-2 bg-indigo-500/10 border border-indigo-500/20 shadow-lg rounded-xl text-xs space-y-1 group/card relative overflow-hidden hover:scale-105 hover:bg-indigo-500/20 transition-all cursor-pointer"
-                                  style={{
-                                    borderLeft: "4px solid #6366f1",
-                                    background: "rgba(99, 102, 241, 0.05)",
-                                    backdropFilter: "blur(4px)"
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Prevent slot click
-                                    handleViewDetails(slots[0]);
-                                  }}
-                                >
-                                  <div className="flex justify-between items-start">
-                                    <span className="font-bold truncate pr-4 text-indigo-300">
-                                    {slots[0].name}
-                                  </span>
-                                </div>
-
-                                <div className="flex flex-col gap-0.5 text-[10px] text-muted-foreground">
-                                  <div className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3 opacity-70" />
-                                    <span>{slots[0].roomId}</span>
-                                  </div>
-                                </div>
+                          {/* Slot card */}
+                          {hasSlot && slots[0] && (
+                            <div
+                              key={slots[0].id || 0}
+                              className="flex-1 p-2 rounded-lg text-xs space-y-1 cursor-pointer hover:bg-indigo-500/20 transition-all"
+                              style={{
+                                borderLeft: "3px solid #6366f1",
+                                background: "rgba(99,102,241,0.08)",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(slots[0]);
+                              }}
+                            >
+                              <span className="font-semibold block truncate text-indigo-200">
+                                {slots[0].name}
+                              </span>
+                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <MapPin className="h-3 w-3 opacity-70 shrink-0" />
+                                <span className="truncate">{slots[0].roomId}</span>
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                 ))}
               </div>
+
             </div>
           </div>
         </CardContent>
