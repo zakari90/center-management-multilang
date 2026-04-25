@@ -88,8 +88,9 @@ export const useCacheStatusStore = create<CacheStatusState>((set, get) => ({
 
           const isCached = !!match;
           if (!isCached) {
-            console.warn(`[CacheStatus] MISSING: ${normalizedPath} (Tried ${fullUrl} and variants)`);
+            console.debug(`[CacheStatus] Not yet cached: ${normalizedPath}`);
           }
+
           
           newStatuses[pagePath] = isCached;
           return isCached;
