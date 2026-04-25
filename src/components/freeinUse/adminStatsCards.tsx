@@ -2,36 +2,31 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, UserCheck, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useState } from "react";
 import {
-  userActions,
   studentActions,
   teacherActions,
-  receiptActions,
+  userActions,
 } from "@/freelib/dexie/freedexieaction";
-import { Role } from "@/freelib/dexie/dbSchema";
+import { useLiveQuery } from "dexie-react-hooks";
+import { UserCheck, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 
 export default function AdminStatsCards() {
   const t = useTranslations("adminStats");
   const queryData = useLiveQuery(async () => {
     try {
       // ✅ Fetch from local DB
-      const [allUsers, allStudents, allTeachers, allReceipts] =
-        await Promise.all([
-          userActions.getAll(),
-          studentActions.getAll(),
-          teacherActions.getAll(),
-          receiptActions.getAll(),
-        ]);
+      const [allUsers, allStudents, allTeachers] = await Promise.all([
+        userActions.getAll(),
+        studentActions.getAll(),
+        teacherActions.getAll(),
+      ]);
 
-      const [activeUsers, activeStudents, activeTeachers, activeReceipts] = [
+      const [activeUsers, activeStudents, activeTeachers] = [
         allUsers,
         allStudents,
         allTeachers,
-        allReceipts,
       ];
 
       // ✅ Calculate stats
@@ -39,56 +34,11 @@ export default function AdminStatsCards() {
       const totalStudents = activeStudents.length;
       const totalTeachers = activeTeachers.length;
 
-      // ✅ Calculate revenue
-      const totalRevenue = activeReceipts.reduce((sum, r) => sum + r.amount, 0);
-
-      // ✅ Calculate monthly revenue (current month)
-      const now = new Date();
-      const currentMonthStart = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        1,
-      ).getTime();
-      const monthlyReceipts = activeReceipts.filter(
-        (r) => r.date >= currentMonthStart,
-      );
-      const monthlyRevenue = monthlyReceipts.reduce(
-        (sum, r) => sum + r.amount,
-        0,
-      );
-
-      // ✅ Calculate revenue growth (compare with previous month)
-      const previousMonthStart = new Date(
-        now.getFullYear(),
-        now.getMonth() - 1,
-        1,
-      ).getTime();
-      const previousMonthEnd = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        0,
-      ).getTime();
-      const previousMonthReceipts = activeReceipts.filter(
-        (r) => r.date >= previousMonthStart && r.date <= previousMonthEnd,
-      );
-      const previousMonthRevenue = previousMonthReceipts.reduce(
-        (sum, r) => sum + r.amount,
-        0,
-      );
-      const revenueGrowth =
-        previousMonthRevenue > 0
-          ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) *
-            100
-          : 0;
-
       return {
         totalCenters: 0, // Centers are managed separately
         totalAdmins,
         totalStudents,
         totalTeachers,
-        totalRevenue,
-        monthlyRevenue,
-        revenueGrowth,
       };
     } catch (err) {
       console.error("Failed to fetch stats from local DB:", err);
@@ -108,8 +58,8 @@ export default function AdminStatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="h-4 w-24 bg-muted animate-pulse rounded" />
@@ -151,24 +101,10 @@ export default function AdminStatsCards() {
       subtitle: "",
       colorClass: "text-green-600",
     },
-    {
-      title: t("totalRevenue"),
-      icon: TrendingUp,
-      value: `MAD ${stats.totalRevenue.toFixed(2)}`,
-      subtitle: (
-        <div className="flex items-center gap-1">
-          <TrendingUp className="h-3 w-3 text-green-600" />
-          <span>
-            +{stats.revenueGrowth.toFixed(1)}% {t("thisMonth")}
-          </span>
-        </div>
-      ),
-      colorClass: "text-orange-600",
-    },
   ];
 
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {statsData.map((stat, index) => {
         const Icon = stat.icon;
         return (

@@ -2054,13 +2054,8 @@
   "AttendanceRegister": {
     "home": "Accueil",
     "title": "Registre de Présence",
-    "registerName": "Nom du Registre",
-    "registerNamePlaceholder": "Sélectionner le Registre",
     "viewMode": "Mode Affichage",
     "editMode": "Mode Édition",
-    "morning": "Matin",
-    "evening": "Soir",
-    "shift": "Période",
     "deleteAll": "Tout supprimer",
     "confirmDeleteAll": "Confirmer la suppression",
     "confirmDeleteAllDesc": "Cela supprimera définitivement tous les enregistrements de présence pour cette session.",
@@ -2069,7 +2064,6 @@
     "uploadNames": "Charger tous les membres",
     "addNames": "Ajouter des noms",
     "addName": "Ajouter un nom",
-    "noGroupsForPeriod": "Aucun groupe planifié pour cette période",
     "saveSuccess": "Présence enregistrée",
     "saveError": "Échec de l'enregistrement",
     "loadError": "Échec du chargement des noms",
@@ -2109,7 +2103,6 @@
     "sessions": "sessions",
     "loading": "Chargement...",
     "noSavedSessions": "Aucune session enregistrée pour le moment",
-    "created": "Créé le :",
     "legend": "Légende",
     "loadingMonthlyTracker": "Chargement du suivi mensuel...",
     "exportPdf": "Exporter PDF",
@@ -2140,7 +2133,17 @@
       "name": "Nom",
       "status": "Statut",
       "remarks": "Remarques"
-    }
+    },
+    "welcome_title": "Bienvenue dans le système de présence",
+    "welcome_desc": "Un système de gestion intelligent qui fonctionne entièrement localement.",
+    "welcome_later_names": "Plus tard, vous pourrez ajouter des noms manuellement ou les charger depuis un fichier Excel.",
+    "welcome_privacy_title": "Confidentialité et Mode Hors Ligne",
+    "welcome_data_local": "Vos données sont enregistrées localement. Nous ne collectons pas vos données.",
+    "welcome_dont_clear_cache": "Important : ne videz pas le cache de votre navigateur pour éviter de perdre votre progression.",
+    "welcome_works_offline": "Fonctionne à 100 % hors ligne une fois l'application entièrement mise en cache dans votre navigateur.",
+    "welcome_add_favorites": "Ajoutez ce lien à vos favoris pour un accès facile.",
+    "welcome_confirm_btn": "Accepter",
+    "welcome_cancel_btn": "Refuser"
   },
   "Contact": {
     "description": "Vous avez des questions ou besoin d'une démonstration personnalisée ? Notre équipe est là pour vous aider à choisir le meilleur plan pour votre centre.",
@@ -2166,18 +2169,5 @@
     "bookingInquiry": "Pour réservations ou demandes :",
     "contactEmail": "zakariazinedine1@gmail.com",
     "btnPaid": "Contactez-nous 💬"
-  },
-  "AttendanceRegister": {
-    "title": "Registre de Présence",
-    "welcome_title": "Bienvenue dans le système de présence",
-    "welcome_desc": "Un système de gestion intelligent qui fonctionne entièrement localement.",
-    "welcome_later_names": "Plus tard, vous pourrez ajouter des noms manuellement ou les charger depuis un fichier Excel.",
-    "welcome_privacy_title": "Confidentialité et Mode Hors Ligne",
-    "welcome_data_local": "Vos données sont enregistrées localement. Nous ne collectons pas vos données.",
-    "welcome_dont_clear_cache": "Important : ne videz pas le cache de votre navigateur pour éviter de perdre votre progression.",
-    "welcome_works_offline": "Fonctionne à 100 % hors ligne une fois l'application entièrement mise en cache dans votre navigateur.",
-    "welcome_add_favorites": "Ajoutez ce lien à vos favoris pour un accès facile.",
-    "welcome_confirm_btn": "Accepter",
-    "welcome_cancel_btn": "Refuser"
   }
 }
