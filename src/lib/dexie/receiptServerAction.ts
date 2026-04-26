@@ -222,19 +222,22 @@ const ServerActionReceipts = {
       const backup = [...syncedReceipts];
 
       try {
-        for (const receipt of syncedReceipts) {
-          await receiptActions.deleteLocal(receipt.id);
-        }
+        const pendingReceipts = await receiptActions.getByStatus(["w", "0"]);
+        const pendingIds = new Set(pendingReceipts.map((r) => r.id));
+
+        // Bulk delete all synced receipts atomically
+        await localDb.receipts.bulkDelete(syncedReceipts.map((r) => r.id));
 
         const transformedReceipts = Array.isArray(data)
           ? data.map((receipt: any) => transformServerReceipt(receipt))
           : [];
-        for (const receipt of transformedReceipts) {
-          const existing = await receiptActions.getLocal(receipt.id);
-          if (existing && existing.status === "w") {
-            continue; // Don't overwrite local pending changes
-          }
-          await receiptActions.putLocal(receipt);
+
+        // Bulk insert only non-pending receipts
+        const receiptsToImport = transformedReceipts.filter(
+          (r) => !pendingIds.has(r.id),
+        );
+        if (receiptsToImport.length > 0) {
+          await localDb.receipts.bulkPut(receiptsToImport);
         }
 
         return {

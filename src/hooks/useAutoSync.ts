@@ -105,10 +105,13 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isSyncingRef = useRef(false);
   const lastSyncTimeRef = useRef<number>(0);
+  const sessionCacheRef = useRef<{ valid: boolean; time: number } | null>(null);
+  const SESSION_CACHE_TTL = 30_000; // 30 seconds
 
   const log = useCallback(
     (message: string, ...args: any[]) => {
       if (opts.debug) {
+        console.log(`[AutoSync]`, message, ...args);
       }
     },
     [opts.debug],
@@ -118,12 +121,23 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
    * Validate that server session is valid before attempting sync
    */
   const validateServerSession = useCallback(async (): Promise<boolean> => {
+    // Return cached result if still fresh (avoids a round-trip before every periodic sync)
+    if (
+      sessionCacheRef.current &&
+      Date.now() - sessionCacheRef.current.time < SESSION_CACHE_TTL
+    ) {
+      return sessionCacheRef.current.valid;
+    }
+
     try {
       const response = await fetch("/api/auth/me", {
         credentials: "include",
       });
 
-      if (!response.ok) {
+      const valid = response.ok;
+      sessionCacheRef.current = { valid, time: Date.now() };
+
+      if (!valid) {
         log(
           "Server session invalid or expired (status: " + response.status + ")",
         );
@@ -133,10 +147,11 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
       log("Server session validated successfully");
       return true;
     } catch (error) {
+      sessionCacheRef.current = { valid: false, time: Date.now() };
       log("Failed to validate server session:", error);
       return false;
     }
-  }, [log]);
+  }, [log, SESSION_CACHE_TTL]);
 
   /**
    * Perform sync operation (push local changes to server)
@@ -379,22 +394,7 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
   useEffect(() => {
     if (!opts.syncBeforeUnload || !user) return;
 
-    const handleBeforeUnload = () => {
-      // Only sync if there are pending changes and we're online
-      if (isOnline() && !isSyncingRef.current) {
-        // Use sendBeacon for reliable sync on page close
-        log("Syncing before page unload...");
-
-        // Note: sendBeacon doesn't support async, so we use navigator.sendBeacon
-        // For now, we'll use a synchronous approach or skip if not critical
-        // The periodic sync will catch up on next session
-
-        // For critical sync, you might want to show a confirmation dialog
-        // but that's usually annoying for users
-      }
-    };
-
-    // Use visibilitychange for better reliability
+    // Use visibilitychange for better reliability (beforeunload is too late for async ops)
     const handleVisibilityChange = () => {
       if (
         document.visibilityState === "hidden" &&
@@ -402,18 +402,15 @@ export function useAutoSync(options: AutoSyncOptions = {}) {
         !isSyncingRef.current
       ) {
         log("Page hidden, performing sync...");
-        // Use sendBeacon or fetch with keepalive
         performSync().catch((err) => {
           log("Background sync failed:", err);
         });
       }
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [opts.syncBeforeUnload, user, performSync, log]);

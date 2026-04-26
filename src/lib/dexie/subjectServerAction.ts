@@ -227,28 +227,19 @@ const ServerActionSubjects = {
       const backup = [...syncedSubjects];
 
       try {
-        for (const subject of syncedSubjects) {
-          await subjectActions.deleteLocal(subject.id);
-        }
+        // Bulk delete all synced subjects atomically
+        await localDb.subjects.bulkDelete(syncedSubjects.map((s) => s.id));
 
         const transformedSubjects = Array.isArray(data)
           ? data.map((subject: any) => transformServerSubject(subject))
           : [];
 
-        for (const subject of transformedSubjects) {
-          // ✅ Skip if there are pending local changes for this subject
-          if (pendingIds.has(subject.id)) {
-            continue;
-          }
-
-          const existing = await subjectActions.getLocal(subject.id);
-          if (existing && existing.status === "w") {
-            continue; // Don't overwrite local pending changes
-          }
-          await subjectActions.putLocal(subject);
-        }
-
-        if (pendingIds.size > 0) {
+        // Bulk insert only non-pending subjects
+        const subjectsToImport = transformedSubjects.filter(
+          (s) => !pendingIds.has(s.id),
+        );
+        if (subjectsToImport.length > 0) {
+          await localDb.subjects.bulkPut(subjectsToImport);
         }
 
         return {

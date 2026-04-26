@@ -79,9 +79,10 @@ export async function syncAllEntitiesForRole(isAdmin: boolean) {
     ServerActionSchedules.Sync(),
   ];
 
-  // Only sync users if admin
+  // Only sync users and delete requests if admin
   if (isAdmin) {
     syncPromises.unshift(ServerActionUsers.Sync());
+    syncPromises.push(ServerActionDeleteRequests.Sync());
   }
 
   const results = await Promise.allSettled(syncPromises);
@@ -95,6 +96,7 @@ export async function syncAllEntitiesForRole(isAdmin: boolean) {
       subjects: results[4],
       receipts: results[5],
       schedules: results[6],
+      deleteRequests: results[7],
     };
   } else {
     return {

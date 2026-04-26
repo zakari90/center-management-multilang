@@ -273,19 +273,22 @@ const ServerActionSchedules = {
       const backup = [...syncedSchedules];
 
       try {
-        for (const schedule of syncedSchedules) {
-          await scheduleActions.deleteLocal(schedule.id);
-        }
+        const pendingSchedules = await scheduleActions.getByStatus(["w", "0"]);
+        const pendingIds = new Set(pendingSchedules.map((s) => s.id));
+
+        // Bulk delete all synced schedules atomically
+        await localDb.schedules.bulkDelete(syncedSchedules.map((s) => s.id));
 
         const transformedSchedules = Array.isArray(data)
           ? data.map((schedule: any) => transformServerSchedule(schedule))
           : [];
-        for (const schedule of transformedSchedules) {
-          const existing = await scheduleActions.getLocal(schedule.id);
-          if (existing && existing.status === "w") {
-            continue; // Don't overwrite local pending changes
-          }
-          await scheduleActions.putLocal(schedule);
+
+        // Bulk insert only non-pending schedules
+        const schedulesToImport = transformedSchedules.filter(
+          (s) => !pendingIds.has(s.id),
+        );
+        if (schedulesToImport.length > 0) {
+          await localDb.schedules.bulkPut(schedulesToImport);
         }
 
         return {

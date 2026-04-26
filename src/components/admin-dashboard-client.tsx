@@ -11,7 +11,6 @@ import SystemActivityLog from "@/components/systemActivitylog";
 import TopSubjects from "@/components/top-subjects";
 import { InstallAppButton } from "@/components/install-app-button";
 import { useTranslations } from "next-intl";
-import { AutoSyncProvider } from "./AutoSyncProvider";
 import PageHeader from "./page-header";
 
 export default function AdminDashboardClient() {
@@ -19,7 +18,6 @@ export default function AdminDashboardClient() {
 
   return (
     <>
-      <AutoSyncProvider />
 
       <div className="container mx-auto p-4 sm:p-6 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <PageHeader title={t("title")} subtitle={t("subtitle")} />

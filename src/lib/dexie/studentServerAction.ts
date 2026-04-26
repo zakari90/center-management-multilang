@@ -263,9 +263,8 @@ const ServerActionStudents = {
       const backup = [...syncedStudents];
 
       try {
-        for (const student of syncedStudents) {
-          await studentActions.deleteLocal(student.id);
-        }
+        // Bulk delete all synced students atomically
+        await localDb.students.bulkDelete(syncedStudents.map((s) => s.id));
 
         const transformedStudents = Array.isArray(data)
           ? data.map((student: any) => transformServerStudent(student))
@@ -310,17 +309,12 @@ const ServerActionStudents = {
           }
         }
 
-        for (const student of transformedStudents) {
-          // ✅ Skip if there are pending local changes for this student
-          if (pendingIds.has(student.id)) {
-            continue;
-          }
-
-          const existing = await studentActions.getLocal(student.id);
-          if (existing && existing.status === "w") {
-            continue; // Don't overwrite local pending changes
-          }
-          await studentActions.putLocal(student);
+        // Bulk insert only non-pending students
+        const studentsToImport = transformedStudents.filter(
+          (s) => !pendingIds.has(s.id),
+        );
+        if (studentsToImport.length > 0) {
+          await localDb.students.bulkPut(studentsToImport);
         }
 
         // ✅ Clear synced studentSubjects for the imported students and save new ones
@@ -328,24 +322,19 @@ const ServerActionStudents = {
           "1",
         ]);
         const studentIdsToImport = new Set(
-          transformedStudents
-            .filter((s) => !pendingIds.has(s.id))
-            .map((s) => s.id),
+          studentsToImport.map((s) => s.id),
         );
 
-        for (const ss of syncedStudentSubjects) {
-          // Only delete studentSubjects for students we're importing
-          if (studentIdsToImport.has(ss.studentId)) {
-            await studentSubjectActions.deleteLocal(ss.id);
-          }
+        const ssToDelete = syncedStudentSubjects
+          .filter((ss) => studentIdsToImport.has(ss.studentId))
+          .map((ss) => ss.id);
+        if (ssToDelete.length > 0) {
+          await localDb.studentSubjects.bulkDelete(ssToDelete);
         }
 
-        // ✅ Save all studentSubjects from server
-        for (const ss of allStudentSubjects) {
-          await studentSubjectActions.putLocal(ss);
-        }
-
-        if (pendingIds.size > 0) {
+        // ✅ Bulk save all studentSubjects from server
+        if (allStudentSubjects.length > 0) {
+          await localDb.studentSubjects.bulkPut(allStudentSubjects);
         }
 
         return {
