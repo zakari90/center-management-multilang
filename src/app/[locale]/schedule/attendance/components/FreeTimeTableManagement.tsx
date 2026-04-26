@@ -2,6 +2,7 @@
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +27,7 @@ import { timeTableActions } from "@/freelib/dexie/scheduleDb";
 import { generateObjectId } from "@/freelib/utils/generateObjectId";
 import { useLiveQuery } from "dexie-react-hooks";
 import ExcelJS from "exceljs";
-import { Clock, FileSpreadsheet, Loader2, MapPin, Trash2 } from "lucide-react";
+import { Clock, FileSpreadsheet, Loader2, MapPin, Trash2, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { cn } from "@/freelib/utils";
@@ -412,7 +413,7 @@ export default function FreeTimetableManagement({
       )}
 
       {/* Timetable Grid */}
-      <Card className="border-none bg-black/20 backdrop-blur-xl shadow-2xl overflow-hidden rounded-3xl">
+      <Card>
         <CardHeader>
           <CardTitle>{t("weeklySchedule")}</CardTitle>
           <CardDescription>
@@ -421,49 +422,37 @@ export default function FreeTimetableManagement({
               : t("weeklyScheduleDescription")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-0 sm:p-6">
-          <div className="w-full overflow-x-auto">
-            {/* Inner wrapper — wide enough to always show all 7 day columns */}
-            <div style={{ minWidth: `${7 * 140 + 110}px` }}>
-
-              {/* ── Header Row ── */}
-              <div
-                className="grid gap-1.5 mb-1.5"
-                style={{ gridTemplateColumns: `110px repeat(${daysOfWeek.length}, 1fr)` }}
-              >
-                {/* Time header */}
-                <div className="font-bold text-xs uppercase tracking-wider text-indigo-400 p-3 border border-indigo-500/20 rounded-xl bg-black/60">
+        <CardContent>
+          <div className="overflow-x-auto relative">
+            <div className="min-w-[1200px]">
+              {/* Header Row */}
+              <div className="grid grid-cols-8 gap-2 mb-2 ">
+                <div className="font-semibold text-sm text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
                   {t("time")}
                 </div>
-                {/* Day headers */}
                 {daysOfWeek.map((day: any) => (
                   <div
                     key={day.key}
-                    className="font-bold text-xs uppercase tracking-wider text-center p-3 bg-indigo-500/10 text-indigo-300 rounded-xl border border-indigo-500/20"
+                    className="font-semibold text-sm text-center p-2 bg-primary/10 rounded-md sticky top-0 z-20"
                   >
                     {day.label}
                   </div>
                 ))}
               </div>
 
-              {/* ── Time Slot Rows ── */}
-              <div className="flex flex-col gap-1.5">
+              {/* Time Slots */}
+              <div className="space-y-2 sticky">
                 {TIME_SLOTS.slice(0, -1).map((time, timeIndex) => (
-                  <div
-                    key={time}
-                    className="grid gap-1.5"
-                    style={{ gridTemplateColumns: `110px repeat(${daysOfWeek.length}, 1fr)` }}
-                  >
-                    {/* Time label */}
-                    <div className="flex items-center justify-center text-[11px] font-semibold text-indigo-200 p-2 border border-white/5 rounded-xl bg-black/40 shadow-sm shrink-0">
-                      <Clock className="h-3 w-3 mr-1 text-indigo-400 shrink-0" />
-                      <span className="whitespace-nowrap">{time}–{TIME_SLOTS[timeIndex + 1]}</span>
+                  <div key={time} className="grid grid-cols-8 gap-2">
+                    {/* Time Label - fixed on left */}
+                    <div className="flex items-center justify-center text-sm font-medium text-muted-foreground p-2 border rounded-md sticky left-0 bg-background z-10">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {time} - {TIME_SLOTS[timeIndex + 1]}
                     </div>
 
-                    {/* Day cells */}
+                    {/* Day  */}
                     {daysOfWeek.map((day: any) => {
                       const slots = getSlotsByDayAndTime(day.key, time);
-                      const hasSlot = slots.length > 0;
 
                       return (
                         <div
@@ -472,54 +461,44 @@ export default function FreeTimetableManagement({
                             !effectiveReadOnly && handleSlotClick(day.key, time)
                           }
                           className={cn(
-                            "min-h-[80px] p-1.5 rounded-xl transition-all flex flex-col relative group/cell border",
-                            hasSlot
-                              ? "bg-indigo-500/5 border-indigo-500/20"
-                              : "bg-white/[0.03] border-dashed border-white/10",
-                            !effectiveReadOnly && !hasSlot &&
-                              "cursor-pointer hover:border-indigo-500/40 hover:bg-indigo-500/5",
-                            !effectiveReadOnly && hasSlot && "cursor-pointer",
+                            "min-h-[100px] p-2 border-2 rounded-md transition-all",
+                            !effectiveReadOnly && "cursor-pointer hover:border-primary hover:bg-primary/5",
+                            slots.length === 0 && "bg-muted/30",
                           )}
                         >
-                          {/* Hover add icon (empty cell) */}
-                          {!hasSlot && !effectiveReadOnly && (
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity z-10">
-                              <div className="bg-indigo-500/10 p-1.5 rounded-full">
-                                <Clock className="h-3.5 w-3.5 text-indigo-400" />
+                          <div className="space-y-1">
+                            {slots.map((slot, idx) => (
+                              <div
+                                key={slot.id || idx}
+                                className="p-2 bg-card border-2 border-primary/20 rounded-lg text-xs space-y-2 group relative shadow-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewDetails(slot);
+                                }}
+                              >
+                                <div className="flex justify-between items-start">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary border-0"
+                                  >
+                                    {slot.name}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-foreground">
+                                  <MapPin className="h-3 w-3 text-muted-foreground" />
+                                  <span className="font-medium">
+                                    {slot.roomId}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          )}
-
-                          {/* Slot card */}
-                          {hasSlot && slots[0] && (
-                            <div
-                              key={slots[0].id || 0}
-                              className="flex-1 p-2 rounded-lg text-xs space-y-1 cursor-pointer hover:bg-indigo-500/20 transition-all"
-                              style={{
-                                borderLeft: "3px solid #6366f1",
-                                background: "rgba(99,102,241,0.08)",
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewDetails(slots[0]);
-                              }}
-                            >
-                              <span className="font-semibold block truncate text-indigo-200">
-                                {slots[0].name}
-                              </span>
-                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                                <MapPin className="h-3 w-3 opacity-70 shrink-0" />
-                                <span className="truncate">{slots[0].roomId}</span>
-                              </div>
-                            </div>
-                          )}
+                            ))}
+                          </div>
                         </div>
                       );
                     })}
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
         </CardContent>
