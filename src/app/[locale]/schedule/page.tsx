@@ -127,7 +127,7 @@ function SchedulePageContent() {
         className="w-full"
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <TabsList className="flex w-full sm:w-auto max-w-[500px] items-center">
             <TabsTrigger value="schedule" className="gap-2 cursor-pointer">
               {tTimetable("title") || "Schedule Management"}
             </TabsTrigger>
@@ -137,7 +137,7 @@ function SchedulePageContent() {
             <CacheStatusDot href={`${base}/schedule`} />
           </TabsList>
 
-          <div className="flex items-center gap-2">
+          <div className="flex hover:cursor-pointer items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
