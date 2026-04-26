@@ -21,7 +21,7 @@ import {
 } from "@/lib/dexie/serverActions";
 import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 import { performCombinedScheduleBackup } from "@/utils/backupUtils";
-import { Moon, RefreshCw, Sun } from "lucide-react";
+import { Home, Moon, RefreshCw, Sun } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -134,9 +134,19 @@ function SchedulePageContent() {
             <TabsTrigger value="attendance" className="gap-2 cursor-pointer">
               {tAttendance("title") || "Attendance Register"}
             </TabsTrigger>
+            <CacheStatusDot href={`${base}/schedule`} />
           </TabsList>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push(`/${locale}`)}
+              className="rounded-full hover:bg-white dark:hover:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800"
+              title={tManager("home") || "Home"}
+            >
+              <Home size={18} className="text-slate-600 dark:text-slate-400" />
+            </Button>
             {user && (
               <Button
                 variant="ghost"
@@ -165,7 +175,6 @@ function SchedulePageContent() {
               )}
             </Button>
             <LanguageSwitcher />
-            <CacheStatusDot href={`${base}/schedule`} />
           </div>
         </div>
 
