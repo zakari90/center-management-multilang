@@ -356,7 +356,18 @@
       "name": "Name",
       "status": "Status",
       "remarks": "Remarks"
-    }
+    },
+    "welcome_title": "Welcome to the Attendance System",
+    "welcome_desc": "A smart management system that works fully locally.",
+    "welcome_later_names": "Later, you can add names manually, upload them from an Excel file.",
+    "welcome_privacy_title": "Privacy & Offline Information",
+    "welcome_data_local": "Data is saved locally. We do not collect your data.",
+    "welcome_dont_clear_cache": "Important: Do not clear your browser cache/site data to avoid losing progress.",
+    "welcome_works_offline": "Works 100% offline once the application is fully cached in your browser.",
+    "welcome_auto_backup": "Monthly Auto-Backups: Your data is automatically saved to your device every month.",
+    "welcome_add_favorites": "Add this link to favorites / bookmarks for easy access.",
+    "welcome_confirm_btn": "Accept",
+    "welcome_cancel_btn": "Refuse"
   },
   "register": {
     "successMessage": "Account created successfully! Redirecting...",
@@ -2224,20 +2235,5 @@
     "bookingInquiry": "For bookings or inquiries:",
     "contactEmail": "zakariazinedine1@gmail.com",
     "btnPaid": "Contact Us to Subscribe 💬"
-  },
-  "AttendanceRegister": {
-    "title": "Attendance Register",
-    "welcome_title": "Welcome to the Attendance System",
-    "welcome_desc": "A smart management system that works fully locally.",
-    "welcome_later_names": "Later, you can add names manually, upload them from an Excel file.",
-    "welcome_privacy_title": "Privacy & Offline Information",
-    "welcome_data_local": "Data is saved locally. We do not collect your data.",
-    "welcome_dont_clear_cache": "Important: Do not clear your browser cache/site data to avoid losing progress.",
-    "welcome_works_offline": "Works 100% offline once the application is fully cached in your browser.",
-    "welcome_auto_backup": "Monthly Auto-Backups: Your data is automatically saved to your device every month.",
-    "welcome_add_favorites": "Add this link to favorites / bookmarks for easy access.",
-
-    "welcome_confirm_btn": "Accept",
-    "welcome_cancel_btn": "Refuse"
   }
 }

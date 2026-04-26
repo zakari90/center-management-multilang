@@ -316,7 +316,18 @@
       "name": "الاسم",
       "status": "الحالة",
       "remarks": "ملاحظات"
-    }
+    },
+    "welcome_title": "مرحباً بك في نظام الحضور",
+    "welcome_desc": "نظام إدارة ذكي يعمل محلياً بالكامل.",
+    "welcome_later_names": "يمكنك لاحقاً إضافة الأسماء يدوياً، أو تحميلها من ملف Excel.",
+    "welcome_privacy_title": "معلومات الخصوصية والعمل بدون إنترنت",
+    "welcome_data_local": "يتم حفظ البيانات محلياً. نحن لا نجمع بياناتك.",
+    "welcome_dont_clear_cache": "هام: لا تمسح ذاكرة التخزين المؤقت للمتصفح لتجنب فقدان البيانات.",
+    "welcome_works_offline": "يعمل النظام 100% بدون إنترنت بمجرد اكتمال تحميل التطبيق في متصفحك.",
+    "welcome_auto_backup": "نسخ احتياطي تلقائي شهري: يتم حفظ بياناتك تلقائياً على جهازك كل شهر.",
+    "welcome_add_favorites": "أضف هذا الرابط إلى المفضلة للوصول السريع والسهل.",
+    "welcome_confirm_btn": "قبول",
+    "welcome_cancel_btn": "رفض"
   },
 
   "register": {
@@ -2178,20 +2189,5 @@
     "bookingInquiry": "للحجز أو الاستفسار:",
     "contactEmail": "zakariazinedine1@gmail.com",
     "btnPaid": "تواصل معنا للحجز 💬"
-  },
-  "AttendanceRegister": {
-    "title": "دفتر الحضور",
-    "welcome_title": "مرحباً بك في نظام الحضور",
-    "welcome_desc": "نظام إدارة ذكي يعمل محلياً بالكامل.",
-    "welcome_later_names": "يمكنك لاحقاً إضافة الأسماء يدوياً، أو تحميلها من ملف Excel.",
-    "welcome_privacy_title": "معلومات الخصوصية والعمل بدون إنترنت",
-    "welcome_data_local": "يتم حفظ البيانات محلياً. نحن لا نجمع بياناتك.",
-    "welcome_dont_clear_cache": "هام: لا تمسح ذاكرة التخزين المؤقت للمتصفح لتجنب فقدان البيانات.",
-    "welcome_works_offline": "يعمل النظام 100% بدون إنترنت بمجرد اكتمال تحميل التطبيق في متصفحك.",
-    "welcome_auto_backup": "نسخ احتياطي تلقائي شهري: يتم حفظ بياناتك تلقائياً على جهازك كل شهر.",
-    "welcome_add_favorites": "أضف هذا الرابط إلى المفضلة للوصول السريع والسهل.",
-
-    "welcome_confirm_btn": "قبول",
-    "welcome_cancel_btn": "رفض"
   }
 }
