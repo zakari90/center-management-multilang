@@ -117,7 +117,7 @@ export function SubjectsTableView({
                       {subject.duration ? (
                         <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-medium">
                           <Clock className="h-3 w-3" />
-                          {subject.duration} min
+                          {subject.duration} {t("duration")}
                         </div>
                       ) : (
                         "-"

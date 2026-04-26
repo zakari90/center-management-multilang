@@ -128,7 +128,7 @@ function HomePageContent() {
 
         <button
           onClick={() => router.push(dashboardLink)}
-          className="group relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden bg-white/40 backdrop-blur-md border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:bg-white/60 transition-all duration-300 ease-out active:scale-95"
+          className="hover:cursor-pointer group relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden bg-white/40 backdrop-blur-md border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:bg-white/60 transition-all duration-300 ease-out active:scale-95"
         >
           <span className="relative z-10 font-semibold text-slate-700 tracking-wide text-sm">
             {user ? t("dashboard") : t("ownerDashboard")}
@@ -247,7 +247,7 @@ function HomePageContent() {
         className="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 animate-fade-in-up"
         style={{ animationDelay: "500ms" }}
       >
-        <div className="flex items-center gap-6 px-6 sm:px-8 py-3.5 bg-white/70 backdrop-blur-2xl border border-white/60 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.2)] rounded-full hover:bg-white/80 transition-colors duration-300">
+        <div className="hover:cursor-pointer flex items-center gap-6 px-6 sm:px-8 py-3.5 bg-white/70 backdrop-blur-2xl border border-white/60 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.2)] rounded-full hover:bg-white/80 transition-colors duration-300">
           {/* WhatsApp Button */}
           {content.phone && (
             <button
@@ -257,7 +257,7 @@ function HomePageContent() {
                   "_blank",
                 )
               }
-              className="group flex flex-row-reverse items-center gap-3 hover:scale-105 active:scale-95 transition-all duration-300"
+              className="hover:cursor-pointer group flex flex-row-reverse items-center gap-3 hover:scale-105 active:scale-95 transition-all duration-300"
             >
               <div className="bg-[#25D366]/10 p-2.5 rounded-full group-hover:bg-[#25D366]/20 transition-colors">
                 <svg fill="#25D366" viewBox="0 0 32 32" className="w-6 h-6">
