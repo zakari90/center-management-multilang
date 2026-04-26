@@ -118,7 +118,7 @@
   padding-bottom: calc(64px + env(safe-area-inset-bottom));
 }
 
-@container app (min-width: 768px) {
+@media (min-width: 768px) {
   .app-bottom-nav {
     display: none;
   }
