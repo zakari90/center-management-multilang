@@ -59,7 +59,7 @@ const content = {
     freeToolsTitle: "أدوات ذكية مجانية فورية",
     freeToolsSubtitle:
       "جرب أدواتنا الأساسية للإدارة فوراً وبدون أي تسجيل أو تعقيد.",
-    scheduleToolTitle: "مدير الجداول (استعمال الزمن)",
+    scheduleToolTitle: "استعمال الزمن",
     scheduleToolDesc: "نظم حصصك ومجموعاتك في شبكة ذكية، احترافية وبسيطة.",
     attendanceToolTitle: "دفتر الحضور",
     attendanceToolDesc: "سجل حضور الطلاب، تابع سجلاتهم واستخرج تقاريرك بسرعة.",
@@ -163,7 +163,8 @@ const content = {
     copyright: "Tous droits réservés",
     waAccountName: "Zakaria",
     waStatusMessage: "En ligne",
-    waChatMessage: "Bonjour ! Comment puis-je vous aider à gérer votre centre ?",
+    waChatMessage:
+      "Bonjour ! Comment puis-je vous aider à gérer votre centre ?",
     waPlaceholder: "Tapez votre message...",
   },
 };
