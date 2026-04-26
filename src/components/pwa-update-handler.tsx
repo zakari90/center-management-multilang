@@ -180,6 +180,7 @@ export default function PWAUpdateHandler() {
   const isExcludedPage =
     pathname.startsWith(`/${locale}/free`) ||
     pathname.startsWith(`/${locale}/schedule`) ||
+    pathname.startsWith(`/${locale}/pro`) ||
     pathname === `/${locale}` ||
     pathname === `/${locale}/`;
 
