@@ -115,7 +115,7 @@ export default function ReceiptsSummary() {
             trend="down"
           />
           <StatCard
-            label="Net Profit"
+            label={t("totalRevenue")}
             value={stats.netProfit}
             icon={Wallet}
             colorClass="text-blue-600"

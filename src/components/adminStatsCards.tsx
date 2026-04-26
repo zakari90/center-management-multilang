@@ -51,10 +51,21 @@ export default function AdminStatsCards() {
       const totalStudents = activeStudents.length;
       const totalTeachers = activeTeachers.length;
 
-      // ✅ Calculate revenue
-      const totalRevenue = activeReceipts.reduce((sum, r) => sum + r.amount, 0);
+      // ✅ Calculate revenue (Net Amount = Income - Expense)
+      const studentPayments = activeReceipts.filter(
+        (r) => r.type === "STUDENT_PAYMENT",
+      );
+      const teacherPayments = activeReceipts.filter(
+        (r) => r.type === "TEACHER_PAYMENT",
+      );
+      const totalIncome = studentPayments.reduce((sum, r) => sum + r.amount, 0);
+      const totalExpense = teacherPayments.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
+      const totalRevenue = totalIncome - totalExpense;
 
-      // ✅ Calculate monthly revenue (current month)
+      // ✅ Calculate monthly revenue (current month Net Amount)
       const now = new Date();
       const currentMonthStart = new Date(
         now.getFullYear(),
@@ -64,12 +75,15 @@ export default function AdminStatsCards() {
       const monthlyReceipts = activeReceipts.filter(
         (r) => r.date >= currentMonthStart,
       );
-      const monthlyRevenue = monthlyReceipts.reduce(
-        (sum, r) => sum + r.amount,
-        0,
-      );
+      const monthlyIncome = monthlyReceipts
+        .filter((r) => r.type === "STUDENT_PAYMENT")
+        .reduce((sum, r) => sum + r.amount, 0);
+      const monthlyExpense = monthlyReceipts
+        .filter((r) => r.type === "TEACHER_PAYMENT")
+        .reduce((sum, r) => sum + r.amount, 0);
+      const monthlyRevenue = monthlyIncome - monthlyExpense;
 
-      // ✅ Calculate revenue growth (compare with previous month)
+      // ✅ Calculate revenue growth (compare with previous month Net Amount)
       const previousMonthStart = new Date(
         now.getFullYear(),
         now.getMonth() - 1,
@@ -83,13 +97,18 @@ export default function AdminStatsCards() {
       const previousMonthReceipts = activeReceipts.filter(
         (r) => r.date >= previousMonthStart && r.date <= previousMonthEnd,
       );
-      const previousMonthRevenue = previousMonthReceipts.reduce(
-        (sum, r) => sum + r.amount,
-        0,
-      );
+      const previousMonthIncome = previousMonthReceipts
+        .filter((r) => r.type === "STUDENT_PAYMENT")
+        .reduce((sum, r) => sum + r.amount, 0);
+      const previousMonthExpense = previousMonthReceipts
+        .filter((r) => r.type === "TEACHER_PAYMENT")
+        .reduce((sum, r) => sum + r.amount, 0);
+      const previousMonthRevenue = previousMonthIncome - previousMonthExpense;
+
       const revenueGrowth =
-        previousMonthRevenue > 0
-          ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) *
+        previousMonthRevenue !== 0
+          ? ((monthlyRevenue - previousMonthRevenue) /
+              Math.abs(previousMonthRevenue)) *
             100
           : 0;
 

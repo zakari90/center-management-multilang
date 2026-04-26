@@ -73,13 +73,27 @@ export default function CenterOverview() {
           managerIds.includes(t.managerId),
         ).length;
 
-        // Calculate revenue from receipts for managers in this center
-        const centerReceipts = activeReceipts.filter(
+        // Calculate net revenue (Income - Expense) for managers in this center
+        const centerStudentReceipts = activeReceipts.filter(
           (r) =>
             managerIds.includes(r.managerId) &&
             r.type === ReceiptType.STUDENT_PAYMENT,
         );
-        const revenue = centerReceipts.reduce((sum, r) => sum + r.amount, 0);
+        const centerTeacherReceipts = activeReceipts.filter(
+          (r) =>
+            managerIds.includes(r.managerId) &&
+            r.type === ReceiptType.TEACHER_PAYMENT,
+        );
+
+        const income = centerStudentReceipts.reduce(
+          (sum, r) => sum + r.amount,
+          0,
+        );
+        const expense = centerTeacherReceipts.reduce(
+          (sum, r) => sum + r.amount,
+          0,
+        );
+        const revenue = income - expense;
 
         // Count managers
         const managersCount = managerIds.length;

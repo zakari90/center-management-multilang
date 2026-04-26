@@ -90,21 +90,55 @@ export default function ManagerStatsCards() {
       });
 
       // Calculate revenue
-      const monthlyRevenue = thisMonthReceipts.reduce(
+      const monthlyIncome = thisMonthReceipts.reduce(
         (sum, r) => sum + r.amount,
         0,
       );
-      const lastMonthRevenue = lastMonthReceipts.reduce(
+
+      const thisMonthExpenseReceipts = managerReceipts.filter((r) => {
+        const receiptDate = new Date(r.date);
+        return (
+          receiptDate >= firstDayOfMonth &&
+          r.type === ReceiptType.TEACHER_PAYMENT
+        );
+      });
+      const monthlyExpense = thisMonthExpenseReceipts.reduce(
         (sum, r) => sum + r.amount,
         0,
       );
+      const monthlyRevenue = monthlyIncome - monthlyExpense;
+
+      const lastMonthIncome = lastMonthReceipts.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
+      const lastMonthExpenseReceipts = managerReceipts.filter((r) => {
+        const receiptDate = new Date(r.date);
+        return (
+          receiptDate >= firstDayOfLastMonth &&
+          receiptDate <= lastDayOfLastMonth &&
+          r.type === ReceiptType.TEACHER_PAYMENT
+        );
+      });
+      const lastMonthExpense = lastMonthExpenseReceipts.reduce(
+        (sum, r) => sum + r.amount,
+        0,
+      );
+      const lastMonthRevenue = lastMonthIncome - lastMonthExpense;
+
       const revenueGrowth =
-        lastMonthRevenue > 0
-          ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+        lastMonthRevenue !== 0
+          ? ((monthlyRevenue - lastMonthRevenue) / Math.abs(lastMonthRevenue)) *
+            100
           : 0;
-      const totalRevenueTotal = managerReceipts
+
+      const totalIncome = managerReceipts
         .filter((r) => r.type === ReceiptType.STUDENT_PAYMENT)
         .reduce((sum, r) => sum + r.amount, 0);
+      const totalExpense = managerReceipts
+        .filter((r) => r.type === ReceiptType.TEACHER_PAYMENT)
+        .reduce((sum, r) => sum + r.amount, 0);
+      const totalRevenueTotal = totalIncome - totalExpense;
 
       return {
         totalStudents: allActiveStudents.length,
