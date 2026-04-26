@@ -34,7 +34,6 @@ import { useAutoBackup } from "@/hooks/useAutoBackup";
 import { performCombinedScheduleBackup } from "@/utils/backupUtils";
 import { toast } from "sonner";
 
-
 function SchedulePageContent() {
   const locale = useLocale();
   const { user } = useAuth();
@@ -123,7 +122,6 @@ function SchedulePageContent() {
 
   useAutoBackup(handleAutoSave);
 
-
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
       <Tabs
@@ -135,11 +133,9 @@ function SchedulePageContent() {
           <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
             <TabsTrigger value="schedule" className="gap-2 cursor-pointer">
               {tTimetable("title") || "Schedule Management"}
-              <CacheStatusDot href={`${base}/schedule`} />
             </TabsTrigger>
             <TabsTrigger value="attendance" className="gap-2 cursor-pointer">
               {tAttendance("title") || "Attendance Register"}
-              <CacheStatusDot href={`${base}/schedule/attendance`} />
             </TabsTrigger>
           </TabsList>
 
@@ -171,6 +167,7 @@ function SchedulePageContent() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
+            <CacheStatusDot href={`${base}/schedule`} />
             <CacheStatusIndicator />
             <LanguageSwitcher />
           </div>
