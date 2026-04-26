@@ -1,38 +1,35 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import FreeTimeTableManagement from "./attendance/components/FreeTimeTableManagement";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useTranslations } from "next-intl";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { AttendanceModule } from "./attendance/components/AttendanceModule";
-import { CacheStatusIndicator } from "@/components/cache-status-indicator";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
-import { useLocale } from "next-intl";
-import { useEffect, useCallback } from "react";
-import { useAuth } from "@/context/authContext";
-import { useTheme } from "next-themes";
-import {
-  syncAllEntitiesForRole,
-  importAllFromServerForRole,
-} from "@/lib/dexie/serverActions";
-import { Button } from "@/components/ui/button";
-import { RefreshCw, Sun, Moon } from "lucide-react";
-import PublicFooter from "@/components/PublicFooter";
 import { CacheStatusDot } from "@/components/cache-status-indicator";
-import { WelcomeDialog } from "./attendance/components/WelcomeDialog";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PublicFooter from "@/components/PublicFooter";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/authContext";
+import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
+import { centerActions } from "@/freelib/dexie/freedexieaction";
 import {
-  timeTableActions,
   attendanceActions,
   getScheduleDb,
   isScheduleDatabaseCreated,
+  timeTableActions,
 } from "@/freelib/dexie/scheduleDb";
-import { centerActions } from "@/freelib/dexie/freedexieaction";
-import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 import { useAutoBackup } from "@/hooks/useAutoBackup";
+import {
+  importAllFromServerForRole,
+  syncAllEntitiesForRole,
+} from "@/lib/dexie/serverActions";
+import { useCacheStatusStore } from "@/stores/useCacheStatusStore";
 import { performCombinedScheduleBackup } from "@/utils/backupUtils";
+import { Moon, RefreshCw, Sun } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { AttendanceModule } from "./attendance/components/AttendanceModule";
+import FreeTimeTableManagement from "./attendance/components/FreeTimeTableManagement";
+import { WelcomeDialog } from "./attendance/components/WelcomeDialog";
 
 function SchedulePageContent() {
   const locale = useLocale();
@@ -167,9 +164,8 @@ function SchedulePageContent() {
                 <Moon className="h-4 w-4" />
               )}
             </Button>
-            <CacheStatusDot href={`${base}/schedule`} />
-            <CacheStatusIndicator />
             <LanguageSwitcher />
+            <CacheStatusDot href={`${base}/schedule`} />
           </div>
         </div>
 

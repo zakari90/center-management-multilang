@@ -2,8 +2,8 @@ import AutoImportFromServer from "@/components/auto-import-from-server";
 import { AutoSyncProvider } from "@/components/AutoSyncProvider";
 import { EpochMismatchDialog } from "@/components/epoch-mismatch-dialog";
 import PWAUpdateHandler from "@/components/pwa-update-handler";
-import InstallPWA from "@/components/installPWA";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/authContext";
 import { routing } from "@/i18n/routing";
 import { Analytics } from "@vercel/analytics/react";
@@ -19,7 +19,6 @@ import { notFound } from "next/navigation";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { WebSite } from "schema-dts";
 import { Toaster } from "sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import "../globals.css";
 import LoadWS from "./loadws";
 

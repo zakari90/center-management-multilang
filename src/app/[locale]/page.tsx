@@ -1,7 +1,7 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import Contact from "@/components/Contact";
+import { FloatingWhatsApp } from "@digicroz/react-floating-whatsapp";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -11,7 +11,6 @@ import {
   Database,
   Globe,
   Laptop,
-  Lock,
   MonitorSmartphone,
   Rocket,
   ShieldCheck,
@@ -20,10 +19,9 @@ import {
   WifiOff,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Contact from "@/components/Contact";
-import PublicFooter from "@/components/PublicFooter";
-import { FloatingWhatsApp } from "@digicroz/react-floating-whatsapp";
 
 // In-file translations to avoid polluting global dictionaries for this specific marketing page
 const content = {
