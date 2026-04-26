@@ -2,29 +2,28 @@
 
 import Lottie from "lottie-react";
 import starAnimation from "../../../../public/Star.json";
-
-import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { useAutoBackup } from "@/hooks/useAutoBackup";
 import { performFreeAutoBackup } from "@/utils/backupUtils";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Card } from "@/components/ui/card";
 import {
-  WifiOff,
-  Database,
-  ArrowRight,
   ArrowLeft,
+  ArrowRight,
+  Database,
   History,
   Star,
+  WifiOff,
 } from "lucide-react";
 
 import LanguageSwitcher from "@/components/freeinUse/LanguageSwitcher";
 import { ModeToggle } from "@/components/freeinUse/ModeToggle";
-import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 import PublicFooter from "@/components/PublicFooter";
+import { isDatabaseCreated } from "@/freelib/dexie/dbSchema";
 
 export default function FreeVersionIntro() {
   const locale = useLocale();
@@ -80,7 +79,7 @@ export default function FreeVersionIntro() {
   const content = {
     en: {
       title: "Free Local Version",
-      subtitle: "Full control, zero servers.",
+      // subtitle: "Full control, zero servers.",
       description:
         "This is the free, standalone version of the application. It provides essential management features designed for total privacy and seamless offline capability.",
       features: [
@@ -111,7 +110,7 @@ export default function FreeVersionIntro() {
 
     ar: {
       title: "النسخة المجانية المحلية",
-      subtitle: "تحكم كامل، بدون خوادم.",
+      // subtitle: "تحكم كامل، بدون خوادم.",
       description:
         "هذه هي النسخة المجانية المستقلة من التطبيق. توفر ميزات الإدارة الأساسية المصممة للخصوصية التامة والعمل السلس بدون إنترنت.",
       features: [
@@ -142,7 +141,7 @@ export default function FreeVersionIntro() {
 
     fr: {
       title: "Version Locale Gratuite",
-      subtitle: "Contrôle total, zéro serveur.",
+      // subtitle: "Contrôle total, zéro serveur.",
       description:
         "Il s'agit de la version gratuite et autonome de l'application. Elle offre des fonctionnalités de gestion essentielles conçues pour une confidentialité totale et une capacité hors ligne fluide.",
       features: [
@@ -227,9 +226,9 @@ export default function FreeVersionIntro() {
                   <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
                     {t.title}
                   </h1>
-                  <p className="text-xl font-medium bg-linear-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+                  {/* <p className="text-xl font-medium bg-linear-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
                     {t.subtitle}
-                  </p>
+                  </p> */}
                 </div>
 
                 <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -239,7 +238,7 @@ export default function FreeVersionIntro() {
                 <div className="pt-4 border-t border-border/50">
                   <Button
                     onClick={handleStart}
-                    className="w-full h-14 text-lg font-bold rounded-2xl shadow-[0_8px_30px_rgb(79,70,229,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.3)] hover:-translate-y-0.5 transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 text-white group"
+                    className="hover:cursor-pointer w-full h-14 text-lg font-bold rounded-2xl shadow-[0_8px_30px_rgb(79,70,229,0.2)] hover:shadow-[0_8px_30px_rgb(79,70,229,0.3)] hover:-translate-y-0.5 transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 text-white group"
                   >
                     <span>{t.btn}</span>
                     <div className="bg-white/20 p-1.5 rounded-full ml-3 group-hover:scale-110 transition-transform duration-300 rtl:mr-3 rtl:ml-0">
