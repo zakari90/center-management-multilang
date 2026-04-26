@@ -406,7 +406,7 @@
     "totalManagers": "Total Managers",
     "totalStudents": "Total Students",
     "totalTeachers": "Total Teachers",
-    "totalRevenue": "Total Revenue",
+    "totalRevenue": "Net Amount",
     "totalAdmins": "Total Admins",
     "thisMonth": "this month"
   },
@@ -1162,7 +1162,7 @@
   },
   "ManagerReceiptsSummary": {
     "financialOverview": "Manager Financial Overview",
-    "totalRevenue": "Total Revenue",
+    "totalRevenue": "Net Amount",
     "thisMonth": "This Month",
     "income": "Income",
     "expenses": "Expenses",
@@ -1180,7 +1180,7 @@
     "monthlyRevenuetitle": "Monthly Revenue",
     "monthlyRevenuegrowth": "+{percent}% from last month",
 
-    "totalRevenuetitle": "Total Revenue",
+    "totalRevenuetitle": "Net Amount",
     "totalRevenuesubtitle": "{count} receipts issued"
   },
   "QuickActions": {
@@ -1456,7 +1456,7 @@
     "allPaymentStatuses": "All Payments",
     "totalStudents": "Total Students",
     "activeEnrollments": "Active Enrollments",
-    "totalRevenue": "Total Revenue",
+    "totalRevenue": "Net Amount",
     "avgSubjectsPerStudent": "Avg. Subjects/Student",
     "student": "Student",
     "name": "Name",
@@ -1730,7 +1730,7 @@
     "studentSince": "Student since",
     "editStudent": "Edit Student",
     "enrolledSubjects": "Enrolled Subjects",
-    "totalRevenue": "Total Revenue",
+    "totalRevenue": "Net Amount",
     "totalPaid": "Total Paid",
     "contactInformation": "Contact Information",
     "email": "Email",

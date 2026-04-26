@@ -268,7 +268,7 @@
     "totalManagers": "Gestionnaires totaux",
     "totalStudents": "Élèves totaux",
     "totalTeachers": "Enseignants totaux",
-    "totalRevenue": "Revenu total",
+    "totalRevenue": "Montant net",
     "totalAdmins": "Total Administrateurs",
     "thisMonth": "ce mois"
   },
@@ -1011,7 +1011,7 @@
   },
   "ManagerReceiptsSummary": {
     "financialOverview": "Aperçu financier du gestionnaire",
-    "totalRevenue": "Revenu total",
+    "totalRevenue": "Montant net",
     "thisMonth": "Ce mois",
     "income": "Revenu",
     "expenses": "Dépenses",
@@ -1026,7 +1026,7 @@
     "teacherssubtitle": "Enseigne {count} matières",
     "monthlyRevenuetitle": "Revenu mensuel",
     "monthlyRevenuegrowth": "+{percent}% par rapport au mois dernier",
-    "totalRevenuetitle": "Revenu total",
+    "totalRevenuetitle": "Montant net",
     "totalRevenuesubtitle": "{count} reçus émis"
   },
   "QuickActions": {
@@ -1295,7 +1295,7 @@
     "allPaymentStatuses": "Tous les paiements",
     "totalStudents": "Élèves totaux",
     "activeEnrollments": "Inscriptions actives",
-    "totalRevenue": "Revenu total",
+    "totalRevenue": "Montant net",
     "avgSubjectsPerStudent": "Moy. Matières/Élève",
     "student": "Élève",
     "name": "Nom",
@@ -1772,7 +1772,7 @@
     "studentSince": "Étudiant depuis",
     "editStudent": "Modifier l'étudiant",
     "enrolledSubjects": "Matières inscrites",
-    "totalRevenue": "Revenu total",
+    "totalRevenue": "Montant net",
     "totalPaid": "Total payé",
     "contactInformation": "Informations de contact",
     "email": "Email",

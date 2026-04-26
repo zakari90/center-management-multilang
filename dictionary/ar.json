@@ -372,7 +372,7 @@
     "totalManagers": "إجمالي المشرفين",
     "totalStudents": "إجمالي الطلاب",
     "totalTeachers": "إجمالي المعلمين",
-    "totalRevenue": "إجمالي الإيرادات",
+    "totalRevenue": "المبلغ الصافي",
     "totalAdmins": "إجمالي المسؤولين",
     "thisMonth": "هذا الشهر"
   },
@@ -1118,7 +1118,7 @@
   },
   "ManagerReceiptsSummary": {
     "financialOverview": "نظرة عامة على المالية لل مشرف",
-    "totalRevenue": "إجمالي الإيرادات",
+    "totalRevenue": "المبلغ الصافي",
     "thisMonth": "هذا الشهر",
     "income": "الدخل",
     "expenses": "النفقات",
@@ -1133,7 +1133,7 @@
     "teacherssubtitle": "تدريس {count} مواد",
     "monthlyRevenuetitle": "الإيرادات الشهرية",
     "monthlyRevenuegrowth": "+{percent}% من الشهر الماضي",
-    "totalRevenuetitle": "إجمالي الإيرادات",
+    "totalRevenuetitle": "المبلغ الصافي",
     "totalRevenuesubtitle": "{count} إيصالات صادرة"
   },
   "QuickActions": {
@@ -1402,7 +1402,7 @@
     "allPaymentStatuses": "جميع حالات الدفع",
     "totalStudents": "إجمالي الطلاب",
     "activeEnrollments": "التسجيلات النشطة",
-    "totalRevenue": "إجمالي الإيرادات",
+    "totalRevenue": "المبلغ الصافي",
     "avgSubjectsPerStudent": "متوسط المواد/طالب",
     "student": "طالب",
     "name": "الاسم",
@@ -1630,7 +1630,7 @@
     "studentSince": "طالب منذ",
     "editStudent": "تعديل الطالب",
     "enrolledSubjects": "المواد المسجلة",
-    "totalRevenue": "إجمالي الإيرادات",
+    "totalRevenue": "المبلغ الصافي",
     "totalPaid": "إجمالي المدفوع",
     "contactInformation": "معلومات التواصل",
     "email": "البريد الإلكتروني",
