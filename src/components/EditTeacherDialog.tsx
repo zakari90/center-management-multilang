@@ -178,6 +178,16 @@ const SubjectCompensationCard = ({
 };
 
 // ==================== MAIN COMPONENT ====================
+const DAYS = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
+
 export default function EditTeacherDialog({
   teacherId,
   onTeacherUpdated,
@@ -194,15 +204,6 @@ export default function EditTeacherDialog({
   const [managers, setManagers] = useState<{ id: string; name: string }[]>([]);
   const [selectedManagerId, setSelectedManagerId] = useState<string>("");
 
-  const DAYS = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-  ];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -409,7 +410,7 @@ export default function EditTeacherDialog({
       };
       fetchData();
     }
-  }, [open, teacherId, user, t, DAYS]);
+  }, [open, teacherId, user, t, adminMode]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
