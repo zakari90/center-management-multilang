@@ -15,7 +15,6 @@ export async function GET() {
     }
 
     const users = await db.user.findMany({
-      where: { role: "MANAGER" },
       select: {
         id: true,
         name: true,
