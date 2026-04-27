@@ -136,9 +136,9 @@ export default function ViewStudentCardDialog({
         )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="sr-only">
           <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription className="sr-only">
+          <DialogDescription>
             {t("title")}
           </DialogDescription>
         </DialogHeader>
