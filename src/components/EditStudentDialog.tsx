@@ -183,7 +183,7 @@ export default function EditStudentDialog({
       if (adminMode) {
         const allUsers = await userActions.getAll();
         const activeManagers = allUsers.filter(
-          (u) => u.status !== "0" && u.role === "MANAGER",
+          (u) => u.status !== "0" && (u.role === "MANAGER" || u.role === "ADMIN"),
         );
         setManagers(activeManagers.map((m) => ({ id: m.id, name: m.name })));
       }
