@@ -1,20 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Pencil, Loader2, X } from "lucide-react";
+import { Pencil, Loader2, X, User, BookOpen, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -42,7 +44,6 @@ interface Teacher {
   email: string | null;
   phone: string | null;
 }
-
 interface TeacherSubject {
   id: string;
   teacherId: string;
@@ -50,7 +51,6 @@ interface TeacherSubject {
   hourlyRate: number | null;
   teacher: Teacher;
 }
-
 interface Subject {
   id: string;
   name: string;
@@ -59,7 +59,6 @@ interface Subject {
   duration: number | null;
   teacherSubjects: TeacherSubject[];
 }
-
 interface EnrolledSubject {
   subjectId: string;
   teacherId: string;
@@ -68,13 +67,45 @@ interface EnrolledSubject {
   grade: string;
   price: number;
 }
-
 interface EditStudentDialogProps {
   studentId: string;
   trigger?: React.ReactNode;
   onStudentUpdated?: () => void;
   adminMode?: boolean;
 }
+
+const StepIndicator = ({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) => {
+  const icons = [User, BookOpen, CheckCircle];
+  return (
+    <div className="flex items-center justify-center gap-2 py-3 md:hidden">
+      {Array.from({ length: totalSteps }, (_, i) => {
+        const Icon = icons[i];
+        const isActive = i + 1 === currentStep;
+        const isCompleted = i + 1 < currentStep;
+        return (
+          <div key={i} className="flex items-center">
+            <div
+              className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-all ${isActive ? "bg-primary text-primary-foreground scale-110" : isCompleted ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}
+            >
+              <Icon className="h-4 w-4" />
+            </div>
+            {i < totalSteps - 1 && (
+              <div
+                className={`w-8 h-0.5 mx-1 ${isCompleted ? "bg-primary" : "bg-muted"}`}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default function EditStudentDialog({
   studentId,
@@ -84,6 +115,7 @@ export default function EditStudentDialog({
 }: EditStudentDialogProps) {
   const t = useTranslations("editStudent");
   const { user, isLoading: authLoading } = useAuth();
+
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -92,7 +124,9 @@ export default function EditStudentDialog({
   const [managers, setManagers] = useState<{ id: string; name: string }[]>([]);
   const [selectedManagerId, setSelectedManagerId] = useState<string>("");
 
-  // Form state
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -103,30 +137,25 @@ export default function EditStudentDialog({
     grade: "",
   });
 
-  // Enrollment flow state
   const [selectedGrade, setSelectedGrade] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
-
-  // Enrolled subjects list
   const [enrolledSubjects, setEnrolledSubjects] = useState<EnrolledSubject[]>(
     [],
   );
 
   const fetchData = useCallback(async () => {
     if (!open) return;
-
     setIsFetching(true);
     setError("");
     try {
       if (!user && !authLoading) {
-        setError(t("unauthorized"));
+        setError(t("unauthorized") || "Unauthorized");
         setIsFetching(false);
         return;
       }
-
       if (!user?.id) {
-        setError(t("unauthorized"));
+        setError(t("unauthorized") || "Unauthorized");
         setIsFetching(false);
         return;
       }
@@ -150,12 +179,9 @@ export default function EditStudentDialog({
       const studentData = allStudents.find(
         (s) => s.id === studentId && s.status !== "0",
       );
+      if (!studentData)
+        throw new Error(t("studentInfo") || "Student not found");
 
-      if (!studentData) {
-        throw new Error(t("studentInfo"));
-      }
-
-      // Get student subjects with related data
       const studentSubjectsData = allStudentSubjects
         .filter((ss) => ss.studentId === studentId && ss.status !== "0")
         .map((ss) => {
@@ -165,9 +191,7 @@ export default function EditStudentDialog({
           const teacher = allTeachers.find(
             (t) => t.id === ss.teacherId && t.status !== "0",
           );
-
           if (!subject || !teacher) return null;
-
           return {
             subjectId: subject.id,
             teacherId: teacher.id,
@@ -179,16 +203,15 @@ export default function EditStudentDialog({
         })
         .filter((ss) => ss !== null) as EnrolledSubject[];
 
-      // Manager selection for admin
       if (adminMode) {
         const allUsers = await userActions.getAll();
         const activeManagers = allUsers.filter(
-          (u) => u.status !== "0" && (u.role === "MANAGER" || u.role === "ADMIN"),
+          (u) =>
+            u.status !== "0" && (u.role === "MANAGER" || u.role === "ADMIN"),
         );
         setManagers(activeManagers.map((m) => ({ id: m.id, name: m.name })));
       }
 
-      // Build subjects with teachers
       let filteredSubjects: typeof allSubjects = [];
       if (adminMode) {
         filteredSubjects = allSubjects.filter((s) => s.status !== "0");
@@ -226,7 +249,6 @@ export default function EditStudentDialog({
                 : null;
             })
             .filter((ts) => ts !== null) as TeacherSubject[];
-
           return {
             id: subject.id,
             name: subject.name,
@@ -239,16 +261,6 @@ export default function EditStudentDialog({
       );
 
       setSubjects(subjectsWithTeachers);
-
-      // Debug logging
-
-      if (!adminMode) {
-        const managerCenters = allCenters.filter(
-          (c) => (c.managers || []).includes(user.id) && c.status !== "0",
-        );
-      }
-
-      // Set form data
       setFormData({
         name: studentData.name,
         email: studentData.email || "",
@@ -258,12 +270,7 @@ export default function EditStudentDialog({
         parentEmail: studentData.parentEmail || "",
         grade: studentData.grade || "",
       });
-
-      if (studentData.managerId) {
-        setSelectedManagerId(studentData.managerId);
-      }
-
-      // Set enrolled subjects
+      if (studentData.managerId) setSelectedManagerId(studentData.managerId);
       setEnrolledSubjects(studentSubjectsData);
     } catch (err) {
       console.error("Failed to fetch data:", err);
@@ -271,12 +278,11 @@ export default function EditStudentDialog({
     } finally {
       setIsFetching(false);
     }
-  }, [studentId, open, user, authLoading, t]);
+  }, [studentId, open, user, authLoading, t, adminMode]);
 
   useEffect(() => {
-    if (open && !authLoading) {
-      fetchData();
-    }
+    if (open && !authLoading) fetchData();
+    else if (!open) setCurrentStep(1);
   }, [open, authLoading, fetchData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,41 +290,30 @@ export default function EditStudentDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Get unique grades from subjects
   const availableGrades = [...new Set(subjects.map((s) => s.grade))].sort();
-
-  // Filter subjects by selected grade
   const subjectsForGrade = selectedGrade
     ? subjects.filter((s) => s.grade === selectedGrade)
     : [];
-
-  // Get teachers for selected subject
   const teachersForSubject =
     selectedSubject?.teacherSubjects?.filter((ts) => ts.teacher) || [];
 
   const handleAddEnrollment = () => {
     if (!selectedSubject || !selectedTeacher) {
-      setError(t("fetchSubjects"));
+      setError(t("fetchSubjects") || "Please select a subject and teacher");
       return;
     }
-
-    // Check if already enrolled in this subject with this teacher
     const alreadyEnrolled = enrolledSubjects.some(
       (es) =>
         es.subjectId === selectedSubject.id && es.teacherId === selectedTeacher,
     );
-
     if (alreadyEnrolled) {
-      setError(t("alreadyEnrolled"));
+      setError(t("alreadyEnrolled") || "Already enrolled");
       return;
     }
-
     const teacher = teachersForSubject.find(
       (ts) => ts.teacherId === selectedTeacher,
     )?.teacher;
-
     if (!teacher) return;
-
     setEnrolledSubjects((prev) => [
       ...prev,
       {
@@ -330,8 +325,6 @@ export default function EditStudentDialog({
         price: selectedSubject.price,
       },
     ]);
-
-    // Reset enrollment flow
     setSelectedGrade("");
     setSelectedSubject(null);
     setSelectedTeacher("");
@@ -346,30 +339,45 @@ export default function EditStudentDialog({
     );
   };
 
+  const nextStep = () => {
+    if (currentStep === 1 && !formData.name.trim()) {
+      setError(t("fullName") + " is required");
+      return;
+    }
+    if (currentStep === 2 && enrolledSubjects.length === 0) {
+      setError(t("atLeastOneSubject") || "Please add at least one subject");
+      return;
+    }
+    setError("");
+    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    setError("");
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  const isSubmittingRef = useRef(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentStep < totalSteps) {
+      nextStep();
+      return;
+    }
+    if (isSubmittingRef.current || isLoading) return;
+    isSubmittingRef.current = true;
     setIsLoading(true);
     setError("");
 
     try {
-      if (!user || !user.id) {
-        throw new Error(t("unauthorized"));
-      }
-
-      // Validate and sanitize data
+      if (!user || !user.id) throw new Error(t("unauthorized"));
       const validatedData = StudentFormSchema.parse(formData);
-
-      if (enrolledSubjects.length === 0) {
+      if (enrolledSubjects.length === 0)
         throw new Error(t("atLeastOneSubject"));
-      }
-
-      // Get existing student
       const existingStudent = await studentActions.getLocal(studentId);
-      if (!existingStudent) {
-        throw new Error(t("studentInfo"));
-      }
+      if (!existingStudent) throw new Error(t("studentInfo"));
 
-      // Update student in local DB
       const now = Date.now();
       const updatedStudent = {
         ...existingStudent,
@@ -379,7 +387,7 @@ export default function EditStudentDialog({
         parentName: validatedData.parentName || undefined,
         parentPhone: validatedData.parentPhone || undefined,
         parentEmail: validatedData.parentEmail || undefined,
-        grade: validatedData.grade || undefined,
+        grade: validatedData.grade || enrolledSubjects[0]?.grade || undefined,
         managerId: adminMode
           ? selectedManagerId || existingStudent.managerId
           : existingStudent.managerId,
@@ -389,13 +397,11 @@ export default function EditStudentDialog({
 
       await studentActions.putLocal(updatedStudent);
 
-      // ... existing code for enrollments ...
       const existingEnrollments = await studentSubjectActions.getAll();
       const currentEnrollments = existingEnrollments.filter(
         (ss) => ss.studentId === studentId && ss.status !== "0",
       );
 
-      // Remove enrollments that are no longer in the list
       const enrollmentsToRemove = currentEnrollments.filter(
         (ce) =>
           !enrolledSubjects.some(
@@ -403,12 +409,9 @@ export default function EditStudentDialog({
               es.subjectId === ce.subjectId && es.teacherId === ce.teacherId,
           ),
       );
-
-      for (const enrollment of enrollmentsToRemove) {
+      for (const enrollment of enrollmentsToRemove)
         await studentSubjectActions.markForDelete(enrollment.id);
-      }
 
-      // Add new enrollments
       const enrollmentsToAdd = enrolledSubjects.filter(
         (es) =>
           !currentEnrollments.some(
@@ -416,13 +419,11 @@ export default function EditStudentDialog({
               ce.subjectId === es.subjectId && ce.teacherId === es.teacherId,
           ),
       );
-
       for (const enrollment of enrollmentsToAdd) {
         const { generateObjectId } =
           await import("@/lib/utils/generateObjectId");
-        const enrollmentId = generateObjectId();
         await studentSubjectActions.putLocal({
-          id: enrollmentId,
+          id: generateObjectId(),
           enrolledAt: now,
           studentId: studentId,
           subjectId: enrollment.subjectId,
@@ -433,26 +434,317 @@ export default function EditStudentDialog({
           updatedAt: now,
         });
       }
-
-      // Close dialog and refresh
       setOpen(false);
       onStudentUpdated?.();
     } catch (err) {
       console.error(err);
-      if (err instanceof z.ZodError) {
+      if (err instanceof z.ZodError)
         setError(err.issues.map((i) => i.message).join(", "));
-      } else {
+      else
         setError(err instanceof Error ? err.message : t("somethingWentWrong"));
-      }
     } finally {
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
-  // Calculate total price
   const totalPrice = enrolledSubjects.reduce(
     (total, es) => total + es.price,
     0,
+  );
+
+  const renderStep1 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("studentInfo") || "Student Information"}
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="name" className="text-sm sr-only md:not-sr-only">
+            {t("fullName")} <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder={t("fullName") + " *"}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="grade" className="text-sm sr-only md:not-sr-only">
+            {t("grade")}
+          </Label>
+          <Input
+            id="grade"
+            name="grade"
+            value={formData.grade}
+            onChange={handleInputChange}
+            placeholder={t("grade")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        {adminMode && (
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="managerId"
+              className="text-sm sr-only md:not-sr-only"
+            >
+              Manager
+            </Label>
+            <Select
+              value={selectedManagerId}
+              onValueChange={setSelectedManagerId}
+            >
+              <SelectTrigger className="h-10 md:h-9">
+                <SelectValue placeholder="Select Manager" />
+              </SelectTrigger>
+              <SelectContent>
+                {managers.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+        <div className="space-y-1.5">
+          <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">
+            {t("phone")}
+          </Label>
+          <Input
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder={t("phone")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm sr-only md:not-sr-only">
+            {t("email")}
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder={t("email")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="parentName"
+            className="text-sm sr-only md:not-sr-only"
+          >
+            {t("parentName")}
+          </Label>
+          <Input
+            id="parentName"
+            name="parentName"
+            value={formData.parentName}
+            onChange={handleInputChange}
+            placeholder={t("parentName")}
+            className="h-10 md:h-9"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="parentPhone"
+            className="text-sm sr-only md:not-sr-only"
+          >
+            {t("parentPhone")}
+          </Label>
+          <Input
+            id="parentPhone"
+            name="parentPhone"
+            value={formData.parentPhone}
+            onChange={handleInputChange}
+            placeholder={t("parentPhone")}
+            className="h-10 md:h-9"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("addNewSubject") || "Add New Subject"}
+      </h3>
+      {subjects.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
+          {t("noSubjectsAvailable") || "No subjects available"}
+        </p>
+      ) : (
+        <div className="space-y-3">
+          <div>
+            <span className="text-xs font-medium mb-2 block">
+              {t("step1SelectGrade") || "Select Grade"}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {availableGrades.map((grade) => (
+                <Badge
+                  key={grade}
+                  onClick={() => {
+                    setSelectedGrade(grade);
+                    setSelectedSubject(null);
+                    setSelectedTeacher("");
+                  }}
+                  variant={selectedGrade === grade ? "default" : "outline"}
+                  className="cursor-pointer"
+                >
+                  {grade}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          {selectedGrade && (
+            <div>
+              <span className="text-xs font-medium mb-2 block">
+                {t("step2SelectSubject") || "Select Subject"}
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto">
+                {subjectsForGrade.map((subject) => (
+                  <Button
+                    key={subject.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSubject(subject);
+                      setSelectedTeacher("");
+                    }}
+                    disabled={subject.teacherSubjects.length === 0}
+                    variant={
+                      selectedSubject?.id === subject.id ? "default" : "outline"
+                    }
+                    className="h-auto py-2 px-3 justify-start text-left text-xs"
+                    size="sm"
+                  >
+                    <div className="w-full min-w-0">
+                      <div className="font-medium truncate">{subject.name}</div>
+                      <div className="text-xs opacity-70">
+                        MAD {subject.price}
+                      </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+          {selectedSubject && (
+            <div>
+              <span className="text-xs font-medium mb-2 block">
+                {t("step3SelectTeacher") || "Select Teacher"}{" "}
+                {selectedSubject.name}
+              </span>
+              <div className="space-y-2 max-h-[100px] overflow-y-auto">
+                {teachersForSubject.map((ts) => (
+                  <Button
+                    key={ts.id}
+                    type="button"
+                    onClick={() => setSelectedTeacher(ts.teacherId)}
+                    variant={
+                      selectedTeacher === ts.teacherId ? "default" : "outline"
+                    }
+                    className="w-full h-auto py-2 justify-start text-left text-xs"
+                    size="sm"
+                  >
+                    {ts.teacher.name}
+                  </Button>
+                ))}
+              </div>
+              {selectedTeacher && (
+                <Button
+                  type="button"
+                  onClick={handleAddEnrollment}
+                  className="mt-2 w-full"
+                  size="sm"
+                >
+                  {t("addEnrollment") || "Add Enrollment"}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {enrolledSubjects.length > 0 && (
+        <div className="space-y-2 pt-3 border-t md:hidden">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-muted-foreground">
+              {enrolledSubjects.length}{" "}
+              {t("currentEnrollments") || "Current Enrollments"}
+            </span>
+            <span className="text-sm font-bold text-primary">
+              MAD {totalPrice.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-muted-foreground hidden md:block">
+        {t("currentEnrollments") || "Current Enrollments"}
+      </h3>
+      {enrolledSubjects.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-md">
+          {t("atLeastOneSubject") || "Please add at least one subject"}
+        </p>
+      ) : (
+        <>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">
+              {enrolledSubjects.length} subject(s)
+            </span>
+            <span className="text-lg font-bold text-primary">
+              MAD {totalPrice.toFixed(2)}
+            </span>
+          </div>
+          <div className="space-y-2 max-h-[200px] md:max-h-[100px] overflow-y-auto">
+            {enrolledSubjects.map((es, index) => (
+              <Card
+                key={`${es.subjectId}-${es.teacherId}-${index}`}
+                className="bg-muted/50"
+              >
+                <CardContent className="py-2 px-3 flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium">
+                      {es.subjectName}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      ({es.teacherName} • {es.grade})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">MAD {es.price}</span>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        handleRemoveEnrollment(es.subjectId, es.teacherId)
+                      }
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 
   return (
@@ -464,7 +756,7 @@ export default function EditStudentDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="w-[95vw] max-w-[700px] max-h-[96vh] flex flex-col overflow-hidden p-1">
         <div className="p-4 sm:p-6 pb-2 sm:pb-3 border-b shrink-0">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
@@ -481,361 +773,87 @@ export default function EditStudentDialog({
                 </>
               )}
             </DialogTitle>
+            <DialogDescription className="hidden md:block">
+              {t("title")}
+            </DialogDescription>
           </DialogHeader>
+          <div className="mt-2">
+            <StepIndicator currentStep={currentStep} totalSteps={totalSteps} />
+          </div>
         </div>
-
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-2 sm:pt-3">
           {isFetching ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <form
-              id="edit-student-form"
-              onSubmit={handleSubmit}
-              className="space-y-4"
-            >
+            <>
               {error && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="mb-4">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-
-              {/* Student Information */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">
-                    {t("studentInfo")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label htmlFor="name" className="text-sm">
-                      {t("fullName")}
-                    </Label>
-                    <Input
-                      type="text"
-                      id="name"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
+              <form
+                id="edit-student-form"
+                onSubmit={handleSubmit}
+                className="space-y-4 pb-4"
+              >
+                <div className="space-y-4">
+                  <div className={currentStep !== 1 ? "hidden" : "block"}>
+                    {renderStep1()}
                   </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="grade" className="text-sm">
-                      {t("grade")}
-                    </Label>
-                    <Input
-                      type="text"
-                      id="grade"
-                      name="grade"
-                      value={formData.grade}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
+                  <div className={currentStep !== 2 ? "hidden" : "block"}>
+                    {renderStep2()}
                   </div>
-                  {adminMode && (
-                    <div className="space-y-1">
-                      <Label htmlFor="managerId" className="text-sm">
-                        Manager
-                      </Label>
-                      <Select
-                        value={selectedManagerId}
-                        onValueChange={setSelectedManagerId}
-                      >
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select Manager" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {managers.map((m) => (
-                            <SelectItem key={m.id} value={m.id}>
-                              {m.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  <div className="space-y-1">
-                    <Label htmlFor="email" className="text-sm">
-                      {t("email")}
-                    </Label>
-                    <Input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
+                  <div
+                    className={currentStep === totalSteps ? "block" : "hidden"}
+                  >
+                    {renderStep3()}
                   </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="phone" className="text-sm">
-                      {t("phone")}
-                    </Label>
-                    <Input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Parent Information */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{t("parentInfo")}</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label htmlFor="parentName" className="text-sm">
-                      {t("parentName")}
-                    </Label>
-                    <Input
-                      type="text"
-                      id="parentName"
-                      name="parentName"
-                      value={formData.parentName}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="parentPhone" className="text-sm">
-                      {t("parentPhone")}
-                    </Label>
-                    <Input
-                      type="tel"
-                      id="parentPhone"
-                      name="parentPhone"
-                      value={formData.parentPhone}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
-                  </div>
-                  <div className="space-y-1 col-span-2">
-                    <Label htmlFor="parentEmail" className="text-sm">
-                      {t("parentEmail")}
-                    </Label>
-                    <Input
-                      type="email"
-                      id="parentEmail"
-                      name="parentEmail"
-                      value={formData.parentEmail}
-                      onChange={handleInputChange}
-                      className="h-9"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Current Enrollments */}
-              <Card>
-                <CardHeader className="pb-3 flex flex-row justify-between items-center">
-                  <CardTitle className="text-base">
-                    {t("currentEnrollments")}
-                  </CardTitle>
-                  <span className="text-sm font-semibold text-green-600">
-                    MAD {totalPrice.toFixed(2)}
-                  </span>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {enrolledSubjects.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      {t("atLeastOneSubject")}
-                    </p>
-                  ) : (
-                    enrolledSubjects.map((es, index) => (
-                      <div
-                        key={`${es.subjectId}-${es.teacherId}-${index}`}
-                        className="border p-2 rounded-lg flex justify-between items-center"
-                      >
-                        <div>
-                          <p className="text-sm font-medium">
-                            {es.subjectName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {es.teacherName} • {es.grade}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-green-600">
-                            MAD {es.price}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleRemoveEnrollment(es.subjectId, es.teacherId)
-                            }
-                          >
-                            <X className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Add New Subject */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">
-                    {t("addNewSubject")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Grade Selection */}
-                  <div>
-                    <span className="text-sm font-medium mb-2 block">
-                      {t("step1SelectGrade")}
-                    </span>
-                    {availableGrades.length === 0 ? (
-                      <Alert>
-                        <AlertDescription>
-                          {t("noSubjectsAvailable") ||
-                            "No subjects available. Please add subjects to your center first."}
-                        </AlertDescription>
-                      </Alert>
-                    ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {availableGrades.map((grade) => (
-                          <Button
-                            key={grade}
-                            type="button"
-                            variant={
-                              selectedGrade === grade ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => {
-                              setSelectedGrade(grade);
-                              setSelectedSubject(null);
-                              setSelectedTeacher("");
-                            }}
-                          >
-                            {grade}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Subject Selection */}
-                  {selectedGrade && (
-                    <div>
-                      <span className="text-sm font-medium mb-2 block">
-                        {t("step2SelectSubject")}
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {subjectsForGrade.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">
-                            {t("noSubjectsForGrade")}
-                          </p>
-                        ) : (
-                          subjectsForGrade.map((subject) => (
-                            <Button
-                              key={subject.id}
-                              type="button"
-                              variant={
-                                selectedSubject?.id === subject.id
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => {
-                                setSelectedSubject(subject);
-                                setSelectedTeacher("");
-                              }}
-                            >
-                              {subject.name} (MAD {subject.price})
-                            </Button>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Teacher Selection */}
-                  {selectedSubject && (
-                    <div>
-                      <span className="text-sm font-medium mb-2 block">
-                        {t("step3SelectTeacher")} {selectedSubject.name}
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {teachersForSubject.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">
-                            {t("noTeachersAvailable")}
-                          </p>
-                        ) : (
-                          teachersForSubject.map((ts) => (
-                            <Button
-                              key={ts.teacherId}
-                              type="button"
-                              variant={
-                                selectedTeacher === ts.teacherId
-                                  ? "default"
-                                  : "outline"
-                              }
-                              size="sm"
-                              onClick={() => setSelectedTeacher(ts.teacherId)}
-                            >
-                              {ts.teacher.name}
-                            </Button>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Add Button */}
-                  {selectedTeacher && (
-                    <Button
-                      type="button"
-                      onClick={handleAddEnrollment}
-                      className="w-full"
-                      size="sm"
-                    >
-                      {t("addEnrollment")}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            </form>
+                </div>
+              </form>
+            </>
           )}
         </div>
         <div className="p-4 sm:p-6 pt-2 sm:pt-3 border-t shrink-0 bg-muted/5">
-          <div className="flex gap-3">
+          <div className="flex justify-between gap-3">
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={currentStep === 1 ? () => setOpen(false) : prevStep}
+              disabled={isLoading || isFetching}
               className="flex-1"
             >
-              {t("cancel")}
+              {currentStep === 1 ? t("cancel") || "Cancel" : "Previous"}
             </Button>
-            <Button
-              form="edit-student-form"
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("saving")}
-                </>
-              ) : (
-                t("saveChanges")
-              )}
-            </Button>
+            {currentStep < totalSteps ? (
+              <Button
+                type="button"
+                onClick={nextStep}
+                disabled={isLoading || isFetching}
+                className="flex-1"
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                form="edit-student-form"
+                type="submit"
+                disabled={
+                  isLoading || isFetching || enrolledSubjects.length === 0
+                }
+                className="flex-1"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t("saving") || "Saving..."}
+                  </>
+                ) : (
+                  t("saveChanges") || "Save Changes"
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>
