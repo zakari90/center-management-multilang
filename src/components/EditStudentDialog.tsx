@@ -477,14 +477,26 @@ export default function EditStudentDialog({
           <Label htmlFor="grade" className="text-sm sr-only md:not-sr-only">
             {t("grade")}
           </Label>
-          <Input
-            id="grade"
-            name="grade"
+          <Select
             value={formData.grade}
-            onChange={handleInputChange}
-            placeholder={t("grade")}
-            className="h-10 md:h-9"
-          />
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, grade: value }))
+            }
+          >
+            <SelectTrigger className="h-10 md:h-9">
+              <SelectValue placeholder={t("grade") || "Select Grade"} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableGrades.map((grade) => (
+                <SelectItem key={grade} value={grade}>
+                  {grade}
+                </SelectItem>
+              ))}
+              {!availableGrades.includes(formData.grade) && formData.grade && (
+                <SelectItem value={formData.grade}>{formData.grade}</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         </div>
         {adminMode && (
           <div className="space-y-1.5">

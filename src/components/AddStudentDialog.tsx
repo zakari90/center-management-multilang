@@ -15,6 +15,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/context/authContext";
 import {
   studentActions,
@@ -460,6 +467,30 @@ export default function AddStudentDialog({
             placeholder={t("studentInfofullNamePlaceholder") + " *"}
             className="h-10 md:h-9"
           />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="grade" className="text-sm sr-only md:not-sr-only">
+            {t("studentInfograde") || "Grade/Level"}
+          </Label>
+          <Select
+            value={formData.grade}
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, grade: value }))
+            }
+          >
+            <SelectTrigger className="h-10 md:h-9">
+              <SelectValue
+                placeholder={t("studentInfogradePlaceholder") || "Select Grade"}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {availableGrades.map((grade) => (
+                <SelectItem key={grade} value={grade}>
+                  {grade}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="phone" className="text-sm sr-only md:not-sr-only">
