@@ -5,7 +5,7 @@ import { PublicOfferings } from "@/components/PublicOfferings";
 import { useAuth } from "@/context/authContext";
 import { useLocale, useTranslations } from "next-intl";
 import Lottie from "lottie-react";
-import studentAnimation from "../../Student-transparent.json";
+import studentAnimation from "../../../Student-transparent.json";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Phone } from "lucide-react";

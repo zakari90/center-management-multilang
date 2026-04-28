@@ -24,8 +24,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-
-
 interface WelcomeDialogProps {
   open: boolean;
   onConfirm: () => void;
@@ -41,7 +39,6 @@ export function WelcomeDialog({
   isRtl,
   t,
 }: WelcomeDialogProps) {
-
   const handleConfirm = () => {
     onConfirm();
   };
@@ -50,14 +47,17 @@ export function WelcomeDialog({
     onCancel();
   };
 
-
   return (
     <AlertDialog open={open}>
       <AlertDialogContent dir={isRtl ? "rtl" : "ltr"} className="max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center justify-center mb-4">
             <div className="w-24 h-24 flex items-center justify-center">
-              <Lottie animationData={starAnimation} loop={true} autoplay={true} />
+              <Lottie
+                animationData={starAnimation}
+                loop={true}
+                autoplay={true}
+              />
             </div>
           </div>
           <AlertDialogTitle className="text-2xl text-center font-black">
@@ -117,7 +117,6 @@ export function WelcomeDialog({
                   {t("welcome_add_favorites")}
                 </span>
               </div>
-
             </div>
           </div>
         </div>
