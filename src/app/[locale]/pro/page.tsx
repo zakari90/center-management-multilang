@@ -5,10 +5,12 @@ import { PublicOfferings } from "@/components/PublicOfferings";
 import { useAuth } from "@/context/authContext";
 import { useLocale, useTranslations } from "next-intl";
 import Lottie from "lottie-react";
-import studentAnimation from "../../../Student-transparent.json";
+import studentAnimation from "../../Student-transparent.json";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Phone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Phone, Download } from "lucide-react";
+import PWAInstallationGuide from "@/components/pwa-installation-guide";
+import { InstallAppButton } from "@/components/install-app-button";
 
 interface CenterContent {
   id: string;
@@ -126,17 +128,21 @@ function HomePageContent() {
         {/* Empty div for flex layout spacing */}
         <div></div>
 
-        <button
-          onClick={() => router.push(dashboardLink)}
-          className="hover:cursor-pointer group relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden bg-white/40 backdrop-blur-md border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:bg-white/60 transition-all duration-300 ease-out active:scale-95"
-        >
-          <span className="relative z-10 font-semibold text-slate-700 tracking-wide text-sm">
-            {user ? t("dashboard") : t("ownerDashboard")}
-          </span>
-          <div className="relative z-10 text-slate-700 group-hover:translate-x-1 transition-transform duration-300">
-            {isRtl ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
-          </div>
-        </button>
+        <div className="flex items-center gap-4">
+          <InstallAppButton />
+          <PWAInstallationGuide />
+          <button
+            onClick={() => router.push(dashboardLink)}
+            className="hover:cursor-pointer group relative flex items-center gap-2 px-5 py-2.5 rounded-full overflow-hidden bg-white/40 backdrop-blur-md border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:bg-white/60 transition-all duration-300 ease-out active:scale-95"
+          >
+            <span className="relative z-10 font-semibold text-slate-700 tracking-wide text-sm">
+              {user ? t("dashboard") : t("ownerDashboard")}
+            </span>
+            <div className="relative z-10 text-slate-700 group-hover:translate-x-1 transition-transform duration-300">
+              {isRtl ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+            </div>
+          </button>
+        </div>
       </nav>
 
       {/* Main Hero Content */}
