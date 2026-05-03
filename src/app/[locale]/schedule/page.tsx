@@ -199,7 +199,7 @@ function SchedulePageContent() {
           setShowWelcome(false);
         }}
         onCancel={() => {
-          setShowWelcome(false);
+          router.push(`/${locale}`);
         }}
       />
 
