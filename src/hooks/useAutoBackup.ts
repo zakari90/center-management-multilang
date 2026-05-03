@@ -30,20 +30,17 @@ export function useAutoBackup(onBackup: () => Promise<void>) {
     };
 
     const checkAndSchedule = async () => {
-      const lastRunStr = localStorage.getItem(AUTOSAVE_KEY);
-      const lastRun = lastRunStr ? Number(lastRunStr) : 0;
-      const now = Date.now();
-      
-      // Target for the current month
-      const today = new Date();
-      const thisMonthTarget = new Date(today.getFullYear(), today.getMonth(), 1, 12, 0, 0, 0).getTime();
+      const nextBackup = getNextBackupTime();
+      const delay = nextBackup.getTime() - Date.now();
 
-      // Catch-up logic:
-      // If we are currently past the target time for this month, 
-      // AND the last successful backup was before this month's target,
-      // then we need to run it now.
-      if (now >= thisMonthTarget && lastRun < thisMonthTarget) {
-        console.log("[AutoBackup] Triggering monthly auto-save catch-up...");
+      // Safety check for maximum setTimeout delay (approx 24.8 days)
+      // If delay is too long, we check again in 24 hours
+      const actualDelay = Math.min(delay, 24 * 60 * 60 * 1000);
+
+      if (timerRef.current) clearTimeout(timerRef.current);
+
+      timerRef.current = setTimeout(async () => {
+        console.log("[AutoBackup] Triggering scheduled monthly auto-save...");
         try {
           await onBackupRef.current();
           localStorage.setItem(AUTOSAVE_KEY, String(Date.now()));
@@ -51,18 +48,9 @@ export function useAutoBackup(onBackup: () => Promise<void>) {
         } catch (error) {
           console.error("[AutoBackup] Failed to perform auto-save:", error);
         }
-      }
-
-      const nextBackup = getNextBackupTime();
-      const delay = nextBackup.getTime() - Date.now();
-
-      // Safety check for maximum setTimeout delay (approx 24.8 days)
-      // If delay is too long, we check again in 24 hours
-      const MAX_DELAY = 2147483647; 
-      const actualDelay = Math.min(delay, 24 * 60 * 60 * 1000);
-
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(checkAndSchedule, actualDelay);
+        // Schedule the next one
+        checkAndSchedule();
+      }, actualDelay);
     };
 
     checkAndSchedule();
