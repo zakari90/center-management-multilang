@@ -4,15 +4,25 @@ import withSerwistInit from "@serwist/next";
 
 const withNextIntl = createNextIntlPlugin();
 
+// Disable Serwist (webpack plugin) when Turbopack is active to prevent build conflicts.
+const isTurbopack = Boolean(
+  process.env.TURBOPACK ||
+  process.env.NEXT_TURBOPACK ||
+  process.env.npm_lifecycle_script?.includes("--turbo")
+);
+
 const withSerwist = withSerwistInit({
   swSrc: "src/worker/index.ts",
   swDest: "public/sw.js",
-  disable: process.env.NODE_ENV === "development",
+  disable: isTurbopack || process.env.NODE_ENV === "development",
 });
 
 const nextConfig = {
   output: "standalone" as const,
   reactStrictMode: true,
+  // Declaring an empty turbopack config silences the "webpack config detected" warning
+  // when Vercel runs the build without --webpack explicitly set.
+  turbopack: {},
   async headers() {
     return [
       {
